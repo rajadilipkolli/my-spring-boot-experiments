@@ -7,11 +7,10 @@ import com.amazonaws.services.sqs.model.AmazonSQSException;
 import com.amazonaws.services.sqs.model.CreateQueueRequest;
 import com.amazonaws.services.sqs.model.Message;
 import com.example.graphql.common.LocalStackConfig;
-import java.time.Duration;
-import java.util.List;
-
 import io.awspring.cloud.autoconfigure.messaging.SqsAutoConfiguration;
 import io.awspring.cloud.messaging.core.QueueMessagingTemplate;
+import java.time.Duration;
+import java.util.List;
 import org.awaitility.Awaitility;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
