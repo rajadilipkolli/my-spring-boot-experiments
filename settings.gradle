@@ -1,0 +1,4 @@
+rootProject.name = 'spring-experiments'
+
+include 'spring-graph-ql'
+

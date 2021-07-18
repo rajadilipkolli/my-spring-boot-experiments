@@ -1,0 +1,14 @@
+{
+  "generator-springboot": {
+    "appName": "spring-graph-ql",
+    "packageName": "com.example.graphql",
+    "databaseType": "postgresql",
+    "dbMigrationTool": "liquibase",
+    "features": [
+      "localstack"
+    ],
+    "buildTool": "gradle",
+    "packageFolder": "com/example/graphql",
+    "liquibaseMigrationCounter": 1
+  }
+}
