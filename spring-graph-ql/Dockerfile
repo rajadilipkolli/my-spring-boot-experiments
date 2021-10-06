@@ -1,4 +1,4 @@
-FROM openjdk:11-jdk-slim
+FROM openjdk:17-jdk-slim
 VOLUME /tmp
 ADD build/libs/spring-graph-ql-0.0.1-SNAPSHOT.jar app.jar
 RUN sh -c 'touch /app.jar'
