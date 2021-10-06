@@ -1,8 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <databaseChangeLog
-        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
-        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
          http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+    <changeSet id="create_tables" author="raja">
+        <createTable tableName="customer">
+            <column name="id" type="BIGINT" autoIncrement="1">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_customer"/>
+            </column>
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="raja" id="insert-sql">
+        <comment>insert queries</comment>
+        <sql dbms="h2, postgresql"
+             splitStatements="true"
+             stripComments="true">
+            insert into customer (id, name) values (1, 'Raja');
+            insert into customer (id, name) values (2, 'Dilip');
+            insert into customer (id, name) values (3, 'Chowdary');
+            insert into customer (id, name) values (4, 'Kolli');
+        </sql>
+    </changeSet>
 
 </databaseChangeLog>

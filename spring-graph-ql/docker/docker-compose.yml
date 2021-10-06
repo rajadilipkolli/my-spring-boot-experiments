@@ -2,24 +2,10 @@ version: '3.8'
 services:
 
   postgresqldb:
-    image: postgres:12.3
+    image: postgres:latest
     environment:
-      - POSTGRES_USER=siva
-      - POSTGRES_PASSWORD=secret
-      - POSTGRES_DB=appdb
+      - POSTGRES_USER=local
+      - POSTGRES_PASSWORD=local
+      - POSTGRES_DB=rest
     ports:
       - "5432:5432"
-
-  localstack:
-    image: localstack/localstack:0.11.2
-    ports:
-      - "4566:4566"
-    environment:
-      - SERVICES=S3,SQS
-      - DEFAULT_REGION=us-east-1
-      - DOCKER_HOST=unix:///var/run/docker.sock
-      - HOST_TMP_FOLDER=${TMPDIR}
-    volumes:
-      - "${TMPDIR:-/private}:/private"
-      - "/var/run/docker.sock:/var/run/docker.sock"
-      - '../.localstack:/docker-entrypoint-initaws.d'
