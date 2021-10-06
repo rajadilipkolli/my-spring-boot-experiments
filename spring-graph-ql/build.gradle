@@ -56,8 +56,13 @@ dependencies {
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    runtimeOnly 'com.h2database:h2'
+    implementation 'org.springframework.boot:spring-boot-starter-data-r2dbc'
+    // Needed to run liquibase
+    implementation 'org.springframework:spring-jdbc'
+    // Needed for pointcut
+    implementation 'org.springframework.boot:spring-boot-starter-aop'
+
+    runtimeOnly 'io.r2dbc:r2dbc-postgresql'
     runtimeOnly 'org.postgresql:postgresql'
     implementation 'org.liquibase:liquibase-core'
     implementation "io.springfox:springfox-boot-starter:${swagger_version}"
@@ -66,10 +71,12 @@ dependencies {
     implementation "commons-io:commons-io:${commons_io_version}"
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'io.projectreactor:reactor-test'
     testImplementation "org.projectlombok:lombok"
     testImplementation "org.awaitility:awaitility"
-    testImplementation "org.testcontainers:junit-jupiter"
-    testImplementation "org.testcontainers:postgresql"
+    testImplementation 'org.testcontainers:junit-jupiter'
+    testImplementation 'org.testcontainers:postgresql'
+    testImplementation 'org.testcontainers:r2dbc'
 }
 
 dependencyManagement {
