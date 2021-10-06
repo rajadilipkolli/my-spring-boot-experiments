@@ -50,11 +50,13 @@ ext {
 
 dependencies {
     implementation 'org.springframework.experimental:graphql-spring-boot-starter:1.0.0-M2'
+
+    // To fix com.fasterxml.jackson.databind.exc.InvalidDefinitionException: Java 8 date/time type `java.time.Instant`
+    // not supported by default
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
-    implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
-    developmentOnly 'org.springframework.boot:spring-boot-devtools'
-    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
     implementation 'org.springframework.boot:spring-boot-starter-data-r2dbc'
@@ -78,6 +80,7 @@ dependencies {
     testImplementation 'org.testcontainers:junit-jupiter'
     testImplementation 'org.testcontainers:postgresql'
     testImplementation 'org.testcontainers:r2dbc'
+    testImplementation 'org.springframework.graphql:spring-graphql-test:1.0.0-M2'
 }
 
 dependencyManagement {

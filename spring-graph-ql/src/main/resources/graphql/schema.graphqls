@@ -1,5 +1,10 @@
 type Query {
     customers : [Customer]
+    customersByName(name : String) : [Customer]
+}
+
+type Mutation {
+    addCustomer(name : String) : Customer
 }
 
 type Order {

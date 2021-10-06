@@ -17,7 +17,7 @@ It contains 3 concepts
 * Mutations - Update data on the Server
 * Subscriptions - Read data over a period of time(Stock market updates, inflight recorder)
 
-### How to access URL
+### How to fetch data using URL
 
 - There are two types of annotations that can be used expose API
     * `@SchemaMapping(typeName = "Query", field = "customers")` , Here typeName should be matching the schema declared in schema.graphqls and filed should match the definition
@@ -44,6 +44,16 @@ or
     customers {
      id
     }
+}
+`
+
+Fetching data based on name
+
+`{
+customersByName(name: "kolli") {
+id
+name
+}
 }
 `
 

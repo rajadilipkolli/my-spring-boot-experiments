@@ -12,7 +12,7 @@ public class DBContainerInitializerBase {
         new PostgreSQLContainer<>("postgres:latest")
             .withDatabaseName("integration-tests-db")
             .withUsername("username")
-            .withPassword("password");
+            .withPassword("password").withReuse(true);
 
     static {
         postgreSQLContainer.start();
