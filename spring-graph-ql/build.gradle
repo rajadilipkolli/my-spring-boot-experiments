@@ -1,6 +1,7 @@
 buildscript {
     repositories {
         mavenCentral()
+        maven { url 'https://repo.spring.io/milestone' }
     }
     dependencies {
         classpath "com.avast.gradle:gradle-docker-compose-plugin:${docker_compose_plugin_version}"
@@ -60,7 +61,7 @@ dependencies {
     runtimeOnly 'org.postgresql:postgresql'
     implementation 'org.liquibase:liquibase-core'
     implementation "io.springfox:springfox-boot-starter:${swagger_version}"
-    implementation "org.zalando:problem-spring-web-starter:0.27.0"
+    implementation "org.zalando:problem-spring-webflux:0.27.0"
     implementation "org.apache.commons:commons-lang3:${commons_lang_version}"
     implementation "commons-io:commons-io:${commons_io_version}"
 
