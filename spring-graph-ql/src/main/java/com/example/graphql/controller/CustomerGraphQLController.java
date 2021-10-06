@@ -1,7 +1,7 @@
 package com.example.graphql.controller;
 
-import com.example.graphql.record.Customer;
-import com.example.graphql.record.Order;
+import com.example.graphql.dtos.Customer;
+import com.example.graphql.dtos.Order;
 import com.example.graphql.repository.CustomerRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.graphql.data.method.annotation.Argument;
@@ -16,7 +16,7 @@ import java.util.ArrayList;
 
 @Controller
 @RequiredArgsConstructor
-public class CustomerGraphQlController {
+public class CustomerGraphQLController {
 
   private final CustomerRepository customerRepository;
 
