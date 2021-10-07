@@ -12,6 +12,7 @@ import org.springframework.stereotype.Controller;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.security.SecureRandom;
 import java.util.ArrayList;
 
 @Controller
@@ -35,7 +36,7 @@ public class CustomerGraphQLController {
   Flux<Order> orders(Customer customer) {
     // Could be webservice call
     var orders = new ArrayList<Order>();
-    for (var orderId = 1; orderId <= Math.random() * 100; orderId++) {
+    for (var orderId = 1; orderId <= new SecureRandom().nextInt() * 100; orderId++) {
       orders.add(new Order(orderId, customer.id()));
     }
     return Flux.fromIterable(orders);
