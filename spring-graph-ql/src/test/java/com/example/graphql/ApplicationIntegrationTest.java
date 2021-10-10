@@ -48,13 +48,14 @@ class ApplicationIntegrationTest extends AbstractIntegrationTest {
     this.graphQlTester
         .query(
             """
-                query {
-                  customersByName(name: "raja") {
-                    id
-                    name
-                  }
-                }
+                query ($name: String) {
+                   customersByName(name: $name) {
+                     id
+                     name
+                   }
+                 }
                 """)
+        .variable("name", "raja")
         .execute()
         .path("customersByName[*]")
         .pathExists()
