@@ -75,10 +75,9 @@ class ApplicationIntegrationTest extends AbstractIntegrationTest {
                       }
                     }
                     """;
-//        String finalQuery = query.replace("$cname", randomString);
         this.graphQlTester
             .query(query)
-            .variable("cname", "JUnit")
+            .variable("cname", randomString)
             .execute()
             .path("addCustomer")
             .pathExists()
