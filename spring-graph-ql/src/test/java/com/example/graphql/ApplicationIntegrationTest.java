@@ -68,16 +68,17 @@ class ApplicationIntegrationTest extends AbstractIntegrationTest {
     void test_query_insert() {
       String randomString = RandomStringUtils.randomAlphabetic(5);
       String query =  """
-                    mutation {
-                      addCustomer(name: "$cname") {
+                    mutation addCustomer($cname: String) {
+                      addCustomer(name: $cname) {
                         id
                         name
                       }
                     }
                     """;
-        String finalQuery = query.replace("$cname", randomString);
+//        String finalQuery = query.replace("$cname", randomString);
         this.graphQlTester
-            .query(finalQuery)
+            .query(query)
+            .variable("cname", "JUnit")
             .execute()
             .path("addCustomer")
             .pathExists()
