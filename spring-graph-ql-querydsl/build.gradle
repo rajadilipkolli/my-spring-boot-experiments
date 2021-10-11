@@ -1,6 +1,8 @@
 plugins {
 	id 'org.springframework.boot' version '2.5.5'
 	id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+	id 'com.github.ben-manes.versions' version '0.39.0'
+	id 'org.sonarqube'
 	id 'java'
 }
 
@@ -53,6 +55,28 @@ dependencyManagement {
 	}
 }
 
+defaultTasks "bootRun"
+
+springBoot {
+	buildInfo()
+}
+
+compileJava.dependsOn processResources
+processResources.dependsOn bootBuildInfo
+
 test {
 	useJUnitPlatform()
+}
+
+file("sonar-project.properties").withReader {
+	Properties sonarProperties = new Properties()
+	sonarProperties.load(it)
+
+	sonarProperties.forEach { key, value ->
+		sonarqube {
+			properties {
+				property key, value
+			}
+		}
+	}
 }
