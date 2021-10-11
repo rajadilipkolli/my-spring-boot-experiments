@@ -2,4 +2,3 @@ rootProject.name = 'spring-experiments'
 
 include 'spring-graph-ql',
         'spring-graph-ql-querydsl'
-
