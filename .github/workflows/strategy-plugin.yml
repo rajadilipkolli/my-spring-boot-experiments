@@ -43,4 +43,4 @@ jobs:
         run: |
           cd strategy-plugin
           chmod +x gradlew
-          ./gradlew clean build sonarqube --info
+          ./gradlew clean build --info
