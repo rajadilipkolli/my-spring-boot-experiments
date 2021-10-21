@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="DatabaseMigrationSettings">
+    <database-infos>
+      <database-info>
+        <option name="enabled" value="true" />
+        <dbms-id>postgres</dbms-id>
+      </database-info>
+    </database-infos>
+  </component>
+  <component name="JpaPluginProjectSettings">
+    <option name="lastSelectedLanguage" value="Java" />
+  </component>
+</project>
