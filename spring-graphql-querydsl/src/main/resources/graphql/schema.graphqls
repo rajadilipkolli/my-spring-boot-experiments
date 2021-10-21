@@ -1,9 +1,30 @@
 type Query {
-    customers : [Customer]
-    customersByName(name : String) : [Customer]
+    getPostsByUserName(name : String) : [PostsDTO!]
 }
 
-type Customer {
-    id: ID
+type Mutation {
+    createPostByUserName(name : String) : [PostRequestDTO]
+}
+
+type PostRequestDTO {
+    title: String
+    content: String
+    comments: PostCommentsDTO!
+    tags: TagDTO!
+}
+
+type TagDTO {
     name: String
+}
+
+type PostsDTO {
+    title: String
+    content: String
+    createdBy: String
+    createdOn: String
+    comments: PostCommentsDTO!
+}
+
+type PostCommentsDTO {
+    review: String
 }
