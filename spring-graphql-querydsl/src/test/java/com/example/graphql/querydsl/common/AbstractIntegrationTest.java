@@ -13,5 +13,5 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 public abstract class AbstractIntegrationTest extends DBContainerInitializerBase {
 
-    @Autowired protected ObjectMapper objectMapper;
+  @Autowired protected ObjectMapper objectMapper;
 }

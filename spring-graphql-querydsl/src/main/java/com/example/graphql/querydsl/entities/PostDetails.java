@@ -14,49 +14,48 @@ import java.util.Objects;
 @Setter
 public class PostDetails {
 
-    @Id
-    @GenericGenerator(
-            name = "sequenceGenerator",
-            strategy = "enhanced-sequence",
-            parameters = {
-                    @org.hibernate.annotations.Parameter(name = "optimizer", value = "pooled-lo"),
-                    @org.hibernate.annotations.Parameter(name = "initial_value", value = "1"),
-                    @org.hibernate.annotations.Parameter(name = "increment_size", value = "5")
-            })
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequenceGenerator")
-    private Long id;
+  @Id
+  @GenericGenerator(
+      name = "sequenceGenerator",
+      strategy = "enhanced-sequence",
+      parameters = {
+        @org.hibernate.annotations.Parameter(name = "optimizer", value = "pooled-lo"),
+        @org.hibernate.annotations.Parameter(name = "initial_value", value = "1"),
+        @org.hibernate.annotations.Parameter(name = "increment_size", value = "5")
+      })
+  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequenceGenerator")
+  private Long id;
 
-    @Column(name = "created_on")
-    private LocalDateTime createdOn;
+  @Column(name = "created_on")
+  private LocalDateTime createdOn;
 
-    @Column(name = "created_by")
-    private String createdBy;
+  @Column(name = "created_by")
+  private String createdBy;
+  @OneToOne(fetch = FetchType.LAZY)
+  @MapsId
+  private Post post;
 
-    public PostDetails() {
-        this.createdOn = LocalDateTime.now();
+  public PostDetails() {
+    this.createdOn = LocalDateTime.now();
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
     }
-
-    @OneToOne(fetch = FetchType.LAZY)
-    @MapsId
-    private Post post;
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        PostDetails other = (PostDetails) obj;
-        return Objects.equals(this.createdBy, other.createdBy);
+    if (obj == null) {
+      return false;
     }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(this.createdBy);
+    if (getClass() != obj.getClass()) {
+      return false;
     }
+    PostDetails other = (PostDetails) obj;
+    return Objects.equals(this.createdBy, other.createdBy);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(this.createdBy);
+  }
 }

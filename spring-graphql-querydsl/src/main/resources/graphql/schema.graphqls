@@ -3,18 +3,23 @@ type Query {
 }
 
 type Mutation {
-    createPostByUserName(name : String) : [PostRequestDTO]
+    createPost(postRequestDTO : PostRequestDTO ) : PostsDTO
 }
 
-type PostRequestDTO {
-    title: String
-    content: String
-    comments: PostCommentsDTO!
-    tags: TagDTO!
+input PostRequestDTO {
+    name: String!
+    title: String!
+    content: String!
+    comments: [PostCommentsRequestDTO]
+    tags: [TagRequestDTO]
 }
 
-type TagDTO {
+input TagRequestDTO {
     name: String
+}
+
+input PostCommentsRequestDTO {
+    review: String
 }
 
 type PostsDTO {
@@ -22,9 +27,9 @@ type PostsDTO {
     content: String
     createdBy: String
     createdOn: String
-    comments: PostCommentsDTO!
+    comments: [PostCommentDTO]
 }
 
-type PostCommentsDTO {
+type PostCommentDTO {
     review: String
 }

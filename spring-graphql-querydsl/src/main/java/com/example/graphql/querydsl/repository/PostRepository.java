@@ -6,5 +6,5 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.graphql.data.GraphQlRepository;
 
 @GraphQlRepository
-public interface PostRepository CrudRepository<Post, String>, QuerydslPredicateExecutor<Post> {
-}
+public interface PostRepository
+    extends CrudRepository<Post, String>, QuerydslPredicateExecutor<Post> {}
