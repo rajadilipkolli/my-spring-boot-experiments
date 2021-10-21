@@ -16,7 +16,7 @@ dependencies {
     implementation 'org.springframework.plugin:spring-plugin-core:2.0.0.RELEASE'
     implementation 'org.springframework.plugin:spring-plugin-metadata:2.0.0.RELEASE'
 
-    implementation 'org.springframework.boot:spring-boot-starter'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
 
