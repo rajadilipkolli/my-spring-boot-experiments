@@ -12,5 +12,5 @@ import static com.example.graphql.utils.AppConstants.PROFILE_TEST;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public abstract class AbstractIntegrationTest extends DBContainerInitializerBase {
 
-    @Autowired protected ObjectMapper objectMapper;
+  @Autowired protected ObjectMapper objectMapper;
 }

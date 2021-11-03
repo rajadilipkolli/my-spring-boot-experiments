@@ -10,10 +10,10 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class Initializer implements CommandLineRunner {
 
-    private final ApplicationProperties properties;
+  private final ApplicationProperties properties;
 
-    @Override
-    public void run(String... args) {
-        log.info("Running Initializer.....");
-    }
+  @Override
+  public void run(String... args) {
+    log.info("Running Initializer.....");
+  }
 }
