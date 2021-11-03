@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <databaseChangeLog
-    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
     xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
          http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
 
@@ -15,7 +15,21 @@
             </column>
         </createTable>
 
+        <createTable tableName="orders">
+            <column name="id" type="BIGINT" autoIncrement="1">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_orders"/>
+            </column>
+            <column name="customer_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
         <addAutoIncrement tableName="customer" columnName="id" incrementBy="1" startWith="1"/>
+        <addAutoIncrement tableName="orders" columnName="id" incrementBy="1" startWith="1"/>
+
+        <addForeignKeyConstraint baseTableName="orders" baseColumnNames="customer_id"
+                                 constraintName="fk_order_customer" referencedTableName="customer"
+                                 referencedColumnNames="id"/>
     </changeSet>
 
     <changeSet author="raja" id="insert-sql">
@@ -27,6 +41,9 @@
             insert into customer (name) values ('Dilip');
             insert into customer (name) values ('Chowdary');
             insert into customer (name) values ('Kolli');
+            insert into orders (customer_id) values (1);
+            insert into orders (customer_id) values (1);
+            insert into orders (customer_id) values (1);
         </sql>
     </changeSet>
 
