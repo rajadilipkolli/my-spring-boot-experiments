@@ -30,10 +30,7 @@ jobs:
           cache: 'gradle'
 
       - name: Build and analyze
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
           cd spring-graphql
           chmod +x gradlew
-          ./gradlew clean build --info
+          ./gradlew clean build

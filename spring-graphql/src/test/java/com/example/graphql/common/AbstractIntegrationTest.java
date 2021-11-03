@@ -7,10 +7,9 @@ import org.springframework.test.context.ActiveProfiles;
 
 import static com.example.graphql.utils.AppConstants.PROFILE_IT;
 import static com.example.graphql.utils.AppConstants.PROFILE_TEST;
-import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 @ActiveProfiles({PROFILE_TEST, PROFILE_IT})
-@SpringBootTest(webEnvironment = RANDOM_PORT)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public abstract class AbstractIntegrationTest extends DBContainerInitializerBase {
 
     @Autowired protected ObjectMapper objectMapper;
