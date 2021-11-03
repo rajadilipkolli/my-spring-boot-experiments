@@ -28,6 +28,7 @@ public class PostComment {
   private String review;
 
   private LocalDateTime createdOn;
+
   @ManyToOne(fetch = FetchType.LAZY)
   private Post post;
 

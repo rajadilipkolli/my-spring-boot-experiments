@@ -31,6 +31,7 @@ public class PostDetails {
 
   @Column(name = "created_by")
   private String createdBy;
+
   @OneToOne(fetch = FetchType.LAZY)
   @MapsId
   private Post post;

@@ -3,12 +3,12 @@ package com.example.graphql.querydsl;
 import com.example.graphql.querydsl.common.AbstractIntegrationTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.graphql.boot.test.tester.AutoConfigureGraphQlTester;
+import org.springframework.graphql.boot.test.tester.AutoConfigureWebGraphQlTester;
 import org.springframework.graphql.test.tester.WebGraphQlTester;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@AutoConfigureGraphQlTester
+@AutoConfigureWebGraphQlTester
 class GraphQueryDSLApplicationTests extends AbstractIntegrationTest {
 
   @Autowired private WebGraphQlTester graphQlTester;
