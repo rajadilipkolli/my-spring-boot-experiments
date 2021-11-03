@@ -3,6 +3,7 @@ package com.example.graphql.controller;
 import com.example.graphql.dtos.Customer;
 import com.example.graphql.dtos.CustomerDTO;
 import com.example.graphql.repository.CustomerRepository;
+import com.example.graphql.repository.OrdersRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -20,6 +21,9 @@ class CustomerGraphQLControllerTest {
 
     @MockBean
     private CustomerRepository customerRepository;
+
+    @MockBean
+    private OrdersRepository ordersRepository;
 
     @Test
     void test_query_all_customers() {
