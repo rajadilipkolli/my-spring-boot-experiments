@@ -4,6 +4,9 @@ import com.example.graphql.dtos.Orders;
 import org.springframework.data.repository.reactive.ReactiveCrudRepository;
 import reactor.core.publisher.Flux;
 
+import java.util.List;
+
 public interface OrdersRepository extends ReactiveCrudRepository<Orders, Integer> {
-  Flux<Orders> findByCustomerId(Integer customerId);
+
+  Flux<Orders> findByCustomerIdIn(List<Integer> orderIds);
 }
