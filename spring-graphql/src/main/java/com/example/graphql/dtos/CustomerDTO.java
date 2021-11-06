@@ -7,5 +7,5 @@ import java.util.List;
 
 public record CustomerDTO(@JsonProperty("id") @Id Integer id,
                           @JsonProperty("name") String name,
-                          @JsonProperty("orders") List<Order> orders) {
+                          @JsonProperty("orders") List<Orders> orders) {
 }
