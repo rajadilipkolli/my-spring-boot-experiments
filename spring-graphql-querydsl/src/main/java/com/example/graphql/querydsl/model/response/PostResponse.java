@@ -2,6 +2,7 @@ package com.example.graphql.querydsl.model.response;
 
 import com.example.graphql.querydsl.model.PostCommentsDTO;
 import com.example.graphql.querydsl.model.TagDTO;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -11,6 +12,6 @@ public record PostResponse(
                            String content,
                            String createdBy,
                            LocalDateTime createdOn,
-                           List<PostCommentsDTO> comments,
-                           List<TagDTO> tags) {
+                           @JsonProperty("comments") List<PostCommentsDTO> comments,
+                           @JsonProperty("tags") List<TagDTO> tags) {
 }

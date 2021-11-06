@@ -28,8 +28,13 @@ type PostsDTO {
     createdBy: String
     createdOn: String
     comments: [PostCommentDTO]
+    tags: [TagDTO]
 }
 
 type PostCommentDTO {
     review: String
+}
+
+type TagDTO {
+    name: String
 }

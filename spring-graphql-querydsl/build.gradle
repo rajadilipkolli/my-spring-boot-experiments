@@ -24,11 +24,11 @@ repositories {
 }
 
 ext {
-	set('testcontainersVersion', "1.16.1")
+	set('testcontainersVersion', "1.16.2")
 }
 
 dependencies {
-	implementation 'org.springframework.experimental:graphql-spring-boot-starter:1.0.0-M2'
+	implementation 'org.springframework.experimental:graphql-spring-boot-starter:1.0.0-M3'
 
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
@@ -51,7 +51,7 @@ dependencies {
 	testImplementation 'io.projectreactor:reactor-test'
 	testImplementation 'org.testcontainers:junit-jupiter'
 	testImplementation 'org.testcontainers:postgresql'
-	testImplementation 'org.springframework.graphql:spring-graphql-test:1.0.0-M2'
+	testImplementation 'org.springframework.graphql:spring-graphql-test:1.0.0-M3'
 	testImplementation 'org.projectlombok:lombok'
 }
 

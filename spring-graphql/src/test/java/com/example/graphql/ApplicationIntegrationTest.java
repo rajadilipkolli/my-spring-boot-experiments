@@ -6,15 +6,15 @@ import com.example.graphql.dtos.CustomerDTO;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.graphql.boot.test.tester.AutoConfigureWebGraphQlTester;
-import org.springframework.graphql.test.tester.WebGraphQlTester;
+import org.springframework.graphql.boot.test.tester.AutoConfigureGraphQlTester;
+import org.springframework.graphql.test.tester.GraphQlTester;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@AutoConfigureWebGraphQlTester
+@AutoConfigureGraphQlTester
 class ApplicationIntegrationTest extends AbstractIntegrationTest {
 
-  @Autowired private WebGraphQlTester graphQlTester;
+  @Autowired private GraphQlTester graphQlTester;
 
   @Test
   void contextLoads() {
