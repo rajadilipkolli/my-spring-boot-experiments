@@ -38,8 +38,8 @@ dependencies {
 	implementation 'net.ttddyy:datasource-proxy:1.7'
 
 	// QueryDSL for JPA
-	implementation 'com.querydsl:querydsl-core:5.0.0'
-	implementation 'com.querydsl:querydsl-jpa:5.0.0'
+	implementation 'com.querydsl:querydsl-core'
+	implementation 'com.querydsl:querydsl-jpa'
 
 	compileOnly 'org.projectlombok:lombok'
 	runtimeOnly 'org.postgresql:postgresql'

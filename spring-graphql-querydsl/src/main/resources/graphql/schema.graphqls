@@ -1,9 +1,16 @@
 type Query {
     getPostsByUserName(name : String) : [PostsDTO!]
+    countPosts: Int!
 }
 
 type Mutation {
     createPost(postRequestDTO : PostRequestDTO ) : PostsDTO
+    addTagsToPost(addTagRequest: AddTagRequestDTO) : PostsDTO
+}
+
+input AddTagRequestDTO {
+    tagNames: [TagRequestDTO]!
+    postId: ID
 }
 
 input PostRequestDTO {
@@ -15,7 +22,7 @@ input PostRequestDTO {
 }
 
 input TagRequestDTO {
-    name: String
+    name: String!
 }
 
 input PostCommentsRequestDTO {
@@ -23,6 +30,7 @@ input PostCommentsRequestDTO {
 }
 
 type PostsDTO {
+    id: ID
     title: String
     content: String
     createdBy: String

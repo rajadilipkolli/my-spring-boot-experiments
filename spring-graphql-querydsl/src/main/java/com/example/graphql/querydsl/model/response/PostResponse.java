@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.LocalDateTime;
 import java.util.List;
 
-public record PostResponse(
+public record PostResponse(Long postId,
                            String title,
                            String content,
                            String createdBy,
