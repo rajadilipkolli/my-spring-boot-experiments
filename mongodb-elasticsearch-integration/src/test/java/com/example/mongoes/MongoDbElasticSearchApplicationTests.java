@@ -1,4 +1,4 @@
-package com.example.mongoes.mongodbelasticsearchintegration;
+package com.example.mongoes;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
