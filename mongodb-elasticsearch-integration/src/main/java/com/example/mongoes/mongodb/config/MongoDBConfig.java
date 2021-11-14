@@ -1,6 +1,6 @@
 package com.example.mongoes.mongodb.config;
 
-import com.example.mongoes.mongodb.event.CascadeSaveMongoEventListener;
+import com.example.mongoes.mongodb.eventlistener.CascadeSaveMongoEventListener;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
