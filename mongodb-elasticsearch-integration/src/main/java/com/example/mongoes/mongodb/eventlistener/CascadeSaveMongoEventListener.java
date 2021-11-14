@@ -1,4 +1,4 @@
-package com.example.mongoes.mongodb.event;
+package com.example.mongoes.mongodb.eventlistener;
 
 import com.example.mongoes.mongodb.customannotation.CascadeSaveList;
 import org.springframework.data.annotation.Id;
@@ -12,7 +12,7 @@ import org.springframework.util.ReflectionUtils;
 import java.lang.reflect.Field;
 import java.util.List;
 
-public class CascadeSaveMongoEventListener extends AbstractMongoEventListener<Object> {
+public class CascadeSaveMongoEventListener<E> extends AbstractMongoEventListener<E> {
 
   private final ReactiveMongoOperations reactiveMongoOperations;
 
@@ -21,7 +21,7 @@ public class CascadeSaveMongoEventListener extends AbstractMongoEventListener<Ob
   }
 
   @Override
-  public void onBeforeConvert(BeforeConvertEvent<Object> event) {
+  public void onBeforeConvert(BeforeConvertEvent<E> event) {
     ReflectionUtils.doWithFields(
         event.getSource().getClass(),
             new CascadeCallback(event.getSource(), reactiveMongoOperations));
@@ -64,9 +64,6 @@ public class CascadeSaveMongoEventListener extends AbstractMongoEventListener<Ob
 
     private boolean idFound;
 
-    /**
-     * {@inheritDoc}
-     */
     public void doWith(Field field) {
       ReflectionUtils.makeAccessible(field);
 

@@ -25,7 +25,7 @@ public class Restaurant {
     @Id
     private String id;
 
-    @Field("aName")
+    @Field("rName")
     @Indexed(direction = IndexDirection.ASCENDING)
     @NotBlank
     @Size(min = 2)
