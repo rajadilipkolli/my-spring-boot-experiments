@@ -1,4 +1,5 @@
-FROM openjdk:18-ea-6
+FROM openjdk:18-jdk-slim
+
 VOLUME /tmp
 ADD build/libs/spring-graphql-0.0.1-SNAPSHOT.jar app.jar
 RUN sh -c 'touch /app.jar'

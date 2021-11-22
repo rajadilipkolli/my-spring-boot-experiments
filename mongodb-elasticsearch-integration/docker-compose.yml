@@ -1,0 +1,29 @@
+version: '3.8' # specify docker-compose version
+
+# Define the services/containers to be run
+services:
+  mongodb: 
+    image: mongo 
+    volumes:
+      - mongodata:/data/db
+    ports:
+      - "27017:27017"
+      - "27018:27018"
+      - "27019:27019"
+      - "27020:27020"
+     
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.15.2
+    environment:
+      - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    volumes:
+      - esdata1:/usr/share/elasticsearch/data
+      
+volumes:
+  mongodata: 
+  esdata1:
+    driver: edge
