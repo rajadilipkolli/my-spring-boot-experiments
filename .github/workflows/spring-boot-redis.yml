@@ -1,13 +1,13 @@
-name: spring-boot-redis
+name: boot-ultimate-redis
 
 on:
   push:
     paths:
-      - "spring-boot-redis/**"
+      - "boot-ultimate-redis/**"
     branches: [ main ]
   pull_request:
     paths:
-      - "spring-boot-redis/**"
+      - "boot-ultimate-redis/**"
     types:
       - opened
       - synchronize
@@ -30,10 +30,11 @@ jobs:
         cache: 'maven'
     - name: Start up databases via Docker Compose 
       run: |
+        cd boot-ultimate-redis
         docker-compose up -d
         sleep 5
         docker ps -a      
     - name: Build with Maven
       run: |
-        cd spring-boot-redis
+        cd boot-ultimate-redis
         mvn -B package --file pom.xml

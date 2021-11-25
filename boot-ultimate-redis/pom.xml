@@ -9,7 +9,7 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.example</groupId>
-    <artifactId>ultimate-redis</artifactId>
+    <artifactId>boot-ultimate-redis</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>ultimate-redis</name>
     <description>Demo project for Spring Boot</description>
