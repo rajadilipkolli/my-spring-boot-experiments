@@ -2,36 +2,12 @@ version: '3.8' # specify docker-compose version
 
 # Define the services/containers to be run
 services:
-  mongo1:
+  mongodb:
     image: mongo
-    container_name: mongo1
-    command: [ "--replSet", "my-replica-set", "--bind_ip_all", "--port", "27017" ]
     volumes:
-      - ./data/mongo-1:/data/db
+      - mongodata:/data/db
     ports:
       - "27017:27017"
-    healthcheck:
-      test: test $$(echo "rs.initiate({_id:'my-replica-set',members:[{_id:0,host:\"mongo1:27017\"},{_id:1,host:\"mongo2:27018\"},{_id:2,host:\"mongo3:27019\"}]}).ok || rs.status().ok" | mongo --port 27017 --quiet) -eq 1
-      interval: 10s
-      start_period: 30s
-
-  mongo2:
-    image: mongo
-    container_name: mongo2
-    command: [ "--replSet", "my-replica-set", "--bind_ip_all", "--port", "27018" ]
-    volumes:
-      - ./data/mongo-2:/data/db
-    ports:
-      - "27018:27018"
-
-  mongo3:
-    image: mongo
-    container_name: mongo3
-    command: [ "--replSet", "my-replica-set", "--bind_ip_all", "--port", "27019" ]
-    volumes:
-      - ./data/mongo-3:/data/db
-    ports:
-      - "27019:27019"
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.15.2

@@ -22,60 +22,52 @@ import java.util.List;
 @Document(collection = "restaurant")
 public class Restaurant {
 
-    @Id
-    private String id;
+  @Id private String id;
 
-    @Field("rName")
-    @Indexed(direction = IndexDirection.ASCENDING)
-    @NotBlank
-    @Size(min = 2)
-    private String restaurantName;
+  @Field("rName")
+  @Indexed(direction = IndexDirection.ASCENDING)
+  @NotBlank
+  @Size(min = 2)
+  private String restaurantName;
 
-    @NotBlank
-    private String borough;
+  @NotBlank private String borough;
 
-    @NotBlank
-    private String cuisine;
+  @NotBlank private String cuisine;
 
-    private String building;
+  private String building;
 
-    /**
-     * {@code location} is stored in GeoJSON format.
-     *
-     * <pre>
-     * <code>
-     * {
-     *   "type" : "Point",
-     *   "coordinates" : [ x, y ]
-     * }
-     * </code>
-     * </pre>
-     */
-    @GeoSpatialIndexed(type = GeoSpatialIndexType.GEO_2DSPHERE)
-    private GeoJsonPoint location;
+  /**
+   * {@code location} is stored in GeoJSON format.
+   *
+   * <pre>
+   * <code>
+   * {
+   *   "type" : "Point",
+   *   "coordinates" : [ x, y ]
+   * }
+   * </code>
+   * </pre>
+   */
+  @GeoSpatialIndexed(type = GeoSpatialIndexType.GEO_2DSPHERE)
+  private GeoJsonPoint location;
 
-    private String street;
+  private String street;
 
-    private String zipcode;
+  private String zipcode;
 
-    @CascadeSaveList
-    @DBRef
-    private List<Notes> notes = new ArrayList<>();
+  @CascadeSaveList @DBRef private List<Notes> notes = new ArrayList<>();
 
-    @Version
-    private Long version;
+  @Version private Long version;
 
-    @CreatedBy
-    private String createdBy;
+  @CreatedBy private String createdBy;
 
-    @CreatedDate
-    @Field("cDate")
-    private LocalDateTime createdDate;
+  @CreatedDate
+  @Field("cDate")
+  private LocalDateTime createdDate;
 
-    @LastModifiedBy
-    private String lastModifiedBy;
+  @LastModifiedBy private String lastModifiedBy;
 
-    @LastModifiedDate
-    @Field("lDate")
-    private LocalDateTime lastModifiedDate;
+  @LastModifiedDate
+  @Field("lDate")
+  private LocalDateTime lastModifiedDate;
 }

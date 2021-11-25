@@ -28,12 +28,6 @@ jobs:
           java-version: 17
           distribution: 'adopt'
           cache: 'gradle'
-      - name: Start up databases via Docker Compose 
-        run: |
-          cd mongodb-elasticsearch-integration
-          docker-compose up -d
-          sleep 5
-          docker ps -a 
       - name: Build and analyze
         run: |
           cd mongodb-elasticsearch-integration

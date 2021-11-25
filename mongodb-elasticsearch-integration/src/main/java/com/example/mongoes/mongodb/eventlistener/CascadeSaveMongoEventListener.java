@@ -1,9 +1,10 @@
 package com.example.mongoes.mongodb.eventlistener;
 
 import com.example.mongoes.mongodb.customannotation.CascadeSaveList;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mapping.MappingException;
-import org.springframework.data.mongodb.core.ReactiveMongoOperations;
+import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.event.AbstractMongoEventListener;
 import org.springframework.data.mongodb.core.mapping.event.BeforeConvertEvent;
@@ -12,23 +13,24 @@ import org.springframework.util.ReflectionUtils;
 import java.lang.reflect.Field;
 import java.util.List;
 
+@Slf4j
 public class CascadeSaveMongoEventListener<E> extends AbstractMongoEventListener<E> {
 
-  private final ReactiveMongoOperations reactiveMongoOperations;
+  private final MongoOperations mongoOperations;
 
-  public CascadeSaveMongoEventListener(ReactiveMongoOperations reactiveMongoOperations) {
-    this.reactiveMongoOperations = reactiveMongoOperations;
+  public CascadeSaveMongoEventListener(MongoOperations reactiveMongoOperations) {
+    this.mongoOperations = reactiveMongoOperations;
   }
 
   @Override
   public void onBeforeConvert(BeforeConvertEvent<E> event) {
     ReflectionUtils.doWithFields(
         event.getSource().getClass(),
-            new CascadeCallback(event.getSource(), reactiveMongoOperations));
+            new CascadeCallback(event.getSource(), mongoOperations));
   }
 
   private record CascadeCallback(Object source,
-                                 ReactiveMongoOperations reactiveMongoOperations) implements ReflectionUtils.FieldCallback {
+                                 MongoOperations mongoOperations1) implements ReflectionUtils.FieldCallback {
 
     @Override
     public void doWith(Field field) throws IllegalArgumentException, IllegalAccessException {
@@ -54,8 +56,7 @@ public class CascadeSaveMongoEventListener<E> extends AbstractMongoEventListener
         if (!dbRefFieldCallback.isIdFound()) {
           throw new MappingException("Cannot perform cascade save on child object without id set");
         }
-
-        reactiveMongoOperations.save(fieldValue).block();
+        mongoOperations1.save(fieldValue);
       }
     }
   }

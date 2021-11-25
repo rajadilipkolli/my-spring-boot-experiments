@@ -10,28 +10,49 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.MongoDBContainer;
-import reactor.test.StepVerifier;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@Testcontainers
 class MongoDbElasticSearchApplicationTests {
+
+  @Container
+  private static final MongoDBContainer MONGO_DB_CONTAINER =
+      new MongoDBContainer("mongo:latest").withExposedPorts(27017, 27018, 27019);
 
   @Autowired private RestaurantRepository restaurantRepository;
 
+  @BeforeAll
+  static void setUpAll() {
+    MONGO_DB_CONTAINER.start();
+  }
+
+  @AfterAll
+  static void tearDownAll() {
+    if (!MONGO_DB_CONTAINER.isShouldBeReused()) {
+      MONGO_DB_CONTAINER.stop();
+    }
+  }
+
+  @DynamicPropertySource
+  static void setMongoDbContainerURI(DynamicPropertyRegistry propertyRegistry) {
+    propertyRegistry.add("spring.data.mongodb.uri", MONGO_DB_CONTAINER::getReplicaSetUrl);
+  }
+
   @AfterEach
   void tearDown() {
-    StepVerifier.create(restaurantRepository.deleteAll()).verifyComplete();
+    restaurantRepository.deleteAll();
   }
 
   @Test
   void contextLoads() throws InterruptedException {
     TimeUnit.SECONDS.sleep(5);
-    StepVerifier.create(restaurantRepository.count())
-        .expectNext(1L)
-        .expectNextCount(1)
-        .verifyComplete();
+    assertThat(MONGO_DB_CONTAINER.isRunning()).isTrue();
+    assertThat(restaurantRepository.count()).isEqualTo(1);
   }
 }

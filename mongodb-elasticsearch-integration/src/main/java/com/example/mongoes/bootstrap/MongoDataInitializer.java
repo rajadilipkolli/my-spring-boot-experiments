@@ -36,11 +36,10 @@ public class MongoDataInitializer {
     restaurant.setBorough(RandomStringUtils.randomAlphabetic(5));
     restaurant.setCuisine(RandomStringUtils.randomAlphabetic(5));
     restaurant.setNotes(List.of(notes, notes1, notes2));
-    
-    this.restaurantRepository
-        .deleteAll()
-        .then(this.restaurantRepository.save(restaurant))
-        .log()
-        .subscribe(null, null, () -> log.info("done initialization..."));
+
+    this.restaurantRepository.deleteAll();
+
+    Restaurant savedRestaurant = this.restaurantRepository.save(restaurant);
+    log.info("Saved Restaurant :{}", savedRestaurant);
   }
 }
