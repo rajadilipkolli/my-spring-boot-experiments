@@ -21,35 +21,14 @@ class MongoDbElasticSearchApplicationTests {
 
   @Autowired private RestaurantRepository restaurantRepository;
 
-  private static final MongoDBContainer MONGO_DB_CONTAINER =
-      new MongoDBContainer("mongo:latest").withExposedPorts(27017, 27018, 27019);
-
-  @BeforeAll
-  static void setUpAll() {
-    MONGO_DB_CONTAINER.start();
-  }
-
-  @AfterAll
-  static void tearDownAll() {
-    if (!MONGO_DB_CONTAINER.isShouldBeReused()) {
-      MONGO_DB_CONTAINER.stop();
-    }
-  }
-
   @AfterEach
   void tearDown() {
     StepVerifier.create(restaurantRepository.deleteAll()).verifyComplete();
   }
 
-  @DynamicPropertySource
-  static void setMongoDbContainerURI(DynamicPropertyRegistry propertyRegistry) {
-    propertyRegistry.add("spring.data.mongodb.uri", MONGO_DB_CONTAINER::getReplicaSetUrl);
-  }
-
   @Test
   void contextLoads() throws InterruptedException {
     TimeUnit.SECONDS.sleep(5);
-    assertThat(MONGO_DB_CONTAINER.isRunning()).isTrue();
     StepVerifier.create(restaurantRepository.count())
         .expectNext(1L)
         .expectNextCount(1)
