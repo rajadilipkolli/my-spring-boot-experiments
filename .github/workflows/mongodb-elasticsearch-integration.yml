@@ -28,7 +28,6 @@ jobs:
           java-version: 17
           distribution: 'adopt'
           cache: 'gradle'
-
       - name: Build and analyze
         run: |
           cd mongodb-elasticsearch-integration

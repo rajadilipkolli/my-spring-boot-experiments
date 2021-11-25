@@ -1,0 +1,12 @@
+spring:
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/test
+      #uri: mongodb://mongo1:27017,mongo2:27018,mongo3:27019/test
+logging:
+  level:
+    org:
+      springframework:
+        data.mongodb: INFO
+        boot.autoconfigure.mongo: INFO
+    com.mongodb.client: INFO
