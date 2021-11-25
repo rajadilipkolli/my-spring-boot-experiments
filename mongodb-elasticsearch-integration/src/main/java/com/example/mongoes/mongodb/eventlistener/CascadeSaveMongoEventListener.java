@@ -1,12 +1,18 @@
 package com.example.mongoes.mongodb.eventlistener;
 
+import com.example.mongoes.elasticsearch.domain.ERestaurant;
+import com.example.mongoes.elasticsearch.repository.ERestaurantRepository;
 import com.example.mongoes.mongodb.customannotation.CascadeSaveList;
+import com.example.mongoes.mongodb.domain.Restaurant;
+import com.example.mongoes.utils.ApplicationConstants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.elasticsearch.core.geo.GeoJsonPoint;
 import org.springframework.data.mapping.MappingException;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.event.AbstractMongoEventListener;
+import org.springframework.data.mongodb.core.mapping.event.AfterSaveEvent;
 import org.springframework.data.mongodb.core.mapping.event.BeforeConvertEvent;
 import org.springframework.util.ReflectionUtils;
 
@@ -18,8 +24,11 @@ public class CascadeSaveMongoEventListener<E> extends AbstractMongoEventListener
 
   private final MongoOperations mongoOperations;
 
-  public CascadeSaveMongoEventListener(MongoOperations reactiveMongoOperations) {
+  private final ERestaurantRepository eRestaurantRepository;
+
+  public CascadeSaveMongoEventListener(MongoOperations reactiveMongoOperations, ERestaurantRepository eRestaurantRepository) {
     this.mongoOperations = reactiveMongoOperations;
+    this.eRestaurantRepository = eRestaurantRepository;
   }
 
   @Override
@@ -27,6 +36,26 @@ public class CascadeSaveMongoEventListener<E> extends AbstractMongoEventListener
     ReflectionUtils.doWithFields(
         event.getSource().getClass(),
             new CascadeCallback(event.getSource(), mongoOperations));
+  }
+
+  @Override
+  public void onAfterSave(AfterSaveEvent<E> event) {
+
+      log.debug("onAfterSave({}, {})", event.getSource(), event.getDocument());
+      if (ApplicationConstants.RESTAURANT_COLLECTION.equals(event.getCollectionName())) {
+         ERestaurant eRestaurant = convertToERestaurant(event.getSource());
+         this.eRestaurantRepository.save(eRestaurant)
+                 .subscribe(eRestaurant1 -> log.info("Saved in ElasticSearch :{}", eRestaurant1));
+      }
+
+  }
+
+  private ERestaurant convertToERestaurant(E source) {
+    Restaurant restaurant = (Restaurant) source;
+    return ERestaurant.builder().restaurantName(restaurant.getRestaurantName())
+//            .location(GeoJsonPoint.of(restaurant.getLocation().getX(), restaurant.getLocation().getY()))
+            .borough(restaurant.getBorough())
+            .id(restaurant.getId()).build();
   }
 
   private record CascadeCallback(Object source,

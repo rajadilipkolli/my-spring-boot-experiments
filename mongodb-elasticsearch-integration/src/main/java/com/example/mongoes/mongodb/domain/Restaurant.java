@@ -1,6 +1,7 @@
 package com.example.mongoes.mongodb.domain;
 
 import com.example.mongoes.mongodb.customannotation.CascadeSaveList;
+import com.example.mongoes.utils.ApplicationConstants;
 import lombok.Data;
 import org.springframework.data.annotation.*;
 import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
@@ -19,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Data
-@Document(collection = "restaurant")
+@Document(collection = ApplicationConstants.RESTAURANT_COLLECTION)
 public class Restaurant {
 
   @Id private String id;

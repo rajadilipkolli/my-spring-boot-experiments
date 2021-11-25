@@ -2,7 +2,10 @@ spring:
   data:
     mongodb:
       uri: mongodb://localhost:27017/test
-      #uri: mongodb://mongo1:27017,mongo2:27018,mongo3:27019/test
+  elasticsearch:
+    uris: localhost:9200
+    socket-timeout: 10s
+    #uri: mongodb://mongo1:27017,mongo2:27018,mongo3:27019/test
 logging:
   level:
     org:
