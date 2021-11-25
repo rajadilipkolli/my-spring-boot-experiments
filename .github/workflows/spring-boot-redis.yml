@@ -1,0 +1,39 @@
+name: spring-boot-redis
+
+on:
+  push:
+    paths:
+      - "spring-boot-redis/**"
+    branches: [ master ]
+  pull_request:
+    paths:
+      - "spring-boot-redis/**"
+    types:
+      - opened
+      - synchronize
+      - reopened
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+          fetch-depth: 0
+    - name: Set up JDK
+      uses: actions/setup-java@v2.3.1
+      with:
+        java-version: '17'
+        distribution: 'zulu'
+        cache: 'maven'
+    - name: Start up databases via Docker Compose 
+      run: |
+        docker-compose up -d
+        sleep 5
+        docker ps -a      
+    - name: Build with Maven
+      run: |
+        cd spring-boot-redis
+        mvn -B package --file pom.xml
