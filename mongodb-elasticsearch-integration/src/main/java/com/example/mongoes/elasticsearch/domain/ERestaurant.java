@@ -7,9 +7,14 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
-import org.springframework.data.elasticsearch.core.geo.GeoJsonPoint;
+import org.springframework.data.elasticsearch.annotations.GeoPointField;
+import org.springframework.data.elasticsearch.annotations.Setting;
+import org.springframework.data.geo.Point;
+
+import java.util.List;
 
 @Document(indexName = ApplicationConstants.RESTAURANT_COLLECTION)
+@Setting(replicas = 1, shards = 2)
 @Data
 @Builder
 public class ERestaurant {
@@ -28,12 +33,14 @@ public class ERestaurant {
   @Field(store = true, type = FieldType.Text)
   private String building;
 
-  @Field(type = FieldType.Percolator)
-  private GeoJsonPoint location;
+  @GeoPointField private Point location;
 
   @Field(store = true, type = FieldType.Text)
   private String street;
 
   @Field(store = true, type = FieldType.Integer)
-  private String zipcode;
+  private Integer zipcode;
+
+  @Field(type = FieldType.Nested)
+  private List<ENotes> notes;
 }

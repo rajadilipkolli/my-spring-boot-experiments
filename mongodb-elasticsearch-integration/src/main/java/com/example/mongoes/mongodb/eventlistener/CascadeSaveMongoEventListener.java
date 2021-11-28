@@ -1,13 +1,15 @@
 package com.example.mongoes.mongodb.eventlistener;
 
+import com.example.mongoes.elasticsearch.domain.ENotes;
 import com.example.mongoes.elasticsearch.domain.ERestaurant;
 import com.example.mongoes.elasticsearch.repository.ERestaurantRepository;
 import com.example.mongoes.mongodb.customannotation.CascadeSaveList;
+import com.example.mongoes.mongodb.domain.Notes;
 import com.example.mongoes.mongodb.domain.Restaurant;
 import com.example.mongoes.utils.ApplicationConstants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.elasticsearch.core.geo.GeoJsonPoint;
+import org.springframework.data.geo.Point;
 import org.springframework.data.mapping.MappingException;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.data.mongodb.core.mapping.DBRef;
@@ -18,6 +20,7 @@ import org.springframework.util.ReflectionUtils;
 
 import java.lang.reflect.Field;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 public class CascadeSaveMongoEventListener<E> extends AbstractMongoEventListener<E> {
@@ -45,7 +48,7 @@ public class CascadeSaveMongoEventListener<E> extends AbstractMongoEventListener
       if (ApplicationConstants.RESTAURANT_COLLECTION.equals(event.getCollectionName())) {
          ERestaurant eRestaurant = convertToERestaurant(event.getSource());
          this.eRestaurantRepository.save(eRestaurant)
-                 .subscribe(eRestaurant1 -> log.info("Saved in ElasticSearch :{}", eRestaurant1));
+                 .subscribe(persistedRepository -> log.info("Saved in ElasticSearch :{}", persistedRepository));
       }
 
   }
@@ -53,9 +56,24 @@ public class CascadeSaveMongoEventListener<E> extends AbstractMongoEventListener
   private ERestaurant convertToERestaurant(E source) {
     Restaurant restaurant = (Restaurant) source;
     return ERestaurant.builder().restaurantName(restaurant.getRestaurantName())
-//            .location(GeoJsonPoint.of(restaurant.getLocation().getX(), restaurant.getLocation().getY()))
+            .location(new Point(restaurant.getLocation().getX(), restaurant.getLocation().getY()))
             .borough(restaurant.getBorough())
+            .cuisine(restaurant.getCuisine())
+            .street(restaurant.getStreet())
+            .building(restaurant.getBuilding())
+            .zipcode(restaurant.getZipcode())
+            .notes(convertToNoteList(restaurant.getNotes()))
             .id(restaurant.getId()).build();
+  }
+
+  private List<ENotes> convertToNoteList(List<Notes> notes) {
+    return notes.stream().map(this::convertToENote).collect(Collectors.toList());
+  }
+
+  private ENotes convertToENote(Notes mongoNotes) {
+    return ENotes.builder().note(mongoNotes.getNote()).id(mongoNotes.getId())
+            .score(mongoNotes.getScore())
+            .date(mongoNotes.getDate()).build();
   }
 
   private record CascadeCallback(Object source,

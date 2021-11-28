@@ -1,5 +1,6 @@
 package com.example.mongoes;
 
+import com.example.mongoes.elasticsearch.repository.ERestaurantRepository;
 import com.example.mongoes.mongodb.repository.RestaurantRepository;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -10,8 +11,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.MongoDBContainer;
+import org.testcontainers.elasticsearch.ElasticsearchContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import reactor.test.StepVerifier;
 
 import java.util.concurrent.TimeUnit;
 
@@ -25,7 +28,13 @@ class MongoDbElasticSearchApplicationTests {
   private static final MongoDBContainer MONGO_DB_CONTAINER =
       new MongoDBContainer("mongo:latest").withExposedPorts(27017, 27018, 27019);
 
+  @Container
+  static ElasticsearchContainer esContainer =
+      new ElasticsearchContainer("docker.elastic.co/elasticsearch/elasticsearch:7.15.2")
+          .withEnv("discovery.type", "single-node");
+
   @Autowired private RestaurantRepository restaurantRepository;
+  @Autowired private ERestaurantRepository eRestaurantRepository;
 
   @BeforeAll
   static void setUpAll() {
@@ -40,8 +49,9 @@ class MongoDbElasticSearchApplicationTests {
   }
 
   @DynamicPropertySource
-  static void setMongoDbContainerURI(DynamicPropertyRegistry propertyRegistry) {
+  static void setApplicationProperties(DynamicPropertyRegistry propertyRegistry) {
     propertyRegistry.add("spring.data.mongodb.uri", MONGO_DB_CONTAINER::getReplicaSetUrl);
+    propertyRegistry.add("spring.elasticsearch.uris", esContainer::getHttpHostAddress);
   }
 
   @AfterEach
@@ -54,5 +64,10 @@ class MongoDbElasticSearchApplicationTests {
     TimeUnit.SECONDS.sleep(5);
     assertThat(MONGO_DB_CONTAINER.isRunning()).isTrue();
     assertThat(restaurantRepository.count()).isEqualTo(1);
+    eRestaurantRepository
+        .count()
+        .as(StepVerifier::create)
+        .consumeNextWith(p -> assertThat(p).isEqualTo(1))
+        .verifyComplete();
   }
 }

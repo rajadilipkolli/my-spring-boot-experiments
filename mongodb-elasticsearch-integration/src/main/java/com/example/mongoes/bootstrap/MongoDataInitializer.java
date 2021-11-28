@@ -30,7 +30,7 @@ public class MongoDataInitializer {
     Restaurant restaurant = new Restaurant();
     restaurant.setBuilding(RandomStringUtils.randomAlphabetic(5));
     restaurant.setStreet(RandomStringUtils.randomAlphabetic(5));
-    restaurant.setZipcode(RandomStringUtils.randomNumeric(4));
+    restaurant.setZipcode(Integer.valueOf(RandomStringUtils.randomNumeric(4)));
     restaurant.setLocation(new GeoJsonPoint(-73.9387768, 40.8509032));
     restaurant.setRestaurantName(RandomStringUtils.randomAlphabetic(5));
     restaurant.setBorough(RandomStringUtils.randomAlphabetic(5));
