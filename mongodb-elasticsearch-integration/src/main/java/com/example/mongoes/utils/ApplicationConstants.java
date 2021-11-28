@@ -6,4 +6,5 @@ import lombok.experimental.UtilityClass;
 public class ApplicationConstants {
 
     public static final String RESTAURANT_COLLECTION = "restaurant";
+    public static final String NOTE_COLLECTION = "notes";
 }

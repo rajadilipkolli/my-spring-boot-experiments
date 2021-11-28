@@ -14,6 +14,7 @@ import org.springframework.data.mapping.MappingException;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.event.AbstractMongoEventListener;
+import org.springframework.data.mongodb.core.mapping.event.AfterDeleteEvent;
 import org.springframework.data.mongodb.core.mapping.event.AfterSaveEvent;
 import org.springframework.data.mongodb.core.mapping.event.BeforeConvertEvent;
 import org.springframework.util.ReflectionUtils;
@@ -50,7 +51,13 @@ public class CascadeSaveMongoEventListener<E> extends AbstractMongoEventListener
          this.eRestaurantRepository.save(eRestaurant)
                  .subscribe(persistedRepository -> log.info("Saved in ElasticSearch :{}", persistedRepository));
       }
+  }
 
+  @Override
+  public void onAfterDelete(AfterDeleteEvent<E> event) {
+
+      log.debug("onAfterDelete({})", event.getDocument());
+      this.eRestaurantRepository.deleteById(event.getSource().getString("id"));
   }
 
   private ERestaurant convertToERestaurant(E source) {
