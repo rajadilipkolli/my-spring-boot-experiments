@@ -46,6 +46,7 @@ public class CascadeSaveMongoEventListener<E> extends AbstractMongoEventListener
 
   @Override
   public void onBeforeConvert(BeforeConvertEvent<E> event) {
+    log.debug("onBeforeConvert({})", event.getSource());
     ReflectionUtils.doWithFields(
         event.getSource().getClass(),
             new CascadeCallback(event.getSource(), mongoOperations));
@@ -68,7 +69,7 @@ public class CascadeSaveMongoEventListener<E> extends AbstractMongoEventListener
   public void onAfterDelete(AfterDeleteEvent<E> event) {
 
       log.debug("onAfterDelete({})", event.getDocument());
-      this.reactiveElasticsearchOperations.delete(event.getSource().getString("id"), IndexCoordinates.of(ApplicationConstants.RESTAURANT_COLLECTION))
+      this.reactiveElasticsearchOperations.delete(event.getSource().getString("id"), IndexCoordinates.of(event.getCollectionName()))
               .subscribe();
   }
 
@@ -77,7 +78,7 @@ public class CascadeSaveMongoEventListener<E> extends AbstractMongoEventListener
   }
 
   private record CascadeCallback(Object source,
-                                 MongoOperations mongoOperations1) implements ReflectionUtils.FieldCallback {
+                                 MongoOperations mongoOperations) implements ReflectionUtils.FieldCallback {
 
     @Override
     public void doWith(Field field) throws IllegalArgumentException, IllegalAccessException {
@@ -103,7 +104,7 @@ public class CascadeSaveMongoEventListener<E> extends AbstractMongoEventListener
         if (!dbRefFieldCallback.isIdFound()) {
           throw new MappingException("Cannot perform cascade save on child object without id set");
         }
-        mongoOperations1.save(fieldValue);
+        mongoOperations.save(fieldValue);
       }
     }
   }
