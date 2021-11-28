@@ -77,10 +77,11 @@ class MongoDbElasticSearchApplicationTests {
     Function<UriBuilder, URI> uriFunction =
         uriBuilder ->
             uriBuilder
-                .path("withInRange")
+                .path("/withInRange")
                 .queryParam("lat", -73.9)
                 .queryParam("lon", 40.8)
                 .queryParam("distance", 50)
+                .queryParam("unit", "km")
                 .build();
 
     this.webTestClient
