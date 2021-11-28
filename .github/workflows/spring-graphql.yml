@@ -33,4 +33,4 @@ jobs:
         run: |
           cd spring-graphql
           chmod +x gradlew
-          ./gradlew clean build
+          ./gradlew clean build --info
