@@ -91,7 +91,7 @@ class MongoDbElasticSearchApplicationTests {
         .exchange()
         .expectStatus()
         .isOk()
-        .expectBodyList(ResultData.class)
+        .expectBodyList(String.class)
         .hasSize(1);
   }
 }
