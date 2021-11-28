@@ -2,14 +2,14 @@ package com.example.mongoes.mongodb.eventlistener;
 
 import com.example.mongoes.elasticsearch.domain.ENotes;
 import com.example.mongoes.elasticsearch.domain.ERestaurant;
-import com.example.mongoes.elasticsearch.repository.ERestaurantRepository;
 import com.example.mongoes.mongodb.customannotation.CascadeSaveList;
-import com.example.mongoes.mongodb.domain.Notes;
-import com.example.mongoes.mongodb.domain.Restaurant;
 import com.example.mongoes.utils.ApplicationConstants;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.geo.Point;
+import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperations;
+import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
 import org.springframework.data.mapping.MappingException;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.data.mongodb.core.mapping.DBRef;
@@ -20,35 +20,47 @@ import org.springframework.data.mongodb.core.mapping.event.BeforeConvertEvent;
 import org.springframework.util.ReflectionUtils;
 
 import java.lang.reflect.Field;
+import java.util.HashMap;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Map;
 
 @Slf4j
 public class CascadeSaveMongoEventListener<E> extends AbstractMongoEventListener<E> {
 
   private final MongoOperations mongoOperations;
+  private final ReactiveElasticsearchOperations reactiveElasticsearchOperations;
+  private final ObjectMapper objectMapper;
+  private final Map<String, Class<?>> classMap = new HashMap<>();
 
-  private final ERestaurantRepository eRestaurantRepository;
-
-  public CascadeSaveMongoEventListener(MongoOperations reactiveMongoOperations, ERestaurantRepository eRestaurantRepository) {
+  public CascadeSaveMongoEventListener(MongoOperations reactiveMongoOperations, ReactiveElasticsearchOperations reactiveElasticsearchOperations, ObjectMapper objectMapper) {
     this.mongoOperations = reactiveMongoOperations;
-    this.eRestaurantRepository = eRestaurantRepository;
+    this.reactiveElasticsearchOperations = reactiveElasticsearchOperations;
+    this.objectMapper = objectMapper;
+    populateMap();
+  }
+
+  private void populateMap() {
+    classMap.put(ApplicationConstants.RESTAURANT_COLLECTION, ERestaurant.class);
+    classMap.put(ApplicationConstants.NOTE_COLLECTION, ENotes.class);
   }
 
   @Override
   public void onBeforeConvert(BeforeConvertEvent<E> event) {
+    log.debug("onBeforeConvert({})", event.getSource());
     ReflectionUtils.doWithFields(
         event.getSource().getClass(),
             new CascadeCallback(event.getSource(), mongoOperations));
   }
 
+  @SneakyThrows
   @Override
   public void onAfterSave(AfterSaveEvent<E> event) {
 
       log.debug("onAfterSave({}, {})", event.getSource(), event.getDocument());
       if (ApplicationConstants.RESTAURANT_COLLECTION.equals(event.getCollectionName())) {
-         ERestaurant eRestaurant = convertToERestaurant(event.getSource());
-         this.eRestaurantRepository.save(eRestaurant)
+          String json = objectMapper.writeValueAsString(event.getSource());
+          var tClass = getClassByCollectionName(event.getCollectionName());
+          reactiveElasticsearchOperations.save(objectMapper.readValue(json, tClass), IndexCoordinates.of(event.getCollectionName()))
                  .subscribe(persistedRepository -> log.info("Saved in ElasticSearch :{}", persistedRepository));
       }
   }
@@ -57,34 +69,16 @@ public class CascadeSaveMongoEventListener<E> extends AbstractMongoEventListener
   public void onAfterDelete(AfterDeleteEvent<E> event) {
 
       log.debug("onAfterDelete({})", event.getDocument());
-      this.eRestaurantRepository.deleteById(event.getSource().getString("id"));
+      this.reactiveElasticsearchOperations.delete(event.getSource().getString("id"), IndexCoordinates.of(event.getCollectionName()))
+              .subscribe();
   }
 
-  private ERestaurant convertToERestaurant(E source) {
-    Restaurant restaurant = (Restaurant) source;
-    return ERestaurant.builder().restaurantName(restaurant.getRestaurantName())
-            .location(new Point(restaurant.getLocation().getX(), restaurant.getLocation().getY()))
-            .borough(restaurant.getBorough())
-            .cuisine(restaurant.getCuisine())
-            .street(restaurant.getStreet())
-            .building(restaurant.getBuilding())
-            .zipcode(restaurant.getZipcode())
-            .notes(convertToNoteList(restaurant.getNotes()))
-            .id(restaurant.getId()).build();
-  }
-
-  private List<ENotes> convertToNoteList(List<Notes> notes) {
-    return notes.stream().map(this::convertToENote).collect(Collectors.toList());
-  }
-
-  private ENotes convertToENote(Notes mongoNotes) {
-    return ENotes.builder().note(mongoNotes.getNote()).id(mongoNotes.getId())
-            .score(mongoNotes.getScore())
-            .date(mongoNotes.getDate()).build();
+  private Class<?> getClassByCollectionName(String collectionName) {
+    return classMap.get(collectionName);
   }
 
   private record CascadeCallback(Object source,
-                                 MongoOperations mongoOperations1) implements ReflectionUtils.FieldCallback {
+                                 MongoOperations mongoOperations) implements ReflectionUtils.FieldCallback {
 
     @Override
     public void doWith(Field field) throws IllegalArgumentException, IllegalAccessException {
@@ -110,7 +104,7 @@ public class CascadeSaveMongoEventListener<E> extends AbstractMongoEventListener
         if (!dbRefFieldCallback.isIdFound()) {
           throw new MappingException("Cannot perform cascade save on child object without id set");
         }
-        mongoOperations1.save(fieldValue);
+        mongoOperations.save(fieldValue);
       }
     }
   }
