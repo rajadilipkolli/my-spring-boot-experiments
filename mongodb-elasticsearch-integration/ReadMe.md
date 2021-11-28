@@ -1,7 +1,6 @@
 ## Tools used
 - Spring Data MongoDB
 - Spring Data ElasticSearch
-- MapStruct
 - Lombok
 
 ## Steps to save the documents in MongoDb and elasticSearch

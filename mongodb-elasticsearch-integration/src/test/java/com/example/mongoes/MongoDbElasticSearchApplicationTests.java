@@ -2,7 +2,6 @@ package com.example.mongoes;
 
 import com.example.mongoes.elasticsearch.repository.ERestaurantRepository;
 import com.example.mongoes.mongodb.repository.RestaurantRepository;
-import com.example.mongoes.web.response.ResultData;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
