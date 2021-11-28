@@ -4,4 +4,4 @@ import com.example.mongoes.elasticsearch.domain.ERestaurant;
 import org.springframework.data.elasticsearch.repository.ReactiveElasticsearchRepository;
 
 public interface ERestaurantRepository
-    extends ReactiveElasticsearchRepository<ERestaurant, String> {}
+    extends ReactiveElasticsearchRepository<ERestaurant, String> , ERestaurantRepositoryCustom {}
