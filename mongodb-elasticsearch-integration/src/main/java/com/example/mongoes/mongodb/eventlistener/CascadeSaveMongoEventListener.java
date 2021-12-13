@@ -23,6 +23,7 @@ import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @Slf4j
 public class CascadeSaveMongoEventListener<E> extends AbstractMongoEventListener<E> {
@@ -56,21 +57,20 @@ public class CascadeSaveMongoEventListener<E> extends AbstractMongoEventListener
   @Override
   public void onAfterSave(AfterSaveEvent<E> event) {
 
-      log.debug("onAfterSave({}, {})", event.getSource(), event.getDocument());
-      if (ApplicationConstants.RESTAURANT_COLLECTION.equals(event.getCollectionName())) {
-          String json = objectMapper.writeValueAsString(event.getSource());
-          var tClass = getClassByCollectionName(event.getCollectionName());
-          reactiveElasticsearchOperations.save(objectMapper.readValue(json, tClass), IndexCoordinates.of(event.getCollectionName()))
-                 .subscribe(persistedRepository -> log.info("Saved in ElasticSearch :{}", persistedRepository));
-      }
+    log.debug("onAfterSave({}, {})", event.getSource(), event.getDocument());
+    String json = objectMapper.writeValueAsString(event.getSource());
+    var tClass = getClassByCollectionName(Objects.requireNonNull(event.getCollectionName()));
+    reactiveElasticsearchOperations.save(objectMapper.readValue(json, tClass), IndexCoordinates.of(event.getCollectionName()))
+            .subscribe(persistedRepository -> log.info("Saved in ElasticSearch :{}", persistedRepository));
+
   }
 
   @Override
   public void onAfterDelete(AfterDeleteEvent<E> event) {
 
-      log.debug("onAfterDelete({})", event.getDocument());
-      this.reactiveElasticsearchOperations.delete(event.getSource().getString("id"), IndexCoordinates.of(event.getCollectionName()))
-              .subscribe();
+    log.info("onAfterDelete({})", event.getDocument());
+    this.reactiveElasticsearchOperations.delete(event.getSource().getString("id"), IndexCoordinates.of(event.getCollectionName()))
+            .subscribe();
   }
 
   private Class<?> getClassByCollectionName(String collectionName) {
@@ -96,16 +96,14 @@ public class CascadeSaveMongoEventListener<E> extends AbstractMongoEventListener
     }
 
     private void checkAndCreateIDIfNotExists(Object fieldValue) {
-      if (fieldValue != null) {
-        DbRefFieldCallback dbRefFieldCallback = new DbRefFieldCallback();
+      DbRefFieldCallback dbRefFieldCallback = new DbRefFieldCallback();
 
-        ReflectionUtils.doWithFields(fieldValue.getClass(), dbRefFieldCallback);
+      ReflectionUtils.doWithFields(fieldValue.getClass(), dbRefFieldCallback);
 
-        if (!dbRefFieldCallback.isIdFound()) {
-          throw new MappingException("Cannot perform cascade save on child object without id set");
-        }
-        mongoOperations.save(fieldValue);
+      if (!dbRefFieldCallback.isIdFound()) {
+        throw new MappingException("Cannot perform cascade save on child object without id set");
       }
+      mongoOperations.save(fieldValue);
     }
   }
 
