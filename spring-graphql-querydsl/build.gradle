@@ -51,7 +51,7 @@ dependencies {
 	testImplementation 'io.projectreactor:reactor-test'
 	testImplementation 'org.testcontainers:junit-jupiter'
 	testImplementation 'org.testcontainers:postgresql'
-	testImplementation 'org.springframework.graphql:spring-graphql-test:1.0.0-M3'
+	testImplementation 'org.springframework.graphql:spring-graphql-test:1.0.0-M4'
 	testImplementation 'org.projectlombok:lombok'
 }
 
