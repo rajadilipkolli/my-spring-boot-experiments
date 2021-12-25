@@ -1,0 +1,54 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Spring Boot-StrategyPluginApplication<strategy-plugin>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "console": "internalConsole",
+            "mainClass": "com.example.plugin.strategyplugin.StrategyPluginApplication",
+            "projectName": "strategy-plugin",
+            "args": ""
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-Application<spring-graphql>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "console": "internalConsole",
+            "mainClass": "com.example.graphql.Application",
+            "projectName": "spring-graphql",
+            "args": ""
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-UltimateRedisApplication<boot-ultimate-redis>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "console": "internalConsole",
+            "mainClass": "com.example.ultimateredis.UltimateRedisApplication",
+            "projectName": "boot-ultimate-redis",
+            "args": ""
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-MongoDbElasticSearchApplication<mongodb-elasticsearch-integration>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "console": "internalConsole",
+            "mainClass": "com.example.mongoes.MongoDbElasticSearchApplication",
+            "projectName": "mongodb-elasticsearch-integration",
+            "args": ""
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-GraphQueryDSLApplication<spring-graphql-querydsl>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "console": "internalConsole",
+            "mainClass": "com.example.graphql.querydsl.GraphQueryDSLApplication",
+            "projectName": "spring-graphql-querydsl",
+            "args": ""
+        }
+    ]
+}

@@ -15,3 +15,9 @@
 - Enable AuditLogging
 - Use `AfterConvertEvent` to trigger saving to ElasticSearch
 - ElasticSearch uses NestedField to save 1-n relationShip
+
+## Useful commands
+
+ - To view elasticsearch stats for a document http://localhost:9200/restaurant?pretty
+ - To retrieve specific document from index http://localhost:9200/restaurant/_doc/61c75c9dab6a3e6abf8a3179?pretty
+ - 
