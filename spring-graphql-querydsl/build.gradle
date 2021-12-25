@@ -61,6 +61,14 @@ dependencyManagement {
 	}
 }
 
+sourceSets {
+    main {
+        java {
+            srcDirs = ['src/main/java', 'build/generated/sources/annotationProcessor/java/main']
+        }
+    }
+}
+
 defaultTasks "bootRun"
 
 springBoot {
