@@ -28,7 +28,12 @@ jobs:
           java-version: 17
           distribution: 'microsoft'
           cache: 'gradle'
-
+      - name: Start up databases via docker compose
+        run: |
+          cd read-replica-postgresql
+          docker compose up -d
+          sleep 5
+          docker ps -a
       - name: Build and analyze
         run: |
           cd read-replica-postgresql
