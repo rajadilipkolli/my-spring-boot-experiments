@@ -49,6 +49,16 @@
             "mainClass": "com.example.graphql.querydsl.GraphQueryDSLApplication",
             "projectName": "spring-graphql-querydsl",
             "args": ""
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-ReadReplicaApplication<read-replica-postgresql>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "console": "internalConsole",
+            "mainClass": "com.example.demo.readreplica.ReadReplicaApplication",
+            "projectName": "read-replica-postgresql",
+            "args": ""
         }
     ]
 }
