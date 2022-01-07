@@ -6,10 +6,10 @@ The following table list all sample codes related to the above posts.
 
 ### Spring Samples
 
-| name                                                         | description                                                  |
-status                                                       |
-| :----------------------------------------------------------- | ------------------------------------------------------------ |
------------------------------------------------------------- |
+
+|
+ Name  | Description | Current Status
+------------- | ------------------ | --------------
 | [boot-ultimate-redis](./boot-ultimate-redis) | The application discovers ways of interacting with Redis with different TTLs for different Caches | completed |
 | [mongodb-elasticsearch-integration](./mongodb-elasticsearch-integration) | The application, demonstrates saving the data in MongoDb and then searching in ElasticSearch for quick Search, GeoSpatial Search |
 | [multipledatasources](./multipledatasources) | The application demonstrates the way spring boot application connects with multiple databases |
