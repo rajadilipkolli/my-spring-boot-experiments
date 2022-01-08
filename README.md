@@ -16,3 +16,4 @@ The following table list all sample codes related to the above posts.
 | [spring-graphql](./spring-graphql) | The application, demonstrates the way to connect to database using graph ql |  Completed 👏 |
 | [spring-graphql-querydsl](./spring-graphql-querydsl) | The application, demonstrates the way to connect to database using graph ql and querydsl| In-Progress |
 | [startegy-plugin](./startegy-plugin) | The application, demonstrates startegy pattern in spring feature, use a main class to start up the application | Completed 👏 |
+| [archunit-api](./archunit-api) | The application, demonstrates how to apply arch unit rules to the spring boot project | Completed 👏  |

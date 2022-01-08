@@ -25,3 +25,6 @@ hs_err_pid*
 build/
 .idea/
 !gradle/wrapper/gradle-wrapper.jar
+
+### VS Code ###
+.vscode/
