@@ -1,11 +1,10 @@
 package com.example.multipledatasources.model.cardholder;
 
-import org.hibernate.Hibernate;
-
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.Hibernate;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -16,6 +15,7 @@ import javax.persistence.Table;
 
 import java.util.Objects;
 
+
 @Entity
 @Getter
 @Setter
@@ -24,24 +24,26 @@ import java.util.Objects;
 @Table(name = "card_holder")
 public class CardHolder {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    @Column(nullable = false)
-    private String memberId;
-    @Column(nullable = false)
-    private String cardNumber;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
-        CardHolder that = (CardHolder) o;
-        return id != null && Objects.equals(id, that.id);
-    }
+  @Column(nullable = false, name = "member_id")
+  private String memberId;
 
-    @Override
-    public int hashCode() {
-        return getClass().hashCode();
-    }
+  @Column(nullable = false, name = "card_number")
+  private String cardNumber;
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+    CardHolder that = (CardHolder) o;
+    return id != null && Objects.equals(id, that.id);
+  }
+
+  @Override
+  public int hashCode() {
+    return getClass().hashCode();
+  }
 }
