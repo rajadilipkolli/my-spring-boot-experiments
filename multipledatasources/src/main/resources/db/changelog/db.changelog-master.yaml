@@ -6,4 +6,4 @@ databaseChangeLog:
   - include:
       file: db/changelog/db.changelog-json-db.json
 #  - include:
-#      file: db/changelog/db.changelog-xml-db.xml
+#      file: db/changelog/db.changelog-yaml-db.yaml

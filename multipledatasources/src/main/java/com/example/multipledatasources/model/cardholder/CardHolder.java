@@ -1,8 +1,13 @@
 package com.example.multipledatasources.model.cardholder;
 
-import lombok.*;
 import org.hibernate.Hibernate;
 
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -19,7 +24,9 @@ public class CardHolder {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
+    @Column(nullable = false)
     private String memberId;
+    @Column(nullable = false)
     private String cardNumber;
 
     @Override
