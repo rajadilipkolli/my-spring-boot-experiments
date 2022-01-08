@@ -32,11 +32,12 @@ public class DataInitilizer {
     cardHolder.setMemberId(memberId);
     cardHolder.setCardNumber("1234-5678-9012-3456");
 
+    CardHolder savedCardHolder = this.cardHolderRepository.save(cardHolder);
+    log.info("Saved CardHolder :{}", savedCardHolder);
+
     Member savedMember = this.memberRepository.save(member);
     log.info("Saved Member :{}", savedMember);
 
-    CardHolder savedCardHolder = this.cardHolderRepository.save(cardHolder);
-    log.info("Saved CardHolder :{}", savedCardHolder);
     log.info("Data Boot strapping completed");
   }
 }

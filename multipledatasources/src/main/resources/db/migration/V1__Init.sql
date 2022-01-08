@@ -9,5 +9,5 @@ CREATE TABLE card_holder (
 
 -- Requires only if sequence type is Auto
 create table hibernate_sequence(
-    next_val INTEGER NOT null
+    next_val INTEGER AUTO_INCREMENT NOT null
 );
