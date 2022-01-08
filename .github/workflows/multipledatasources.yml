@@ -28,6 +28,12 @@ jobs:
           java-version: 17
           distribution: 'microsoft'
           cache: 'gradle'
+      - name: Start up databases via docker compose
+        run: |
+          cd multipledatasources
+          docker compose up -d
+          sleep 15
+          docker ps -a
 
       - name: Build and analyze
         run: |
