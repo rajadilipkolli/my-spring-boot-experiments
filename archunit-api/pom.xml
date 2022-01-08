@@ -19,7 +19,7 @@
 		<java.version>11</java.version>
 		
 		<!-- General -->
-		<guava.version>31.0-jre</guava.version>
+		<guava.version>31.0.1-jre</guava.version>
 		
 		<!-- Test -->
 		<com.tngtech.archunit.version>0.22.0</com.tngtech.archunit.version>
