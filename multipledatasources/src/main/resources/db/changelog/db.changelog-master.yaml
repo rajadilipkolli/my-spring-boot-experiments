@@ -1,0 +1,9 @@
+databaseChangeLog:
+  - include:
+      file: db/changelog/db.changelog-xml-db.xml
+  - include:
+      file: db/changelog/db.changelog-sql-db.sql
+  - include:
+      file: db/changelog/db.changelog-json-db.json
+#  - include:
+#      file: db/changelog/db.changelog-yaml-db.yaml

@@ -1,0 +1,17 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-table-member
+      author: raja
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+              - column:
+                  name: name
+                  type: ${textColumnType}
+              - column:
+                  name: member_id
+                  type: ${textColumnType}
+            tableName: Member

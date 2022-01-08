@@ -1,0 +1,26 @@
+{
+  "databaseChangeLog": [
+    {
+      "changeSet": {
+        "id": "add-non-null-constraint",
+        "author": "raja",
+        "changes": [
+          {
+            "addNotNullConstraint": {
+              "columnName": "name",
+              "constraintName": "user_name_key",
+              "tableName": "member"
+            }
+          },
+          {
+            "addNotNullConstraint": {
+              "columnName": "member_id",
+              "constraintName": "user_member_id_key",
+              "tableName": "member"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
