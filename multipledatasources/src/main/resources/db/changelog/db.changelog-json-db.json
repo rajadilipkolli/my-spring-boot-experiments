@@ -10,7 +10,15 @@
             "constraintName": "user_name_key",
             "tableName": "member"
           }
-        }]
+        },
+        {
+          "addNotNullConstraint": {
+            "columnName": "member_id",
+            "constraintName": "user_member_id_key",
+            "tableName": "member"
+          }
+        }
+      ]
     }
   }
 ]}
