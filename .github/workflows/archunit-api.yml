@@ -1,13 +1,13 @@
-name: multipledatasources
+name: archunit-api
 
 on:
   push:
     paths:
-      - "multipledatasources/**"
+      - "archunit-api/**"
     branches: [ main ]
   pull_request:
     paths:
-      - "multipledatasources/**"
+      - "archunit-api/**"
     types:
       - opened
       - synchronize
@@ -28,15 +28,9 @@ jobs:
           java-version: 17
           distribution: 'microsoft'
           cache: 'maven'
-      - name: Start up databases via docker compose
-        run: |
-          cd multipledatasources
-          docker compose up -d
-          sleep 15
-          docker ps -a
 
       - name: Build and analyze
         run: |
-          cd multipledatasources
+          cd archunit-api
           chmod +x mvnw
           ./mvnw clean package
