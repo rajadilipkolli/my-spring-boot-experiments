@@ -10,7 +10,7 @@
 		<relativePath />
 	</parent>
 	<groupId>com.example</groupId>
-	<artifactId>api-example-archunit</artifactId>
+	<artifactId>archunit-api</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>api-example-archunit</name>
 	<description>Example of the use of Archunit</description>

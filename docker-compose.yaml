@@ -4,7 +4,7 @@ services:
   mssql:
     image: mcr.microsoft.com/mssql/server:2019-latest
     ports:
-      - 1433:1433
+      - "1433:1433"
     volumes:
       - ~/apps/mssql/data:/var/lib/mssqlql/data
     environment:
@@ -14,7 +14,7 @@ services:
   mysql:
     image: mysql:8
     ports:
-      - 3306:3306
+      - "3306:3306"
     volumes:
       - ~/apps/mysql:/var/lib/mysql
     environment:
@@ -26,7 +26,7 @@ services:
   postgres:
     image: postgres:14-alpine
     ports:
-      - 5432:5432
+      - "5432:5432"
     volumes:
       - ~/apps/postgres:/var/lib/postgresql/data
     environment:
@@ -37,14 +37,14 @@ services:
   redis:
     image: redis:6.2-alpine
     ports:
-      - 6379:6379
+      - "6379:6379"
     command: redis-server --save 60 1 --requirepass MDNcVb924a --loglevel warning
 
   jenkins:
     image: jenkins/jenkins:latest
     container_name: my-jenkins
     ports:
-      - 8080:8080
+      - "8080:8080"
     volumes:
       - ~/jenkins_data:/var/jenkins_home
       - /var/run/docker.sock:/var/run/docker.sock
@@ -52,7 +52,7 @@ services:
   mongodb:
     image: mongo:5.0
     ports:
-      - 27017:27017
+      - "27017:27017"
     volumes:
       - ~/apps/mongo:/data/db
     environment:
