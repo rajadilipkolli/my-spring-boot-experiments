@@ -1,8 +1,8 @@
-# spring-experiments
+# spring boot integration experiments
 
 ## Sample Codes
 
-The following table list all sample codes related to the above posts.
+The following table list all sample codes related to the spring boot integrations.
 
 ### Spring Samples
 
