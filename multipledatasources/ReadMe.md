@@ -5,3 +5,5 @@ This example demostrates how to connect to multiple datasources in same spring b
 ## Databases used
  - Postgresql
  - MySQL
+ - Liquibase
+ - Flyway
