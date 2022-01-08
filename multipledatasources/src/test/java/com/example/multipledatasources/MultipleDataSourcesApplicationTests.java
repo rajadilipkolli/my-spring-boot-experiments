@@ -27,7 +27,7 @@ class MultipleDataSourcesApplicationTests {
         .andDo(print())
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-        .andExpect(content().string("""
+        .andExpect(content().json("""
                 {"memberId":"1","cardNumber":"1234-5678-9012-3456","memberName":"raja"}
                 """));
   }
