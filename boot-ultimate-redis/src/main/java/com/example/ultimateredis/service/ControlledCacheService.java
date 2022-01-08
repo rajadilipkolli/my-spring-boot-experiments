@@ -1,4 +1,4 @@
-package com.example.ultimateredis;
+package com.example.ultimateredis.service;
 
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;

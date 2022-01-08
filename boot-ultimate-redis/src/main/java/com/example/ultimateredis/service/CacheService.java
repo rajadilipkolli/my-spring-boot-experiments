@@ -1,4 +1,4 @@
-package com.example.ultimateredis;
+package com.example.ultimateredis.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
@@ -10,8 +10,8 @@ import org.springframework.stereotype.Service;
 public class CacheService {
 
   @Cacheable(cacheNames = "myCache", key = "'myPrefix_'.concat(#relevant)")
-  public String cacheThis(String relevant, String unrelevantTrackingId) {
-    log.info("Returning NOT from cache. Tracking: {}!", unrelevantTrackingId);
+  public String cacheThis(String relevant, String unRelevantTrackingId) {
+    log.info("Returning NOT from cache. Tracking: {}!", unRelevantTrackingId);
     return "this Is it";
   }
 

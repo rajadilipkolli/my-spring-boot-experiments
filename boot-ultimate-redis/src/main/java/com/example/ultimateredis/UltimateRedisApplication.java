@@ -9,6 +9,9 @@ import org.springframework.cache.annotation.EnableCaching;
 
 import java.util.UUID;
 
+import com.example.ultimateredis.service.CacheService;
+import com.example.ultimateredis.service.ControlledCacheService;
+
 @EnableCaching
 @SpringBootApplication
 @Slf4j
@@ -23,7 +26,7 @@ public class UltimateRedisApplication implements CommandLineRunner {
   }
 
   @Override
-  public void run(String... args) throws Exception {
+  public void run(String... args) {
     String firstString = cacheService.cacheThis("param1", UUID.randomUUID().toString());
     log.info("First: {}", firstString);
     String secondString = cacheService.cacheThis("param1", UUID.randomUUID().toString());
@@ -42,15 +45,15 @@ public class UltimateRedisApplication implements CommandLineRunner {
     getFromControlledCache("first");
     getFromControlledCache("second");
     getFromControlledCache("third");
-    // log.info("Clearing all cache entries:");
-    // cacheService.forgetAboutThis("param1");
-    // controlledCacheService.removeFromCache("controlledParam1");
+    log.info("Clearing all cache entries:");
+    cacheService.forgetAboutThis("param1");
+    controlledCacheService.removeFromCache("controlledParam1");
   }
 
   private String getFromControlledCache(String param) {
     String fromCache = controlledCacheService.getFromCache(param);
     if (fromCache == null) {
-      log.info("Oups - Cache was empty. Going to populate it");
+      log.info("Oops - Cache was empty. Going to populate it");
       String newValue = controlledCacheService.populateCache(param, UUID.randomUUID().toString());
       log.info("Populated Cache with: {}", newValue);
       return newValue;
