@@ -16,20 +16,20 @@ public class ControlledCacheService {
 
   @Cacheable(
       cacheNames = "myControlledCache",
-      key = "T(com.example.ultimateredis.ControlledCacheService).getCacheKey(#relevant)")
+      key = "T(com.example.ultimateredis.service.ControlledCacheService).getCacheKey(#relevant)")
   public String getFromCache(String relevant) {
     return null;
   }
 
   @CachePut(
       cacheNames = "myControlledCache",
-      key = "T(com.example.ultimateredis.ControlledCacheService).getCacheKey(#relevant)")
+      key = "T(com.example.ultimateredis.service.ControlledCacheService).getCacheKey(#relevant)")
   public String populateCache(String relevant, String unrelevantTrackingId) {
     return "this is it again!";
   }
 
   @CacheEvict(
       cacheNames = "myControlledCache",
-      key = "T(com.example.ultimateredis.ControlledCacheService).getCacheKey(#relevant)")
+      key = "T(com.example.ultimateredis.service.ControlledCacheService).getCacheKey(#relevant)")
   public void removeFromCache(String relevant) {}
 }
