@@ -10,7 +10,7 @@ services:
     environment:
       - ACCEPT_EULA=Y
       - SA_PASSWORD=password
-  
+
   mysql:
     image: mysql:8
     ports:
@@ -58,4 +58,3 @@ services:
     environment:
       - MONGO_INITDB_ROOT_USERNAME=user
       - MONGO_INITDB_ROOT_PASSWORD=password
-  
