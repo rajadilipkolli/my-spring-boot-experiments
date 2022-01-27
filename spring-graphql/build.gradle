@@ -10,7 +10,7 @@ buildscript {
 }
 
 plugins {
-    id 'org.springframework.boot' version '2.6.2'
+    id 'org.springframework.boot' version '2.6.3'
     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
     id 'java-library'
     id 'com.gorylenko.gradle-git-properties' version '2.3.2'
@@ -45,7 +45,7 @@ repositories {
 }
 
 ext {
-    set('testcontainers_version', "1.16.2")
+    set('testcontainers_version', "1.16.3")
 }
 
 dependencies {
@@ -68,7 +68,7 @@ dependencies {
     runtimeOnly 'io.r2dbc:r2dbc-postgresql'
     runtimeOnly 'org.postgresql:postgresql'
     implementation 'org.liquibase:liquibase-core'
-    implementation "io.springfox:springfox-boot-starter:${swagger_version}"
+    implementation 'org.springdoc:springdoc-openapi-webflux-ui:1.6.5'
     implementation "org.zalando:problem-spring-webflux:0.27.0"
     implementation "org.apache.commons:commons-lang3:${commons_lang_version}"
     implementation "commons-io:commons-io:${commons_io_version}"
