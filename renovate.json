@@ -1,16 +1,10 @@
 {
   "extends": [
-    "config:base",
-    "schedule:weekly"
+    "config:base"
   ],
   "packageRules": [
     {
-      "updateTypes": [
-        "minor",
-        "patch",
-        "pin",
-        "digest"
-      ],
+      "updateTypes": ["minor", "patch", "pin", "digest"],
       "automerge": true
     }
   ]
