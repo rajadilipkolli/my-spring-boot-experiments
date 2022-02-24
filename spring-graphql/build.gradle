@@ -80,7 +80,7 @@ dependencies {
     testImplementation 'org.testcontainers:junit-jupiter'
     testImplementation 'org.testcontainers:postgresql'
     testImplementation 'org.testcontainers:r2dbc'
-    testImplementation 'org.springframework.graphql:spring-graphql-test:1.0.0-M4'
+    testImplementation 'org.springframework.graphql:spring-graphql-test:1.0.0-M5'
 }
 
 dependencyManagement {
