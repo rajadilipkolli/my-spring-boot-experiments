@@ -3,6 +3,11 @@ pluginManagement {
         id 'org.sonarqube' version "3.3"
         id 'com.github.ben-manes.versions' version '0.42.0'
     }
+    repositories {
+        mavenCentral()
+        maven { url 'https://repo.spring.io/milestone' }
+        gradlePluginPortal()
+    }
 }
 
 rootProject.name = 'spring-graphql-querydsl'

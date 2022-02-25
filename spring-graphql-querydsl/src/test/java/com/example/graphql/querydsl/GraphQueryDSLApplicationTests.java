@@ -4,7 +4,7 @@ import com.example.graphql.querydsl.common.AbstractIntegrationTest;
 import com.example.graphql.querydsl.model.PostCommentsDTO;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.graphql.boot.test.tester.AutoConfigureGraphQlTester;
+import org.springframework.boot.test.autoconfigure.graphql.tester.AutoConfigureGraphQlTester;
 import org.springframework.graphql.test.tester.GraphQlTester;
 
 import static org.assertj.core.api.Assertions.assertThat;
