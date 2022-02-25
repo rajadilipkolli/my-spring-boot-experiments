@@ -19,7 +19,6 @@ configurations {
 
 repositories {
 	mavenCentral()
-	// Spring GraphQl is not released yet, add spring snapshot repo
 	maven { url 'https://repo.spring.io/milestone' }
 }
 
@@ -45,7 +44,7 @@ dependencies {
 	runtimeOnly 'org.postgresql:postgresql'
 	annotationProcessor 'org.projectlombok:lombok',
             'com.querydsl:querydsl-apt:5.0.0:jpa',
-            'org.hibernate.javax.persistence:hibernate-jpa-2.1-api:1.0.2',
+			'org.hibernate.javax.persistence:hibernate-jpa-2.1-api:1.0.2.Final',
             'javax.annotation:javax.annotation-api'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'io.projectreactor:reactor-test'
@@ -53,6 +52,8 @@ dependencies {
 	testImplementation 'org.testcontainers:postgresql'
 	testImplementation 'org.springframework.graphql:spring-graphql-test'
 	testImplementation 'org.projectlombok:lombok'
+	// WebGraphQlTester needs webflux as dependency 
+	testImplementation 'org.springframework.boot:spring-boot-starter-webflux'
 }
 
 dependencyManagement {
@@ -89,7 +90,7 @@ file("sonar-project.properties").withReader {
 	sonarProperties.forEach { key, value ->
 		sonarqube {
 			properties {
-				property key, value
+				property key as String, value
 			}
 		}
 	}
