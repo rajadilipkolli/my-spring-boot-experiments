@@ -37,6 +37,7 @@ class GeneralCodingRulesTest {
     static final ArchRule noJavaUtilLogging = NO_CLASSES_SHOULD_USE_JAVA_UTIL_LOGGING
             .because("Use org.slf4j.Logger instead");
 
+    /*
     //Fields
     @ArchTest
     static final ArchRule loggersShouldBePrivateStaticAndFinal = fields().that().haveRawType(Logger.class)
@@ -58,6 +59,6 @@ class GeneralCodingRulesTest {
     @ArchTest
     static final ArchRule beanMethodsShouldBePublic = methods().that().areAnnotatedWith(Bean.class).should().bePublic()
             .because("@Bean annotation does not work in non public methods");
-
+    */
 
 }

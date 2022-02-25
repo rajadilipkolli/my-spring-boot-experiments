@@ -22,7 +22,7 @@
 		<guava.version>31.0.1-jre</guava.version>
 		
 		<!-- Test -->
-		<com.tngtech.archunit.version>0.22.0</com.tngtech.archunit.version>
+		<com.tngtech.archunit.version>0.23.0</com.tngtech.archunit.version>
 	</properties>
 
 	<dependencies>
