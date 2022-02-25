@@ -49,7 +49,7 @@ ext {
 }
 
 dependencies {
-    implementation 'org.springframework:graphql-spring-boot-starter'
+    implementation 'org.springframework.boot:spring-boot-starter-graphql'
 
     // To fix com.fasterxml.jackson.databind.exc.InvalidDefinitionException: Java 8 date/time type `java.time.Instant`
     // not supported by default
