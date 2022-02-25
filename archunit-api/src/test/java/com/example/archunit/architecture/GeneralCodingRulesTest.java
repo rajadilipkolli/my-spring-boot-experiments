@@ -59,6 +59,6 @@ class GeneralCodingRulesTest {
     @ArchTest
     static final ArchRule beanMethodsShouldBePublic = methods().that().areAnnotatedWith(Bean.class).should().bePublic()
             .because("@Bean annotation does not work in non public methods");
-    /*
+    */
 
 }
