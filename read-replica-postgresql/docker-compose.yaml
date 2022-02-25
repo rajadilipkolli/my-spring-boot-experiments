@@ -33,4 +33,3 @@ services:
 
 volumes:
   postgresql_master_data:
-    driver: bridge
