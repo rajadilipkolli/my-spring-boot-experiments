@@ -4,6 +4,8 @@ services:
   postgresql-master:
     image: docker.io/bitnami/postgresql:14
     container_name: postgresql-master
+    extra_hosts:
+      - "host.docker.internal:postgresql-master"
     ports:
       - '5432'
     volumes:
@@ -20,6 +22,8 @@ services:
   postgresql-slave:
     image: docker.io/bitnami/postgresql:14
     container_name: postgresql-slave
+    extra_hosts:
+      - "host.docker.internal:postgresql-slave"
     ports:
       - '5432'
     depends_on:
