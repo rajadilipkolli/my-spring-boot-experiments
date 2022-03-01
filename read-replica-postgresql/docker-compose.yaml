@@ -3,6 +3,7 @@ version: '3.8'
 services:
   postgresql-master:
     image: docker.io/bitnami/postgresql:14
+    container_name: postgresql-master
     ports:
       - '5432'
     volumes:
@@ -18,6 +19,7 @@ services:
   
   postgresql-slave:
     image: docker.io/bitnami/postgresql:14
+    container_name: postgresql-slave
     ports:
       - '5432'
     depends_on:
