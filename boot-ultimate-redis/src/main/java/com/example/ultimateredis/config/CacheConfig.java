@@ -2,16 +2,20 @@ package com.example.ultimateredis.config;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CachingConfigurerSupport;
+import org.springframework.cache.interceptor.CacheErrorHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.RedisSerializationContext;
 
 import java.time.Duration;
 import java.util.HashMap;
@@ -23,9 +27,19 @@ import java.util.Map.Entry;
 @Slf4j
 public class CacheConfig extends CachingConfigurerSupport {
 
-  private static RedisCacheConfiguration createCacheConfiguration(long timeoutInSeconds) {
+  private RedisCacheConfiguration createCacheConfiguration(long timeoutInSeconds) {
     return RedisCacheConfiguration.defaultCacheConfig()
         .entryTtl(Duration.ofSeconds(timeoutInSeconds));
+  }
+
+  @Bean
+  @Primary
+  public RedisCacheConfiguration defaultCacheConfig() {
+    RedisCacheGZIPSerializer serializerGzip = new RedisCacheGZIPSerializer();
+
+    return RedisCacheConfiguration.defaultCacheConfig()
+        .serializeValuesWith(
+            RedisSerializationContext.SerializationPair.fromSerializer(serializerGzip));
   }
 
   @Bean
@@ -67,5 +81,33 @@ public class CacheConfig extends CachingConfigurerSupport {
         .cacheDefaults(cacheConfiguration(properties))
         .withInitialCacheConfigurations(cacheConfigurations)
         .build();
+  }
+
+  @Override
+  public CacheErrorHandler errorHandler() {
+    return new CustomCacheErrorHandler();
+  }
+
+  private class CustomCacheErrorHandler implements CacheErrorHandler {
+    @Override
+    public void handleCacheGetError(RuntimeException exception, Cache cache, Object key) {
+      // your custom error handling logic
+    }
+
+    @Override
+    public void handleCachePutError(
+        RuntimeException exception, Cache cache, Object key, Object value) {
+      // your custom error handling logic
+    }
+
+    @Override
+    public void handleCacheEvictError(RuntimeException exception, Cache cache, Object key) {
+      // your custom error handling logic
+    }
+
+    @Override
+    public void handleCacheClearError(RuntimeException exception, Cache cache) {
+      // your custom error handling logic
+    }
   }
 }
