@@ -14,6 +14,37 @@ on:
       - reopened
 
 jobs:
+  container-job:
+    # Containers must run in Linux based operating systems
+    runs-on: ubuntu-latest
+    # Service containers to run with `container-job`
+    services:
+      postgresql-master:
+        image: 'bitnami/postgresql:latest'
+        ports:
+          - '5432'
+        volumes:
+          - 'postgresql_master_data:/bitnami/postgresql'
+        env:
+          POSTGRESQL_REPLICATION_MODE: master
+          POSTGRESQL_REPLICATION_USER: repl_user
+          POSTGRESQL_REPLICATION_PASSWORD: repl_password
+          POSTGRESQL_USERNAME: my_user
+          POSTGRESQL_PASSWORD: my_password
+          POSTGRESQL_DATABASE: my_database
+      postgresql-slave:
+        image: 'bitnami/postgresql:latest'
+        ports:
+          - '5432'
+#         options:
+#           depends_on: postgresql-master
+        env:
+          POSTGRESQL_REPLICATION_MODE: slave
+          POSTGRESQL_REPLICATION_USER: repl_user
+          POSTGRESQL_REPLICATION_PASSWORD: repl_password
+          POSTGRESQL_MASTER_HOST: postgresql-master
+          POSTGRESQL_PASSWORD: my_password
+          POSTGRESQL_MASTER_PORT_NUMBER: 5432
   build:
     name: Run Unit & Integration Tests
     runs-on: ubuntu-latest
@@ -28,12 +59,6 @@ jobs:
           java-version: 17
           distribution: "microsoft"
           cache: "maven"
-      - name: Start up databases via docker compose
-        run: |
-          cd read-replica-postgresql
-          docker compose up -d
-          sleep 5
-          docker ps -a
       - name: Build and analyze
         run: |
           cd read-replica-postgresql
