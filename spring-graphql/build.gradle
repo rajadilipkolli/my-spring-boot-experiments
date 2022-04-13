@@ -45,7 +45,7 @@ repositories {
 }
 
 ext {
-    set('testcontainers_version', "1.17.0")
+    set('testcontainers_version', "1.17.1")
 }
 
 dependencies {
