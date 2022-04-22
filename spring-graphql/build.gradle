@@ -68,7 +68,7 @@ dependencies {
     runtimeOnly 'io.r2dbc:r2dbc-postgresql'
     runtimeOnly 'org.postgresql:postgresql'
     implementation 'org.liquibase:liquibase-core'
-    implementation 'org.springdoc:springdoc-openapi-webflux-ui:1.6.7'
+    implementation 'org.springdoc:springdoc-openapi-webflux-ui:1.6.8'
     implementation "org.zalando:problem-spring-webflux:0.27.0"
     implementation "org.apache.commons:commons-lang3:${commons_lang_version}"
     implementation "commons-io:commons-io:${commons_io_version}"
