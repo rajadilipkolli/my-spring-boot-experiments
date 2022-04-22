@@ -52,6 +52,17 @@ public class PostServiceImpl implements PostService {
     return this.postRepository.count();
   }
 
+  @Override
+  @Transactional
+  public List<PostResponse> getPostsByUserName(String name) {
+    List<Post> post = this.postRepository.findByDetails_CreatedByEqualsIgnoreCase(name);
+    return this.postRepository
+               .findAllById(post.stream().map(Post::getId).toList())
+               .stream()
+               .map(this::convertToPostDTO)
+               .toList();
+  }
+
   private PostResponse convertToPostDTO(Post post) {
     return new PostResponse(
         post.getId(),
