@@ -65,7 +65,7 @@ dependencies {
     // Needed for pointcut
     implementation 'org.springframework.boot:spring-boot-starter-aop'
 
-    runtimeOnly 'io.r2dbc:r2dbc-postgresql'
+    runtimeOnly 'org.postgresql:r2dbc-postgresql'
     runtimeOnly 'org.postgresql:postgresql'
     implementation 'org.liquibase:liquibase-core'
     implementation 'org.springdoc:springdoc-openapi-webflux-ui:1.6.8'
