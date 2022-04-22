@@ -10,7 +10,7 @@ buildscript {
 }
 
 plugins {
-    id 'org.springframework.boot' version '2.7.0-M1'
+    id 'org.springframework.boot' version '2.7.0-RC1'
     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
     id 'java-library'
     id 'com.gorylenko.gradle-git-properties' version '2.4.0'
@@ -30,8 +30,8 @@ if (project.hasProperty("ci")) {
 
 group = 'com.example.graphql'
 version = '0.0.1-SNAPSHOT'
-sourceCompatibility = 17
-targetCompatibility = 17
+sourceCompatibility = 18
+targetCompatibility = 18
 
 configurations {
     compileOnly {
@@ -65,7 +65,7 @@ dependencies {
     // Needed for pointcut
     implementation 'org.springframework.boot:spring-boot-starter-aop'
 
-    runtimeOnly 'io.r2dbc:r2dbc-postgresql'
+    runtimeOnly 'org.postgresql:r2dbc-postgresql'
     runtimeOnly 'org.postgresql:postgresql'
     implementation 'org.liquibase:liquibase-core'
     implementation 'org.springdoc:springdoc-openapi-webflux-ui:1.6.8'

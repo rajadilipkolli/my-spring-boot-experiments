@@ -34,7 +34,7 @@ class CustomerGraphQLControllerTest {
         given(customerRepository.findAll()).willReturn(Flux.just(new Customer(1,"junit")));
         given(ordersRepository.findByCustomerIdIn(List.of(1))).willReturn(Flux.just(new Orders(2,1)));
         this.graphQlTester
-            .query("""
+            .document("""
             {
               customers {
                 id
@@ -47,8 +47,7 @@ class CustomerGraphQLControllerTest {
             """)
             .execute()
             .path("customers[*]")
-            .pathExists()
-            .valueIsNotEmpty()
+            .hasValue()
             .entityList(CustomerDTO.class)
             .hasSize(1);
     }
