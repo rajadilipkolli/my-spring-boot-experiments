@@ -24,7 +24,7 @@ class ApplicationIntegrationTest extends AbstractIntegrationTest {
   @Test
   void test_query_all_customers() {
     this.graphQlTester
-        .query("""
+        .document("""
             {
               customers {
                 id
@@ -37,8 +37,7 @@ class ApplicationIntegrationTest extends AbstractIntegrationTest {
             """)
         .execute()
         .path("customers[*]")
-        .pathExists()
-        .valueIsNotEmpty()
+        .hasValue()
         .entityList(CustomerDTO.class)
         .hasSizeGreaterThan(4);
   }
@@ -46,7 +45,7 @@ class ApplicationIntegrationTest extends AbstractIntegrationTest {
   @Test
   void test_query_customers_by_name() {
     this.graphQlTester
-        .query(
+        .document(
             """
                 query ($name: String) {
                    customersByName(name: $name) {
@@ -58,8 +57,7 @@ class ApplicationIntegrationTest extends AbstractIntegrationTest {
         .variable("name", "raja")
         .execute()
         .path("customersByName[*]")
-        .pathExists()
-        .valueIsNotEmpty()
+        .hasValue()
         .entityList(Customer.class)
         .hasSize(1);
   }
@@ -76,14 +74,13 @@ class ApplicationIntegrationTest extends AbstractIntegrationTest {
                     }
                     """;
         this.graphQlTester
-            .query(query)
+            .document(query)
             .variable("cname", randomString)
             .execute()
             .path("addCustomer")
-            .pathExists()
-            .valueIsNotEmpty()
+            .hasValue()
             .path("addCustomer.id")
-            .pathExists()
+            .hasValue()
             .path("addCustomer.name")
             .entity(String.class).isEqualTo(randomString);
     }

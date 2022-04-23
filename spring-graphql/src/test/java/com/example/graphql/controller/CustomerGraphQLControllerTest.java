@@ -3,17 +3,17 @@ package com.example.graphql.controller;
 import com.example.graphql.dtos.Customer;
 import com.example.graphql.dtos.CustomerDTO;
 import com.example.graphql.dtos.Orders;
-import com.example.graphql.repository.CustomerRepository;
-import com.example.graphql.repository.OrdersRepository;
+import com.example.graphql.service.CustomerGraphQLService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.graphql.GraphQlTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-
 import org.springframework.graphql.test.tester.GraphQlTester;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
+import java.util.Map;
 
 import static org.mockito.BDDMockito.given;
 
@@ -24,18 +24,17 @@ class CustomerGraphQLControllerTest {
     private GraphQlTester graphQlTester;
 
     @MockBean
-    private CustomerRepository customerRepository;
-
-    @MockBean
-    private OrdersRepository ordersRepository;
+    private CustomerGraphQLService customerGraphQLService;
 
     @Test
     void test_query_all_customers() {
-        given(customerRepository.findAll()).willReturn(Flux.just(new Customer(1,"junit")));
-        given(ordersRepository.findByCustomerIdIn(List.of(1))).willReturn(Flux.just(new Orders(2,1)));
+        Customer customer = new Customer(1, "junit");
+        given(customerGraphQLService.findAllCustomers()).willReturn(Flux.just(customer));
+        given(customerGraphQLService.findAllOrdersByCustomers(List.of(customer)))
+            .willReturn(Mono.just(Map.of(customer,List.of(new Orders(2,1)))));
         this.graphQlTester
-            .query("""
-            {
+            .document("""
+            query {
               customers {
                 id
                 name
@@ -47,8 +46,7 @@ class CustomerGraphQLControllerTest {
             """)
             .execute()
             .path("customers[*]")
-            .pathExists()
-            .valueIsNotEmpty()
+            .hasValue()
             .entityList(CustomerDTO.class)
             .hasSize(1);
     }

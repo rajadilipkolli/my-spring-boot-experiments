@@ -1,5 +1,5 @@
 plugins {
-	id 'org.springframework.boot' version '2.7.0-M1'
+	id 'org.springframework.boot' version '2.7.0-RC1'
 	id 'io.spring.dependency-management' version '1.0.11.RELEASE'
 	id 'com.github.ben-manes.versions' version '0.42.0'
 	id 'org.sonarqube'
@@ -8,8 +8,8 @@ plugins {
 
 group = 'com.example'
 version = '0.0.1-SNAPSHOT'
-sourceCompatibility = '17'
-targetCompatibility = '17'
+sourceCompatibility = '18'
+targetCompatibility = '18'
 
 configurations {
 	compileOnly {
@@ -23,7 +23,7 @@ repositories {
 }
 
 ext {
-	set('testcontainersVersion', "1.16.3")
+	set('testcontainersVersion', "1.17.1")
 }
 
 dependencies {
@@ -44,7 +44,7 @@ dependencies {
 	runtimeOnly 'org.postgresql:postgresql'
 	annotationProcessor 'org.projectlombok:lombok',
             'com.querydsl:querydsl-apt:5.0.0:jpa',
-			'org.hibernate.javax.persistence:hibernate-jpa-2.1-api:1.0.2.Final',
+			'org.hibernate.javax.persistence:hibernate-jpa-2.1-api:1.0.2',
             'javax.annotation:javax.annotation-api'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'io.projectreactor:reactor-test'

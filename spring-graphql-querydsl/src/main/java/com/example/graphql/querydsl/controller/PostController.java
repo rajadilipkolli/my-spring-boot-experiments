@@ -10,6 +10,8 @@ import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.stereotype.Controller;
 
+import java.util.List;
+
 @Controller
 @RequiredArgsConstructor
 public class PostController {
@@ -29,6 +31,11 @@ public class PostController {
   @MutationMapping
   public PostResponse addTagsToPost(@Argument("addTagRequest") AddTagRequestDTO addTagRequest) {
     return this.postService.addTagsToPost(addTagRequest);
+  }
+
+  @QueryMapping
+  public List<PostResponse> getPostsByUserName(@Argument String name){
+    return this.postService.getPostsByUserName(name);
   }
 
 }

@@ -4,15 +4,15 @@ import com.example.graphql.querydsl.common.AbstractIntegrationTest;
 import com.example.graphql.querydsl.model.PostCommentsDTO;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.graphql.tester.AutoConfigureGraphQlTester;
-import org.springframework.graphql.test.tester.GraphQlTester;
+import org.springframework.boot.test.autoconfigure.graphql.tester.AutoConfigureHttpGraphQlTester;
+import org.springframework.graphql.test.tester.HttpGraphQlTester;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@AutoConfigureGraphQlTester
+@AutoConfigureHttpGraphQlTester
 class GraphQueryDSLApplicationTests extends AbstractIntegrationTest {
 
-  @Autowired private GraphQlTester graphQlTester;
+  @Autowired private HttpGraphQlTester graphQlTester;
 
   @Test
   void contextLoads() {
@@ -52,17 +52,16 @@ class GraphQueryDSLApplicationTests extends AbstractIntegrationTest {
                }
              """;
     this.graphQlTester
-            .query(query)
+            .document(query)
             .execute()
             .path("createPost")
-            .pathExists()
-            .valueIsNotEmpty()
+            .hasValue()
             .path("createPost.createdOn")
-            .pathExists()
+            .hasValue()
             .path("createPost.title")
             .entity(String.class).isEqualTo("title1")
             .path("createPost.comments")
-            .valueExists().entityList(PostCommentsDTO.class)
+            .hasValue().entityList(PostCommentsDTO.class)
             .contains(new PostCommentsDTO("review1"),new PostCommentsDTO("review2"));
   }
 }
