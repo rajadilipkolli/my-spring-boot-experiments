@@ -15,31 +15,31 @@ import org.zalando.problem.violations.ConstraintViolationProblemModule;
 @ConditionalOnWebApplication
 public class ProblemJacksonAutoConfiguration {
 
-  @Bean
-  public ProblemModule problemModule() {
-    return new ProblemModule();
-  }
+    @Bean
+    public ProblemModule problemModule() {
+        return new ProblemModule();
+    }
 
-  @Bean
-  public ConstraintViolationProblemModule constraintViolationProblemModule() {
-    return new ConstraintViolationProblemModule();
-  }
+    @Bean
+    public ConstraintViolationProblemModule constraintViolationProblemModule() {
+        return new ConstraintViolationProblemModule();
+    }
 
-  @Bean
-  @Order(-2)
-  // The handler must have precedence over WebFluxResponseStatusExceptionHandler and Spring
-  // Boot's ErrorWebExceptionHandler
-  public WebExceptionHandler problemExceptionHandler(
-      ObjectMapper mapper, ProblemHandling problemHandling) {
-    return new ProblemExceptionHandler(mapper, problemHandling);
-  }
+    @Bean
+    @Order(-2)
+    // The handler must have precedence over WebFluxResponseStatusExceptionHandler and Spring
+    // Boot's ErrorWebExceptionHandler
+    public WebExceptionHandler problemExceptionHandler(
+            ObjectMapper mapper, ProblemHandling problemHandling) {
+        return new ProblemExceptionHandler(mapper, problemHandling);
+    }
 
-  @Bean
-  public ObjectMapper objectMapper(
-      ProblemModule problemModule,
-      ConstraintViolationProblemModule constraintViolationProblemModule) {
-    ObjectMapper objectMapper = new ObjectMapper();
-    objectMapper.registerModules(problemModule, constraintViolationProblemModule);
-    return objectMapper;
-  }
+    @Bean
+    public ObjectMapper objectMapper(
+            ProblemModule problemModule,
+            ConstraintViolationProblemModule constraintViolationProblemModule) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModules(problemModule, constraintViolationProblemModule);
+        return objectMapper;
+    }
 }

@@ -3,5 +3,10 @@ image:
 
 vscode:
   extensions:
-    - Pivotal.vscode-boot-dev-pack
     - vscjava.vscode-java-pack
+    - pivotal.vscode-spring-boot
+    - pivotal.vscode-boot-dev-pack
+    - vscjava.vscode-spring-boot-dashboard
+    - vscjava.vscode-maven
+    - vscjava.vscode-spring-initializr
+    - GabrielBB.vscode-lombok

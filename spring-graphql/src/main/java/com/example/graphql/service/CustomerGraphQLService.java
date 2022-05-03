@@ -2,11 +2,10 @@ package com.example.graphql.service;
 
 import com.example.graphql.dtos.Customer;
 import com.example.graphql.dtos.Orders;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-
 import java.util.List;
 import java.util.Map;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 public interface CustomerGraphQLService {
     Flux<Customer> findAllCustomers();
