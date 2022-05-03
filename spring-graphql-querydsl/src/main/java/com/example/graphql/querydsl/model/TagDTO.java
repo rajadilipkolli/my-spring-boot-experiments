@@ -1,4 +1,3 @@
 package com.example.graphql.querydsl.model;
 
-public record TagDTO(String name) {
-}
+public record TagDTO(String name) {}

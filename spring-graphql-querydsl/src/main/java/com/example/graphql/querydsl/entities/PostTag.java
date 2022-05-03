@@ -1,11 +1,10 @@
 package com.example.graphql.querydsl.entities;
 
-import lombok.Getter;
-import lombok.Setter;
-
-import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.Objects;
+import javax.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 @Entity(name = "PostTag")
 @Table(name = "post_tag")
@@ -13,44 +12,44 @@ import java.util.Objects;
 @Getter
 public class PostTag {
 
-  @EmbeddedId private PostTagId id;
+    @EmbeddedId private PostTagId id;
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @MapsId("postId")
-  private Post post;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @MapsId("postId")
+    private Post post;
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @MapsId("tagId")
-  private Tag tag;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @MapsId("tagId")
+    private Tag tag;
 
-  @Column(name = "created_on")
-  private LocalDateTime createdOn = LocalDateTime.now();
+    @Column(name = "created_on")
+    private LocalDateTime createdOn = LocalDateTime.now();
 
-  public PostTag() {
-    this.createdOn = LocalDateTime.now();
-  }
-
-  public PostTag(Post post, Tag tag) {
-    this.post = post;
-    this.tag = tag;
-    this.id = new PostTagId(post.getId(), tag.getId());
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
+    public PostTag() {
+        this.createdOn = LocalDateTime.now();
     }
 
-    if (o == null || getClass() != o.getClass()) {
-      return false;
+    public PostTag(Post post, Tag tag) {
+        this.post = post;
+        this.tag = tag;
+        this.id = new PostTagId(post.getId(), tag.getId());
     }
-    PostTag that = (PostTag) o;
-    return Objects.equals(this.post, that.post) && Objects.equals(this.tag, that.tag);
-  }
 
-  @Override
-  public int hashCode() {
-    return Objects.hash(this.post, this.tag);
-  }
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        PostTag that = (PostTag) o;
+        return Objects.equals(this.post, that.post) && Objects.equals(this.tag, that.tag);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.post, this.tag);
+    }
 }

@@ -6,6 +6,7 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.graphql.data.GraphQlRepository;
 
 @GraphQlRepository
-public interface PostDetailsRepository extends CrudRepository<PostDetails, Long> , QuerydslPredicateExecutor<PostDetails> {
-  long countByPost_Details_CreatedByIgnoreCase(String createdBy);
+public interface PostDetailsRepository
+        extends CrudRepository<PostDetails, Long>, QuerydslPredicateExecutor<PostDetails> {
+    long countByPost_Details_CreatedByIgnoreCase(String createdBy);
 }

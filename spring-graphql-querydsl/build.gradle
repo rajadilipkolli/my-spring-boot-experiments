@@ -1,9 +1,29 @@
+buildscript {
+    repositories {
+        mavenCentral()
+        maven { url 'https://repo.spring.io/milestone' }
+    }
+    dependencies {
+        classpath "com.avast.gradle:gradle-docker-compose-plugin:${docker_compose_plugin_version}"
+        classpath "org.owasp:dependency-check-gradle:${owasp_plugin_version}"
+    }
+}
+
 plugins {
-	id 'org.springframework.boot' version '2.7.0-RC1'
-	id 'io.spring.dependency-management' version '1.0.11.RELEASE'
-	id 'com.github.ben-manes.versions' version '0.42.0'
-	id 'org.sonarqube'
-	id 'java'
+    id 'org.springframework.boot'
+    id 'io.spring.dependency-management'
+    id 'java-library'
+    id 'com.gorylenko.gradle-git-properties'
+    id 'com.github.ben-manes.versions'
+    id 'com.github.sherter.google-java-format'
+    id "org.sonarqube" apply false
+    id 'java'
+}
+
+apply plugin: "idea"
+apply from: "gradle/code-quality.gradle"
+if (project.hasProperty("ci")) {
+    apply from: "gradle/owasp.gradle"
 }
 
 group = 'com.example'
@@ -76,22 +96,59 @@ springBoot {
 	buildInfo()
 }
 
+
 compileJava.dependsOn processResources
 processResources.dependsOn bootBuildInfo
 
-test {
-	useJUnitPlatform()
+if (project.hasProperty("local")) {
+    bootRun {
+        args = ["--spring.profiles.active=local"]
+    }
 }
 
-file("sonar-project.properties").withReader {
-	Properties sonarProperties = new Properties()
-	sonarProperties.load(it)
+gitProperties {
+    failOnNoGitDirectory = false
+    keys = ["git.branch", "git.commit.id.abbrev", "git.commit.id.describe"]
+}
 
-	sonarProperties.forEach { key, value ->
-		sonarqube {
-			properties {
-				property key as String, value
-			}
-		}
-	}
+googleJavaFormat {
+    toolVersion = '1.15.0'
+    options style: 'AOSP'
+}
+
+check.dependsOn verifyGoogleJavaFormat
+
+test {
+    useJUnitPlatform()
+    exclude "**/*IT*", "**/*IntegrationTest*", "**/*IntTest*"
+    testLogging {
+        events = ["PASSED", "FAILED", "SKIPPED"]
+        showStandardStreams = true
+        exceptionFormat = "full"
+    }
+}
+
+task integrationTest(type: Test) {
+    useJUnitPlatform()
+
+    include "**/*IT*", "**/*IntegrationTest*", "**/*IntTest*"
+    shouldRunAfter test
+
+    testLogging {
+        events = ["PASSED", "FAILED", "SKIPPED"]
+        showStandardStreams = true
+        exceptionFormat = "full"
+    }
+}
+
+check.dependsOn integrationTest
+
+task testReport(type: TestReport) {
+    destinationDir = file("$buildDir/reports/tests")
+    reportOn test
+}
+
+task integrationTestReport(type: TestReport) {
+    destinationDir = file("$buildDir/reports/tests")
+    reportOn integrationTest
 }
