@@ -1,0 +1,11 @@
+image:
+  file: .gitpod.Dockerfile
+
+tasks:
+  - before: sdk install mvnd
+    init: mvnd verify -DskipTests=true
+
+vscode:
+  extensions:
+    - Pivotal.vscode-boot-dev-pack
+    - vscjava.vscode-java-pack
