@@ -10,19 +10,17 @@ buildscript {
 }
 
 plugins {
-    id 'org.springframework.boot' version '2.7.0-RC1'
-    id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+    id 'org.springframework.boot'
+    id 'io.spring.dependency-management'
     id 'java-library'
-    id 'com.gorylenko.gradle-git-properties' version '2.4.1'
-    id 'com.github.ben-manes.versions' version '0.42.0'
- //  id 'com.github.sherter.google-java-format' version '0.9'
- //  id "com.github.spotbugs" apply false version '4.3.0'
-    id "org.sonarqube"
+    id 'com.gorylenko.gradle-git-properties'
+    id 'com.github.ben-manes.versions'
+    id 'com.github.sherter.google-java-format'
+    id "org.sonarqube" apply false
     id 'java'
 }
 
 apply plugin: "idea"
-apply plugin: "docker-compose"
 apply from: "gradle/code-quality.gradle"
 if (project.hasProperty("ci")) {
     apply from: "gradle/owasp.gradle"
@@ -103,11 +101,6 @@ bootBuildImage {
     imageName = "DOCKER_USERNAME/spring-graph-ql"
 }
 
-dockerCompose {
-    environment.put 'TMPDIR', "/private"
-    useComposeFiles = ["docker/docker-compose.yml"]
-}
-
 compileJava.dependsOn processResources
 processResources.dependsOn bootBuildInfo
 
@@ -115,7 +108,6 @@ if (project.hasProperty("local")) {
     bootRun {
         args = ["--spring.profiles.active=local"]
     }
-    bootRun.dependsOn composeUp
 }
 
 gitProperties {
@@ -123,11 +115,12 @@ gitProperties {
     keys = ["git.branch", "git.commit.id.abbrev", "git.commit.id.describe"]
 }
 
-// googleJavaFormat {
-//    options style: 'AOSP'
-// }
+googleJavaFormat {
+    toolVersion = '1.15.0'
+    options style: 'AOSP'
+}
 
-// check.dependsOn verifyGoogleJavaFormat
+check.dependsOn verifyGoogleJavaFormat
 
 test {
     useJUnitPlatform()

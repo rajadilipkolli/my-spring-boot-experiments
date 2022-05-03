@@ -1,5 +1,7 @@
 package com.example.graphql.querydsl;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.example.graphql.querydsl.common.AbstractIntegrationTest;
 import com.example.graphql.querydsl.model.PostCommentsDTO;
 import org.junit.jupiter.api.Test;
@@ -7,21 +9,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.graphql.tester.AutoConfigureHttpGraphQlTester;
 import org.springframework.graphql.test.tester.HttpGraphQlTester;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 @AutoConfigureHttpGraphQlTester
 class GraphQueryDSLApplicationTests extends AbstractIntegrationTest {
 
-  @Autowired private HttpGraphQlTester graphQlTester;
+    @Autowired private HttpGraphQlTester graphQlTester;
 
-  @Test
-  void contextLoads() {
-    assertThat(POSTGRE_SQL_CONTAINER.isRunning()).isTrue();
-  }
+    @Test
+    void contextLoads() {
+        assertThat(POSTGRE_SQL_CONTAINER.isRunning()).isTrue();
+    }
 
-  @Test
-  void test_query_insert() {
-    String query =  """
+    @Test
+    void test_query_insert() {
+        String query =
+                """
              mutation {
                  createPost(postRequestDTO: {
                 name: "unit",
@@ -51,17 +52,19 @@ class GraphQueryDSLApplicationTests extends AbstractIntegrationTest {
                  }
                }
              """;
-    this.graphQlTester
-            .document(query)
-            .execute()
-            .path("createPost")
-            .hasValue()
-            .path("createPost.createdOn")
-            .hasValue()
-            .path("createPost.title")
-            .entity(String.class).isEqualTo("title1")
-            .path("createPost.comments")
-            .hasValue().entityList(PostCommentsDTO.class)
-            .contains(new PostCommentsDTO("review1"),new PostCommentsDTO("review2"));
-  }
+        this.graphQlTester
+                .document(query)
+                .execute()
+                .path("createPost")
+                .hasValue()
+                .path("createPost.createdOn")
+                .hasValue()
+                .path("createPost.title")
+                .entity(String.class)
+                .isEqualTo("title1")
+                .path("createPost.comments")
+                .hasValue()
+                .entityList(PostCommentsDTO.class)
+                .contains(new PostCommentsDTO("review1"), new PostCommentsDTO("review2"));
+    }
 }
