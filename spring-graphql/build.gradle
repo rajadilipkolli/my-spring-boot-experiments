@@ -98,7 +98,7 @@ bootJar {
 }
 
 bootBuildImage {
-    imageName = "DOCKER_USERNAME/<%= appName %>"
+    imageName = "DOCKER_USERNAME/spring-graph-ql"
 }
 
 compileJava.dependsOn processResources
