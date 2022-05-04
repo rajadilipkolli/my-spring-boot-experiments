@@ -17,6 +17,9 @@
             <column name="text" type="varchar(1024)">
                 <constraints nullable="false"/>
             </column>
+            <column name="version" type="bigint">
+                <constraints nullable="false"/>
+            </column>
         </createTable>
     </changeSet>
 </databaseChangeLog>

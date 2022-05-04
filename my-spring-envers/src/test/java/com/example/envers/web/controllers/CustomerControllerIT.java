@@ -31,9 +31,9 @@ class CustomerControllerIT extends AbstractIntegrationTest {
         customerRepository.deleteAll();
 
         customerList = new ArrayList<>();
-        customerList.add(new Customer(1L, "First Customer"));
-        customerList.add(new Customer(2L, "Second Customer"));
-        customerList.add(new Customer(3L, "Third Customer"));
+        customerList.add(new Customer(1L, "First Customer", 0L));
+        customerList.add(new Customer(2L, "Second Customer", 0L));
+        customerList.add(new Customer(3L, "Third Customer", 0L));
         customerList = customerRepository.saveAll(customerList);
     }
 
@@ -58,7 +58,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldCreateNewCustomer() throws Exception {
-        Customer customer = new Customer(null, "New Customer");
+        Customer customer = new Customer(null, "New Customer", 0L);
         this.mockMvc
                 .perform(
                         post("/api/customers")
@@ -70,7 +70,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldReturn400WhenCreateNewCustomerWithoutText() throws Exception {
-        Customer customer = new Customer(null, null);
+        Customer customer = new Customer(null, null, null);
 
         this.mockMvc
                 .perform(
