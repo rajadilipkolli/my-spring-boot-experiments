@@ -1,0 +1,14 @@
+{
+  "generator-springboot": {
+    "appName": "my-spring-envers",
+    "packageName": "com.example.envers",
+    "databaseType": "postgresql",
+    "dbMigrationTool": "liquibase",
+    "features": [
+      "monitoring"
+    ],
+    "buildTool": "gradle",
+    "packageFolder": "com/example/envers",
+    "liquibaseMigrationCounter": 2
+  }
+}
