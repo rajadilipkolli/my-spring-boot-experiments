@@ -11,7 +11,6 @@ vscode:
     - vscjava.vscode-java-debug
     - vscjava.vscode-java-dependency
     - vscjava.vscode-java-test
-    - vscjava.vscode-gradle
     - vscjava.vscode-spring-initializr
     - GabrielBB.vscode-lombok
     - redhat.java

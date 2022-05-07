@@ -4,22 +4,17 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
          http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
-    <changeSet author="sivalabs" id="createTable-customers">
+    <changeSet author="sivalabs" id="createTable-revinfo">
         <createSequence
-                        sequenceName="customer_id_seq"
-                        incrementBy="100"
+                        sequenceName="hibernate_sequence"
+                        incrementBy="1"
                         startValue="1"
                         />
-        <createTable tableName="customers">
-            <column name="id" type="bigint" defaultValueSequenceNext="customer_id_seq">
+        <createTable tableName="revinfo" >
+            <column name="rev" type="int" defaultValueSequenceNext="hibernate_sequence">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
-            <column name="name" type="varchar(1024)">
-                <constraints nullable="false"/>
-            </column>
-            <column name="version" type="bigint">
-                <constraints nullable="false"/>
-            </column>
+            <column name="revtstmp" type="bigint"/>
         </createTable>
     </changeSet>
 </databaseChangeLog>
