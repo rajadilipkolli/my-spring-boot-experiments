@@ -9,7 +9,9 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 @RequiredArgsConstructor
-@EnableJpaRepositories(repositoryFactoryBeanClass = EnversRevisionRepositoryFactoryBean.class)
+@EnableJpaRepositories(
+        repositoryFactoryBeanClass = EnversRevisionRepositoryFactoryBean.class,
+        basePackages = "com.example.envers.repositories")
 public class WebMvcConfig implements WebMvcConfigurer {
     private final ApplicationProperties properties;
 

@@ -1,17 +1,15 @@
 package com.example.envers.common;
 
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.test.util.TestPropertyValues;
-import org.springframework.context.ApplicationContextInitializer;
-import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.junit.jupiter.Container;
 
-@Slf4j
-public class DBContainerInitializer
-        implements ApplicationContextInitializer<ConfigurableApplicationContext> {
+public abstract class DBContainerInitializer {
 
-    private static final PostgreSQLContainer<?> sqlContainer =
-            new PostgreSQLContainer<>("postgres:14-alpine")
+    @Container
+    protected static final PostgreSQLContainer<?> sqlContainer =
+            new PostgreSQLContainer<>("postgres:latest")
                     .withDatabaseName("integration-tests-db")
                     .withUsername("username")
                     .withPassword("password");
@@ -20,11 +18,10 @@ public class DBContainerInitializer
         sqlContainer.start();
     }
 
-    public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
-        TestPropertyValues.of(
-                        "spring.datasource.url=" + sqlContainer.getJdbcUrl(),
-                        "spring.datasource.username=" + sqlContainer.getUsername(),
-                        "spring.datasource.password=" + sqlContainer.getPassword())
-                .applyTo(configurableApplicationContext.getEnvironment());
+    @DynamicPropertySource
+    static void registerPgProperties(DynamicPropertyRegistry registry) {
+        registry.add("spring.datasource.url", sqlContainer::getJdbcUrl);
+        registry.add("spring.datasource.username", sqlContainer::getUsername);
+        registry.add("spring.datasource.password", sqlContainer::getPassword);
     }
 }
