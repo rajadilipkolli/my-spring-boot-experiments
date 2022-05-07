@@ -53,7 +53,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(get("/api/customers/{id}", customerId))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.text", is(customer.getText())));
+                .andExpect(jsonPath("$.name", is(customer.getName())));
     }
 
     @Test
@@ -65,7 +65,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(customer)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.text", is(customer.getText())));
+                .andExpect(jsonPath("$.name", is(customer.getName())));
     }
 
     @Test
@@ -86,15 +86,15 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.title", is("Constraint Violation")))
                 .andExpect(jsonPath("$.status", is(400)))
                 .andExpect(jsonPath("$.violations", hasSize(1)))
-                .andExpect(jsonPath("$.violations[0].field", is("text")))
-                .andExpect(jsonPath("$.violations[0].message", is("Text cannot be empty")))
+                .andExpect(jsonPath("$.violations[0].field", is("name")))
+                .andExpect(jsonPath("$.violations[0].message", is("Name cannot be empty")))
                 .andReturn();
     }
 
     @Test
     void shouldUpdateCustomer() throws Exception {
         Customer customer = customerList.get(0);
-        customer.setText("Updated Customer");
+        customer.setName("Updated Customer");
 
         this.mockMvc
                 .perform(
@@ -102,7 +102,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(customer)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.text", is(customer.getText())));
+                .andExpect(jsonPath("$.name", is(customer.getName())));
     }
 
     @Test
@@ -112,6 +112,6 @@ class CustomerControllerIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(delete("/api/customers/{id}", customer.getId()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.text", is(customer.getText())));
+                .andExpect(jsonPath("$.name", is(customer.getName())));
     }
 }

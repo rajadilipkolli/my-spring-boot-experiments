@@ -2,16 +2,11 @@ package com.example.envers.config;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.envers.repository.support.EnversRevisionRepositoryFactoryBean;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 @RequiredArgsConstructor
-@EnableJpaRepositories(
-        repositoryFactoryBeanClass = EnversRevisionRepositoryFactoryBean.class,
-        basePackages = "com.example.envers.repositories")
 public class WebMvcConfig implements WebMvcConfigurer {
     private final ApplicationProperties properties;
 

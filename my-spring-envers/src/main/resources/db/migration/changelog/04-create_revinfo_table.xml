@@ -10,8 +10,10 @@
                         incrementBy="1"
                         startValue="1"
                         />
-        <createTable tableName="revinfo">
-            <column name="rev" type="int"/>
+        <createTable tableName="revinfo" >
+            <column name="rev" type="int" defaultValueSequenceNext="hibernate_sequence">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
             <column name="revtstmp" type="bigint"/>
         </createTable>
     </changeSet>
