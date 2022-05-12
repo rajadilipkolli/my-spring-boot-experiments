@@ -1,0 +1,9 @@
+type Author{
+    id:ID!
+    name:String!
+    email:String!
+}
+
+type Query{
+     allAuthors: [Author!]!
+}
