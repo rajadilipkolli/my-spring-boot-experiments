@@ -53,7 +53,7 @@ class TagControllerIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(get("/api/tags/{id}", tagId))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.text", is(tag.getText())));
+                .andExpect(jsonPath("$.name", is(tag.getName())));
     }
 
     @Test
@@ -65,7 +65,7 @@ class TagControllerIT extends AbstractIntegrationTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(tag)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.text", is(tag.getText())));
+                .andExpect(jsonPath("$.name", is(tag.getName())));
     }
 
     @Test
@@ -94,7 +94,7 @@ class TagControllerIT extends AbstractIntegrationTest {
     @Test
     void shouldUpdateTag() throws Exception {
         Tag tag = tagList.get(0);
-        tag.setText("Updated Tag");
+        tag.setName("Updated Tag");
 
         this.mockMvc
                 .perform(
@@ -102,7 +102,7 @@ class TagControllerIT extends AbstractIntegrationTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(tag)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.text", is(tag.getText())));
+                .andExpect(jsonPath("$.name", is(tag.getName())));
     }
 
     @Test
@@ -112,6 +112,6 @@ class TagControllerIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(delete("/api/tags/{id}", tag.getId()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.text", is(tag.getText())));
+                .andExpect(jsonPath("$.name", is(tag.getName())));
     }
 }

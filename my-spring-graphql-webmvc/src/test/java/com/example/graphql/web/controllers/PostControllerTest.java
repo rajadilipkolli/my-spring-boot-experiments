@@ -47,9 +47,9 @@ class PostControllerTest {
     @BeforeEach
     void setUp() {
         this.postList = new ArrayList<>();
-        this.postList.add(new Post(1L, "text 1"));
-        this.postList.add(new Post(2L, "text 2"));
-        this.postList.add(new Post(3L, "text 3"));
+        this.postList.add(Post.builder().id(1L).content("First Post").build());
+        this.postList.add(Post.builder().id(2L).content("Second Post").build());
+        this.postList.add(Post.builder().id(3L).content("Third Post").build());
 
         objectMapper.registerModule(new ProblemModule());
         objectMapper.registerModule(new ConstraintViolationProblemModule());
@@ -68,13 +68,13 @@ class PostControllerTest {
     @Test
     void shouldFindPostById() throws Exception {
         Long postId = 1L;
-        Post post = new Post(postId, "text 1");
+        Post post = Post.builder().id(postId).content("First Post").build();
         given(postService.findPostById(postId)).willReturn(Optional.of(post));
 
         this.mockMvc
                 .perform(get("/api/posts/{id}", postId))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.text", is(post.getText())));
+                .andExpect(jsonPath("$.content", is(post.getContent())));
     }
 
     @Test
@@ -90,7 +90,7 @@ class PostControllerTest {
         given(postService.savePost(any(Post.class)))
                 .willAnswer((invocation) -> invocation.getArgument(0));
 
-        Post post = new Post(1L, "some text");
+        Post post = Post.builder().id(1L).content("First Post").build();
         this.mockMvc
                 .perform(
                         post("/api/posts")
@@ -98,12 +98,12 @@ class PostControllerTest {
                                 .content(objectMapper.writeValueAsString(post)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id", notNullValue()))
-                .andExpect(jsonPath("$.text", is(post.getText())));
+                .andExpect(jsonPath("$.content", is(post.getContent())));
     }
 
     @Test
     void shouldReturn400WhenCreateNewPostWithoutText() throws Exception {
-        Post post = new Post(null, null);
+        Post post = new Post(null, null, null, null, null, null, null);
 
         this.mockMvc
                 .perform(
@@ -127,7 +127,7 @@ class PostControllerTest {
     @Test
     void shouldUpdatePost() throws Exception {
         Long postId = 1L;
-        Post post = new Post(postId, "Updated text");
+        Post post = Post.builder().id(postId).content("Updated Post").build();
         given(postService.findPostById(postId)).willReturn(Optional.of(post));
         given(postService.savePost(any(Post.class)))
                 .willAnswer((invocation) -> invocation.getArgument(0));
@@ -138,14 +138,14 @@ class PostControllerTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(post)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.text", is(post.getText())));
+                .andExpect(jsonPath("$.content", is(post.getContent())));
     }
 
     @Test
     void shouldReturn404WhenUpdatingNonExistingPost() throws Exception {
         Long postId = 1L;
         given(postService.findPostById(postId)).willReturn(Optional.empty());
-        Post post = new Post(postId, "Updated text");
+        Post post = Post.builder().id(postId).content("Updated Post").build();
 
         this.mockMvc
                 .perform(
@@ -158,14 +158,14 @@ class PostControllerTest {
     @Test
     void shouldDeletePost() throws Exception {
         Long postId = 1L;
-        Post post = new Post(postId, "Some text");
+        Post post = Post.builder().id(postId).content("First Post").build();
         given(postService.findPostById(postId)).willReturn(Optional.of(post));
         doNothing().when(postService).deletePostById(post.getId());
 
         this.mockMvc
                 .perform(delete("/api/posts/{id}", post.getId()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.text", is(post.getText())));
+                .andExpect(jsonPath("$.content", is(post.getContent())));
     }
 
     @Test

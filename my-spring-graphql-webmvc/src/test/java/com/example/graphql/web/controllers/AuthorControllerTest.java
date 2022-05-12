@@ -47,9 +47,9 @@ class AuthorControllerTest {
     @BeforeEach
     void setUp() {
         this.authorList = new ArrayList<>();
-        this.authorList.add(new Author(1L, "text 1"));
-        this.authorList.add(new Author(2L, "text 2"));
-        this.authorList.add(new Author(3L, "text 3"));
+        this.authorList.add(new Author(1L, "text 1", "junit1@email.com"));
+        this.authorList.add(new Author(2L, "text 2", "junit2@email.com"));
+        this.authorList.add(new Author(3L, "text 3", "junit3@email.com"));
 
         objectMapper.registerModule(new ProblemModule());
         objectMapper.registerModule(new ConstraintViolationProblemModule());
@@ -68,13 +68,13 @@ class AuthorControllerTest {
     @Test
     void shouldFindAuthorById() throws Exception {
         Long authorId = 1L;
-        Author author = new Author(authorId, "text 1");
+        Author author = new Author(authorId, "text 1", "junit1@email.com");
         given(authorService.findAuthorById(authorId)).willReturn(Optional.of(author));
 
         this.mockMvc
                 .perform(get("/api/authors/{id}", authorId))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.text", is(author.getText())));
+                .andExpect(jsonPath("$.name", is(author.getName())));
     }
 
     @Test
@@ -90,7 +90,7 @@ class AuthorControllerTest {
         given(authorService.saveAuthor(any(Author.class)))
                 .willAnswer((invocation) -> invocation.getArgument(0));
 
-        Author author = new Author(1L, "some text");
+        Author author = new Author(1L, "some text", "junit1@email.com");
         this.mockMvc
                 .perform(
                         post("/api/authors")
@@ -98,12 +98,12 @@ class AuthorControllerTest {
                                 .content(objectMapper.writeValueAsString(author)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id", notNullValue()))
-                .andExpect(jsonPath("$.text", is(author.getText())));
+                .andExpect(jsonPath("$.name", is(author.getName())));
     }
 
     @Test
     void shouldReturn400WhenCreateNewAuthorWithoutText() throws Exception {
-        Author author = new Author(null, null);
+        Author author = new Author(null, null, null);
 
         this.mockMvc
                 .perform(
@@ -127,7 +127,7 @@ class AuthorControllerTest {
     @Test
     void shouldUpdateAuthor() throws Exception {
         Long authorId = 1L;
-        Author author = new Author(authorId, "Updated text");
+        Author author = new Author(authorId, "Updated text", "junit1@email.com");
         given(authorService.findAuthorById(authorId)).willReturn(Optional.of(author));
         given(authorService.saveAuthor(any(Author.class)))
                 .willAnswer((invocation) -> invocation.getArgument(0));
@@ -138,14 +138,14 @@ class AuthorControllerTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(author)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.text", is(author.getText())));
+                .andExpect(jsonPath("$.name", is(author.getName())));
     }
 
     @Test
     void shouldReturn404WhenUpdatingNonExistingAuthor() throws Exception {
         Long authorId = 1L;
         given(authorService.findAuthorById(authorId)).willReturn(Optional.empty());
-        Author author = new Author(authorId, "Updated text");
+        Author author = new Author(authorId, "Updated text", "junit1@email.com");
 
         this.mockMvc
                 .perform(
@@ -158,14 +158,14 @@ class AuthorControllerTest {
     @Test
     void shouldDeleteAuthor() throws Exception {
         Long authorId = 1L;
-        Author author = new Author(authorId, "Some text");
+        Author author = new Author(authorId, "Some text", "junit1@email.com");
         given(authorService.findAuthorById(authorId)).willReturn(Optional.of(author));
         doNothing().when(authorService).deleteAuthorById(author.getId());
 
         this.mockMvc
                 .perform(delete("/api/authors/{id}", author.getId()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.text", is(author.getText())));
+                .andExpect(jsonPath("$.name", is(author.getName())));
     }
 
     @Test

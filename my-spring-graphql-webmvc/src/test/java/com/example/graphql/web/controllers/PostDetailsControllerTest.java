@@ -47,9 +47,9 @@ class PostDetailsControllerTest {
     @BeforeEach
     void setUp() {
         this.postDetailsList = new ArrayList<>();
-        this.postDetailsList.add(new PostDetails(1L, "text 1"));
-        this.postDetailsList.add(new PostDetails(2L, "text 2"));
-        this.postDetailsList.add(new PostDetails(3L, "text 3"));
+        this.postDetailsList.add(PostDetails.builder().id(1L).createdBy("Junit1").build());
+        this.postDetailsList.add(PostDetails.builder().id(2L).createdBy("Junit2").build());
+        this.postDetailsList.add(PostDetails.builder().id(3L).createdBy("Junit3").build());
 
         objectMapper.registerModule(new ProblemModule());
         objectMapper.registerModule(new ConstraintViolationProblemModule());
@@ -68,14 +68,15 @@ class PostDetailsControllerTest {
     @Test
     void shouldFindPostDetailsById() throws Exception {
         Long postDetailsId = 1L;
-        PostDetails postDetails = new PostDetails(postDetailsId, "text 1");
+        PostDetails postDetails =
+                PostDetails.builder().id(postDetailsId).createdBy("Junit1").build();
         given(postDetailsService.findPostDetailsById(postDetailsId))
                 .willReturn(Optional.of(postDetails));
 
         this.mockMvc
                 .perform(get("/api/postdetails/{id}", postDetailsId))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.text", is(postDetails.getText())));
+                .andExpect(jsonPath("$.createdBy", is(postDetails.getCreatedBy())));
     }
 
     @Test
@@ -93,7 +94,7 @@ class PostDetailsControllerTest {
         given(postDetailsService.savePostDetails(any(PostDetails.class)))
                 .willAnswer((invocation) -> invocation.getArgument(0));
 
-        PostDetails postDetails = new PostDetails(1L, "some text");
+        PostDetails postDetails = PostDetails.builder().id(1L).createdBy("Junit1").build();
         this.mockMvc
                 .perform(
                         post("/api/postdetails")
@@ -101,12 +102,12 @@ class PostDetailsControllerTest {
                                 .content(objectMapper.writeValueAsString(postDetails)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id", notNullValue()))
-                .andExpect(jsonPath("$.text", is(postDetails.getText())));
+                .andExpect(jsonPath("$.createdBy", is(postDetails.getCreatedBy())));
     }
 
     @Test
     void shouldReturn400WhenCreateNewPostDetailsWithoutText() throws Exception {
-        PostDetails postDetails = new PostDetails(null, null);
+        PostDetails postDetails = new PostDetails(null, null, null, null);
 
         this.mockMvc
                 .perform(
@@ -130,7 +131,8 @@ class PostDetailsControllerTest {
     @Test
     void shouldUpdatePostDetails() throws Exception {
         Long postDetailsId = 1L;
-        PostDetails postDetails = new PostDetails(postDetailsId, "Updated text");
+        PostDetails postDetails =
+                PostDetails.builder().id(postDetailsId).createdBy("updated").build();
         given(postDetailsService.findPostDetailsById(postDetailsId))
                 .willReturn(Optional.of(postDetails));
         given(postDetailsService.savePostDetails(any(PostDetails.class)))
@@ -142,14 +144,15 @@ class PostDetailsControllerTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(postDetails)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.text", is(postDetails.getText())));
+                .andExpect(jsonPath("$.createdBy", is(postDetails.getCreatedBy())));
     }
 
     @Test
     void shouldReturn404WhenUpdatingNonExistingPostDetails() throws Exception {
         Long postDetailsId = 1L;
         given(postDetailsService.findPostDetailsById(postDetailsId)).willReturn(Optional.empty());
-        PostDetails postDetails = new PostDetails(postDetailsId, "Updated text");
+        PostDetails postDetails =
+                PostDetails.builder().id(postDetailsId).createdBy("Junit1").build();
 
         this.mockMvc
                 .perform(
@@ -162,7 +165,8 @@ class PostDetailsControllerTest {
     @Test
     void shouldDeletePostDetails() throws Exception {
         Long postDetailsId = 1L;
-        PostDetails postDetails = new PostDetails(postDetailsId, "Some text");
+        PostDetails postDetails =
+                PostDetails.builder().id(postDetailsId).createdBy("Junit1").build();
         given(postDetailsService.findPostDetailsById(postDetailsId))
                 .willReturn(Optional.of(postDetails));
         doNothing().when(postDetailsService).deletePostDetailsById(postDetails.getId());
@@ -170,7 +174,7 @@ class PostDetailsControllerTest {
         this.mockMvc
                 .perform(delete("/api/postdetails/{id}", postDetails.getId()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.text", is(postDetails.getText())));
+                .andExpect(jsonPath("$.createdBy", is(postDetails.getCreatedBy())));
     }
 
     @Test

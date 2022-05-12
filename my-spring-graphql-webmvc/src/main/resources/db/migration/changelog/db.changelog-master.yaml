@@ -1,0 +1,5 @@
+databaseChangeLogdatabaseChangeLog:
+  - includeAll:
+      id: "create_ddls"
+      author: "raja"
+      relativeToChangelogFile: true

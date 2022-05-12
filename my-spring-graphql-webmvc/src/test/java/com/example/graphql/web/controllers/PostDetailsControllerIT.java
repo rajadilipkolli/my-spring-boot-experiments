@@ -31,9 +31,9 @@ class PostDetailsControllerIT extends AbstractIntegrationTest {
         postDetailsRepository.deleteAll();
 
         postDetailsList = new ArrayList<>();
-        postDetailsList.add(new PostDetails(1L, "First PostDetails"));
-        postDetailsList.add(new PostDetails(2L, "Second PostDetails"));
-        postDetailsList.add(new PostDetails(3L, "Third PostDetails"));
+        postDetailsList.add(PostDetails.builder().id(1L).createdBy("Junit1").build());
+        postDetailsList.add(PostDetails.builder().id(2L).createdBy("Junit2").build());
+        postDetailsList.add(PostDetails.builder().id(3L).createdBy("Junit3").build());
         postDetailsList = postDetailsRepository.saveAll(postDetailsList);
     }
 
@@ -53,24 +53,24 @@ class PostDetailsControllerIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(get("/api/postdetails/{id}", postDetailsId))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.text", is(postDetails.getText())));
+                .andExpect(jsonPath("$.createdBy", is(postDetails.getCreatedBy())));
     }
 
     @Test
     void shouldCreateNewPostDetails() throws Exception {
-        PostDetails postDetails = new PostDetails(null, "New PostDetails");
+        PostDetails postDetails = PostDetails.builder().createdBy("Junit1").build();
         this.mockMvc
                 .perform(
                         post("/api/postdetails")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(postDetails)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.text", is(postDetails.getText())));
+                .andExpect(jsonPath("$.createdBy", is(postDetails.getCreatedBy())));
     }
 
     @Test
     void shouldReturn400WhenCreateNewPostDetailsWithoutText() throws Exception {
-        PostDetails postDetails = new PostDetails(null, null);
+        PostDetails postDetails = new PostDetails(null, null, null, null);
 
         this.mockMvc
                 .perform(
@@ -94,7 +94,7 @@ class PostDetailsControllerIT extends AbstractIntegrationTest {
     @Test
     void shouldUpdatePostDetails() throws Exception {
         PostDetails postDetails = postDetailsList.get(0);
-        postDetails.setText("Updated PostDetails");
+        postDetails.setCreatedBy("Updated PostDetails");
 
         this.mockMvc
                 .perform(
@@ -102,7 +102,7 @@ class PostDetailsControllerIT extends AbstractIntegrationTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(postDetails)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.text", is(postDetails.getText())));
+                .andExpect(jsonPath("$.createdBy", is(postDetails.getCreatedBy())));
     }
 
     @Test
@@ -112,6 +112,6 @@ class PostDetailsControllerIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(delete("/api/postdetails/{id}", postDetails.getId()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.text", is(postDetails.getText())));
+                .andExpect(jsonPath("$.createdBy", is(postDetails.getCreatedBy())));
     }
 }

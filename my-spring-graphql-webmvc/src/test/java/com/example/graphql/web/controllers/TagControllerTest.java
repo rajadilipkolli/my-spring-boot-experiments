@@ -74,7 +74,7 @@ class TagControllerTest {
         this.mockMvc
                 .perform(get("/api/tags/{id}", tagId))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.text", is(tag.getText())));
+                .andExpect(jsonPath("$.name", is(tag.getName())));
     }
 
     @Test
@@ -98,7 +98,7 @@ class TagControllerTest {
                                 .content(objectMapper.writeValueAsString(tag)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id", notNullValue()))
-                .andExpect(jsonPath("$.text", is(tag.getText())));
+                .andExpect(jsonPath("$.name", is(tag.getName())));
     }
 
     @Test
@@ -138,7 +138,7 @@ class TagControllerTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(tag)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.text", is(tag.getText())));
+                .andExpect(jsonPath("$.name", is(tag.getName())));
     }
 
     @Test
@@ -165,7 +165,7 @@ class TagControllerTest {
         this.mockMvc
                 .perform(delete("/api/tags/{id}", tag.getId()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.text", is(tag.getText())));
+                .andExpect(jsonPath("$.name", is(tag.getName())));
     }
 
     @Test

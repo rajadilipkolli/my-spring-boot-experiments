@@ -31,9 +31,9 @@ class PostControllerIT extends AbstractIntegrationTest {
         postRepository.deleteAll();
 
         postList = new ArrayList<>();
-        postList.add(new Post(1L, "First Post"));
-        postList.add(new Post(2L, "Second Post"));
-        postList.add(new Post(3L, "Third Post"));
+        postList.add(Post.builder().id(1L).content("First Post").build());
+        postList.add(Post.builder().id(2L).content("Second Post").build());
+        postList.add(Post.builder().id(3L).content("Third Post").build());
         postList = postRepository.saveAll(postList);
     }
 
@@ -53,24 +53,24 @@ class PostControllerIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(get("/api/posts/{id}", postId))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.text", is(post.getText())));
+                .andExpect(jsonPath("$.content", is(post.getContent())));
     }
 
     @Test
     void shouldCreateNewPost() throws Exception {
-        Post post = new Post(null, "New Post");
+        Post post = Post.builder().content("New Post").build();
         this.mockMvc
                 .perform(
                         post("/api/posts")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(post)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.text", is(post.getText())));
+                .andExpect(jsonPath("$.content", is(post.getContent())));
     }
 
     @Test
     void shouldReturn400WhenCreateNewPostWithoutText() throws Exception {
-        Post post = new Post(null, null);
+        Post post = new Post(null, null, null, null, null, null, null);
 
         this.mockMvc
                 .perform(
@@ -94,7 +94,7 @@ class PostControllerIT extends AbstractIntegrationTest {
     @Test
     void shouldUpdatePost() throws Exception {
         Post post = postList.get(0);
-        post.setText("Updated Post");
+        post.setContent("Updated Post");
 
         this.mockMvc
                 .perform(
@@ -102,7 +102,7 @@ class PostControllerIT extends AbstractIntegrationTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(post)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.text", is(post.getText())));
+                .andExpect(jsonPath("$.content", is(post.getContent())));
     }
 
     @Test
@@ -112,6 +112,6 @@ class PostControllerIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(delete("/api/posts/{id}", post.getId()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.text", is(post.getText())));
+                .andExpect(jsonPath("$.content", is(post.getContent())));
     }
 }

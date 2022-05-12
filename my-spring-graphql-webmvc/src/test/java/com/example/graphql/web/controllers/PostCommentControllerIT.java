@@ -31,9 +31,9 @@ class PostCommentControllerIT extends AbstractIntegrationTest {
         postCommentRepository.deleteAll();
 
         postCommentList = new ArrayList<>();
-        postCommentList.add(new PostComment(1L, "First PostComment"));
-        postCommentList.add(new PostComment(2L, "Second PostComment"));
-        postCommentList.add(new PostComment(3L, "Third PostComment"));
+        postCommentList.add(PostComment.builder().id(1L).review("First PostComment").build());
+        postCommentList.add(PostComment.builder().id(2L).review("Second PostComment").build());
+        postCommentList.add(PostComment.builder().id(3L).review("Third PostComment").build());
         postCommentList = postCommentRepository.saveAll(postCommentList);
     }
 
@@ -53,24 +53,24 @@ class PostCommentControllerIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(get("/api/postcomments/{id}", postCommentId))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.text", is(postComment.getText())));
+                .andExpect(jsonPath("$.review", is(postComment.getReview())));
     }
 
     @Test
     void shouldCreateNewPostComment() throws Exception {
-        PostComment postComment = new PostComment(null, "New PostComment");
+        PostComment postComment = PostComment.builder().review("New PostComment").build();
         this.mockMvc
                 .perform(
                         post("/api/postcomments")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(postComment)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.text", is(postComment.getText())));
+                .andExpect(jsonPath("$.review", is(postComment.getReview())));
     }
 
     @Test
     void shouldReturn400WhenCreateNewPostCommentWithoutText() throws Exception {
-        PostComment postComment = new PostComment(null, null);
+        PostComment postComment = new PostComment(null, null, null, null);
 
         this.mockMvc
                 .perform(
@@ -94,7 +94,7 @@ class PostCommentControllerIT extends AbstractIntegrationTest {
     @Test
     void shouldUpdatePostComment() throws Exception {
         PostComment postComment = postCommentList.get(0);
-        postComment.setText("Updated PostComment");
+        postComment.setReview("Updated PostComment");
 
         this.mockMvc
                 .perform(
@@ -102,7 +102,7 @@ class PostCommentControllerIT extends AbstractIntegrationTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(postComment)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.text", is(postComment.getText())));
+                .andExpect(jsonPath("$.review", is(postComment.getReview())));
     }
 
     @Test
@@ -112,6 +112,6 @@ class PostCommentControllerIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(delete("/api/postcomments/{id}", postComment.getId()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.text", is(postComment.getText())));
+                .andExpect(jsonPath("$.review", is(postComment.getReview())));
     }
 }

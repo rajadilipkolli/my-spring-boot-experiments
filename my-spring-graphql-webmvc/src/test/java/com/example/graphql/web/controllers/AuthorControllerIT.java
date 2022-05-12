@@ -31,9 +31,9 @@ class AuthorControllerIT extends AbstractIntegrationTest {
         authorRepository.deleteAll();
 
         authorList = new ArrayList<>();
-        authorList.add(new Author(1L, "First Author"));
-        authorList.add(new Author(2L, "Second Author"));
-        authorList.add(new Author(3L, "Third Author"));
+        authorList.add(new Author(1L, "First Author", "junit1@email.com"));
+        authorList.add(new Author(2L, "Second Author", "junit2@email.com"));
+        authorList.add(new Author(3L, "Third Author", "junit3@email.com"));
         authorList = authorRepository.saveAll(authorList);
     }
 
@@ -53,24 +53,24 @@ class AuthorControllerIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(get("/api/authors/{id}", authorId))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.text", is(author.getText())));
+                .andExpect(jsonPath("$.name", is(author.getName())));
     }
 
     @Test
     void shouldCreateNewAuthor() throws Exception {
-        Author author = new Author(null, "New Author");
+        Author author = new Author(null, "New Author", "junit4@email.com");
         this.mockMvc
                 .perform(
                         post("/api/authors")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(author)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.text", is(author.getText())));
+                .andExpect(jsonPath("$.name", is(author.getName())));
     }
 
     @Test
     void shouldReturn400WhenCreateNewAuthorWithoutText() throws Exception {
-        Author author = new Author(null, null);
+        Author author = new Author(null, null, null);
 
         this.mockMvc
                 .perform(
@@ -86,15 +86,15 @@ class AuthorControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.title", is("Constraint Violation")))
                 .andExpect(jsonPath("$.status", is(400)))
                 .andExpect(jsonPath("$.violations", hasSize(1)))
-                .andExpect(jsonPath("$.violations[0].field", is("text")))
-                .andExpect(jsonPath("$.violations[0].message", is("Text cannot be empty")))
+                .andExpect(jsonPath("$.violations[0].field", is("name")))
+                .andExpect(jsonPath("$.violations[0].message", is("Name cannot be empty")))
                 .andReturn();
     }
 
     @Test
     void shouldUpdateAuthor() throws Exception {
         Author author = authorList.get(0);
-        author.setText("Updated Author");
+        author.setName("Updated Author");
 
         this.mockMvc
                 .perform(
@@ -102,7 +102,7 @@ class AuthorControllerIT extends AbstractIntegrationTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(author)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.text", is(author.getText())));
+                .andExpect(jsonPath("$.name", is(author.getName())));
     }
 
     @Test
@@ -112,6 +112,6 @@ class AuthorControllerIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(delete("/api/authors/{id}", author.getId()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.text", is(author.getText())));
+                .andExpect(jsonPath("$.name", is(author.getName())));
     }
 }
