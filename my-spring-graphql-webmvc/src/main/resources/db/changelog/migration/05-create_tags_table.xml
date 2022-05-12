@@ -4,19 +4,20 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
          http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
-    <changeSet author="sivalabs" id="createTable-post detailss">
+    <changeSet author="sivalabs" id="createTable-tags">
         <createSequence
-                        sequenceName="postDetails_id_seq"
+                        sequenceName="tag_id_seq"
                         incrementBy="100"
                         startValue="1"
                         />
-        <createTable tableName="post detailss">
-            <column name="id" type="bigint" defaultValueSequenceNext="postDetails_id_seq">
+        <createTable tableName="tags">
+            <column name="id" type="bigint" defaultValueSequenceNext="tag_id_seq">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
-            <column name="text" type="varchar(1024)">
+            <column name="name" type="varchar(1024)">
                 <constraints nullable="false"/>
             </column>
         </createTable>
+        <addUniqueConstraint columnNames="name" constraintName="uc_tag_name" tableName="tags"/>
     </changeSet>
 </databaseChangeLog>

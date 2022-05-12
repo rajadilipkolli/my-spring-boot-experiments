@@ -3,7 +3,6 @@ package com.example.graphql.web.controllers;
 import static com.example.graphql.utils.AppConstants.PROFILE_TEST;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
@@ -11,7 +10,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -103,29 +101,6 @@ class PostCommentControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id", notNullValue()))
                 .andExpect(jsonPath("$.review", is(postComment.getReview())));
-    }
-
-    @Test
-    void shouldReturn400WhenCreateNewPostCommentWithoutText() throws Exception {
-        PostComment postComment = new PostComment(null, null, null, null);
-
-        this.mockMvc
-                .perform(
-                        post("/api/postcomments")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(postComment)))
-                .andExpect(status().isBadRequest())
-                .andExpect(header().string("Content-Type", is("application/problem+json")))
-                .andExpect(
-                        jsonPath(
-                                "$.type",
-                                is("https://zalando.github.io/problem/constraint-violation")))
-                .andExpect(jsonPath("$.title", is("Constraint Violation")))
-                .andExpect(jsonPath("$.status", is(400)))
-                .andExpect(jsonPath("$.violations", hasSize(1)))
-                .andExpect(jsonPath("$.violations[0].field", is("text")))
-                .andExpect(jsonPath("$.violations[0].message", is("Text cannot be empty")))
-                .andReturn();
     }
 
     @Test

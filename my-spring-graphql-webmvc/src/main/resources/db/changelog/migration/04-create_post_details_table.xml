@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+    <changeSet author="sivalabs" id="createTable-post-details">
+        <createSequence
+                        sequenceName="post_details_id_seq"
+                        incrementBy="100"
+                        startValue="1"
+                        />
+        <createTable tableName="post_details">
+            <column name="post_id" type="bigint" defaultValueSequenceNext="post_details_id_seq">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="created_on" type="DATETIME"/>
+            <column name="created_by" type="VARCHAR(255)"/>
+        </createTable>
+        <addForeignKeyConstraint baseColumnNames="post_id" baseTableName="post_details"
+                                 constraintName="FK_POST_DETAILS_ON_POST" referencedColumnNames="id"
+                                 referencedTableName="posts"/>
+        <addForeignKeyConstraint baseColumnNames="details_id" baseTableName="posts" constraintName="FK_POST_ON_DETAILS"
+                                 referencedColumnNames="post_id" referencedTableName="post_details"/>
+    </changeSet>
+</databaseChangeLog>

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+    <changeSet author="sivalabs" id="createTable-post-comments">
+        <createSequence
+                        sequenceName="post_comment_id_seq"
+                        incrementBy="100"
+                        startValue="1"
+                        />
+        <createTable tableName="post_comments">
+            <column name="id" type="bigint" defaultValueSequenceNext="post_comment_id_seq">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="review" type="varchar(1024)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_on" type="DATETIME"/>
+            <column name="post_id" type="BIGINT"/>
+        </createTable>
+        <addForeignKeyConstraint baseColumnNames="post_id" baseTableName="post_comments"
+                                 constraintName="FK_POST_COMMENT_ON_POST" referencedColumnNames="id"
+                                 referencedTableName="posts"/>
+    </changeSet>
+</databaseChangeLog>

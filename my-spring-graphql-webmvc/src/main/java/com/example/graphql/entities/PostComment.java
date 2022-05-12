@@ -16,7 +16,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Table(name = "post comments")
+@Table(name = "post_comments")
 @Getter
 @Setter
 @Builder
