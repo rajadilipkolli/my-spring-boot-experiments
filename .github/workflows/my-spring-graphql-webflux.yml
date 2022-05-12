@@ -1,13 +1,13 @@
-name: spring-graphql
+name: my-spring-graphql-webflux
 
 on:
   push:
     paths:
-      - "spring-graphql/**"
+      - "my-spring-graphql-webflux/**"
     branches: [main]
   pull_request:
     paths:
-      - "spring-graphql/**"
+      - "my-spring-graphql-webflux/**"
     types:
       - opened
       - synchronize
@@ -31,6 +31,6 @@ jobs:
 
       - name: Build and analyze
         run: |
-          cd spring-graphql
+          cd my-spring-graphql-webflux
           chmod +x gradlew
           ./gradlew clean build --info

@@ -14,4 +14,4 @@ pluginManagement {
     }
 }
 
-rootProject.name = 'spring-graphql-querydsl'
+rootProject.name = 'my-spring-graphql-querydsl'

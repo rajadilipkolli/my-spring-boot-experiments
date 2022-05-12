@@ -1,13 +1,13 @@
-name: my-spring-envers
+name: my-spring-graphql-querydsl
 
 on:
   push:
     paths:
-      - "my-spring-envers/**"
+      - "my-spring-graphql-querydsl/**"
     branches: [main]
   pull_request:
     paths:
-      - "my-spring-envers/**"
+      - "my-spring-graphql-querydsl/**"
     types:
       - opened
       - synchronize
@@ -30,7 +30,10 @@ jobs:
           cache: "gradle"
 
       - name: Build and analyze
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-          cd my-spring-envers
+          cd my-spring-graphql-querydsl
           chmod +x gradlew
           ./gradlew clean build --info
