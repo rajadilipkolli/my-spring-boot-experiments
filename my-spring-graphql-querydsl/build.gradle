@@ -73,7 +73,7 @@ dependencies {
 	testImplementation 'org.springframework.graphql:spring-graphql-test'
 	testImplementation 'org.projectlombok:lombok'
 	// WebGraphQlTester needs webflux as dependency 
-	testImplementation 'org.springframework.boot:spring-boot-starter-webflux'
+	testImplementation 'org.springframework:spring-webflux'
 }
 
 dependencyManagement {

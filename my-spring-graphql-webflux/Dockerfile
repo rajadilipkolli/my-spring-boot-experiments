@@ -1,6 +1,6 @@
 FROM openjdk:19-jdk-slim
 VOLUME /tmp
-ADD build/libs/spring-graphql-0.0.1-SNAPSHOT.jar app.jar
+ADD build/libs/,y-spring-graphql-webflux-0.0.1-SNAPSHOT.jar app.jar
 RUN sh -c 'touch /app.jar'
 ENV JAVA_OPTS="-Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=8787,suspend=n"
 ENV SPRING_PROFILES_ACTIVE "default"
