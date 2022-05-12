@@ -1,4 +1,4 @@
-# my-spring-envers
+# my-spring-data-envers
 
 
 ### Run tests
