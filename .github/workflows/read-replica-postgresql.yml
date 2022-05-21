@@ -28,10 +28,10 @@ jobs:
           java-version: 18
           distribution: "zulu"
           cache: "maven"
-      - name: Start up databases via docker compose
+      - name: Start up redis via Docker Compose
         run: |
           cd read-replica-postgresql
-          docker compose up -d
+          docker-compose up -d
           sleep 5
           docker ps -a
       - name: Build and analyze
