@@ -54,7 +54,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.liquibase:liquibase-core'
 	// Printing Queries effectively
-	implementation 'net.ttddyy:datasource-proxy:1.7'
+	implementation 'net.ttddyy:datasource-proxy:1.8'
 
 	// QueryDSL for JPA
 	implementation 'com.querydsl:querydsl-core'
