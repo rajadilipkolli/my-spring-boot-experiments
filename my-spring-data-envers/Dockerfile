@@ -1,4 +1,4 @@
-FROM openjdk:19-jdk-slim
+FROM openjdk:20-jdk-slim
 VOLUME /tmp
 ADD build/libs/my-spring-envers-0.0.1-SNAPSHOT.jar app.jar
 RUN sh -c 'touch /app.jar'
