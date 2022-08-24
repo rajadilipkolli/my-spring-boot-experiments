@@ -60,7 +60,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
 
   mongodb:
-    image: mongo:5.0
+    image: mongo:6.0
     ports:
       - "27017:27017"
     volumes:
