@@ -14,3 +14,10 @@ vscode:
     - vscjava.vscode-spring-initializr
     - GabrielBB.vscode-lombok
     - redhat.java
+
+
+ports:
+  - port: 5432
+    visibility: public
+  - port: 8080
+    visibility: public
