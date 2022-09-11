@@ -2,7 +2,7 @@ version: '3.8'
 services:
 
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:6.2.2
+    image: docker.elastic.co/elasticsearch/elasticsearch:6.8.23
     container_name: elasticsearch
     environment:
       - cluster.name=docker-cluster
