@@ -27,10 +27,13 @@ jobs:
         with:
           java-version: 18
           distribution: "zulu"
-          cache: "maven"
+          cache: "gradle"
 
       - name: Build and analyze
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
           cd my-spring-choas-monkey
-          chmod +x mvnw
-          ./mvnw clean package
+          chmod +x gradlew
+          ./gradlew clean build --info
