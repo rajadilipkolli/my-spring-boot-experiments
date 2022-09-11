@@ -1,0 +1,67 @@
+apply plugin: 'jacoco'
+apply plugin: "org.sonarqube"
+
+jacoco {
+    toolVersion = "${jacoco_plugin_version}"
+}
+
+def jacocoExcludes = [
+    '**/*Application.*',
+    '**/config/**',
+    '**/models/**',
+    '**/exceptions/**',
+    '**/dtos/**',
+    '**/*Constants*',
+]
+
+jacocoTestReport {
+    executionData tasks.withType(Test)
+    classDirectories.from = files(sourceSets.main.output.classesDirs)
+    sourceDirectories.from = files(sourceSets.main.java.srcDirs)
+
+    afterEvaluate {
+        getClassDirectories().setFrom(files(classDirectories.files.collect {
+            fileTree(dir: it, exclude: jacocoExcludes)
+        }))
+    }
+
+    reports {
+        xml.enabled = true
+        html.enabled = true
+    }
+}
+
+jacocoTestCoverageVerification {
+    executionData fileTree(project.buildDir.absolutePath).include("jacoco/*.exec")
+    afterEvaluate {
+        getClassDirectories().setFrom(files(classDirectories.files.collect {
+            fileTree(dir: it, exclude: jacocoExcludes)
+        }))
+    }
+    violationRules {
+        rule {
+            element = 'BUNDLE'
+            limit {
+                counter = 'COMPLEXITY'
+                value = 'COVEREDRATIO'
+                minimum = new BigDecimal("${jacoco_min_coverage_required}")
+            }
+            excludes = jacocoExcludes
+        }
+    }
+}
+
+check.dependsOn jacocoTestCoverageVerification
+
+file("sonar-project.properties").withReader {
+    Properties sonarProperties = new Properties()
+    sonarProperties.load(it)
+
+    sonarProperties.each { key, value ->
+        sonarqube {
+            properties {
+                property key, value
+            }
+        }
+    }
+}

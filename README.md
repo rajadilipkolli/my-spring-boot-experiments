@@ -22,6 +22,7 @@ The following table list all sample codes related to the spring boot integration
 | [archunit-api](./archunit-api)                                           | The application, demonstrates how to apply arch unit rules to the spring boot project                                                                      | Completed |
 | [my-spring-data-envers](./my-spring-data-envers)                           | The application, demonstrates how to apply hibernate envers to the spring boot project                                                                      | Completed |
 | [my-spring-graphql-webmvc](./my-spring-graphql-webmvc)                           | The application, demonstrates how to apply graphql concepts to the spring boot project                                                                      | WIP |
+| [my-spring-choas-moneky](./my-spring-choas-monkey)                           | The application, demonstrates how to apply choas engineering concepts to the spring boot project | WIP |
 
 
 
