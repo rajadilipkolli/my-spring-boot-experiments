@@ -52,6 +52,7 @@ dependencies {
     implementation "org.zalando:problem-spring-web-starter:${problem_spring_web_version}"
     implementation "org.apache.commons:commons-lang3:${commons_lang_version}"
     implementation "commons-io:commons-io:${commons_io_version}"
+    implementation 'de.codecentric:chaos-monkey-spring-boot:2.6.1'
 
     testImplementation "org.springframework.boot:spring-boot-starter-test"
     testImplementation "org.projectlombok:lombok"
