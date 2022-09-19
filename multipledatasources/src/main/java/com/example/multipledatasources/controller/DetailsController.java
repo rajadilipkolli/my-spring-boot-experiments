@@ -11,10 +11,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class DetailsController {
 
-  private final DetailsService detailsService;
+    private final DetailsService detailsService;
 
-  @GetMapping("/details/{memberId}")
-  ResponseDto getDetails(@PathVariable("memberId") String memberId) {
-    return detailsService.getDetails(memberId);
-  }
+    @GetMapping("/details/{memberId}")
+    ResponseDto getDetails(@PathVariable("memberId") String memberId) {
+        return detailsService.getDetails(memberId);
+    }
 }

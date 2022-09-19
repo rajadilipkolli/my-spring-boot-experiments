@@ -15,29 +15,29 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class DataInitilizer {
 
-  private final CardHolderRepository cardHolderRepository;
-  private final MemberRepository memberRepository;
+    private final CardHolderRepository cardHolderRepository;
+    private final MemberRepository memberRepository;
 
-  @EventListener(ApplicationReadyEvent.class)
-  void loadInitialData() {
+    @EventListener(ApplicationReadyEvent.class)
+    void loadInitialData() {
 
-    log.info("Data Boot strapping started");
-    String memberId = "1";
+        log.info("Data Boot strapping started");
+        String memberId = "1";
 
-    Member member = new Member();
-    member.setMemberId(memberId);
-    member.setName("raja");
+        Member member = new Member();
+        member.setMemberId(memberId);
+        member.setName("raja");
 
-    CardHolder cardHolder = new CardHolder();
-    cardHolder.setMemberId(memberId);
-    cardHolder.setCardNumber("1234-5678-9012-3456");
+        CardHolder cardHolder = new CardHolder();
+        cardHolder.setMemberId(memberId);
+        cardHolder.setCardNumber("1234-5678-9012-3456");
 
-    CardHolder savedCardHolder = this.cardHolderRepository.save(cardHolder);
-    log.info("Saved CardHolder :{}", savedCardHolder);
+        CardHolder savedCardHolder = this.cardHolderRepository.save(cardHolder);
+        log.info("Saved CardHolder :{}", savedCardHolder);
 
-    Member savedMember = this.memberRepository.save(member);
-    log.info("Saved Member :{}", savedMember);
+        Member savedMember = this.memberRepository.save(member);
+        log.info("Saved Member :{}", savedMember);
 
-    log.info("Data Boot strapping completed");
-  }
+        log.info("Data Boot strapping completed");
+    }
 }

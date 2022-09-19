@@ -17,6 +17,7 @@
 	<properties>
 		<java.version>18</java.version>
 		<testcontainers.version>1.17.3</testcontainers.version>
+		<spotless.version>2.26.0</spotless.version>
 	</properties>
 
 	<dependencies>
@@ -49,13 +50,11 @@
 		<dependency>
 			<groupId>org.flywaydb</groupId>
 			<artifactId>flyway-mysql</artifactId>
-			<version>9.3.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.liquibase</groupId>
 			<artifactId>liquibase-core</artifactId>
 		</dependency>
-
 
 		<dependency>
 			<groupId>org.projectlombok</groupId>
@@ -111,6 +110,27 @@
 					</excludes>
 				</configuration>
 			</plugin>
+			<plugin>
+                <groupId>com.diffplug.spotless</groupId>
+                <artifactId>spotless-maven-plugin</artifactId>
+                <version>${spotless.version}</version>
+                <configuration>
+                    <java>
+                        <googleJavaFormat>
+                            <version>1.15.0</version>
+                            <style>AOSP</style>
+                        </googleJavaFormat>
+                    </java>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
 		</plugins>
 	</build>
 

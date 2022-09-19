@@ -21,3 +21,5 @@ ports:
     visibility: public
   - port: 8080
     visibility: public
+  - port: 3306
+    visibility: public
