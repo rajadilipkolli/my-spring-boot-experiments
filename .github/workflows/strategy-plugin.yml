@@ -22,12 +22,20 @@ jobs:
         with:
           fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
 
-      - name: Set up JDK 18
-        uses: actions/setup-java@v3.5.0
+      - uses: graalvm/setup-graalvm@v1
         with:
-          java-version: 18
-          distribution: "zulu"
-          cache: "gradle"
+          version: 'latest'
+          java-version: '17'
+          components: 'native-image'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: printing versions
+        run: |
+          echo "GRAALVM_HOME: $GRAALVM_HOME"
+          echo "JAVA_HOME: $JAVA_HOME"
+          java --version
+          gu --version
+          native-image --version
 
       - name: Build and analyze
         env:
@@ -36,4 +44,4 @@ jobs:
         run: |
           cd strategy-plugin
           chmod +x gradlew
-          ./gradlew clean build --info
+          ./gradlew clean bootBuildImage --info

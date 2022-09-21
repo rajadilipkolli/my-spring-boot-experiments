@@ -2,13 +2,15 @@ plugins {
     id 'org.springframework.boot' version '2.7.3'
     id 'io.spring.dependency-management' version '1.0.13.RELEASE'
     id 'java'
+    id 'org.springframework.experimental.aot' version '0.12.1'
 }
 
 group = 'com.example.plugin'
 version = '0.0.1-SNAPSHOT'
-sourceCompatibility = '18'
+sourceCompatibility = '17'
 
 repositories {
+    maven { url 'https://repo.spring.io/release' }
     mavenCentral()
 }
 
@@ -16,11 +18,16 @@ dependencies {
     implementation 'org.springframework.plugin:spring-plugin-core:2.0.0.RELEASE'
     implementation 'org.springframework.plugin:spring-plugin-metadata:2.0.0.RELEASE'
 
-    implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
 
-test {
+tasks.named('test') {
     useJUnitPlatform()
+}
+
+tasks.named('bootBuildImage') {
+    builder = 'paketobuildpacks/builder:tiny'
+    environment = ['BP_NATIVE_IMAGE': 'true']
 }
