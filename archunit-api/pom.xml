@@ -16,7 +16,7 @@
 	<description>Example of the use of Archunit</description>
 
 	<properties>
-		<java.version>18</java.version>
+		<java.version>19</java.version>
 		
 		<!-- General -->
 		<guava.version>31.1-jre</guava.version>
