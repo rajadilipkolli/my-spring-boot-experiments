@@ -28,8 +28,8 @@ if (project.hasProperty("ci")) {
 
 group = 'com.example'
 version = '0.0.1-SNAPSHOT'
-sourceCompatibility = '18'
-targetCompatibility = '18'
+sourceCompatibility = '19'
+targetCompatibility = '19'
 
 configurations {
 	compileOnly {

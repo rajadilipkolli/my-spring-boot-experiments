@@ -15,7 +15,7 @@
 	<description>Demo project for using multiple datasource's in a Spring Boot Application</description>
 
 	<properties>
-		<java.version>18</java.version>
+		<java.version>19</java.version>
 		<testcontainers.version>1.17.3</testcontainers.version>
 		<spotless.version>2.27.0</spotless.version>
 	</properties>

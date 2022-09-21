@@ -24,7 +24,7 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v3.5.0
         with:
-          java-version: "18"
+          java-version: "19"
           distribution: "zulu"
           cache: "maven"
       - name: Start up redis via Docker Compose
