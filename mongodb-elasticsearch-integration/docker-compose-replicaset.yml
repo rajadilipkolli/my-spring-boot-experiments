@@ -3,7 +3,7 @@ version: '3.8' # specify docker-compose version
 # Define the services/containers to be run
 services:
   mongo1:
-    image: mongo
+    image: mongo:5.0
     container_name: mongo1
     command: [ "--replSet", "my-replica-set", "--bind_ip_all", "--port", "27017" ]
     volumes:
@@ -16,7 +16,7 @@ services:
       start_period: 30s
 
   mongo2:
-    image: mongo
+    image: mongo:5.0
     container_name: mongo2
     command: [ "--replSet", "my-replica-set", "--bind_ip_all", "--port", "27018" ]
     volumes:
@@ -25,7 +25,7 @@ services:
       - "27018:27018"
 
   mongo3:
-    image: mongo
+    image: mongo:5.0
     container_name: mongo3
     command: [ "--replSet", "my-replica-set", "--bind_ip_all", "--port", "27019" ]
     volumes:
