@@ -17,6 +17,9 @@ jobs:
   build:
     name: Run Unit & Integration Tests
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: my-spring-choas-monkey
     steps:
       - uses: actions/checkout@v3
         with:
@@ -33,7 +36,13 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: |
-          cd my-spring-choas-monkey
-          chmod +x gradlew
-          ./gradlew clean build --info
+        run: ./gradlew clean build --info
+
+      - name: Add coverage to PR
+        id: jacoco
+        uses: madrapps/jacoco-report@v1.3
+        with:
+          paths: ${{ github.workspace }}/build/reports/jacoco/testCoverage/testCoverage.xml
+          token: ${{ secrets.GITHUB_TOKEN }}
+          min-coverage-overall: 40
+          min-coverage-changed-files: 60
