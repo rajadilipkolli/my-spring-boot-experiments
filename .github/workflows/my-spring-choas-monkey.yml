@@ -38,11 +38,13 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: ./gradlew clean build --info
 
-      - name: Add coverage to PR
-        id: jacoco
-        uses: madrapps/jacoco-report@v1.3
+      - name: Generate Code Coverage Report
+        run: ./gradlew jacocoTestReport
+      - name: Upload Code Coverage Report
+        uses: codecov/codecov-action@v1
         with:
-          paths: ${{ github.workspace }}/build/reports/jacoco/testCoverage/testCoverage.xml
-          token: ${{ secrets.GITHUB_TOKEN }}
-          min-coverage-overall: 40
-          min-coverage-changed-files: 60
+          token: ${{ secrets.CODECOV_TOKEN }}
+          file: build/reports/jacoco/test/jacocoTestReport.xml
+          name: codecov-action
+          flags: unittests
+          fail_ci_if_error: true
