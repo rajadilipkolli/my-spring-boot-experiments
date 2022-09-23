@@ -34,4 +34,8 @@ public class CustomerService {
     public void deleteCustomerById(Long id) {
         customerRepository.deleteById(id);
     }
+
+    public Optional<Customer> findCustomerByFirstName(String firstName) {
+        return customerRepository.findByFirstName(firstName);
+    }
 }
