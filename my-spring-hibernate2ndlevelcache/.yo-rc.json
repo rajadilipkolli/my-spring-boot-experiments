@@ -1,0 +1,15 @@
+{
+  "generator-springboot": {
+    "appName": "my-spring-hibernate2ndlevelcache",
+    "packageName": "com.example.hibernatecache",
+    "databaseType": "postgresql",
+    "dbMigrationTool": "liquibase",
+    "features": [
+      "elk",
+      "monitoring"
+    ],
+    "buildTool": "maven",
+    "packageFolder": "com/example/hibernatecache",
+    "liquibaseMigrationCounter": 2
+  }
+}
