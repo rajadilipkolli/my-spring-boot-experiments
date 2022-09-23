@@ -18,7 +18,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-        <java.version>17</java.version>
+        <java.version>18</java.version>
         <spring-cloud.version>2021.0.4</spring-cloud.version>
         <problem-spring-web.version>0.27.0</problem-spring-web.version>
         <springdoc-openapi.version>1.6.11</springdoc-openapi.version>
@@ -106,6 +106,17 @@
             <artifactId>redisson-hibernate-53</artifactId>
             <version>3.17.6</version>
         </dependency>
+        <dependency>
+            <groupId>com.vladmihalcea</groupId>
+            <artifactId>db-util</artifactId>
+            <version>1.0.7</version>
+        </dependency>
+        <dependency>
+            <groupId>net.ttddyy</groupId>
+            <artifactId>datasource-proxy</artifactId>
+            <version>1.8</version>
+        </dependency>
+        
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-ui</artifactId>
