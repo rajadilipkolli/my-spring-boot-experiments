@@ -20,3 +20,4 @@ $ ./mvnw spring-boot:run -Dspring-boot.run.profiles=local
 ### Notes
 
 * we need to explicitly set the querycacheHint to customerqueries for enabling 2nd level cache
+* This is enabled only for SessionFactory(i.e as soon as application is closed it will be deleted)
