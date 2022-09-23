@@ -1,37 +1,22 @@
-## Welcome to GitHub Pages
+## Welcome to My Spring Boot Experiments
 
-You can use the [editor on GitHub](https://github.com/rajadileepkolli/spring-experiments/edit/gh-pages/index.md) to maintain and preview the content for your website in Markdown files.
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+The following table list all sample codes related to the spring boot integrations.
 
-### Markdown
+### Spring Samples
 
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
 
-```markdown
-Syntax highlighted code block
-
-# Header 1
-## Header 2
-### Header 3
-
-- Bulleted
-- List
-
-1. Numbered
-2. List
-
-**Bold** and _Italic_ and `Code` text
-
-[Link](url) and ![Image](src)
-```
-
-For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
-
-### Jekyll Themes
-
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/rajadileepkolli/spring-experiments/settings/pages). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
-
-### Support or Contact
-
-Having trouble with Pages? Check out our [documentation](https://docs.github.com/categories/github-pages-basics/) or [contact support](https://support.github.com/contact) and we’ll help you sort it out.
+| Name                                                                     | Description 		                                                                                                                                                                | Status 		 |
+|--------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------|
+| [Ultimate Redis Implementation ](https://github.com/rajadilipkolli/my-spring-boot-experiments/tree/main/boot-ultimate-redis#ultimate-redis-boot)                             | The application, discovers ways of interacting with Redis with different TTLs for different Caches                                                                            | Completed |
+| [Connecting to multiple data sources](./multipledatasources)                             | The application, demonstrates the way spring boot application connects with multiple databases,connection pooling and both type of database migrations (liquibase and flyway) | Completed |
+| [Implementation of Strategy Design Pattern](./strategy-plugin)                                     | The application, demonstrates strategy pattern in spring application and build native image using GraalVM, use a main class to start up the application                       | Completed |
+| [Archunit Implementation](./archunit-api)                                           | The application, demonstrates how to apply arch unit rules to the spring boot project                                                                                         | Completed |
+| [Hibernate Envers Implementation using spring data JPA](./my-spring-data-envers)                         | The application, demonstrates how to apply hibernate envers to the spring boot project                                                                                        | Completed |
+| [Graph QL implementation using webflux](./my-spring-graphql-webflux)                 | The application, demonstrates the way to connect to database using graph ql using webflux                                                                                     | Completed |
+| [mongodb-elasticsearch-integration](./mongodb-elasticsearch-integration) | The application, demonstrates saving the data in MongoDb and then searching in ElasticSearch for quick Search, GeoSpatial Search                                              | WIP       |
+| [read-replica-postgresql](./read-replica-postgresql)                     | The application, demonstrates saving the data in Posrgresql and then read from replica instance                                                                               | WIP       |
+| [my-spring-graphql-querydsl](./my-spring-graphql-querydsl)               | The application, demonstrates the way to connect to database using graph ql and querydsl                                                                                      | WIP       |
+| [my-spring-graphql-webmvc](./my-spring-graphql-webmvc)                   | The application, demonstrates how to apply graphql concepts to the spring boot project                                                                                        | WIP       |
+| [my-spring-choas-moneky](./my-spring-choas-monkey)                       | The application, demonstrates how to apply choas engineering concepts to the spring boot project                                                                              | WIP       |
+| [my-spring-hibernate2ndlevelcache](./my-spring-hibernate2ndlevelcache)   | The application, demonstrates how to apply Hibernate 2nd level cache using redis to the spring boot project                                                                       | WIP       |
