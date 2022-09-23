@@ -1,11 +1,11 @@
 package com.example.hibernatecache.config;
 
+import static com.example.hibernatecache.utils.AppConstants.PROFILE_NOT_PROD;
+
 import java.lang.reflect.Method;
 import javax.sql.DataSource;
-import net.ttddyy.dsproxy.listener.ChainListener;
-import net.ttddyy.dsproxy.listener.DataSourceQueryCountListener;
+import net.ttddyy.dsproxy.listener.ThreadQueryCountHolder;
 import net.ttddyy.dsproxy.listener.logging.SLF4JLogLevel;
-import net.ttddyy.dsproxy.listener.logging.SLF4JQueryLoggingListener;
 import net.ttddyy.dsproxy.support.ProxyDataSource;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 import org.aopalliance.intercept.MethodInterceptor;
@@ -13,9 +13,11 @@ import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.util.ReflectionUtils;
 
 @Configuration(proxyBeanMethods = false)
+@Profile(PROFILE_NOT_PROD)
 public class DatasourceProxyBeanPostProcessor implements BeanPostProcessor {
 
     @Override
@@ -39,16 +41,12 @@ public class DatasourceProxyBeanPostProcessor implements BeanPostProcessor {
         private final DataSource dataSource;
 
         public ProxyDataSourceInterceptor(final DataSource dataSource) {
-            ChainListener listener = new ChainListener();
-            SLF4JQueryLoggingListener loggingListener = new SLF4JQueryLoggingListener();
-            loggingListener.setLogLevel(SLF4JLogLevel.INFO);
-            listener.addListener(loggingListener);
-            listener.addListener(new DataSourceQueryCountListener());
             this.dataSource =
                     ProxyDataSourceBuilder.create(dataSource)
                             .name("DS-Proxy")
                             .multiline()
-                            .listener(listener)
+                            .logQueryBySlf4j(SLF4JLogLevel.INFO)
+                            .countQuery(new ThreadQueryCountHolder())
                             .build();
         }
 

@@ -35,7 +35,6 @@ class ApplicationIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.firstName", is(request.getFirstName())));
         assertInsertCount(1);
-        SQLStatementCountValidator.reset();
         for (int i = 0; i < 5; i++) {
             this.mockMvc
                     .perform(
