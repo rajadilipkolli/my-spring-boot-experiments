@@ -23,6 +23,7 @@ The following table list all sample codes related to the spring boot integration
 | [my-spring-data-envers](./my-spring-data-envers)                         | The application, demonstrates how to apply hibernate envers to the spring boot project                                                                                        | Completed |
 | [my-spring-graphql-webmvc](./my-spring-graphql-webmvc)                   | The application, demonstrates how to apply graphql concepts to the spring boot project                                                                                        | WIP       |
 | [my-spring-choas-moneky](./my-spring-choas-monkey)                       | The application, demonstrates how to apply choas engineering concepts to the spring boot project                                                                              | WIP       |
+| [my-spring-hibernate2ndlevelcache](./my-spring-hibernate2ndlevelcache)                       | The application, demonstrates how to apply Hibernate 2nd level cache using redis to the spring boot project                                                                              | WIP       |
 
 
 
