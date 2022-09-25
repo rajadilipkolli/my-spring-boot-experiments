@@ -20,6 +20,7 @@ The following table list all sample codes related to the spring boot integration
 | [my-spring-graphql-querydsl](https://github.com/rajadilipkolli/my-spring-boot-experiments/tree/main/my-spring-graphql-querydsl)                       | The application, demonstrates the way to connect to database using graph ql and querydsl                                                                                      | WIP       |
 | [my-spring-graphql-webmvc](https://github.com/rajadilipkolli/my-spring-boot-experiments/tree/main/my-spring-graphql-webmvc)                           | The application, demonstrates how to apply graphql concepts to the spring boot project                                                                                        | WIP       |
 | [my-spring-choas-moneky](https://github.com/rajadilipkolli/my-spring-boot-experiments/tree/main/my-spring-choas-monkey)                               | The application, demonstrates how to apply choas engineering concepts to the spring boot project                                                                              | WIP       |
+| [Feature Toggles](https://github.com/rajadilipkolli/my-spring-boot-experiments/tree/main/toggle-spring-boot)                               | The application, demonstrates how to apply feature toggles concepts to the spring boot project                                                                              | WIP       |
 
 
 
