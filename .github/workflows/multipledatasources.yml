@@ -39,4 +39,4 @@ jobs:
         run: |
           cd multipledatasources
           chmod +x mvnw
-          ./mvnw clean package
+          ./mvnw clean verify package

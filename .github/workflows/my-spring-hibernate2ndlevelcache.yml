@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./my-spring-hibernate2ndlevelcache
+        working-directory: my-spring-hibernate2ndlevelcache
     steps:
       - uses: actions/checkout@v3
         with:
@@ -33,4 +33,4 @@ jobs:
           cache: "maven"
 
       - name: Build and analyze
-        run: ./mvnw clean package
+        run: ./mvnw clean verify package
