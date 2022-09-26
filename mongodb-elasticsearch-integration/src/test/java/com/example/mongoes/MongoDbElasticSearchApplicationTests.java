@@ -32,7 +32,7 @@ class MongoDbElasticSearchApplicationTests {
 
   @Container
   private static final MongoDBContainer MONGO_DB_CONTAINER =
-      new MongoDBContainer("mongo:latest").withExposedPorts(27017, 27018, 27019);
+      new MongoDBContainer("mongo:5.0").withExposedPorts(27017, 27018, 27019);
 
   @Container
   static ElasticsearchContainer esContainer =

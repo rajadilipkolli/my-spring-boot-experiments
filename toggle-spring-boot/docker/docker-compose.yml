@@ -1,0 +1,14 @@
+version: '3.8'
+services:
+
+  mysqldb:
+    image: mysql:8.0
+    environment:
+      - MYSQL_DATABASE=appdb
+      - MYSQL_USER=appuser
+      - MYSQL_PASSWORD=secret
+      - MYSQL_ROOT_PASSWORD=root
+    ports:
+      - "3306:3306"
+
+

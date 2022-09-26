@@ -9,14 +9,14 @@ import org.springframework.stereotype.Service;
 @Service
 public class CacheService {
 
-  @Cacheable(cacheNames = "myCache", key = "'myPrefix_'.concat(#relevant)")
-  public String cacheThis(String relevant, String unRelevantTrackingId) {
-    log.info("Returning NOT from cache. Tracking: {}!", unRelevantTrackingId);
-    return "this Is it";
-  }
+    @Cacheable(cacheNames = "myCache", key = "'myPrefix_'.concat(#relevant)")
+    public String cacheThis(String relevant, String unRelevantTrackingId) {
+        log.info("Returning NOT from cache. Tracking: {}!", unRelevantTrackingId);
+        return "this Is it";
+    }
 
-  @CacheEvict(cacheNames = "myCache", key = "'myPrefix_'.concat(#relevant)")
-  public void forgetAboutThis(String relevant) {
-    log.info("Forgetting everything about this '{}'!", relevant);
-  }
+    @CacheEvict(cacheNames = "myCache", key = "'myPrefix_'.concat(#relevant)")
+    public void forgetAboutThis(String relevant) {
+        log.info("Forgetting everything about this '{}'!", relevant);
+    }
 }

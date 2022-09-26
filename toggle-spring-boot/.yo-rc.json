@@ -1,0 +1,15 @@
+{
+  "generator-springboot": {
+    "appName": "toggle-spring-boot",
+    "packageName": "com.example.featuretoggle",
+    "databaseType": "mysql",
+    "dbMigrationTool": "flywaydb",
+    "features": [
+      "elk",
+      "monitoring"
+    ],
+    "buildTool": "maven",
+    "packageFolder": "com/example/featuretoggle",
+    "flywayMigrationCounter": 2
+  }
+}

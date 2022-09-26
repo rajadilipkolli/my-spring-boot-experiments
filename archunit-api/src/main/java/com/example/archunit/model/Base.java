@@ -1,63 +1,61 @@
 package com.example.archunit.model;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.Version;
 import java.io.Serializable;
-
-import javax.persistence.Column;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.MappedSuperclass;
-import javax.persistence.Version;
-
-import com.google.common.base.Objects;
+import java.util.Objects;
 
 @MappedSuperclass
 public abstract class Base implements Serializable {
 
-	private static final long serialVersionUID = -2053886894431223968L;
+    private static final long serialVersionUID = -2053886894431223968L;
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-	@Version
-	@Column(nullable = false)
-	private Integer version;
+    @Version
+    @Column(nullable = false)
+    private Integer version;
 
-	@Column(nullable = false, columnDefinition = "boolean default true")
-	private Boolean active = Boolean.TRUE;
+    @Column(nullable = false, columnDefinition = "boolean default true")
+    private Boolean active = Boolean.TRUE;
 
-	public Long getId() {
-		return id;
-	}
+    public Long getId() {
+        return id;
+    }
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	public Integer getVersion() {
-		return version;
-	}
+    public Integer getVersion() {
+        return version;
+    }
 
-	public void setVersion(Integer version) {
-		this.version = version;
-	}
+    public void setVersion(Integer version) {
+        this.version = version;
+    }
 
-	public Boolean getActive() {
-		return active;
-	}
+    public Boolean getActive() {
+        return active;
+    }
 
-	public void setActive(Boolean active) {
-		this.active = active;
-	}
+    public void setActive(Boolean active) {
+        this.active = active;
+    }
 
-	@Override
-	public int hashCode() {
-		return Objects.hashCode(id, active, version);
-	}
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, active, version);
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		return Objects.equal(this, obj);
-	}
+    @Override
+    public boolean equals(Object obj) {
+        return Objects.equals(this, obj);
+    }
 }

@@ -1,64 +1,59 @@
 package com.example.archunit.model;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-
-import com.google.common.base.Objects;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import java.util.Objects;
 
 @Entity
 @Table(name = "clientPhone")
 public class ClientPhone extends Base {
 
-	private static final long serialVersionUID = 1396542167093193958L;
+    private static final long serialVersionUID = 1396542167093193958L;
 
-	@Column(nullable = false, length = 80)
-	private String number;
-	
-	@ManyToOne(fetch = FetchType.LAZY)
-	private PhoneType phoneType;
-	
-	@ManyToOne(fetch = FetchType.LAZY)
-	private Client client;
-	
-	public String getNumber() {
-		return number;
-	}
+    @Column(nullable = false, length = 80)
+    private String number;
 
-	public void setNumber(String number) {
-		this.number = number;
-	}
+    @ManyToOne(fetch = FetchType.LAZY)
+    private PhoneType phoneType;
 
-	public PhoneType getPhoneType() {
-		return phoneType;
-	}
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Client client;
 
-	public void setPhoneType(PhoneType phoneType) {
-		this.phoneType = phoneType;
-	}
+    public String getNumber() {
+        return number;
+    }
 
-	public Client getClient() {
-		return client;
-	}
+    public void setNumber(String number) {
+        this.number = number;
+    }
 
-	public void setClient(Client client) {
-		this.client = client;
-	}
-	
-	@Override
-	public int hashCode() {
-		return Objects.hashCode(this.getId(), 
-				this.getActive(), 
-				this.getVersion(),
-				number,
-				phoneType,
-				client);
-	}
+    public PhoneType getPhoneType() {
+        return phoneType;
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		return Objects.equal(this, obj);
-	}	
+    public void setPhoneType(PhoneType phoneType) {
+        this.phoneType = phoneType;
+    }
+
+    public Client getClient() {
+        return client;
+    }
+
+    public void setClient(Client client) {
+        this.client = client;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(
+                this.getId(), this.getActive(), this.getVersion(), number, phoneType, client);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return Objects.equals(this, obj);
+    }
 }
