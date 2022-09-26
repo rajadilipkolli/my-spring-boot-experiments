@@ -1,4 +1,4 @@
-name: spring-boot-strategy-plugin
+name: spring-boot-strategy-plugin-non-native
 
 on:
   push:

@@ -1,4 +1,4 @@
-name: spring-boot-strategy-plugin
+name: spring-boot-strategy-pluginn-native
 
 on:
   push:
@@ -44,4 +44,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: ./gradlew clean nativeCompile nativeTest bootBuildImage --info
+        run: ./gradlew clean nativeCompile bootBuildImage --info
