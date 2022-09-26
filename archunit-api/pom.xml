@@ -20,7 +20,7 @@
 		
 		<spotless.version>2.27.0</spotless.version>
 		<!-- Test -->
-		<com.tngtech.archunit.version>0.23.1</com.tngtech.archunit.version>
+		<com.tngtech.archunit.version>1.0.0-rc1</com.tngtech.archunit.version>
 	</properties>
 
 	<dependencies>

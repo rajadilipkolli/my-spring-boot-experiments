@@ -20,6 +20,7 @@ class LayeredArchitectureTest {
     @ArchTest
     static final ArchRule layeredArchitectureRule =
             layeredArchitecture()
+                    .consideringOnlyDependenciesInLayers()
                     .layer(CONTROLLER)
                     .definedBy(CONTROLLER_PACKAGE)
                     .layer(MODEL)
