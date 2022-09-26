@@ -14,15 +14,12 @@ public class ArchitectureConstants {
     public static final String REPOSITORY_PACKAGE = "..repository..";
     public static final String SERVICE_PACKAGE = "..service..";
 
-
     // Package to scan
     public static final String DEFAULT_PACKAGE = "com.example.archunit";
 
     // Explanations
-    public static final String ANNOTATED_EXPLANATION = "Classes in %s package should be annotated with %s";
+    public static final String ANNOTATED_EXPLANATION =
+            "Classes in %s package should be annotated with %s";
 
-    private ArchitectureConstants() {
-
-    }
-
+    private ArchitectureConstants() {}
 }

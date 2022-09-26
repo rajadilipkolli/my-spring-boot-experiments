@@ -12,6 +12,6 @@ import com.tngtech.archunit.lang.ArchRule;
 class CyclicDependencyRulesTest {
 
     @ArchTest
-    public static final ArchRule noCyclesDependencies = slices().matching("..(*)..")
-            .should().beFreeOfCycles();
+    public static final ArchRule noCyclesDependencies =
+            slices().matching("..(*)..").should().beFreeOfCycles();
 }

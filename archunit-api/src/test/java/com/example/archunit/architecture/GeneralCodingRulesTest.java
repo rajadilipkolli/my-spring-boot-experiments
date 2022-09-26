@@ -14,21 +14,22 @@ import com.tngtech.archunit.lang.ArchRule;
 @AnalyzeClasses(packages = DEFAULT_PACKAGE, importOptions = ImportOption.DoNotIncludeTests.class)
 class GeneralCodingRulesTest {
 
-    //Classes
+    // Classes
     @ArchTest
-    static final ArchRule noClassesShouldUseJodatime = NO_CLASSES_SHOULD_USE_JODATIME
-            .because("Use java.time objects instead");
-    
+    static final ArchRule noClassesShouldUseJodatime =
+            NO_CLASSES_SHOULD_USE_JODATIME.because("Use java.time objects instead");
+
     @ArchTest
     static final ArchRule noAccessToStandardStreams = NO_CLASSES_SHOULD_ACCESS_STANDARD_STREAMS;
 
     @ArchTest
-    static final ArchRule noGenericExceptions = NO_CLASSES_SHOULD_THROW_GENERIC_EXCEPTIONS
-            .because("Throw AlmundoException or any child of this instead");
+    static final ArchRule noGenericExceptions =
+            NO_CLASSES_SHOULD_THROW_GENERIC_EXCEPTIONS.because(
+                    "Throw AlmundoException or any child of this instead");
 
     @ArchTest
-    static final ArchRule noJavaUtilLogging = NO_CLASSES_SHOULD_USE_JAVA_UTIL_LOGGING
-            .because("Use org.slf4j.Logger instead");
+    static final ArchRule noJavaUtilLogging =
+            NO_CLASSES_SHOULD_USE_JAVA_UTIL_LOGGING.because("Use org.slf4j.Logger instead");
 
     /*
     //Fields
@@ -40,14 +41,14 @@ class GeneralCodingRulesTest {
             .andShould().haveName("LOGGER")
             .because("Logger variables should be private, static and final, and it should be named as LOGGER");
 
-    
+
     @ArchTest
     static final ArchRule finalStaticVariablesInUppercase = fields().that().areStatic().and().areFinal()
             .and().doNotHaveName("serialVersionUID")
             .and().doNotHaveModifier(JavaModifier.SYNTHETIC)
             .should().haveNameMatching(".*^[A-Z].*")
             .because("Variables with static and final modifiers should be named in uppercase");
-    
+
     //Methods
     @ArchTest
     static final ArchRule beanMethodsShouldBePublic = methods().that().areAnnotatedWith(Bean.class).should().bePublic()
