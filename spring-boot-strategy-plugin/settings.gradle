@@ -5,4 +5,4 @@ pluginManagement {
   }
 }
 
-rootProject.name = 'strategy-plugin'
+rootProject.name = 'spring-boot-strategy-plugin'
