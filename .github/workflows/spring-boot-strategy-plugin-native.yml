@@ -1,13 +1,13 @@
-name: strategy-plugin
+name: spring-boot-strategy-pluginn-native
 
 on:
   push:
     paths:
-      - "strategy-plugin/**"
+      - "spring-boot-strategy-plugin/**"
     branches: [main]
   pull_request:
     paths:
-      - "strategy-plugin/**"
+      - "spring-boot-strategy-plugin/**"
     types:
       - opened
       - synchronize
@@ -17,6 +17,9 @@ jobs:
   build:
     name: Run Unit & Integration Tests
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: spring-boot-strategy-plugin
     steps:
       - uses: actions/checkout@v3
         with:
@@ -41,7 +44,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: |
-          cd strategy-plugin
-          chmod +x gradlew
-          ./gradlew clean bootBuildImage --info
+        run: ./gradlew clean nativeCompile bootBuildImage --info
