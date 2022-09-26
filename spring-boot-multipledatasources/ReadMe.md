@@ -16,3 +16,8 @@ This example demostrates how to connect to multiple datasources in same spring b
  - As soon as application is ready bootstrapping of data is done using `@EventListener(ApplicationReadyEvent.class)`
  - Data from both databases are retrieved in API and merged as response
  - Json serialization and deSerialization is done using `@JsonTest`
+
+### Upgrade Notes to Spring Boot 3.x
+
+ - Hibernate 6 By default enables pool-lo sequencing strategy with `table_seq` name instead of hibernate_seq with allocation size 50
+ - javax.persistance is moved to jakarta.persistance

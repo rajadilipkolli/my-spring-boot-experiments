@@ -20,7 +20,8 @@ public class DataInitilizer {
 
     @EventListener(ApplicationReadyEvent.class)
     void loadInitialData() {
-
+        this.cardHolderRepository.deleteAll();
+        this.memberRepository.deleteAll();
         log.info("Data Boot strapping started");
         String memberId = "1";
 

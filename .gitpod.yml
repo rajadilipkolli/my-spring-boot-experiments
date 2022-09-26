@@ -23,3 +23,5 @@ ports:
     visibility: public
   - port: 3306
     visibility: public
+  - port: 5050
+    visibility: public
