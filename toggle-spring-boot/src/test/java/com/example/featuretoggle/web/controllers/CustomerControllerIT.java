@@ -19,7 +19,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.TestPropertySource;
 
+@TestPropertySource(properties = {"togglz.features.ADD_NEW_FIELDS.enabled=false"})
 class CustomerControllerIT extends AbstractIntegrationTest {
 
     @Autowired private CustomerRepository customerRepository;
@@ -28,12 +30,12 @@ class CustomerControllerIT extends AbstractIntegrationTest {
 
     @BeforeEach
     void setUp() {
-        customerRepository.deleteAll();
+        customerRepository.deleteAllInBatch();
 
         customerList = new ArrayList<>();
-        customerList.add(new Customer(1L, "First Customer"));
-        customerList.add(new Customer(2L, "Second Customer"));
-        customerList.add(new Customer(3L, "Third Customer"));
+        customerList.add(new Customer(1L, "First Customer", "name 1", 1));
+        customerList.add(new Customer(2L, "Second Customer", "name 2", 2));
+        customerList.add(new Customer(3L, "Third Customer", "name 3", 3));
         customerList = customerRepository.saveAll(customerList);
     }
 
@@ -58,7 +60,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldCreateNewCustomer() throws Exception {
-        Customer customer = new Customer(null, "New Customer");
+        Customer customer = new Customer(null, "New Customer", "name 1", 1);
         this.mockMvc
                 .perform(
                         post("/api/customers")
@@ -70,7 +72,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldReturn400WhenCreateNewCustomerWithoutText() throws Exception {
-        Customer customer = new Customer(null, null);
+        Customer customer = new Customer(null, null, null, null);
 
         this.mockMvc
                 .perform(

@@ -27,4 +27,8 @@ public class Customer {
     @Column(nullable = false)
     @NotEmpty(message = "Text cannot be empty")
     private String text;
+
+    private String name;
+
+    private Integer zipCode;
 }
