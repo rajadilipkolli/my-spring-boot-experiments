@@ -19,3 +19,10 @@ $ ./gradlew bootRun -Plocal
 
 ### Notes
 Based on choas engineering principles
+ - Choas can be introduced at Controller, Service, Repositort and RestTemplate or WebClient Level 
+ - Choas can be of two types Assults and Watchers
+ - To Enable Choas using starter need to activate the choas-monkey profile which comes OOTB
+
+
+### Reference
+ - https://codecentric.github.io/chaos-monkey-spring-boot/
