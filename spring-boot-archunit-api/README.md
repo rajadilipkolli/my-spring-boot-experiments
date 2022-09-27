@@ -10,6 +10,6 @@ The idea behind this API is to show some of all possibles rules that you can val
 
 ## Technologies
 Here are some of technologies that I used to developed this example:
-- Spring Boot - 2.6.2
-- Archunit - 0.22.0
+- Spring Boot - 2.7.4
+- Archunit - 1.0.0-rc1
 
