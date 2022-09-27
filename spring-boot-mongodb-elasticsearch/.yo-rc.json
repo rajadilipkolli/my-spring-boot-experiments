@@ -1,0 +1,14 @@
+{
+  "generator-springboot": {
+    "appName": "spring-boot-mongodb-elasticsearch",
+    "packageName": "com.example.mongoes",
+    "databaseType": "postgresql",
+    "dbMigrationTool": "none",
+    "features": [
+      "elk",
+      "monitoring"
+    ],
+    "buildTool": "maven",
+    "packageFolder": "com/example/mongoes"
+  }
+}
