@@ -50,13 +50,13 @@ dependencies {
     implementation 'org.liquibase:liquibase-core'
     implementation "org.springdoc:springdoc-openapi-ui:${springdoc_openapi_version}"
     implementation "org.zalando:problem-spring-web-starter:${problem_spring_web_version}"
-    implementation "org.apache.commons:commons-lang3:${commons_lang_version}"
+    implementation "org.apache.commons:commons-lang3"
     implementation "commons-io:commons-io:${commons_io_version}"
     implementation 'de.codecentric:chaos-monkey-spring-boot:2.6.1'
 
     testImplementation "org.springframework.boot:spring-boot-starter-test"
     testImplementation "org.projectlombok:lombok"
-    testImplementation "org.awaitility:awaitility:${awaitility_version}"
+    testImplementation "org.awaitility:awaitility"
     testImplementation "org.testcontainers:junit-jupiter"
     testImplementation "org.testcontainers:postgresql"
 }

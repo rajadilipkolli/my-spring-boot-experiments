@@ -9,4 +9,4 @@ pluginManagement {
     }
 }
 
-rootProject.name = 'my-spring-choas-monkey'
+rootProject.name = 'spring-boot-choas-monkey'

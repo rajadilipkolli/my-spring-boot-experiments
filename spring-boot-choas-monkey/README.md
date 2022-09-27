@@ -1,4 +1,4 @@
-# my-spring-choas-monkey
+# spring-boot-choas-monkey
 
 
 ### Run tests
@@ -16,3 +16,6 @@ $ ./gradlew bootRun -Plocal
 * Prometheus: http://localhost:9090/
 * Grafana: http://localhost:3000/ (admin/admin)
 * Kibana: http://localhost:5601/
+
+### Notes
+Based on choas engineering principles
