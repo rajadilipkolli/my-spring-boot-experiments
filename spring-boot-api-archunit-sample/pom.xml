@@ -10,9 +10,9 @@
 		<relativePath />
 	</parent>
 	<groupId>com.example</groupId>
-	<artifactId>archunit-api</artifactId>
+	<artifactId>spring-boot-api-archunit-sample</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>api-example-archunit</name>
+	<name>spring-boot-api-archunit-sample</name>
 	<description>Example of the use of Archunit</description>
 
 	<properties>

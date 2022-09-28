@@ -8,7 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
-import org.springframework.cache.annotation.CachingConfigurerSupport;
+import org.springframework.cache.annotation.CachingConfigurer;
 import org.springframework.cache.interceptor.CacheErrorHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,7 +24,7 @@ import org.springframework.data.redis.serializer.RedisSerializationContext;
 @Configuration(proxyBeanMethods = false)
 @EnableConfigurationProperties(CacheConfigurationProperties.class)
 @Slf4j
-public class CacheConfig extends CachingConfigurerSupport {
+public class CacheConfig implements CachingConfigurer {
 
     private RedisCacheConfiguration createCacheConfiguration(long timeoutInSeconds) {
         return RedisCacheConfiguration.defaultCacheConfig()
@@ -92,7 +92,7 @@ public class CacheConfig extends CachingConfigurerSupport {
         return new CustomCacheErrorHandler();
     }
 
-    private class CustomCacheErrorHandler implements CacheErrorHandler {
+    private static class CustomCacheErrorHandler implements CacheErrorHandler {
         @Override
         public void handleCacheGetError(RuntimeException exception, Cache cache, Object key) {
             // your custom error handling logic
