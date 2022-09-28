@@ -1,5 +1,7 @@
 package com.example.mongoes.config;
 
+import com.example.mongoes.web.service.RestaurantService;
+import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
@@ -10,10 +12,15 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class Initializer implements CommandLineRunner {
 
-    private final ApplicationProperties properties;
+    private final RestaurantService restaurantService;
 
     @Override
-    public void run(String... args) {
+    public void run(String... args) throws IOException {
         log.info("Running Initializer.....");
+        restaurantService
+                .deleteAll()
+                .thenMany(restaurantService.loadData())
+                .log()
+                .subscribe(null, null, () -> log.info("done initialization..."));
     }
 }
