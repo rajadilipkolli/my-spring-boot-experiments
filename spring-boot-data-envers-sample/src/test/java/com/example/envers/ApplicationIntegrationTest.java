@@ -60,7 +60,7 @@ class ApplicationIntegrationTest extends AbstractIntegrationTest {
         assertThat(revision)
                 .isPresent()
                 .hasValueSatisfying(
-                        rev -> assertThat(rev.getRevisionNumber()).isPresent().get().isEqualTo(2))
+                        rev -> assertThat(rev.getRevisionNumber()).isPresent().get().isEqualTo(4))
                 .hasValueSatisfying(
                         rev ->
                                 assertThat(rev.getEntity())

@@ -10,6 +10,7 @@ plugins {
     id 'org.springframework.boot'
     id 'io.spring.dependency-management'
     id 'java-library'
+    id 'java'
     id 'com.gorylenko.gradle-git-properties'
     id 'com.github.ben-manes.versions'
     id "com.github.sherter.google-java-format"
@@ -22,8 +23,13 @@ if (project.hasProperty("ci")) {
 
 group = 'com.example.envers'
 version = '0.0.1-SNAPSHOT'
-sourceCompatibility = 18
-targetCompatibility = 18
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(19)
+        vendor = JvmVendorSpec.ADOPTIUM
+    }
+}
 
 configurations {
     compileOnly {

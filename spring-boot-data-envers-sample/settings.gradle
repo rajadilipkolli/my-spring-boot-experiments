@@ -9,4 +9,4 @@ pluginManagement {
     }
 }
 
-rootProject.name = 'my-spring-data-envers'
+rootProject.name = 'spring-boot-data-envers-sample'
