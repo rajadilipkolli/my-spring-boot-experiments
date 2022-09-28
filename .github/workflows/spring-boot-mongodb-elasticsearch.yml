@@ -30,7 +30,7 @@ jobs:
           java-version: "19"
           distribution: "zulu"
           cache: "maven"
-      - name: Start up redis via Docker Compose
+      - name: Start up databases via Docker Compose
         run: |
           cd docker
           docker-compose up -d

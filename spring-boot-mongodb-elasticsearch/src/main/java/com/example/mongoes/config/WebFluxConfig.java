@@ -7,7 +7,7 @@ import org.springframework.web.reactive.config.WebFluxConfigurer;
 
 @Configuration
 @RequiredArgsConstructor
-public class WebMvcConfig implements WebFluxConfigurer {
+public class WebFluxConfig implements WebFluxConfigurer {
 
     private final ApplicationProperties properties;
 
