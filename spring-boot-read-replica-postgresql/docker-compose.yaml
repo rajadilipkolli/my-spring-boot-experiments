@@ -28,5 +28,15 @@ services:
       - POSTGRESQL_PASSWORD=postgres_write
       - POSTGRESQL_MASTER_PORT_NUMBER=5432
 
+  pgadmin4:
+    image: dpage/pgadmin4
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=pgadmin4@pgadmin.org
+      - PGADMIN_DEFAULT_PASSWORD=admin
+
 volumes:
   postgresql_master_data:
