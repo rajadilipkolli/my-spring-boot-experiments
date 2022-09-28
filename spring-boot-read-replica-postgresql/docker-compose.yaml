@@ -33,7 +33,7 @@ services:
     ports:
       - "5050:80"
     depends_on:
-      - postgres
+      - postgresql-master
     environment:
       - PGADMIN_DEFAULT_EMAIL=pgadmin4@pgadmin.org
       - PGADMIN_DEFAULT_PASSWORD=admin
