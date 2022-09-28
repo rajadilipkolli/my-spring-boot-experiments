@@ -64,3 +64,7 @@ insert into comments (comment, article_id)  values ('first!' , (select max(id) f
 insert into comments (comment, article_id)  values ('first!' , (select min(id) from articles));
 insert into comments (comment, article_id)  values ('i came here to say that.' , (select min(id) from articles));
 --rollback truncate comments, articles;
+
+--changeset raja:7
+--preconditions onFail:MARK_RAN, onError:MARK_RAN,
+GRANT SELECT ON ALL TABLES IN SCHEMA public TO repl_user;
