@@ -3,7 +3,6 @@ package com.example.graphql.web.controllers;
 import com.example.graphql.entities.Post;
 import com.example.graphql.services.PostService;
 import java.util.List;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +19,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/posts")
-@Slf4j
 public class PostController {
 
     private final PostService postService;
