@@ -1,0 +1,35 @@
+name: spring-boot-jobrunr-sample
+
+on:
+  push:
+    paths:
+      - "spring-boot-jobrunr-sample/**"
+    branches: [main]
+  pull_request:
+    paths:
+      - "spring-boot-jobrunr-sample/**"
+    types:
+      - opened
+      - synchronize
+      - reopened
+
+jobs:
+  build:
+    name: Run Unit & Integration Tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: spring-boot-jobrunr-sample
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
+
+      - name: Set up JDK 19
+        uses: actions/setup-java@v3.5.1
+        with:
+          java-version: 19
+          distribution: "zulu"
+          cache: "maven"
+      - name: Build and analyze
+        run: ./mvnw clean package
