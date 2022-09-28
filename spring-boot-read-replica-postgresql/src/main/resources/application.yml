@@ -13,8 +13,12 @@ spring:
       url: jdbc:postgresql://localhost:15432/my_database
 
   jpa:
+    open-in-view: false
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     properties:
       hibernate:
         temp:
           use_jdbc_metadata_defaults: false
+
+  liquibase:
+    change-log: classpath:/db/changelog/changelog.sql
