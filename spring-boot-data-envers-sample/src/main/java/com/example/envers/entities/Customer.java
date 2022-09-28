@@ -13,6 +13,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 import org.hibernate.envers.Audited;
 
 @Entity
@@ -22,6 +23,7 @@ import org.hibernate.envers.Audited;
 @NoArgsConstructor
 @AllArgsConstructor
 @Audited
+@ToString
 public class Customer {
 
     @Id
@@ -37,4 +39,8 @@ public class Customer {
     private String name;
 
     @Version Long version = 0L;
+
+    public Customer(String name) {
+        this.name = name;
+    }
 }

@@ -1,4 +1,4 @@
-# my-spring-data-envers
+# spring-boot-data-envers-sample
 
 
 ### Run tests

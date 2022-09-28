@@ -1,13 +1,13 @@
-name: my-spring-data-envers
+name: spring-boot-data-envers-sample
 
 on:
   push:
     paths:
-      - "my-spring-data-envers/**"
+      - "spring-boot-data-envers-sample/**"
     branches: [main]
   pull_request:
     paths:
-      - "my-spring-data-envers/**"
+      - "spring-boot-data-envers-sample/**"
     types:
       - opened
       - synchronize
@@ -17,6 +17,9 @@ jobs:
   build:
     name: Run Unit & Integration Tests
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: spring-boot-data-envers-sample
     steps:
       - uses: actions/checkout@v3
         with:
@@ -30,7 +33,4 @@ jobs:
           cache: "gradle"
 
       - name: Build and analyze
-        run: |
-          cd my-spring-data-envers
-          chmod +x gradlew
-          ./gradlew clean build --info
+        run: ./gradlew clean build --info

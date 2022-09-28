@@ -1,6 +1,6 @@
 {
   "generator-springboot": {
-    "appName": "my-spring-data-envers",
+    "appName": "spring-boot-data-envers-sample",
     "packageName": "com.example.envers",
     "databaseType": "postgresql",
     "dbMigrationTool": "liquibase",
