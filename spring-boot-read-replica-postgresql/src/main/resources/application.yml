@@ -1,0 +1,20 @@
+spring:
+  primary:
+    datasource:
+      password: postgres_write
+      username: postgres_write
+      driver: org.postgresql.Driver
+      url: jdbc:postgresql://localhost:5432/my_database
+  replica:
+    datasource:
+      password: repl_password
+      username: repl_user
+      driver: org.postgresql.Driver
+      url: jdbc:postgresql://localhost:15432/my_database
+
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    properties:
+      hibernate:
+        temp:
+          use_jdbc_metadata_defaults: false
