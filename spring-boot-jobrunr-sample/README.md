@@ -16,4 +16,5 @@ $ ./mvnw spring-boot:run -Dspring-boot.run.profiles=local
 * Prometheus: http://localhost:9090/
 * Grafana: http://localhost:3000/ (admin/admin)
 * Kibana: http://localhost:5601/
-* Dashboard: http://localhost:8000/dashboard/overview
+* JobRunr Dashboard: http://localhost:8000/dashboard/overview
+* PgAdmin http://localhost:5050
