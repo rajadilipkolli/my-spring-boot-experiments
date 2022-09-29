@@ -17,6 +17,7 @@ $ ./mvnw spring-boot:run -Dspring-boot.run.profiles=local
 * Grafana: http://localhost:3000/ (admin/admin)
 * Kibana: http://localhost:5601/
 * Elasticsearch : http://localhost:9200/
+* MongoExpress : http://localhost:8081
 
 ## UseFull ElasticSearch Commands
  - Count http://localhost:9200/restaurant/_count

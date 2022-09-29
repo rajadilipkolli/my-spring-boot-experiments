@@ -1,9 +1,11 @@
 package com.example.mongoes.web.service;
 
 import com.example.mongoes.document.Address;
+import com.example.mongoes.document.ChangeStreamResume;
 import com.example.mongoes.document.Grades;
 import com.example.mongoes.document.Restaurant;
 import com.example.mongoes.elasticsearch.repository.RestaurantESRepository;
+import com.example.mongoes.mongodb.repository.ChangeStreamResumeRepository;
 import com.example.mongoes.mongodb.repository.RestaurantRepository;
 import com.example.mongoes.utils.AppConstants;
 import com.example.mongoes.utils.DateUtility;
@@ -35,6 +37,7 @@ public class RestaurantService {
 
     private final RestaurantRepository restaurantRepository;
     private final RestaurantESRepository restaurantESRepository;
+    private final ChangeStreamResumeRepository changeStreamResumeRepository;
 
     private final ReactiveMongoTemplate reactiveMongoTemplate;
 
@@ -150,7 +153,7 @@ public class RestaurantService {
                                             .log()
                                             .subscribe(
                                                     restaurant1 ->
-                                                            log.info(
+                                                            log.debug(
                                                                     "Deleted in ElasticSearch:{}",
                                                                     restaurant1));
                                 } else if (restaurantChangeStreamEvent.getOperationType()
@@ -162,7 +165,7 @@ public class RestaurantService {
                                             .log()
                                             .subscribe(
                                                     restaurant1 ->
-                                                            log.info(
+                                                            log.debug(
                                                                     "Inserted in ElasticSearch:{}",
                                                                     restaurant1));
                                 }
@@ -177,12 +180,18 @@ public class RestaurantService {
                                                     .asObjectId()
                                                     .getValue()
                                                     .toString();
-                                    this.restaurantESRepository
-                                            .deleteById(objectId)
-                                            .log("Deleting restaurant with Id " + objectId)
-                                            .subscribe();
+                                    this.restaurantESRepository.deleteById(objectId).subscribe();
                                 }
                             }
+                            this.changeStreamResumeRepository
+                                    .save(
+                                            new ChangeStreamResume(
+                                                    restaurantChangeStreamEvent
+                                                            .getResumeToken()
+                                                            .asDocument()
+                                                            .get("_data")
+                                                            .toString()))
+                                    .subscribe();
                         })
                 .log("completed processing");
     }

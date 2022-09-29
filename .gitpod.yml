@@ -31,6 +31,7 @@ ports:
     visibility: public
   - port: 8080
     visibility: public
+    onOpen: ignore
   - port: 8081
     visibility: public
     onOpen: open-browser
