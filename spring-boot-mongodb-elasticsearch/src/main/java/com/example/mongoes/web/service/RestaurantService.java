@@ -7,6 +7,7 @@ import com.example.mongoes.elasticsearch.repository.RestaurantESRepository;
 import com.example.mongoes.mongodb.repository.RestaurantRepository;
 import com.example.mongoes.utils.AppConstants;
 import com.example.mongoes.utils.DateUtility;
+import com.mongodb.client.model.changestream.ChangeStreamDocument;
 import com.mongodb.client.model.changestream.OperationType;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -14,14 +15,15 @@ import java.nio.file.Path;
 import java.time.Duration;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.Document;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.data.elasticsearch.core.geo.GeoJsonPoint;
 import org.springframework.data.mongodb.core.ChangeStreamEvent;
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
-import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -65,7 +67,7 @@ public class RestaurantService {
                                                     addressDoc.get("zipcode", String.class)));
                                     List<Double> obj = addressDoc.getList("coord", Double.class);
                                     GeoJsonPoint geoJsonPoint =
-                                            new GeoJsonPoint(obj.get(0), obj.get(1));
+                                            GeoJsonPoint.of(obj.get(0), obj.get(1));
                                     address.setLocation(geoJsonPoint);
                                     restaurant.setAddress(address);
                                     List<Grades> gradesList =
@@ -164,8 +166,24 @@ public class RestaurantService {
                                                                     "Inserted in ElasticSearch:{}",
                                                                     restaurant1));
                                 }
+                            } else {
+                                ChangeStreamDocument<Document> eventRaw =
+                                        restaurantChangeStreamEvent.getRaw();
+                                if (Objects.requireNonNull(eventRaw).getOperationType()
+                                        == OperationType.DELETE) {
+                                    var objectId =
+                                            eventRaw.getDocumentKey()
+                                                    .get("_id")
+                                                    .asObjectId()
+                                                    .getValue()
+                                                    .toString();
+                                    this.restaurantESRepository
+                                            .deleteById(objectId)
+                                            .log("Deleting restaurant with Id " + objectId)
+                                            .subscribe();
+                                }
                             }
                         })
-                .log("completed");
+                .log("completed processing");
     }
 }
