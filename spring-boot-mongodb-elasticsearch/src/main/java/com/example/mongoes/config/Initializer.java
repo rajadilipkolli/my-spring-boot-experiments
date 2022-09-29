@@ -5,6 +5,8 @@ import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.context.event.ApplicationStartedEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -22,5 +24,11 @@ public class Initializer implements CommandLineRunner {
                 .thenMany(restaurantService.loadData())
                 .log()
                 .subscribe(null, null, () -> log.info("done initialization..."));
+    }
+
+    @EventListener(ApplicationStartedEvent.class)
+    public void startListeningToChangeStream() {
+        log.info("Inside ApplicationStartedEvent");
+        this.restaurantService.changeStreamProcessor().log().subscribe();
     }
 }
