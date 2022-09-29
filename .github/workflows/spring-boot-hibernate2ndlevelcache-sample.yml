@@ -1,13 +1,13 @@
-name: my-spring-hibernate2ndlevelcache
+name: spring-boot-hibernate2ndlevelcache-sample
 
 on:
   push:
     paths:
-      - "my-spring-hibernate2ndlevelcache/**"
+      - "spring-boot-hibernate2ndlevelcache-sample/**"
     branches: [main]
   pull_request:
     paths:
-      - "my-spring-hibernate2ndlevelcache/**"
+      - "spring-boot-hibernate2ndlevelcache-sample/**"
     types:
       - opened
       - synchronize
@@ -19,18 +19,23 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: my-spring-hibernate2ndlevelcache
+        working-directory: spring-boot-hibernate2ndlevelcache-sample
     steps:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
 
-      - name: Set up JDK 18
+      - name: Set up JDK 19
         uses: actions/setup-java@v3.5.1
         with:
-          java-version: 18
+          java-version: 19
           distribution: "zulu"
           cache: "maven"
-
+      - name: Start up redis & postgres via Docker Compose
+        run: |
+          cd docker
+          docker-compose up -d
+          sleep 5
+          docker ps -a
       - name: Build and analyze
-        run: ./mvnw clean verify package
+        run: ./mvnw clean verify
