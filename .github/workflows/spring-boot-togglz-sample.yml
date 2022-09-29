@@ -1,13 +1,13 @@
-name: toggle-spring-boot
+name: spring-boot-togglz-sample
 
 on:
   push:
     paths:
-      - "toggle-spring-boot/**"
+      - "spring-boot-togglz-sample/**"
     branches: [main]
   pull_request:
     paths:
-      - "toggle-spring-boot/**"
+      - "spring-boot-togglz-sample/**"
     types:
       - opened
       - synchronize
@@ -19,18 +19,18 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: toggle-spring-boot
+        working-directory: spring-boot-togglz-sample
     steps:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
 
-      - name: Set up JDK 18
+      - name: Set up JDK 19
         uses: actions/setup-java@v3.5.1
         with:
-          java-version: 18
+          java-version: 19
           distribution: "zulu"
           cache: "maven"
 
       - name: Build and analyze
-        run: ./mvnw clean verify package
+        run: ./mvnw clean verify

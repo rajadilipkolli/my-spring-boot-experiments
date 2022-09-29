@@ -1,4 +1,4 @@
-# toggle-spring-boot
+# spring-boot-togglz-sample
 
 ### Run tests
 `$ ./mvnw clean verify`

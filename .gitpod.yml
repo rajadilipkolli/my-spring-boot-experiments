@@ -25,3 +25,7 @@ ports:
     visibility: public
   - port: 5050
     visibility: public
+  - port: 6379
+    visibility: public
+  - port: 8001
+    visibility: public

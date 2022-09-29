@@ -33,9 +33,9 @@ class CustomerControllerIT extends AbstractIntegrationTest {
         customerRepository.deleteAllInBatch();
 
         customerList = new ArrayList<>();
-        customerList.add(new Customer(1L, "First Customer", "name 1", 1));
-        customerList.add(new Customer(2L, "Second Customer", "name 2", 2));
-        customerList.add(new Customer(3L, "Third Customer", "name 3", 3));
+        customerList.add(new Customer(null, "First Customer", "name 1", 1));
+        customerList.add(new Customer(null, "Second Customer", "name 2", 2));
+        customerList.add(new Customer(null, "Third Customer", "name 3", 3));
         customerList = customerRepository.saveAll(customerList);
     }
 
