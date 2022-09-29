@@ -1,6 +1,6 @@
 package com.example.mongoes.mongodb.repository;
 
-import com.example.mongoes.mongodb.document.Restaurant;
+import com.example.mongoes.document.Restaurant;
 import org.springframework.data.mongodb.repository.ReactiveMongoRepository;
 import reactor.core.publisher.Mono;
 

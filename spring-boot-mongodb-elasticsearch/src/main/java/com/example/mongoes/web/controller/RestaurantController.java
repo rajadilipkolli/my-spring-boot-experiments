@@ -1,7 +1,7 @@
 package com.example.mongoes.web.controller;
 
-import com.example.mongoes.mongodb.document.Grades;
-import com.example.mongoes.mongodb.document.Restaurant;
+import com.example.mongoes.document.Grades;
+import com.example.mongoes.document.Restaurant;
 import com.example.mongoes.web.service.RestaurantService;
 import io.micrometer.core.annotation.Timed;
 import lombok.RequiredArgsConstructor;

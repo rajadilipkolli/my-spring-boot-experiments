@@ -1,4 +1,4 @@
-package com.example.mongoes.mongodb.document;
+package com.example.mongoes.document;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import lombok.AllArgsConstructor;

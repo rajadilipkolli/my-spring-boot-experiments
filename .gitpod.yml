@@ -31,3 +31,7 @@ ports:
     visibility: public
   - port: 8080
     visibility: public
+  - port: 9200
+    visibility: public
+  - port: 9300
+    visibility: public

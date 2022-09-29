@@ -13,4 +13,6 @@ For More info about this repository, Please visit [here](https://rajadilipkolli.
  >  Start postgres and pgadmin `docker compose up postgres pgadmin4`
  
  >  Clean up everything using `docker system prune -a -f --volumes`
+
+ >  Claim unused volumes `docker volume prune`
  
