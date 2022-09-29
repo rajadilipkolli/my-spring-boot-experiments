@@ -17,7 +17,7 @@
     <properties>
         <java.version>19</java.version>
         <testcontainers.version>1.17.3</testcontainers.version>
-        <spotless.version>2.27.0</spotless.version>
+        <spotless.version>2.27.1</spotless.version>
     </properties>
 
     <dependencies>
