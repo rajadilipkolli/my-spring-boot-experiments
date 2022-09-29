@@ -22,21 +22,26 @@ public class Initializer implements CommandLineRunner {
     @Override
     public void run(String... args) {
         log.info("Running Initializer.....");
-        jobScheduler.enqueue(this::doSomeWork);
-        log.info("Completed setting Job using jobScheduler");
-        BackgroundJob.enqueue(UUID.randomUUID(), this::doSomeWork);
-        log.info("Completed setting BackgroundJob");
+        jobScheduler.enqueue(this::doFireAndForgetWork);
+        log.info("Completed setting Fire and Forget using JobScheduler");
+        BackgroundJob.enqueue(UUID.randomUUID(), this::doFireAndForgetWork);
+        log.info("Completed setting Fire and Forget BackgroundJob");
         BackgroundJob.schedule(Instant.now().plusMillis(1), this::doSomeWork);
-        log.info("Completed Scheduling BackgroundJob");
+        log.info("Completed Scheduling Background Delayed Job");
         BackgroundJob.scheduleRecurrently(Cron.every15seconds(), this::doSomeWork);
-        log.info("Completed Scheduling BackgroundJob Recurrently");
+        log.info("Completed Scheduling Recurrently BackgroundJob");
         BackgroundJob.scheduleRecurrently(Cron.every30seconds(), this::doWorkWithCustomJobFilters);
-        log.info("Completed Scheduling BackgroundJob Recurrently with 2 reties");
+        log.info("Completed Scheduling Recurrently BackgroundJob with 2 retries");
     }
 
     @Job(name = "doSomeWork")
     public void doSomeWork() {
         log.info("Hi, I am from BackgroundJob scheduling at {}", LocalDateTime.now());
+    }
+
+    @Job(name = "doFireAndForgetWork")
+    public void doFireAndForgetWork() {
+        log.info("Hi, I am from FireAndForget BackgroundJob scheduling at {}", LocalDateTime.now());
     }
 
     @Job(name = "someJobName", retries = 2)

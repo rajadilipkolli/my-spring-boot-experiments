@@ -17,15 +17,17 @@ vscode:
 
 
 ports:
-  - port: 5432
-    visibility: public
-  - port: 8080
-    visibility: public
   - port: 3306
     visibility: public
   - port: 5050
     visibility: public
+  - port: 5432
+    visibility: public
   - port: 6379
     visibility: public
+  - port: 8000
+    visibility: public
   - port: 8001
+    visibility: public
+  - port: 8080
     visibility: public
