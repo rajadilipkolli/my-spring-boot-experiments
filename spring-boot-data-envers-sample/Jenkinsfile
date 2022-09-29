@@ -6,7 +6,7 @@ pipeline {
     }
 
     environment {
-        APPLICATION_NAME = 'my-spring-data-envers'
+        APPLICATION_NAME = 'spring-boot-data-envers-sample'
     }
 
     stages {

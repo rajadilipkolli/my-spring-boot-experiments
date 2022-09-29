@@ -1,6 +1,6 @@
 {
   "generator-springboot": {
-    "appName": "toggle-spring-boot",
+    "appName": "spring-boot-togglz-sample",
     "packageName": "com.example.featuretoggle",
     "databaseType": "mysql",
     "dbMigrationTool": "flywaydb",

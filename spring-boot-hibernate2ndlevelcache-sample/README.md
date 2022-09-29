@@ -1,4 +1,4 @@
-# my-spring-hibernate2ndlevelcache
+# spring-boot-hibernate2ndlevelcache-sample
 
 ### Run tests
 `$ ./mvnw clean verify`
