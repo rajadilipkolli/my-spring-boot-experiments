@@ -45,7 +45,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(get("/api/customers"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.size()", is(customerList.size())));
+                .andExpect(jsonPath("$.size()", is(2)));
     }
 
     @Test
