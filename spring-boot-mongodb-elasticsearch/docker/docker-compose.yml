@@ -1,36 +1,40 @@
-version: '3'
+version: '2'
 
 services:
-  mongo1:
-    image: mongo:5.0
-    container_name: mongo1
-    command: [ "--replSet", "my-replica-set", "--bind_ip_all", "--port", "27017" ]
-    volumes:
-      - ./data/mongo-1:/data/db
-    ports:
-      - "27017:27017"
-    healthcheck:
-      test: test $$(echo "rs.initiate({_id:'my-replica-set',members:[{_id:0,host:\"mongo1:27017\"},{_id:1,host:\"mongo2:27018\"},{_id:2,host:\"mongo3:27019\"}]}).ok || rs.status().ok" | mongo --port 27017 --quiet) -eq 1
-      interval: 10s
-      start_period: 30s
+  mongodb-primary:
+    image: 'bitnami/mongodb:latest'
+    environment:
+      - MONGODB_ADVERTISED_HOSTNAME=mongodb-primary
+      - MONGODB_REPLICA_SET_MODE=primary
+      - MONGODB_ROOT_PASSWORD=password123
+      - MONGODB_REPLICA_SET_KEY=replicasetkey123
 
-  mongo2:
-    image: mongo:5.0
-    container_name: mongo2
-    command: [ "--replSet", "my-replica-set", "--bind_ip_all", "--port", "27018" ]
     volumes:
-      - ./data/mongo-2:/data/db
-    ports:
-      - "27018:27018"
+      - 'mongodb_master_data:/bitnami'
 
-  mongo3:
-    image: mongo:5.0
-    container_name: mongo3
-    command: [ "--replSet", "my-replica-set", "--bind_ip_all", "--port", "27019" ]
-    volumes:
-      - ./data/mongo-3:/data/db
-    ports:
-      - "27019:27019"
+  mongodb-secondary:
+    image: 'bitnami/mongodb:latest'
+    depends_on:
+      - mongodb-primary
+    environment:
+      - MONGODB_ADVERTISED_HOSTNAME=mongodb-secondary
+      - MONGODB_REPLICA_SET_MODE=secondary
+      - MONGODB_INITIAL_PRIMARY_HOST=mongodb-primary
+      - MONGODB_INITIAL_PRIMARY_PORT_NUMBER=27017
+      - MONGODB_INITIAL_PRIMARY_ROOT_PASSWORD=password123
+      - MONGODB_REPLICA_SET_KEY=replicasetkey123
+
+  mongodb-arbiter:
+    image: 'bitnami/mongodb:latest'
+    depends_on:
+      - mongodb-primary
+    environment:
+      - MONGODB_ADVERTISED_HOSTNAME=mongodb-arbiter
+      - MONGODB_REPLICA_SET_MODE=arbiter
+      - MONGODB_INITIAL_PRIMARY_HOST=mongodb-primary
+      - MONGODB_INITIAL_PRIMARY_PORT_NUMBER=27017
+      - MONGODB_INITIAL_PRIMARY_ROOT_PASSWORD=password123
+      - MONGODB_REPLICA_SET_KEY=replicasetkey123
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.17.6
@@ -45,5 +49,6 @@ services:
       - esdata1:/usr/share/elasticsearch/data
 
 volumes:
+  mongodb_master_data:
   esdata1:
     driver: local
