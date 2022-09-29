@@ -8,7 +8,8 @@ services:
       - "18787:8787"
     restart: always
     depends_on:
-      - postgresqldb
+      - elasticsearch
+      - mongodb
     environment:
       - SPRING_PROFILES_ACTIVE=docker
       - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.postgresql.Driver
