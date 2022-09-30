@@ -13,7 +13,6 @@ class ApplicationIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     void contextLoads() {
-        assertThat(MONGO_DB_CONTAINER.isRunning()).isTrue();
         assertThat(ELASTICSEARCH_CONTAINER.isRunning()).isTrue();
     }
 
