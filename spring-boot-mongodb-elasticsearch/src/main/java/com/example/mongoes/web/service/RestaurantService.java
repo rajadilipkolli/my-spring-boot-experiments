@@ -133,7 +133,7 @@ public class RestaurantService {
         return this.restaurantESRepository.count();
     }
 
-    public Flux<ChangeStreamEvent<Restaurant>> changeStreamProcessor() {  
+    public Flux<ChangeStreamEvent<Restaurant>> changeStreamProcessor() {
         var changeStreamFluxProjection =
                 reactiveMongoTemplate
                         .changeStream(Restaurant.class)
