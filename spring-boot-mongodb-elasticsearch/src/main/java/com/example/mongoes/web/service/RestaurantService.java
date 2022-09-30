@@ -132,14 +132,23 @@ public class RestaurantService {
         return this.restaurantESRepository.count();
     }
 
-    public Flux<ChangeStreamEvent<Restaurant>> changeStreamProcessor() {
-        ChangeStreamOptions changeStreamOption =
-                ChangeStreamOptions.builder().resumeToken(getResumeToken()).build();
-        return reactiveMongoTemplate
-                .changeStream(Restaurant.class)
-                .watchCollection(AppConstants.RESTAURANT_COLLECTION)
-                .resumeAfter(changeStreamOption)
-                .listen()
+    public Flux<ChangeStreamEvent<Restaurant>> changeStreamProcessor() {  
+        var changeStreamFluxProjection =
+                reactiveMongoTemplate
+                        .changeStream(Restaurant.class)
+                        .watchCollection(AppConstants.RESTAURANT_COLLECTION);
+        Flux<ChangeStreamEvent<Restaurant>> changeStreamFlux;
+        BsonValue resumeToken = getResumeToken();
+        ChangeStreamOptions changeStreamOption;
+        if (null == resumeToken) {
+            // Scenario where MongoDb is started freshly hence resumeToken is empty
+            changeStreamOption = ChangeStreamOptions.builder().resumeAt(Instant.now()).build();
+            changeStreamFlux = changeStreamFluxProjection.resumeAt(changeStreamOption).listen();
+        } else {
+            changeStreamOption = ChangeStreamOptions.builder().resumeToken(resumeToken).build();
+            changeStreamFlux = changeStreamFluxProjection.resumeAfter(changeStreamOption).listen();
+        }
+        return changeStreamFlux
                 .delayElements(Duration.ofMillis(5))
                 .doOnNext(
                         restaurantChangeStreamEvent -> {
