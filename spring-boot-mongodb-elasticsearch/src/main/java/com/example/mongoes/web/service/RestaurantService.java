@@ -19,11 +19,14 @@ import java.util.List;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import org.bson.BsonValue;
 import org.bson.Document;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.data.geo.Point;
 import org.springframework.data.mongodb.core.ChangeStreamEvent;
+import org.springframework.data.mongodb.core.ChangeStreamOptions;
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -131,9 +134,12 @@ public class RestaurantService {
     }
 
     public Flux<ChangeStreamEvent<Restaurant>> changeStreamProcessor() {
+        ChangeStreamOptions changeStreamOption =
+                ChangeStreamOptions.builder().resumeToken(getResumeToken()).build();
         return reactiveMongoTemplate
                 .changeStream(Restaurant.class)
                 .watchCollection(AppConstants.RESTAURANT_COLLECTION)
+                .resumeAfter(changeStreamOption)
                 .listen()
                 .delayElements(Duration.ofMillis(5))
                 .doOnNext(
@@ -185,13 +191,18 @@ public class RestaurantService {
                             this.changeStreamResumeRepository
                                     .update(
                                             restaurantChangeStreamEvent
-                                                    .getResumeToken()
-                                                    .asDocument()
-                                                    .get("_data")
-                                                    .asString()
-                                                    .getValue())
+                                                    .getResumeToken())
                                     .subscribe();
                         })
                 .log("completed processing");
+    }
+
+    private BsonValue getResumeToken() {
+        return this.changeStreamResumeRepository
+                .findAll()
+                .toStream()
+                .toList()
+                .get(0)
+                .getResumeToken();
     }
 }
