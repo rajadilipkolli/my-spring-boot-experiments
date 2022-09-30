@@ -1,7 +1,6 @@
 package com.example.mongoes.web.service;
 
 import com.example.mongoes.document.Address;
-import com.example.mongoes.document.ChangeStreamResume;
 import com.example.mongoes.document.Grades;
 import com.example.mongoes.document.Restaurant;
 import com.example.mongoes.elasticsearch.repository.RestaurantESRepository;
@@ -23,7 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.bson.Document;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
-import org.springframework.data.elasticsearch.core.geo.GeoJsonPoint;
+import org.springframework.data.geo.Point;
 import org.springframework.data.mongodb.core.ChangeStreamEvent;
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
 import org.springframework.stereotype.Service;
@@ -69,8 +68,7 @@ public class RestaurantService {
                                             Integer.valueOf(
                                                     addressDoc.get("zipcode", String.class)));
                                     List<Double> obj = addressDoc.getList("coord", Double.class);
-                                    GeoJsonPoint geoJsonPoint =
-                                            GeoJsonPoint.of(obj.get(0), obj.get(1));
+                                    Point geoJsonPoint = new Point(obj.get(0), obj.get(1));
                                     address.setLocation(geoJsonPoint);
                                     restaurant.setAddress(address);
                                     List<Grades> gradesList =
@@ -183,14 +181,15 @@ public class RestaurantService {
                                     this.restaurantESRepository.deleteById(objectId).subscribe();
                                 }
                             }
+
                             this.changeStreamResumeRepository
-                                    .save(
-                                            new ChangeStreamResume(
-                                                    restaurantChangeStreamEvent
-                                                            .getResumeToken()
-                                                            .asDocument()
-                                                            .get("_data")
-                                                            .toString()))
+                                    .update(
+                                            restaurantChangeStreamEvent
+                                                    .getResumeToken()
+                                                    .asDocument()
+                                                    .get("_data")
+                                                    .asString()
+                                                    .getValue())
                                     .subscribe();
                         })
                 .log("completed processing");
