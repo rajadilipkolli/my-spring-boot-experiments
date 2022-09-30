@@ -1,9 +1,11 @@
 package com.example.mongoes.web.service;
 
 import com.example.mongoes.document.Address;
+import com.example.mongoes.document.ChangeStreamResume;
 import com.example.mongoes.document.Grades;
 import com.example.mongoes.document.Restaurant;
 import com.example.mongoes.elasticsearch.repository.RestaurantESRepository;
+import com.example.mongoes.mongodb.repository.ChangeStreamResumeRepository;
 import com.example.mongoes.mongodb.repository.RestaurantRepository;
 import com.example.mongoes.utils.AppConstants;
 import com.example.mongoes.utils.DateUtility;
@@ -13,16 +15,19 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.bson.BsonTimestamp;
 import org.bson.Document;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
-import org.springframework.data.elasticsearch.core.geo.GeoJsonPoint;
+import org.springframework.data.geo.Point;
 import org.springframework.data.mongodb.core.ChangeStreamEvent;
+import org.springframework.data.mongodb.core.ChangeStreamOptions;
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -35,6 +40,7 @@ public class RestaurantService {
 
     private final RestaurantRepository restaurantRepository;
     private final RestaurantESRepository restaurantESRepository;
+    private final ChangeStreamResumeRepository changeStreamResumeRepository;
 
     private final ReactiveMongoTemplate reactiveMongoTemplate;
 
@@ -66,8 +72,7 @@ public class RestaurantService {
                                             Integer.valueOf(
                                                     addressDoc.get("zipcode", String.class)));
                                     List<Double> obj = addressDoc.getList("coord", Double.class);
-                                    GeoJsonPoint geoJsonPoint =
-                                            GeoJsonPoint.of(obj.get(0), obj.get(1));
+                                    Point geoJsonPoint = new Point(obj.get(0), obj.get(1));
                                     address.setLocation(geoJsonPoint);
                                     restaurant.setAddress(address);
                                     List<Grades> gradesList =
@@ -133,6 +138,7 @@ public class RestaurantService {
         return reactiveMongoTemplate
                 .changeStream(Restaurant.class)
                 .watchCollection(AppConstants.RESTAURANT_COLLECTION)
+                .resumeAt(getChangeStreamOption())
                 .listen()
                 .delayElements(Duration.ofMillis(5))
                 .doOnNext(
@@ -150,7 +156,7 @@ public class RestaurantService {
                                             .log()
                                             .subscribe(
                                                     restaurant1 ->
-                                                            log.info(
+                                                            log.debug(
                                                                     "Deleted in ElasticSearch:{}",
                                                                     restaurant1));
                                 } else if (restaurantChangeStreamEvent.getOperationType()
@@ -162,7 +168,7 @@ public class RestaurantService {
                                             .log()
                                             .subscribe(
                                                     restaurant1 ->
-                                                            log.info(
+                                                            log.debug(
                                                                     "Inserted in ElasticSearch:{}",
                                                                     restaurant1));
                                 }
@@ -177,13 +183,36 @@ public class RestaurantService {
                                                     .asObjectId()
                                                     .getValue()
                                                     .toString();
-                                    this.restaurantESRepository
-                                            .deleteById(objectId)
-                                            .log("Deleting restaurant with Id " + objectId)
-                                            .subscribe();
+                                    this.restaurantESRepository.deleteById(objectId).subscribe();
                                 }
                             }
+
+                            this.changeStreamResumeRepository
+                                    .update(restaurantChangeStreamEvent.getBsonTimestamp())
+                                    .subscribe();
                         })
                 .log("completed processing");
+    }
+
+    private ChangeStreamOptions getChangeStreamOption() {
+        List<ChangeStreamResume> resumeTokenList = getResumeToken();
+        ChangeStreamOptions changeStreamOption;
+        if (resumeTokenList.isEmpty()) {
+            // Scenario where MongoDb is started freshly hence resumeToken is empty
+            changeStreamOption =
+                    ChangeStreamOptions.builder()
+                            .resumeAt(new BsonTimestamp(Instant.now().getEpochSecond()))
+                            .build();
+        } else {
+            changeStreamOption =
+                    ChangeStreamOptions.builder()
+                            .resumeAt(resumeTokenList.get(0).getResumeTimestamp())
+                            .build();
+        }
+        return changeStreamOption;
+    }
+
+    private List<ChangeStreamResume> getResumeToken() {
+        return this.changeStreamResumeRepository.findAll().toStream().toList();
     }
 }

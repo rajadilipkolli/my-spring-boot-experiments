@@ -10,9 +10,10 @@ import lombok.Setter;
 import lombok.ToString;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Version;
+import org.springframework.data.elasticsearch.annotations.Field;
+import org.springframework.data.elasticsearch.annotations.FieldType;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.mongodb.core.mapping.Field;
 
 @Getter
 @Setter
@@ -27,10 +28,12 @@ public class Restaurant {
 
     @Indexed
     @Field("restaurant_id")
+    @org.springframework.data.mongodb.core.mapping.Field("restaurant_id")
     private Long restaurantId;
 
     private String name;
 
+    @Field(type = FieldType.Nested, includeInParent = true)
     private Address address;
 
     @NotBlank(message = "Borough Cant be Blank")

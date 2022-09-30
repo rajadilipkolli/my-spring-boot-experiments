@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.data.elasticsearch.core.geo.GeoJsonPoint;
+import org.springframework.data.elasticsearch.annotations.GeoPointField;
 import org.springframework.data.geo.Point;
 import org.springframework.data.mongodb.core.index.GeoSpatialIndexType;
 import org.springframework.data.mongodb.core.index.GeoSpatialIndexed;
@@ -31,8 +31,10 @@ public class Address {
      */
     @JsonDeserialize(as = Point.class)
     @GeoSpatialIndexed(type = GeoSpatialIndexType.GEO_2DSPHERE)
+    @GeoPointField
+    @org.springframework.data.elasticsearch.annotations.Field("coord")
     @Field("coord")
-    private GeoJsonPoint location;
+    private Point location;
 
     private String street;
 
