@@ -30,11 +30,5 @@ jobs:
           java-version: "19"
           distribution: "zulu"
           cache: "maven"
-      - name: Start up databases via Docker Compose
-        run: |
-          cd docker
-          docker-compose up -d mongodb elasticsearch
-          sleep 5
-          docker ps -a
       - name: Build with Maven
         run: ./mvnw clean verify
