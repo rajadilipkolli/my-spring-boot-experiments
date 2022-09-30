@@ -19,11 +19,11 @@ public class Initializer implements CommandLineRunner {
     @Override
     public void run(String... args) throws IOException {
         log.info("Running Initializer.....");
-        restaurantService
-                .deleteAll()
-                .thenMany(restaurantService.loadData())
-                .log()
-                .subscribe(null, null, () -> log.info("done initialization..."));
+        //        restaurantService
+        //                .deleteAll()
+        //                .thenMany(restaurantService.loadData())
+        //                .log()
+        //                .subscribe(null, null, () -> log.info("done initialization..."));
     }
 
     @EventListener(ApplicationStartedEvent.class)

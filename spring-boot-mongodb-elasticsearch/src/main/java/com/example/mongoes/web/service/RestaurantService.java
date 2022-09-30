@@ -7,6 +7,7 @@ import com.example.mongoes.document.Restaurant;
 import com.example.mongoes.elasticsearch.repository.RestaurantESRepository;
 import com.example.mongoes.mongodb.repository.ChangeStreamResumeRepository;
 import com.example.mongoes.mongodb.repository.RestaurantRepository;
+import com.example.mongoes.response.ResultData;
 import com.example.mongoes.utils.AppConstants;
 import com.example.mongoes.utils.DateUtility;
 import com.mongodb.client.model.changestream.ChangeStreamDocument;
@@ -25,11 +26,14 @@ import org.bson.BsonTimestamp;
 import org.bson.Document;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.elasticsearch.core.geo.GeoPoint;
 import org.springframework.data.geo.Point;
 import org.springframework.data.mongodb.core.ChangeStreamEvent;
 import org.springframework.data.mongodb.core.ChangeStreamOptions;
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -101,8 +105,10 @@ public class RestaurantService {
                 .toList();
     }
 
+    @Transactional
     public Mono<Restaurant> addGrade(Grades grade, Long restaurantId) {
-        return this.findByRestaurantId(restaurantId)
+        return this.restaurantRepository
+                .findByRestaurantId(restaurantId)
                 .flatMap(
                         restaurant -> {
                             restaurant.getGrades().add(grade);
@@ -114,20 +120,12 @@ public class RestaurantService {
         return this.restaurantRepository.save(restaurant);
     }
 
-    public Flux<Restaurant> findAll() {
-        return this.restaurantRepository.findAll();
-    }
-
     public Mono<Restaurant> findByRestaurantName(String restaurantName) {
         return this.restaurantESRepository.findByName(restaurantName);
     }
 
     public Mono<Restaurant> findByRestaurantId(Long restaurantId) {
         return this.restaurantESRepository.findByRestaurantId(restaurantId);
-    }
-
-    public Mono<Void> deleteAll() {
-        return this.restaurantRepository.deleteAll().log("Deleted All Restaurants");
     }
 
     public Mono<Long> totalCount() {
@@ -144,9 +142,7 @@ public class RestaurantService {
                 .doOnNext(
                         restaurantChangeStreamEvent -> {
                             log.info(
-                                    "processed at {} , {}",
-                                    restaurantChangeStreamEvent.getBsonTimestamp(),
-                                    restaurantChangeStreamEvent.getTimestamp());
+                                    "processed at {} ", restaurantChangeStreamEvent.getTimestamp());
                             Restaurant restaurant = restaurantChangeStreamEvent.getBody();
                             if (restaurant != null) {
                                 if (restaurantChangeStreamEvent.getOperationType()
@@ -154,23 +150,12 @@ public class RestaurantService {
                                     this.restaurantESRepository
                                             .delete(restaurant)
                                             .log()
-                                            .subscribe(
-                                                    restaurant1 ->
-                                                            log.debug(
-                                                                    "Deleted in ElasticSearch:{}",
-                                                                    restaurant1));
+                                            .subscribe();
                                 } else if (restaurantChangeStreamEvent.getOperationType()
-                                                == OperationType.UPDATE
+                                                == OperationType.REPLACE
                                         || restaurantChangeStreamEvent.getOperationType()
                                                 == OperationType.INSERT) {
-                                    this.restaurantESRepository
-                                            .save(restaurant)
-                                            .log()
-                                            .subscribe(
-                                                    restaurant1 ->
-                                                            log.debug(
-                                                                    "Inserted in ElasticSearch:{}",
-                                                                    restaurant1));
+                                    this.restaurantESRepository.save(restaurant).log().subscribe();
                                 }
                             } else {
                                 ChangeStreamDocument<Document> eventRaw =
@@ -189,6 +174,7 @@ public class RestaurantService {
 
                             this.changeStreamResumeRepository
                                     .update(restaurantChangeStreamEvent.getBsonTimestamp())
+                                    .log()
                                     .subscribe();
                         })
                 .log("completed processing");
@@ -214,5 +200,31 @@ public class RestaurantService {
 
     private List<ChangeStreamResume> getResumeToken() {
         return this.changeStreamResumeRepository.findAll().toStream().toList();
+    }
+
+    public Flux<Restaurant> findAllRestaurants() {
+        Sort sort = Sort.by(Sort.Direction.DESC, "restaurantId");
+        return this.restaurantESRepository.findAll(sort);
+    }
+
+    public Mono<Restaurant> createRestaurant(Restaurant restaurant) {
+        return save(restaurant);
+    }
+
+    public Flux<ResultData> searchRestaurantsWithInRange(
+            Double lat, Double lon, Double distance, String unit) {
+        GeoPoint location = new GeoPoint(lat, lon);
+        return this.restaurantESRepository
+                .searchWithin(location, distance, unit)
+                .flatMap(
+                        eRestaurantSearchHit -> {
+                            Double dist = (Double) eRestaurantSearchHit.getSortValues().get(0);
+                            Restaurant eRestaurant = eRestaurantSearchHit.getContent();
+                            return Mono.just(
+                                    new ResultData(
+                                            eRestaurant.getName(),
+                                            eRestaurant.getAddress().getLocation(),
+                                            dist));
+                        });
     }
 }
