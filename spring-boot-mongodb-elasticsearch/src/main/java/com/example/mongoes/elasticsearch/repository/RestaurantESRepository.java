@@ -5,7 +5,7 @@ import org.springframework.data.elasticsearch.repository.ReactiveElasticsearchRe
 import reactor.core.publisher.Mono;
 
 public interface RestaurantESRepository
-        extends ReactiveElasticsearchRepository<Restaurant, String> {
+        extends ReactiveElasticsearchRepository<Restaurant, String>, CustomRestaurantESRepository {
     Mono<Restaurant> findByRestaurantId(Long restaurantId);
 
     Mono<Restaurant> findByName(String restaurantName);

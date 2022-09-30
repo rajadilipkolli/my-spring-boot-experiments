@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.annotation.Version;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
@@ -21,6 +22,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
         indexName = AppConstants.RESTAURANT_COLLECTION)
 @Document(collection = AppConstants.RESTAURANT_COLLECTION)
 @NoArgsConstructor
+@TypeAlias(AppConstants.RESTAURANT_COLLECTION)
 @ToString
 public class Restaurant {
 
