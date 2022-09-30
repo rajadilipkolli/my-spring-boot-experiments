@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.bson.BsonTimestamp;
 import org.bson.Document;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -134,25 +135,11 @@ public class RestaurantService {
     }
 
     public Flux<ChangeStreamEvent<Restaurant>> changeStreamProcessor() {
-        var changeStreamFluxProjection =
-                reactiveMongoTemplate
-                        .changeStream(Restaurant.class)
-                        .watchCollection(AppConstants.RESTAURANT_COLLECTION);
-        Flux<ChangeStreamEvent<Restaurant>> changeStreamFlux;
-        List<ChangeStreamResume> resumeTokenList = getResumeToken();
-        ChangeStreamOptions changeStreamOption;
-        if (resumeTokenList.isEmpty()) {
-            // Scenario where MongoDb is started freshly hence resumeToken is empty
-            changeStreamOption = ChangeStreamOptions.builder().resumeAt(Instant.now()).build();
-            changeStreamFlux = changeStreamFluxProjection.resumeAt(changeStreamOption).listen();
-        } else {
-            changeStreamOption =
-                    ChangeStreamOptions.builder()
-                            .resumeToken(resumeTokenList.get(0).getResumeToken())
-                            .build();
-            changeStreamFlux = changeStreamFluxProjection.resumeAfter(changeStreamOption).listen();
-        }
-        return changeStreamFlux
+        return reactiveMongoTemplate
+                .changeStream(Restaurant.class)
+                .watchCollection(AppConstants.RESTAURANT_COLLECTION)
+                .resumeAt(getChangeStreamOption())
+                .listen()
                 .delayElements(Duration.ofMillis(5))
                 .doOnNext(
                         restaurantChangeStreamEvent -> {
@@ -201,10 +188,28 @@ public class RestaurantService {
                             }
 
                             this.changeStreamResumeRepository
-                                    .update(restaurantChangeStreamEvent.getResumeToken())
+                                    .update(restaurantChangeStreamEvent.getBsonTimestamp())
                                     .subscribe();
                         })
                 .log("completed processing");
+    }
+
+    private ChangeStreamOptions getChangeStreamOption() {
+        List<ChangeStreamResume> resumeTokenList = getResumeToken();
+        ChangeStreamOptions changeStreamOption;
+        if (resumeTokenList.isEmpty()) {
+            // Scenario where MongoDb is started freshly hence resumeToken is empty
+            changeStreamOption =
+                    ChangeStreamOptions.builder()
+                            .resumeAt(new BsonTimestamp(Instant.now().getEpochSecond()))
+                            .build();
+        } else {
+            changeStreamOption =
+                    ChangeStreamOptions.builder()
+                            .resumeAt(resumeTokenList.get(0).getResumeTimestamp())
+                            .build();
+        }
+        return changeStreamOption;
     }
 
     private List<ChangeStreamResume> getResumeToken() {

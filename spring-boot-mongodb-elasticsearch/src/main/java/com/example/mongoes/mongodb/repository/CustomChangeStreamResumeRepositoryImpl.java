@@ -3,7 +3,7 @@ package com.example.mongoes.mongodb.repository;
 import com.example.mongoes.document.ChangeStreamResume;
 import com.mongodb.client.result.UpdateResult;
 import lombok.RequiredArgsConstructor;
-import org.bson.BsonValue;
+import org.bson.BsonTimestamp;
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
@@ -14,12 +14,12 @@ public class CustomChangeStreamResumeRepositoryImpl implements CustomChangeStrea
 
     private final ReactiveMongoTemplate reactiveMongoTemplate;
 
-    private static final String field = "resumeToken";
+    private static final String field = "resumeTimestamp";
 
     @Override
-    public Mono<UpdateResult> update(BsonValue resumeToken) {
+    public Mono<UpdateResult> update(BsonTimestamp resumeTimestamp) {
         Query query = new Query();
-        Update update = new Update().set(field, resumeToken);
+        Update update = new Update().set(field, resumeTimestamp);
         return reactiveMongoTemplate.upsert(query, update, ChangeStreamResume.class);
     }
 }

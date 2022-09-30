@@ -31,9 +31,9 @@ public class RestaurantController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/{restaurantId}")
     public Mono<ResponseEntity<Restaurant>> findRestaurantById(
-            @PathVariable("id") Long restaurantId) {
+            @PathVariable("restaurantId") Long restaurantId) {
         return restaurantService
                 .findByRestaurantId(restaurantId)
                 .map(ResponseEntity::ok)

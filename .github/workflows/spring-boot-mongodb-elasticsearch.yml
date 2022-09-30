@@ -33,8 +33,8 @@ jobs:
       - name: Start up databases via Docker Compose
         run: |
           cd docker
-          docker-compose up -d
+          docker-compose up -d mongodb elasticsearch
           sleep 5
           docker ps -a
       - name: Build with Maven
-        run: ./mvnw clean verify package
+        run: ./mvnw clean verify
