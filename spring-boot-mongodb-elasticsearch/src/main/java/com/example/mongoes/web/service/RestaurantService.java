@@ -1,6 +1,7 @@
 package com.example.mongoes.web.service;
 
 import com.example.mongoes.document.Address;
+import com.example.mongoes.document.ChangeStreamResume;
 import com.example.mongoes.document.Grades;
 import com.example.mongoes.document.Restaurant;
 import com.example.mongoes.elasticsearch.repository.RestaurantESRepository;
@@ -20,7 +21,6 @@ import java.util.List;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.bson.BsonValue;
 import org.bson.Document;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -139,14 +139,17 @@ public class RestaurantService {
                         .changeStream(Restaurant.class)
                         .watchCollection(AppConstants.RESTAURANT_COLLECTION);
         Flux<ChangeStreamEvent<Restaurant>> changeStreamFlux;
-        BsonValue resumeToken = getResumeToken();
+        List<ChangeStreamResume> resumeTokenList = getResumeToken();
         ChangeStreamOptions changeStreamOption;
-        if (null == resumeToken) {
+        if (resumeTokenList.isEmpty()) {
             // Scenario where MongoDb is started freshly hence resumeToken is empty
             changeStreamOption = ChangeStreamOptions.builder().resumeAt(Instant.now()).build();
             changeStreamFlux = changeStreamFluxProjection.resumeAt(changeStreamOption).listen();
         } else {
-            changeStreamOption = ChangeStreamOptions.builder().resumeToken(resumeToken).build();
+            changeStreamOption =
+                    ChangeStreamOptions.builder()
+                            .resumeToken(resumeTokenList.get(0).getResumeToken())
+                            .build();
             changeStreamFlux = changeStreamFluxProjection.resumeAfter(changeStreamOption).listen();
         }
         return changeStreamFlux
@@ -204,12 +207,7 @@ public class RestaurantService {
                 .log("completed processing");
     }
 
-    private BsonValue getResumeToken() {
-        return this.changeStreamResumeRepository
-                .findAll()
-                .toStream()
-                .toList()
-                .get(0)
-                .getResumeToken();
+    private List<ChangeStreamResume> getResumeToken() {
+        return this.changeStreamResumeRepository.findAll().toStream().toList();
     }
 }
