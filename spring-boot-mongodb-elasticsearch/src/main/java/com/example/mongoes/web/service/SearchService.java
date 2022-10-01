@@ -6,20 +6,19 @@ import com.example.mongoes.response.AggregationSearchResponse;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.index.query.Operator;
-import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.aggregations.Aggregation;
+import org.elasticsearch.search.aggregations.bucket.MultiBucketsAggregation;
 import org.elasticsearch.search.aggregations.bucket.range.ParsedDateRange;
-import org.elasticsearch.search.aggregations.bucket.terms.ParsedLongTerms;
 import org.elasticsearch.search.aggregations.bucket.terms.ParsedStringTerms;
-import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.elasticsearch.core.ElasticsearchAggregations;
 import org.springframework.data.elasticsearch.core.SearchPage;
-import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -118,75 +117,60 @@ public class SearchService {
             direction = Sort.Direction.DESC;
         }
 
-        NativeSearchQueryBuilder nativeSearchQueryBuilder =
-                new NativeSearchQueryBuilder()
-                        .withQuery(
-                                QueryBuilders.multiMatchQuery(
-                                                searchKeyword, fieldNames.toArray(String[]::new))
-                                        .operator(Operator.OR))
-                        .withSort(Sort.by(direction, sortFields));
-
-        return Mono.zip(
-                        restaurantESRepository.searchResultsForFacets(
-                                nativeSearchQueryBuilder, limit, offset),
-                        restaurantESRepository
-                                .aggregateSearch(nativeSearchQueryBuilder)
-                                .map(
-                                        aggregationContainer -> {
-                                            Aggregation aggregation =
-                                                    (Aggregation)
-                                                            aggregationContainer.aggregation();
-                                            List<?> buckets;
-                                            if (aggregation
-                                                    instanceof
-                                                    ParsedStringTerms
-                                                    parsedStringTerms) {
-                                                buckets = parsedStringTerms.getBuckets();
-                                            } else if (aggregation
-                                                    instanceof ParsedLongTerms parsedLongTerms) {
-                                                buckets = parsedLongTerms.getBuckets();
-                                            } else if (aggregation
-                                                    instanceof ParsedDateRange parsedDateRange) {
-                                                buckets = parsedDateRange.getBuckets();
-                                            } else {
-                                                throw new UnsupportedOperationException(
-                                                        "Unsupported type ("
-                                                                + aggregation.getClass()
-                                                                + ") for aggList:"
-                                                                + aggregation.getName());
-                                            }
-                                            Map<String, Map<String, Object>> resultMap =
-                                                    new HashMap<>();
-                                            Map<String, Object> subItems = new HashMap<>();
-                                            for (Object resultItemObj : buckets) {
-                                                String key = "";
-                                                long count = 0;
-                                                if (resultItemObj
-                                                        instanceof Terms.Bucket resultItem) {
-                                                    key = resultItem.getKeyAsString();
-                                                    count = resultItem.getDocCount();
-                                                } else if (resultItemObj
-                                                        instanceof
-                                                        ParsedDateRange.ParsedBucket
-                                                        resultItem) {
-                                                    String from = resultItem.getFromAsString();
-                                                    String to = resultItem.getToAsString();
-                                                    key = from + " - " + to;
-                                                    count = resultItem.getDocCount();
-                                                }
-                                                if (count != 0) {
-                                                    subItems.put(key, count);
-                                                }
-                                            }
-                                            resultMap.put(aggregation.getName(), subItems);
-                                            return resultMap;
-                                        })
-                                .collectList())
+        return restaurantESRepository
+                .aggregateSearch(searchKeyword, fieldNames, direction, limit, offset, sortFields)
                 .map(
-                        objects ->
-                                new AggregationSearchResponse(
-                                        objects.getT1(),
-                                        objects.getT2(),
-                                        objects.getT1().getSearchHits().getTotalHits()));
+                        searchPage -> {
+                            ElasticsearchAggregations elasticsearchAggregations =
+                                    (ElasticsearchAggregations)
+                                            searchPage.getSearchHits().getAggregations();
+                            Map<String, Map<String, Long>> map = new HashMap<>();
+                            if (elasticsearchAggregations != null) {
+                                map =
+                                        aggregationFunction.apply(
+                                                elasticsearchAggregations.aggregations().asMap());
+                            }
+                            return new AggregationSearchResponse(
+                                    searchPage.getContent(),
+                                    map,
+                                    searchPage.getPageable(),
+                                    searchPage.getTotalPages(),
+                                    searchPage.getTotalElements());
+                        });
     }
+
+    Function<Map<String, Aggregation>, Map<String, Map<String, Long>>> aggregationFunction =
+            aggregationMap -> {
+                Map<String, Map<String, Long>> resultMap = new HashMap<>();
+                aggregationMap.forEach(
+                        (String aggregateKey, Aggregation aggregation) -> {
+                            Map<String, Long> countMap = new HashMap<>();
+                            if (aggregation instanceof ParsedStringTerms parsedStringTerms) {
+                                countMap =
+                                        parsedStringTerms.getBuckets().stream()
+                                                .collect(
+                                                        Collectors.toMap(
+                                                                MultiBucketsAggregation.Bucket
+                                                                        ::getKeyAsString,
+                                                                MultiBucketsAggregation.Bucket
+                                                                        ::getDocCount));
+                            } else if (aggregation instanceof ParsedDateRange parsedDateRange) {
+                                countMap =
+                                        parsedDateRange.getBuckets().stream()
+                                                .filter(bucket -> bucket.getDocCount() != 0)
+                                                .collect(
+                                                        Collectors.toMap(
+                                                                bucket ->
+                                                                        bucket.getFromAsString()
+                                                                                + " - "
+                                                                                + bucket
+                                                                                        .getToAsString(),
+                                                                MultiBucketsAggregation.Bucket
+                                                                        ::getDocCount));
+                            }
+                            resultMap.put(aggregateKey, countMap);
+                        });
+
+                return resultMap;
+            };
 }

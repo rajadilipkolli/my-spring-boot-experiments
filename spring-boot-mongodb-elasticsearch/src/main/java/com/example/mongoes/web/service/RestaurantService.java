@@ -227,4 +227,8 @@ public class RestaurantService {
                                             dist));
                         });
     }
+
+    public Mono<Void> deleteAll() {
+        return this.restaurantRepository.deleteAll();
+    }
 }

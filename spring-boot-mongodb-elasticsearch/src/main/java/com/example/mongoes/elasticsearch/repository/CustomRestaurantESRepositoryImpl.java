@@ -9,6 +9,7 @@ import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.MultiMatchQueryBuilder;
+import org.elasticsearch.index.query.Operator;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.BucketOrder;
@@ -18,7 +19,6 @@ import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.elasticsearch.core.AggregationContainer;
 import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchPage;
@@ -171,39 +171,43 @@ public class CustomRestaurantESRepositoryImpl implements CustomRestaurantESRepos
     }
 
     @Override
-    public Flux<? extends AggregationContainer<?>> aggregateSearch(
-            NativeSearchQueryBuilder nativeSearchQueryBuilder) {
+    public Mono<SearchPage<Restaurant>> aggregateSearch(
+            String searchKeyword,
+            List<String> fieldNames,
+            Sort.Direction direction,
+            Integer limit,
+            Integer offset,
+            String[] sortFields) {
+        {
+            TermsAggregationBuilder cuisineTermsBuilder =
+                    AggregationBuilders.terms("MyCuisine")
+                            .field("cuisine")
+                            .size(PAGE_SIZE)
+                            .order(BucketOrder.count(false));
+            TermsAggregationBuilder boroughTermsBuilder =
+                    AggregationBuilders.terms("MyBorough")
+                            .field("borough")
+                            .size(PAGE_SIZE)
+                            .order(BucketOrder.count(false));
+            DateRangeAggregationBuilder dateRangeBuilder =
+                    AggregationBuilders.dateRange("MyDateRange").field("grades.date");
+            addDateRange(dateRangeBuilder);
 
-        TermsAggregationBuilder cuisineTermsBuilder =
-                AggregationBuilders.terms("MyCuisine")
-                        .field("cuisine")
-                        .size(PAGE_SIZE)
-                        .order(BucketOrder.count(false));
-        TermsAggregationBuilder boroughTermsBuilder =
-                AggregationBuilders.terms("MyBorough")
-                        .field("borough")
-                        .size(PAGE_SIZE)
-                        .order(BucketOrder.count(false));
-        DateRangeAggregationBuilder dateRangeBuilder =
-                AggregationBuilders.dateRange("MyDateRange").field("grades.date");
-        addDateRange(dateRangeBuilder);
+            Query query =
+                    new NativeSearchQueryBuilder()
+                            .withQuery(
+                                    QueryBuilders.multiMatchQuery(
+                                                    searchKeyword,
+                                                    fieldNames.toArray(String[]::new))
+                                            .operator(Operator.OR))
+                            .withSort(Sort.by(direction, sortFields))
+                            .withAggregations(
+                                    cuisineTermsBuilder, boroughTermsBuilder, dateRangeBuilder)
+                            .build();
+            query.setPageable(PageRequest.of(offset, limit));
 
-        NativeSearchQuery query =
-                nativeSearchQueryBuilder
-                        .withAggregations(
-                                cuisineTermsBuilder, boroughTermsBuilder, dateRangeBuilder)
-                        .build();
-
-        return this.reactiveElasticsearchOperations.aggregate(query, Restaurant.class);
-    }
-
-    @Override
-    public Mono<SearchPage<Restaurant>> searchResultsForFacets(
-            NativeSearchQueryBuilder nativeSearchQueryBuilder, Integer limit, Integer offset) {
-        Query query = nativeSearchQueryBuilder.build();
-        Pageable pageable = PageRequest.of(offset, limit);
-        query.setPageable(pageable);
-        return this.reactiveElasticsearchOperations.searchForPage(query, Restaurant.class);
+            return this.reactiveElasticsearchOperations.searchForPage(query, Restaurant.class);
+        }
     }
 
     private void addDateRange(DateRangeAggregationBuilder dateRangeBuilder) {

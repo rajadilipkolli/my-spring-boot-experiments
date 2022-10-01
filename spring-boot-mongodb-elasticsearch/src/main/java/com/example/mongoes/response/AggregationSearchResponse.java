@@ -3,9 +3,12 @@ package com.example.mongoes.response;
 import com.example.mongoes.document.Restaurant;
 import java.util.List;
 import java.util.Map;
-import org.springframework.data.elasticsearch.core.SearchPage;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.elasticsearch.core.SearchHit;
 
 public record AggregationSearchResponse(
-        SearchPage<Restaurant> searchResults,
-        List<Map<String, Map<String, Object>>> facets,
-        long totalHits) {}
+        List<SearchHit<Restaurant>> content,
+        Map<String, Map<String, Long>> facets,
+        Pageable pageable,
+        int totalPages,
+        long numberOfElements) {}

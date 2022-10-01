@@ -13,6 +13,7 @@ import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.annotation.Version;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
+import org.springframework.data.elasticsearch.annotations.Setting;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -24,6 +25,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @NoArgsConstructor
 @TypeAlias(AppConstants.RESTAURANT_COLLECTION)
 @ToString
+@Setting(shards = 3)
 public class Restaurant {
 
     @Id private String id;
@@ -39,9 +41,11 @@ public class Restaurant {
     private Address address;
 
     @NotBlank(message = "Borough Cant be Blank")
+    @Field(type = FieldType.Keyword)
     private String borough;
 
     @NotBlank(message = "Cuisine Cant be Blank")
+    @Field(fielddata = true, type = FieldType.Text)
     private String cuisine;
 
     private List<Grades> grades = new ArrayList<>();

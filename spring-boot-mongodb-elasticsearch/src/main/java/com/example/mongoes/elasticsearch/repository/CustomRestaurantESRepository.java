@@ -3,11 +3,10 @@ package com.example.mongoes.elasticsearch.repository;
 import com.example.mongoes.document.Restaurant;
 import java.util.List;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.elasticsearch.core.AggregationContainer;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchPage;
 import org.springframework.data.elasticsearch.core.geo.GeoPoint;
-import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -39,9 +38,11 @@ public interface CustomRestaurantESRepository {
 
     Mono<SearchPage<Restaurant>> searchDateRange(String fromDate, String toDate, Pageable pageable);
 
-    Flux<? extends AggregationContainer<?>> aggregateSearch(
-            NativeSearchQueryBuilder nativeSearchQueryBuilder);
-
-    Mono<SearchPage<Restaurant>> searchResultsForFacets(
-            NativeSearchQueryBuilder nativeSearchQueryBuilder, Integer limit, Integer offset);
+    Mono<SearchPage<Restaurant>> aggregateSearch(
+            String searchKeyword,
+            List<String> fieldNames,
+            Sort.Direction direction,
+            Integer limit,
+            Integer offset,
+            String[] sortFields);
 }
