@@ -8,11 +8,24 @@
 For More info about this repository, Please visit [here](https://rajadilipkolli.github.io/my-spring-boot-experiments/)
 
 
-### Docker Commands
+### Useful Docker Commands
 
- >  Start postgres and pgadmin `docker compose up postgres pgadmin4`
+ >  Start postgres and pgadmin 
+ ```
+ docker compose up postgres pgadmin4
+ ```
  
- >  Clean up everything using `docker system prune -a -f --volumes`
+ >  Clean up everything using 
+ ```
+ docker system prune -a -f --volumes
+ ```
 
- >  Claim unused volumes `docker volume prune`
+ >  Claim unused volumes 
+ ```
+ docker volume prune
+ ```
+ > Running container
+ ```
+ docker container ls
+ ```
  
