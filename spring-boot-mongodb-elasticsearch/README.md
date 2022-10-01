@@ -30,3 +30,13 @@ $ ./mvnw spring-boot:run -Dspring-boot.run.profiles=local
 
 ### Reference
 - https://medium.com/geekculture/elastic-search-queries-hands-on-examples-fe5b2bc10c0e
+
+### Exceptions & Resolutions
+ - When using reactive elasticeSearch we get below issue
+
+` 2022-10-01 21:24:14.156 ERROR 34465 --- [or-http-epoll-2] a.w.r.e.AbstractErrorWebExceptionHandler : [8006d397-1]  500 Server Error for HTTP GET "/restaurant?limit=1000&offset=1"
+
+org.springframework.core.io.buffer.DataBufferLimitException: Exceeded limit on max bytes to buffer : 262144
+        at org.springframework.core.io.buffer.LimitedDataBufferList.raiseLimitException(LimitedDataBufferList.java:99)`
+
+To fix this set `spring.elasticsearch.webclient.max-in-memory-size=-1` for unlimited memory

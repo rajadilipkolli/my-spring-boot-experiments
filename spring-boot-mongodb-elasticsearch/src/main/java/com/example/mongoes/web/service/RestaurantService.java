@@ -26,7 +26,10 @@ import org.bson.BsonTimestamp;
 import org.bson.Document;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.elasticsearch.core.SearchPage;
 import org.springframework.data.elasticsearch.core.geo.GeoPoint;
 import org.springframework.data.geo.Point;
 import org.springframework.data.mongodb.core.ChangeStreamEvent;
@@ -202,9 +205,10 @@ public class RestaurantService {
         return this.changeStreamResumeRepository.findAll().toStream().toList();
     }
 
-    public Flux<Restaurant> findAllRestaurants() {
-        Sort sort = Sort.by(Sort.Direction.DESC, "restaurantId");
-        return this.restaurantESRepository.findAll(sort);
+    public Mono<SearchPage<Restaurant>> findAllRestaurants(Integer offset, Integer limit) {
+        Sort sort = Sort.by(Sort.Direction.DESC, "restaurant_id");
+        Pageable pageable = PageRequest.of(offset, limit, sort);
+        return this.restaurantESRepository.findAll(pageable);
     }
 
     public Mono<Restaurant> createRestaurant(Restaurant restaurant) {

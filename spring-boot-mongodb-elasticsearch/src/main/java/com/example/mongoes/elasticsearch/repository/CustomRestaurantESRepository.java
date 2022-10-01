@@ -45,4 +45,6 @@ public interface CustomRestaurantESRepository {
             Integer limit,
             Integer offset,
             String[] sortFields);
+
+    Mono<SearchPage<Restaurant>> findAll(Pageable pageable);
 }

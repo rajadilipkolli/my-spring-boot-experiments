@@ -7,7 +7,10 @@ import com.example.mongoes.response.ResultData;
 import com.example.mongoes.web.service.RestaurantService;
 import io.micrometer.core.annotation.Timed;
 import java.net.URI;
+import javax.validation.Valid;
+import javax.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.elasticsearch.core.SearchPage;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -29,8 +32,11 @@ public class RestaurantController {
     private final RestaurantService restaurantService;
 
     @GetMapping
-    public ResponseEntity<Flux<Restaurant>> findAllRestaurants() {
-        return ResponseEntity.ok(restaurantService.findAllRestaurants());
+    public Mono<ResponseEntity<SearchPage<Restaurant>>> findAllRestaurants(
+            @Valid @RequestParam(value = "limit", defaultValue = "10") @Size(max = 999)
+                    Integer limit,
+            @RequestParam(value = "offset", defaultValue = "0") Integer offset) {
+        return restaurantService.findAllRestaurants(offset, limit).map(ResponseEntity::ok);
     }
 
     @GetMapping("/name/{restaurantName}")

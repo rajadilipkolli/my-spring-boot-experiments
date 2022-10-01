@@ -178,36 +178,41 @@ public class CustomRestaurantESRepositoryImpl implements CustomRestaurantESRepos
             Integer limit,
             Integer offset,
             String[] sortFields) {
-        {
-            TermsAggregationBuilder cuisineTermsBuilder =
-                    AggregationBuilders.terms("MyCuisine")
-                            .field("cuisine")
-                            .size(PAGE_SIZE)
-                            .order(BucketOrder.count(false));
-            TermsAggregationBuilder boroughTermsBuilder =
-                    AggregationBuilders.terms("MyBorough")
-                            .field("borough")
-                            .size(PAGE_SIZE)
-                            .order(BucketOrder.count(false));
-            DateRangeAggregationBuilder dateRangeBuilder =
-                    AggregationBuilders.dateRange("MyDateRange").field("grades.date");
-            addDateRange(dateRangeBuilder);
+        TermsAggregationBuilder cuisineTermsBuilder =
+                AggregationBuilders.terms("MyCuisine")
+                        .field("cuisine")
+                        .size(PAGE_SIZE)
+                        .order(BucketOrder.count(false));
+        TermsAggregationBuilder boroughTermsBuilder =
+                AggregationBuilders.terms("MyBorough")
+                        .field("borough")
+                        .size(PAGE_SIZE)
+                        .order(BucketOrder.count(false));
+        DateRangeAggregationBuilder dateRangeBuilder =
+                AggregationBuilders.dateRange("MyDateRange").field("grades.date");
+        addDateRange(dateRangeBuilder);
 
-            Query query =
-                    new NativeSearchQueryBuilder()
-                            .withQuery(
-                                    QueryBuilders.multiMatchQuery(
-                                                    searchKeyword,
-                                                    fieldNames.toArray(String[]::new))
-                                            .operator(Operator.OR))
-                            .withSort(Sort.by(direction, sortFields))
-                            .withAggregations(
-                                    cuisineTermsBuilder, boroughTermsBuilder, dateRangeBuilder)
-                            .build();
-            query.setPageable(PageRequest.of(offset, limit));
+        Query query =
+                new NativeSearchQueryBuilder()
+                        .withQuery(
+                                QueryBuilders.multiMatchQuery(
+                                                searchKeyword, fieldNames.toArray(String[]::new))
+                                        .operator(Operator.OR))
+                        .withSort(Sort.by(direction, sortFields))
+                        .withAggregations(
+                                cuisineTermsBuilder, boroughTermsBuilder, dateRangeBuilder)
+                        .build();
+        query.setPageable(PageRequest.of(offset, limit));
 
-            return this.reactiveElasticsearchOperations.searchForPage(query, Restaurant.class);
-        }
+        return this.reactiveElasticsearchOperations.searchForPage(query, Restaurant.class);
+    }
+
+    @Override
+    public Mono<SearchPage<Restaurant>> findAll(Pageable pageable) {
+        Query query = new CriteriaQuery(Criteria.where("_id").exists());
+        query.setPageable(pageable);
+
+        return reactiveElasticsearchOperations.searchForPage(query, Restaurant.class);
     }
 
     private void addDateRange(DateRangeAggregationBuilder dateRangeBuilder) {
