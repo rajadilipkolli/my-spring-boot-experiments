@@ -104,7 +104,7 @@
         <dependency>
             <groupId>org.redisson</groupId>
             <artifactId>redisson-hibernate-53</artifactId>
-            <version>3.17.6</version>
+            <version>3.17.7</version>
         </dependency>
         <dependency>
             <groupId>com.vladmihalcea</groupId>
