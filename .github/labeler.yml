@@ -6,10 +6,10 @@
   - spring-boot-mongodb-elasticsearch/**/*
 "component: graphql-webflux":
   - spring-boot-graphql-webflux/**/*
-"component: dynamodb":
-  - aws-dynamodb-project/**/*
-"component: ses":
-  - aws-ses-project/**/*
+"component: togglz":
+  - spring-boot-togglz-sample/**/*
+"component: jobrunr":
+  - spring-boot-jobrunr-sample/**/*
 "component: sns":
   - aws-sns-project/**/*
 "component: sqs":
@@ -26,8 +26,8 @@
   - spring-boot-mongodb-elasticsearch/pom.xml
   - spring-boot-graphql-webflux/gradle.properties
   - spring-boot-graphql-webflux/build.gradle
-  - aws-dynamodb-project/pom.xml
-  - aws-ses-project/pom.xml
+  - spring-boot-togglz-sample/pom.xml
+  - spring-boot-jobrunr-sample/pom.xml
   - aws-sns-project/pom.xml
   - aws-sqs-project/pom.xml
   - aws-kinesis-project/pom.xml
