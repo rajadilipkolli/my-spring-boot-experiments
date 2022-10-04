@@ -4,8 +4,8 @@
   - spring-boot-strategy-plugin/**/*
 "component: mongodb-elasticsearch":
   - spring-boot-mongodb-elasticsearch/**/*
-"component: secrets-manager":
-  - aws-secrets-manager-project/**/*
+"component: jobrunr":
+  - spring-boot-jobrunr-sample/**/*
 "component: dynamodb":
   - aws-dynamodb-project/**/*
 "component: ses":
@@ -24,7 +24,7 @@
   - spring-boot-hibernate2ndlevelcache-sample/pom.xml
   - spring-boot-strategy-plugin/pom.xml
   - spring-boot-mongodb-elasticsearch/pom.xml
-  - aws-secrets-manager-project/pom.xml
+  - spring-boot-jobrunr-sample/pom.xml
   - aws-dynamodb-project/pom.xml
   - aws-ses-project/pom.xml
   - aws-sns-project/pom.xml
