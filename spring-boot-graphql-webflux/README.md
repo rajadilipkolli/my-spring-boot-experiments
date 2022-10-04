@@ -1,4 +1,4 @@
-# spring-graph-ql [SourceCode](https://www.youtube.com/watch?v=kVSYVhmvNCI&t=876s)
+# spring-boot-graph-ql [SourceCode](https://www.youtube.com/watch?v=kVSYVhmvNCI&t=876s)
 
 
 ### Run tests
