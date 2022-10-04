@@ -24,7 +24,8 @@
   - spring-boot-hibernate2ndlevelcache-sample/pom.xml
   - spring-boot-strategy-plugin/pom.xml
   - spring-boot-mongodb-elasticsearch/pom.xml
-  - spring-boot-graphql-webflux/pom.xml
+  - spring-boot-graphql-webflux/gradle.properties
+  - spring-boot-graphql-webflux/build.gradle
   - aws-dynamodb-project/pom.xml
   - aws-ses-project/pom.xml
   - aws-sns-project/pom.xml
