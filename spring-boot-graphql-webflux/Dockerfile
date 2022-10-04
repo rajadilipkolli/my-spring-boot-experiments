@@ -1,6 +1,6 @@
 FROM eclipse-temurin:19-jre-focal as builder
 WORKDIR application
-ARG JAR_FILE=build/libs/my-spring-graphql-webflux-0.0.1-SNAPSHOT.jar
+ARG JAR_FILE=build/libs/spring-boot-graphql-webflux-0.0.1-SNAPSHOT.jar
 COPY ${JAR_FILE} application.jar
 RUN java -Djarmode=layertools -jar application.jar extract
 

@@ -1,13 +1,13 @@
-name: my-spring-graphql-webflux
+name: spring-boot-graphql-webflux
 
 on:
   push:
     paths:
-      - "my-spring-graphql-webflux/**"
+      - "spring-boot-graphql-webflux/**"
     branches: [main]
   pull_request:
     paths:
-      - "my-spring-graphql-webflux/**"
+      - "spring-boot-graphql-webflux/**"
     types:
       - opened
       - synchronize
@@ -17,6 +17,9 @@ jobs:
   build:
     name: Run Unit & Integration Tests
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: "spring-boot-graphql-webflux"
     steps:
       - uses: actions/checkout@v3
         with:
@@ -30,7 +33,4 @@ jobs:
           cache: "gradle"
 
       - name: Build and analyze
-        run: |
-          cd my-spring-graphql-webflux
-          chmod +x gradlew
-          ./gradlew clean build --info
+        run: ./gradlew clean build --info

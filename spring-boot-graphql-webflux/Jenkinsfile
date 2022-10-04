@@ -6,7 +6,7 @@ pipeline {
     }
 
     environment {
-        APPLICATION_NAME = 'my-spring-graphql-webflux'
+        APPLICATION_NAME = 'spring-boot-graphql-webflux'
     }
 
     stages {
