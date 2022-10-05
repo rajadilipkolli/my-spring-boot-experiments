@@ -10,7 +10,7 @@ services:
     ports:
       - 8080:8080
     environment:
-      - JAVA_TOOL_OPTIONS=-javaagent:/workspace/BOOT-INF/lib/opentelemetry-javaagent-1.18.0.jar
+      - JAVA_TOOL_OPTIONS=-javaagent:/workspace/BOOT-INF/lib/opentelemetry-javaagent-1.12.1.jar
       - OTEL_SERVICE_NAME=strategy-plugin-service
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://tempo:4317
     logging:
