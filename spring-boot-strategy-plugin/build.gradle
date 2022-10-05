@@ -18,13 +18,12 @@ repositories {
 dependencies {
     implementation 'org.springframework.plugin:spring-plugin-core:2.0.0.RELEASE'
     implementation 'org.springframework.plugin:spring-plugin-metadata:2.0.0.RELEASE'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
 
     // Observability
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
     runtimeOnly 'io.opentelemetry.javaagent:opentelemetry-javaagent:1.18.0'
-
-    implementation 'org.springframework.boot:spring-boot-starter-web'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
