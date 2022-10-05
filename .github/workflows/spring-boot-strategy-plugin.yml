@@ -16,6 +16,7 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
+  PROJECT_NAME : spring-boot-strategy-plugin
   VERSION: latest
 
 jobs:
@@ -44,12 +45,12 @@ jobs:
         run: ./gradlew clean build --info
 
       - name: Build container image
-        run: ./gradlew bootBuildImage
+        run: ./gradlew bootBuildImage --imageName ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ PROJECT_NAME }}:${{ env.VERSION }}
       - name: OCI image vulnerability scanning
         uses: anchore/scan-action@v3
         id: scan
         with:
-          image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.VERSION }}
+          image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ PROJECT_NAME }}:${{ env.VERSION }}
           fail-build: false
           severity-cutoff: high
           acs-report-enable: true
@@ -60,4 +61,4 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Publish container image
-        run: docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.VERSION }}
+        run: docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ PROJECT_NAME }}:${{ env.VERSION }}
