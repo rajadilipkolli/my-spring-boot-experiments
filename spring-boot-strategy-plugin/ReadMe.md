@@ -1,0 +1,2 @@
+# spring-boot-strategy-plugin
+

@@ -2,17 +2,16 @@ version: "3.8"
 services:
 
   # Application
-  strategy-service:
+  strategy-plugin-service:
     image:  ghcr.io/rajadilipkolli/my-spring-boot-experiments/spring-boot-strategy-plugin:latest
-    container_name: strategy-service
+    container_name: strategy-plugin-service
     depends_on:
       - fluent-bit
-      - keycloak
     ports:
-      - 9000:9000
+      - 8080:8080
     environment:
       - JAVA_TOOL_OPTIONS=-javaagent:/workspace/BOOT-INF/lib/opentelemetry-javaagent-1.18.0.jar
-      - OTEL_SERVICE_NAME=strategy-service
+      - OTEL_SERVICE_NAME=strategy-plugin-service
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://tempo:4317
     logging:
       driver: fluentd
