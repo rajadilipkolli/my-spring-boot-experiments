@@ -44,8 +44,7 @@ jobs:
         run: ./gradlew clean build --info
 
       - name: Build container image
-        run: ./gradlew bootBuildImage \
-            --imageName ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.VERSION }}
+        run: ./gradlew bootBuildImage
       - name: OCI image vulnerability scanning
         uses: anchore/scan-action@v3
         id: scan
