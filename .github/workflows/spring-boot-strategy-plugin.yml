@@ -15,13 +15,16 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: rajadilipkolli/my-spring-boot-experiments/spring-boot-strategy-plugin
+  IMAGE_NAME: ${{ github.repository }}
   VERSION: latest
 
 jobs:
   build:
     name: Run Unit & Integration Tests
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     defaults:
       run:
         working-directory: spring-boot-strategy-plugin
@@ -42,24 +45,23 @@ jobs:
 
       - if: ${{ github.ref == 'refs/heads/main' }}
         name: Build container image
-        run: ./gradlew bootBuildImage \
-            --imageName ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.VERSION }}
+        run: ./gradlew bootBuildImage --imageName ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/spring-boot-strategy-plugin:${{ env.VERSION }}
       - if: ${{ github.ref == 'refs/heads/main' }}
         name: OCI image vulnerability scanning
         uses: anchore/scan-action@v3
         id: scan
         with:
-          image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.VERSION }}
+          image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/spring-boot-strategy-plugin:${{ env.VERSION }}
           fail-build: false
           severity-cutoff: high
           acs-report-enable: true
       - if: ${{ github.ref == 'refs/heads/main' }}
-        name: Log into container registry
-        uses: docker/login-action@v1
+        name: Log in to the Container registry
+        uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
-          password: ${{ secrets.MY_TOKEN }}
+          password: ${{ secrets.GITHUB_TOKEN }}
       - if: ${{ github.ref == 'refs/heads/main' }}
         name: Publish container image
-        run: docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.VERSION }}
+        run: docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/spring-boot-strategy-plugin:${{ env.VERSION }}
