@@ -46,7 +46,7 @@ services:
       - "3100:3100"
 
   fluent-bit:
-    image: grafana/fluent-bit-plugin-loki:2.4.2-amd64
+    image: grafana/fluent-bit-plugin-loki:2.6.1-amd64
     container_name: fluent-bit
     ports:
       - "24224:24224"
