@@ -7,7 +7,7 @@ plugins {
 
 group = 'com.example.strategy.plugin'
 version = '0.0.1-SNAPSHOT'
-sourceCompatibility = '17'
+sourceCompatibility = '18'
 
 repositories {
   mavenCentral()
@@ -23,6 +23,9 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
     runtimeOnly 'io.opentelemetry.javaagent:opentelemetry-javaagent:1.18.0'
+
+    //Swagger
+    implementation "org.springdoc:springdoc-openapi-ui:1.6.11"
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
