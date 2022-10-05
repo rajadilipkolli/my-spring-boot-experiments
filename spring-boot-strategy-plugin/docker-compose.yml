@@ -38,7 +38,7 @@ services:
       - ./platform/grafana/grafana.ini:/etc/grafana/grafana.ini
 
   loki:
-    image: grafana/loki:2.4.2
+    image: grafana/loki:2.6.1
     container_name: loki
     depends_on:
       - fluent-bit
