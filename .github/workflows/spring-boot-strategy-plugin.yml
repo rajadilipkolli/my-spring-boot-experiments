@@ -43,9 +43,11 @@ jobs:
       - name: Build and analyze
         run: ./gradlew clean build --info
 
-      - name: Build container image
+      - if: ${{ github.ref == 'refs/heads/main' }}
+        name: Build container image
         run: ./gradlew bootBuildImage --imageName ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/spring-boot-strategy-plugin:${{ env.VERSION }}
-      - name: OCI image vulnerability scanning
+      - if: ${{ github.ref == 'refs/heads/main' }}
+        name: OCI image vulnerability scanning
         uses: anchore/scan-action@v3
         id: scan
         with:
@@ -53,11 +55,13 @@ jobs:
           fail-build: false
           severity-cutoff: high
           acs-report-enable: true
-      - name: Log in to the Container registry
+      - if: ${{ github.ref == 'refs/heads/main' }}
+        name: Log in to the Container registry
         uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Publish container image
+      - if: ${{ github.ref == 'refs/heads/main' }}
+        name: Publish container image
         run: docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/spring-boot-strategy-plugin:${{ env.VERSION }}
