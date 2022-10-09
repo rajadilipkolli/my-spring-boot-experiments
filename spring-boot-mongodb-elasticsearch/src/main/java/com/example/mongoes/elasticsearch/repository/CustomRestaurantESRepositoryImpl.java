@@ -15,7 +15,6 @@ import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.BucketOrder;
 import org.elasticsearch.search.aggregations.bucket.range.DateRangeAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
-import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -83,7 +82,8 @@ public class CustomRestaurantESRepositoryImpl implements CustomRestaurantESRepos
             List<String> queries, Pageable pageable) {
         Query query =
                 new NativeSearchQuery(
-                        QueryBuilders.termsQuery("borough.keyword", queries.stream().toList()));
+                        QueryBuilders.termsQuery(
+                                "borough", queries.stream().map(String::toLowerCase).toList()));
         query.setPageable(pageable);
 
         return reactiveElasticsearchOperations.searchForPage(query, Restaurant.class);
@@ -92,13 +92,11 @@ public class CustomRestaurantESRepositoryImpl implements CustomRestaurantESRepos
     @Override
     public Mono<SearchPage<Restaurant>> queryBoolWithShould(
             String borough, String cuisine, String name, Pageable pageable) {
-        SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
         BoolQueryBuilder queryBuilders = new BoolQueryBuilder();
         queryBuilders.should(QueryBuilders.matchQuery("borough", borough));
         queryBuilders.should(QueryBuilders.wildcardQuery("cuisine", "*" + cuisine + "*"));
         queryBuilders.should(QueryBuilders.matchQuery("name", name));
-        sourceBuilder.query(queryBuilders);
-        Query query = new NativeSearchQuery(sourceBuilder.query());
+        Query query = new NativeSearchQuery(queryBuilders);
         query.setPageable(pageable);
 
         return reactiveElasticsearchOperations.searchForPage(query, Restaurant.class);
