@@ -7,7 +7,6 @@ import com.example.mongoes.document.Restaurant;
 import com.example.mongoes.elasticsearch.repository.RestaurantESRepository;
 import com.example.mongoes.mongodb.repository.ChangeStreamResumeRepository;
 import com.example.mongoes.mongodb.repository.RestaurantRepository;
-import com.example.mongoes.response.ResultData;
 import com.example.mongoes.utils.AppConstants;
 import com.example.mongoes.utils.DateUtility;
 import com.mongodb.client.model.changestream.ChangeStreamDocument;
@@ -30,7 +29,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.elasticsearch.core.SearchPage;
-import org.springframework.data.elasticsearch.core.geo.GeoPoint;
 import org.springframework.data.geo.Point;
 import org.springframework.data.mongodb.core.ChangeStreamEvent;
 import org.springframework.data.mongodb.core.ChangeStreamOptions;
@@ -185,20 +183,19 @@ public class RestaurantService {
 
     private ChangeStreamOptions getChangeStreamOption() {
         List<ChangeStreamResume> resumeTokenList = getResumeToken();
-        ChangeStreamOptions changeStreamOption;
+        ChangeStreamOptions.ChangeStreamOptionsBuilder changeStreamOptionsBuilder;
         if (resumeTokenList.isEmpty()) {
             // Scenario where MongoDb is started freshly hence resumeToken is empty
-            changeStreamOption =
+            changeStreamOptionsBuilder =
                     ChangeStreamOptions.builder()
-                            .resumeAt(new BsonTimestamp(Instant.now().getEpochSecond()))
-                            .build();
+                            .resumeAt(new BsonTimestamp(Instant.now().getEpochSecond()));
         } else {
-            changeStreamOption =
+            changeStreamOptionsBuilder =
                     ChangeStreamOptions.builder()
-                            .resumeAt(resumeTokenList.get(0).getResumeTimestamp())
-                            .build();
+                            .resumeAt(resumeTokenList.get(0).getResumeTimestamp());
         }
-        return changeStreamOption;
+        changeStreamOptionsBuilder.returnFullDocumentOnUpdate();
+        return changeStreamOptionsBuilder.build();
     }
 
     private List<ChangeStreamResume> getResumeToken() {
@@ -213,23 +210,6 @@ public class RestaurantService {
 
     public Mono<Restaurant> createRestaurant(Restaurant restaurant) {
         return save(restaurant);
-    }
-
-    public Flux<ResultData> searchRestaurantsWithInRange(
-            Double lat, Double lon, Double distance, String unit) {
-        GeoPoint location = new GeoPoint(lat, lon);
-        return this.restaurantESRepository
-                .searchWithin(location, distance, unit)
-                .flatMap(
-                        eRestaurantSearchHit -> {
-                            Double dist = (Double) eRestaurantSearchHit.getSortValues().get(0);
-                            Restaurant eRestaurant = eRestaurantSearchHit.getContent();
-                            return Mono.just(
-                                    new ResultData(
-                                            eRestaurant.getName(),
-                                            eRestaurant.getAddress().getLocation(),
-                                            dist));
-                        });
     }
 
     public Mono<Void> deleteAll() {
