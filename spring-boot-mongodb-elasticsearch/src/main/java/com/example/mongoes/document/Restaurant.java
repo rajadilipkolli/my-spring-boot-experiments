@@ -31,20 +31,21 @@ public class Restaurant {
     @Id private String id;
 
     @Indexed
-    @Field("restaurant_id")
+    @Field(value = "restaurant_id", type = FieldType.Long)
     @org.springframework.data.mongodb.core.mapping.Field("restaurant_id")
     private Long restaurantId;
 
+    @NotBlank(message = "Restaurant Name Can't be Blank")
     private String name;
 
     @Field(type = FieldType.Nested, includeInParent = true)
     private Address address;
 
-    @NotBlank(message = "Borough Cant be Blank")
-    @Field(type = FieldType.Keyword)
+    @NotBlank(message = "Borough Can't be Blank")
+    @Field(fielddata = true, type = FieldType.Text)
     private String borough;
 
-    @NotBlank(message = "Cuisine Cant be Blank")
+    @NotBlank(message = "Cuisine Can't be Blank")
     @Field(fielddata = true, type = FieldType.Text)
     private String cuisine;
 

@@ -35,7 +35,7 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class CustomRestaurantESRepositoryImpl implements CustomRestaurantESRepository {
 
-    private static final int PAGE_SIZE = 10_000;
+    private static final int PAGE_SIZE = 1_000;
     private final ReactiveElasticsearchOperations reactiveElasticsearchOperations;
 
     @Override
@@ -69,17 +69,10 @@ public class CustomRestaurantESRepositoryImpl implements CustomRestaurantESRepos
     }
 
     @Override
-    public Mono<SearchPage<Restaurant>> queryBoroughKeywordTerm(String keyword, Pageable pageable) {
-        Query query = new NativeSearchQuery(QueryBuilders.termQuery("borough.keyword", keyword));
-        query.setPageable(pageable);
-
-        return reactiveElasticsearchOperations.searchForPage(query, Restaurant.class);
-    }
-
-    @Override
     public Mono<SearchPage<Restaurant>> termQueryForBorough(String queryTerm, Pageable pageable) {
         Query query =
-                new NativeSearchQuery(QueryBuilders.termQuery("borough", queryTerm.toLowerCase()));
+                new NativeSearchQuery(
+                        QueryBuilders.termQuery("borough", queryTerm).caseInsensitive(true));
         query.setPageable(pageable);
 
         return reactiveElasticsearchOperations.searchForPage(query, Restaurant.class);
@@ -90,8 +83,7 @@ public class CustomRestaurantESRepositoryImpl implements CustomRestaurantESRepos
             List<String> queries, Pageable pageable) {
         Query query =
                 new NativeSearchQuery(
-                        QueryBuilders.termsQuery(
-                                "borough", queries.stream().map(String::toLowerCase).toList()));
+                        QueryBuilders.termsQuery("borough.keyword", queries.stream().toList()));
         query.setPageable(pageable);
 
         return reactiveElasticsearchOperations.searchForPage(query, Restaurant.class);
@@ -114,21 +106,21 @@ public class CustomRestaurantESRepositoryImpl implements CustomRestaurantESRepos
 
     @Override
     public Mono<SearchPage<Restaurant>> wildcardSearch(String queryKeyword, Pageable pageable) {
-        SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
         BoolQueryBuilder queryBuilders = new BoolQueryBuilder();
         queryBuilders.should(QueryBuilders.wildcardQuery("borough", "*" + queryKeyword + "*"));
         queryBuilders.should(QueryBuilders.wildcardQuery("cuisine", "*" + queryKeyword + "*"));
         queryBuilders.should(QueryBuilders.wildcardQuery("name", "*" + queryKeyword + "*"));
-        sourceBuilder.query(queryBuilders);
-        Query query = new NativeSearchQuery(sourceBuilder.query());
+        Query query = new NativeSearchQuery(queryBuilders);
         query.setPageable(pageable);
 
         return reactiveElasticsearchOperations.searchForPage(query, Restaurant.class);
     }
 
     @Override
-    public Mono<SearchPage<Restaurant>> regExpSearch(String queryKeyword, Pageable pageable) {
-        Query query = new NativeSearchQuery(QueryBuilders.regexpQuery("borough", "e[a-z]*h"));
+    public Mono<SearchPage<Restaurant>> regExpSearch(String reqEx, Pageable pageable) {
+        Query query =
+                new NativeSearchQuery(
+                        QueryBuilders.regexpQuery("borough", reqEx).caseInsensitive(true));
         query.setPageable(pageable);
 
         return reactiveElasticsearchOperations.searchForPage(query, Restaurant.class);

@@ -21,7 +21,7 @@ class ApplicationIntegrationTest extends AbstractIntegrationTest {
         Function<UriBuilder, URI> uriFunction =
                 uriBuilder ->
                         uriBuilder
-                                .path("/restaurant/withInRange")
+                                .path("/search/restaurant/withInRange")
                                 .queryParam("lat", -73.9)
                                 .queryParam("lon", 40.8)
                                 .queryParam("distance", 50)

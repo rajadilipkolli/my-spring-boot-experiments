@@ -14,6 +14,7 @@ vscode:
     - vscjava.vscode-spring-initializr
     - GabrielBB.vscode-lombok
     - redhat.java
+    - ms-azuretools.vscode-docker
 
 
 ports:
