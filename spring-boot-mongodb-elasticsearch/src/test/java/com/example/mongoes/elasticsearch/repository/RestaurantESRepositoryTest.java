@@ -9,6 +9,9 @@ import com.example.mongoes.document.Grades;
 import com.example.mongoes.document.Restaurant;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import org.elasticsearch.search.aggregations.Aggregation;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -17,6 +20,7 @@ import org.springframework.boot.test.autoconfigure.data.elasticsearch.DataElasti
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.elasticsearch.core.ElasticsearchAggregations;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchPage;
 import org.springframework.data.elasticsearch.core.geo.GeoPoint;
@@ -36,7 +40,7 @@ class RestaurantESRepositoryTest extends ElasticsearchContainerSetUp {
     @Autowired private RestaurantESRepository restaurantESRepository;
 
     @BeforeAll
-    void setUpData() {
+    void setUpData() throws InterruptedException {
         Restaurant restaurant = new Restaurant();
         restaurant.setRestaurantId(2L);
         restaurant.setName(RESTAURANT_NAME);
@@ -53,12 +57,15 @@ class RestaurantESRepositoryTest extends ElasticsearchContainerSetUp {
         restaurant1.setBorough("Brooklyn");
         restaurant1.setCuisine("Chinese");
         restaurant1.setName("Yono gardens");
+        restaurant1.setGrades(List.of(grade, grade1));
         this.restaurantESRepository
                 .deleteAll()
                 .log()
                 .thenMany(this.restaurantESRepository.saveAll(List.of(restaurant, restaurant1)))
                 .log("saving restaurant")
                 .subscribe();
+
+        TimeUnit.SECONDS.sleep(5);
     }
 
     @Test
@@ -298,7 +305,7 @@ class RestaurantESRepositoryTest extends ElasticsearchContainerSetUp {
                             assertThat(restaurant1.getName()).isEqualTo("Yono gardens");
                             assertThat(restaurant1.getBorough()).isEqualTo(BOROUGH_NAME);
                             assertThat(restaurant1.getCuisine()).isEqualTo("Chinese");
-                            assertThat(restaurant1.getGrades()).isEmpty();
+                            assertThat(restaurant1.getGrades()).isNotEmpty().hasSize(2);
                         })
                 .verifyComplete();
     }
@@ -388,18 +395,18 @@ class RestaurantESRepositoryTest extends ElasticsearchContainerSetUp {
                 this.restaurantESRepository.searchDateRange(
                         LocalDateTime.of(2021, 12, 31, 23, 59, 59).toString(),
                         LocalDateTime.of(2022, 4, 11, 0, 0, 0).toString(),
-                        PageRequest.of(0, 5));
+                        PageRequest.of(0, 5, Sort.by(Sort.Direction.ASC, "restaurant_id")));
 
         StepVerifier.create(searchDateRangeMono)
                 .consumeNextWith(
                         searchPage -> {
-                            assertThat(searchPage.getNumberOfElements()).isEqualTo(1);
+                            assertThat(searchPage.getNumberOfElements()).isEqualTo(2);
                             assertThat(searchPage.getTotalPages()).isEqualTo(1);
                             assertThat(searchPage.isFirst()).isEqualTo(true);
                             assertThat(searchPage.isLast()).isEqualTo(true);
                             assertThat(searchPage.isEmpty()).isEqualTo(false);
                             assertThat(searchPage.hasContent()).isEqualTo(true);
-                            assertThat(searchPage.stream().count()).isEqualTo(1);
+                            assertThat(searchPage.stream().count()).isEqualTo(2);
                             Restaurant restaurant1 = searchPage.getContent().get(0).getContent();
                             assertThat(restaurant1.getRestaurantId()).isEqualTo(2L);
                             assertThat(restaurant1.getName()).isEqualTo(RESTAURANT_NAME);
@@ -432,6 +439,49 @@ class RestaurantESRepositoryTest extends ElasticsearchContainerSetUp {
                             assertThat(restaurant1.getBorough()).isEqualTo(BOROUGH_NAME);
                             assertThat(restaurant1.getCuisine()).isEqualTo(CUISINE_NAME);
                             assertThat(restaurant1.getGrades()).isNotEmpty().hasSize(2);
+                        })
+                .verifyComplete();
+    }
+
+    @Test
+    void testAggregation() {
+        Mono<SearchPage<Restaurant>> aggregationMono =
+                this.restaurantESRepository.aggregateSearch(
+                        "Pizza",
+                        List.of("name", "borough", "cuisine"),
+                        Sort.Direction.ASC,
+                        10,
+                        0,
+                        new String[] {"restaurant_id"});
+
+        StepVerifier.create(aggregationMono)
+                .consumeNextWith(
+                        searchPage -> {
+                            assertThat(searchPage.getNumberOfElements()).isEqualTo(1);
+                            assertThat(searchPage.getTotalPages()).isEqualTo(1);
+                            assertThat(searchPage.isFirst()).isEqualTo(true);
+                            assertThat(searchPage.isLast()).isEqualTo(true);
+                            assertThat(searchPage.isEmpty()).isEqualTo(false);
+                            assertThat(searchPage.hasContent()).isEqualTo(true);
+                            assertThat(searchPage.getSearchHits().getAggregations())
+                                    .isNotNull()
+                                    .isExactlyInstanceOf(ElasticsearchAggregations.class);
+                            assertThat(searchPage.stream().count()).isEqualTo(1);
+                            Restaurant restaurant1 = searchPage.getContent().get(0).getContent();
+                            assertThat(restaurant1.getRestaurantId()).isEqualTo(2L);
+                            assertThat(restaurant1.getName()).isEqualTo(RESTAURANT_NAME);
+                            assertThat(restaurant1.getBorough()).isEqualTo(BOROUGH_NAME);
+                            assertThat(restaurant1.getCuisine()).isEqualTo(CUISINE_NAME);
+                            assertThat(restaurant1.getGrades()).isNotEmpty().hasSize(2);
+                            ElasticsearchAggregations elasticsearchAggregations =
+                                    (ElasticsearchAggregations)
+                                            searchPage.getSearchHits().getAggregations();
+                            assertThat(elasticsearchAggregations.aggregations()).isNotNull();
+                            Map<String, Aggregation> aggregationMap =
+                                    elasticsearchAggregations.aggregations().asMap();
+                            assertThat(aggregationMap).isNotEmpty().hasSize(3);
+                            assertThat(aggregationMap)
+                                    .containsOnlyKeys("MyCuisine", "MyDateRange", "MyBorough");
                         })
                 .verifyComplete();
     }
