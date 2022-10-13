@@ -22,7 +22,7 @@ dependencies {
     // Observability
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
-    runtimeOnly 'io.opentelemetry.javaagent:opentelemetry-javaagent:1.18.0'
+    runtimeOnly 'io.opentelemetry.javaagent:opentelemetry-javaagent:1.19.0'
 
     //Swagger
     implementation "org.springdoc:springdoc-openapi-ui:1.6.11"
