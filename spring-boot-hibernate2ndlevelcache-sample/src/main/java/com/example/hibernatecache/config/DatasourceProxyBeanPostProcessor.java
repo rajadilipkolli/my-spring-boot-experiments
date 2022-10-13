@@ -37,10 +37,8 @@ public class DatasourceProxyBeanPostProcessor implements BeanPostProcessor {
         return bean;
     }
 
-    private static class ProxyDataSourceInterceptor implements MethodInterceptor {
-        private final DataSource dataSource;
-
-        public ProxyDataSourceInterceptor(final DataSource dataSource) {
+    private record ProxyDataSourceInterceptor(DataSource dataSource) implements MethodInterceptor {
+        private ProxyDataSourceInterceptor(final DataSource dataSource) {
             this.dataSource =
                     ProxyDataSourceBuilder.create(dataSource)
                             .name("DS-Proxy")
