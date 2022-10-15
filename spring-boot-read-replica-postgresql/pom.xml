@@ -9,7 +9,7 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.example.demo</groupId>
-    <artifactId>read-replica-postgresql</artifactId>
+    <artifactId>spring-boot-read-replica-postgresql</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>read-replica</name>
     <description>Demo project for Spring Boot Read Replica</description>
