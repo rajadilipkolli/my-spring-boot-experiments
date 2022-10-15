@@ -1,5 +1,6 @@
 package com.example.jobrunr.config;
 
+import com.example.jobrunr.utils.AppConstants;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -10,11 +11,13 @@ import org.jobrunr.scheduling.BackgroundJob;
 import org.jobrunr.scheduling.JobScheduler;
 import org.jobrunr.scheduling.cron.Cron;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
 @Slf4j
+@Profile({AppConstants.PROFILE_NOT_TEST, AppConstants.PROFILE_NOT_PROD})
 public class Initializer implements CommandLineRunner {
 
     private final JobScheduler jobScheduler;
