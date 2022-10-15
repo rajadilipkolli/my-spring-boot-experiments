@@ -1,42 +1,58 @@
-version: "3.4"
+version: '3.8'
 
 services:
   mongo1:
     container_name: mongo1
     image: mongo:5.0.13
-    volumes:
-      - ./scripts/rs-init.sh:/scripts/rs-init.sh
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+      - "docker.for.win.host.internal:host-gateway"
     networks:
-      - mongo-network
+      - mongoCluster
     ports:
       - 27017:27017
-    depends_on:
-      - mongo2
-      - mongo3
     links:
       - mongo2
       - mongo3
     restart: always
-    entrypoint: [ "/usr/bin/mongod", "--bind_ip_all", "--replSet", "rs0" ]
-
+    entrypoint: [ "/usr/bin/mongod", "--replSet", "myReplicaSet", "--bind_ip", "localhost,mongo1" ]
   mongo2:
     container_name: mongo2
     image: mongo:5.0.13
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+      - "docker.for.win.host.internal:host-gateway"
     networks:
-      - mongo-network
+      - mongoCluster
     ports:
       - 27018:27017
     restart: always
-    entrypoint: [ "/usr/bin/mongod", "--bind_ip_all", "--replSet", "rs0" ]
+    entrypoint: [ "/usr/bin/mongod", "--replSet", "myReplicaSet", "--bind_ip", "localhost,mongo2" ]
   mongo3:
     container_name: mongo3
     image: mongo:5.0.13
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+      - "docker.for.win.host.internal:host-gateway"
     networks:
-      - mongo-network
+      - mongoCluster
     ports:
       - 27019:27017
     restart: always
-    entrypoint: [ "/usr/bin/mongod", "--bind_ip_all", "--replSet", "rs0" ]
+    entrypoint: [ "/usr/bin/mongod", "--replSet", "myReplicaSet", "--bind_ip", "localhost,mongo3" ]
+
+  mongo-express:
+    image: mongo-express
+    ports:
+      - "8081:8081"
+    networks:
+      - mongoCluster
+    environment:
+      #      - ME_CONFIG_MONGODB_ADMINUSERNAME=admin
+      #      - ME_CONFIG_MONGODB_ADMINPASSWORD=passcode
+      #      - ME_CONFIG_MONGODB_SERVER=mongodb
+      - ME_CONFIG_MONGODB_URL= mongodb://mongo1:27017,mongo2:27018,mongo3:27019/?replicaSet=myReplicaSet
+    restart: unless-stopped
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.17.6
@@ -44,14 +60,29 @@ services:
     environment:
       - discovery.type=single-node
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    networks:
+      - mongoCluster
     ports:
       - "9200:9200"
       - "9300:9300"
     volumes:
       - esdata1:/usr/share/elasticsearch/data
 
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.17.6
+    restart: always
+    ports:
+      - 5601:5601
+    networks:
+      - mongoCluster
+    environment:
+      ELASTICSEARCH_URL: http://elasticsearch:9200
+      ELASTICSEARCH_HOSTS: '["http://elasticsearch:9200"]'
+    depends_on:
+      - elasticsearch
+
 networks:
-  mongo-network:
+  mongoCluster:
     driver: bridge
 
 volumes:

@@ -9,15 +9,15 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.example</groupId>
-    <artifactId>multipledatasources</artifactId>
+    <artifactId>spring-boot-multipledatasources</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>multipledatasources</name>
     <description>Demo project for using multiple datasource's in a Spring Boot Application</description>
 
     <properties>
         <java.version>19</java.version>
-        <testcontainers.version>1.17.4</testcontainers.version>
-        <spotless.version>2.27.1</spotless.version>
+        <testcontainers.version>1.17.5</testcontainers.version>
+        <spotless.version>2.27.2</spotless.version>
     </properties>
 
     <dependencies>

@@ -3,6 +3,7 @@ package com.example.mongoes.web.service;
 import com.example.mongoes.document.Restaurant;
 import com.example.mongoes.elasticsearch.repository.RestaurantESRepository;
 import com.example.mongoes.response.AggregationSearchResponse;
+import com.example.mongoes.response.ResultData;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,6 +20,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.elasticsearch.core.ElasticsearchAggregations;
 import org.springframework.data.elasticsearch.core.SearchPage;
+import org.springframework.data.elasticsearch.core.geo.GeoPoint;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -39,12 +41,6 @@ public class SearchService {
         Pageable pageable = PageRequest.of(offset, limit);
         return restaurantESRepository.findByBoroughOrCuisineOrName(
                 query, prefixPhraseEnabled, pageable);
-    }
-
-    public Mono<SearchPage<Restaurant>> queryBoroughKeywordTerm(
-            String query, Integer offset, Integer limit) {
-        Pageable pageable = PageRequest.of(offset, limit);
-        return restaurantESRepository.queryBoroughKeywordTerm(query, pageable);
     }
 
     public Mono<SearchPage<Restaurant>> termQueryForBorough(
@@ -173,4 +169,21 @@ public class SearchService {
 
                 return resultMap;
             };
+
+    public Flux<ResultData> searchRestaurantsWithInRange(
+            Double lat, Double lon, Double distance, String unit) {
+        GeoPoint location = new GeoPoint(lat, lon);
+        return this.restaurantESRepository
+                .searchWithin(location, distance, unit)
+                .flatMap(
+                        restaurantSearchHit -> {
+                            Double dist = (Double) restaurantSearchHit.getSortValues().get(0);
+                            Restaurant eRestaurant = restaurantSearchHit.getContent();
+                            return Mono.just(
+                                    new ResultData(
+                                            eRestaurant.getName(),
+                                            eRestaurant.getAddress().getLocation(),
+                                            dist));
+                        });
+    }
 }

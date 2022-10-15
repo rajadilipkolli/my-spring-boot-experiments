@@ -9,14 +9,14 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.example.demo</groupId>
-    <artifactId>read-replica-postgresql</artifactId>
+    <artifactId>spring-boot-read-replica-postgresql</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>read-replica</name>
     <description>Demo project for Spring Boot Read Replica</description>
 	
     <properties>
         <java.version>19</java.version>
-        <spotless.version>2.27.1</spotless.version>
+        <spotless.version>2.27.2</spotless.version>
         <springdoc-openapi.version>1.6.11</springdoc-openapi.version>
     </properties>
 
@@ -76,7 +76,7 @@
             <plugin>
                 <groupId>org.liquibase</groupId>
                 <artifactId>liquibase-maven-plugin</artifactId>
-                <version>4.16.1</version>
+                <version>4.17.0</version>
                 <configuration>
                     <propertyFile>
                         src/main/resources/liquibase.properties

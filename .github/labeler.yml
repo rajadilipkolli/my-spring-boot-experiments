@@ -1,36 +1,44 @@
-"component: hibernate2ndlevelcache-sample":
-  - spring-boot-hibernate2ndlevelcache-sample/**/*
-"component: strategy-plugin":
-  - spring-boot-strategy-plugin/**/*
-"component: mongodb-elasticsearch":
-  - spring-boot-mongodb-elasticsearch/**/*
-"component: jobrunr":
-  - spring-boot-jobrunr-sample/**/*
+"component : archunit":
+ - spring-boot-api-archunit-sample/**/*
+"component : choas-monkey":
+ - spring-boot-choas-monkey/**/*
+"component: data-envers":
+  - spring-boot-data-envers-sample/**/*
 "component: graphql-webflux":
   - spring-boot-graphql-webflux/**/*
-"component: dynamodb":
-  - aws-dynamodb-project/**/*
-"component: ses":
-  - aws-ses-project/**/*
-"component: sns":
-  - aws-sns-project/**/*
-"component: sqs":
-  - aws-sqs-project/**/*
-"component: kinesis":
-  - aws-kinesis-project/**/*
+"component: hibernate2ndlevelcache-sample":
+  - spring-boot-hibernate2ndlevelcache-sample/**/*
+"component: jobrunr":
+  - spring-boot-jobrunr-sample/**/*
+"component: mongodb-elasticsearch":
+  - spring-boot-mongodb-elasticsearch/**/*
+"component: multiple-datasources":
+  - spring-boot-multipledatasources/**/*
+"component: read-replica-postgres":
+  - spring-boot-read-replica-postgresql/**/*
+"component: strategy-plugin":
+  - spring-boot-strategy-plugin/**/*
+"component: togglz":
+  - spring-boot-togglz-sample/**/*
+"component: ultimate-redis":
+  - spring-boot-ultimate-redis/**/*
 "status: waiting-for-triage":
   - ./*
   - ./**/*
 "type: documentation": docs/**/*
 "type: dependency-upgrade":
+  - spring-boot-api-archunit-sample/pom.xml
+  - spring-boot-choas-monkey/build.gradle
+  - spring-boot-choas-monkey/gradle.properties
+  - spring-boot-data-envers-sample/build.gradle
+  - spring-boot-data-envers-sample/gradle.properties
   - spring-boot-hibernate2ndlevelcache-sample/pom.xml
-  - spring-boot-strategy-plugin/pom.xml
-  - spring-boot-mongodb-elasticsearch/pom.xml
   - spring-boot-jobrunr-sample/pom.xml
-  - spring-boot-graphql-webflux/gradle.properties
+  - spring-boot-mongodb-elasticsearch/pom.xml
+  - spring-boot-multipledatasources/pom.xml
+  - spring-boot-read-replica-postgresql/pom.xml
   - spring-boot-graphql-webflux/build.gradle
-  - aws-dynamodb-project/pom.xml
-  - aws-ses-project/pom.xml
-  - aws-sns-project/pom.xml
-  - aws-sqs-project/pom.xml
-  - aws-kinesis-project/pom.xml
+  - spring-boot-graphql-webflux/gradle.properties
+  - spring-boot-strategy-plugin/build.gradle
+  - spring-boot-togglz-sample/pom.xml
+  - spring-boot-ultimate-redis/pom.xml

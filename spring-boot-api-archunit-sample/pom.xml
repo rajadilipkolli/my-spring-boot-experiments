@@ -18,7 +18,7 @@
 	<properties>
 		<java.version>19</java.version>
 		
-		<spotless.version>2.27.1</spotless.version>
+		<spotless.version>2.27.2</spotless.version>
 		<!-- Test -->
 		<com.tngtech.archunit.version>1.0.0</com.tngtech.archunit.version>
 	</properties>

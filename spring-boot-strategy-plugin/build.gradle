@@ -2,13 +2,12 @@ plugins {
   id 'org.springframework.boot' version '3.0.0-M5'
   id 'io.spring.dependency-management' version '1.0.14.RELEASE'
   id 'java'
-  id 'org.graalvm.buildtools.native' version '0.9.14'
 }
 
 
 group = 'com.example.strategy.plugin'
 version = '0.0.1-SNAPSHOT'
-sourceCompatibility = '17'
+sourceCompatibility = '18'
 
 repositories {
   mavenCentral()
@@ -18,17 +17,19 @@ repositories {
 dependencies {
     implementation 'org.springframework.plugin:spring-plugin-core:2.0.0.RELEASE'
     implementation 'org.springframework.plugin:spring-plugin-metadata:2.0.0.RELEASE'
-
-    implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'org.springframework.boot:spring-boot-starter-web'
+
+    // Observability
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
+    runtimeOnly 'io.opentelemetry.javaagent:opentelemetry-javaagent:1.19.0'
+
+    //Swagger
+    implementation "org.springdoc:springdoc-openapi-ui:1.6.11"
+
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
 
 tasks.named('test') {
     useJUnitPlatform()
-}
-
-tasks.named('bootBuildImage') {
-    builder = 'paketobuildpacks/builder:tiny'
-    environment = ['BP_NATIVE_IMAGE': 'true']
 }

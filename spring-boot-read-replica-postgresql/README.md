@@ -11,4 +11,5 @@ Use below script for generating the difference in the database
 > ./diff.sh
 
 ### Reference
- - https://github.com/spring-tips/liquibase
+ - https://github.com/spring-tips/liquidate
+ - https://stackoverflow.com/questions/25911359/how-to-split-read-only-and-read-write-transactions-with-jpa-and-hibernate/26026237#26026237

@@ -2,6 +2,7 @@ package com.example.mongoes.web.controller;
 
 import com.example.mongoes.document.Restaurant;
 import com.example.mongoes.response.AggregationSearchResponse;
+import com.example.mongoes.response.ResultData;
 import com.example.mongoes.web.service.SearchService;
 import io.micrometer.core.annotation.Timed;
 import java.util.List;
@@ -35,19 +36,10 @@ public class SearchController {
             @RequestParam(value = "limit", defaultValue = "10") Integer limit,
             @RequestParam(value = "offset", defaultValue = "0") Integer offset,
             @RequestParam(value = "prefix_phrase_enabled", defaultValue = "false")
-                    Boolean prefixPhraseEnabled)
-            throws Exception {
+                    Boolean prefixPhraseEnabled) {
         return searchService
                 .multiSearchQuery(query, offset, limit, prefixPhraseEnabled)
                 .map(ResponseEntity::ok);
-    }
-
-    @GetMapping("/search/keyword/borough")
-    public Mono<ResponseEntity<SearchPage<Restaurant>>> searchKeywordTerm(
-            @RequestParam("query") String query,
-            @RequestParam(value = "limit", defaultValue = "10") Integer limit,
-            @RequestParam(value = "offset", defaultValue = "0") Integer offset) {
-        return searchService.queryBoroughKeywordTerm(query, offset, limit).map(ResponseEntity::ok);
     }
 
     @GetMapping("/search/term/borough")
@@ -90,7 +82,7 @@ public class SearchController {
                 .map(ResponseEntity::ok);
     }
 
-    @GetMapping("/search/wildcard")
+    @GetMapping("/search/wildcard/borough")
     public Mono<ResponseEntity<SearchPage<Restaurant>>> searchBoolShould(
             @RequestParam("query") String query,
             @RequestParam(value = "limit", defaultValue = "10") Integer limit,
@@ -98,7 +90,7 @@ public class SearchController {
         return searchService.wildcardSearch(query, offset, limit).map(ResponseEntity::ok);
     }
 
-    @GetMapping("/search/regexp")
+    @GetMapping("/search/regexp/borough")
     public Mono<ResponseEntity<SearchPage<Restaurant>>> searchRegularExpression(
             @RequestParam("query") String query,
             @RequestParam(value = "limit", defaultValue = "10") Integer limit,
@@ -151,5 +143,14 @@ public class SearchController {
         return searchService
                 .aggregateSearch(searchKeyword, fieldNames, sortOrder, limit, offset, sortFields)
                 .map(ResponseEntity::ok);
+    }
+
+    @GetMapping("/search/restaurant/withInRange")
+    public Flux<ResultData> searchRestaurantsWithInRange(
+            @RequestParam Double lat,
+            @RequestParam Double lon,
+            @RequestParam Double distance,
+            @RequestParam(defaultValue = "km", required = false) String unit) {
+        return this.searchService.searchRestaurantsWithInRange(lat, lon, distance, unit);
     }
 }

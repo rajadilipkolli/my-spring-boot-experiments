@@ -17,8 +17,6 @@ public interface CustomRestaurantESRepository {
     Mono<SearchPage<Restaurant>> findByBoroughOrCuisineOrName(
             String query, Boolean prefixPhraseEnabled, Pageable pageable);
 
-    Mono<SearchPage<Restaurant>> queryBoroughKeywordTerm(String query, Pageable pageable);
-
     Mono<SearchPage<Restaurant>> termQueryForBorough(String query, Pageable pageable);
 
     Mono<SearchPage<Restaurant>> termsQueryForBorough(List<String> queries, Pageable pageable);
@@ -28,7 +26,7 @@ public interface CustomRestaurantESRepository {
 
     Mono<SearchPage<Restaurant>> wildcardSearch(String queryKeyword, Pageable pageable);
 
-    Mono<SearchPage<Restaurant>> regExpSearch(String queryKeyword, Pageable pageable);
+    Mono<SearchPage<Restaurant>> regExpSearch(String reqEx, Pageable pageable);
 
     Mono<SearchPage<Restaurant>> searchSimpleQueryForBoroughAndCuisine(
             String queryKeyword, Pageable pageable);

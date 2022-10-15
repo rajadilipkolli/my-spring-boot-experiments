@@ -3,7 +3,6 @@ package com.example.mongoes.web.controller;
 import com.example.mongoes.document.Grades;
 import com.example.mongoes.document.Restaurant;
 import com.example.mongoes.response.GenericMessage;
-import com.example.mongoes.response.ResultData;
 import com.example.mongoes.web.service.RestaurantService;
 import io.micrometer.core.annotation.Timed;
 import java.net.URI;
@@ -20,7 +19,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @RestController
@@ -90,14 +88,5 @@ public class RestaurantController {
                         new GenericMessage(
                                 String.format(
                                         "restaurant with name %s created", restaurant.getName())));
-    }
-
-    @GetMapping("/withInRange")
-    public Flux<ResultData> searchRestaurantsWithInRange(
-            @RequestParam Double lat,
-            @RequestParam Double lon,
-            @RequestParam Double distance,
-            @RequestParam(defaultValue = "km", required = false) String unit) {
-        return this.restaurantService.searchRestaurantsWithInRange(lat, lon, distance, unit);
     }
 }
