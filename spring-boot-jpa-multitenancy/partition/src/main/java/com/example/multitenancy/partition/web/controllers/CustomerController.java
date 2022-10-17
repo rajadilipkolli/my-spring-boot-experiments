@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -31,44 +32,48 @@ public class CustomerController {
     }
 
     @GetMapping
-    public List<Customer> getAllCustomers() {
-        return customerService.findAllCustomers();
+    public List<Customer> getAllCustomers(@RequestParam String tenant) {
+        return customerService.findAllCustomers(tenant);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Customer> getCustomerById(@PathVariable Long id) {
+    public ResponseEntity<Customer> getCustomerById(
+            @PathVariable Long id, @RequestParam String tenant) {
         return customerService
-                .findCustomerById(id)
+                .findCustomerById(id, tenant)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Customer createCustomer(@RequestBody @Validated Customer customer) {
-        return customerService.saveCustomer(customer);
+    public Customer createCustomer(
+            @RequestBody @Validated Customer customer, @RequestParam String tenant) {
+        return customerService.saveCustomer(customer, tenant);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<Customer> updateCustomer(
-            @PathVariable Long id, @RequestBody Customer customer) {
+            @PathVariable Long id, @RequestBody Customer customer, @RequestParam String tenant) {
         return customerService
-                .findCustomerById(id)
+                .findCustomerById(id, tenant)
                 .map(
                         customerObj -> {
                             customer.setId(id);
-                            return ResponseEntity.ok(customerService.saveCustomer(customer));
+                            return ResponseEntity.ok(
+                                    customerService.saveCustomer(customer, tenant));
                         })
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Customer> deleteCustomer(@PathVariable Long id) {
+    public ResponseEntity<Customer> deleteCustomer(
+            @PathVariable Long id, @RequestParam String tenant) {
         return customerService
-                .findCustomerById(id)
+                .findCustomerById(id, tenant)
                 .map(
                         customer -> {
-                            customerService.deleteCustomerById(id);
+                            customerService.deleteCustomerById(id, tenant);
                             return ResponseEntity.ok(customer);
                         })
                 .orElseGet(() -> ResponseEntity.notFound().build());
