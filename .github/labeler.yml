@@ -10,6 +10,8 @@
   - spring-boot-hibernate2ndlevelcache-sample/**/*
 "component: jobrunr":
   - spring-boot-jobrunr-sample/**/*
+"component: jpa-multitenancy":
+  - spring-boot-jpa-multitenancy/**/*
 "component: mongodb-elasticsearch":
   - spring-boot-mongodb-elasticsearch/**/*
 "component: multiple-datasources":
@@ -33,6 +35,9 @@
   - spring-boot-data-envers-sample/build.gradle
   - spring-boot-data-envers-sample/gradle.properties
   - spring-boot-hibernate2ndlevelcache-sample/pom.xml
+  - spring-boot-jpa-multitenancy/db/pom.xml
+  - spring-boot-jpa-multitenancy/partition/pom.xml
+  - spring-boot-jpa-multitenancy/schema/pom.xml
   - spring-boot-jobrunr-sample/pom.xml
   - spring-boot-mongodb-elasticsearch/pom.xml
   - spring-boot-multipledatasources/pom.xml
