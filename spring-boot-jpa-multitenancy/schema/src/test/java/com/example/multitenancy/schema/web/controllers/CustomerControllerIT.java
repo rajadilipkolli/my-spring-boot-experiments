@@ -11,6 +11,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.example.multitenancy.schema.common.AbstractIntegrationTest;
+import com.example.multitenancy.schema.config.TenantIdentifierResolver;
 import com.example.multitenancy.schema.entities.Customer;
 import com.example.multitenancy.schema.repositories.CustomerRepository;
 import java.util.ArrayList;
@@ -23,26 +24,32 @@ import org.springframework.http.MediaType;
 class CustomerControllerIT extends AbstractIntegrationTest {
 
     @Autowired private CustomerRepository customerRepository;
+    @Autowired private TenantIdentifierResolver tenantIdentifierResolver;
 
     private List<Customer> customerList = null;
 
     @BeforeEach
     void setUp() {
+        tenantIdentifierResolver.setCurrentTenant("test1");
         customerRepository.deleteAll();
 
         customerList = new ArrayList<>();
-        customerList.add(new Customer(1L, "First Customer"));
-        customerList.add(new Customer(2L, "Second Customer"));
-        customerList.add(new Customer(3L, "Third Customer"));
+        customerList.add(new Customer(null, "First Customer"));
+        customerList.add(new Customer(null, "Second Customer"));
+        customerList.add(new Customer(null, "Third Customer"));
         customerList = customerRepository.saveAll(customerList);
     }
 
     @Test
     void shouldFetchAllCustomers() throws Exception {
         this.mockMvc
-                .perform(get("/api/customers"))
+                .perform(get("/api/customers").param("tenant", "test1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.size()", is(customerList.size())));
+        this.mockMvc
+                .perform(get("/api/customers").param("tenant", "test2"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.size()", is(0)));
     }
 
     @Test
@@ -51,9 +58,9 @@ class CustomerControllerIT extends AbstractIntegrationTest {
         Long customerId = customer.getId();
 
         this.mockMvc
-                .perform(get("/api/customers/{id}", customerId))
+                .perform(get("/api/customers/{id}", customerId).param("tenant", "test1"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.text", is(customer.getText())));
+                .andExpect(jsonPath("$.name", is(customer.getName())));
     }
 
     @Test
@@ -62,10 +69,11 @@ class CustomerControllerIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(
                         post("/api/customers")
+                                .param("tenant", "test1")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(customer)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.text", is(customer.getText())));
+                .andExpect(jsonPath("$.name", is(customer.getName())));
     }
 
     @Test
@@ -75,6 +83,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(
                         post("/api/customers")
+                                .param("tenant", "test1")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(customer)))
                 .andExpect(status().isBadRequest())
@@ -86,23 +95,24 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.title", is("Constraint Violation")))
                 .andExpect(jsonPath("$.status", is(400)))
                 .andExpect(jsonPath("$.violations", hasSize(1)))
-                .andExpect(jsonPath("$.violations[0].field", is("text")))
-                .andExpect(jsonPath("$.violations[0].message", is("Text cannot be empty")))
+                .andExpect(jsonPath("$.violations[0].field", is("name")))
+                .andExpect(jsonPath("$.violations[0].message", is("Name cannot be empty")))
                 .andReturn();
     }
 
     @Test
     void shouldUpdateCustomer() throws Exception {
         Customer customer = customerList.get(0);
-        customer.setText("Updated Customer");
+        customer.setName("Updated Customer");
 
         this.mockMvc
                 .perform(
                         put("/api/customers/{id}", customer.getId())
+                                .param("tenant", "test1")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(customer)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.text", is(customer.getText())));
+                .andExpect(jsonPath("$.name", is(customer.getName())));
     }
 
     @Test
@@ -110,8 +120,8 @@ class CustomerControllerIT extends AbstractIntegrationTest {
         Customer customer = customerList.get(0);
 
         this.mockMvc
-                .perform(delete("/api/customers/{id}", customer.getId()))
+                .perform(delete("/api/customers/{id}", customer.getId()).param("tenant", "test1"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.text", is(customer.getText())));
+                .andExpect(jsonPath("$.name", is(customer.getName())));
     }
 }

@@ -5,6 +5,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -43,6 +44,7 @@ class CustomerControllerTest {
     @Autowired private ObjectMapper objectMapper;
 
     private List<Customer> customerList;
+    private final String tenant = "test1";
 
     @BeforeEach
     void setUp() {
@@ -57,10 +59,10 @@ class CustomerControllerTest {
 
     @Test
     void shouldFetchAllCustomers() throws Exception {
-        given(customerService.findAllCustomers()).willReturn(this.customerList);
+        given(customerService.findAllCustomers(tenant)).willReturn(this.customerList);
 
         this.mockMvc
-                .perform(get("/api/customers"))
+                .perform(get("/api/customers").param("tenant", tenant))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.size()", is(customerList.size())));
     }
@@ -69,38 +71,40 @@ class CustomerControllerTest {
     void shouldFindCustomerById() throws Exception {
         Long customerId = 1L;
         Customer customer = new Customer(customerId, "text 1");
-        given(customerService.findCustomerById(customerId)).willReturn(Optional.of(customer));
+        given(customerService.findCustomerById(customerId, tenant))
+                .willReturn(Optional.of(customer));
 
         this.mockMvc
-                .perform(get("/api/customers/{id}", customerId))
+                .perform(get("/api/customers/{id}", customerId).param("tenant", tenant))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.text", is(customer.getText())));
+                .andExpect(jsonPath("$.name", is(customer.getName())));
     }
 
     @Test
     void shouldReturn404WhenFetchingNonExistingCustomer() throws Exception {
         Long customerId = 1L;
-        given(customerService.findCustomerById(customerId)).willReturn(Optional.empty());
+        given(customerService.findCustomerById(customerId, tenant)).willReturn(Optional.empty());
 
         this.mockMvc
-                .perform(get("/api/customers/{id}", customerId))
+                .perform(get("/api/customers/{id}", customerId).param("tenant", tenant))
                 .andExpect(status().isNotFound());
     }
 
     @Test
     void shouldCreateNewCustomer() throws Exception {
-        given(customerService.saveCustomer(any(Customer.class)))
+        given(customerService.saveCustomer(any(Customer.class), eq(tenant)))
                 .willAnswer((invocation) -> invocation.getArgument(0));
 
         Customer customer = new Customer(1L, "some text");
         this.mockMvc
                 .perform(
                         post("/api/customers")
+                                .param("tenant", tenant)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(customer)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id", notNullValue()))
-                .andExpect(jsonPath("$.text", is(customer.getText())));
+                .andExpect(jsonPath("$.name", is(customer.getName())));
     }
 
     @Test
@@ -110,6 +114,7 @@ class CustomerControllerTest {
         this.mockMvc
                 .perform(
                         post("/api/customers")
+                                .param("tenant", tenant)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(customer)))
                 .andExpect(status().isBadRequest())
@@ -121,8 +126,8 @@ class CustomerControllerTest {
                 .andExpect(jsonPath("$.title", is("Constraint Violation")))
                 .andExpect(jsonPath("$.status", is(400)))
                 .andExpect(jsonPath("$.violations", hasSize(1)))
-                .andExpect(jsonPath("$.violations[0].field", is("text")))
-                .andExpect(jsonPath("$.violations[0].message", is("Text cannot be empty")))
+                .andExpect(jsonPath("$.violations[0].field", is("name")))
+                .andExpect(jsonPath("$.violations[0].message", is("Name cannot be empty")))
                 .andReturn();
     }
 
@@ -130,28 +135,31 @@ class CustomerControllerTest {
     void shouldUpdateCustomer() throws Exception {
         Long customerId = 1L;
         Customer customer = new Customer(customerId, "Updated text");
-        given(customerService.findCustomerById(customerId)).willReturn(Optional.of(customer));
-        given(customerService.saveCustomer(any(Customer.class)))
+        given(customerService.findCustomerById(customerId, tenant))
+                .willReturn(Optional.of(customer));
+        given(customerService.saveCustomer(any(Customer.class), eq(tenant)))
                 .willAnswer((invocation) -> invocation.getArgument(0));
 
         this.mockMvc
                 .perform(
                         put("/api/customers/{id}", customer.getId())
+                                .param("tenant", tenant)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(customer)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.text", is(customer.getText())));
+                .andExpect(jsonPath("$.name", is(customer.getName())));
     }
 
     @Test
     void shouldReturn404WhenUpdatingNonExistingCustomer() throws Exception {
         Long customerId = 1L;
-        given(customerService.findCustomerById(customerId)).willReturn(Optional.empty());
+        given(customerService.findCustomerById(customerId, tenant)).willReturn(Optional.empty());
         Customer customer = new Customer(customerId, "Updated text");
 
         this.mockMvc
                 .perform(
                         put("/api/customers/{id}", customerId)
+                                .param("tenant", tenant)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(customer)))
                 .andExpect(status().isNotFound());
@@ -161,22 +169,23 @@ class CustomerControllerTest {
     void shouldDeleteCustomer() throws Exception {
         Long customerId = 1L;
         Customer customer = new Customer(customerId, "Some text");
-        given(customerService.findCustomerById(customerId)).willReturn(Optional.of(customer));
-        doNothing().when(customerService).deleteCustomerById(customer.getId());
+        given(customerService.findCustomerById(customerId, tenant))
+                .willReturn(Optional.of(customer));
+        doNothing().when(customerService).deleteCustomerById(customer.getId(), tenant);
 
         this.mockMvc
-                .perform(delete("/api/customers/{id}", customer.getId()))
+                .perform(delete("/api/customers/{id}", customer.getId()).param("tenant", tenant))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.text", is(customer.getText())));
+                .andExpect(jsonPath("$.name", is(customer.getName())));
     }
 
     @Test
     void shouldReturn404WhenDeletingNonExistingCustomer() throws Exception {
         Long customerId = 1L;
-        given(customerService.findCustomerById(customerId)).willReturn(Optional.empty());
+        given(customerService.findCustomerById(customerId, tenant)).willReturn(Optional.empty());
 
         this.mockMvc
-                .perform(delete("/api/customers/{id}", customerId))
+                .perform(delete("/api/customers/{id}", customerId).param("tenant", tenant))
                 .andExpect(status().isNotFound());
     }
 }

@@ -23,13 +23,10 @@ public class Customer {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "customer_id_generator")
-    @SequenceGenerator(
-            name = "customer_id_generator",
-            sequenceName = "customer_id_seq",
-            allocationSize = 100)
+    @SequenceGenerator(name = "customer_id_generator", sequenceName = "customers_seq")
     private Long id;
 
     @Column(nullable = false)
-    @NotEmpty(message = "Text cannot be empty")
-    private String text;
+    @NotEmpty(message = "Name cannot be empty")
+    private String name;
 }
