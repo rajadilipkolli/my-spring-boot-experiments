@@ -61,6 +61,10 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                 .perform(get("/api/customers/{id}", customerId).param("tenant", "test1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name", is(customer.getName())));
+
+        this.mockMvc
+                .perform(get("/api/customers/{id}", customerId).param("tenant", "test2"))
+                .andExpect(status().isNotFound());
     }
 
     @Test
@@ -77,7 +81,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
     }
 
     @Test
-    void shouldReturn400WhenCreateNewCustomerWithoutText() throws Exception {
+    void shouldReturn400WhenCreateNewCustomerWithoutName() throws Exception {
         Customer customer = new Customer(null, null);
 
         this.mockMvc
@@ -113,6 +117,14 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                                 .content(objectMapper.writeValueAsString(customer)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name", is(customer.getName())));
+
+        this.mockMvc
+                .perform(
+                        put("/api/customers/{id}", customer.getId())
+                                .param("tenant", "test2")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(customer)))
+                .andExpect(status().isNotFound());
     }
 
     @Test
@@ -123,5 +135,9 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                 .perform(delete("/api/customers/{id}", customer.getId()).param("tenant", "test1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name", is(customer.getName())));
+
+        this.mockMvc
+                .perform(delete("/api/customers/{id}", customer.getId()).param("tenant", "test1"))
+                .andExpect(status().isNotFound());
     }
 }
