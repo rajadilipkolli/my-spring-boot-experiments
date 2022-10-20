@@ -4,12 +4,8 @@
     "packageName": "com.example.choasmonkey",
     "databaseType": "postgresql",
     "dbMigrationTool": "liquibase",
-    "features": [
-      "elk",
-      "monitoring",
-      "localstack"
-    ],
-    "buildTool": "gradle",
+    "features": [],
+    "buildTool": "maven",
     "packageFolder": "com/example/choasmonkey",
     "liquibaseMigrationCounter": 2
   }
