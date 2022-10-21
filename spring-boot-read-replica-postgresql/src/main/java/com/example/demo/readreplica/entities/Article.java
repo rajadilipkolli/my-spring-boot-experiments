@@ -1,9 +1,9 @@
 package com.example.demo.readreplica.entities;
 
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import javax.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
