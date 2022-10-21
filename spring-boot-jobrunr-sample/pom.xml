@@ -19,8 +19,7 @@
 
         <java.version>17</java.version>
         <spring-cloud.version>2021.0.4</spring-cloud.version>
-        <problem-spring-web.version>0.27.0</problem-spring-web.version>
-        <springdoc-openapi.version>1.6.12</springdoc-openapi.version>
+        <springdoc-openapi.version>2.0.0-M7</springdoc-openapi.version>
         <commons-io.version>2.11.0</commons-io.version>
 
         <testcontainers.version>1.17.5</testcontainers.version>
@@ -53,11 +52,6 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.zalando</groupId>
-            <artifactId>problem-spring-web-starter</artifactId>
-            <version>${problem-spring-web.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -94,7 +88,7 @@
         </dependency>
         <dependency>
             <groupId>org.springdoc</groupId>
-            <artifactId>springdoc-openapi-ui</artifactId>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
             <version>${springdoc-openapi.version}</version>
         </dependency>
         <dependency>
@@ -158,6 +152,14 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <image>
+                        <buildpacks>
+                            <buildpack>gcr.io/paketo-buildpacks/bellsoft-liberica:9.9.0-ea</buildpack>
+                            <buildpack>gcr.io/paketo-buildpacks/java-native-image</buildpack>
+                        </buildpacks>
+                    </image>
+                </configuration>
                 <executions>
                     <execution>
                         <goals>
@@ -166,6 +168,24 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.hibernate.orm.tooling</groupId>
+                <artifactId>hibernate-enhance-maven-plugin</artifactId>
+                <version>${hibernate.version}</version>
+                <executions>
+                  <execution>
+                    <id>enhance</id>
+                    <goals>
+                      <goal>enhance</goal>
+                    </goals>
+                    <configuration>
+                      <enableLazyInitialization>true</enableLazyInitialization>
+                      <enableDirtyTracking>true</enableDirtyTracking>
+                      <enableAssociationManagement>true</enableAssociationManagement>
+                    </configuration>
+                  </execution>
+                </executions>
+              </plugin>
             <plugin>
                 <groupId>pl.project13.maven</groupId>
                 <artifactId>git-commit-id-plugin</artifactId>
