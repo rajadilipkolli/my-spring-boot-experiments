@@ -17,7 +17,5 @@
     </springProfile>
 
     <logger name="com.example.choasmonkey" level="DEBUG"/>
-    <logger name="com.amazonaws.util.EC2MetadataUtils" level="ERROR"/>
-    <logger name="com.amazonaws.internal.InstanceMetadataServiceResourceFetcher" level="ERROR"/>
 
 </configuration>

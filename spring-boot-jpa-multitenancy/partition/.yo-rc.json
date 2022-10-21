@@ -1,0 +1,12 @@
+{
+  "generator-springboot": {
+    "appName": "partition",
+    "packageName": "com.example.multitenancy.partition",
+    "databaseType": "postgresql",
+    "dbMigrationTool": "liquibase",
+    "features": [],
+    "buildTool": "maven",
+    "packageFolder": "com/example/multitenancy/partition",
+    "liquibaseMigrationCounter": 2
+  }
+}

@@ -14,12 +14,10 @@ For More info about this repository, Please visit [here](https://rajadilipkolli.
  ```
  docker compose up postgres pgadmin4
  ```
- 
  >  Clean up everything using 
  ```
  docker system prune -a -f --volumes
  ```
-
  >  Claim unused volumes 
  ```
  docker volume prune
@@ -28,4 +26,8 @@ For More info about this repository, Please visit [here](https://rajadilipkolli.
  ```
  docker container ls
  ```
- 
+> How to overwrite local changes with git pull
+
+Stash local changes: `$ git stash`
+
+Pull changes from remote: `$ git pull`

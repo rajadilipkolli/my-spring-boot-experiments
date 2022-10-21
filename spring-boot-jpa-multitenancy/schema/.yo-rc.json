@@ -1,0 +1,12 @@
+{
+  "generator-springboot": {
+    "appName": "schema",
+    "packageName": "com.example.multitenancy.schema",
+    "databaseType": "postgresql",
+    "dbMigrationTool": "liquibase",
+    "features": [],
+    "buildTool": "maven",
+    "packageFolder": "com/example/multitenancy/schema",
+    "liquibaseMigrationCounter": 2
+  }
+}

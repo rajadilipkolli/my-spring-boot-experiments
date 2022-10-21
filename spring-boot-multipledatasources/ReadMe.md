@@ -7,6 +7,7 @@ This example demostrates how to connect to multiple datasources in same spring b
  - [MySQL](./src/main/java/com/example/multipledatasources/model/member)
  - Liquibase - DataBase Migration Tool for Postgres Database
  - Flyway - DataBase Migration Tool for MySQL Database
+ - Swagger - http://localhost:8080/swagger-ui.html
 
 ### Notes
 
@@ -21,3 +22,4 @@ This example demostrates how to connect to multiple datasources in same spring b
 
  - Hibernate 6 By default enables pool-lo sequencing strategy with `table_seq` name instead of hibernate_seq with allocation size 50
  - javax.persistance is moved to jakarta.persistance
+ - added validation starter
