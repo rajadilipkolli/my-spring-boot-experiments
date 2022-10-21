@@ -31,3 +31,4 @@ build/
 multipledatasources/.jpb/jpb-settings.xml
 spring-boot-mongodb-elasticsearch/docker/data/
 .rewrite-cache/
+spring-boot-togglz-sample/SPRING_BOOT_3_UPGRADE_REPORT.html
