@@ -8,7 +8,16 @@
 $ docker-compose -f docker/docker-compose.yml up -d
 $ ./mvnw spring-boot:run -Dspring-boot.run.profiles=local
 ```
+### Run native 
+ Install GraalVM 22.3 or later
+ verify with native-image --version
 
+ ```
+ ./mvnw native:compile -Pnative
+```
+
+Building native Buildpacks
+./mvnw spring-boot:build-image -Pnative
 
 ### Useful Links
 * Swagger UI: http://localhost:8080/swagger-ui.html
