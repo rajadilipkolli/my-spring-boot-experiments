@@ -6,7 +6,7 @@ pipeline {
     }
 
     environment {
-        APPLICATION_NAME = 'my-spring-graphql-webmvc'
+        APPLICATION_NAME = 'spring-boot-graphql-webmvc'
     }
 
     stages {

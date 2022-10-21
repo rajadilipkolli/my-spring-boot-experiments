@@ -1,4 +1,4 @@
-# my-spring-graphql-webmvc
+# spring-boot-graphql-webmvc
 
 ### Run tests
 `$ ./mvnw clean verify`

@@ -9,10 +9,10 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.example.graphql</groupId>
-    <artifactId>my-spring-graphql-webmvc</artifactId>
+    <artifactId>spring-boot-graphql-webmvc</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>my-spring-graphql-webmvc</name>
-    <description>my-spring-graphql-webmvc</description>
+    <description>spring-boot-graphql-webmvc</description>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

@@ -1,6 +1,6 @@
 {
   "generator-springboot": {
-    "appName": "my-spring-graphql-webmvc",
+    "appName": "spring-boot-graphql-webmvc",
     "packageName": "com.example.graphql",
     "databaseType": "postgresql",
     "dbMigrationTool": "liquibase",

@@ -1,13 +1,13 @@
-name: my-spring-graphql-webmvc
+name: spring-boot-graphql-webmvc
 
 on:
   push:
     paths:
-      - "my-spring-graphql-webmvc/**"
+      - "spring-boot-graphql-webmvc/**"
     branches: [main]
   pull_request:
     paths:
-      - "my-spring-graphql-webmvc/**"
+      - "spring-boot-graphql-webmvc/**"
     types:
       - opened
       - synchronize
@@ -31,6 +31,6 @@ jobs:
 
       - name: Build and analyze
         run: |
-          cd my-spring-graphql-webmvc
+          cd spring-boot-graphql-webmvc
           chmod +x mvnw
           ./mvnw clean package
