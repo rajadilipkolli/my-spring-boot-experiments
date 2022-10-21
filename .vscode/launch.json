@@ -6,6 +6,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "Launch MultipleDataSourcesApplication",
+            "request": "launch",
+            "mainClass": "com.example.multipledatasources.MultipleDataSourcesApplication",
+            "projectName": "spring-boot-multipledatasources"
+        },
+        {
+            "type": "java",
             "name": "Launch StrategyPluginApplication",
             "request": "launch",
             "mainClass": "com.example.plugin.strategyplugin.StrategyPluginApplication",
