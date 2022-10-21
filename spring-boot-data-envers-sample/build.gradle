@@ -1,6 +1,7 @@
 buildscript {
     repositories {
         mavenCentral()
+        maven { url 'https://repo.spring.io/milestone' }
     }
     dependencies {
         classpath "org.owasp:dependency-check-gradle:${owasp_plugin_version}"
@@ -9,6 +10,7 @@ buildscript {
 plugins {
     id 'org.springframework.boot'
     id 'io.spring.dependency-management'
+    id 'org.graalvm.buildtools.native' version '0.9.16'
     id 'java-library'
     id 'java'
     id 'com.gorylenko.gradle-git-properties'
@@ -23,13 +25,7 @@ if (project.hasProperty("ci")) {
 
 group = 'com.example.envers'
 version = '0.0.1-SNAPSHOT'
-
-java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(19)
-        vendor = JvmVendorSpec.ADOPTIUM
-    }
-}
+sourceCompatibility = '17'
 
 configurations {
     compileOnly {
@@ -56,7 +52,6 @@ dependencies {
     runtimeOnly 'org.postgresql:postgresql'
     implementation 'org.liquibase:liquibase-core'
     implementation "org.springdoc:springdoc-openapi-ui:${springdoc_openapi_version}"
-    implementation "org.zalando:problem-spring-web-starter:${problem_spring_web_version}"
     implementation "org.apache.commons:commons-lang3"
     implementation "commons-io:commons-io:${commons_io_version}"
 
@@ -84,9 +79,10 @@ bootJar {
     //launchScript()
 }
 
-bootBuildImage {
-    imageName = "DOCKER_USERNAME/my-spring-envers"
+tasks.named('bootBuildImage') {
+  buildpacks =  ['gcr.io/paketo-buildpacks/bellsoft-liberica:9.9.0-ea', 'gcr.io/paketo-buildpacks/java-native-image']
 }
+
 
 compileJava.dependsOn processResources
 processResources.dependsOn bootBuildInfo

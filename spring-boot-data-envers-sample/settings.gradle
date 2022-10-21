@@ -7,6 +7,10 @@ pluginManagement {
         id "com.github.ben-manes.versions" version "${benmanes_versions_plugin_version}"
         id "com.github.sherter.google-java-format" version "${google_java_format_plugin_version}"
     }
+    repositories {
+        maven { url 'https://repo.spring.io/milestone' }
+        gradlePluginPortal()
+    }
 }
 
 rootProject.name = 'spring-boot-data-envers-sample'
