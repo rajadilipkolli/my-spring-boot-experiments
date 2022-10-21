@@ -16,11 +16,6 @@ spring:
     open-in-view: false
     hibernate:
       ddl-auto: validate
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
-    properties:
-      hibernate:
-        temp:
-          use_jdbc_metadata_defaults: false
 
   liquibase:
     change-log: classpath:/db/changelog/changelog.sql
