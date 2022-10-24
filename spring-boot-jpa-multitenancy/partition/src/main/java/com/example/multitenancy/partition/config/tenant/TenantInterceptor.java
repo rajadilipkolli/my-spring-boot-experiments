@@ -21,7 +21,7 @@ public class TenantInterceptor implements HandlerInterceptor {
             HttpServletRequest request, HttpServletResponse response, Object handler)
             throws IOException {
         var tenant = request.getParameter("tenant");
-        if (!StringUtils.hasText(tenant)) {
+        if (request.getServletPath().startsWith("/api/") && !StringUtils.hasText(tenant)) {
             response.sendError(FORBIDDEN.value(), "Unknown user tenant");
             return false;
         }
