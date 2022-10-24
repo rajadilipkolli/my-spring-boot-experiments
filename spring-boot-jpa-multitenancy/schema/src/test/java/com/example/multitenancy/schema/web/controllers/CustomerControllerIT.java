@@ -10,7 +10,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.example.multitenancy.schema.common.AbstractIntegrationTest;
-import com.example.multitenancy.schema.config.TenantIdentifierResolver;
+import com.example.multitenancy.schema.config.tenant.TenantIdentifierResolver;
 import com.example.multitenancy.schema.entities.Customer;
 import com.example.multitenancy.schema.repositories.CustomerRepository;
 import java.util.ArrayList;

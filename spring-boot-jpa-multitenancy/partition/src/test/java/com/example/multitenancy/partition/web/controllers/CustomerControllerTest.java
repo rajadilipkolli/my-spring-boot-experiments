@@ -12,7 +12,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-import com.example.multitenancy.partition.config.TenantIdentifierResolver;
+import com.example.multitenancy.partition.config.tenant.TenantIdentifierResolver;
 import com.example.multitenancy.partition.entities.Customer;
 import com.example.multitenancy.partition.services.CustomerService;
 import com.fasterxml.jackson.databind.ObjectMapper;

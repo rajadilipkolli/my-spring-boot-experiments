@@ -4,7 +4,6 @@ import static com.example.multitenancy.schema.utils.AppConstants.PROFILE_TEST;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -15,6 +14,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.example.multitenancy.schema.config.tenant.TenantIdentifierResolver;
 import com.example.multitenancy.schema.entities.Customer;
 import com.example.multitenancy.schema.services.CustomerService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -35,10 +35,10 @@ import org.springframework.test.web.servlet.MockMvc;
 class CustomerControllerTest {
 
     @Autowired private MockMvc mockMvc;
+    @Autowired private ObjectMapper objectMapper;
 
     @MockBean private CustomerService customerService;
-
-    @Autowired private ObjectMapper objectMapper;
+    @MockBean private TenantIdentifierResolver tenantIdentifierResolver;
 
     private List<Customer> customerList;
     private final String tenant = "test1";
@@ -53,7 +53,7 @@ class CustomerControllerTest {
 
     @Test
     void shouldFetchAllCustomers() throws Exception {
-        given(customerService.findAllCustomers(tenant)).willReturn(this.customerList);
+        given(customerService.findAllCustomers()).willReturn(this.customerList);
 
         this.mockMvc
                 .perform(get("/api/customers").param("tenant", tenant))
@@ -65,8 +65,7 @@ class CustomerControllerTest {
     void shouldFindCustomerById() throws Exception {
         Long customerId = 1L;
         Customer customer = new Customer(customerId, "text 1");
-        given(customerService.findCustomerById(customerId, tenant))
-                .willReturn(Optional.of(customer));
+        given(customerService.findCustomerById(customerId)).willReturn(Optional.of(customer));
 
         this.mockMvc
                 .perform(get("/api/customers/{id}", customerId).param("tenant", tenant))
@@ -77,7 +76,7 @@ class CustomerControllerTest {
     @Test
     void shouldReturn404WhenFetchingNonExistingCustomer() throws Exception {
         Long customerId = 1L;
-        given(customerService.findCustomerById(customerId, tenant)).willReturn(Optional.empty());
+        given(customerService.findCustomerById(customerId)).willReturn(Optional.empty());
 
         this.mockMvc
                 .perform(get("/api/customers/{id}", customerId).param("tenant", tenant))
@@ -86,7 +85,7 @@ class CustomerControllerTest {
 
     @Test
     void shouldCreateNewCustomer() throws Exception {
-        given(customerService.saveCustomer(any(Customer.class), eq(tenant)))
+        given(customerService.saveCustomer(any(Customer.class)))
                 .willAnswer((invocation) -> invocation.getArgument(0));
 
         Customer customer = new Customer(1L, "some text");
@@ -125,9 +124,8 @@ class CustomerControllerTest {
     void shouldUpdateCustomer() throws Exception {
         Long customerId = 1L;
         Customer customer = new Customer(customerId, "Updated text");
-        given(customerService.findCustomerById(customerId, tenant))
-                .willReturn(Optional.of(customer));
-        given(customerService.saveCustomer(any(Customer.class), eq(tenant)))
+        given(customerService.findCustomerById(customerId)).willReturn(Optional.of(customer));
+        given(customerService.saveCustomer(any(Customer.class)))
                 .willAnswer((invocation) -> invocation.getArgument(0));
 
         this.mockMvc
@@ -143,7 +141,7 @@ class CustomerControllerTest {
     @Test
     void shouldReturn404WhenUpdatingNonExistingCustomer() throws Exception {
         Long customerId = 1L;
-        given(customerService.findCustomerById(customerId, tenant)).willReturn(Optional.empty());
+        given(customerService.findCustomerById(customerId)).willReturn(Optional.empty());
         Customer customer = new Customer(customerId, "Updated text");
 
         this.mockMvc
@@ -159,9 +157,8 @@ class CustomerControllerTest {
     void shouldDeleteCustomer() throws Exception {
         Long customerId = 1L;
         Customer customer = new Customer(customerId, "Some text");
-        given(customerService.findCustomerById(customerId, tenant))
-                .willReturn(Optional.of(customer));
-        doNothing().when(customerService).deleteCustomerById(customer.getId(), tenant);
+        given(customerService.findCustomerById(customerId)).willReturn(Optional.of(customer));
+        doNothing().when(customerService).deleteCustomerById(customer.getId());
 
         this.mockMvc
                 .perform(delete("/api/customers/{id}", customer.getId()).param("tenant", tenant))
@@ -172,7 +169,7 @@ class CustomerControllerTest {
     @Test
     void shouldReturn404WhenDeletingNonExistingCustomer() throws Exception {
         Long customerId = 1L;
-        given(customerService.findCustomerById(customerId, tenant)).willReturn(Optional.empty());
+        given(customerService.findCustomerById(customerId)).willReturn(Optional.empty());
 
         this.mockMvc
                 .perform(delete("/api/customers/{id}", customerId).param("tenant", tenant))

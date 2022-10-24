@@ -1,4 +1,4 @@
-package com.example.multitenancy.partition.config;
+package com.example.multitenancy.partition.config.tenant;
 
 import static org.springframework.http.HttpStatus.FORBIDDEN;
 

@@ -1,4 +1,4 @@
-package com.example.multitenancy.schema.config;
+package com.example.multitenancy.schema.config.tenant;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -16,7 +16,6 @@ public class MultiTenantConnectionProviderImpl
         implements MultiTenantConnectionProvider, HibernatePropertiesCustomizer {
 
     private final DataSource dataSource;
-    private final TenantIdentifierResolver tenantIdentifierResolver;
 
     @Override
     public Connection getAnyConnection() throws SQLException {
@@ -29,19 +28,15 @@ public class MultiTenantConnectionProviderImpl
     }
 
     @Override
-    public Connection getConnection(String schema) throws SQLException {
+    public Connection getConnection(String tenantIdentifier) throws SQLException {
         final Connection connection = dataSource.getConnection();
-        // Tenant Id is not getting cleared hence setting the value based on tenantId of Request
-        if ("PUBLIC".equals(schema)) {
-            connection.setSchema(schema);
-        } else {
-            connection.setSchema(tenantIdentifierResolver.resolveCurrentTenantIdentifier());
-        }
+        connection.setSchema(tenantIdentifier);
         return connection;
     }
 
     @Override
-    public void releaseConnection(String s, Connection connection) throws SQLException {
+    public void releaseConnection(String tenantIdentifier, Connection connection)
+            throws SQLException {
         connection.setSchema("PUBLIC");
         connection.close();
     }
@@ -52,7 +47,7 @@ public class MultiTenantConnectionProviderImpl
     }
 
     @Override
-    public boolean isUnwrappableAs(Class unwrapType) {
+    public boolean isUnwrappableAs(Class<?> unwrapType) {
         return false;
     }
 

@@ -1,4 +1,4 @@
-package com.example.multitenancy.schema.config;
+package com.example.multitenancy.schema.config.tenant;
 
 import java.util.Map;
 import org.hibernate.cfg.AvailableSettings;
@@ -6,7 +6,7 @@ import org.hibernate.context.spi.CurrentTenantIdentifierResolver;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernatePropertiesCustomizer;
 import org.springframework.stereotype.Component;
 
-@Component()
+@Component
 public class TenantIdentifierResolver
         implements CurrentTenantIdentifierResolver, HibernatePropertiesCustomizer {
 

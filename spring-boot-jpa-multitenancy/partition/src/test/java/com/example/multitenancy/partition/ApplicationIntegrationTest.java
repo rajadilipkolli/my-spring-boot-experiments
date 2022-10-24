@@ -9,7 +9,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.example.multitenancy.partition.common.AbstractIntegrationTest;
-import com.example.multitenancy.partition.config.TenantIdentifierResolver;
+import com.example.multitenancy.partition.config.tenant.TenantIdentifierResolver;
 import com.example.multitenancy.partition.entities.Customer;
 import com.example.multitenancy.partition.repositories.CustomerRepository;
 import java.nio.charset.StandardCharsets;

@@ -1,4 +1,4 @@
-package com.example.multitenancy.partition.config;
+package com.example.multitenancy.partition.config.tenant;
 
 import java.util.Map;
 import org.hibernate.cfg.AvailableSettings;

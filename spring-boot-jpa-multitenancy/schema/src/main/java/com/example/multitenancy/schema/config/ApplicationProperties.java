@@ -2,11 +2,12 @@ package com.example.multitenancy.schema.config;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.NestedConfigurationProperty;
 
 @Data
 @ConfigurationProperties("application")
 public class ApplicationProperties {
-    private Cors cors = new Cors();
+    @NestedConfigurationProperty private Cors cors = new Cors();
 
     @Data
     public static class Cors {
