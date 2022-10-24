@@ -10,4 +10,6 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
 
     @Query(value = "select * from customers c where text = :text", nativeQuery = true)
     Customer findSqlByText(String text);
+
+    long countByTenant(String tenant);
 }
