@@ -4,18 +4,22 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Map;
 import javax.sql.DataSource;
-import lombok.RequiredArgsConstructor;
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.engine.jdbc.connections.spi.MultiTenantConnectionProvider;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernatePropertiesCustomizer;
 import org.springframework.stereotype.Component;
 
 @Component
-@RequiredArgsConstructor
 public class MultiTenantConnectionProviderImpl
         implements MultiTenantConnectionProvider, HibernatePropertiesCustomizer {
 
     private final DataSource tenantRoutingDatasource;
+
+    public MultiTenantConnectionProviderImpl(
+            @Qualifier("tenantRoutingDatasource") DataSource tenantRoutingDatasource) {
+        this.tenantRoutingDatasource = tenantRoutingDatasource;
+    }
 
     @Override
     public Connection getAnyConnection() throws SQLException {
