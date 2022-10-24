@@ -2,50 +2,104 @@ package com.example.multitenancy.partition;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.example.multitenancy.partition.common.AbstractIntegrationTest;
 import com.example.multitenancy.partition.config.TenantIdentifierResolver;
 import com.example.multitenancy.partition.entities.Customer;
 import com.example.multitenancy.partition.repositories.CustomerRepository;
+import java.nio.charset.StandardCharsets;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
+import org.springframework.http.MediaType;
 import org.springframework.transaction.support.TransactionTemplate;
+import org.testcontainers.shaded.org.apache.commons.lang3.RandomStringUtils;
 
+@Slf4j
 class ApplicationIntegrationTest extends AbstractIntegrationTest {
 
-    private static final String SUBSYSTEM = "dbsystv";
+    private static final String SUBSYSTEM_V = "dbsystv";
     private static final String SUBSYSTEM_P = "dbsystp";
+    private static final String SUBSYSTEM_C = "dbsystc";
+
     @Autowired TransactionTemplate txTemplate;
 
-    @Autowired TenantIdentifierResolver currentTenant;
+    @Autowired TenantIdentifierResolver tenantIdentifierResolver;
 
     @Autowired CustomerRepository customerRepository;
 
     @AfterEach
     void afterEach() {
-        currentTenant.setCurrentTenant(SUBSYSTEM);
-        customerRepository.deleteAll();
-        currentTenant.setCurrentTenant(SUBSYSTEM_P);
-        customerRepository.deleteAll();
+        tenantIdentifierResolver.setCurrentTenant(SUBSYSTEM_V);
+        customerRepository.deleteAllInBatch();
+        tenantIdentifierResolver.setCurrentTenant(SUBSYSTEM_P);
+        customerRepository.deleteAllInBatch();
+        tenantIdentifierResolver.setCurrentTenant(SUBSYSTEM_C);
+        customerRepository.deleteAllInBatch();
+    }
+
+    @Test
+    void testSequenceCollision() throws Exception {
+        long count = this.customerRepository.count();
+        for (int i = 0; i < 153; i++) {
+            Customer customer = new Customer(null, RandomStringUtils.randomAlphanumeric(10), null);
+            String tenant;
+            if (i % 3 == 0) {
+                tenant = SUBSYSTEM_P;
+            } else if ((i % 3 == 1)) {
+                tenant = SUBSYSTEM_V;
+            } else {
+                tenant = SUBSYSTEM_C;
+            }
+            String response =
+                    this.mockMvc
+                            .perform(
+                                    post("/api/customers")
+                                            .param("tenant", tenant)
+                                            .contentType(MediaType.APPLICATION_JSON)
+                                            .content(objectMapper.writeValueAsString(customer)))
+                            .andExpect(status().isCreated())
+                            .andExpect(jsonPath("$.text", is(customer.getText())))
+                            .andExpect(jsonPath("$.id", notNullValue()))
+                            .andReturn()
+                            .getResponse()
+                            .getContentAsString(StandardCharsets.UTF_8);
+            log.info("Response :{}", response);
+        }
+        assertThat(this.customerRepository.countByTenant(SUBSYSTEM_V)).isEqualTo(count);
+        assertThat(this.customerRepository.countByTenant(SUBSYSTEM_P)).isEqualTo(count);
+        assertThat(this.customerRepository.countByTenant(SUBSYSTEM_C)).isEqualTo(count + 51);
+        // querying db also needs tenant to be set hence setting
+        tenantIdentifierResolver.setCurrentTenant(SUBSYSTEM_V);
+        assertThat(this.customerRepository.countByTenant(SUBSYSTEM_V)).isEqualTo(count + 51);
+        tenantIdentifierResolver.setCurrentTenant(SUBSYSTEM_P);
+        assertThat(this.customerRepository.countByTenant(SUBSYSTEM_P)).isEqualTo(count + 51);
+        tenantIdentifierResolver.setCurrentTenant(SUBSYSTEM_C);
+        assertThat(this.customerRepository.countByTenant(SUBSYSTEM_C)).isEqualTo(count + 51);
     }
 
     @Test
     void saveAndLoadCustomer() {
 
         final Customer rock = createCustomer(SUBSYSTEM_P, "Rock");
-        final Customer stoneCold = createCustomer(SUBSYSTEM, "Stonecold");
+        final Customer stoneCold = createCustomer(SUBSYSTEM_V, "Stonecold");
 
         assertThat(rock.getTenant()).isEqualTo(SUBSYSTEM_P);
-        assertThat(stoneCold.getTenant()).isEqualTo(SUBSYSTEM);
+        assertThat(stoneCold.getTenant()).isEqualTo(SUBSYSTEM_V);
 
-        currentTenant.setCurrentTenant(SUBSYSTEM);
+        tenantIdentifierResolver.setCurrentTenant(SUBSYSTEM_V);
         assertThat(customerRepository.findAll())
                 .extracting(Customer::getText)
                 .containsExactly("Stonecold");
 
-        currentTenant.setCurrentTenant(SUBSYSTEM_P);
+        tenantIdentifierResolver.setCurrentTenant(SUBSYSTEM_P);
         assertThat(customerRepository.findAll())
                 .extracting(Customer::getText)
                 .containsExactly("Rock");
@@ -55,12 +109,12 @@ class ApplicationIntegrationTest extends AbstractIntegrationTest {
     void findById() {
 
         final Customer rock = createCustomer(SUBSYSTEM_P, "Rock");
-        final Customer vRock = createCustomer(SUBSYSTEM, "Rock");
+        final Customer vRock = createCustomer(SUBSYSTEM_V, "Rock");
 
-        currentTenant.setCurrentTenant(SUBSYSTEM);
+        tenantIdentifierResolver.setCurrentTenant(SUBSYSTEM_V);
         assertThat(customerRepository.findById(vRock.getId())).isPresent();
         assertThat(customerRepository.findById(vRock.getId()).get().getTenant())
-                .isEqualTo(SUBSYSTEM);
+                .isEqualTo(SUBSYSTEM_V);
         assertThat(customerRepository.findById(rock.getId())).isEmpty();
     }
 
@@ -68,13 +122,13 @@ class ApplicationIntegrationTest extends AbstractIntegrationTest {
     void queryJPQL() {
 
         createCustomer(SUBSYSTEM_P, "Rock");
-        createCustomer(SUBSYSTEM, "Rock");
-        createCustomer(SUBSYSTEM, "Stonecold");
+        createCustomer(SUBSYSTEM_V, "Rock");
+        createCustomer(SUBSYSTEM_V, "Stonecold");
 
-        currentTenant.setCurrentTenant(SUBSYSTEM);
-        assertThat(customerRepository.findJpqlByText("Rock").getTenant()).isEqualTo(SUBSYSTEM);
+        tenantIdentifierResolver.setCurrentTenant(SUBSYSTEM_V);
+        assertThat(customerRepository.findJpqlByText("Rock").getTenant()).isEqualTo(SUBSYSTEM_V);
 
-        currentTenant.setCurrentTenant(SUBSYSTEM_P);
+        tenantIdentifierResolver.setCurrentTenant(SUBSYSTEM_P);
         assertThat(customerRepository.findJpqlByText("Stonecold")).isNull();
     }
 
@@ -82,16 +136,16 @@ class ApplicationIntegrationTest extends AbstractIntegrationTest {
     void querySQL() {
 
         createCustomer(SUBSYSTEM_P, "Rock");
-        createCustomer(SUBSYSTEM, "Rock");
+        createCustomer(SUBSYSTEM_V, "Rock");
 
-        currentTenant.setCurrentTenant(SUBSYSTEM);
+        tenantIdentifierResolver.setCurrentTenant(SUBSYSTEM_V);
         assertThatThrownBy(() -> customerRepository.findSqlByText("Rock"))
                 .isInstanceOf(IncorrectResultSizeDataAccessException.class);
     }
 
     private Customer createCustomer(String schema, String name) {
 
-        currentTenant.setCurrentTenant(schema);
+        tenantIdentifierResolver.setCurrentTenant(schema);
 
         var customerObj =
                 txTemplate.execute(
