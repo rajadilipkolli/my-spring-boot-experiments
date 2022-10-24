@@ -1,7 +1,6 @@
 package com.example.multitenancy.db.web.controllers;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -31,16 +30,38 @@ class CustomerControllerIT extends AbstractIntegrationTest {
         customerRepository.deleteAll();
 
         customerList = new ArrayList<>();
-        customerList.add(new Customer(1L, "First Customer"));
-        customerList.add(new Customer(2L, "Second Customer"));
-        customerList.add(new Customer(3L, "Third Customer"));
+        customerList.add(new Customer(null, "First Customer"));
+        customerList.add(new Customer(null, "Second Customer"));
+        customerList.add(new Customer(null, "Third Customer"));
         customerList = customerRepository.saveAll(customerList);
+    }
+
+    @Test
+    void shouldFetchAllCustomersWhenHeaderNotSet() throws Exception {
+        this.mockMvc
+                .perform(get("/api/customers"))
+                .andExpect(status().isBadRequest())
+                .andExpect(header().string("Content-Type", is("application/problem+json")))
+                .andExpect(jsonPath("$.type", is("about:blank")))
+                .andExpect(jsonPath("$.title", is("Bad Request")))
+                .andExpect(jsonPath("$.status", is(400)))
+                .andExpect(jsonPath("$.detail", is("Required header 'X-tenantId' is not present.")))
+                .andExpect(jsonPath("$.instance", is("/api/customers")));
+    }
+
+    @Test
+    void shouldFetchAllCustomersWhenWrongHeaderSet() throws Exception {
+        this.mockMvc
+                .perform(get("/api/customers").header("X-tenantId", "junk"))
+                .andExpect(status().isForbidden())
+                .andExpect(header().string("Content-Type", is("application/json")))
+                .andExpect(jsonPath("$.error", is("Unknown Database tenant")));
     }
 
     @Test
     void shouldFetchAllCustomers() throws Exception {
         this.mockMvc
-                .perform(get("/api/customers"))
+                .perform(get("/api/customers").header("X-tenantId", "primary"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.size()", is(customerList.size())));
     }
@@ -51,7 +72,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
         Long customerId = customer.getId();
 
         this.mockMvc
-                .perform(get("/api/customers/{id}", customerId))
+                .perform(get("/api/customers/{id}", customerId).header("X-tenantId", "primary"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.text", is(customer.getText())));
     }
@@ -62,6 +83,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(
                         post("/api/customers")
+                                .header("X-tenantId", "primary")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(customer)))
                 .andExpect(status().isCreated())
@@ -75,19 +97,16 @@ class CustomerControllerIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(
                         post("/api/customers")
+                                .header("X-tenantId", "primary")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(customer)))
                 .andExpect(status().isBadRequest())
                 .andExpect(header().string("Content-Type", is("application/problem+json")))
-                .andExpect(
-                        jsonPath(
-                                "$.type",
-                                is("https://zalando.github.io/problem/constraint-violation")))
-                .andExpect(jsonPath("$.title", is("Constraint Violation")))
+                .andExpect(jsonPath("$.type", is("about:blank")))
+                .andExpect(jsonPath("$.title", is("Bad Request")))
                 .andExpect(jsonPath("$.status", is(400)))
-                .andExpect(jsonPath("$.violations", hasSize(1)))
-                .andExpect(jsonPath("$.violations[0].field", is("text")))
-                .andExpect(jsonPath("$.violations[0].message", is("Text cannot be empty")))
+                .andExpect(jsonPath("$.detail", is("Invalid request content.")))
+                .andExpect(jsonPath("$.instance", is("/api/customers")))
                 .andReturn();
     }
 
@@ -99,6 +118,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(
                         put("/api/customers/{id}", customer.getId())
+                                .header("X-tenantId", "primary")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(customer)))
                 .andExpect(status().isOk())
@@ -110,7 +130,9 @@ class CustomerControllerIT extends AbstractIntegrationTest {
         Customer customer = customerList.get(0);
 
         this.mockMvc
-                .perform(delete("/api/customers/{id}", customer.getId()))
+                .perform(
+                        delete("/api/customers/{id}", customer.getId())
+                                .header("X-tenantId", "primary"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.text", is(customer.getText())));
     }

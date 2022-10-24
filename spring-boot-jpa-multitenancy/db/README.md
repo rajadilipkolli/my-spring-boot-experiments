@@ -1,4 +1,4 @@
-# db
+# multitenancy-db
 
 ### Run tests
 `$ ./mvnw clean verify`
@@ -13,3 +13,4 @@ $ ./mvnw spring-boot:run -Dspring-boot.run.profiles=local
 ### Useful Links
 * Swagger UI: http://localhost:8080/swagger-ui.html
 * Actuator Endpoint: http://localhost:8080/actuator
+* PgAdmin : http://localhost:5050

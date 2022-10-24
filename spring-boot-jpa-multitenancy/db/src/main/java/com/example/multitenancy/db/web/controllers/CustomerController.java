@@ -2,6 +2,7 @@ package com.example.multitenancy.db.web.controllers;
 
 import com.example.multitenancy.db.entities.Customer;
 import com.example.multitenancy.db.services.CustomerService;
+import com.example.multitenancy.db.utils.AppConstants;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
@@ -31,12 +33,16 @@ public class CustomerController {
     }
 
     @GetMapping
-    public List<Customer> getAllCustomers() {
+    public List<Customer> getAllCustomers(
+            @RequestHeader(AppConstants.X_TENANT_ID) String tenantId) {
+        log.info("fetching all customer for tenant : {}", tenantId);
         return customerService.findAllCustomers();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Customer> getCustomerById(@PathVariable Long id) {
+    public ResponseEntity<Customer> getCustomerById(
+            @PathVariable Long id, @RequestHeader(AppConstants.X_TENANT_ID) String tenantId) {
+        log.info("fetching customer by id {} for tenant : {}", id, tenantId);
         return customerService
                 .findCustomerById(id)
                 .map(ResponseEntity::ok)
@@ -45,13 +51,19 @@ public class CustomerController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Customer createCustomer(@RequestBody @Validated Customer customer) {
+    public Customer createCustomer(
+            @RequestBody @Validated Customer customer,
+            @RequestHeader(AppConstants.X_TENANT_ID) String tenantId) {
+        log.info("creating customer by for tenant : {}", tenantId);
         return customerService.saveCustomer(customer);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<Customer> updateCustomer(
-            @PathVariable Long id, @RequestBody Customer customer) {
+            @PathVariable Long id,
+            @RequestBody Customer customer,
+            @RequestHeader(AppConstants.X_TENANT_ID) String tenantId) {
+        log.info("updating customer for id {} in tenant : {}", id, tenantId);
         return customerService
                 .findCustomerById(id)
                 .map(
@@ -63,7 +75,9 @@ public class CustomerController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Customer> deleteCustomer(@PathVariable Long id) {
+    public ResponseEntity<Customer> deleteCustomer(
+            @PathVariable Long id, @RequestHeader(AppConstants.X_TENANT_ID) String tenantId) {
+        log.info("deleting customer by id {} for tenant : {}", id, tenantId);
         return customerService
                 .findCustomerById(id)
                 .map(

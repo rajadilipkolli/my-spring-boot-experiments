@@ -3,7 +3,6 @@ package com.example.multitenancy.db.web.controllers;
 import static com.example.multitenancy.db.utils.AppConstants.PROFILE_TEST;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
@@ -15,6 +14,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.example.multitenancy.db.config.multitenant.TenantIdentifierResolver;
 import com.example.multitenancy.db.entities.Customer;
 import com.example.multitenancy.db.services.CustomerService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -29,18 +29,16 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import org.zalando.problem.jackson.ProblemModule;
-import org.zalando.problem.violations.ConstraintViolationProblemModule;
 
 @WebMvcTest(controllers = CustomerController.class)
 @ActiveProfiles(PROFILE_TEST)
 class CustomerControllerTest {
 
     @Autowired private MockMvc mockMvc;
+    @Autowired private ObjectMapper objectMapper;
 
     @MockBean private CustomerService customerService;
-
-    @Autowired private ObjectMapper objectMapper;
+    @MockBean private TenantIdentifierResolver tenantIdentifierResolver;
 
     private List<Customer> customerList;
 
@@ -50,9 +48,6 @@ class CustomerControllerTest {
         this.customerList.add(new Customer(1L, "text 1"));
         this.customerList.add(new Customer(2L, "text 2"));
         this.customerList.add(new Customer(3L, "text 3"));
-
-        objectMapper.registerModule(new ProblemModule());
-        objectMapper.registerModule(new ConstraintViolationProblemModule());
     }
 
     @Test
@@ -60,7 +55,7 @@ class CustomerControllerTest {
         given(customerService.findAllCustomers()).willReturn(this.customerList);
 
         this.mockMvc
-                .perform(get("/api/customers"))
+                .perform(get("/api/customers").header("X-tenantId", "primary"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.size()", is(customerList.size())));
     }
@@ -72,7 +67,7 @@ class CustomerControllerTest {
         given(customerService.findCustomerById(customerId)).willReturn(Optional.of(customer));
 
         this.mockMvc
-                .perform(get("/api/customers/{id}", customerId))
+                .perform(get("/api/customers/{id}", customerId).header("X-tenantId", "primary"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.text", is(customer.getText())));
     }
@@ -83,7 +78,7 @@ class CustomerControllerTest {
         given(customerService.findCustomerById(customerId)).willReturn(Optional.empty());
 
         this.mockMvc
-                .perform(get("/api/customers/{id}", customerId))
+                .perform(get("/api/customers/{id}", customerId).header("X-tenantId", "primary"))
                 .andExpect(status().isNotFound());
     }
 
@@ -96,6 +91,7 @@ class CustomerControllerTest {
         this.mockMvc
                 .perform(
                         post("/api/customers")
+                                .header("X-tenantId", "primary")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(customer)))
                 .andExpect(status().isCreated())
@@ -110,19 +106,16 @@ class CustomerControllerTest {
         this.mockMvc
                 .perform(
                         post("/api/customers")
+                                .header("X-tenantId", "primary")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(customer)))
                 .andExpect(status().isBadRequest())
                 .andExpect(header().string("Content-Type", is("application/problem+json")))
-                .andExpect(
-                        jsonPath(
-                                "$.type",
-                                is("https://zalando.github.io/problem/constraint-violation")))
-                .andExpect(jsonPath("$.title", is("Constraint Violation")))
+                .andExpect(jsonPath("$.type", is("about:blank")))
+                .andExpect(jsonPath("$.title", is("Bad Request")))
                 .andExpect(jsonPath("$.status", is(400)))
-                .andExpect(jsonPath("$.violations", hasSize(1)))
-                .andExpect(jsonPath("$.violations[0].field", is("text")))
-                .andExpect(jsonPath("$.violations[0].message", is("Text cannot be empty")))
+                .andExpect(jsonPath("$.detail", is("Invalid request content.")))
+                .andExpect(jsonPath("$.instance", is("/api/customers")))
                 .andReturn();
     }
 
@@ -137,6 +130,7 @@ class CustomerControllerTest {
         this.mockMvc
                 .perform(
                         put("/api/customers/{id}", customer.getId())
+                                .header("X-tenantId", "primary")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(customer)))
                 .andExpect(status().isOk())
@@ -152,6 +146,7 @@ class CustomerControllerTest {
         this.mockMvc
                 .perform(
                         put("/api/customers/{id}", customerId)
+                                .header("X-tenantId", "primary")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(customer)))
                 .andExpect(status().isNotFound());
@@ -165,7 +160,9 @@ class CustomerControllerTest {
         doNothing().when(customerService).deleteCustomerById(customer.getId());
 
         this.mockMvc
-                .perform(delete("/api/customers/{id}", customer.getId()))
+                .perform(
+                        delete("/api/customers/{id}", customer.getId())
+                                .header("X-tenantId", "primary"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.text", is(customer.getText())));
     }
@@ -176,7 +173,7 @@ class CustomerControllerTest {
         given(customerService.findCustomerById(customerId)).willReturn(Optional.empty());
 
         this.mockMvc
-                .perform(delete("/api/customers/{id}", customerId))
+                .perform(delete("/api/customers/{id}", customerId).header("X-tenantId", "primary"))
                 .andExpect(status().isNotFound());
     }
 }
