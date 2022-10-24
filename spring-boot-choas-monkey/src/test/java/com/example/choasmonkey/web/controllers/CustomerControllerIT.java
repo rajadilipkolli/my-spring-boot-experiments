@@ -1,7 +1,7 @@
 package com.example.choasmonkey.web.controllers;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -31,9 +31,9 @@ class CustomerControllerIT extends AbstractIntegrationTest {
         customerRepository.deleteAll();
 
         customerList = new ArrayList<>();
-        customerList.add(new Customer(1L, "First Customer"));
-        customerList.add(new Customer(2L, "Second Customer"));
-        customerList.add(new Customer(3L, "Third Customer"));
+        customerList.add(new Customer(null, "First Customer"));
+        customerList.add(new Customer(null, "Second Customer"));
+        customerList.add(new Customer(null, "Third Customer"));
         customerList = customerRepository.saveAll(customerList);
     }
 
@@ -65,6 +65,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(customer)))
                 .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id", notNullValue()))
                 .andExpect(jsonPath("$.text", is(customer.getText())));
     }
 
@@ -79,15 +80,11 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                                 .content(objectMapper.writeValueAsString(customer)))
                 .andExpect(status().isBadRequest())
                 .andExpect(header().string("Content-Type", is("application/problem+json")))
-                .andExpect(
-                        jsonPath(
-                                "$.type",
-                                is("https://zalando.github.io/problem/constraint-violation")))
-                .andExpect(jsonPath("$.title", is("Constraint Violation")))
+                .andExpect(jsonPath("$.type", is("about:blank")))
+                .andExpect(jsonPath("$.title", is("Bad Request")))
                 .andExpect(jsonPath("$.status", is(400)))
-                .andExpect(jsonPath("$.violations", hasSize(1)))
-                .andExpect(jsonPath("$.violations[0].field", is("text")))
-                .andExpect(jsonPath("$.violations[0].message", is("Text cannot be empty")))
+                .andExpect(jsonPath("$.detail", is("Invalid request content.")))
+                .andExpect(jsonPath("$.instance", is("/api/customers")))
                 .andReturn();
     }
 
