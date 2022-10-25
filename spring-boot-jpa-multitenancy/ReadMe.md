@@ -1,13 +1,13 @@
 ## MultiTenancy using Hibernate in Spring Data JPA
 
-This is the parent project for a couple of examples demonstrating how to integrate Hibernates Multitenant feature with Spring Data JPA in Spring Boot.
+ - MultiTenancy is a feature of JPA that allows you to store database data across multiple tenants. It's not a new concept—many applications have used it for years to separate data by tenant. However, Spring Data JPA provides an easy way to use multi-tenancy in your application by using Hibernate as your persistence provider.
 
-There are three modules for the three examples.
+ - This allows you to create a single entity class that can be shared by multiple tenants, giving each tenant its own independent instance of the data.
 
-Each uses a different strategy to separate data by tenant:
+Lets see how it works by using three different approaches:
 
- - Partition tables by tenant id.
+ > Partition tables by tenant id.
 
- - Use a separate schema per tenant
+ > Use a separate schema per tenant
 
- - Use a separate database per tenant.
+ > Use a separate database per tenant.
