@@ -49,7 +49,7 @@ public class CustomerRequestSimulation extends Simulation {
                                     .check(status().is(200)));
 
     public CustomerRequestSimulation() {
-        this.setUp(scn.injectOpen(constantUsersPerSec(50).during(Duration.ofSeconds(30))))
+        this.setUp(scn.injectOpen(constantUsersPerSec(100).during(Duration.ofSeconds(30))))
                 .protocols(httpProtocol);
     }
 }
