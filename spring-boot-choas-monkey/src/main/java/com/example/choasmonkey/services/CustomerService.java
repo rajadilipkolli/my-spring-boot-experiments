@@ -1,7 +1,7 @@
 package com.example.choasmonkey.services;
 
-import com.example.choasmonkey.model.response.CustomerResponse;
 import com.example.choasmonkey.entities.Customer;
+import com.example.choasmonkey.model.response.CustomerResponse;
 import com.example.choasmonkey.repositories.CustomerRepository;
 import java.util.List;
 import java.util.Optional;

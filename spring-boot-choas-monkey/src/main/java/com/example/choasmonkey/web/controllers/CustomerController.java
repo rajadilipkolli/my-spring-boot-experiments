@@ -1,7 +1,7 @@
 package com.example.choasmonkey.web.controllers;
 
-import com.example.choasmonkey.model.response.CustomerResponse;
 import com.example.choasmonkey.entities.Customer;
+import com.example.choasmonkey.model.response.CustomerResponse;
 import com.example.choasmonkey.services.CustomerService;
 import com.example.choasmonkey.utils.AppConstants;
 import lombok.extern.slf4j.Slf4j;

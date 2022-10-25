@@ -14,8 +14,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.example.choasmonkey.model.response.CustomerResponse;
 import com.example.choasmonkey.entities.Customer;
+import com.example.choasmonkey.model.response.CustomerResponse;
 import com.example.choasmonkey.services.CustomerService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
