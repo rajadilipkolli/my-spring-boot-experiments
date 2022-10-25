@@ -1,8 +1,13 @@
+# traceID and spanId are predefined MDC keys - we want the logs to include them
 logging:
   pattern:
     level: "%5p [${spring.application.name},%X{trace_id},%X{span_id}]"
 
+# All traces should be sent to latency analysis tool
 management:
+  tracing:
+    sampling:
+      probability: 1.0
   endpoints:
     web:
       exposure:
@@ -11,4 +16,3 @@ management:
 spring:
   application:
     name: strategy-plugin-service
-
