@@ -14,6 +14,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.example.choasmonkey.model.response.CustomerResponse;
 import com.example.choasmonkey.entities.Customer;
 import com.example.choasmonkey.services.CustomerService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -51,12 +52,16 @@ class CustomerControllerTest {
 
     @Test
     void shouldFetchAllCustomers() throws Exception {
-        given(customerService.findAllCustomers()).willReturn(this.customerList);
+        CustomerResponse customerResponse = new CustomerResponse();
+        customerResponse.setContent(this.customerList);
+        customerResponse.setLast(false);
+
+        given(customerService.findAllCustomers(0, 10, "id", "asc")).willReturn(customerResponse);
 
         this.mockMvc
                 .perform(get("/api/customers"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.size()", is(customerList.size())));
+                .andExpect(jsonPath("$.content.size()", is(customerList.size())));
     }
 
     @Test
