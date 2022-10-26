@@ -58,7 +58,9 @@ public class CustomerController {
 
     @PutMapping("/{id}")
     public ResponseEntity<Customer> updateCustomer(
-            @PathVariable Long id, @RequestBody CustomerDto customerDto, @RequestParam String tenant) {
+            @PathVariable Long id,
+            @RequestBody CustomerDto customerDto,
+            @RequestParam String tenant) {
         log.info("updating customer for id {} in tenant : {}", id, tenant);
         return customerService
                 .findCustomerById(id)

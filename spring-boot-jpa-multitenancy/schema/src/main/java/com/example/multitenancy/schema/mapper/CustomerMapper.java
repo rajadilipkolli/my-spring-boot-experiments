@@ -3,7 +3,6 @@ package com.example.multitenancy.schema.mapper;
 import com.example.multitenancy.schema.domain.request.CustomerDto;
 import com.example.multitenancy.schema.entities.Customer;
 import java.util.List;
-
 import org.mapstruct.InheritInverseConfiguration;
 import org.mapstruct.Mapper;
 
