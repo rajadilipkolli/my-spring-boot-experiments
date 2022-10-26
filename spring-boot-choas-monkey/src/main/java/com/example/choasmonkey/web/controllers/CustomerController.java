@@ -4,8 +4,10 @@ import com.example.choasmonkey.entities.Customer;
 import com.example.choasmonkey.model.response.CustomerResponse;
 import com.example.choasmonkey.services.CustomerService;
 import com.example.choasmonkey.utils.AppConstants;
+import io.micrometer.observation.Observation;
+import io.micrometer.observation.ObservationRegistry;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -22,14 +24,11 @@ import org.springframework.web.util.UriComponentsBuilder;
 @RestController
 @RequestMapping("/api/customers")
 @Slf4j
+@RequiredArgsConstructor
 public class CustomerController {
 
     private final CustomerService customerService;
-
-    @Autowired
-    public CustomerController(CustomerService customerService) {
-        this.customerService = customerService;
-    }
+    private final ObservationRegistry observationRegistry;
 
     @GetMapping
     public CustomerResponse getAllCustomers(
@@ -58,46 +57,62 @@ public class CustomerController {
 
     @GetMapping("/{id}")
     public ResponseEntity<Customer> getCustomerById(@PathVariable Long id) {
-        return customerService
-                .findCustomerById(id)
-                .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+
+        return observerRequest(
+                "customers.findById",
+                customerService
+                        .findCustomerById(id)
+                        .map(ResponseEntity::ok)
+                        .orElseGet(() -> ResponseEntity.notFound().build()));
+    }
+
+    private ResponseEntity<Customer> observerRequest(
+            String metricName, ResponseEntity<Customer> customerResponseEntity) {
+        return Observation.createNotStarted(metricName, observationRegistry)
+                .observe(() -> customerResponseEntity);
     }
 
     @PostMapping
     public ResponseEntity<Customer> createCustomer(
             @RequestBody @Validated Customer customer, UriComponentsBuilder uriComponentsBuilder) {
         Customer createdCustomer = customerService.saveCustomer(customer);
-        return ResponseEntity.created(
-                        uriComponentsBuilder
-                                .path("/api/customers/{id}")
-                                .buildAndExpand(createdCustomer.getId())
-                                .toUri())
-                .body(createdCustomer);
+        return observerRequest(
+                "customers.create",
+                ResponseEntity.created(
+                                uriComponentsBuilder
+                                        .path("/api/customers/{id}")
+                                        .buildAndExpand(createdCustomer.getId())
+                                        .toUri())
+                        .body(createdCustomer));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<Customer> updateCustomer(
             @PathVariable Long id, @RequestBody Customer customer) {
-        return customerService
-                .findCustomerById(id)
-                .map(
-                        customerObj -> {
-                            customer.setId(id);
-                            return ResponseEntity.ok(customerService.saveCustomer(customer));
-                        })
-                .orElseGet(() -> ResponseEntity.notFound().build());
+        return observerRequest(
+                "customers.update",
+                customerService
+                        .findCustomerById(id)
+                        .map(
+                                customerObj -> {
+                                    customer.setId(id);
+                                    return ResponseEntity.ok(
+                                            customerService.saveCustomer(customer));
+                                })
+                        .orElseGet(() -> ResponseEntity.notFound().build()));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Customer> deleteCustomer(@PathVariable Long id) {
-        return customerService
-                .findCustomerById(id)
-                .map(
-                        customer -> {
-                            customerService.deleteCustomerById(id);
-                            return ResponseEntity.ok(customer);
-                        })
-                .orElseGet(() -> ResponseEntity.notFound().build());
+        return observerRequest(
+                "customers.delete",
+                customerService
+                        .findCustomerById(id)
+                        .map(
+                                customer -> {
+                                    customerService.deleteCustomerById(id);
+                                    return ResponseEntity.ok(customer);
+                                })
+                        .orElseGet(() -> ResponseEntity.notFound().build()));
     }
 }
