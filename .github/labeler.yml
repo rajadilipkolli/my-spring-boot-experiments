@@ -35,6 +35,7 @@
   - spring-boot-data-envers-sample/gradle.properties
   - spring-boot-hibernate2ndlevelcache-sample/pom.xml
   - spring-boot-jpa-multitenancy/db/pom.xml
+  - spring-boot-jpa-multitenancy/multidatasource-multitenancy/pom.xml
   - spring-boot-jpa-multitenancy/partition/pom.xml
   - spring-boot-jpa-multitenancy/schema/pom.xml
   - spring-boot-jobrunr-sample/pom.xml
