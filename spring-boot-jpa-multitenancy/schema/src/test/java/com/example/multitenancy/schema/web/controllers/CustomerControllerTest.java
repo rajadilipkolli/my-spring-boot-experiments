@@ -85,10 +85,9 @@ class CustomerControllerTest {
 
     @Test
     void shouldCreateNewCustomer() throws Exception {
-        given(customerService.saveCustomer(any(CustomerDto.class)))
-                .willAnswer((invocation) -> invocation.getArgument(0));
-
+        Customer customer = new Customer(1L, "some text");
         CustomerDto customerDto = new CustomerDto("some text");
+        given(customerService.saveCustomer(any(CustomerDto.class))).willReturn(customer);
         this.mockMvc
                 .perform(
                         post("/api/customers")
@@ -135,8 +134,8 @@ class CustomerControllerTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(customerDto)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(customerId)))
-                .andExpect(jsonPath("$.name", is(customer.getName())));
+                .andExpect(jsonPath("$.id", is(1)))
+                .andExpect(jsonPath("$.name", is(customerDto.name())));
     }
 
     @Test

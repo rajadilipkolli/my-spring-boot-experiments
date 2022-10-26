@@ -11,6 +11,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.example.multitenancy.schema.common.AbstractIntegrationTest;
 import com.example.multitenancy.schema.config.multitenancy.TenantIdentifierResolver;
+import com.example.multitenancy.schema.domain.request.CustomerDto;
 import com.example.multitenancy.schema.entities.Customer;
 import com.example.multitenancy.schema.repositories.CustomerRepository;
 import java.util.ArrayList;
@@ -68,7 +69,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldCreateNewCustomer() throws Exception {
-        Customer customer = new Customer(null, "New Customer");
+        CustomerDto customer = new CustomerDto("New Customer");
         this.mockMvc
                 .perform(
                         post("/api/customers")
@@ -76,12 +77,12 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(customer)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.name", is(customer.getName())));
+                .andExpect(jsonPath("$.name", is(customer.name())));
     }
 
     @Test
     void shouldReturn400WhenCreateNewCustomerWithoutName() throws Exception {
-        Customer customer = new Customer(null, null);
+        CustomerDto customer = new CustomerDto(null);
 
         this.mockMvc
                 .perform(
@@ -102,23 +103,23 @@ class CustomerControllerIT extends AbstractIntegrationTest {
     @Test
     void shouldUpdateCustomer() throws Exception {
         Customer customer = customerList.get(0);
-        customer.setName("Updated Customer");
+        CustomerDto customerDto = new CustomerDto("Updated Customer");
 
         this.mockMvc
                 .perform(
                         put("/api/customers/{id}", customer.getId())
                                 .param("tenant", "test1")
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(customer)))
+                                .content(objectMapper.writeValueAsString(customerDto)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name", is(customer.getName())));
+                .andExpect(jsonPath("$.name", is(customerDto.name())));
 
         this.mockMvc
                 .perform(
                         put("/api/customers/{id}", customer.getId())
                                 .param("tenant", "test2")
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(customer)))
+                                .content(objectMapper.writeValueAsString(customerDto)))
                 .andExpect(status().isNotFound());
     }
 
