@@ -51,6 +51,7 @@ class CustomerControllerTest {
         this.customerList.add(new Customer(1L, "text 1"));
         this.customerList.add(new Customer(2L, "text 2"));
         this.customerList.add(new Customer(3L, "text 3"));
+        given(observationRegistry.isNoop()).willReturn(true);
     }
 
     @Test
