@@ -2,6 +2,7 @@ package com.example.multitenancy.schema.config.tenant;
 
 import static org.springframework.http.HttpStatus.FORBIDDEN;
 
+import com.example.multitenancy.schema.utils.TenantName;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -34,6 +35,6 @@ public class TenantInterceptor implements HandlerInterceptor {
     }
 
     private List<String> getValidTenants() {
-        return List.of("test1", "test2");
+        return List.of(TenantName.TEST1.name, TenantName.TEST2.name);
     }
 }
