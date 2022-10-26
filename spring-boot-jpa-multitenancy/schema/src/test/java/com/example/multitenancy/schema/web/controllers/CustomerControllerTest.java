@@ -15,6 +15,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.example.multitenancy.schema.config.tenant.TenantIdentifierResolver;
+import com.example.multitenancy.schema.domain.request.CustomerDto;
 import com.example.multitenancy.schema.entities.Customer;
 import com.example.multitenancy.schema.services.CustomerService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -85,7 +86,7 @@ class CustomerControllerTest {
 
     @Test
     void shouldCreateNewCustomer() throws Exception {
-        given(customerService.saveCustomer(any(Customer.class)))
+        given(customerService.saveCustomer(any(CustomerDto.class)))
                 .willAnswer((invocation) -> invocation.getArgument(0));
 
         Customer customer = new Customer(1L, "some text");
@@ -125,7 +126,7 @@ class CustomerControllerTest {
         Long customerId = 1L;
         Customer customer = new Customer(customerId, "Updated text");
         given(customerService.findCustomerById(customerId)).willReturn(Optional.of(customer));
-        given(customerService.saveCustomer(any(Customer.class)))
+        given(customerService.updateCustomer(any(Customer.class)))
                 .willAnswer((invocation) -> invocation.getArgument(0));
 
         this.mockMvc

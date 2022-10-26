@@ -1,5 +1,6 @@
 package com.example.multitenancy.schema.web.controllers;
 
+import com.example.multitenancy.schema.domain.request.CustomerDto;
 import com.example.multitenancy.schema.entities.Customer;
 import com.example.multitenancy.schema.services.CustomerService;
 import java.util.List;
@@ -50,21 +51,23 @@ public class CustomerController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public Customer createCustomer(
-            @RequestBody @Validated Customer customer, @RequestParam String tenant) {
+            @RequestBody @Validated CustomerDto customer, @RequestParam String tenant) {
         log.info("creating customer by for tenant : {}", tenant);
         return customerService.saveCustomer(customer);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<Customer> updateCustomer(
-            @PathVariable Long id, @RequestBody Customer customer, @RequestParam String tenant) {
+            @PathVariable Long id, @RequestBody CustomerDto customerDto, @RequestParam String tenant) {
         log.info("updating customer for id {} in tenant : {}", id, tenant);
         return customerService
                 .findCustomerById(id)
                 .map(
                         customerObj -> {
+                            Customer customer = new Customer();
                             customer.setId(id);
-                            return ResponseEntity.ok(customerService.saveCustomer(customer));
+                            customer.setName(customerDto.name());
+                            return ResponseEntity.ok(customerService.updateCustomer(customer));
                         })
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
