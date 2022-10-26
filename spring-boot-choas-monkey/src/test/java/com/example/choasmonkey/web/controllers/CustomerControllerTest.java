@@ -3,6 +3,7 @@ package com.example.choasmonkey.web.controllers;
 import static com.example.choasmonkey.utils.AppConstants.PROFILE_TEST;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
@@ -18,6 +19,7 @@ import com.example.choasmonkey.entities.Customer;
 import com.example.choasmonkey.model.response.CustomerResponse;
 import com.example.choasmonkey.services.CustomerService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.micrometer.observation.ObservationRegistry;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -37,6 +39,7 @@ class CustomerControllerTest {
     @Autowired private MockMvc mockMvc;
 
     @MockBean private CustomerService customerService;
+    @MockBean private ObservationRegistry observationRegistry;
 
     @Autowired private ObjectMapper objectMapper;
 
@@ -55,13 +58,22 @@ class CustomerControllerTest {
         CustomerResponse customerResponse = new CustomerResponse();
         customerResponse.setContent(this.customerList);
         customerResponse.setLast(false);
+        customerResponse.setTotalPages(1);
+        customerResponse.setPageNo(0);
+        customerResponse.setTotalElements(11);
+        customerResponse.setPageSize(10);
 
         given(customerService.findAllCustomers(0, 10, "id", "asc")).willReturn(customerResponse);
 
         this.mockMvc
                 .perform(get("/api/customers"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content.size()", is(customerList.size())));
+                .andExpect(jsonPath("$.content.size()", is(customerList.size())))
+                .andExpect(jsonPath("$.last", is(false)))
+                .andExpect(jsonPath("$.totalPages", is(1)))
+                .andExpect(jsonPath("$.pageNo", is(0)))
+                .andExpect(jsonPath("$.totalElements", is(11)))
+                .andExpect(jsonPath("$.pageSize", is(10)));
     }
 
     @Test
@@ -114,10 +126,13 @@ class CustomerControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(header().string("Content-Type", is("application/problem+json")))
                 .andExpect(jsonPath("$.type", is("about:blank")))
-                .andExpect(jsonPath("$.title", is("Bad Request")))
+                .andExpect(jsonPath("$.title", is("Constraint Violation")))
                 .andExpect(jsonPath("$.status", is(400)))
                 .andExpect(jsonPath("$.detail", is("Invalid request content.")))
                 .andExpect(jsonPath("$.instance", is("/api/customers")))
+                .andExpect(jsonPath("$.violations", hasSize(1)))
+                .andExpect(jsonPath("$.violations[0].field", is("text")))
+                .andExpect(jsonPath("$.violations[0].message", is("Text cannot be empty")))
                 .andReturn();
     }
 
