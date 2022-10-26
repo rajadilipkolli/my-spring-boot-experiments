@@ -1,4 +1,4 @@
-package com.example.multitenancy.schema.config.tenant;
+package com.example.multitenancy.schema.config.multitenancy;
 
 import static org.springframework.http.HttpStatus.FORBIDDEN;
 
