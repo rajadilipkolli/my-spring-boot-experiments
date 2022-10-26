@@ -33,12 +33,19 @@ public class MultiTenantConnectionProviderImpl
 
     @Override
     public Connection getConnection(String tenantIdentifier) throws SQLException {
-        return tenantRoutingDatasource.getConnection();
+        var connection = tenantRoutingDatasource.getConnection();
+        if (!DatabaseType.primary.name().equals(tenantIdentifier)) {
+            connection.setSchema(tenantIdentifier);
+        }
+        return connection;
     }
 
     @Override
     public void releaseConnection(String tenantIdentifier, Connection connection)
             throws SQLException {
+        if (!DatabaseType.primary.name().equals(tenantIdentifier)) {
+            connection.setSchema("public");
+        }
         connection.close();
     }
 

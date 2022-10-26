@@ -20,8 +20,9 @@ public class TenantRoutingDatasource extends AbstractRoutingDataSource {
         setDefaultTargetDataSource(primaryDataSource);
 
         HashMap<Object, Object> targetDataSources = new HashMap<>();
-        targetDataSources.put("primary", primaryDataSource);
-        targetDataSources.put("secondary", secondaryDataSource);
+        targetDataSources.put(DatabaseType.primary, primaryDataSource);
+        targetDataSources.put(DatabaseType.test1, secondaryDataSource);
+        targetDataSources.put(DatabaseType.test2, secondaryDataSource);
         setTargetDataSources(targetDataSources);
     }
 
