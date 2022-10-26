@@ -2,7 +2,6 @@ package com.example.multitenancy.schema.web.controllers;
 
 import static com.example.multitenancy.schema.utils.AppConstants.PROFILE_TEST;
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
@@ -14,7 +13,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.example.multitenancy.schema.config.tenant.TenantIdentifierResolver;
+import com.example.multitenancy.schema.config.multitenancy.TenantIdentifierResolver;
+import com.example.multitenancy.schema.domain.request.CustomerDto;
 import com.example.multitenancy.schema.entities.Customer;
 import com.example.multitenancy.schema.services.CustomerService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -85,19 +85,17 @@ class CustomerControllerTest {
 
     @Test
     void shouldCreateNewCustomer() throws Exception {
-        given(customerService.saveCustomer(any(Customer.class)))
-                .willAnswer((invocation) -> invocation.getArgument(0));
-
         Customer customer = new Customer(1L, "some text");
+        CustomerDto customerDto = new CustomerDto("some text");
+        given(customerService.saveCustomer(any(CustomerDto.class))).willReturn(customer);
         this.mockMvc
                 .perform(
                         post("/api/customers")
                                 .param("tenant", tenant)
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(customer)))
+                                .content(objectMapper.writeValueAsString(customerDto)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id", notNullValue()))
-                .andExpect(jsonPath("$.name", is(customer.getName())));
+                .andExpect(jsonPath("$.name", is(customerDto.name())));
     }
 
     @Test
@@ -124,8 +122,9 @@ class CustomerControllerTest {
     void shouldUpdateCustomer() throws Exception {
         Long customerId = 1L;
         Customer customer = new Customer(customerId, "Updated text");
+        CustomerDto customerDto = new CustomerDto("Updated text");
         given(customerService.findCustomerById(customerId)).willReturn(Optional.of(customer));
-        given(customerService.saveCustomer(any(Customer.class)))
+        given(customerService.updateCustomer(any(Customer.class)))
                 .willAnswer((invocation) -> invocation.getArgument(0));
 
         this.mockMvc
@@ -133,9 +132,10 @@ class CustomerControllerTest {
                         put("/api/customers/{id}", customer.getId())
                                 .param("tenant", tenant)
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(customer)))
+                                .content(objectMapper.writeValueAsString(customerDto)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name", is(customer.getName())));
+                .andExpect(jsonPath("$.id", is(1)))
+                .andExpect(jsonPath("$.name", is(customerDto.name())));
     }
 
     @Test

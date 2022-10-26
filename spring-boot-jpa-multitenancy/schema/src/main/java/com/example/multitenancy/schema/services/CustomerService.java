@@ -1,6 +1,8 @@
 package com.example.multitenancy.schema.services;
 
+import com.example.multitenancy.schema.domain.request.CustomerDto;
 import com.example.multitenancy.schema.entities.Customer;
+import com.example.multitenancy.schema.mapper.CustomerMapper;
 import com.example.multitenancy.schema.repositories.CustomerRepository;
 import java.util.List;
 import java.util.Optional;
@@ -15,6 +17,8 @@ public class CustomerService {
 
     private final CustomerRepository customerRepository;
 
+    private final CustomerMapper customerMapper;
+
     public List<Customer> findAllCustomers() {
         return customerRepository.findAll();
     }
@@ -23,7 +27,11 @@ public class CustomerService {
         return customerRepository.findById(id);
     }
 
-    public Customer saveCustomer(Customer customer) {
+    public Customer saveCustomer(CustomerDto customer) {
+        return customerRepository.save(customerMapper.dtoToEntity(customer));
+    }
+
+    public Customer updateCustomer(Customer customer) {
         return customerRepository.save(customer);
     }
 
