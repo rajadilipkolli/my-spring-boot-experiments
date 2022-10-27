@@ -22,14 +22,14 @@ public class DBContainerInitializer
                     .withPassword("password");
 
     static {
-        Startables.deepStart(POSTGRE_SQL_CONTAINER, POSTGRE_SQL_CONTAINER).join();
+        Startables.deepStart(sqlContainer, POSTGRE_SQL_CONTAINER).join();
     }
 
     public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
         TestPropertyValues.of(
-                        "datasource.primary.url=" + POSTGRE_SQL_CONTAINER.getJdbcUrl(),
-                        "datasource.primary.username=" + POSTGRE_SQL_CONTAINER.getUsername(),
-                        "datasource.primary.password=" + POSTGRE_SQL_CONTAINER.getPassword(),
+                        "datasource.primary.url=" + sqlContainer.getJdbcUrl(),
+                        "datasource.primary.username=" + sqlContainer.getUsername(),
+                        "datasource.primary.password=" + sqlContainer.getPassword(),
                         "datasource.secondary.url=" + POSTGRE_SQL_CONTAINER.getJdbcUrl(),
                         "datasource.secondary.username=" + POSTGRE_SQL_CONTAINER.getUsername(),
                         "datasource.secondary.password=" + POSTGRE_SQL_CONTAINER.getPassword())
