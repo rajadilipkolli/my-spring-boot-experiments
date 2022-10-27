@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.2.xsd">
+    
+    <changeSet author="raja" id="createSequence-customers-sequence" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <sequenceExists sequenceName="customers_seq"/>
+            </not>
+        </preConditions>
+        <createSequence
+            sequenceName="customers_seq"
+            incrementBy="50"
+            startValue="1"
+        />
+    </changeSet>
+
+    <changeSet author="raja" id="createTable-customers" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="customers"/>
+            </not>
+        </preConditions>
+        <createTable tableName="customers">
+            <column name="id" type="bigint" defaultValueSequenceNext="customers_seq">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="text" type="varchar(1024)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version" type="BIGINT"/>
+            <column name="tenant" type="VARCHAR(255)">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+        </createTable>
+        <modifySql dbms="postgresql">
+            <append value=" PARTITION BY LIST (tenant)"/>
+        </modifySql>
+    </changeSet>
+    
+    <changeSet id="createPartition-tables" author="raja" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="customers"/>
+            <and>
+                <not>
+                    <tableExists tableName="customers_dbsystc"/>
+                    <tableExists tableName="customers_def"/>
+                </not>
+            </and>
+        </preConditions>
+        <sql dbms="postgresql">
+            CREATE TABLE if not exists customers_dbsystc PARTITION OF customers FOR VALUES IN ('dbsystc');
+            CREATE TABLE if not exists customers_def PARTITION OF customers DEFAULT;
+        </sql>
+        <sql dbms="mariadb">
+            CREATE TABLE customers_dbsystc PARTITION OF customers FOR VALUES IN ('dbsystc');
+            CREATE TABLE customers_def PARTITION OF customers DEFAULT;
+        </sql>
+    </changeSet>
+
+</databaseChangeLog>

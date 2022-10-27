@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.2.xsd">
+
+    <changeSet id="create-schema" author="raja">
+        <sql dbms="postgresql">
+            create schema if not exists test1;
+            create schema if not exists test2;
+        </sql>
+        <sql dbms="mariadb">
+            create schema test1;
+            create schema test2;
+        </sql>
+    </changeSet>
+
+    <changeSet id="create-sequences" author="raja">
+        <preConditions>
+            <not>
+                <sequenceExists sequenceName="customers_seq" schemaName="test1"/>
+                <sequenceExists sequenceName="customers_seq" schemaName="test2"/>
+            </not>
+        </preConditions>
+        <createSequence
+            sequenceName="customers_seq"
+            incrementBy="50"
+            startValue="1" schemaName="test1"
+        />
+        <createSequence
+            sequenceName="customers_seq"
+            incrementBy="50"
+            startValue="1" schemaName="test2"
+        />
+    </changeSet>
+
+    <changeSet author="raja" id="createTable-customers" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="customers" schemaName="test1"/>
+                <tableExists tableName="customers" schemaName="test2"/>
+            </not>
+            <and>
+                <sequenceExists sequenceName="customers_seq" schemaName="test1"/>
+                <sequenceExists sequenceName="customers_seq" schemaName="test2"/>
+            </and>
+        </preConditions>
+        <createTable tableName="customers" schemaName="test1">
+            <column name="id" type="bigint">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="varchar(1024)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addDefaultValue tableName="customers" columnName="id" schemaName="test1" defaultValueSequenceNext="customers_seq"/>
+        <createTable tableName="customers" schemaName="test2">
+            <column name="id" type="bigint">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="varchar(1024)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addDefaultValue tableName="customers" columnName="id" schemaName="test2" defaultValueSequenceNext="customers_seq"/>
+    </changeSet>
+</databaseChangeLog>
