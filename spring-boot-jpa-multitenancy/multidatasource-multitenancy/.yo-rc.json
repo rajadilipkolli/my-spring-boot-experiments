@@ -1,12 +1,12 @@
 {
   "generator-springboot": {
-    "appName": "db",
-    "packageName": "com.example.multitenancy.db",
+    "appName": "multidatasource-multitenancy",
+    "packageName": "com.example.multitenancy",
     "databaseType": "postgresql",
     "dbMigrationTool": "liquibase",
     "features": [],
     "buildTool": "maven",
-    "packageFolder": "com/example/multitenancy/db",
+    "packageFolder": "com/example/multitenancy",
     "liquibaseMigrationCounter": 2
   }
 }
