@@ -62,16 +62,7 @@ public class CustomerController {
             @RequestBody CustomerDto customerDto,
             @RequestParam String tenant) {
         log.info("updating customer for id {} in tenant : {}", id, tenant);
-        return customerService
-                .findCustomerById(id)
-                .map(
-                        customerObj -> {
-                            Customer customer = new Customer();
-                            customer.setId(id);
-                            customer.setName(customerDto.name());
-                            return ResponseEntity.ok(customerService.updateCustomer(customer));
-                        })
-                .orElseGet(() -> ResponseEntity.notFound().build());
+        return customerService.updateCustomer(id, customerDto);
     }
 
     @DeleteMapping("/{id}")
