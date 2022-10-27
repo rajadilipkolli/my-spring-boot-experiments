@@ -1,4 +1,4 @@
-# multitenancy-db
+# multidatasource-multitenancy
 
 ### Run tests
 `$ ./mvnw clean verify`
