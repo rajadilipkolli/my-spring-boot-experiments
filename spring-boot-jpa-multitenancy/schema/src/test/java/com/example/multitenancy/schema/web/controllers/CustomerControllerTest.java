@@ -3,6 +3,7 @@ package com.example.multitenancy.schema.web.controllers;
 import static com.example.multitenancy.schema.utils.AppConstants.PROFILE_TEST;
 import static org.hamcrest.CoreMatchers.is;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -27,6 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -123,9 +125,8 @@ class CustomerControllerTest {
         Long customerId = 1L;
         Customer customer = new Customer(customerId, "Updated text");
         CustomerDto customerDto = new CustomerDto("Updated text");
-        given(customerService.findCustomerById(customerId)).willReturn(Optional.of(customer));
-        given(customerService.updateCustomer(any(Customer.class)))
-                .willAnswer((invocation) -> invocation.getArgument(0));
+        given(customerService.updateCustomer(eq(customerId), any(CustomerDto.class)))
+                .willReturn(ResponseEntity.ok(customer));
 
         this.mockMvc
                 .perform(
@@ -141,7 +142,8 @@ class CustomerControllerTest {
     @Test
     void shouldReturn404WhenUpdatingNonExistingCustomer() throws Exception {
         Long customerId = 1L;
-        given(customerService.findCustomerById(customerId)).willReturn(Optional.empty());
+        given(customerService.updateCustomer(eq(customerId), any(CustomerDto.class)))
+                .willReturn(ResponseEntity.notFound().build());
         Customer customer = new Customer(customerId, "Updated text");
 
         this.mockMvc

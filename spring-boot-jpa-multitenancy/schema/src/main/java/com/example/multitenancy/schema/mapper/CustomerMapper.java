@@ -6,6 +6,7 @@ import java.util.List;
 import org.mapstruct.InheritInverseConfiguration;
 import org.mapstruct.IterableMapping;
 import org.mapstruct.Mapper;
+import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValueCheckStrategy;
 import org.mapstruct.NullValueMappingStrategy;
 
@@ -22,4 +23,6 @@ public interface CustomerMapper {
 
     @IterableMapping(nullValueMappingStrategy = NullValueMappingStrategy.RETURN_DEFAULT)
     List<Customer> dtoToEntity(Iterable<CustomerDto> customerDtoList);
+
+    Customer updateCustomerFromDto(CustomerDto customerDto, @MappingTarget Customer customer);
 }
