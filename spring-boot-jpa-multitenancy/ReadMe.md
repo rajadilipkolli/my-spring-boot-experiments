@@ -6,8 +6,8 @@
 
 Lets see how it works by using three different approaches:
 
- > Partition tables by tenant id.
+ > Partition tables by tenant id.  ->  Single table having partition
 
- > Use a separate schema per tenant
+ > Use a separate schema per tenant. -> Single Database having multiple schemas
 
- > Use a separate database per tenant.
+ > Use a separate database per tenant. -> Different Databases having same schema (Could be having different aws regions)
