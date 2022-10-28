@@ -17,6 +17,9 @@ jobs:
   build:
     name: Run Unit & Integration Tests
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: "spring-boot-graphql-webmvc"
     steps:
       - uses: actions/checkout@v3
         with:
@@ -30,7 +33,4 @@ jobs:
           cache: "maven"
 
       - name: Build and analyze
-        run: |
-          cd spring-boot-graphql-webmvc
-          chmod +x mvnw
-          ./mvnw clean package
+        run: ./mvnw clean package

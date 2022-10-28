@@ -27,8 +27,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import org.zalando.problem.jackson.ProblemModule;
-import org.zalando.problem.violations.ConstraintViolationProblemModule;
 
 @WebMvcTest(controllers = AuthorController.class)
 @ActiveProfiles(PROFILE_TEST)
@@ -48,9 +46,6 @@ class AuthorControllerTest {
         this.authorList.add(new Author(1L, "text 1", "junit1@email.com"));
         this.authorList.add(new Author(2L, "text 2", "junit2@email.com"));
         this.authorList.add(new Author(3L, "text 3", "junit3@email.com"));
-
-        objectMapper.registerModule(new ProblemModule());
-        objectMapper.registerModule(new ConstraintViolationProblemModule());
     }
 
     @Test

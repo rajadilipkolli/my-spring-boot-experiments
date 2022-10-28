@@ -27,8 +27,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import org.zalando.problem.jackson.ProblemModule;
-import org.zalando.problem.violations.ConstraintViolationProblemModule;
 
 @WebMvcTest(controllers = PostDetailsController.class)
 @ActiveProfiles(PROFILE_TEST)
@@ -48,9 +46,6 @@ class PostDetailsControllerTest {
         this.postDetailsList.add(PostDetails.builder().id(1L).createdBy("Junit1").build());
         this.postDetailsList.add(PostDetails.builder().id(2L).createdBy("Junit2").build());
         this.postDetailsList.add(PostDetails.builder().id(3L).createdBy("Junit3").build());
-
-        objectMapper.registerModule(new ProblemModule());
-        objectMapper.registerModule(new ConstraintViolationProblemModule());
     }
 
     @Test

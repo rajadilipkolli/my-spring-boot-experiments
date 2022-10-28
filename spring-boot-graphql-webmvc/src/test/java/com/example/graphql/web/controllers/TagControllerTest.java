@@ -27,8 +27,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import org.zalando.problem.jackson.ProblemModule;
-import org.zalando.problem.violations.ConstraintViolationProblemModule;
 
 @WebMvcTest(controllers = TagController.class)
 @ActiveProfiles(PROFILE_TEST)
@@ -48,9 +46,6 @@ class TagControllerTest {
         this.tagList.add(new Tag(1L, "text 1"));
         this.tagList.add(new Tag(2L, "text 2"));
         this.tagList.add(new Tag(3L, "text 3"));
-
-        objectMapper.registerModule(new ProblemModule());
-        objectMapper.registerModule(new ConstraintViolationProblemModule());
     }
 
     @Test
