@@ -62,7 +62,10 @@ public class CustomerController {
             @RequestBody CustomerDto customerDto,
             @RequestParam String tenant) {
         log.info("updating customer for id {} in tenant : {}", id, tenant);
-        return customerService.updateCustomer(id, customerDto);
+        return customerService
+                .updateCustomer(id, customerDto)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{id}")

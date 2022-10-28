@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,16 +32,12 @@ public class CustomerService {
         return customerRepository.save(customerMapper.dtoToEntity(customer));
     }
 
-    public ResponseEntity<Customer> updateCustomer(long id, CustomerDto customerDto) {
-        Function<Customer, ResponseEntity<Customer>> customerResponseEntityFunction =
+    public Optional<Customer> updateCustomer(long id, CustomerDto customerDto) {
+        final Function<Customer, Customer> customerResponseEntityFunction =
                 customerObj ->
-                        ResponseEntity.ok(
-                                customerRepository.save(
-                                        customerMapper.updateCustomerFromDto(
-                                                customerDto, customerObj)));
-        return findCustomerById(id)
-                .map(customerResponseEntityFunction)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+                        customerRepository.save(
+                                customerMapper.updateCustomerFromDto(customerDto, customerObj));
+        return findCustomerById(id).map(customerResponseEntityFunction);
     }
 
     public void deleteCustomerById(Long id) {

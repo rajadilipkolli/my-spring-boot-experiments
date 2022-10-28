@@ -28,7 +28,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -126,7 +125,7 @@ class CustomerControllerTest {
         Customer customer = new Customer(customerId, "Updated text");
         CustomerDto customerDto = new CustomerDto("Updated text");
         given(customerService.updateCustomer(eq(customerId), any(CustomerDto.class)))
-                .willReturn(ResponseEntity.ok(customer));
+                .willReturn(Optional.of(customer));
 
         this.mockMvc
                 .perform(
@@ -143,7 +142,7 @@ class CustomerControllerTest {
     void shouldReturn404WhenUpdatingNonExistingCustomer() throws Exception {
         Long customerId = 1L;
         given(customerService.updateCustomer(eq(customerId), any(CustomerDto.class)))
-                .willReturn(ResponseEntity.notFound().build());
+                .willReturn(Optional.empty());
         Customer customer = new Customer(customerId, "Updated text");
 
         this.mockMvc
