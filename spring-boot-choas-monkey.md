@@ -1,6 +1,14 @@
+---
+description: Choas Monkey Implementation
+---
+
 # spring-boot-choas-monkey
 
-Adds Gatling performance tests to demonstrate adding assaults will cause delay in response and choas monkey is working as expected .
+[Choas Monkey](https://netflix.github.io/chaosmonkey/)
+
+&#x20;![](.gitbook/assets/logo.png)
+
+Adds Gatling performance tests to demonstrate adding assaults will cause delay in response and choas monkey is working as expected.
 
 Using Springframework 6.0 `ProblemDetails` and spring boot micrometer Observability in controller
 
