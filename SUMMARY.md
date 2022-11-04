@@ -1,7 +1,7 @@
 # Table of contents
 
 * [README](<README.md>)
-* [Code Of Conduct] (Code-of-conduct.md)
+* [Code Of Conduct](Code-of-conduct.md)
 * [API Example for Archunit](spring-boot-api-archunit-sample/README.md)
 * [spring-boot-choas-monkey](spring-boot-choas-monkey/README.md)
 * [spring-boot-data-envers-sample](spring-boot-data-envers-sample/README.md)
