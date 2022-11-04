@@ -1,6 +1,8 @@
 # API Example for Archunit
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+ ![](images/ArchUnit-Logo.png) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+ArchUnit Implementation in a Spring Boot Project, read [more](https://www.archunit.org/motivation) for understanding concept.
 
 ## Credits
 
@@ -14,3 +16,4 @@ Here are some of technologies that I used to develop this example:
 
 * Spring Boot - 3.0.0
 * Archunit - 1.0.0
+* Junit5
