@@ -80,7 +80,7 @@ bootJar {
 }
 
 tasks.named('bootBuildImage') {
-  buildpacks =  ['gcr.io/paketo-buildpacks/bellsoft-liberica:9.9.0-ea', 'gcr.io/paketo-buildpacks/java-native-image']
+  buildpacks =  ['gcr.io/paketo-buildpacks/bellsoft-liberica:9.10.0', 'gcr.io/paketo-buildpacks/java-native-image']
 }
 
 
