@@ -1,12 +1,13 @@
 # API Example for Archunit
 
- ![](images/ArchUnit-Logo.png) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+ ![](../images/ArchUnit-Logo.png) 
+ [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ArchUnit Implementation in a Spring Boot Project, read [more](https://www.archunit.org/motivation) for understanding concept.
 
 ## Credits
 
-Shamelessly copied from https://github.com/andres-sacco/api-example-archunit
+Shamelessly copied from [api-example-archunit](https://github.com/andres-sacco/api-example-archunit)
 
 The idea behind this API is to show some of all possibles rules that you can validate in one particular project. For more information about this library and how you can use it check his [page](https://sacco-andres.medium.com/)
 
