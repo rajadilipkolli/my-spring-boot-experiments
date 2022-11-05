@@ -2,7 +2,8 @@
 
 [Choas Monkey](https://netflix.github.io/chaosmonkey/)
 
-&#x20;![](images/choas-monkey.png)
+
+![](../images/choas-monkey.png)
 
 The idea behind this API is to show some of all possibles ways that you can introduce Choas Engineering principles in a project. Adds Gatling performance tests to demonstrate how adding assaults will cause delay in response and choas monkey is working as expected .
 
