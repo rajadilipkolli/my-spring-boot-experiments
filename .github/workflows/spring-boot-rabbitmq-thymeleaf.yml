@@ -34,6 +34,11 @@ jobs:
           java-version: ${{ matrix.java }}
           distribution: 'zulu'
           cache: 'maven'
+      - name: Start up rabbitmq via Docker Compose
+        run: |
+          docker-compose up -d
+          sleep 5
+          docker ps -a
       - name: Build with Maven and analyze
         run: ./mvnw -B clean verify package --file pom.xml 
 
