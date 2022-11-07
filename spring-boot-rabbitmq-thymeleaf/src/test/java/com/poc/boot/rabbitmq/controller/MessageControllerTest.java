@@ -79,7 +79,6 @@ class MessageControllerTest {
         assertThat(exception)
                 .isEqualTo(
                         "500 INTERNAL_SERVER_ERROR \"Unable To Parse Order"
-                                + "(orderNumber=null, productId=null, amount=null)\"; nested exception "
-                                + "is com.poc.boot.rabbitmq.controller.MessageControllerTest$1: Exception");
+                                + "(orderNumber=null, productId=null, amount=null)\"");
     }
 }
