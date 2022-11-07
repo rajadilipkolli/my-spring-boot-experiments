@@ -19,4 +19,5 @@
 * [spring-boot-strategy-plugin](spring-boot-strategy-plugin/ReadMe.md)
 * [spring-boot-togglz-sample](spring-boot-togglz-sample/README.md)
 * [spring-boot-ultimate-redis](spring-boot-ultimate-redis/README.md)
+* [spring-boot-rabbitmq-thymeleaf](spring-boot-rabbitmq-thymeleaf/README.md)
 * [Code Of Conduct](Code-of-conduct.md)

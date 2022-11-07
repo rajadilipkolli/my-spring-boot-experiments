@@ -24,6 +24,8 @@
   - spring-boot-togglz-sample/**/*
 "component: ultimate-redis":
   - spring-boot-ultimate-redis/**/*
+"component: rabbitmq-thymeleaf":
+  - spring-boot-rabbitmq-thymeleaf/**/*
 "status: waiting-for-triage":
   - ./*
   - ./**/*
@@ -47,3 +49,4 @@
   - spring-boot-strategy-plugin/build.gradle
   - spring-boot-togglz-sample/pom.xml
   - spring-boot-ultimate-redis/pom.xml
+  - spring-boot-rabbitmq-thymeleaf/pom.xml

@@ -1,0 +1,40 @@
+name: spring-boot-rabbitmq-thymeleaf CI
+on:
+  push:
+    paths:
+      - "spring-boot-rabbitmq-thymeleaf/**"
+    branches:
+      - main
+  pull_request:
+    paths:
+      - "spring-boot-rabbitmq-thymeleaf/**"
+    types:
+      - opened
+      - synchronize
+      - reopened
+
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        java: [ '17' ]
+    defaults:
+      run:
+        working-directory: "spring-boot-rabbitmq-thymeleaf"
+    name: Build on Java ${{ matrix.Java }}
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Set up JDK ${{ matrix.java }}
+        uses: actions/setup-java@v3.6.0
+        with:
+          java-version: ${{ matrix.java }}
+          distribution: 'zulu'
+          cache: 'maven'
+      - name: Build with Maven and analyze
+        run: ./mvnw -B clean verify package --file pom.xml 
+
+
