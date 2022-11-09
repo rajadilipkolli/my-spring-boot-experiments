@@ -35,13 +35,13 @@ class ApplicationIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.firstName", is(request.getFirstName())));
         assertInsertCount(1);
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 10; i++) {
             this.mockMvc
                     .perform(
                             get("/api/customers/search?firstName=firstNameTest")
                                     .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isOk());
         }
-        assertSelectCount(1);
+        assertSelectCount(2);
     }
 }
