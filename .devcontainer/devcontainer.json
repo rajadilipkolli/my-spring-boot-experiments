@@ -16,7 +16,9 @@
 		"vscode": {
 			"extensions": [
 				"vscjava.vscode-gradle",
-				"vscjava.vscode-java-debug"
+				"vscjava.vscode-java-debug",
+				"ms-azuretools.vscode-docker",
+				"Pivotal.vscode-boot-dev-pack"
 			]
 		}
 	}
