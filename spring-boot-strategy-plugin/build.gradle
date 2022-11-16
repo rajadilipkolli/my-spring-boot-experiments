@@ -16,7 +16,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'org.springframework.plugin:spring-plugin-core:2.0.0.RELEASE'
+    implementation 'org.springframework.plugin:spring-plugin-core:3.0.0'
     implementation 'org.springframework.plugin:spring-plugin-metadata:2.0.0.RELEASE'
     implementation 'org.springframework.boot:spring-boot-starter-web'
 
