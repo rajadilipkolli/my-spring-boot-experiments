@@ -32,6 +32,7 @@ jobs:
           components: 'native-image'
           cache: 'gradle'
           github-token: ${{ secrets.GITHUB_TOKEN }}
+          native-image-job-reports: true
       
       - name: Printing versions
         run: |
