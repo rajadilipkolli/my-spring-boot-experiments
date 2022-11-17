@@ -11,11 +11,15 @@ Using Springframework 6.0 `ProblemDetails` and spring boot micrometer Observabil
 
 ### Run tests
 
-`./mvnw clean verify`
+```shell
+./mvnw clean verify
+```
 
 ### Run Gatling
 
-`./mvnw gatling:test`
+```shell
+./mvnw gatling:test
+```
 
 ### Run locally
 
