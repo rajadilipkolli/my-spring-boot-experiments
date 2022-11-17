@@ -23,7 +23,7 @@
         <springdoc-openapi.version>2.0.0-RC1</springdoc-openapi.version>
         <commons-io.version>2.11.0</commons-io.version>
 
-        <testcontainers.version>1.17.5</testcontainers.version>
+        <testcontainers.version>1.17.6</testcontainers.version>
         <gatling.version>3.8.4</gatling.version>
         <gatling-maven-plugin.version>4.2.7</gatling-maven-plugin.version>
 
