@@ -79,11 +79,6 @@ bootJar {
     //launchScript()
 }
 
-tasks.named('bootBuildImage') {
-  buildpacks =  ['gcr.io/paketo-buildpacks/bellsoft-liberica:9.10.0', 'gcr.io/paketo-buildpacks/java-native-image']
-}
-
-
 compileJava.dependsOn processResources
 processResources.dependsOn bootBuildInfo
 
