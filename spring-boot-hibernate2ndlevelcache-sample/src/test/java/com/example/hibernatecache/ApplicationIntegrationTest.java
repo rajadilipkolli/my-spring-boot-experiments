@@ -35,6 +35,7 @@ class ApplicationIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.firstName", is(request.getFirstName())));
         assertInsertCount(1);
+        // For selecting next sequence value
         assertSelectCount(1);
         SQLStatementCountValidator.reset();
         for (int i = 0; i < 10; i++) {
