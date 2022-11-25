@@ -65,7 +65,7 @@ dependencies {
 	annotationProcessor 'org.projectlombok:lombok',
             'com.querydsl:querydsl-apt:5.0.0:jpa',
 			'org.hibernate.javax.persistence:hibernate-jpa-2.1-api:1.0.2',
-            'jakarta.annotation:jakarta.annotation-api'
+            'javax.annotation:javax.annotation-api'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'io.projectreactor:reactor-test'
 	testImplementation 'org.testcontainers:junit-jupiter'
