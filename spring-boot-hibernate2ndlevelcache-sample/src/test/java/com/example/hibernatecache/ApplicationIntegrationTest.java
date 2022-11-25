@@ -35,6 +35,9 @@ class ApplicationIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.firstName", is(request.getFirstName())));
         assertInsertCount(1);
+        // For selecting next sequence value
+        assertSelectCount(1);
+        SQLStatementCountValidator.reset();
         for (int i = 0; i < 10; i++) {
             this.mockMvc
                     .perform(
@@ -42,6 +45,6 @@ class ApplicationIntegrationTest extends AbstractIntegrationTest {
                                     .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isOk());
         }
-        assertSelectCount(2);
+        assertSelectCount(1);
     }
 }

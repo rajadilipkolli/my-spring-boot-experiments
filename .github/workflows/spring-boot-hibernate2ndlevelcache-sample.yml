@@ -34,8 +34,10 @@ jobs:
       - name: Start up redis & postgres via Docker Compose
         run: |
           cd docker
-          docker-compose up -d postgresqldb redis
+          docker compose up -d postgresqldb redis
           sleep 5
           docker ps -a
       - name: Build and analyze
         run: ./mvnw clean verify
+      - name: Codecov
+        uses: codecov/codecov-action@v3.1.1

@@ -10,7 +10,7 @@ buildscript {
 plugins {
     id 'org.springframework.boot'
     id 'io.spring.dependency-management'
-    id 'org.graalvm.buildtools.native' version '0.9.17'
+    id 'org.graalvm.buildtools.native' version '0.9.18'
     id 'java-library'
     id 'java'
     id 'com.gorylenko.gradle-git-properties'
@@ -51,7 +51,7 @@ dependencies {
     runtimeOnly 'com.h2database:h2'
     runtimeOnly 'org.postgresql:postgresql'
     implementation 'org.liquibase:liquibase-core'
-    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.0-RC1'
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.0'
     implementation "org.apache.commons:commons-lang3"
     implementation "commons-io:commons-io:${commons_io_version}"
 
@@ -78,11 +78,6 @@ springBoot {
 bootJar {
     //launchScript()
 }
-
-tasks.named('bootBuildImage') {
-  buildpacks =  ['gcr.io/paketo-buildpacks/bellsoft-liberica:9.10.0', 'gcr.io/paketo-buildpacks/java-native-image']
-}
-
 
 compileJava.dependsOn processResources
 processResources.dependsOn bootBuildInfo
