@@ -22,7 +22,7 @@ import org.testcontainers.lifecycle.Startables;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
 @Testcontainers
-class MultipleDataSourcesApplicationTests {
+class ApplicationIntegrationTest {
 
     @Container
     private static final MySQLContainer<?> MY_SQL_CONTAINER =
