@@ -17,6 +17,9 @@ jobs:
   build:
     name: Run Unit & Integration Tests
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: "spring-boot-multipledatasources"
     steps:
       - uses: actions/checkout@v3
         with:
@@ -30,13 +33,9 @@ jobs:
           cache: "maven"
       - name: Start up databases via docker compose
         run: |
-          cd spring-boot-multipledatasources
           docker compose up -d
           sleep 15
           docker ps -a
 
       - name: Build and analyze
-        run: |
-          cd spring-boot-multipledatasources
-          chmod +x mvnw
-          ./mvnw clean verify package
+        run: ./mvnw clean verify
