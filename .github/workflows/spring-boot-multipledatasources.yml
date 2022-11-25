@@ -31,11 +31,5 @@ jobs:
           java-version: 17
           distribution: "zulu"
           cache: "maven"
-      - name: Start up databases via docker compose
-        run: |
-          docker compose up -d
-          sleep 15
-          docker ps -a
-
       - name: Build and analyze
         run: ./mvnw clean verify
