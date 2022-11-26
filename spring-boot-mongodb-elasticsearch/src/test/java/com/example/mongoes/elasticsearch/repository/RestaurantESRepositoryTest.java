@@ -451,7 +451,7 @@ class RestaurantESRepositoryTest extends ElasticsearchContainerSetUp {
         Mono<SearchPage<Restaurant>> aggregationMono =
                 this.restaurantESRepository.aggregateSearch(
                         "Pizza",
-                        List.of("name", "borough", "cuisine"),
+                        List.of("restautant_name", "borough", "cuisine"),
                         Sort.Direction.ASC,
                         10,
                         0,

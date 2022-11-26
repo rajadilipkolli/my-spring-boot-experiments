@@ -222,18 +222,10 @@ public class CustomRestaurantESRepositoryImpl implements CustomRestaurantESRepos
             Integer offset,
             String[] sortFields) {
         TermsAggregation cuisineTermsBuilder =
-                AggregationBuilders.terms()
-                        .name("MyCuisine")
-                        .field("cuisine")
-                        .size(PAGE_SIZE)
-                        .build();
+                AggregationBuilders.terms().field("cuisine").size(PAGE_SIZE).build();
         // .order(BucketOrder.count(false));
         TermsAggregation boroughTermsBuilder =
-                AggregationBuilders.terms()
-                        .name("MyBorough")
-                        .field("borough")
-                        .size(PAGE_SIZE)
-                        .build();
+                AggregationBuilders.terms().field("borough").size(PAGE_SIZE).build();
         // .order(BucketOrder.count(false));
         Builder dateRangeBuilder =
                 AggregationBuilders.dateRange().name("MyDateRange").field("grades.date");

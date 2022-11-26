@@ -36,6 +36,7 @@ public class Restaurant {
     private Long restaurantId;
 
     @NotBlank(message = "Restaurant Name Can't be Blank")
+    @Field(value = "restautant_name", fielddata = true, type = FieldType.Text)
     private String name;
 
     @Field(type = FieldType.Nested, includeInParent = true)
