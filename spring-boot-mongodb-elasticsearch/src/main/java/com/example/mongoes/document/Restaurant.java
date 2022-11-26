@@ -1,9 +1,9 @@
 package com.example.mongoes.document;
 
 import com.example.mongoes.utils.AppConstants;
+import jakarta.validation.constraints.NotBlank;
 import java.util.ArrayList;
 import java.util.List;
-import javax.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;

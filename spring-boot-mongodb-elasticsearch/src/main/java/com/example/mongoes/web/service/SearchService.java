@@ -8,17 +8,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.search.aggregations.Aggregation;
-import org.elasticsearch.search.aggregations.bucket.MultiBucketsAggregation;
-import org.elasticsearch.search.aggregations.bucket.range.ParsedDateRange;
-import org.elasticsearch.search.aggregations.bucket.terms.ParsedStringTerms;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.elasticsearch.core.ElasticsearchAggregations;
+import org.springframework.data.elasticsearch.client.elc.ElasticsearchAggregation;
+import org.springframework.data.elasticsearch.client.elc.ElasticsearchAggregations;
 import org.springframework.data.elasticsearch.core.SearchPage;
 import org.springframework.data.elasticsearch.core.geo.GeoPoint;
 import org.springframework.stereotype.Service;
@@ -124,7 +120,7 @@ public class SearchService {
                             if (elasticsearchAggregations != null) {
                                 map =
                                         aggregationFunction.apply(
-                                                elasticsearchAggregations.aggregations().asMap());
+                                                elasticsearchAggregations.aggregationsAsMap());
                             }
                             return new AggregationSearchResponse(
                                     searchPage.getContent(),
@@ -135,40 +131,54 @@ public class SearchService {
                         });
     }
 
-    Function<Map<String, Aggregation>, Map<String, Map<String, Long>>> aggregationFunction =
-            aggregationMap -> {
-                Map<String, Map<String, Long>> resultMap = new HashMap<>();
-                aggregationMap.forEach(
-                        (String aggregateKey, Aggregation aggregation) -> {
-                            Map<String, Long> countMap = new HashMap<>();
-                            if (aggregation instanceof ParsedStringTerms parsedStringTerms) {
-                                countMap =
-                                        parsedStringTerms.getBuckets().stream()
-                                                .collect(
-                                                        Collectors.toMap(
-                                                                MultiBucketsAggregation.Bucket
-                                                                        ::getKeyAsString,
-                                                                MultiBucketsAggregation.Bucket
-                                                                        ::getDocCount));
-                            } else if (aggregation instanceof ParsedDateRange parsedDateRange) {
-                                countMap =
-                                        parsedDateRange.getBuckets().stream()
-                                                .filter(bucket -> bucket.getDocCount() != 0)
-                                                .collect(
-                                                        Collectors.toMap(
-                                                                bucket ->
-                                                                        bucket.getFromAsString()
-                                                                                + " - "
-                                                                                + bucket
-                                                                                        .getToAsString(),
-                                                                MultiBucketsAggregation.Bucket
-                                                                        ::getDocCount));
-                            }
-                            resultMap.put(aggregateKey, countMap);
-                        });
+    Function<Map<String, ElasticsearchAggregation>, Map<String, Map<String, Long>>>
+            aggregationFunction =
+                    aggregationMap -> {
+                        Map<String, Map<String, Long>> resultMap = new HashMap<>();
+                        aggregationMap.forEach(
+                                (String aggregateKey, ElasticsearchAggregation aggregation) -> {
+                                    Map<String, Long> countMap = new HashMap<>();
+                                    //     if (aggregation instanceof ParsedStringTerms
+                                    // parsedStringTerms) {
+                                    //         countMap =
+                                    //                 parsedStringTerms.getBuckets().stream()
+                                    //                         .collect(
+                                    //                                 Collectors.toMap(
+                                    //
+                                    // MultiBucketsAggregation.Bucket
+                                    //
+                                    // ::getKeyAsString,
+                                    //
+                                    // MultiBucketsAggregation.Bucket
+                                    //
+                                    // ::getDocCount));
+                                    //     } else if (aggregation instanceof ParsedDateRange
+                                    // parsedDateRange) {
+                                    //         countMap =
+                                    //                 parsedDateRange.getBuckets().stream()
+                                    //                         .filter(bucket ->
+                                    // bucket.getDocCount() != 0)
+                                    //                         .collect(
+                                    //                                 Collectors.toMap(
+                                    //                                         bucket ->
+                                    //
+                                    // bucket.getFromAsString()
+                                    //                                                         + " -
+                                    // "
+                                    //                                                         +
+                                    // bucket
+                                    //
+                                    //   .getToAsString(),
+                                    //
+                                    // MultiBucketsAggregation.Bucket
+                                    //
+                                    // ::getDocCount));
+                                    //     }
+                                    resultMap.put(aggregateKey, countMap);
+                                });
 
-                return resultMap;
-            };
+                        return resultMap;
+                    };
 
     public Flux<ResultData> searchRestaurantsWithInRange(
             Double lat, Double lon, Double distance, String unit) {
