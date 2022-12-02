@@ -17,6 +17,7 @@ This example demostrates how to connect to multiple datasources in same spring b
  - As soon as application is ready bootstrapping of data is done using `@EventListener(ApplicationReadyEvent.class)`
  - Data from both databases are retrieved in API and merged as response
  - Json serialization and deSerialization is done using `@JsonTest`
+ - When we set HikariDataSource manually we need to set `app.datasource._______.hikari.autoCommit=false`
 
 ### Upgrade Notes to Spring Boot 3.x
 
