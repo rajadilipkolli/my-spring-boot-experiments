@@ -1,0 +1,12 @@
+{
+  "generator-springboot": {
+    "appName": "spring-boot-jooq-r2dbc-sample",
+    "packageName": "com.example.jooq.r2dbc",
+    "databaseType": "postgresql",
+    "dbMigrationTool": "flywaydb",
+    "features": [],
+    "buildTool": "maven",
+    "packageFolder": "com/example/jooq/r2dbc",
+    "flywayMigrationCounter": 1
+  }
+}
