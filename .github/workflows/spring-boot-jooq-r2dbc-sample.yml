@@ -3,11 +3,11 @@ name: spring-boot-jooq-r2dbc-sample
 on:
   push:
     paths:
-      - "spring-boot-jooq-r2dbc-sample/**"
+      - "r2dbc/spring-boot-jooq-r2dbc-sample/**"
     branches: [main]
   pull_request:
     paths:
-      - "spring-boot-jooq-r2dbc-sample/**"
+      - "r2dbc/spring-boot-jooq-r2dbc-sample/**"
     types:
       - opened
       - synchronize
