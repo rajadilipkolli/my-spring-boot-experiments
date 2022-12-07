@@ -39,7 +39,7 @@ public class Customer {
                         name = StringPrefixedSequenceIdGenerator.NUMBER_FORMAT_PARAMETER,
                         value = "%05d")
             })
-    private Long id;
+    private String id;
 
     @Column(nullable = false)
     @NotEmpty(message = "Text cannot be empty")

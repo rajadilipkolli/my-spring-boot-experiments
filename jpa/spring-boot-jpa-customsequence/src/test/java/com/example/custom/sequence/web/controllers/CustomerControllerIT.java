@@ -56,7 +56,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
     @Test
     void shouldFindCustomerById() throws Exception {
         Customer customer = customerList.get(0);
-        Long customerId = customer.getId();
+        String customerId = customer.getId();
 
         this.mockMvc
                 .perform(get("/api/customers/{id}", customerId))

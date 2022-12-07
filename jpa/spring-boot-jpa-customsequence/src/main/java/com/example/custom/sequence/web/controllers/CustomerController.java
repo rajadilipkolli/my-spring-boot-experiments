@@ -58,7 +58,7 @@ public class CustomerController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Customer> getCustomerById(@PathVariable Long id) {
+    public ResponseEntity<Customer> getCustomerById(@PathVariable String id) {
         return customerService
                 .findCustomerById(id)
                 .map(ResponseEntity::ok)
@@ -73,7 +73,7 @@ public class CustomerController {
 
     @PutMapping("/{id}")
     public ResponseEntity<Customer> updateCustomer(
-            @PathVariable Long id, @RequestBody Customer customer) {
+            @PathVariable String id, @RequestBody Customer customer) {
         return customerService
                 .findCustomerById(id)
                 .map(
@@ -85,7 +85,7 @@ public class CustomerController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Customer> deleteCustomer(@PathVariable Long id) {
+    public ResponseEntity<Customer> deleteCustomer(@PathVariable String id) {
         return customerService
                 .findCustomerById(id)
                 .map(

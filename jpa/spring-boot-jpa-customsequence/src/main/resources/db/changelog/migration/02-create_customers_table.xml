@@ -6,7 +6,11 @@
          http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.2.xsd">
     <changeSet author="app" id="createTable-customers">
 
-        <createTable tableName="customers">
+        <createSequence
+                        sequenceName="custom_seq" 
+                        incrementBy="50"/>
+
+        <createTable tableName="varchar(50)">
             <column name="id" type="bigint">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
