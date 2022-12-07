@@ -11,7 +11,7 @@ public class DBContainerInitializer
         implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
     private static final MariaDBContainer<?> sqlContainer =
-            new MariaDBContainer<>("mariadb:10.9")
+            new MariaDBContainer<>("mariadb:10.10")
                     .withDatabaseName("integration-tests-db")
                     .withUsername("username")
                     .withPassword("password");
