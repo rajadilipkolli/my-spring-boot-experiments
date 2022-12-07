@@ -1,0 +1,12 @@
+{
+  "generator-springboot": {
+    "appName": "spring-boot-jpa-customsequence",
+    "packageName": "com.example.custom.sequence",
+    "databaseType": "mariadb",
+    "dbMigrationTool": "liquibase",
+    "features": [],
+    "buildTool": "maven",
+    "packageFolder": "com/example/custom/sequence",
+    "liquibaseMigrationCounter": 2
+  }
+}
