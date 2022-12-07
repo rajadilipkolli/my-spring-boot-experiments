@@ -3,11 +3,11 @@ name: spring-boot-jpa-multitenancy-db
 on:
   push:
     paths:
-      - "spring-boot-jpa-multitenancy/db/**"
+      - "jpa/spring-boot-jpa-multitenancy/db/**"
     branches: [main]
   pull_request:
     paths:
-      - "spring-boot-jpa-multitenancy/db/**"
+      - "jpa/spring-boot-jpa-multitenancy/db/**"
     types:
       - opened
       - synchronize
@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: spring-boot-jpa-multitenancy/db
+        working-directory: "jpa/spring-boot-jpa-multitenancy/db"
 
     steps:
       - uses: actions/checkout@v3
