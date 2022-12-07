@@ -3,21 +3,25 @@
 "component : choas-monkey":
  - spring-boot-choas-monkey/**/*
 "component: data-envers":
-  - spring-boot-data-envers-sample/**/*
+  - jpa/spring-boot-data-envers-sample/**/*
 "component: graphql-webflux":
-  - spring-boot-graphql-webflux/**/*
+  - graphql/spring-boot-graphql-webflux/**/*
+"component: graphql-webmvc":
+  - graphql/spring-boot-graphql-webmvc/**/*
+"component: graphql-querydsl":
+  - graphql/spring-boot-graphql-querydsl/**/*
 "component: hibernate2ndlevelcache-sample":
-  - spring-boot-hibernate2ndlevelcache-sample/**/*
+  - jpa/spring-boot-hibernate2ndlevelcache-sample/**/*
 "component: jobrunr":
   - spring-boot-jobrunr-sample/**/*
 "component: jpa-multitenancy":
-  - spring-boot-jpa-multitenancy/**/*
+  - jpa/spring-boot-jpa-multitenancy/**/*
 "component: mongodb-elasticsearch":
   - spring-boot-mongodb-elasticsearch/**/*
 "component: multiple-datasources":
-  - spring-boot-multipledatasources/**/*
+  - jpa'/spring-boot-multipledatasources/**/*
 "component: read-replica-postgres":
-  - spring-boot-read-replica-postgresql/**/*
+  - jpa/spring-boot-read-replica-postgresql/**/*
 "component: strategy-plugin":
   - spring-boot-strategy-plugin/**/*
 "component: togglz":
@@ -33,19 +37,22 @@
 "type: dependency-upgrade":
   - spring-boot-api-archunit-sample/pom.xml
   - spring-boot-choas-monkey/pom.xml
-  - spring-boot-data-envers-sample/build.gradle
-  - spring-boot-data-envers-sample/gradle.properties
-  - spring-boot-hibernate2ndlevelcache-sample/pom.xml
-  - spring-boot-jpa-multitenancy/db/pom.xml
-  - spring-boot-jpa-multitenancy/multidatasource-multitenancy/pom.xml
-  - spring-boot-jpa-multitenancy/partition/pom.xml
-  - spring-boot-jpa-multitenancy/schema/pom.xml
+  - jpa/spring-boot-data-envers-sample/build.gradle
+  - jpa/spring-boot-data-envers-sample/gradle.properties
+  - jpa/spring-boot-hibernate2ndlevelcache-sample/pom.xml
+  - jpa/spring-boot-jpa-multitenancy/db/pom.xml
+  - jpa/spring-boot-jpa-multitenancy/multidatasource-multitenancy/pom.xml
+  - jpa/spring-boot-jpa-multitenancy/partition/pom.xml
+  - jpa/spring-boot-jpa-multitenancy/schema/pom.xml
+  - jpa/spring-boot-multipledatasources/pom.xml
+  - jpa/spring-boot-read-replica-postgresql/pom.xml
   - spring-boot-jobrunr-sample/pom.xml
   - spring-boot-mongodb-elasticsearch/pom.xml
-  - spring-boot-multipledatasources/pom.xml
-  - spring-boot-read-replica-postgresql/pom.xml
-  - spring-boot-graphql-webflux/build.gradle
-  - spring-boot-graphql-webflux/gradle.properties
+  - graphql/spring-boot-graphql-webflux/build.gradle
+  - graphql/spring-boot-graphql-webflux/gradle.properties
+  - graphql/spring-boot-graphql-querydsl/build.gradle
+  - graphql/spring-boot-graphql-querydsl/gradle.properties
+  - graphql/spring-boot-graphql-webmvc/pom.xml
   - spring-boot-strategy-plugin/build.gradle
   - spring-boot-togglz-sample/pom.xml
   - spring-boot-ultimate-redis/pom.xml
