@@ -34,7 +34,7 @@ public class Customer {
                 @Parameter(name = StringPrefixedSequenceIdGenerator.INCREMENT_PARAM, value = "50"),
                 @Parameter(
                         name = StringPrefixedSequenceIdGenerator.VALUE_PREFIX_PARAMETER,
-                        value = "B_"),
+                        value = "CUS_"),
                 @Parameter(
                         name = StringPrefixedSequenceIdGenerator.NUMBER_FORMAT_PARAMETER,
                         value = "%05d")

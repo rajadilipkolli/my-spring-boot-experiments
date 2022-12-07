@@ -60,7 +60,7 @@ class CustomerServiceTest {
         // then
         assertThat(optionalCustomer).isPresent();
         Customer customer = optionalCustomer.get();
-        assertThat(customer.getId()).isEqualTo(1L);
+        assertThat(customer.getId()).isEqualTo("CUS_1");
         assertThat(customer.getText()).isEqualTo("junitTest");
     }
 
@@ -72,7 +72,7 @@ class CustomerServiceTest {
         Customer persistedCustomer = customerService.saveCustomer(getCustomer());
         // then
         assertThat(persistedCustomer).isNotNull();
-        assertThat(persistedCustomer.getId()).isEqualTo(1L);
+        assertThat(persistedCustomer.getId()).isEqualTo("CUS_1");
         assertThat(persistedCustomer.getText()).isEqualTo("junitTest");
     }
 
