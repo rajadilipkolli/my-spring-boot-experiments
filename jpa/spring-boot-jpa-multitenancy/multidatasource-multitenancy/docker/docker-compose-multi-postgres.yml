@@ -6,19 +6,11 @@ services:
     environment:
       - POSTGRES_USER=appuser
       - POSTGRES_PASSWORD=secret
-      - POSTGRES_DB=appdb
+      - POSTGRES_DB=primary
     ports:
       - "5432:5432"
-
-  mariadb:
-    image: mariadb:10.10
-    environment:
-      - MYSQL_DATABASE=appdb
-      - MYSQL_USER=appuser
-      - MYSQL_PASSWORD=secret
-      - MYSQL_ROOT_PASSWORD=root
-    ports:
-      - "3306:3306"
+    volumes:
+      - ./docker_postgres_init.sql:/docker-entrypoint-initdb.d/docker_postgres_init.sql
 
   pgadmin4:
     image: dpage/pgadmin4

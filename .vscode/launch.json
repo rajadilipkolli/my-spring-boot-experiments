@@ -54,6 +54,16 @@
             "projectName": "spring-boot-jpa-customsequence",
             "args": "",
             "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-Application<multidatasource-multitenancy>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.example.multitenancy.Application",
+            "projectName": "multidatasource-multitenancy",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
         }
     ]
 }
