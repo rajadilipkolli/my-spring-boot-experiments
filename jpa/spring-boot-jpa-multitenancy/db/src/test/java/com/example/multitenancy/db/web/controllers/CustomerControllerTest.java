@@ -55,7 +55,7 @@ class CustomerControllerTest {
         given(customerService.findAllCustomers()).willReturn(this.customerList);
 
         this.mockMvc
-                .perform(get("/api/customers").header("X-tenantId", "primary"))
+                .perform(get("/api/customers").header("X-tenantId", "postgres"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.size()", is(customerList.size())));
     }
@@ -67,7 +67,7 @@ class CustomerControllerTest {
         given(customerService.findCustomerById(customerId)).willReturn(Optional.of(customer));
 
         this.mockMvc
-                .perform(get("/api/customers/{id}", customerId).header("X-tenantId", "primary"))
+                .perform(get("/api/customers/{id}", customerId).header("X-tenantId", "postgres"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.text", is(customer.getText())));
     }
@@ -78,7 +78,7 @@ class CustomerControllerTest {
         given(customerService.findCustomerById(customerId)).willReturn(Optional.empty());
 
         this.mockMvc
-                .perform(get("/api/customers/{id}", customerId).header("X-tenantId", "primary"))
+                .perform(get("/api/customers/{id}", customerId).header("X-tenantId", "postgres"))
                 .andExpect(status().isNotFound());
     }
 
@@ -91,7 +91,7 @@ class CustomerControllerTest {
         this.mockMvc
                 .perform(
                         post("/api/customers")
-                                .header("X-tenantId", "primary")
+                                .header("X-tenantId", "postgres")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(customer)))
                 .andExpect(status().isCreated())
@@ -106,7 +106,7 @@ class CustomerControllerTest {
         this.mockMvc
                 .perform(
                         post("/api/customers")
-                                .header("X-tenantId", "primary")
+                                .header("X-tenantId", "postgres")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(customer)))
                 .andExpect(status().isBadRequest())
@@ -130,7 +130,7 @@ class CustomerControllerTest {
         this.mockMvc
                 .perform(
                         put("/api/customers/{id}", customer.getId())
-                                .header("X-tenantId", "primary")
+                                .header("X-tenantId", "postgres")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(customer)))
                 .andExpect(status().isOk())
@@ -146,7 +146,7 @@ class CustomerControllerTest {
         this.mockMvc
                 .perform(
                         put("/api/customers/{id}", customerId)
-                                .header("X-tenantId", "primary")
+                                .header("X-tenantId", "postgres")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(customer)))
                 .andExpect(status().isNotFound());
@@ -162,7 +162,7 @@ class CustomerControllerTest {
         this.mockMvc
                 .perform(
                         delete("/api/customers/{id}", customer.getId())
-                                .header("X-tenantId", "primary"))
+                                .header("X-tenantId", "postgres"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.text", is(customer.getText())));
     }
@@ -173,7 +173,7 @@ class CustomerControllerTest {
         given(customerService.findCustomerById(customerId)).willReturn(Optional.empty());
 
         this.mockMvc
-                .perform(delete("/api/customers/{id}", customerId).header("X-tenantId", "primary"))
+                .perform(delete("/api/customers/{id}", customerId).header("X-tenantId", "postgres"))
                 .andExpect(status().isNotFound());
     }
 }
