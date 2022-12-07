@@ -37,7 +37,7 @@ public class CustomerService {
         return new PagedResult<>(customersPage);
     }
 
-    public Optional<Customer> findCustomerById(Long id) {
+    public Optional<Customer> findCustomerById(String id) {
         return customerRepository.findById(id);
     }
 
@@ -45,7 +45,7 @@ public class CustomerService {
         return customerRepository.save(customer);
     }
 
-    public void deleteCustomerById(Long id) {
+    public void deleteCustomerById(String id) {
         customerRepository.deleteById(id);
     }
 }

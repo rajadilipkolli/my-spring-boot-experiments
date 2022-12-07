@@ -54,13 +54,13 @@ class CustomerServiceTest {
     @Test
     void findCustomerById() {
         // given
-        given(customerRepository.findById(1L)).willReturn(Optional.of(getCustomer()));
+        given(customerRepository.findById("CUS_1")).willReturn(Optional.of(getCustomer()));
         // when
-        Optional<Customer> optionalCustomer = customerService.findCustomerById(1L);
+        Optional<Customer> optionalCustomer = customerService.findCustomerById("CUS_1");
         // then
         assertThat(optionalCustomer).isPresent();
         Customer customer = optionalCustomer.get();
-        assertThat(customer.getId()).isEqualTo(1L);
+        assertThat(customer.getId()).isEqualTo("CUS_1");
         assertThat(customer.getText()).isEqualTo("junitTest");
     }
 
@@ -72,23 +72,23 @@ class CustomerServiceTest {
         Customer persistedCustomer = customerService.saveCustomer(getCustomer());
         // then
         assertThat(persistedCustomer).isNotNull();
-        assertThat(persistedCustomer.getId()).isEqualTo(1L);
+        assertThat(persistedCustomer.getId()).isEqualTo("CUS_1");
         assertThat(persistedCustomer.getText()).isEqualTo("junitTest");
     }
 
     @Test
     void deleteCustomerById() {
         // given
-        willDoNothing().given(customerRepository).deleteById(1L);
+        willDoNothing().given(customerRepository).deleteById("CUS_1");
         // when
-        customerService.deleteCustomerById(1L);
+        customerService.deleteCustomerById("CUS_1");
         // then
-        verify(customerRepository, times(1)).deleteById(1L);
+        verify(customerRepository, times(1)).deleteById("CUS_1");
     }
 
     private Customer getCustomer() {
         Customer customer = new Customer();
-        customer.setId(1L);
+        customer.setId("CUS_1");
         customer.setText("junitTest");
         return customer;
     }

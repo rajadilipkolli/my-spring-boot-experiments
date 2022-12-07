@@ -29,7 +29,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
 
     @BeforeEach
     void setUp() {
-        customerRepository.deleteAll();
+        customerRepository.deleteAllInBatch();
 
         customerList = new ArrayList<>();
         customerList.add(new Customer(null, "First Customer"));
@@ -56,11 +56,12 @@ class CustomerControllerIT extends AbstractIntegrationTest {
     @Test
     void shouldFindCustomerById() throws Exception {
         Customer customer = customerList.get(0);
-        Long customerId = customer.getId();
+        String customerId = customer.getId();
 
         this.mockMvc
                 .perform(get("/api/customers/{id}", customerId))
                 .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", is(customer.getId())))
                 .andExpect(jsonPath("$.text", is(customer.getText())));
     }
 
