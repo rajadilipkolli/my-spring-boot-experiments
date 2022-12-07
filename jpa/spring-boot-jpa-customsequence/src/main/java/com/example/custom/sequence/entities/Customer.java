@@ -1,5 +1,6 @@
 package com.example.custom.sequence.entities;
 
+import com.example.custom.sequence.config.StringPrefixedSequenceIdGenerator;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -13,6 +14,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.Hibernate;
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Parameter;
 
 @Entity
 @Table(name = "customers")
@@ -23,7 +26,19 @@ import org.hibernate.Hibernate;
 public class Customer {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "custom_seq")
+    @GenericGenerator(
+            name = "custom_seq",
+            strategy = "com.example.custom.sequence.config.StringPrefixedSequenceIdGenerator",
+            parameters = {
+                @Parameter(name = StringPrefixedSequenceIdGenerator.INCREMENT_PARAM, value = "50"),
+                @Parameter(
+                        name = StringPrefixedSequenceIdGenerator.VALUE_PREFIX_PARAMETER,
+                        value = "B_"),
+                @Parameter(
+                        name = StringPrefixedSequenceIdGenerator.NUMBER_FORMAT_PARAMETER,
+                        value = "%05d")
+            })
     private Long id;
 
     @Column(nullable = false)

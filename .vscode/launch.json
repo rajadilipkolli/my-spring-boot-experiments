@@ -44,6 +44,16 @@
             "projectName": "spring-boot-jooq-r2dbc-sample",
             "args": "",
             "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-Application<spring-boot-jpa-customsequence>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.example.custom.sequence.Application",
+            "projectName": "spring-boot-jpa-customsequence",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
         }
     ]
 }

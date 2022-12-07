@@ -6,14 +6,8 @@
          http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.2.xsd">
     <changeSet author="app" id="createTable-customers">
 
-        <createSequence
-                        sequenceName="customers_seq"
-                        incrementBy="50"
-                        startValue="1"
-                        />
-
         <createTable tableName="customers">
-            <column name="id" type="bigint" defaultValueSequenceNext="customers_seq">
+            <column name="id" type="bigint" defaultValueSequenceNext="custom_seq">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="text" type="varchar(1024)">
