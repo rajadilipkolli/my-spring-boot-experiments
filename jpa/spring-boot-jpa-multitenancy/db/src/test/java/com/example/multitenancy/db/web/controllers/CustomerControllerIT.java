@@ -61,7 +61,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
     @Test
     void shouldFetchAllCustomers() throws Exception {
         this.mockMvc
-                .perform(get("/api/customers").header("X-tenantId", "postgres"))
+                .perform(get("/api/customers").header("X-tenantId", "primary"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.size()", is(customerList.size())));
     }
@@ -72,7 +72,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
         Long customerId = customer.getId();
 
         this.mockMvc
-                .perform(get("/api/customers/{id}", customerId).header("X-tenantId", "postgres"))
+                .perform(get("/api/customers/{id}", customerId).header("X-tenantId", "primary"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.text", is(customer.getText())));
     }
@@ -83,7 +83,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(
                         post("/api/customers")
-                                .header("X-tenantId", "postgres")
+                                .header("X-tenantId", "primary")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(customer)))
                 .andExpect(status().isCreated())
@@ -97,7 +97,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(
                         post("/api/customers")
-                                .header("X-tenantId", "postgres")
+                                .header("X-tenantId", "primary")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(customer)))
                 .andExpect(status().isBadRequest())
@@ -118,7 +118,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(
                         put("/api/customers/{id}", customer.getId())
-                                .header("X-tenantId", "postgres")
+                                .header("X-tenantId", "primary")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(customer)))
                 .andExpect(status().isOk())
@@ -132,7 +132,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(
                         delete("/api/customers/{id}", customer.getId())
-                                .header("X-tenantId", "postgres"))
+                                .header("X-tenantId", "primary"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.text", is(customer.getText())));
     }

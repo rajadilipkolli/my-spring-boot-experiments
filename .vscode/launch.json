@@ -6,6 +6,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "Launch Application",
+            "request": "launch",
+            "mainClass": "com.example.multitenancy.db.Application",
+            "projectName": "db"
+        },
+        {
+            "type": "java",
             "name": "Launch MultipleDataSourcesApplication",
             "request": "launch",
             "mainClass": "com.example.multipledatasources.MultipleDataSourcesApplication",
@@ -45,16 +52,6 @@
             "cwd": "${workspaceFolder}",
             "mainClass": "com.example.custom.sequence.Application",
             "projectName": "spring-boot-jpa-customsequence",
-            "args": "",
-            "envFile": "${workspaceFolder}/.env"
-        },
-        {
-            "type": "java",
-            "name": "Spring Boot-Application<multitenancy-db>",
-            "request": "launch",
-            "cwd": "${workspaceFolder}",
-            "mainClass": "com.example.multitenancy.db.Application",
-            "projectName": "multitenancy-db",
             "args": "",
             "envFile": "${workspaceFolder}/.env"
         }

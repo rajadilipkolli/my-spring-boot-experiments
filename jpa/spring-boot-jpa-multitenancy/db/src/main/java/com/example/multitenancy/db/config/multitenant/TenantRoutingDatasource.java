@@ -20,8 +20,8 @@ public class TenantRoutingDatasource extends AbstractRoutingDataSource {
         setDefaultTargetDataSource(primaryDataSource);
 
         HashMap<Object, Object> targetDataSources = new HashMap<>();
-        targetDataSources.put("postgres", primaryDataSource);
-        targetDataSources.put("mariadb", secondaryDataSource);
+        targetDataSources.put("primary", primaryDataSource);
+        targetDataSources.put("secondary", secondaryDataSource);
         setTargetDataSources(targetDataSources);
     }
 
