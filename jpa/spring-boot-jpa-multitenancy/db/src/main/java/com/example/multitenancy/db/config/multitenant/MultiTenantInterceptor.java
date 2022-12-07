@@ -34,6 +34,6 @@ public class MultiTenantInterceptor implements HandlerInterceptor {
     }
 
     private List<Object> getValidTenants() {
-        return List.of("primary", "secondary");
+        return List.of("postgres", "mariadb");
     }
 }
