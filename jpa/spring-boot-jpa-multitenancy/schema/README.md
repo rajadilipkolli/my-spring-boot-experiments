@@ -1,5 +1,9 @@
 # schema
 
+![](../../../images/MultitenancyDatabaseSchema-1024x657.png)
+
+Architecture Image Credit : [Vlad](https://twitter.com/vlad_mihalcea)
+
 ### Run tests
 `$ ./mvnw clean verify`
 
