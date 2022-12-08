@@ -6,7 +6,7 @@
 
 Lets see how it works by using three different approaches:
 
- > Partition tables by tenant id.  ->  Single table having partition
+ > Partition tables by tenant id.  ->  Single table having partition (Supported Only from Hibernate 6)
 
  > Use a separate schema per tenant. -> Single Database having multiple schemas
 
