@@ -1,9 +1,9 @@
 package com.example.mongoes.document;
 
 import com.example.mongoes.utils.AppConstants;
+import jakarta.validation.constraints.NotBlank;
 import java.util.ArrayList;
 import java.util.List;
-import javax.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -36,6 +36,7 @@ public class Restaurant {
     private Long restaurantId;
 
     @NotBlank(message = "Restaurant Name Can't be Blank")
+    @Field(value = "restautant_name", fielddata = true, type = FieldType.Text)
     private String name;
 
     @Field(type = FieldType.Nested, includeInParent = true)

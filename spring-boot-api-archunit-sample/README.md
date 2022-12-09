@@ -3,6 +3,8 @@
  ![](../images/ArchUnit-Logo.png) 
  [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
+ArchUnit is a Java-based library that allows developers to create unit tests for the architecture of their code. It provides a set of rules and assertions that can be used to validate the architecture of the code, ensuring that it follows best practices and meets certain architectural requirements. This allows developers to catch potential issues early on in the development process and improve the overall quality and maintainability of the code.
+
 ArchUnit Implementation in a Spring Boot Project, read [more](https://www.archunit.org/motivation) for understanding concept.
 
 ## Credits

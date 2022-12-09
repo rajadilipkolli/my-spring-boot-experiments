@@ -3,11 +3,11 @@ name: spring-boot-jpa-multitenancy-schema
 on:
   push:
     paths:
-      - "spring-boot-jpa-multitenancy/schema/**"
+      - "jpa/spring-boot-jpa-multitenancy/schema/**"
     branches: [main]
   pull_request:
     paths:
-      - "spring-boot-jpa-multitenancy/schema/**"
+      - "jpa/spring-boot-jpa-multitenancy/schema/**"
     types:
       - opened
       - synchronize
@@ -18,14 +18,14 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: "spring-boot-jpa-multitenancy/schema"
+        working-directory: "jpa/spring-boot-jpa-multitenancy/schema"
 
     steps:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
       - name: Set up JDK
-        uses: actions/setup-java@v3.6.0
+        uses: actions/setup-java@v3.8.0
         with:
           java-version: "17"
           distribution: "zulu"

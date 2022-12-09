@@ -1,0 +1,11 @@
+version: '3.8'
+services:
+
+  postgresqldb:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_USER=local
+      - POSTGRES_PASSWORD=local
+      - POSTGRES_DB=rest
+    ports:
+      - "5432:5432"

@@ -3,11 +3,11 @@ name: spring-boot-multipledatasources
 on:
   push:
     paths:
-      - "spring-boot-multipledatasources/**"
+      - "jpa/spring-boot-multipledatasources/**"
     branches: [main]
   pull_request:
     paths:
-      - "spring-boot-multipledatasources/**"
+      - "jpa/spring-boot-multipledatasources/**"
     types:
       - opened
       - synchronize
@@ -17,26 +17,19 @@ jobs:
   build:
     name: Run Unit & Integration Tests
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: "jpa/spring-boot-multipledatasources"
     steps:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
 
       - name: Set up JDK
-        uses: actions/setup-java@v3.6.0
+        uses: actions/setup-java@v3.8.0
         with:
           java-version: 17
           distribution: "zulu"
           cache: "maven"
-      - name: Start up databases via docker compose
-        run: |
-          cd spring-boot-multipledatasources
-          docker compose up -d
-          sleep 15
-          docker ps -a
-
       - name: Build and analyze
-        run: |
-          cd spring-boot-multipledatasources
-          chmod +x mvnw
-          ./mvnw clean verify package
+        run: ./mvnw clean verify
