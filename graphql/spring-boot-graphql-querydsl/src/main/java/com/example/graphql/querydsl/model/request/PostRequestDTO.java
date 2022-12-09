@@ -2,8 +2,8 @@ package com.example.graphql.querydsl.model.request;
 
 import com.example.graphql.querydsl.model.PostCommentsDTO;
 import com.example.graphql.querydsl.model.TagDTO;
+import jakarta.validation.constraints.NotBlank;
 import java.util.List;
-import javax.validation.constraints.NotBlank;
 
 public record PostRequestDTO(
         @NotBlank String name,
