@@ -7,7 +7,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
 public class DBContainerInitializerBase {
 
     protected static final PostgreSQLContainer<?> POSTGRE_SQL_CONTAINER =
-            new PostgreSQLContainer<>("postgres:latest")
+            new PostgreSQLContainer<>("postgres:15-alpine")
                     .withDatabaseName("integration-tests-db")
                     .withUsername("username")
                     .withPassword("password")
