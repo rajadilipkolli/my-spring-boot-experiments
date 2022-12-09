@@ -1,7 +1,7 @@
 package com.example.graphql.querydsl.entities;
 
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
-import javax.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
