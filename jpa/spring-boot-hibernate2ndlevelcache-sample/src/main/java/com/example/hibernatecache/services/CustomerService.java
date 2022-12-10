@@ -10,14 +10,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Transactional
+RequiredArgsConstructor
 public class CustomerService {
 
     private final CustomerRepository customerRepository;
-
-    @Autowired
-    public CustomerService(CustomerRepository customerRepository) {
-        this.customerRepository = customerRepository;
-    }
 
     public List<Customer> findAllCustomers() {
         return customerRepository.findAll();

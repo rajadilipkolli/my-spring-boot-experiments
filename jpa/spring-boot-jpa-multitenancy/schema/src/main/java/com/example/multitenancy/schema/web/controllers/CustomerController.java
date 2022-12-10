@@ -23,14 +23,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/customers")
 @Slf4j
+RequiredArgsConstructor
 public class CustomerController {
 
-    private final CustomerService customerService;
-
-    @Autowired
-    public CustomerController(CustomerService customerService) {
-        this.customerService = customerService;
-    }
+private final CustomerService customerService;
 
     @GetMapping
     public List<Customer> getAllCustomers(@RequestParam String tenant) {
