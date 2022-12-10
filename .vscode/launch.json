@@ -75,6 +75,16 @@
             "projectName": "rest-template",
             "args": "",
             "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-Application<web-client-webflux>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.example.rest.webclient.Application",
+            "projectName": "web-client-webflux",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
         }
     ]
 }
