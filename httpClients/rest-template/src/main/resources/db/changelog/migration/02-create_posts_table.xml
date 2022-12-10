@@ -14,7 +14,13 @@
             <column name="id" type="bigint" defaultValueSequenceNext="posts_seq">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
-            <column name="text" type="varchar(1024)">
+            <column name="title" type="varchar(1024)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="body" type="varchar(1024)">
                 <constraints nullable="false"/>
             </column>
         </createTable>

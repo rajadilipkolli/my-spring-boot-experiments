@@ -61,7 +61,7 @@ class PostServiceTest {
         assertThat(optionalPost).isPresent();
         Post post = optionalPost.get();
         assertThat(post.getId()).isEqualTo(1L);
-        assertThat(post.getText()).isEqualTo("junitTest");
+        assertThat(post.getTitle()).isEqualTo("junitTest");
     }
 
     @Test
@@ -73,7 +73,7 @@ class PostServiceTest {
         // then
         assertThat(persistedPost).isNotNull();
         assertThat(persistedPost.getId()).isEqualTo(1L);
-        assertThat(persistedPost.getText()).isEqualTo("junitTest");
+        assertThat(persistedPost.getTitle()).isEqualTo("junitTest");
     }
 
     @Test
@@ -89,7 +89,7 @@ class PostServiceTest {
     private Post getPost() {
         Post post = new Post();
         post.setId(1L);
-        post.setText("junitTest");
+        post.setTitle("junitTest");
         return post;
     }
 }
