@@ -39,6 +39,5 @@ public class ErrorDetailProblemHandlingControllerAdvice {
         return problemDetail;
     }
 
-    static record ApiValidationError(
-            String object, String field, Object rejectedValue, String message) {}
+    record ApiValidationError(String object, String field, Object rejectedValue, String message) {}
 }

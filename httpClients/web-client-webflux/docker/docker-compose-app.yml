@@ -1,7 +1,7 @@
 version: '3.8'
 services:
 
-  web-client:
+  web-client-webflux:
     build: ..
     ports:
       - "18080:8080"
