@@ -1,4 +1,4 @@
-# web-client
+# web-client-mvc
 
 ### Run tests
 `$ ./mvnw clean verify`

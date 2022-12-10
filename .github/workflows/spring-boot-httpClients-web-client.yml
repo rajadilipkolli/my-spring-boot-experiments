@@ -1,12 +1,12 @@
-name: spring-boot-httpClients-web-client
+name: spring-boot-httpClients-web-client-mvc
 on:
   push:
     paths:
-      - "httpClients/web-client/**"
+      - "httpClients/web-client-mvc/**"
     branches: [main]
   pull_request:
     paths:
-      - "httpClients/web-client/**"
+      - "httpClients/web-client-mvc/**"
     types:
       - opened
       - synchronize
@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: "httpClients/web-client"
+        working-directory: "httpClients/web-client-mvc"
     steps:
       - uses: actions/checkout@v3
         with:

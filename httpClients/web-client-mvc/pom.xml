@@ -9,10 +9,10 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.example.rest.webclient</groupId>
-    <artifactId>web-client</artifactId>
+    <artifactId>web-client-mvc</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>web-client</name>
-    <description>web-client</description>
+    <name>web-client-mvc</name>
+    <description>web- in mvc</description>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
