@@ -4,20 +4,16 @@ import com.example.envers.entities.Customer;
 import com.example.envers.repositories.CustomerRepository;
 import java.util.List;
 import java.util.Optional;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class CustomerService {
 
     private final CustomerRepository customerRepository;
-
-    @Autowired
-    public CustomerService(CustomerRepository customerRepository) {
-        this.customerRepository = customerRepository;
-    }
 
     public List<Customer> findAllCustomers() {
         return customerRepository.findAll();

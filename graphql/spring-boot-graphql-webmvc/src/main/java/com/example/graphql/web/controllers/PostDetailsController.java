@@ -3,7 +3,7 @@ package com.example.graphql.web.controllers;
 import com.example.graphql.entities.PostDetails;
 import com.example.graphql.services.PostDetailsService;
 import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -19,14 +19,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/postdetails")
+@RequiredArgsConstructor
 public class PostDetailsController {
 
     private final PostDetailsService postDetailsService;
-
-    @Autowired
-    public PostDetailsController(PostDetailsService postDetailsService) {
-        this.postDetailsService = postDetailsService;
-    }
 
     @GetMapping
     public List<PostDetails> getAllPostDetailss() {

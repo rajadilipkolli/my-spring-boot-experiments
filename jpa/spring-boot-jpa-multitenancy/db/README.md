@@ -1,5 +1,10 @@
 # multitenancy-db
 
+
+![](../../../images/MultitenancyDatabaseCatalog-1024x629.png)
+
+Architecture Image Credit : [Vlad](https://twitter.com/vlad_mihalcea)
+
 ### Run tests
 `$ ./mvnw clean verify`
 

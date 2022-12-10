@@ -4,8 +4,8 @@ import com.example.multitenancy.schema.domain.request.CustomerDto;
 import com.example.multitenancy.schema.entities.Customer;
 import com.example.multitenancy.schema.services.CustomerService;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -23,14 +23,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/customers")
 @Slf4j
+@RequiredArgsConstructor
 public class CustomerController {
 
     private final CustomerService customerService;
-
-    @Autowired
-    public CustomerController(CustomerService customerService) {
-        this.customerService = customerService;
-    }
 
     @GetMapping
     public List<Customer> getAllCustomers(@RequestParam String tenant) {

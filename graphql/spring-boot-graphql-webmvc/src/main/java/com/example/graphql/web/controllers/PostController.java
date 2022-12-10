@@ -3,7 +3,7 @@ package com.example.graphql.web.controllers;
 import com.example.graphql.entities.Post;
 import com.example.graphql.services.PostService;
 import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -19,14 +19,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/posts")
+@RequiredArgsConstructor
 public class PostController {
 
     private final PostService postService;
-
-    @Autowired
-    public PostController(PostService postService) {
-        this.postService = postService;
-    }
 
     @GetMapping
     public List<Post> getAllPosts() {
