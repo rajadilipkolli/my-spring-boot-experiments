@@ -23,7 +23,7 @@ public class WebClientConfiguration {
     public HttpServiceProxyFactory httpServiceProxyFactory(WebClient webClient) {
         return HttpServiceProxyFactory.builder(WebClientAdapter.forClient(webClient))
                 // default value is 5 sec, as we are unable to get data increasing timeout
-                .blockTimeout(Duration.ofSeconds(30))
+                .blockTimeout(Duration.ofSeconds(20))
                 .build();
     }
 
