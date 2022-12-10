@@ -4,20 +4,16 @@ import com.example.graphql.entities.PostDetails;
 import com.example.graphql.repositories.PostDetailsRepository;
 import java.util.List;
 import java.util.Optional;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class PostDetailsService {
 
     private final PostDetailsRepository postDetailsRepository;
-
-    @Autowired
-    public PostDetailsService(PostDetailsRepository postDetailsRepository) {
-        this.postDetailsRepository = postDetailsRepository;
-    }
 
     public List<PostDetails> findAllPostDetailss() {
         return postDetailsRepository.findAll();

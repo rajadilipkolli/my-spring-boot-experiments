@@ -124,9 +124,11 @@ class PostControllerTest {
                 .andExpect(jsonPath("$.status", is(400)))
                 .andExpect(jsonPath("$.detail", is("Invalid request content.")))
                 .andExpect(jsonPath("$.instance", is("/api/posts")))
-                .andExpect(jsonPath("$.violations", hasSize(1)))
-                .andExpect(jsonPath("$.violations[0].field", is("text")))
-                .andExpect(jsonPath("$.violations[0].message", is("Text cannot be empty")))
+                .andExpect(jsonPath("$.violations", hasSize(2)))
+                .andExpect(jsonPath("$.violations[1].field", is("title")))
+                .andExpect(jsonPath("$.violations[1].message", is("Title cannot be empty")))
+                .andExpect(jsonPath("$.violations[0].field", is("body")))
+                .andExpect(jsonPath("$.violations[0].message", is("Body cannot be empty")))
                 .andReturn();
     }
 
