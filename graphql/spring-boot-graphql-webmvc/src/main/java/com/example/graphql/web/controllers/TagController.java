@@ -3,7 +3,7 @@ package com.example.graphql.web.controllers;
 import com.example.graphql.entities.Tag;
 import com.example.graphql.services.TagService;
 import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -19,14 +19,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/tags")
+@RequiredArgsConstructor
 public class TagController {
 
     private final TagService tagService;
-
-    @Autowired
-    public TagController(TagService tagService) {
-        this.tagService = tagService;
-    }
 
     @GetMapping
     public List<Tag> getAllTags() {

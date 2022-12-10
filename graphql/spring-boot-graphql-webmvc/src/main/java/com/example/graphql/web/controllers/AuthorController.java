@@ -3,7 +3,7 @@ package com.example.graphql.web.controllers;
 import com.example.graphql.entities.Author;
 import com.example.graphql.services.AuthorService;
 import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -19,14 +19,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/authors")
+@RequiredArgsConstructor
 public class AuthorController {
 
     private final AuthorService authorService;
-
-    @Autowired
-    public AuthorController(AuthorService authorService) {
-        this.authorService = authorService;
-    }
 
     @GetMapping
     public List<Author> getAllAuthors() {

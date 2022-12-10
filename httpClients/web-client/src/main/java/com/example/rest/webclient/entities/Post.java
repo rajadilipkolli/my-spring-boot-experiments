@@ -7,6 +7,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Positive;
 import java.util.Objects;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -27,8 +28,16 @@ public class Post {
     private Long id;
 
     @Column(nullable = false)
-    @NotEmpty(message = "Text cannot be empty")
-    private String text;
+    @NotEmpty(message = "Title cannot be empty")
+    private String title;
+
+    @Column(nullable = false)
+    @Positive(message = "Title cannot be empty")
+    private Long userId;
+
+    @Column(nullable = false)
+    @NotEmpty(message = "Body cannot be empty")
+    private String body;
 
     @Override
     public boolean equals(Object o) {

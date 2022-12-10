@@ -1,9 +1,8 @@
 package com.example.rest.webclient.exception;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
-import lombok.AllArgsConstructor;
-import lombok.Data;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
@@ -34,26 +33,12 @@ public class ErrorDetailProblemHandlingControllerAdvice {
                                             fieldError.getRejectedValue(),
                                             Objects.requireNonNull(fieldError.getDefaultMessage()));
                                 })
+                        .sorted(Comparator.comparing(ApiValidationError::field))
                         .toList();
         problemDetail.setProperty("violations", validationErrorsList);
         return problemDetail;
     }
 
-    @Data
-    @AllArgsConstructor
-    static class ApiValidationError {
-
-        private String object;
-
-        private String field;
-
-        private Object rejectedValue;
-
-        private String message;
-
-        ApiValidationError(String object, String message) {
-            this.object = object;
-            this.message = message;
-        }
-    }
+    static record ApiValidationError(
+            String object, String field, Object rejectedValue, String message) {}
 }
