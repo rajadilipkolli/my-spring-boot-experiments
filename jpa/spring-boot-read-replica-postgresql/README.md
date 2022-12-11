@@ -5,7 +5,7 @@ A read replica in Postgres is a database instance that receives data from a prim
 
  - All reads will go to reader instance and writes will go to writer instance
 
- ![](../../../images/replica.png)
+ ![](../../images/replica.png)
 
  Architecture Image Credit : [Vlad](https://twitter.com/vlad_mihalcea)
 
