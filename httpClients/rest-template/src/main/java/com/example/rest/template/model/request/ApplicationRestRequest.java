@@ -18,7 +18,7 @@ public class ApplicationRestRequest {
 
     @Builder.Default private Map<String, String> queryParameters = new HashMap<>();
 
-    private Map<String, String> pathVariables;
+    private Map<String, Object> pathVariables;
 
     @Builder.Default private Map<String, String> headers = new HashMap<>();
     private Object payload;
