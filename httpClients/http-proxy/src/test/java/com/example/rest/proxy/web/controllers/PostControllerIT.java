@@ -82,7 +82,7 @@ class PostControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldReturn400WhenCreateNewPostWithoutTitleAndBody() throws Exception {
-        Post post = new Post(null, null, 0, null);
+        Post post = new Post(null, null, 0L, null);
 
         this.mockMvc
                 .perform(
