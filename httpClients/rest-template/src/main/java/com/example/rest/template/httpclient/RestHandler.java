@@ -38,4 +38,15 @@ public class RestHandler {
             ParameterizedTypeReference<T> responseType) {
         return this.restClient.get(applicationRestRequest, responseType);
     }
+
+    public ApplicationRestResponse<String> post(ApplicationRestRequest applicationRestRequest) {
+
+        return post(applicationRestRequest, String.class);
+    }
+
+    public <T> ApplicationRestResponse<T> post(
+            ApplicationRestRequest applicationRestRequest, Class<T> responseClass) {
+
+        return this.restClient.post(applicationRestRequest, responseClass);
+    }
 }

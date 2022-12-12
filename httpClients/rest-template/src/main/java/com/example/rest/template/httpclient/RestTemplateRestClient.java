@@ -47,6 +47,17 @@ public class RestTemplateRestClient implements RestClient {
                 .body();
     }
 
+    @Override
+    public <T> ApplicationRestResponse<T> post(
+            ApplicationRestRequest applicationRestRequest, Class<T> responseType) {
+        UrlAndHttpEntityRecord urlAndHttpEntityRecord = getUrlAndHttpEntity(applicationRestRequest);
+        return callRestService(
+                urlAndHttpEntityRecord.uri(),
+                HttpMethod.POST,
+                urlAndHttpEntityRecord.httpEntity(),
+                responseType);
+    }
+
     private UrlAndHttpEntityRecord getUrlAndHttpEntity(
             ApplicationRestRequest applicationRestRequest) {
 

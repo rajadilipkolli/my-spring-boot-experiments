@@ -7,9 +7,12 @@ import org.springframework.core.ParameterizedTypeReference;
 public interface RestClient {
 
     <T> ApplicationRestResponse<T> get(
-            ApplicationRestRequest applicationRestRequest, Class<T> responseClass);
+            ApplicationRestRequest applicationRestRequest, Class<T> responseType);
 
     <T> T get(
             ApplicationRestRequest applicationRestRequest,
             ParameterizedTypeReference<T> responseType);
+
+    <T> ApplicationRestResponse<T> post(
+            ApplicationRestRequest applicationRestRequest, Class<T> responseType);
 }
