@@ -109,7 +109,7 @@ class PostControllerTest {
     }
 
     @Test
-    void shouldReturn400WhenCreateNewPostWithoutText() throws Exception {
+    void shouldReturn400WhenCreateNewPostWithoutTitleAndBody() throws Exception {
         Post post = new Post(null, null, null, null);
 
         this.mockMvc

@@ -102,7 +102,8 @@ class PostControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.violations[1].field", is("title")))
                 .andExpect(jsonPath("$.violations[1].message", is("Title cannot be empty")))
                 .andExpect(jsonPath("$.violations[2].field", is("userId")))
-                .andExpect(jsonPath("$.violations[2].message", is("UserId Should be positive Number")))
+                .andExpect(
+                        jsonPath("$.violations[2].message", is("UserId Should be positive Number")))
                 .andReturn();
     }
 
