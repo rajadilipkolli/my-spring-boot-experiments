@@ -3,6 +3,7 @@ package com.example.rest.template.httpclient;
 import com.example.rest.template.model.request.ApplicationRestRequest;
 import com.example.rest.template.model.response.ApplicationRestResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -30,5 +31,11 @@ public class RestHandler {
     public <T> T getBody(ApplicationRestRequest applicationRestRequest, Class<T> responseClass) {
 
         return get(applicationRestRequest, responseClass).body();
+    }
+
+    public <T> T getBody(
+            ApplicationRestRequest applicationRestRequest,
+            ParameterizedTypeReference<T> responseType) {
+        return this.restClient.get(applicationRestRequest, responseType);
     }
 }

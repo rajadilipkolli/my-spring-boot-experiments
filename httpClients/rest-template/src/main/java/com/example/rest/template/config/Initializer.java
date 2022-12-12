@@ -3,12 +3,12 @@ package com.example.rest.template.config;
 import com.example.rest.template.entities.Post;
 import com.example.rest.template.httpclient.RestHandler;
 import com.example.rest.template.model.request.ApplicationRestRequest;
-import com.example.rest.template.model.response.ApplicationRestResponse;
 import com.example.rest.template.repositories.PostRepository;
-import java.util.stream.Stream;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -23,13 +23,13 @@ public class Initializer implements CommandLineRunner {
     public void run(String... args) {
         log.info("Running Initializer.....");
 
-        ApplicationRestResponse<Post[]> response =
-                restHandler.get(
+        List<Post> response =
+                restHandler.getBody(
                         ApplicationRestRequest.builder()
                                 .httpBaseUrl("https://jsonplaceholder.typicode.com/posts")
                                 .build(),
-                        Post[].class);
+                        new ParameterizedTypeReference<List<Post>>() {});
 
-        this.postRepository.saveAll(Stream.of(response.body()).toList());
+        this.postRepository.saveAll(response);
     }
 }

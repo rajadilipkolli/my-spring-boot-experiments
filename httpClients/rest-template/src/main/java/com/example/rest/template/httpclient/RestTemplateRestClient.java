@@ -26,6 +26,30 @@ public class RestTemplateRestClient implements RestClient {
     @Override
     public <T> ApplicationRestResponse<T> get(
             ApplicationRestRequest applicationRestRequest, Class<T> responseClass) {
+        UrlAndHttpEntityRecord urlAndHttpEntityRecord = getUrlAndHttpEntity(applicationRestRequest);
+        return callRestService(
+                urlAndHttpEntityRecord.uri(),
+                HttpMethod.GET,
+                urlAndHttpEntityRecord.httpEntity(),
+                responseClass);
+    }
+
+    @Override
+    public <T> T get(
+            ApplicationRestRequest applicationRestRequest,
+            ParameterizedTypeReference<T> responseType) {
+        UrlAndHttpEntityRecord urlAndHttpEntityRecord = getUrlAndHttpEntity(applicationRestRequest);
+        return callRestService(
+                        urlAndHttpEntityRecord.uri(),
+                        HttpMethod.GET,
+                        urlAndHttpEntityRecord.httpEntity(),
+                        responseType)
+                .body();
+    }
+
+    private UrlAndHttpEntityRecord getUrlAndHttpEntity(
+            ApplicationRestRequest applicationRestRequest) {
+
         URI uri = getUrlRequestBuilder(applicationRestRequest);
         applicationRestRequest
                 .getHeaders()
@@ -34,7 +58,8 @@ public class RestTemplateRestClient implements RestClient {
                 new HttpEntity<>(
                         applicationRestRequest.getPayload(),
                         convertToMultiMap(applicationRestRequest.getHeaders()));
-        return callRestService(uri, HttpMethod.GET, httpEntity, responseClass);
+
+        return new UrlAndHttpEntityRecord(uri, httpEntity);
     }
 
     private URI getUrlRequestBuilder(ApplicationRestRequest applicationRestRequest) {
@@ -87,4 +112,6 @@ public class RestTemplateRestClient implements RestClient {
                 responseEntity.getStatusCode().value(),
                 responseEntity.getHeaders().toSingleValueMap());
     }
+
+    private record UrlAndHttpEntityRecord(URI uri, HttpEntity<Object> httpEntity) {}
 }
