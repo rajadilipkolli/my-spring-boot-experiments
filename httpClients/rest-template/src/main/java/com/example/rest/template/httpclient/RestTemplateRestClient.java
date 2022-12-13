@@ -25,13 +25,8 @@ public class RestTemplateRestClient implements RestClient {
 
     @Override
     public <T> ApplicationRestResponse<T> get(
-            ApplicationRestRequest applicationRestRequest, Class<T> responseClass) {
-        UrlAndHttpEntityRecord urlAndHttpEntityRecord = getUrlAndHttpEntity(applicationRestRequest);
-        return callRestService(
-                urlAndHttpEntityRecord.uri(),
-                HttpMethod.GET,
-                urlAndHttpEntityRecord.httpEntity(),
-                responseClass);
+            ApplicationRestRequest applicationRestRequest, Class<T> responseType) {
+        return getApplicationRestResponse(applicationRestRequest, responseType, HttpMethod.GET);
     }
 
     @Override
@@ -50,10 +45,35 @@ public class RestTemplateRestClient implements RestClient {
     @Override
     public <T> ApplicationRestResponse<T> post(
             ApplicationRestRequest applicationRestRequest, Class<T> responseType) {
+        return getApplicationRestResponse(applicationRestRequest, responseType, HttpMethod.POST);
+    }
+
+    @Override
+    public <T> ApplicationRestResponse<T> put(
+            ApplicationRestRequest applicationRestRequest, Class<T> responseType) {
+        return getApplicationRestResponse(applicationRestRequest, responseType, HttpMethod.PUT);
+    }
+
+    @Override
+    public <T> ApplicationRestResponse<T> patch(
+            ApplicationRestRequest applicationRestRequest, Class<T> responseType) {
+        return getApplicationRestResponse(applicationRestRequest, responseType, HttpMethod.PATCH);
+    }
+
+    @Override
+    public <T> ApplicationRestResponse<T> delete(
+            ApplicationRestRequest applicationRestRequest, Class<T> responseType) {
+        return getApplicationRestResponse(applicationRestRequest, responseType, HttpMethod.DELETE);
+    }
+
+    private <T> ApplicationRestResponse<T> getApplicationRestResponse(
+            ApplicationRestRequest applicationRestRequest,
+            Class<T> responseType,
+            HttpMethod httpMethod) {
         UrlAndHttpEntityRecord urlAndHttpEntityRecord = getUrlAndHttpEntity(applicationRestRequest);
         return callRestService(
                 urlAndHttpEntityRecord.uri(),
-                HttpMethod.POST,
+                httpMethod,
                 urlAndHttpEntityRecord.httpEntity(),
                 responseType);
     }

@@ -49,4 +49,27 @@ public class RestHandler {
 
         return this.restClient.post(applicationRestRequest, responseClass);
     }
+
+    public ApplicationRestResponse<String> put(ApplicationRestRequest applicationRestRequest) {
+
+        return put(applicationRestRequest, String.class);
+    }
+
+    public <T> ApplicationRestResponse<T> put(
+            ApplicationRestRequest applicationRestRequest, Class<T> responseClass) {
+
+        return this.restClient.put(applicationRestRequest, responseClass);
+    }
+
+    public <T> ApplicationRestResponse<T> patch(
+            ApplicationRestRequest applicationRestRequest, Class<T> responseClass) {
+
+        return this.restClient.patch(applicationRestRequest, responseClass);
+    }
+
+    public <T> ApplicationRestResponse<T> delete(
+            ApplicationRestRequest applicationRestRequest, Class<T> responseClass) {
+
+        return this.restClient.delete(applicationRestRequest, responseClass);
+    }
 }

@@ -15,4 +15,13 @@ public interface RestClient {
 
     <T> ApplicationRestResponse<T> post(
             ApplicationRestRequest applicationRestRequest, Class<T> responseType);
+
+    <T> ApplicationRestResponse<T> put(
+            ApplicationRestRequest applicationRestRequest, Class<T> responseClass);
+
+    <T> ApplicationRestResponse<T> patch(
+            ApplicationRestRequest applicationRestRequest, Class<T> responseClass);
+
+    <T> ApplicationRestResponse<T> delete(
+            ApplicationRestRequest applicationRestRequest, Class<T> responseClass);
 }
