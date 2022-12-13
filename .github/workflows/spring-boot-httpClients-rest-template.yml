@@ -32,3 +32,12 @@ jobs:
           cache: "maven"
       - name: Build and analyze
         run: ./mvnw clean verify
+      
+      - name: Add coverage to PR
+        id: jacoco
+        uses: madrapps/jacoco-report@v1.3
+        with:
+          paths: ${{ github.workspace }}/target/jacoco/test/jacoco.xml, ${{ github.workspace }}/target/jacoco/integrationTest/jacoco.xml
+          token: ${{ secrets.GITHUB_TOKEN }}
+          min-coverage-overall: 40
+          min-coverage-changed-files: 60
