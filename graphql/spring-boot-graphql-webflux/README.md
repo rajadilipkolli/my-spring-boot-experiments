@@ -1,5 +1,7 @@
 # spring-boot-graph-ql [SourceCode](https://www.youtube.com/watch?v=kVSYVhmvNCI&t=876s)
 
+The spring-boot-starter-graphql is a starter dependency for Spring Boot applications that allows them to integrate with GraphQL APIs. It provides a set of tools and libraries that enable developers to easily build GraphQL-based applications and expose them through a GraphQL endpoint. The starter includes support for GraphQL queries, mutations, subscriptions, and schema definitions, as well as integration with Spring Boot's autoconfiguration and dependency injection features. 
+
 
 ### Run tests
 `$ ./gradlew clean build`
