@@ -9,7 +9,7 @@ import org.mapstruct.NullValueCheckStrategy;
 @Mapper(componentModel = "spring", nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
 public interface PostMapper {
 
-    @Mapping(target = "id", source = "id")
+    @Mapping(target = "id", ignore = true)
     @Mapping(target = "title", source = "title")
     @Mapping(target = "userId", source = "userId")
     @Mapping(target = "body", source = "body")

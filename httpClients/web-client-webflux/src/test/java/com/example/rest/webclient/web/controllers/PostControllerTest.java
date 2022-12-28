@@ -1,7 +1,6 @@
 package com.example.rest.webclient.web.controllers;
 
 import static com.example.rest.webclient.utils.AppConstants.PROFILE_TEST;
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
@@ -10,15 +9,14 @@ import com.example.rest.webclient.model.PostDto;
 import com.example.rest.webclient.service.PostService;
 import com.example.rest.webclient.web.controller.PostController;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 import org.springframework.test.context.ActiveProfiles;
@@ -111,7 +109,6 @@ class PostControllerTest {
     }
 
     @Test
-    @Disabled
     void shouldReturn400WhenCreateNewPostWithoutTitle() throws Exception {
         PostDto post = new PostDto(null, null, null, null);
 
@@ -124,19 +121,12 @@ class PostControllerTest {
                 .expectStatus()
                 .isBadRequest()
                 .expectBody(ProblemDetail.class)
-                .value(ProblemDetail::getType, is("about:blank"))
-                .value(ProblemDetail::getTitle, is("Constraint Violation"))
-                .value(ProblemDetail::getStatus, is("400"))
+                .value(ProblemDetail::getType, is(URI.create("about:blank")))
+                .value(ProblemDetail::getTitle, is("Validation failure"))
+                .value(ProblemDetail::getStatus, is(400))
                 .value(ProblemDetail::getDetail, is("Invalid request content."))
-                .value(ProblemDetail::getInstance, is("/api/posts"))
-                .consumeWith(
-                        problemDetailEntityExchangeResult -> {
-                            assertThat(
-                                            problemDetailEntityExchangeResult
-                                                    .getRequestHeaders()
-                                                    .get(HttpHeaders.CONTENT_TYPE))
-                                    .containsExactly(MediaType.APPLICATION_PROBLEM_JSON_VALUE);
-                        });
+                .value(ProblemDetail::getInstance, is(URI.create("/api/posts")))
+                .value(t -> t.getProperties().size(), is(1));
     }
 
     @Test
