@@ -1,6 +1,6 @@
 package com.example.rest.webclient.service;
 
-import com.example.rest.webclient.model.Post;
+import com.example.rest.webclient.model.PostDto;
 import java.util.Comparator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -14,32 +14,32 @@ public class PostService {
 
     private final WebClient webClient;
 
-    public Flux<Post> findAllPosts(String sortBy, String sortDir) {
+    public Flux<PostDto> findAllPosts(String sortBy, String sortDir) {
         return webClient
                 .get()
                 .uri("/posts")
                 .retrieve()
-                .bodyToFlux(Post.class)
-                .sort(Comparator.comparing(Post::id));
+                .bodyToFlux(PostDto.class)
+                .sort(Comparator.comparing(PostDto::id));
     }
 
-    public Mono<Post> findPostById(Long id) {
+    public Mono<PostDto> findPostById(Long id) {
         return webClient
                 .get()
                 .uri(uriBuilder -> uriBuilder.path("/posts/{postId}").build(id))
                 .retrieve()
-                .bodyToMono(Post.class);
+                .bodyToMono(PostDto.class);
     }
 
-    public Mono<Post> savePost(Post post) {
-        return webClient.post().uri("/posts").retrieve().bodyToMono(Post.class);
+    public Mono<PostDto> savePost(PostDto post) {
+        return webClient.post().uri("/posts").retrieve().bodyToMono(PostDto.class);
     }
 
-    public Mono<Post> deletePostById(Long id) {
+    public Mono<PostDto> deletePostById(Long id) {
         return webClient
                 .delete()
                 .uri(uriBuilder -> uriBuilder.path("/posts/{postId}").build(id))
                 .retrieve()
-                .bodyToMono(Post.class);
+                .bodyToMono(PostDto.class);
     }
 }
