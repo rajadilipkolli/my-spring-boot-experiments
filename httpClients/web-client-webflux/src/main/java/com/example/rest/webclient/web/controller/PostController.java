@@ -1,8 +1,9 @@
 package com.example.rest.webclient.web.controller;
 
-import com.example.rest.webclient.model.Post;
+import com.example.rest.webclient.model.PostDto;
 import com.example.rest.webclient.service.PostService;
 import com.example.rest.webclient.utils.AppConstants;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,12 +24,13 @@ import reactor.core.publisher.Mono;
 @RestController
 @RequestMapping("/api/posts")
 @RequiredArgsConstructor
+@Validated
 public class PostController {
 
     private final PostService postService;
 
     @GetMapping
-    public Flux<Post> getAllPosts(
+    public Flux<PostDto> getAllPosts(
             @RequestParam(
                             value = "sortBy",
                             defaultValue = AppConstants.DEFAULT_SORT_BY,
@@ -43,7 +45,7 @@ public class PostController {
     }
 
     @GetMapping("/{id}")
-    public Mono<ResponseEntity<Post>> getPostById(@PathVariable Long id) {
+    public Mono<ResponseEntity<PostDto>> getPostById(@PathVariable Long id) {
         return postService
                 .findPostById(id)
                 .map(ResponseEntity::ok)
@@ -52,13 +54,13 @@ public class PostController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Mono<Post> createPost(@RequestBody @Validated Post post) {
+    public Mono<PostDto> createPost(@RequestBody @Valid PostDto post) {
         return postService.savePost(post);
     }
 
     @PutMapping("/{id}")
-    public Mono<ResponseEntity<Mono<Post>>> updatePost(
-            @PathVariable Long id, @RequestBody Post post) {
+    public Mono<ResponseEntity<Mono<PostDto>>> updatePost(
+            @PathVariable Long id, @RequestBody PostDto post) {
         return postService
                 .findPostById(id)
                 .map(
@@ -69,7 +71,7 @@ public class PostController {
     }
 
     @DeleteMapping("/{id}")
-    public Mono<ResponseEntity<Post>> deletePost(@PathVariable Long id) {
+    public Mono<ResponseEntity<PostDto>> deletePost(@PathVariable Long id) {
         return postService
                 .findPostById(id)
                 .map(

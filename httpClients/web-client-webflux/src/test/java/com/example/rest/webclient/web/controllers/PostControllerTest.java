@@ -1,24 +1,22 @@
 package com.example.rest.webclient.web.controllers;
 
 import static com.example.rest.webclient.utils.AppConstants.PROFILE_TEST;
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 
-import com.example.rest.webclient.model.Post;
+import com.example.rest.webclient.model.PostDto;
 import com.example.rest.webclient.service.PostService;
 import com.example.rest.webclient.web.controller.PostController;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 import org.springframework.test.context.ActiveProfiles;
@@ -37,14 +35,14 @@ class PostControllerTest {
 
     @Autowired private ObjectMapper objectMapper;
 
-    private List<Post> postList;
+    private List<PostDto> postList;
 
     @BeforeEach
     void setUp() {
         this.postList = new ArrayList<>();
-        this.postList.add(new Post(1L, "text 1", 1L, "First Body"));
-        this.postList.add(new Post(2L, "text 2", 1L, "Second Body"));
-        this.postList.add(new Post(3L, "text 3", 1L, "Third Body"));
+        this.postList.add(new PostDto(1L, "text 1", 1L, "First Body"));
+        this.postList.add(new PostDto(2L, "text 2", 1L, "Second Body"));
+        this.postList.add(new PostDto(3L, "text 3", 1L, "Third Body"));
     }
 
     @Test
@@ -58,14 +56,14 @@ class PostControllerTest {
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBodyList(Post.class)
+                .expectBodyList(PostDto.class)
                 .hasSize(3);
     }
 
     @Test
     void shouldFindPostById() {
         Long postId = 1L;
-        Post post = new Post(postId, "text 1", 1L, "First Body");
+        PostDto post = new PostDto(postId, "text 1", 1L, "First Body");
         given(postService.findPostById(postId)).willReturn(Mono.just(post));
 
         this.webTestClient
@@ -74,8 +72,8 @@ class PostControllerTest {
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(Post.class)
-                .value(Post::title, is(post.title()));
+                .expectBody(PostDto.class)
+                .value(PostDto::title, is(post.title()));
     }
 
     @Test
@@ -93,10 +91,10 @@ class PostControllerTest {
 
     @Test
     void shouldCreateNewPost() {
-        given(postService.savePost(any(Post.class)))
+        given(postService.savePost(any(PostDto.class)))
                 .willAnswer((invocation) -> Mono.just(invocation.getArgument(0)));
 
-        Post post = new Post(1L, "some text", 1L, "First Body");
+        PostDto post = new PostDto(1L, "some text", 1L, "First Body");
         this.webTestClient
                 .post()
                 .uri("/api/posts")
@@ -105,15 +103,14 @@ class PostControllerTest {
                 .exchange()
                 .expectStatus()
                 .isCreated()
-                .expectBody(Post.class)
-                .value(Post::id, notNullValue())
-                .value(Post::title, is(post.title()));
+                .expectBody(PostDto.class)
+                .value(PostDto::id, notNullValue())
+                .value(PostDto::title, is(post.title()));
     }
 
     @Test
-    @Disabled
     void shouldReturn400WhenCreateNewPostWithoutTitle() throws Exception {
-        Post post = new Post(null, null, null, null);
+        PostDto post = new PostDto(null, null, null, null);
 
         this.webTestClient
                 .post()
@@ -124,27 +121,20 @@ class PostControllerTest {
                 .expectStatus()
                 .isBadRequest()
                 .expectBody(ProblemDetail.class)
-                // .value(ProblemDetail::getType, is("about:blank"))
-                .value(ProblemDetail::getTitle, is("Constraint Violation"))
-                .value(ProblemDetail::getStatus, is("400"))
+                .value(ProblemDetail::getType, is(URI.create("about:blank")))
+                .value(ProblemDetail::getTitle, is("Validation failure"))
+                .value(ProblemDetail::getStatus, is(400))
                 .value(ProblemDetail::getDetail, is("Invalid request content."))
-                .value(ProblemDetail::getInstance, is("/api/posts"))
-                .consumeWith(
-                        problemDetailEntityExchangeResult -> {
-                            assertThat(
-                                            problemDetailEntityExchangeResult
-                                                    .getRequestHeaders()
-                                                    .get(HttpHeaders.CONTENT_TYPE))
-                                    .containsExactly(MediaType.APPLICATION_PROBLEM_JSON_VALUE);
-                        });
+                .value(ProblemDetail::getInstance, is(URI.create("/api/posts")))
+                .value(t -> t.getProperties().size(), is(1));
     }
 
     @Test
     void shouldUpdatePost() throws Exception {
         Long postId = 1L;
-        Post post = new Post(postId, "Updated text", 1L, "First Body");
+        PostDto post = new PostDto(postId, "Updated text", 1L, "First Body");
         given(postService.findPostById(postId)).willReturn(Mono.just(post));
-        given(postService.savePost(any(Post.class)))
+        given(postService.savePost(any(PostDto.class)))
                 .willAnswer((invocation) -> Mono.just(invocation.getArgument(0)));
 
         this.webTestClient
@@ -155,15 +145,15 @@ class PostControllerTest {
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(Post.class)
-                .value(Post::title, is(post.title()));
+                .expectBody(PostDto.class)
+                .value(PostDto::title, is(post.title()));
     }
 
     @Test
     void shouldReturn404WhenUpdatingNonExistingPost() throws Exception {
         Long postId = 1L;
         given(postService.findPostById(postId)).willReturn(Mono.empty());
-        Post post = new Post(postId, "Updated text", 1L, "First Body");
+        PostDto post = new PostDto(postId, "Updated text", 1L, "First Body");
 
         this.webTestClient
                 .put()
@@ -178,7 +168,7 @@ class PostControllerTest {
     @Test
     void shouldDeletePost() {
         Long postId = 1L;
-        Post post = new Post(postId, "Some text", 1L, "First Body");
+        PostDto post = new PostDto(postId, "Some text", 1L, "First Body");
         given(postService.findPostById(postId)).willReturn(Mono.just(post));
         given(postService.deletePostById(post.id())).willReturn(Mono.just(post));
 
@@ -188,8 +178,8 @@ class PostControllerTest {
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(Post.class)
-                .value(Post::title, is(post.title()));
+                .expectBody(PostDto.class)
+                .value(PostDto::title, is(post.title()));
     }
 
     @Test
