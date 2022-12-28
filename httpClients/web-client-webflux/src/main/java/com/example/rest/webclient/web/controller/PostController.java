@@ -3,6 +3,7 @@ package com.example.rest.webclient.web.controller;
 import com.example.rest.webclient.model.PostDto;
 import com.example.rest.webclient.service.PostService;
 import com.example.rest.webclient.utils.AppConstants;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,6 +24,7 @@ import reactor.core.publisher.Mono;
 @RestController
 @RequestMapping("/api/posts")
 @RequiredArgsConstructor
+@Validated
 public class PostController {
 
     private final PostService postService;
@@ -52,7 +54,7 @@ public class PostController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Mono<PostDto> createPost(@RequestBody @Validated PostDto post) {
+    public Mono<PostDto> createPost(@RequestBody @Valid PostDto post) {
         return postService.savePost(post);
     }
 
