@@ -21,15 +21,12 @@ public class Initializer implements CommandLineRunner {
     public void run(String... args) {
         log.info("Running Initializer.....");
         postService
-                .findPostById(1L)
+                .findAllPosts("id", "asc")
+                .map(postDto -> this.postMapper.toEntity(postDto))
+                .flatMap(post -> this.postRepository.save(post))
                 .subscribe(
-                        postDto -> {
-                            this.postRepository
-                                    .save(this.postMapper.toEntity(postDto))
-                                    .subscribe(
-                                            savedPost -> log.info("saved Post {}", savedPost),
-                                            err -> log.error("Error Occurred while saving ", err),
-                                            () -> log.info("Initial Load successful"));
-                        });
+                        savedPost -> log.info("Saved Post {}", savedPost),
+                        err -> log.error("Error Occurred while saving ", err),
+                        () -> log.info("Initial Load successful"));
     }
 }

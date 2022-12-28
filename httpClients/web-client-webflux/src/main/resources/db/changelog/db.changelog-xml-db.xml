@@ -6,7 +6,7 @@
     <changeSet author="raja" id="createTable-posts">
         <createSequence
             sequenceName="posts_seq"
-            incrementBy="50"
+            incrementBy="1"
             startValue="1"
         />
         <createTable tableName="posts">
