@@ -2,7 +2,6 @@ package com.example.rest.webclient.entity;
 
 import lombok.Data;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.annotation.Version;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
@@ -18,6 +17,4 @@ public class Post {
     private Long userId;
 
     private String body;
-
-    @Version private Long version = 0L;
 }

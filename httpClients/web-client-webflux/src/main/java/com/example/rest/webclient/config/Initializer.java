@@ -26,7 +26,10 @@ public class Initializer implements CommandLineRunner {
                         postDto -> {
                             this.postRepository
                                     .save(this.postMapper.toEntity(postDto))
-                                    .subscribe(savedPost -> log.info("saved Post", savedPost));
+                                    .subscribe(
+                                            savedPost -> log.info("saved Post {}", savedPost),
+                                            err -> log.error("Error Occurred while saving ", err),
+                                            () -> log.info("Initial Load successful"));
                         });
     }
 }

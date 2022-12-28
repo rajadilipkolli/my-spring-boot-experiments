@@ -2,26 +2,25 @@
 <databaseChangeLog
     xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
-         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.2.xsd">
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.2.xsd">
     <changeSet author="raja" id="createTable-posts">
         <createSequence
-            sequenceName="postss_seq"
+            sequenceName="posts_seq"
             incrementBy="50"
             startValue="1"
         />
         <createTable tableName="posts">
             <column name="id" type="bigint" defaultValueSequenceNext="posts_seq">
-                <constraints primaryKey="true" nullable="false"/>
+                <constraints primaryKey="true" nullable="false" />
             </column>
-            <column name="title" type="varchar(1024)">
-                <constraints nullable="false"/>
+            <column name="title" type="text">
+                <constraints nullable="false" />
             </column>
             <column name="user_id" type="bigint">
-                <constraints nullable="false"/>
+                <constraints nullable="false" />
             </column>
-            <column name="version" type="bigint">
-                <constraints nullable="false"/>
+            <column name="body" type="text">
+                <constraints nullable="false" />
             </column>
         </createTable>
     </changeSet>
