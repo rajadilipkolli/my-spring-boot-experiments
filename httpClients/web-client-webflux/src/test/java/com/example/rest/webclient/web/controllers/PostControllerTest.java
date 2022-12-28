@@ -92,10 +92,9 @@ class PostControllerTest {
     }
 
     @Test
-    @Disabled
     void shouldCreateNewPost() {
         given(postService.savePost(any(Post.class)))
-                .willAnswer((invocation) -> invocation.getArgument(0));
+                .willAnswer((invocation) -> Mono.just(invocation.getArgument(0)));
 
         Post post = new Post(1L, "some text", 1L, "First Body");
         this.webTestClient
@@ -113,19 +112,19 @@ class PostControllerTest {
 
     @Test
     @Disabled
-    void shouldReturn400WhenCreateNewPostWithoutText() throws Exception {
+    void shouldReturn400WhenCreateNewPostWithoutTitle() throws Exception {
         Post post = new Post(null, null, null, null);
 
         this.webTestClient
                 .post()
                 .uri("/api/posts")
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(post, Post.class)
+                .body(BodyInserters.fromValue(post))
                 .exchange()
                 .expectStatus()
                 .isBadRequest()
                 .expectBody(ProblemDetail.class)
-                .value(ProblemDetail::getType, is("about:blank"))
+                // .value(ProblemDetail::getType, is("about:blank"))
                 .value(ProblemDetail::getTitle, is("Constraint Violation"))
                 .value(ProblemDetail::getStatus, is("400"))
                 .value(ProblemDetail::getDetail, is("Invalid request content."))
@@ -141,13 +140,12 @@ class PostControllerTest {
     }
 
     @Test
-    @Disabled
     void shouldUpdatePost() throws Exception {
         Long postId = 1L;
         Post post = new Post(postId, "Updated text", 1L, "First Body");
         given(postService.findPostById(postId)).willReturn(Mono.just(post));
         given(postService.savePost(any(Post.class)))
-                .willAnswer((invocation) -> invocation.getArgument(0));
+                .willAnswer((invocation) -> Mono.just(invocation.getArgument(0)));
 
         this.webTestClient
                 .put()
