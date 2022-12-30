@@ -43,9 +43,9 @@ class PostCommentControllerTest {
     @BeforeEach
     void setUp() {
         this.postCommentList = new ArrayList<>();
-        this.postCommentList.add(PostComment.builder().id(1L).review("First PostComment").build());
-        this.postCommentList.add(PostComment.builder().id(2L).review("Second PostComment").build());
-        this.postCommentList.add(PostComment.builder().id(3L).review("Third PostComment").build());
+        this.postCommentList.add(PostComment.builder().id(1L).title("First PostComment").build());
+        this.postCommentList.add(PostComment.builder().id(2L).title("Second PostComment").build());
+        this.postCommentList.add(PostComment.builder().id(3L).title("Third PostComment").build());
     }
 
     @Test
@@ -62,14 +62,14 @@ class PostCommentControllerTest {
     void shouldFindPostCommentById() throws Exception {
         Long postCommentId = 1L;
         PostComment postComment =
-                PostComment.builder().id(postCommentId).review("First PostComment").build();
+                PostComment.builder().id(postCommentId).title("First PostComment").build();
         given(postCommentService.findPostCommentById(postCommentId))
                 .willReturn(Optional.of(postComment));
 
         this.mockMvc
                 .perform(get("/api/postcomments/{id}", postCommentId))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.review", is(postComment.getReview())));
+                .andExpect(jsonPath("$.title", is(postComment.getTitle())));
     }
 
     @Test
@@ -87,7 +87,7 @@ class PostCommentControllerTest {
         given(postCommentService.savePostComment(any(PostComment.class)))
                 .willAnswer((invocation) -> invocation.getArgument(0));
 
-        PostComment postComment = PostComment.builder().id(1L).review("First PostComment").build();
+        PostComment postComment = PostComment.builder().id(1L).title("First PostComment").build();
         this.mockMvc
                 .perform(
                         post("/api/postcomments")
@@ -95,14 +95,14 @@ class PostCommentControllerTest {
                                 .content(objectMapper.writeValueAsString(postComment)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id", notNullValue()))
-                .andExpect(jsonPath("$.review", is(postComment.getReview())));
+                .andExpect(jsonPath("$.title", is(postComment.getTitle())));
     }
 
     @Test
     void shouldUpdatePostComment() throws Exception {
         Long postCommentId = 1L;
         PostComment postComment =
-                PostComment.builder().id(postCommentId).review("Updated PostComment").build();
+                PostComment.builder().id(postCommentId).title("Updated PostComment").build();
         given(postCommentService.findPostCommentById(postCommentId))
                 .willReturn(Optional.of(postComment));
         given(postCommentService.savePostComment(any(PostComment.class)))
@@ -114,7 +114,7 @@ class PostCommentControllerTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(postComment)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.review", is(postComment.getReview())));
+                .andExpect(jsonPath("$.title", is(postComment.getTitle())));
     }
 
     @Test
@@ -122,7 +122,7 @@ class PostCommentControllerTest {
         Long postCommentId = 1L;
         given(postCommentService.findPostCommentById(postCommentId)).willReturn(Optional.empty());
         PostComment postComment =
-                PostComment.builder().id(postCommentId).review("Updated PostComment").build();
+                PostComment.builder().id(postCommentId).title("Updated PostComment").build();
 
         this.mockMvc
                 .perform(
@@ -136,7 +136,7 @@ class PostCommentControllerTest {
     void shouldDeletePostComment() throws Exception {
         Long postCommentId = 1L;
         PostComment postComment =
-                PostComment.builder().id(postCommentId).review("First PostComment").build();
+                PostComment.builder().id(postCommentId).title("First PostComment").build();
         given(postCommentService.findPostCommentById(postCommentId))
                 .willReturn(Optional.of(postComment));
         doNothing().when(postCommentService).deletePostCommentById(postComment.getId());
@@ -144,7 +144,7 @@ class PostCommentControllerTest {
         this.mockMvc
                 .perform(delete("/api/postcomments/{id}", postComment.getId()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.review", is(postComment.getReview())));
+                .andExpect(jsonPath("$.title", is(postComment.getTitle())));
     }
 
     @Test

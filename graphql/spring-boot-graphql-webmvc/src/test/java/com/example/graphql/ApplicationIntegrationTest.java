@@ -24,11 +24,11 @@ class ApplicationIntegrationTest extends AbstractIntegrationTest {
                 .hasSize(4)
                 .path("allAuthors[*].firstName")
                 .entityList(String.class)
-                .satisfies(names -> assertThat(names).contains("firstName2"))
+                .satisfies(names -> assertThat(names).contains("first name2"))
                 .hasSize(4)
                 .path("allAuthors[*].lastName")
                 .entityList(String.class)
-                .satisfies(names -> assertThat(names).contains("lastName3"))
+                .satisfies(names -> assertThat(names).contains("last name3"))
                 .hasSize(4);
     }
 }

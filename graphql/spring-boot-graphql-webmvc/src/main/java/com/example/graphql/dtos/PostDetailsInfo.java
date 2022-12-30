@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 public interface PostDetailsInfo {
     Long getId();
 
-    LocalDateTime getCreatedOn();
+    LocalDateTime getCreatedAt();
 
     String getCreatedBy();
 }

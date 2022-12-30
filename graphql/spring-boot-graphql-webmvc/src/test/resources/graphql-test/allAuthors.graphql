@@ -4,5 +4,19 @@ query authors {
         firstName
         lastName
         email
+        version
+        posts {
+        title
+        content
+        comments {
+            title
+            content
+        }
+        details {
+            createdAt
+            id
+        }
+        createdAt
+        }
     }
 }

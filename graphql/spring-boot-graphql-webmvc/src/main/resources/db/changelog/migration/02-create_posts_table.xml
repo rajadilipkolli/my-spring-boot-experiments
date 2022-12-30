@@ -3,8 +3,8 @@
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
-         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
-    <changeSet author="sivalabs" id="createTable-posts">
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.2.xsd">
+    <changeSet author="appUser" id="createTable-posts">
         <createSequence
                         sequenceName="posts_seq"
                         incrementBy="50"
@@ -16,8 +16,10 @@
             </column>
             <column name="title" type="text"/>
             <column name="content" type="text"/>
-            <column name="created_on" type="timestamptz"/>
-            <column name="details_id" type="BIGINT"/>
+            <column name="published" type="boolean"/>
+            <column name="published_at" type="timestamptz"/>
+            <column name="created_at" type="timestamptz"/>
+            <column name="modified_at" type="timestamptz"/>
             <column name="author_id" type="BIGINT"/>
         </createTable>
     </changeSet>

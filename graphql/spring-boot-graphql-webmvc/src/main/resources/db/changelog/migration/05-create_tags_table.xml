@@ -3,8 +3,8 @@
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
-         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
-    <changeSet author="sivalabs" id="createTable-tags">
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.2.xsd">
+    <changeSet author="appUser" id="createTable-tags">
         <createSequence
                         sequenceName="tags_seq"
                         incrementBy="50"
@@ -14,10 +14,11 @@
             <column name="id" type="bigint" defaultValueSequenceNext="tags_seq">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
-            <column name="name" type="text">
+            <column name="tag_name" type="text">
                 <constraints nullable="false"/>
             </column>
+            <column name="tag_description" type="text" />
         </createTable>
-        <addUniqueConstraint columnNames="name" constraintName="uc_tag_name" tableName="tags"/>
+        <addUniqueConstraint columnNames="tag_name" constraintName="uc_tag_name" tableName="tags"/>
     </changeSet>
 </databaseChangeLog>

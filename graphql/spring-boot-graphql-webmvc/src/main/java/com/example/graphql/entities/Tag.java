@@ -8,6 +8,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.util.Objects;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -18,6 +19,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Tag {
 
     @Id
@@ -25,11 +27,9 @@ public class Tag {
     private Long id;
 
     @Column(nullable = false, unique = true)
-    private String name;
+    private String tagName;
 
-    public Tag(String name) {
-        this.name = name;
-    }
+    private String tagDescription;
 
     @Override
     public boolean equals(Object obj) {
@@ -40,11 +40,11 @@ public class Tag {
             return false;
         }
         Tag other = (Tag) obj;
-        return Objects.equals(this.name, other.name);
+        return Objects.equals(this.tagName, other.tagName);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(this.name);
+        return Objects.hash(this.tagName);
     }
 }

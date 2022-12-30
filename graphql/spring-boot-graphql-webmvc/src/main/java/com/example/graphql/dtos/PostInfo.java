@@ -10,7 +10,7 @@ public interface PostInfo {
 
     String getContent();
 
-    LocalDateTime getCreatedOn();
+    LocalDateTime getCreatedAt();
 
     PostDetailsInfo getDetails();
 

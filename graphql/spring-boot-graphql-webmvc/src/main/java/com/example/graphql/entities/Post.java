@@ -3,6 +3,7 @@ package com.example.graphql.entities;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -40,14 +41,23 @@ public class Post implements Serializable {
     @Column(length = 4096)
     private String content;
 
-    private LocalDateTime createdOn;
+    private boolean published;
+
+    private LocalDateTime createdAt;
+
+    private LocalDateTime modifiedAt;
+
+    private LocalDateTime publishedAt;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "post", orphanRemoval = true)
     @Builder.Default
     private List<PostComment> comments = new ArrayList<>();
 
-    @JoinColumn(name = "details_Id")
-    @OneToOne(cascade = CascadeType.ALL, mappedBy = "post", orphanRemoval = true)
+    @OneToOne(
+            mappedBy = "post",
+            cascade = CascadeType.ALL,
+            fetch = FetchType.LAZY,
+            optional = false)
     private PostDetails details;
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -59,17 +69,7 @@ public class Post implements Serializable {
     private Author author;
 
     public Post() {
-        this.createdOn = LocalDateTime.now();
-    }
-
-    public Post(Long id) {
-        this.id = id;
-        this.createdOn = LocalDateTime.now();
-    }
-
-    public Post(String title) {
-        this.title = title;
-        this.createdOn = LocalDateTime.now();
+        this.createdAt = LocalDateTime.now();
     }
 
     public void addComment(PostComment comment) {
@@ -82,14 +82,15 @@ public class Post implements Serializable {
         comment.setPost(null);
     }
 
-    public void addDetails(PostDetails details) {
+    public void setDetails(PostDetails details) {
+        if (details == null) {
+            if (this.details != null) {
+                this.details.setPost(null);
+            }
+        } else {
+            details.setPost(this);
+        }
         this.details = details;
-        details.setPost(this);
-    }
-
-    public void removeDetails() {
-        this.details.setPost(null);
-        this.details = null;
     }
 
     public void addTag(Tag tag) {

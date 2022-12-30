@@ -43,9 +43,9 @@ class TagControllerTest {
     @BeforeEach
     void setUp() {
         this.tagList = new ArrayList<>();
-        this.tagList.add(new Tag(1L, "text 1"));
-        this.tagList.add(new Tag(2L, "text 2"));
-        this.tagList.add(new Tag(3L, "text 3"));
+        this.tagList.add(new Tag(1L, "text 1", null));
+        this.tagList.add(new Tag(2L, "text 2", null));
+        this.tagList.add(new Tag(3L, "text 3", null));
     }
 
     @Test
@@ -61,13 +61,13 @@ class TagControllerTest {
     @Test
     void shouldFindTagById() throws Exception {
         Long tagId = 1L;
-        Tag tag = new Tag(tagId, "text 1");
+        Tag tag = new Tag(tagId, "text 1", null);
         given(tagService.findTagById(tagId)).willReturn(Optional.of(tag));
 
         this.mockMvc
                 .perform(get("/api/tags/{id}", tagId))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name", is(tag.getName())));
+                .andExpect(jsonPath("$.tagName", is(tag.getTagName())));
     }
 
     @Test
@@ -83,7 +83,7 @@ class TagControllerTest {
         given(tagService.saveTag(any(Tag.class)))
                 .willAnswer((invocation) -> invocation.getArgument(0));
 
-        Tag tag = new Tag(1L, "some text");
+        Tag tag = new Tag(1L, "some text", null);
         this.mockMvc
                 .perform(
                         post("/api/tags")
@@ -91,13 +91,13 @@ class TagControllerTest {
                                 .content(objectMapper.writeValueAsString(tag)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id", notNullValue()))
-                .andExpect(jsonPath("$.name", is(tag.getName())));
+                .andExpect(jsonPath("$.tagName", is(tag.getTagName())));
     }
 
     @Test
     void shouldUpdateTag() throws Exception {
         Long tagId = 1L;
-        Tag tag = new Tag(tagId, "Updated text");
+        Tag tag = new Tag(tagId, "Updated text", null);
         given(tagService.findTagById(tagId)).willReturn(Optional.of(tag));
         given(tagService.saveTag(any(Tag.class)))
                 .willAnswer((invocation) -> invocation.getArgument(0));
@@ -108,14 +108,14 @@ class TagControllerTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(tag)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name", is(tag.getName())));
+                .andExpect(jsonPath("$.tagName", is(tag.getTagName())));
     }
 
     @Test
     void shouldReturn404WhenUpdatingNonExistingTag() throws Exception {
         Long tagId = 1L;
         given(tagService.findTagById(tagId)).willReturn(Optional.empty());
-        Tag tag = new Tag(tagId, "Updated text");
+        Tag tag = new Tag(tagId, "Updated text", null);
 
         this.mockMvc
                 .perform(
@@ -128,14 +128,14 @@ class TagControllerTest {
     @Test
     void shouldDeleteTag() throws Exception {
         Long tagId = 1L;
-        Tag tag = new Tag(tagId, "Some text");
+        Tag tag = new Tag(tagId, "Some text", null);
         given(tagService.findTagById(tagId)).willReturn(Optional.of(tag));
         doNothing().when(tagService).deleteTagById(tag.getId());
 
         this.mockMvc
                 .perform(delete("/api/tags/{id}", tag.getId()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name", is(tag.getName())));
+                .andExpect(jsonPath("$.tagName", is(tag.getTagName())));
     }
 
     @Test

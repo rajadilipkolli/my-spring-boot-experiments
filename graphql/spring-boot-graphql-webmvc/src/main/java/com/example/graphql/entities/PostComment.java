@@ -30,22 +30,23 @@ public class PostComment {
     private Long id;
 
     @Column(nullable = false)
-    private String review;
+    private String title;
+
+    private String content;
+
+    private boolean published;
 
     @Column(nullable = false)
-    private LocalDateTime createdOn;
+    private LocalDateTime createdAt;
+
+    private LocalDateTime publishedAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id")
     private Post post;
 
     public PostComment() {
-        this.createdOn = LocalDateTime.now();
-    }
-
-    public PostComment(String review) {
-        this.review = review;
-        this.createdOn = LocalDateTime.now();
+        this.createdAt = LocalDateTime.now();
     }
 
     @Override
@@ -53,7 +54,7 @@ public class PostComment {
         if (this == o) return true;
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
         PostComment postComment = (PostComment) o;
-        return review != null && Objects.equals(review, postComment.review);
+        return id != null && Objects.equals(id, postComment.id);
     }
 
     @Override

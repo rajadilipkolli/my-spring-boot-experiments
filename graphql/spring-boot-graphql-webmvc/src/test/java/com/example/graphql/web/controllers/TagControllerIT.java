@@ -29,9 +29,9 @@ class TagControllerIT extends AbstractIntegrationTest {
         tagRepository.deleteAll();
 
         tagList = new ArrayList<>();
-        tagList.add(new Tag("First Tag"));
-        tagList.add(new Tag("Second Tag"));
-        tagList.add(new Tag("Third Tag"));
+        tagList.add(Tag.builder().tagName("First Tag").build());
+        tagList.add(Tag.builder().tagName("Second Tag").build());
+        tagList.add(Tag.builder().tagName("Third Tag").build());
         tagList = tagRepository.saveAll(tagList);
     }
 
@@ -51,25 +51,25 @@ class TagControllerIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(get("/api/tags/{id}", tagId))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name", is(tag.getName())));
+                .andExpect(jsonPath("$.tagName", is(tag.getTagName())));
     }
 
     @Test
     void shouldCreateNewTag() throws Exception {
-        Tag tag = new Tag(null, "New Tag");
+        Tag tag = new Tag(null, "New Tag", null);
         this.mockMvc
                 .perform(
                         post("/api/tags")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(tag)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.name", is(tag.getName())));
+                .andExpect(jsonPath("$.tagName", is(tag.getTagName())));
     }
 
     @Test
     void shouldUpdateTag() throws Exception {
         Tag tag = tagList.get(0);
-        tag.setName("Updated Tag");
+        tag.setTagName("Updated Tag");
 
         this.mockMvc
                 .perform(
@@ -77,7 +77,7 @@ class TagControllerIT extends AbstractIntegrationTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(tag)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name", is(tag.getName())));
+                .andExpect(jsonPath("$.tagName", is(tag.getTagName())));
     }
 
     @Test
@@ -87,6 +87,6 @@ class TagControllerIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(delete("/api/tags/{id}", tag.getId()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name", is(tag.getName())));
+                .andExpect(jsonPath("$.tagName", is(tag.getTagName())));
     }
 }

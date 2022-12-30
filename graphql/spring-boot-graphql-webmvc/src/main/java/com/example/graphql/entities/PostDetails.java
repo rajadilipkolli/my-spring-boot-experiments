@@ -3,9 +3,8 @@ package com.example.graphql.entities;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.MapsId;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
@@ -24,22 +23,27 @@ import lombok.Setter;
 @Builder
 public class PostDetails {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
-    private Long id;
+    @Id private Long id;
 
-    @Column(name = "created_on")
-    private LocalDateTime createdOn;
+    private String key;
+
+    private LocalDateTime createdAt;
 
     @Column(name = "created_by")
     private String createdBy;
 
     @OneToOne(fetch = FetchType.LAZY)
     @MapsId
+    @JoinColumn(name = "id")
     private Post post;
 
     public PostDetails() {
-        this.createdOn = LocalDateTime.now();
+        this.createdAt = LocalDateTime.now();
+    }
+
+    public PostDetails(String createdBy) {
+        this.createdAt = LocalDateTime.now();
+        this.createdBy = createdBy;
     }
 
     @Override

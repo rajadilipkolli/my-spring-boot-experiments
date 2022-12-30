@@ -27,7 +27,7 @@ class PostControllerIT extends AbstractIntegrationTest {
 
     @BeforeEach
     void setUp() {
-        postRepository.deleteAll();
+        postRepository.deleteAllInBatch();
 
         postList = new ArrayList<>();
         postList.add(Post.builder().content("First Post").build());
