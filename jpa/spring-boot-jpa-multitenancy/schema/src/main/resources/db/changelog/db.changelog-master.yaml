@@ -1,3 +1,5 @@
 databaseChangeLog:
-  - include:
-      file: db/changelog/db.changelog-sql-db.sql
+  - includeAll:
+      path: liquibase/
+      relativeToChangelogFile: true
+      errorIfMissingOrEmpty: true
