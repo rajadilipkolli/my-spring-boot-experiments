@@ -11,9 +11,11 @@ import com.example.graphql.services.TagService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.BatchMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.stereotype.Controller;
@@ -81,5 +83,10 @@ public class AuthorGraphQlController {
     @QueryMapping
     public List<Author> allAuthors() {
         return this.authorService.findAllAuthors();
+    }
+
+    @QueryMapping
+    public Optional<Author> findAuthorByEmailId(@Argument("email") String email) {
+        return this.authorService.findAuthorByEmailId(email);
     }
 }

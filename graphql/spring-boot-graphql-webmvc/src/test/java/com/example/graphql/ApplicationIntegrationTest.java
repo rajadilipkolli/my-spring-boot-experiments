@@ -20,7 +20,7 @@ class ApplicationIntegrationTest extends AbstractIntegrationTest {
                 .execute()
                 .path("allAuthors[*].email")
                 .entityList(String.class)
-                .satisfies(emails -> assertThat(emails).contains("user@example.com"))
+                .satisfies(emails -> assertThat(emails).contains("user2@example.com"))
                 .hasSize(4)
                 .path("allAuthors[*].name")
                 .entityList(String.class)

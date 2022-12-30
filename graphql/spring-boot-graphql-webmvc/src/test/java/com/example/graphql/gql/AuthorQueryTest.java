@@ -7,6 +7,9 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import com.example.graphql.entities.Author;
 import com.example.graphql.services.AuthorService;
+import com.example.graphql.services.PostCommentService;
+import com.example.graphql.services.PostService;
+import com.example.graphql.services.TagService;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.mockito.BDDMockito;
@@ -21,6 +24,9 @@ class AuthorQueryTest {
     @Autowired GraphQlTester graphQlTester;
 
     @MockBean AuthorService authorService;
+    @MockBean PostService postService;
+    @MockBean PostCommentService postCommentService;
+    @MockBean TagService tagService;
 
     @Test
     void allAuthors() {

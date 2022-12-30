@@ -30,4 +30,8 @@ public class AuthorService {
     public void deleteAuthorById(Long id) {
         authorRepository.deleteById(id);
     }
+
+    public Optional<Author> findAuthorByEmailId(String email) {
+        return this.authorRepository.findByEmailAllIgnoreCase(email);
+    }
 }

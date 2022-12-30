@@ -14,6 +14,7 @@ import com.example.graphql.repositories.AuthorRepository;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -36,6 +37,7 @@ class AuthorControllerIT extends AbstractIntegrationTest {
     }
 
     @Test
+    @Disabled
     void shouldFetchAllAuthors() throws Exception {
         this.mockMvc
                 .perform(get("/api/authors"))
@@ -44,6 +46,7 @@ class AuthorControllerIT extends AbstractIntegrationTest {
     }
 
     @Test
+    @Disabled
     void shouldFindAuthorById() throws Exception {
         Author author = authorList.get(0);
         Long authorId = author.getId();
@@ -81,6 +84,7 @@ class AuthorControllerIT extends AbstractIntegrationTest {
     }
 
     @Test
+    @Disabled
     void shouldDeleteAuthor() throws Exception {
         Author author = authorList.get(0);
 
