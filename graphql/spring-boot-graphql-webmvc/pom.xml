@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>3.0.1</version>
-        <relativePath/> <!-- lookup parent from repository -->
+        <relativePath /> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.example.graphql</groupId>
     <artifactId>spring-boot-graphql-webmvc</artifactId>
@@ -22,6 +23,8 @@
         <spring-cloud.version>2022.0.0</spring-cloud.version>
         <springdoc-openapi.version>2.0.2</springdoc-openapi.version>
         <commons-io.version>2.11.0</commons-io.version>
+        <org.mapstruct.extensions.spring.version>0.1.2</org.mapstruct.extensions.spring.version>
+        <org.mapstruct.version>1.5.3.Final</org.mapstruct.version>
 
         <testcontainers.version>1.17.6</testcontainers.version>
 
@@ -29,6 +32,7 @@
         <spotless.version>2.28.0</spotless.version>
         <dependency-check-maven.version>7.4.3</dependency-check-maven.version>
         <properties-maven-plugin.version>1.1.0</properties-maven-plugin.version>
+        <maven-surefire-plugin.version>3.0.0-M7</maven-surefire-plugin.version>
         <maven-failsafe-plugin.version>3.0.0-M7</maven-failsafe-plugin.version>
         <sonar-maven-plugin.version>3.9.1.2184</sonar-maven-plugin.version>
         <jacoco-maven-plugin.version>0.8.8</jacoco-maven-plugin.version>
@@ -58,6 +62,18 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-graphql</artifactId>
         </dependency>
+        <!-- Mapstruct -->
+        <dependency>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct</artifactId>
+            <version>${org.mapstruct.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.mapstruct.extensions.spring</groupId>
+            <artifactId>mapstruct-spring-annotations</artifactId>
+            <version>${org.mapstruct.extensions.spring.version}</version>
+        </dependency>
+        <!-- End Mapstruct -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-devtools</artifactId>
@@ -71,6 +87,7 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
+            <scope>provided</scope>
             <optional>true</optional>
         </dependency>
         <dependency>
@@ -169,6 +186,61 @@
                         </goals>
                     </execution>
                 </executions>
+                <configuration>
+                    <excludes>
+                        <exclude>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                        </exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>${java.version}</source> <!-- depending on your project -->
+                    <target>${java.version}</target> <!-- depending on your project -->
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.mapstruct</groupId>
+                            <artifactId>mapstruct-processor</artifactId>
+                            <version>${org.mapstruct.version}</version>
+                        </path>
+                        <path>
+                            <groupId>org.mapstruct.extensions.spring</groupId>
+                            <artifactId>mapstruct-spring-extensions</artifactId>
+                            <version>0.1.2</version>
+                        </path>
+                        <!-- other annotation processors -->
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>${lombok.version}</version>
+                        </path>
+                        <!-- This is needed when using Lombok 1.18.16 and above -->
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok-mapstruct-binding</artifactId>
+                            <version>0.2.0</version>
+                        </path>
+                    </annotationProcessorPaths>
+                    <showWarnings>true</showWarnings>
+                    <compilerArgs>
+                        <arg>
+                            -Amapstruct.suppressGeneratorTimestamp=true
+                        </arg>
+                        <arg>
+                            -Amapstruct.suppressGeneratorVersionInfoComment=true
+                        </arg>
+                        <arg>
+                            -Amapstruct.defaultComponentModel=spring
+                        </arg>
+                        <arg>
+                            -Amapstruct.verbose=true
+                        </arg>
+                    </compilerArgs>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>io.github.git-commit-id</groupId>
@@ -310,7 +382,8 @@
                             <destFile>${jacoco.utReportFile}</destFile>
                         </configuration>
                     </execution>
-                    <!-- Ensures that the code coverage report for unit tests is created after unit tests have been run -->
+                    <!-- Ensures that the code coverage report for unit tests is created after unit
+                    tests have been run -->
                     <execution>
                         <id>post-unit-test</id>
                         <phase>test</phase>
@@ -332,7 +405,8 @@
                             <destFile>${jacoco.itReportFile}</destFile>
                         </configuration>
                     </execution>
-                    <!-- Ensures that the code coverage report for integration tests is created after integration tests have been run -->
+                    <!-- Ensures that the code coverage report for integration tests is created
+                    after integration tests have been run -->
                     <execution>
                         <id>post-integration-tests</id>
                         <phase>post-integration-test</phase>
@@ -371,22 +445,22 @@
 
     <repositories>
         <repository>
-          <id>spring-milestones</id>
-          <name>Spring Milestones</name>
-          <url>https://repo.spring.io/milestone</url>
-          <snapshots>
-            <enabled>false</enabled>
-          </snapshots>
+            <id>spring-milestones</id>
+            <name>Spring Milestones</name>
+            <url>https://repo.spring.io/milestone</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
         </repository>
     </repositories>
     <pluginRepositories>
         <pluginRepository>
-          <id>spring-milestones</id>
-          <name>Spring Milestones</name>
-          <url>https://repo.spring.io/milestone</url>
-          <snapshots>
-            <enabled>false</enabled>
-          </snapshots>
+            <id>spring-milestones</id>
+            <name>Spring Milestones</name>
+            <url>https://repo.spring.io/milestone</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
         </pluginRepository>
     </pluginRepositories>
 </project>
