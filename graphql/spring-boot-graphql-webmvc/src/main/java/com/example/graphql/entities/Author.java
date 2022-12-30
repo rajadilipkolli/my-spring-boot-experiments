@@ -9,6 +9,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -30,11 +31,22 @@ public class Author {
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
 
-    @Column(nullable = false)
-    private String name;
+    @Column(nullable = false, length = 50)
+    private String firstName;
 
-    @Column(nullable = false, unique = true)
+    @Column(length = 50)
+    private String middleName;
+
+    @Column(nullable = false, length = 50)
+    private String lastName;
+
+    @Column(nullable = false, length = 15)
+    private String mobile;
+
+    @Column(nullable = false, unique = true, length = 50)
     private String email;
+
+    private LocalDateTime registeredAt;
 
     @Version private Long version;
 

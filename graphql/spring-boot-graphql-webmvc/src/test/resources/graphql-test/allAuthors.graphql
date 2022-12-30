@@ -1,7 +1,8 @@
 query authors {
     allAuthors{
         id
-        name
+        firstName
+        lastName
         email
     }
 }

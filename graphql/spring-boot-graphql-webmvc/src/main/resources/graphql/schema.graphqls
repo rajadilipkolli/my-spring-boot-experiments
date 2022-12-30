@@ -1,6 +1,7 @@
 type Author{
     id:ID!
-    name:String!
+    firstName:String!
+    lastName:String!
     email:String!
     version:Int !
     posts: [Post]

@@ -58,7 +58,8 @@ public class Initializer implements CommandLineRunner {
                             Author author =
                                     Author.builder()
                                             .email("user" + i + "@example.com")
-                                            .name("user" + i)
+                                            .firstName("firstName" + i)
+                                            .lastName("lastName" + i)
                                             .build();
                             author.addPost(post);
                             author.addPost(post1);

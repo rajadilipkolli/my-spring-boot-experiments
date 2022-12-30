@@ -35,12 +35,12 @@ class AuthorQueryTest {
                         List.of(
                                 Author.builder()
                                         .id(1L)
-                                        .name("test title")
+                                        .firstName("test title")
                                         .email("junit1@email.com")
                                         .build(),
                                 Author.builder()
                                         .id(2L)
-                                        .name("test title2")
+                                        .firstName("test title2")
                                         .email("junit2@email.com")
                                         .build()));
 
@@ -49,7 +49,7 @@ class AuthorQueryTest {
                 query authors{
                     allAuthors{
                      id
-                     name
+                     firstName
                      email
                    }
                  }""";
@@ -61,7 +61,7 @@ class AuthorQueryTest {
                 .satisfies(
                         emails ->
                                 assertThat(emails).contains("junit1@email.com", "junit2@email.com"))
-                .path("allAuthors[*].name")
+                .path("allAuthors[*].firstName")
                 .entityList(String.class)
                 .satisfies(
                         names ->

@@ -30,9 +30,24 @@ class AuthorControllerIT extends AbstractIntegrationTest {
         authorRepository.deleteAll();
 
         authorList = new ArrayList<>();
-        authorList.add(Author.builder().name("First Author").email("junit1@email.com").build());
-        authorList.add(Author.builder().name("Second Author").email("junit2@email.com").build());
-        authorList.add(Author.builder().name("Third Author").email("junit3@email.com").build());
+        authorList.add(
+                Author.builder()
+                        .firstName("First Author")
+                        .lastName("lastName")
+                        .email("junit1@email.com")
+                        .build());
+        authorList.add(
+                Author.builder()
+                        .firstName("Second Author")
+                        .lastName("lastName")
+                        .email("junit2@email.com")
+                        .build());
+        authorList.add(
+                Author.builder()
+                        .firstName("Third Author")
+                        .lastName("lastName")
+                        .email("junit3@email.com")
+                        .build());
         authorList = authorRepository.saveAll(authorList);
     }
 
@@ -54,25 +69,30 @@ class AuthorControllerIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(get("/api/authors/{id}", authorId))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name", is(author.getName())));
+                .andExpect(jsonPath("$.firstName", is(author.getFirstName())));
     }
 
     @Test
     void shouldCreateNewAuthor() throws Exception {
-        Author author = Author.builder().name("New Author").email("junit4@email.com").build();
+        Author author =
+                Author.builder()
+                        .firstName("New Author")
+                        .lastName("lastName")
+                        .email("junit4@email.com")
+                        .build();
         this.mockMvc
                 .perform(
                         post("/api/authors")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(author)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.name", is(author.getName())));
+                .andExpect(jsonPath("$.firstName", is(author.getFirstName())));
     }
 
     @Test
     void shouldUpdateAuthor() throws Exception {
         Author author = authorList.get(0);
-        author.setName("Updated Author");
+        author.setFirstName("Updated Author");
 
         this.mockMvc
                 .perform(
@@ -80,7 +100,7 @@ class AuthorControllerIT extends AbstractIntegrationTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(author)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name", is(author.getName())));
+                .andExpect(jsonPath("$.firstName", is(author.getFirstName())));
     }
 
     @Test
@@ -91,6 +111,6 @@ class AuthorControllerIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(delete("/api/authors/{id}", author.getId()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name", is(author.getName())));
+                .andExpect(jsonPath("$.firstName", is(author.getFirstName())));
     }
 }

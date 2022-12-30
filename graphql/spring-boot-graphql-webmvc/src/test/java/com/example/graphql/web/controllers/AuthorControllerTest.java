@@ -44,11 +44,26 @@ class AuthorControllerTest {
     void setUp() {
         this.authorList = new ArrayList<>();
         this.authorList.add(
-                Author.builder().id(1L).name("First Author").email("junit1@email.com").build());
+                Author.builder()
+                        .id(1L)
+                        .firstName("First Author")
+                        .lastName("lastName")
+                        .email("junit1@email.com")
+                        .build());
         this.authorList.add(
-                Author.builder().id(2L).name("Second Author").email("junit2@email.com").build());
+                Author.builder()
+                        .id(2L)
+                        .firstName("Second Author")
+                        .lastName("lastName")
+                        .email("junit2@email.com")
+                        .build());
         this.authorList.add(
-                Author.builder().id(3L).name("Third Author").email("junit3@email.com").build());
+                Author.builder()
+                        .id(3L)
+                        .firstName("Third Author")
+                        .lastName("lastName")
+                        .email("junit3@email.com")
+                        .build());
     }
 
     @Test
@@ -67,7 +82,8 @@ class AuthorControllerTest {
         Author author =
                 Author.builder()
                         .id(authorId)
-                        .name("First Author")
+                        .firstName("First Author")
+                        .lastName("lastName")
                         .email("junit1@email.com")
                         .build();
         given(authorService.findAuthorById(authorId)).willReturn(Optional.of(author));
@@ -75,7 +91,7 @@ class AuthorControllerTest {
         this.mockMvc
                 .perform(get("/api/authors/{id}", authorId))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name", is(author.getName())));
+                .andExpect(jsonPath("$.firstName", is(author.getFirstName())));
     }
 
     @Test
@@ -92,7 +108,12 @@ class AuthorControllerTest {
                 .willAnswer((invocation) -> invocation.getArgument(0));
 
         Author author =
-                Author.builder().id(1L).name("First Author").email("junit1@email.com").build();
+                Author.builder()
+                        .id(1L)
+                        .firstName("First Author")
+                        .lastName("lastName")
+                        .email("junit1@email.com")
+                        .build();
         ;
         this.mockMvc
                 .perform(
@@ -101,7 +122,7 @@ class AuthorControllerTest {
                                 .content(objectMapper.writeValueAsString(author)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id", notNullValue()))
-                .andExpect(jsonPath("$.name", is(author.getName())));
+                .andExpect(jsonPath("$.firstName", is(author.getFirstName())));
     }
 
     @Test
@@ -110,7 +131,8 @@ class AuthorControllerTest {
         Author author =
                 Author.builder()
                         .id(authorId)
-                        .name("Updated Author")
+                        .firstName("Updated Author")
+                        .lastName("lastName")
                         .email("junit1@email.com")
                         .build();
         given(authorService.findAuthorById(authorId)).willReturn(Optional.of(author));
@@ -123,7 +145,7 @@ class AuthorControllerTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(author)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name", is(author.getName())));
+                .andExpect(jsonPath("$.firstName", is(author.getFirstName())));
     }
 
     @Test
@@ -133,7 +155,8 @@ class AuthorControllerTest {
         Author author =
                 Author.builder()
                         .id(authorId)
-                        .name("First Author")
+                        .firstName("First Author")
+                        .lastName("lastName")
                         .email("junit1@email.com")
                         .build();
 
@@ -151,7 +174,8 @@ class AuthorControllerTest {
         Author author =
                 Author.builder()
                         .id(authorId)
-                        .name("First Author")
+                        .firstName("First Author")
+                        .lastName("lastName")
                         .email("junit1@email.com")
                         .build();
         given(authorService.findAuthorById(authorId)).willReturn(Optional.of(author));
@@ -160,7 +184,7 @@ class AuthorControllerTest {
         this.mockMvc
                 .perform(delete("/api/authors/{id}", author.getId()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name", is(author.getName())));
+                .andExpect(jsonPath("$.firstName", is(author.getFirstName())));
     }
 
     @Test
