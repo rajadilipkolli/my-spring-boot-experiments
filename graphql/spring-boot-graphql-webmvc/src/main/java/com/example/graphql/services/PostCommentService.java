@@ -3,7 +3,9 @@ package com.example.graphql.services;
 import com.example.graphql.entities.PostComment;
 import com.example.graphql.repositories.PostCommentRepository;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,5 +31,10 @@ public class PostCommentService {
 
     public void deletePostCommentById(Long id) {
         postCommentRepository.deleteById(id);
+    }
+
+    public Map<Long, List<PostComment>> getCommentsByPostIdIn(List<Long> postIds) {
+        return this.postCommentRepository.findByPost_IdIn(postIds).stream()
+                .collect(Collectors.groupingBy(postComment -> postComment.getPost().getId()));
     }
 }

@@ -2,7 +2,8 @@ type Author{
     id:ID!
     name:String!
     email:String!
-    posts: [Post!]!
+    version:Int !
+    posts: [Post]
 }
 
 type Post{
@@ -11,11 +12,16 @@ type Post{
     content:String!
     createdOn:String
     details: PostDetails!
+    comments: PostComments
+}
+
+type PostComments {
+    id:ID
+    review:String
 }
 
 type PostDetails {
     id:ID!
-    review:String!
     createdOn:String
 }
 
