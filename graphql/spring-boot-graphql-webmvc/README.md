@@ -14,3 +14,4 @@ $ ./mvnw spring-boot:run -Dspring-boot.run.profiles=local
 * Swagger UI: http://localhost:8080/swagger-ui.html
 * Actuator Endpoint: http://localhost:8080/actuator
 * GraphQlUI : http://localhost:8080/graphiql
+* PgAdmin : http://localhost:5050

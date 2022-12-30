@@ -3,9 +3,11 @@ package com.example.graphql.gql;
 import com.example.graphql.dtos.PostInfo;
 import com.example.graphql.entities.Author;
 import com.example.graphql.entities.PostComment;
+import com.example.graphql.entities.Tag;
 import com.example.graphql.services.AuthorService;
 import com.example.graphql.services.PostCommentService;
 import com.example.graphql.services.PostService;
+import com.example.graphql.services.TagService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +31,8 @@ public class AuthorGraphQlController {
 
     private final PostCommentService postCommentService;
 
+    private final TagService tagService;
+
     @BatchMapping(typeName = "Author")
     public Map<Author, List<PostInfo>> posts(List<Author> authors) {
         List<Long> authorIds = authors.stream().map(Author::getId).toList();
@@ -49,6 +53,21 @@ public class AuthorGraphQlController {
         List<Long> postIds = posts.stream().map(PostInfo::getId).toList();
 
         var postCommentsMap = this.postCommentService.getCommentsByPostIdIn(postIds);
+
+        return posts.stream()
+                .collect(
+                        Collectors.toMap(
+                                post -> post,
+                                post ->
+                                        postCommentsMap.getOrDefault(
+                                                post.getId(), new ArrayList<>())));
+    }
+
+    @BatchMapping(typeName = "Post")
+    public Map<PostInfo, List<Tag>> tags(List<PostInfo> posts) {
+        List<Long> postIds = posts.stream().map(PostInfo::getId).toList();
+
+        var postCommentsMap = this.tagService.getTagsByPostIdIn(postIds);
 
         return posts.stream()
                 .collect(

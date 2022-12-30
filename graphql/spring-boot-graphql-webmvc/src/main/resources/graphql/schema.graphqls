@@ -11,8 +11,13 @@ type Post{
     title:String!
     content:String!
     createdOn:String
-    details: PostDetails!
+    details: PostDetails
     comments: PostComments
+    tags:[Tags]
+}
+
+type Tags {
+    name:String
 }
 
 type PostComments {
@@ -26,5 +31,5 @@ type PostDetails {
 }
 
 type Query{
-     allAuthors: [Author!]!
+    allAuthors: [Author!]!
 }
