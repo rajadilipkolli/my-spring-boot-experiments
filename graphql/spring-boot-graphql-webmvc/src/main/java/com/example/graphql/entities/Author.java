@@ -54,10 +54,6 @@ public class Author {
     @Builder.Default
     private List<Post> posts = new ArrayList<>();
 
-    public Long getVersion() {
-        return version;
-    }
-
     public void addPost(Post post) {
         this.posts.add(post);
         post.setAuthor(this);

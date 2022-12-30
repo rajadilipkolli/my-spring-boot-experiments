@@ -10,10 +10,12 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
+import java.util.Objects;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.Hibernate;
 
 @Entity
 @Table(name = "post_comments")
@@ -48,13 +50,10 @@ public class PostComment {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        return this.review != null && this.review.equals(((PostComment) o).getReview());
+        if (this == o) return true;
+        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+        PostComment postComment = (PostComment) o;
+        return review != null && Objects.equals(review, postComment.review);
     }
 
     @Override

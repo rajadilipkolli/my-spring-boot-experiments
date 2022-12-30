@@ -21,6 +21,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.Hibernate;
 
 @Entity
 @Table(name = "posts")
@@ -109,23 +110,18 @@ public class Post implements Serializable {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        Post other = (Post) obj;
-        return Objects.equals(this.details, other.details)
-                && Objects.equals(this.title, other.title);
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+        Post post = (Post) o;
+        return id != null
+                && title != null
+                && Objects.equals(id, post.id)
+                && Objects.equals(this.title, post.title);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(this.details, this.title);
+        return getClass().hashCode();
     }
 }
