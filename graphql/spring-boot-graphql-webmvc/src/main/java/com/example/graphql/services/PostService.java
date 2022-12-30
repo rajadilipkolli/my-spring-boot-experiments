@@ -1,7 +1,7 @@
 package com.example.graphql.services;
 
 import com.example.graphql.dtos.PostInfo;
-import com.example.graphql.entities.Post;
+import com.example.graphql.entities.PostEntity;
 import com.example.graphql.repositories.PostRepository;
 import java.util.List;
 import java.util.Map;
@@ -18,15 +18,15 @@ public class PostService {
 
     private final PostRepository postRepository;
 
-    public List<Post> findAllPosts() {
+    public List<PostEntity> findAllPosts() {
         return postRepository.findAll();
     }
 
-    public Optional<Post> findPostById(Long id) {
+    public Optional<PostEntity> findPostById(Long id) {
         return postRepository.findById(id);
     }
 
-    public Post savePost(Post post) {
+    public PostEntity savePost(PostEntity post) {
         return postRepository.save(post);
     }
 

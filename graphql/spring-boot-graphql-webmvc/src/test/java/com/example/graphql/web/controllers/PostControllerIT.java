@@ -9,7 +9,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.example.graphql.common.AbstractIntegrationTest;
-import com.example.graphql.entities.Post;
+import com.example.graphql.entities.PostEntity;
 import com.example.graphql.repositories.PostRepository;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,16 +23,16 @@ class PostControllerIT extends AbstractIntegrationTest {
 
     @Autowired private PostRepository postRepository;
 
-    private List<Post> postList = null;
+    private List<PostEntity> postList = null;
 
     @BeforeEach
     void setUp() {
         postRepository.deleteAllInBatch();
 
         postList = new ArrayList<>();
-        postList.add(Post.builder().content("First Post").build());
-        postList.add(Post.builder().content("Second Post").build());
-        postList.add(Post.builder().content("Third Post").build());
+        postList.add(PostEntity.builder().content("First Post").build());
+        postList.add(PostEntity.builder().content("Second Post").build());
+        postList.add(PostEntity.builder().content("Third Post").build());
         postList = postRepository.saveAll(postList);
     }
 
@@ -48,7 +48,7 @@ class PostControllerIT extends AbstractIntegrationTest {
     @Test
     @Disabled
     void shouldFindPostById() throws Exception {
-        Post post = postList.get(0);
+        PostEntity post = postList.get(0);
         Long postId = post.getId();
 
         this.mockMvc
@@ -59,7 +59,7 @@ class PostControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldCreateNewPost() throws Exception {
-        Post post = Post.builder().content("New Post").build();
+        PostEntity post = PostEntity.builder().content("New Post").build();
         this.mockMvc
                 .perform(
                         post("/api/posts")
@@ -71,7 +71,7 @@ class PostControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldUpdatePost() throws Exception {
-        Post post = postList.get(0);
+        PostEntity post = postList.get(0);
         post.setContent("Updated Post");
 
         this.mockMvc
@@ -86,7 +86,7 @@ class PostControllerIT extends AbstractIntegrationTest {
     @Test
     @Disabled
     void shouldDeletePost() throws Exception {
-        Post post = postList.get(0);
+        PostEntity post = postList.get(0);
 
         this.mockMvc
                 .perform(delete("/api/posts/{id}", post.getId()))

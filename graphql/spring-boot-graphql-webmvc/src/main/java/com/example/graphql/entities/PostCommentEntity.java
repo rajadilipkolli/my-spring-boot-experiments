@@ -23,7 +23,7 @@ import org.hibernate.Hibernate;
 @Setter
 @Builder
 @AllArgsConstructor
-public class PostComment {
+public class PostCommentEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
@@ -43,9 +43,9 @@ public class PostComment {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id")
-    private Post post;
+    private PostEntity post;
 
-    public PostComment() {
+    public PostCommentEntity() {
         this.createdAt = LocalDateTime.now();
     }
 
@@ -53,7 +53,7 @@ public class PostComment {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
-        PostComment postComment = (PostComment) o;
+        PostCommentEntity postComment = (PostCommentEntity) o;
         return id != null && Objects.equals(id, postComment.id);
     }
 

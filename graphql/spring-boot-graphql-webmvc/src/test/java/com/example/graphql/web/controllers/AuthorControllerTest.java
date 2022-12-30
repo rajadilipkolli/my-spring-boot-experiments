@@ -13,7 +13,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.example.graphql.entities.Author;
+import com.example.graphql.entities.AuthorEntity;
 import com.example.graphql.services.AuthorService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
@@ -38,27 +38,27 @@ class AuthorControllerTest {
 
     @Autowired private ObjectMapper objectMapper;
 
-    private List<Author> authorList;
+    private List<AuthorEntity> authorList;
 
     @BeforeEach
     void setUp() {
         this.authorList = new ArrayList<>();
         this.authorList.add(
-                Author.builder()
+                AuthorEntity.builder()
                         .id(1L)
                         .firstName("First Author")
                         .lastName("lastName")
                         .email("junit1@email.com")
                         .build());
         this.authorList.add(
-                Author.builder()
+                AuthorEntity.builder()
                         .id(2L)
                         .firstName("Second Author")
                         .lastName("lastName")
                         .email("junit2@email.com")
                         .build());
         this.authorList.add(
-                Author.builder()
+                AuthorEntity.builder()
                         .id(3L)
                         .firstName("Third Author")
                         .lastName("lastName")
@@ -79,8 +79,8 @@ class AuthorControllerTest {
     @Test
     void shouldFindAuthorById() throws Exception {
         Long authorId = 1L;
-        Author author =
-                Author.builder()
+        AuthorEntity author =
+                AuthorEntity.builder()
                         .id(authorId)
                         .firstName("First Author")
                         .lastName("lastName")
@@ -104,11 +104,11 @@ class AuthorControllerTest {
 
     @Test
     void shouldCreateNewAuthor() throws Exception {
-        given(authorService.saveAuthor(any(Author.class)))
+        given(authorService.saveAuthor(any(AuthorEntity.class)))
                 .willAnswer((invocation) -> invocation.getArgument(0));
 
-        Author author =
-                Author.builder()
+        AuthorEntity author =
+                AuthorEntity.builder()
                         .id(1L)
                         .firstName("First Author")
                         .lastName("lastName")
@@ -128,15 +128,15 @@ class AuthorControllerTest {
     @Test
     void shouldUpdateAuthor() throws Exception {
         Long authorId = 1L;
-        Author author =
-                Author.builder()
+        AuthorEntity author =
+                AuthorEntity.builder()
                         .id(authorId)
                         .firstName("Updated Author")
                         .lastName("lastName")
                         .email("junit1@email.com")
                         .build();
         given(authorService.findAuthorById(authorId)).willReturn(Optional.of(author));
-        given(authorService.saveAuthor(any(Author.class)))
+        given(authorService.saveAuthor(any(AuthorEntity.class)))
                 .willAnswer((invocation) -> invocation.getArgument(0));
 
         this.mockMvc
@@ -152,8 +152,8 @@ class AuthorControllerTest {
     void shouldReturn404WhenUpdatingNonExistingAuthor() throws Exception {
         Long authorId = 1L;
         given(authorService.findAuthorById(authorId)).willReturn(Optional.empty());
-        Author author =
-                Author.builder()
+        AuthorEntity author =
+                AuthorEntity.builder()
                         .id(authorId)
                         .firstName("First Author")
                         .lastName("lastName")
@@ -171,8 +171,8 @@ class AuthorControllerTest {
     @Test
     void shouldDeleteAuthor() throws Exception {
         Long authorId = 1L;
-        Author author =
-                Author.builder()
+        AuthorEntity author =
+                AuthorEntity.builder()
                         .id(authorId)
                         .firstName("First Author")
                         .lastName("lastName")

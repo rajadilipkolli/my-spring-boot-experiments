@@ -13,7 +13,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.example.graphql.entities.PostComment;
+import com.example.graphql.entities.PostCommentEntity;
 import com.example.graphql.services.PostCommentService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
@@ -38,14 +38,17 @@ class PostCommentControllerTest {
 
     @Autowired private ObjectMapper objectMapper;
 
-    private List<PostComment> postCommentList;
+    private List<PostCommentEntity> postCommentList;
 
     @BeforeEach
     void setUp() {
         this.postCommentList = new ArrayList<>();
-        this.postCommentList.add(PostComment.builder().id(1L).title("First PostComment").build());
-        this.postCommentList.add(PostComment.builder().id(2L).title("Second PostComment").build());
-        this.postCommentList.add(PostComment.builder().id(3L).title("Third PostComment").build());
+        this.postCommentList.add(
+                PostCommentEntity.builder().id(1L).title("First PostComment").build());
+        this.postCommentList.add(
+                PostCommentEntity.builder().id(2L).title("Second PostComment").build());
+        this.postCommentList.add(
+                PostCommentEntity.builder().id(3L).title("Third PostComment").build());
     }
 
     @Test
@@ -61,8 +64,8 @@ class PostCommentControllerTest {
     @Test
     void shouldFindPostCommentById() throws Exception {
         Long postCommentId = 1L;
-        PostComment postComment =
-                PostComment.builder().id(postCommentId).title("First PostComment").build();
+        PostCommentEntity postComment =
+                PostCommentEntity.builder().id(postCommentId).title("First PostComment").build();
         given(postCommentService.findPostCommentById(postCommentId))
                 .willReturn(Optional.of(postComment));
 
@@ -84,10 +87,11 @@ class PostCommentControllerTest {
 
     @Test
     void shouldCreateNewPostComment() throws Exception {
-        given(postCommentService.savePostComment(any(PostComment.class)))
+        given(postCommentService.savePostComment(any(PostCommentEntity.class)))
                 .willAnswer((invocation) -> invocation.getArgument(0));
 
-        PostComment postComment = PostComment.builder().id(1L).title("First PostComment").build();
+        PostCommentEntity postComment =
+                PostCommentEntity.builder().id(1L).title("First PostComment").build();
         this.mockMvc
                 .perform(
                         post("/api/postcomments")
@@ -101,11 +105,11 @@ class PostCommentControllerTest {
     @Test
     void shouldUpdatePostComment() throws Exception {
         Long postCommentId = 1L;
-        PostComment postComment =
-                PostComment.builder().id(postCommentId).title("Updated PostComment").build();
+        PostCommentEntity postComment =
+                PostCommentEntity.builder().id(postCommentId).title("Updated PostComment").build();
         given(postCommentService.findPostCommentById(postCommentId))
                 .willReturn(Optional.of(postComment));
-        given(postCommentService.savePostComment(any(PostComment.class)))
+        given(postCommentService.savePostComment(any(PostCommentEntity.class)))
                 .willAnswer((invocation) -> invocation.getArgument(0));
 
         this.mockMvc
@@ -121,8 +125,8 @@ class PostCommentControllerTest {
     void shouldReturn404WhenUpdatingNonExistingPostComment() throws Exception {
         Long postCommentId = 1L;
         given(postCommentService.findPostCommentById(postCommentId)).willReturn(Optional.empty());
-        PostComment postComment =
-                PostComment.builder().id(postCommentId).title("Updated PostComment").build();
+        PostCommentEntity postComment =
+                PostCommentEntity.builder().id(postCommentId).title("Updated PostComment").build();
 
         this.mockMvc
                 .perform(
@@ -135,8 +139,8 @@ class PostCommentControllerTest {
     @Test
     void shouldDeletePostComment() throws Exception {
         Long postCommentId = 1L;
-        PostComment postComment =
-                PostComment.builder().id(postCommentId).title("First PostComment").build();
+        PostCommentEntity postComment =
+                PostCommentEntity.builder().id(postCommentId).title("First PostComment").build();
         given(postCommentService.findPostCommentById(postCommentId))
                 .willReturn(Optional.of(postComment));
         doNothing().when(postCommentService).deletePostCommentById(postComment.getId());

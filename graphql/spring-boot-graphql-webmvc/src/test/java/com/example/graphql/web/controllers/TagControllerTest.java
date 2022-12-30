@@ -13,7 +13,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.example.graphql.entities.Tag;
+import com.example.graphql.entities.TagEntity;
 import com.example.graphql.services.TagService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
@@ -38,14 +38,14 @@ class TagControllerTest {
 
     @Autowired private ObjectMapper objectMapper;
 
-    private List<Tag> tagList;
+    private List<TagEntity> tagList;
 
     @BeforeEach
     void setUp() {
         this.tagList = new ArrayList<>();
-        this.tagList.add(new Tag(1L, "text 1", null));
-        this.tagList.add(new Tag(2L, "text 2", null));
-        this.tagList.add(new Tag(3L, "text 3", null));
+        this.tagList.add(new TagEntity(1L, "text 1", null));
+        this.tagList.add(new TagEntity(2L, "text 2", null));
+        this.tagList.add(new TagEntity(3L, "text 3", null));
     }
 
     @Test
@@ -61,7 +61,7 @@ class TagControllerTest {
     @Test
     void shouldFindTagById() throws Exception {
         Long tagId = 1L;
-        Tag tag = new Tag(tagId, "text 1", null);
+        TagEntity tag = new TagEntity(tagId, "text 1", null);
         given(tagService.findTagById(tagId)).willReturn(Optional.of(tag));
 
         this.mockMvc
@@ -80,10 +80,10 @@ class TagControllerTest {
 
     @Test
     void shouldCreateNewTag() throws Exception {
-        given(tagService.saveTag(any(Tag.class)))
+        given(tagService.saveTag(any(TagEntity.class)))
                 .willAnswer((invocation) -> invocation.getArgument(0));
 
-        Tag tag = new Tag(1L, "some text", null);
+        TagEntity tag = new TagEntity(1L, "some text", null);
         this.mockMvc
                 .perform(
                         post("/api/tags")
@@ -97,9 +97,9 @@ class TagControllerTest {
     @Test
     void shouldUpdateTag() throws Exception {
         Long tagId = 1L;
-        Tag tag = new Tag(tagId, "Updated text", null);
+        TagEntity tag = new TagEntity(tagId, "Updated text", null);
         given(tagService.findTagById(tagId)).willReturn(Optional.of(tag));
-        given(tagService.saveTag(any(Tag.class)))
+        given(tagService.saveTag(any(TagEntity.class)))
                 .willAnswer((invocation) -> invocation.getArgument(0));
 
         this.mockMvc
@@ -115,7 +115,7 @@ class TagControllerTest {
     void shouldReturn404WhenUpdatingNonExistingTag() throws Exception {
         Long tagId = 1L;
         given(tagService.findTagById(tagId)).willReturn(Optional.empty());
-        Tag tag = new Tag(tagId, "Updated text", null);
+        TagEntity tag = new TagEntity(tagId, "Updated text", null);
 
         this.mockMvc
                 .perform(
@@ -128,7 +128,7 @@ class TagControllerTest {
     @Test
     void shouldDeleteTag() throws Exception {
         Long tagId = 1L;
-        Tag tag = new Tag(tagId, "Some text", null);
+        TagEntity tag = new TagEntity(tagId, "Some text", null);
         given(tagService.findTagById(tagId)).willReturn(Optional.of(tag));
         doNothing().when(tagService).deleteTagById(tag.getId());
 

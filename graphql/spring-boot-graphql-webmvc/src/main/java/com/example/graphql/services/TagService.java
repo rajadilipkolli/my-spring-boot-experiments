@@ -1,7 +1,7 @@
 package com.example.graphql.services;
 
-import com.example.graphql.entities.PostTag;
-import com.example.graphql.entities.Tag;
+import com.example.graphql.entities.PostTagEntity;
+import com.example.graphql.entities.TagEntity;
 import com.example.graphql.repositories.PostTagRepository;
 import com.example.graphql.repositories.TagRepository;
 import java.util.List;
@@ -20,15 +20,15 @@ public class TagService {
     private final TagRepository tagRepository;
     private final PostTagRepository postTagRepository;
 
-    public List<Tag> findAllTags() {
+    public List<TagEntity> findAllTags() {
         return tagRepository.findAll();
     }
 
-    public Optional<Tag> findTagById(Long id) {
+    public Optional<TagEntity> findTagById(Long id) {
         return tagRepository.findById(id);
     }
 
-    public Tag saveTag(Tag tag) {
+    public TagEntity saveTag(TagEntity tag) {
         return tagRepository.save(tag);
     }
 
@@ -36,11 +36,11 @@ public class TagService {
         tagRepository.deleteById(id);
     }
 
-    public Map<Long, List<Tag>> getTagsByPostIdIn(List<Long> postIds) {
+    public Map<Long, List<TagEntity>> getTagsByPostIdIn(List<Long> postIds) {
         return postTagRepository.findByPost_IdIn(postIds).stream()
                 .collect(
                         Collectors.groupingBy(
                                 postTag -> postTag.getPost().getId(),
-                                Collectors.mapping(PostTag::getTag, Collectors.toList())));
+                                Collectors.mapping(PostTagEntity::getTag, Collectors.toList())));
     }
 }

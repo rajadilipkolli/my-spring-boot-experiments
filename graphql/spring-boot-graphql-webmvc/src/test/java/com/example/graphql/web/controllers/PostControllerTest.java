@@ -13,7 +13,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.example.graphql.entities.Post;
+import com.example.graphql.entities.PostEntity;
 import com.example.graphql.services.PostService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
@@ -38,14 +38,14 @@ class PostControllerTest {
 
     @Autowired private ObjectMapper objectMapper;
 
-    private List<Post> postList;
+    private List<PostEntity> postList;
 
     @BeforeEach
     void setUp() {
         this.postList = new ArrayList<>();
-        this.postList.add(Post.builder().id(1L).content("First Post").build());
-        this.postList.add(Post.builder().id(2L).content("Second Post").build());
-        this.postList.add(Post.builder().id(3L).content("Third Post").build());
+        this.postList.add(PostEntity.builder().id(1L).content("First Post").build());
+        this.postList.add(PostEntity.builder().id(2L).content("Second Post").build());
+        this.postList.add(PostEntity.builder().id(3L).content("Third Post").build());
     }
 
     @Test
@@ -61,7 +61,7 @@ class PostControllerTest {
     @Test
     void shouldFindPostById() throws Exception {
         Long postId = 1L;
-        Post post = Post.builder().id(postId).content("First Post").build();
+        PostEntity post = PostEntity.builder().id(postId).content("First Post").build();
         given(postService.findPostById(postId)).willReturn(Optional.of(post));
 
         this.mockMvc
@@ -80,10 +80,10 @@ class PostControllerTest {
 
     @Test
     void shouldCreateNewPost() throws Exception {
-        given(postService.savePost(any(Post.class)))
+        given(postService.savePost(any(PostEntity.class)))
                 .willAnswer((invocation) -> invocation.getArgument(0));
 
-        Post post = Post.builder().id(1L).content("First Post").build();
+        PostEntity post = PostEntity.builder().id(1L).content("First Post").build();
         this.mockMvc
                 .perform(
                         post("/api/posts")
@@ -97,9 +97,9 @@ class PostControllerTest {
     @Test
     void shouldUpdatePost() throws Exception {
         Long postId = 1L;
-        Post post = Post.builder().id(postId).content("Updated Post").build();
+        PostEntity post = PostEntity.builder().id(postId).content("Updated Post").build();
         given(postService.findPostById(postId)).willReturn(Optional.of(post));
-        given(postService.savePost(any(Post.class)))
+        given(postService.savePost(any(PostEntity.class)))
                 .willAnswer((invocation) -> invocation.getArgument(0));
 
         this.mockMvc
@@ -115,7 +115,7 @@ class PostControllerTest {
     void shouldReturn404WhenUpdatingNonExistingPost() throws Exception {
         Long postId = 1L;
         given(postService.findPostById(postId)).willReturn(Optional.empty());
-        Post post = Post.builder().id(postId).content("Updated Post").build();
+        PostEntity post = PostEntity.builder().id(postId).content("Updated Post").build();
 
         this.mockMvc
                 .perform(
@@ -128,7 +128,7 @@ class PostControllerTest {
     @Test
     void shouldDeletePost() throws Exception {
         Long postId = 1L;
-        Post post = Post.builder().id(postId).content("First Post").build();
+        PostEntity post = PostEntity.builder().id(postId).content("First Post").build();
         given(postService.findPostById(postId)).willReturn(Optional.of(post));
         doNothing().when(postService).deletePostById(post.getId());
 

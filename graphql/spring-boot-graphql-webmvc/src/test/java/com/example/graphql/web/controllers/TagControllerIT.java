@@ -9,7 +9,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.example.graphql.common.AbstractIntegrationTest;
-import com.example.graphql.entities.Tag;
+import com.example.graphql.entities.TagEntity;
 import com.example.graphql.repositories.TagRepository;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,16 +22,16 @@ class TagControllerIT extends AbstractIntegrationTest {
 
     @Autowired private TagRepository tagRepository;
 
-    private List<Tag> tagList = null;
+    private List<TagEntity> tagList = null;
 
     @BeforeEach
     void setUp() {
         tagRepository.deleteAll();
 
         tagList = new ArrayList<>();
-        tagList.add(Tag.builder().tagName("First Tag").build());
-        tagList.add(Tag.builder().tagName("Second Tag").build());
-        tagList.add(Tag.builder().tagName("Third Tag").build());
+        tagList.add(TagEntity.builder().tagName("First Tag").build());
+        tagList.add(TagEntity.builder().tagName("Second Tag").build());
+        tagList.add(TagEntity.builder().tagName("Third Tag").build());
         tagList = tagRepository.saveAll(tagList);
     }
 
@@ -45,7 +45,7 @@ class TagControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldFindTagById() throws Exception {
-        Tag tag = tagList.get(0);
+        TagEntity tag = tagList.get(0);
         Long tagId = tag.getId();
 
         this.mockMvc
@@ -56,7 +56,7 @@ class TagControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldCreateNewTag() throws Exception {
-        Tag tag = new Tag(null, "New Tag", null);
+        TagEntity tag = new TagEntity(null, "New Tag", null);
         this.mockMvc
                 .perform(
                         post("/api/tags")
@@ -68,7 +68,7 @@ class TagControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldUpdateTag() throws Exception {
-        Tag tag = tagList.get(0);
+        TagEntity tag = tagList.get(0);
         tag.setTagName("Updated Tag");
 
         this.mockMvc
@@ -82,7 +82,7 @@ class TagControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldDeleteTag() throws Exception {
-        Tag tag = tagList.get(0);
+        TagEntity tag = tagList.get(0);
 
         this.mockMvc
                 .perform(delete("/api/tags/{id}", tag.getId()))

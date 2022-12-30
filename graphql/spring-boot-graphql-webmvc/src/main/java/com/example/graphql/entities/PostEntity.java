@@ -30,7 +30,7 @@ import org.hibernate.Hibernate;
 @Setter
 @AllArgsConstructor
 @Builder
-public class Post implements Serializable {
+public class PostEntity implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
@@ -51,38 +51,38 @@ public class Post implements Serializable {
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "post", orphanRemoval = true)
     @Builder.Default
-    private List<PostComment> comments = new ArrayList<>();
+    private List<PostCommentEntity> comments = new ArrayList<>();
 
     @OneToOne(
             mappedBy = "post",
             cascade = CascadeType.ALL,
             fetch = FetchType.LAZY,
             optional = false)
-    private PostDetails details;
+    private PostDetailsEntity details;
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
-    private List<PostTag> tags = new ArrayList<>();
+    private List<PostTagEntity> tags = new ArrayList<>();
 
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "author_id")
-    private Author author;
+    private AuthorEntity author;
 
-    public Post() {
+    public PostEntity() {
         this.createdAt = LocalDateTime.now();
     }
 
-    public void addComment(PostComment comment) {
+    public void addComment(PostCommentEntity comment) {
         this.comments.add(comment);
         comment.setPost(this);
     }
 
-    public void removeComment(PostComment comment) {
+    public void removeComment(PostCommentEntity comment) {
         this.comments.remove(comment);
         comment.setPost(null);
     }
 
-    public void setDetails(PostDetails details) {
+    public void setDetails(PostDetailsEntity details) {
         if (details == null) {
             if (this.details != null) {
                 this.details.setPost(null);
@@ -93,14 +93,14 @@ public class Post implements Serializable {
         this.details = details;
     }
 
-    public void addTag(Tag tag) {
-        PostTag postTag = new PostTag(this, tag);
+    public void addTag(TagEntity tag) {
+        PostTagEntity postTag = new PostTagEntity(this, tag);
         this.tags.add(postTag);
     }
 
-    public void removeTag(Tag tag) {
-        for (Iterator<PostTag> iterator = this.tags.iterator(); iterator.hasNext(); ) {
-            PostTag postTag = iterator.next();
+    public void removeTag(TagEntity tag) {
+        for (Iterator<PostTagEntity> iterator = this.tags.iterator(); iterator.hasNext(); ) {
+            PostTagEntity postTag = iterator.next();
 
             if (postTag.getPost().equals(this) && postTag.getTag().equals(tag)) {
                 iterator.remove();
@@ -114,7 +114,7 @@ public class Post implements Serializable {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
-        Post post = (Post) o;
+        PostEntity post = (PostEntity) o;
         return id != null
                 && title != null
                 && Objects.equals(id, post.id)

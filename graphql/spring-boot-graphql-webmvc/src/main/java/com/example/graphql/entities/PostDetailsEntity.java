@@ -21,7 +21,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @Builder
-public class PostDetails {
+public class PostDetailsEntity {
 
     @Id private Long id;
 
@@ -35,13 +35,13 @@ public class PostDetails {
     @OneToOne(fetch = FetchType.LAZY)
     @MapsId
     @JoinColumn(name = "id")
-    private Post post;
+    private PostEntity post;
 
-    public PostDetails() {
+    public PostDetailsEntity() {
         this.createdAt = LocalDateTime.now();
     }
 
-    public PostDetails(String createdBy) {
+    public PostDetailsEntity(String createdBy) {
         this.createdAt = LocalDateTime.now();
         this.createdBy = createdBy;
     }
@@ -57,7 +57,7 @@ public class PostDetails {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        PostDetails other = (PostDetails) obj;
+        PostDetailsEntity other = (PostDetailsEntity) obj;
         return Objects.equals(this.createdBy, other.createdBy);
     }
 

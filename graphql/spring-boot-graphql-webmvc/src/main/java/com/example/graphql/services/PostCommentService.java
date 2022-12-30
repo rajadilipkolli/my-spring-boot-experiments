@@ -1,6 +1,6 @@
 package com.example.graphql.services;
 
-import com.example.graphql.entities.PostComment;
+import com.example.graphql.entities.PostCommentEntity;
 import com.example.graphql.repositories.PostCommentRepository;
 import java.util.List;
 import java.util.Map;
@@ -17,15 +17,15 @@ public class PostCommentService {
 
     private final PostCommentRepository postCommentRepository;
 
-    public List<PostComment> findAllPostComments() {
+    public List<PostCommentEntity> findAllPostComments() {
         return postCommentRepository.findAll();
     }
 
-    public Optional<PostComment> findPostCommentById(Long id) {
+    public Optional<PostCommentEntity> findPostCommentById(Long id) {
         return postCommentRepository.findById(id);
     }
 
-    public PostComment savePostComment(PostComment postComment) {
+    public PostCommentEntity savePostComment(PostCommentEntity postComment) {
         return postCommentRepository.save(postComment);
     }
 
@@ -33,7 +33,7 @@ public class PostCommentService {
         postCommentRepository.deleteById(id);
     }
 
-    public Map<Long, List<PostComment>> getCommentsByPostIdIn(List<Long> postIds) {
+    public Map<Long, List<PostCommentEntity>> getCommentsByPostIdIn(List<Long> postIds) {
         return this.postCommentRepository.findByPost_IdIn(postIds).stream()
                 .collect(Collectors.groupingBy(postComment -> postComment.getPost().getId()));
     }

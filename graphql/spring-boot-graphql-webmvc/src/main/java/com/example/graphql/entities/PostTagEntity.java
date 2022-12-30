@@ -16,29 +16,29 @@ import lombok.Setter;
 @Table(name = "post_tag")
 @Setter
 @Getter
-public class PostTag {
+public class PostTagEntity {
 
-    @EmbeddedId private PostTagId id;
+    @EmbeddedId private PostTagEntityId id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("postId")
-    private Post post;
+    private PostEntity post;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("tagId")
-    private Tag tag;
+    private TagEntity tag;
 
     @Column(name = "created_on")
     private LocalDateTime createdOn = LocalDateTime.now();
 
-    public PostTag() {
+    public PostTagEntity() {
         this.createdOn = LocalDateTime.now();
     }
 
-    public PostTag(Post post, Tag tag) {
+    public PostTagEntity(PostEntity post, TagEntity tag) {
         this.post = post;
         this.tag = tag;
-        this.id = new PostTagId(post.getId(), tag.getId());
+        this.id = new PostTagEntityId(post.getId(), tag.getId());
     }
 
     @Override
@@ -50,7 +50,7 @@ public class PostTag {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        PostTag that = (PostTag) o;
+        PostTagEntity that = (PostTagEntity) o;
         return Objects.equals(this.post, that.post) && Objects.equals(this.tag, that.tag);
     }
 

@@ -1,6 +1,6 @@
 package com.example.graphql.web.controllers;
 
-import com.example.graphql.entities.Author;
+import com.example.graphql.entities.AuthorEntity;
 import com.example.graphql.services.AuthorService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -25,12 +25,12 @@ public class AuthorController {
     private final AuthorService authorService;
 
     @GetMapping
-    public List<Author> getAllAuthors() {
+    public List<AuthorEntity> getAllAuthors() {
         return authorService.findAllAuthors();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Author> getAuthorById(@PathVariable Long id) {
+    public ResponseEntity<AuthorEntity> getAuthorById(@PathVariable Long id) {
         return authorService
                 .findAuthorById(id)
                 .map(ResponseEntity::ok)
@@ -39,12 +39,13 @@ public class AuthorController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Author createAuthor(@RequestBody @Validated Author author) {
+    public AuthorEntity createAuthor(@RequestBody @Validated AuthorEntity author) {
         return authorService.saveAuthor(author);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Author> updateAuthor(@PathVariable Long id, @RequestBody Author author) {
+    public ResponseEntity<AuthorEntity> updateAuthor(
+            @PathVariable Long id, @RequestBody AuthorEntity author) {
         return authorService
                 .findAuthorById(id)
                 .map(
@@ -56,7 +57,7 @@ public class AuthorController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Author> deleteAuthor(@PathVariable Long id) {
+    public ResponseEntity<AuthorEntity> deleteAuthor(@PathVariable Long id) {
         return authorService
                 .findAuthorById(id)
                 .map(

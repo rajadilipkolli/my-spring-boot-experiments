@@ -20,7 +20,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Tag {
+public class TagEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
@@ -39,7 +39,7 @@ public class Tag {
         if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
-        Tag other = (Tag) obj;
+        TagEntity other = (TagEntity) obj;
         return Objects.equals(this.tagName, other.tagName);
     }
 

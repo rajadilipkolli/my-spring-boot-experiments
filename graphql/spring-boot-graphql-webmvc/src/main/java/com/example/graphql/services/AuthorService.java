@@ -1,6 +1,6 @@
 package com.example.graphql.services;
 
-import com.example.graphql.entities.Author;
+import com.example.graphql.entities.AuthorEntity;
 import com.example.graphql.repositories.AuthorRepository;
 import java.util.List;
 import java.util.Optional;
@@ -15,15 +15,15 @@ public class AuthorService {
 
     private final AuthorRepository authorRepository;
 
-    public List<Author> findAllAuthors() {
+    public List<AuthorEntity> findAllAuthors() {
         return authorRepository.findAll();
     }
 
-    public Optional<Author> findAuthorById(Long id) {
+    public Optional<AuthorEntity> findAuthorById(Long id) {
         return authorRepository.findById(id);
     }
 
-    public Author saveAuthor(Author author) {
+    public AuthorEntity saveAuthor(AuthorEntity author) {
         return authorRepository.save(author);
     }
 
@@ -31,7 +31,7 @@ public class AuthorService {
         authorRepository.deleteById(id);
     }
 
-    public Optional<Author> findAuthorByEmailId(String email) {
+    public Optional<AuthorEntity> findAuthorByEmailId(String email) {
         return this.authorRepository.findByEmailAllIgnoreCase(email);
     }
 }

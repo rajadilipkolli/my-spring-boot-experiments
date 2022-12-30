@@ -1,9 +1,9 @@
 package com.example.graphql.gql;
 
 import com.example.graphql.dtos.PostInfo;
-import com.example.graphql.entities.Author;
-import com.example.graphql.entities.PostComment;
-import com.example.graphql.entities.Tag;
+import com.example.graphql.entities.AuthorEntity;
+import com.example.graphql.entities.PostCommentEntity;
+import com.example.graphql.entities.TagEntity;
 import com.example.graphql.services.AuthorService;
 import com.example.graphql.services.PostCommentService;
 import com.example.graphql.services.PostService;
@@ -36,8 +36,9 @@ public class AuthorGraphQlController {
     private final TagService tagService;
 
     @BatchMapping(typeName = "Author")
-    public Map<Author, List<PostInfo>> posts(List<Author> authors) {
-        List<Long> authorIds = authors.stream().map(Author::getId).toList();
+    public Map<AuthorEntity, List<PostInfo>> posts(List<AuthorEntity> authors) {
+        log.info("Fetching PostInformation by AuthodIds");
+        List<Long> authorIds = authors.stream().map(AuthorEntity::getId).toList();
 
         var authorPostsMap = this.postService.getPostByAuthorIdIn(authorIds);
 
@@ -51,7 +52,8 @@ public class AuthorGraphQlController {
     }
 
     @BatchMapping(typeName = "Post")
-    public Map<PostInfo, List<PostComment>> comments(List<PostInfo> posts) {
+    public Map<PostInfo, List<PostCommentEntity>> comments(List<PostInfo> posts) {
+        log.info("Fetching PostComments by PostIds");
         List<Long> postIds = posts.stream().map(PostInfo::getId).toList();
 
         var postCommentsMap = this.postCommentService.getCommentsByPostIdIn(postIds);
@@ -66,7 +68,8 @@ public class AuthorGraphQlController {
     }
 
     @BatchMapping(typeName = "Post")
-    public Map<PostInfo, List<Tag>> tags(List<PostInfo> posts) {
+    public Map<PostInfo, List<TagEntity>> tags(List<PostInfo> posts) {
+        log.info("Fetching Tags by PostIds");
         List<Long> postIds = posts.stream().map(PostInfo::getId).toList();
 
         var postCommentsMap = this.tagService.getTagsByPostIdIn(postIds);
@@ -81,12 +84,12 @@ public class AuthorGraphQlController {
     }
 
     @QueryMapping
-    public List<Author> allAuthors() {
+    public List<AuthorEntity> allAuthors() {
         return this.authorService.findAllAuthors();
     }
 
     @QueryMapping
-    public Optional<Author> findAuthorByEmailId(@Argument("email") String email) {
+    public Optional<AuthorEntity> findAuthorByEmailId(@Argument("email") String email) {
         return this.authorService.findAuthorByEmailId(email);
     }
 }

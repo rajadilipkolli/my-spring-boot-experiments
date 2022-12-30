@@ -13,7 +13,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.example.graphql.entities.PostDetails;
+import com.example.graphql.entities.PostDetailsEntity;
 import com.example.graphql.services.PostDetailsService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
@@ -38,14 +38,14 @@ class PostDetailsControllerTest {
 
     @Autowired private ObjectMapper objectMapper;
 
-    private List<PostDetails> postDetailsList;
+    private List<PostDetailsEntity> postDetailsList;
 
     @BeforeEach
     void setUp() {
         this.postDetailsList = new ArrayList<>();
-        this.postDetailsList.add(PostDetails.builder().id(1L).createdBy("Junit1").build());
-        this.postDetailsList.add(PostDetails.builder().id(2L).createdBy("Junit2").build());
-        this.postDetailsList.add(PostDetails.builder().id(3L).createdBy("Junit3").build());
+        this.postDetailsList.add(PostDetailsEntity.builder().id(1L).createdBy("Junit1").build());
+        this.postDetailsList.add(PostDetailsEntity.builder().id(2L).createdBy("Junit2").build());
+        this.postDetailsList.add(PostDetailsEntity.builder().id(3L).createdBy("Junit3").build());
     }
 
     @Test
@@ -61,8 +61,8 @@ class PostDetailsControllerTest {
     @Test
     void shouldFindPostDetailsById() throws Exception {
         Long postDetailsId = 1L;
-        PostDetails postDetails =
-                PostDetails.builder().id(postDetailsId).createdBy("Junit1").build();
+        PostDetailsEntity postDetails =
+                PostDetailsEntity.builder().id(postDetailsId).createdBy("Junit1").build();
         given(postDetailsService.findPostDetailsById(postDetailsId))
                 .willReturn(Optional.of(postDetails));
 
@@ -84,10 +84,11 @@ class PostDetailsControllerTest {
 
     @Test
     void shouldCreateNewPostDetails() throws Exception {
-        given(postDetailsService.savePostDetails(any(PostDetails.class)))
+        given(postDetailsService.savePostDetails(any(PostDetailsEntity.class)))
                 .willAnswer((invocation) -> invocation.getArgument(0));
 
-        PostDetails postDetails = PostDetails.builder().id(1L).createdBy("Junit1").build();
+        PostDetailsEntity postDetails =
+                PostDetailsEntity.builder().id(1L).createdBy("Junit1").build();
         this.mockMvc
                 .perform(
                         post("/api/postdetails")
@@ -101,11 +102,11 @@ class PostDetailsControllerTest {
     @Test
     void shouldUpdatePostDetails() throws Exception {
         Long postDetailsId = 1L;
-        PostDetails postDetails =
-                PostDetails.builder().id(postDetailsId).createdBy("updated").build();
+        PostDetailsEntity postDetails =
+                PostDetailsEntity.builder().id(postDetailsId).createdBy("updated").build();
         given(postDetailsService.findPostDetailsById(postDetailsId))
                 .willReturn(Optional.of(postDetails));
-        given(postDetailsService.savePostDetails(any(PostDetails.class)))
+        given(postDetailsService.savePostDetails(any(PostDetailsEntity.class)))
                 .willAnswer((invocation) -> invocation.getArgument(0));
 
         this.mockMvc
@@ -121,8 +122,8 @@ class PostDetailsControllerTest {
     void shouldReturn404WhenUpdatingNonExistingPostDetails() throws Exception {
         Long postDetailsId = 1L;
         given(postDetailsService.findPostDetailsById(postDetailsId)).willReturn(Optional.empty());
-        PostDetails postDetails =
-                PostDetails.builder().id(postDetailsId).createdBy("Junit1").build();
+        PostDetailsEntity postDetails =
+                PostDetailsEntity.builder().id(postDetailsId).createdBy("Junit1").build();
 
         this.mockMvc
                 .perform(
@@ -135,8 +136,8 @@ class PostDetailsControllerTest {
     @Test
     void shouldDeletePostDetails() throws Exception {
         Long postDetailsId = 1L;
-        PostDetails postDetails =
-                PostDetails.builder().id(postDetailsId).createdBy("Junit1").build();
+        PostDetailsEntity postDetails =
+                PostDetailsEntity.builder().id(postDetailsId).createdBy("Junit1").build();
         given(postDetailsService.findPostDetailsById(postDetailsId))
                 .willReturn(Optional.of(postDetails));
         doNothing().when(postDetailsService).deletePostDetailsById(postDetails.getId());

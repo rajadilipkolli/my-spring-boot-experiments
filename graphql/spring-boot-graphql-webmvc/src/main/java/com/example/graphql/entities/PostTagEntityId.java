@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class PostTagId implements Serializable {
+public class PostTagEntityId implements Serializable {
 
     @Serial private static final long serialVersionUID = 1L;
 
@@ -33,7 +33,7 @@ public class PostTagId implements Serializable {
             return false;
         }
 
-        PostTagId that = (PostTagId) o;
+        PostTagEntityId that = (PostTagEntityId) o;
         return Objects.equals(this.postId, that.postId) && Objects.equals(this.tagId, that.tagId);
     }
 

@@ -9,7 +9,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.example.graphql.common.AbstractIntegrationTest;
-import com.example.graphql.entities.PostComment;
+import com.example.graphql.entities.PostCommentEntity;
 import com.example.graphql.repositories.PostCommentRepository;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,16 +22,16 @@ class PostCommentControllerIT extends AbstractIntegrationTest {
 
     @Autowired private PostCommentRepository postCommentRepository;
 
-    private List<PostComment> postCommentList = null;
+    private List<PostCommentEntity> postCommentList = null;
 
     @BeforeEach
     void setUp() {
         postCommentRepository.deleteAll();
 
         postCommentList = new ArrayList<>();
-        postCommentList.add(PostComment.builder().title("First PostComment").build());
-        postCommentList.add(PostComment.builder().title("Second PostComment").build());
-        postCommentList.add(PostComment.builder().title("Third PostComment").build());
+        postCommentList.add(PostCommentEntity.builder().title("First PostComment").build());
+        postCommentList.add(PostCommentEntity.builder().title("Second PostComment").build());
+        postCommentList.add(PostCommentEntity.builder().title("Third PostComment").build());
         postCommentList = postCommentRepository.saveAll(postCommentList);
     }
 
@@ -45,7 +45,7 @@ class PostCommentControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldFindPostCommentById() throws Exception {
-        PostComment postComment = postCommentList.get(0);
+        PostCommentEntity postComment = postCommentList.get(0);
         Long postCommentId = postComment.getId();
 
         this.mockMvc
@@ -56,7 +56,8 @@ class PostCommentControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldCreateNewPostComment() throws Exception {
-        PostComment postComment = PostComment.builder().title("New PostComment").build();
+        PostCommentEntity postComment =
+                PostCommentEntity.builder().title("New PostComment").build();
         this.mockMvc
                 .perform(
                         post("/api/postcomments")
@@ -68,7 +69,7 @@ class PostCommentControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldUpdatePostComment() throws Exception {
-        PostComment postComment = postCommentList.get(0);
+        PostCommentEntity postComment = postCommentList.get(0);
         postComment.setTitle("Updated PostComment");
 
         this.mockMvc
@@ -82,7 +83,7 @@ class PostCommentControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldDeletePostComment() throws Exception {
-        PostComment postComment = postCommentList.get(0);
+        PostCommentEntity postComment = postCommentList.get(0);
 
         this.mockMvc
                 .perform(delete("/api/postcomments/{id}", postComment.getId()))

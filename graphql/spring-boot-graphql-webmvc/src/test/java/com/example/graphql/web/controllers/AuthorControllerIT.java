@@ -9,7 +9,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.example.graphql.common.AbstractIntegrationTest;
-import com.example.graphql.entities.Author;
+import com.example.graphql.entities.AuthorEntity;
 import com.example.graphql.repositories.AuthorRepository;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +23,7 @@ class AuthorControllerIT extends AbstractIntegrationTest {
 
     @Autowired private AuthorRepository authorRepository;
 
-    private List<Author> authorList = null;
+    private List<AuthorEntity> authorList = null;
 
     @BeforeEach
     void setUp() {
@@ -31,19 +31,19 @@ class AuthorControllerIT extends AbstractIntegrationTest {
 
         authorList = new ArrayList<>();
         authorList.add(
-                Author.builder()
+                AuthorEntity.builder()
                         .firstName("First Author")
                         .lastName("lastName")
                         .email("junit1@email.com")
                         .build());
         authorList.add(
-                Author.builder()
+                AuthorEntity.builder()
                         .firstName("Second Author")
                         .lastName("lastName")
                         .email("junit2@email.com")
                         .build());
         authorList.add(
-                Author.builder()
+                AuthorEntity.builder()
                         .firstName("Third Author")
                         .lastName("lastName")
                         .email("junit3@email.com")
@@ -63,7 +63,7 @@ class AuthorControllerIT extends AbstractIntegrationTest {
     @Test
     @Disabled
     void shouldFindAuthorById() throws Exception {
-        Author author = authorList.get(0);
+        AuthorEntity author = authorList.get(0);
         Long authorId = author.getId();
 
         this.mockMvc
@@ -74,8 +74,8 @@ class AuthorControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldCreateNewAuthor() throws Exception {
-        Author author =
-                Author.builder()
+        AuthorEntity author =
+                AuthorEntity.builder()
                         .firstName("New Author")
                         .lastName("lastName")
                         .email("junit4@email.com")
@@ -91,7 +91,7 @@ class AuthorControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldUpdateAuthor() throws Exception {
-        Author author = authorList.get(0);
+        AuthorEntity author = authorList.get(0);
         author.setFirstName("Updated Author");
 
         this.mockMvc
@@ -106,7 +106,7 @@ class AuthorControllerIT extends AbstractIntegrationTest {
     @Test
     @Disabled
     void shouldDeleteAuthor() throws Exception {
-        Author author = authorList.get(0);
+        AuthorEntity author = authorList.get(0);
 
         this.mockMvc
                 .perform(delete("/api/authors/{id}", author.getId()))

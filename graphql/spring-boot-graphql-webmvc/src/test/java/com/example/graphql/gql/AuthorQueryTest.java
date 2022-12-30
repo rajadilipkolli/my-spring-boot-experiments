@@ -5,7 +5,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
-import com.example.graphql.entities.Author;
+import com.example.graphql.entities.AuthorEntity;
 import com.example.graphql.services.AuthorService;
 import com.example.graphql.services.PostCommentService;
 import com.example.graphql.services.PostService;
@@ -33,12 +33,12 @@ class AuthorQueryTest {
         BDDMockito.given(authorService.findAllAuthors())
                 .willReturn(
                         List.of(
-                                Author.builder()
+                                AuthorEntity.builder()
                                         .id(1L)
                                         .firstName("test title")
                                         .email("junit1@email.com")
                                         .build(),
-                                Author.builder()
+                                AuthorEntity.builder()
                                         .id(2L)
                                         .firstName("test title2")
                                         .email("junit2@email.com")

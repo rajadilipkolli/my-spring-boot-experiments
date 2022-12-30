@@ -1,6 +1,6 @@
 package com.example.graphql.web.controllers;
 
-import com.example.graphql.entities.PostComment;
+import com.example.graphql.entities.PostCommentEntity;
 import com.example.graphql.services.PostCommentService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -25,12 +25,12 @@ public class PostCommentController {
     private final PostCommentService postCommentService;
 
     @GetMapping
-    public List<PostComment> getAllPostComments() {
+    public List<PostCommentEntity> getAllPostComments() {
         return postCommentService.findAllPostComments();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<PostComment> getPostCommentById(@PathVariable Long id) {
+    public ResponseEntity<PostCommentEntity> getPostCommentById(@PathVariable Long id) {
         return postCommentService
                 .findPostCommentById(id)
                 .map(ResponseEntity::ok)
@@ -39,13 +39,14 @@ public class PostCommentController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public PostComment createPostComment(@RequestBody @Validated PostComment postComment) {
+    public PostCommentEntity createPostComment(
+            @RequestBody @Validated PostCommentEntity postComment) {
         return postCommentService.savePostComment(postComment);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<PostComment> updatePostComment(
-            @PathVariable Long id, @RequestBody PostComment postComment) {
+    public ResponseEntity<PostCommentEntity> updatePostComment(
+            @PathVariable Long id, @RequestBody PostCommentEntity postComment) {
         return postCommentService
                 .findPostCommentById(id)
                 .map(
@@ -58,7 +59,7 @@ public class PostCommentController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<PostComment> deletePostComment(@PathVariable Long id) {
+    public ResponseEntity<PostCommentEntity> deletePostComment(@PathVariable Long id) {
         return postCommentService
                 .findPostCommentById(id)
                 .map(

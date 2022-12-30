@@ -1,6 +1,6 @@
 package com.example.graphql.web.controllers;
 
-import com.example.graphql.entities.Post;
+import com.example.graphql.entities.PostEntity;
 import com.example.graphql.services.PostService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -25,12 +25,12 @@ public class PostController {
     private final PostService postService;
 
     @GetMapping
-    public List<Post> getAllPosts() {
+    public List<PostEntity> getAllPosts() {
         return postService.findAllPosts();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Post> getPostById(@PathVariable Long id) {
+    public ResponseEntity<PostEntity> getPostById(@PathVariable Long id) {
         return postService
                 .findPostById(id)
                 .map(ResponseEntity::ok)
@@ -39,12 +39,13 @@ public class PostController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Post createPost(@RequestBody @Validated Post post) {
+    public PostEntity createPost(@RequestBody @Validated PostEntity post) {
         return postService.savePost(post);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Post> updatePost(@PathVariable Long id, @RequestBody Post post) {
+    public ResponseEntity<PostEntity> updatePost(
+            @PathVariable Long id, @RequestBody PostEntity post) {
         return postService
                 .findPostById(id)
                 .map(
@@ -56,7 +57,7 @@ public class PostController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Post> deletePost(@PathVariable Long id) {
+    public ResponseEntity<PostEntity> deletePost(@PathVariable Long id) {
         return postService
                 .findPostById(id)
                 .map(

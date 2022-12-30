@@ -25,7 +25,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Author {
+public class AuthorEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
@@ -52,14 +52,14 @@ public class Author {
 
     @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
-    private List<Post> posts = new ArrayList<>();
+    private List<PostEntity> posts = new ArrayList<>();
 
-    public void addPost(Post post) {
+    public void addPost(PostEntity post) {
         this.posts.add(post);
         post.setAuthor(this);
     }
 
-    public void removePost(Post post) {
+    public void removePost(PostEntity post) {
         this.posts.remove(post);
         post.setAuthor(null);
     }

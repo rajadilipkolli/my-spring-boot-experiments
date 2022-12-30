@@ -9,8 +9,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.example.graphql.common.AbstractIntegrationTest;
-import com.example.graphql.entities.Post;
-import com.example.graphql.entities.PostDetails;
+import com.example.graphql.entities.PostDetailsEntity;
+import com.example.graphql.entities.PostEntity;
 import com.example.graphql.repositories.PostDetailsRepository;
 import com.example.graphql.repositories.PostRepository;
 import java.util.ArrayList;
@@ -28,21 +28,21 @@ class PostDetailsControllerIT extends AbstractIntegrationTest {
 
     @Autowired private PostRepository postRepository;
 
-    private List<PostDetails> postDetailsList = null;
+    private List<PostDetailsEntity> postDetailsList = null;
 
-    private Post post;
+    private PostEntity post;
 
     @BeforeEach
     void setUp() {
         postDetailsRepository.deleteAll();
         postRepository.deleteAll();
 
-        post = Post.builder().content("First Post").build();
+        post = PostEntity.builder().content("First Post").build();
 
         postDetailsList = new ArrayList<>();
-        postDetailsList.add(PostDetails.builder().createdBy("Junit1").build());
-        postDetailsList.add(PostDetails.builder().createdBy("Junit2").build());
-        postDetailsList.add(PostDetails.builder().createdBy("Junit3").build());
+        postDetailsList.add(PostDetailsEntity.builder().createdBy("Junit1").build());
+        postDetailsList.add(PostDetailsEntity.builder().createdBy("Junit2").build());
+        postDetailsList.add(PostDetailsEntity.builder().createdBy("Junit3").build());
         postDetailsList.forEach(c -> post.setDetails(c));
         postRepository.save(post);
         postDetailsList = this.postDetailsRepository.findAll();
@@ -58,7 +58,7 @@ class PostDetailsControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldFindPostDetailsById() throws Exception {
-        PostDetails postDetails = postDetailsList.get(0);
+        PostDetailsEntity postDetails = postDetailsList.get(0);
         Long postDetailsId = postDetails.getId();
 
         this.mockMvc
@@ -69,7 +69,7 @@ class PostDetailsControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldCreateNewPostDetails() throws Exception {
-        PostDetails postDetails = PostDetails.builder().createdBy("Junit1").build();
+        PostDetailsEntity postDetails = PostDetailsEntity.builder().createdBy("Junit1").build();
         this.mockMvc
                 .perform(
                         post("/api/postdetails")
@@ -82,7 +82,7 @@ class PostDetailsControllerIT extends AbstractIntegrationTest {
     @Test
     @Disabled
     void shouldUpdatePostDetails() throws Exception {
-        PostDetails postDetails = postDetailsList.get(0);
+        PostDetailsEntity postDetails = postDetailsList.get(0);
         postDetails.setCreatedBy("Updated PostDetails");
 
         this.mockMvc
@@ -96,7 +96,7 @@ class PostDetailsControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldDeletePostDetails() throws Exception {
-        PostDetails postDetails = postDetailsList.get(0);
+        PostDetailsEntity postDetails = postDetailsList.get(0);
 
         this.mockMvc
                 .perform(delete("/api/postdetails/{id}", postDetails.getId()))

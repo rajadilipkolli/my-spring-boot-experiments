@@ -1,6 +1,6 @@
 package com.example.graphql.web.controllers;
 
-import com.example.graphql.entities.PostDetails;
+import com.example.graphql.entities.PostDetailsEntity;
 import com.example.graphql.services.PostDetailsService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -25,12 +25,12 @@ public class PostDetailsController {
     private final PostDetailsService postDetailsService;
 
     @GetMapping
-    public List<PostDetails> getAllPostDetailss() {
+    public List<PostDetailsEntity> getAllPostDetailss() {
         return postDetailsService.findAllPostDetailss();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<PostDetails> getPostDetailsById(@PathVariable Long id) {
+    public ResponseEntity<PostDetailsEntity> getPostDetailsById(@PathVariable Long id) {
         return postDetailsService
                 .findPostDetailsById(id)
                 .map(ResponseEntity::ok)
@@ -39,13 +39,14 @@ public class PostDetailsController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public PostDetails createPostDetails(@RequestBody @Validated PostDetails postDetails) {
+    public PostDetailsEntity createPostDetails(
+            @RequestBody @Validated PostDetailsEntity postDetails) {
         return postDetailsService.savePostDetails(postDetails);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<PostDetails> updatePostDetails(
-            @PathVariable Long id, @RequestBody PostDetails postDetails) {
+    public ResponseEntity<PostDetailsEntity> updatePostDetails(
+            @PathVariable Long id, @RequestBody PostDetailsEntity postDetails) {
         return postDetailsService
                 .findPostDetailsById(id)
                 .map(
@@ -58,7 +59,7 @@ public class PostDetailsController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<PostDetails> deletePostDetails(@PathVariable Long id) {
+    public ResponseEntity<PostDetailsEntity> deletePostDetails(@PathVariable Long id) {
         return postDetailsService
                 .findPostDetailsById(id)
                 .map(

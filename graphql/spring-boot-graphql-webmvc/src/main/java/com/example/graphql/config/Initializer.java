@@ -1,9 +1,9 @@
 package com.example.graphql.config;
 
-import com.example.graphql.entities.Author;
-import com.example.graphql.entities.Post;
-import com.example.graphql.entities.PostComment;
-import com.example.graphql.entities.PostDetails;
+import com.example.graphql.entities.AuthorEntity;
+import com.example.graphql.entities.PostCommentEntity;
+import com.example.graphql.entities.PostDetailsEntity;
+import com.example.graphql.entities.PostEntity;
 import com.example.graphql.repositories.AuthorRepository;
 import java.time.LocalDateTime;
 import java.util.stream.LongStream;
@@ -28,24 +28,24 @@ public class Initializer implements CommandLineRunner {
                 .forEach(
                         i -> {
                             LocalDateTime localDateTime1 = LocalDateTime.now();
-                            PostComment post1Comment =
-                                    PostComment.builder()
+                            PostCommentEntity post1Comment =
+                                    PostCommentEntity.builder()
                                             .title("Sample Review" + i)
                                             .published(true)
                                             .build();
-                            PostComment post1Comment2 =
-                                    PostComment.builder()
+                            PostCommentEntity post1Comment2 =
+                                    PostCommentEntity.builder()
                                             .title("Complicated Review" + i)
                                             .published(false)
                                             .build();
-                            PostDetails post1Details =
-                                    PostDetails.builder()
+                            PostDetailsEntity post1Details =
+                                    PostDetailsEntity.builder()
                                             .createdBy("user" + i)
                                             .createdAt(localDateTime1)
                                             .key("key" + i)
                                             .build();
-                            Post post =
-                                    Post.builder()
+                            PostEntity post =
+                                    PostEntity.builder()
                                             .title("Title" + i)
                                             .content("content" + 1)
                                             .createdAt(localDateTime1)
@@ -56,36 +56,36 @@ public class Initializer implements CommandLineRunner {
                             post.addComment(post1Comment2);
 
                             LocalDateTime localDateTime2 = LocalDateTime.now();
-                            Post post1 =
-                                    Post.builder()
+                            PostEntity post1 =
+                                    PostEntity.builder()
                                             .title("Second Title" + i)
                                             .content("Second Content" + 1)
                                             .createdAt(localDateTime2)
                                             .published(false)
                                             .build();
-                            PostComment post2Comment =
-                                    PostComment.builder()
+                            PostCommentEntity post2Comment =
+                                    PostCommentEntity.builder()
                                             .title("Complicated Title" + i)
                                             .published(true)
                                             .publishedAt(localDateTime2)
                                             .build();
-                            PostDetails post2Details =
-                                    PostDetails.builder()
+                            PostDetailsEntity post2Details =
+                                    PostDetailsEntity.builder()
                                             .createdBy("user" + i)
                                             .createdAt(localDateTime2)
                                             .key("keys" + i)
                                             .build();
                             post1.setDetails(post2Details);
                             post1.addComment(post2Comment);
-                            Author author =
-                                    Author.builder()
+                            AuthorEntity authorEntity =
+                                    AuthorEntity.builder()
                                             .email("user" + i + "@example.com")
                                             .firstName("first name" + i)
                                             .lastName("last name" + i)
                                             .build();
-                            author.addPost(post);
-                            author.addPost(post1);
-                            this.authorRepository.save(author);
+                            authorEntity.addPost(post);
+                            authorEntity.addPost(post1);
+                            this.authorRepository.save(authorEntity);
                         });
     }
 }
