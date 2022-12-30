@@ -33,4 +33,4 @@ jobs:
           cache: "maven"
 
       - name: Build and analyze
-        run: ./mvnw clean package
+        run: ./mvnw clean verify

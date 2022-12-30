@@ -16,7 +16,7 @@ class ApplicationIntegrationTest extends AbstractIntegrationTest {
     @Test
     void allAuthors() {
         graphQlTester
-                .documentName("authors")
+                .documentName("allAuthors")
                 .execute()
                 .path("allAuthors[*].email")
                 .entityList(String.class)
@@ -24,7 +24,7 @@ class ApplicationIntegrationTest extends AbstractIntegrationTest {
                 .hasSize(4)
                 .path("allAuthors[*].name")
                 .entityList(String.class)
-                .satisfies(names -> assertThat(names).contains("user"))
+                .satisfies(names -> assertThat(names).contains("user2"))
                 .hasSize(4);
     }
 }
