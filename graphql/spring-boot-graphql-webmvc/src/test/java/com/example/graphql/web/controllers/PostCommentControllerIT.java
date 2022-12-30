@@ -29,9 +29,9 @@ class PostCommentControllerIT extends AbstractIntegrationTest {
         postCommentRepository.deleteAll();
 
         postCommentList = new ArrayList<>();
-        postCommentList.add(PostComment.builder().id(1L).review("First PostComment").build());
-        postCommentList.add(PostComment.builder().id(2L).review("Second PostComment").build());
-        postCommentList.add(PostComment.builder().id(3L).review("Third PostComment").build());
+        postCommentList.add(PostComment.builder().review("First PostComment").build());
+        postCommentList.add(PostComment.builder().review("Second PostComment").build());
+        postCommentList.add(PostComment.builder().review("Third PostComment").build());
         postCommentList = postCommentRepository.saveAll(postCommentList);
     }
 

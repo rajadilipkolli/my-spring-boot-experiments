@@ -6,18 +6,18 @@
          http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
     <changeSet author="sivalabs" id="createTable-post-comments">
         <createSequence
-                        sequenceName="post_comment_id_seq"
-                        incrementBy="100"
+                        sequenceName="post_comments_seq"
+                        incrementBy="50"
                         startValue="1"
                         />
         <createTable tableName="post_comments">
-            <column name="id" type="bigint" defaultValueSequenceNext="post_comment_id_seq">
+            <column name="id" type="bigint" defaultValueSequenceNext="post_comments_seq">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
-            <column name="review" type="varchar(1024)">
+            <column name="review" type="text">
                 <constraints nullable="false"/>
             </column>
-            <column name="created_on" type="DATETIME"/>
+            <column name="created_on" type="timestamptz"/>
             <column name="post_id" type="BIGINT"/>
         </createTable>
         <addForeignKeyConstraint baseColumnNames="post_id" baseTableName="post_comments"

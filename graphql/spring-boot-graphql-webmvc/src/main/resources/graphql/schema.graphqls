@@ -2,6 +2,21 @@ type Author{
     id:ID!
     name:String!
     email:String!
+    posts: [Post!]!
+}
+
+type Post{
+    id:ID!
+    title:String!
+    content:String!
+    createdOn:String
+    details: PostDetails!
+}
+
+type PostDetails {
+    id:ID!
+    review:String!
+    createdOn:String
 }
 
 type Query{

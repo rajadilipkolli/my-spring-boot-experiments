@@ -29,9 +29,9 @@ class AuthorControllerIT extends AbstractIntegrationTest {
         authorRepository.deleteAll();
 
         authorList = new ArrayList<>();
-        authorList.add(new Author(1L, "First Author", "junit1@email.com"));
-        authorList.add(new Author(2L, "Second Author", "junit2@email.com"));
-        authorList.add(new Author(3L, "Third Author", "junit3@email.com"));
+        authorList.add(Author.builder().name("First Author").email("junit1@email.com").build());
+        authorList.add(Author.builder().name("Second Author").email("junit2@email.com").build());
+        authorList.add(Author.builder().name("Third Author").email("junit3@email.com").build());
         authorList = authorRepository.saveAll(authorList);
     }
 
@@ -56,7 +56,7 @@ class AuthorControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldCreateNewAuthor() throws Exception {
-        Author author = new Author(null, "New Author", "junit4@email.com");
+        Author author = Author.builder().name("New Author").email("junit4@email.com").build();
         this.mockMvc
                 .perform(
                         post("/api/authors")

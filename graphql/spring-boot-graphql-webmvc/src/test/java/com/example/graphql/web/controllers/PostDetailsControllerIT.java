@@ -37,12 +37,12 @@ class PostDetailsControllerIT extends AbstractIntegrationTest {
         postDetailsRepository.deleteAll();
         postRepository.deleteAll();
 
-        post = Post.builder().id(1L).content("First Post").build();
+        post = Post.builder().content("First Post").build();
 
         postDetailsList = new ArrayList<>();
-        postDetailsList.add(PostDetails.builder().id(1L).createdBy("Junit1").build());
-        postDetailsList.add(PostDetails.builder().id(2L).createdBy("Junit2").build());
-        postDetailsList.add(PostDetails.builder().id(3L).createdBy("Junit3").build());
+        postDetailsList.add(PostDetails.builder().createdBy("Junit1").build());
+        postDetailsList.add(PostDetails.builder().createdBy("Junit2").build());
+        postDetailsList.add(PostDetails.builder().createdBy("Junit3").build());
         postDetailsList.forEach(c -> post.addDetails(c));
         postRepository.save(post);
         postDetailsList = this.postDetailsRepository.findAll();

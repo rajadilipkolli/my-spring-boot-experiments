@@ -3,14 +3,13 @@ package com.example.graphql.entities;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
-import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -32,11 +31,7 @@ import lombok.Setter;
 public class Post implements Serializable {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "post_id_generator")
-    @SequenceGenerator(
-            name = "post_id_generator",
-            sequenceName = "post_id_seq",
-            allocationSize = 100)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
 
     private String title;
@@ -50,17 +45,17 @@ public class Post implements Serializable {
     @Builder.Default
     private List<PostComment> comments = new ArrayList<>();
 
-    @JoinColumn(name = "details_ID")
-    @OneToOne(
-            cascade = CascadeType.ALL,
-            mappedBy = "post",
-            orphanRemoval = true,
-            fetch = FetchType.LAZY)
+    @JoinColumn(name = "details_Id")
+    @OneToOne(cascade = CascadeType.ALL, mappedBy = "post", orphanRemoval = true)
     private PostDetails details;
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<PostTag> tags = new ArrayList<>();
+
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "author_id")
+    private Author author;
 
     public Post() {
         this.createdOn = LocalDateTime.now();

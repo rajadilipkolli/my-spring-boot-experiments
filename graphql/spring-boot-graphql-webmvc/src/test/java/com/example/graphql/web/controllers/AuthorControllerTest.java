@@ -43,9 +43,12 @@ class AuthorControllerTest {
     @BeforeEach
     void setUp() {
         this.authorList = new ArrayList<>();
-        this.authorList.add(new Author(1L, "text 1", "junit1@email.com"));
-        this.authorList.add(new Author(2L, "text 2", "junit2@email.com"));
-        this.authorList.add(new Author(3L, "text 3", "junit3@email.com"));
+        this.authorList.add(
+                Author.builder().id(1L).name("First Author").email("junit1@email.com").build());
+        this.authorList.add(
+                Author.builder().id(2L).name("Second Author").email("junit2@email.com").build());
+        this.authorList.add(
+                Author.builder().id(3L).name("Third Author").email("junit3@email.com").build());
     }
 
     @Test
@@ -61,7 +64,12 @@ class AuthorControllerTest {
     @Test
     void shouldFindAuthorById() throws Exception {
         Long authorId = 1L;
-        Author author = new Author(authorId, "text 1", "junit1@email.com");
+        Author author =
+                Author.builder()
+                        .id(authorId)
+                        .name("First Author")
+                        .email("junit1@email.com")
+                        .build();
         given(authorService.findAuthorById(authorId)).willReturn(Optional.of(author));
 
         this.mockMvc
@@ -83,7 +91,9 @@ class AuthorControllerTest {
         given(authorService.saveAuthor(any(Author.class)))
                 .willAnswer((invocation) -> invocation.getArgument(0));
 
-        Author author = new Author(1L, "some text", "junit1@email.com");
+        Author author =
+                Author.builder().id(1L).name("First Author").email("junit1@email.com").build();
+        ;
         this.mockMvc
                 .perform(
                         post("/api/authors")
@@ -97,7 +107,12 @@ class AuthorControllerTest {
     @Test
     void shouldUpdateAuthor() throws Exception {
         Long authorId = 1L;
-        Author author = new Author(authorId, "Updated text", "junit1@email.com");
+        Author author =
+                Author.builder()
+                        .id(authorId)
+                        .name("Updated Author")
+                        .email("junit1@email.com")
+                        .build();
         given(authorService.findAuthorById(authorId)).willReturn(Optional.of(author));
         given(authorService.saveAuthor(any(Author.class)))
                 .willAnswer((invocation) -> invocation.getArgument(0));
@@ -115,7 +130,12 @@ class AuthorControllerTest {
     void shouldReturn404WhenUpdatingNonExistingAuthor() throws Exception {
         Long authorId = 1L;
         given(authorService.findAuthorById(authorId)).willReturn(Optional.empty());
-        Author author = new Author(authorId, "Updated text", "junit1@email.com");
+        Author author =
+                Author.builder()
+                        .id(authorId)
+                        .name("First Author")
+                        .email("junit1@email.com")
+                        .build();
 
         this.mockMvc
                 .perform(
@@ -128,7 +148,12 @@ class AuthorControllerTest {
     @Test
     void shouldDeleteAuthor() throws Exception {
         Long authorId = 1L;
-        Author author = new Author(authorId, "Some text", "junit1@email.com");
+        Author author =
+                Author.builder()
+                        .id(authorId)
+                        .name("First Author")
+                        .email("junit1@email.com")
+                        .build();
         given(authorService.findAuthorById(authorId)).willReturn(Optional.of(author));
         doNothing().when(authorService).deleteAuthorById(author.getId());
 

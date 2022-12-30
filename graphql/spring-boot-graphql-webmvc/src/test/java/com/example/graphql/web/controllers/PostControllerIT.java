@@ -30,9 +30,9 @@ class PostControllerIT extends AbstractIntegrationTest {
         postRepository.deleteAll();
 
         postList = new ArrayList<>();
-        postList.add(Post.builder().id(1L).content("First Post").build());
-        postList.add(Post.builder().id(2L).content("Second Post").build());
-        postList.add(Post.builder().id(3L).content("Third Post").build());
+        postList.add(Post.builder().content("First Post").build());
+        postList.add(Post.builder().content("Second Post").build());
+        postList.add(Post.builder().content("Third Post").build());
         postList = postRepository.saveAll(postList);
     }
 

@@ -29,9 +29,9 @@ class TagControllerIT extends AbstractIntegrationTest {
         tagRepository.deleteAll();
 
         tagList = new ArrayList<>();
-        tagList.add(new Tag(1L, "First Tag"));
-        tagList.add(new Tag(2L, "Second Tag"));
-        tagList.add(new Tag(3L, "Third Tag"));
+        tagList.add(new Tag("First Tag"));
+        tagList.add(new Tag("Second Tag"));
+        tagList.add(new Tag("Third Tag"));
         tagList = tagRepository.saveAll(tagList);
     }
 
