@@ -1,4 +1,4 @@
-query authors {
+query authorEntities {
     allAuthors{
         id
         firstName

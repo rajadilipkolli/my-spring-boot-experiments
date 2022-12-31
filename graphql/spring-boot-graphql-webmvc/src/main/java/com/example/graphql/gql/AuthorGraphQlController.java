@@ -1,6 +1,5 @@
 package com.example.graphql.gql;
 
-import com.example.graphql.entities.AuthorEntity;
 import com.example.graphql.entities.PostCommentEntity;
 import com.example.graphql.entities.TagEntity;
 import com.example.graphql.model.request.AuthorRequest;
@@ -94,12 +93,13 @@ public class AuthorGraphQlController {
     }
 
     @QueryMapping
-    public Optional<AuthorEntity> findAuthorByEmailId(@Argument("email") String email) {
+    public Optional<AuthorResponse> findAuthorByEmailId(@Argument("email") String email) {
         return this.authorService.findAuthorByEmailId(email);
     }
 
     @MutationMapping
-    public AuthorResponse createAuthor(@Valid AuthorRequest authorRequest) {
+    public AuthorResponse createAuthor(
+            @Valid @Argument("authorInput") AuthorRequest authorRequest) {
         return this.authorService.saveAuthor(authorRequest);
     }
 }

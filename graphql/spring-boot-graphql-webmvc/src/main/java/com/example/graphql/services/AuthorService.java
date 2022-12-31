@@ -60,7 +60,9 @@ public class AuthorService {
     }
 
     @Transactional(readOnly = true)
-    public Optional<AuthorEntity> findAuthorByEmailId(String email) {
-        return this.authorRepository.findByEmailAllIgnoreCase(email);
+    public Optional<AuthorResponse> findAuthorByEmailId(String email) {
+        return this.authorRepository
+                .findByEmailAllIgnoreCase(email)
+                .map(conversionServiceAdapter::mapAuthorEntityToAuthorResponse);
     }
 }

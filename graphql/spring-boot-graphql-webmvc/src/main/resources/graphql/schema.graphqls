@@ -1,10 +1,10 @@
 type Author{
     id:ID!
     firstName:String!
+    middleName:String
     lastName:String!
     mobile:String
     email:String!
-    version:Int !
     posts: [Post]
 }
 
@@ -45,3 +45,16 @@ type Query {
     allAuthors: [Author!]
     findAuthorByEmailId(email: String!): Author
 }
+
+type Mutation {
+    createAuthor(authorInput: AuthorInput!): Author
+}
+
+input AuthorInput {
+    firstName:String!
+    middleName: String
+    lastName:String!
+    mobile:String
+    email:String!
+}
+
