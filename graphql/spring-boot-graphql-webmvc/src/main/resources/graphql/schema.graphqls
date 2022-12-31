@@ -48,6 +48,7 @@ type Query {
 
 type Mutation {
     createAuthor(authorInput: AuthorInput!): Author
+    createTag(tagName: String!, tagDescription: String) : Tags
 }
 
 input AuthorInput {
@@ -57,4 +58,3 @@ input AuthorInput {
     mobile:String
     email:String!
 }
-

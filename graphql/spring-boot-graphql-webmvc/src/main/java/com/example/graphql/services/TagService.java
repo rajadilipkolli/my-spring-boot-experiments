@@ -44,4 +44,10 @@ public class TagService {
                                 Collectors.mapping(
                                         PostTagEntity::getTagEntity, Collectors.toList())));
     }
+
+    public TagEntity saveTag(String tagName, String tagDescription) {
+        return this.tagRepository
+                .findByTagName(tagName)
+                .orElseGet(() -> saveTag(new TagEntity(null, tagName, tagDescription)));
+    }
 }
