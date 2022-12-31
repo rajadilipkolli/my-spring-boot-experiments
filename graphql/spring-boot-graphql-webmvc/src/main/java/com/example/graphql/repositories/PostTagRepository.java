@@ -8,6 +8,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface PostTagRepository extends JpaRepository<PostTagEntity, PostTagEntityId> {
 
-    @EntityGraph(attributePaths = "tag")
-    List<PostTagEntity> findByPost_IdIn(List<Long> ids);
+    @EntityGraph(attributePaths = "tagEntity")
+    List<PostTagEntity> findByPostEntity_IdIn(List<Long> ids);
 }

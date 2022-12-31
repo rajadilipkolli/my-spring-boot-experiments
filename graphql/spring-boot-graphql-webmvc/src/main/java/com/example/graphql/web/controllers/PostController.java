@@ -39,19 +39,19 @@ public class PostController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public PostEntity createPost(@RequestBody @Validated PostEntity post) {
-        return postService.savePost(post);
+    public PostEntity createPost(@RequestBody @Validated PostEntity postEntity) {
+        return postService.savePost(postEntity);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<PostEntity> updatePost(
-            @PathVariable Long id, @RequestBody PostEntity post) {
+            @PathVariable Long id, @RequestBody PostEntity postEntity) {
         return postService
                 .findPostById(id)
                 .map(
                         postObj -> {
-                            post.setId(id);
-                            return ResponseEntity.ok(postService.savePost(post));
+                            postEntity.setId(id);
+                            return ResponseEntity.ok(postService.savePost(postEntity));
                         })
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }

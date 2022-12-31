@@ -5,5 +5,5 @@ import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface PostCommentRepository extends JpaRepository<PostCommentEntity, Long> {
-    List<PostCommentEntity> findByPost_IdIn(List<Long> ids);
+    List<PostCommentEntity> findByPostEntity_IdIn(List<Long> ids);
 }

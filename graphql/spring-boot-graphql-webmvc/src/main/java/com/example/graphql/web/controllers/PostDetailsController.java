@@ -40,20 +40,20 @@ public class PostDetailsController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public PostDetailsEntity createPostDetails(
-            @RequestBody @Validated PostDetailsEntity postDetails) {
-        return postDetailsService.savePostDetails(postDetails);
+            @RequestBody @Validated PostDetailsEntity postDetailsEntity) {
+        return postDetailsService.savePostDetails(postDetailsEntity);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<PostDetailsEntity> updatePostDetails(
-            @PathVariable Long id, @RequestBody PostDetailsEntity postDetails) {
+            @PathVariable Long id, @RequestBody PostDetailsEntity postDetailsEntity) {
         return postDetailsService
                 .findPostDetailsById(id)
                 .map(
                         postDetailsObj -> {
-                            postDetails.setId(id);
+                            postDetailsEntity.setId(id);
                             return ResponseEntity.ok(
-                                    postDetailsService.savePostDetails(postDetails));
+                                    postDetailsService.savePostDetails(postDetailsEntity));
                         })
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }

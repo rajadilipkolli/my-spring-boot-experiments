@@ -50,17 +50,17 @@ public class AuthorEntity {
 
     @Version private Long version;
 
-    @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "authorEntity", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
-    private List<PostEntity> posts = new ArrayList<>();
+    private List<PostEntity> postEntities = new ArrayList<>();
 
-    public void addPost(PostEntity post) {
-        this.posts.add(post);
-        post.setAuthor(this);
+    public void addPost(PostEntity postEntity) {
+        this.postEntities.add(postEntity);
+        postEntity.setAuthorEntity(this);
     }
 
-    public void removePost(PostEntity post) {
-        this.posts.remove(post);
-        post.setAuthor(null);
+    public void removePost(PostEntity postEntity) {
+        this.postEntities.remove(postEntity);
+        postEntity.setAuthorEntity(null);
     }
 }

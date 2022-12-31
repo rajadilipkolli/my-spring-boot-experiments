@@ -43,7 +43,7 @@ public class PostCommentEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id")
-    private PostEntity post;
+    private PostEntity postEntity;
 
     public PostCommentEntity() {
         this.createdAt = LocalDateTime.now();
@@ -53,8 +53,8 @@ public class PostCommentEntity {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
-        PostCommentEntity postComment = (PostCommentEntity) o;
-        return id != null && Objects.equals(id, postComment.id);
+        PostCommentEntity postCommentEntity = (PostCommentEntity) o;
+        return id != null && Objects.equals(id, postCommentEntity.id);
     }
 
     @Override

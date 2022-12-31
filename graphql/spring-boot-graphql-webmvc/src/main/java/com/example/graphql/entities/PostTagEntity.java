@@ -4,6 +4,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MapsId;
 import jakarta.persistence.Table;
@@ -22,11 +23,13 @@ public class PostTagEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("postId")
-    private PostEntity post;
+    @JoinColumn(name = "post_id")
+    private PostEntity postEntity;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("tagId")
-    private TagEntity tag;
+    @JoinColumn(name = "tag_id")
+    private TagEntity tagEntity;
 
     @Column(name = "created_on")
     private LocalDateTime createdOn = LocalDateTime.now();
@@ -35,10 +38,10 @@ public class PostTagEntity {
         this.createdOn = LocalDateTime.now();
     }
 
-    public PostTagEntity(PostEntity post, TagEntity tag) {
-        this.post = post;
-        this.tag = tag;
-        this.id = new PostTagEntityId(post.getId(), tag.getId());
+    public PostTagEntity(PostEntity postEntity, TagEntity tagEntity) {
+        this.postEntity = postEntity;
+        this.tagEntity = tagEntity;
+        this.id = new PostTagEntityId(postEntity.getId(), tagEntity.getId());
     }
 
     @Override
@@ -51,11 +54,12 @@ public class PostTagEntity {
             return false;
         }
         PostTagEntity that = (PostTagEntity) o;
-        return Objects.equals(this.post, that.post) && Objects.equals(this.tag, that.tag);
+        return Objects.equals(this.postEntity, that.postEntity)
+                && Objects.equals(this.tagEntity, that.tagEntity);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(this.post, this.tag);
+        return Objects.hash(this.postEntity, this.tagEntity);
     }
 }

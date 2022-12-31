@@ -49,24 +49,24 @@ public class PostEntity implements Serializable {
 
     private LocalDateTime publishedAt;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "post", orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "postEntity", orphanRemoval = true)
     @Builder.Default
     private List<PostCommentEntity> comments = new ArrayList<>();
 
     @OneToOne(
-            mappedBy = "post",
+            mappedBy = "postEntity",
             cascade = CascadeType.ALL,
             fetch = FetchType.LAZY,
             optional = false)
     private PostDetailsEntity details;
 
-    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "postEntity", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<PostTagEntity> tags = new ArrayList<>();
 
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "author_id")
-    private AuthorEntity author;
+    private AuthorEntity authorEntity;
 
     public PostEntity() {
         this.createdAt = LocalDateTime.now();
@@ -74,38 +74,39 @@ public class PostEntity implements Serializable {
 
     public void addComment(PostCommentEntity comment) {
         this.comments.add(comment);
-        comment.setPost(this);
+        comment.setPostEntity(this);
     }
 
     public void removeComment(PostCommentEntity comment) {
         this.comments.remove(comment);
-        comment.setPost(null);
+        comment.setPostEntity(null);
     }
 
     public void setDetails(PostDetailsEntity details) {
         if (details == null) {
             if (this.details != null) {
-                this.details.setPost(null);
+                this.details.setPostEntity(null);
             }
         } else {
-            details.setPost(this);
+            details.setPostEntity(this);
         }
         this.details = details;
     }
 
-    public void addTag(TagEntity tag) {
-        PostTagEntity postTag = new PostTagEntity(this, tag);
-        this.tags.add(postTag);
+    public void addTag(TagEntity tagEntity) {
+        PostTagEntity postTagEntity = new PostTagEntity(this, tagEntity);
+        this.tags.add(postTagEntity);
     }
 
-    public void removeTag(TagEntity tag) {
+    public void removeTag(TagEntity tagEntity) {
         for (Iterator<PostTagEntity> iterator = this.tags.iterator(); iterator.hasNext(); ) {
-            PostTagEntity postTag = iterator.next();
+            PostTagEntity postTagEntity = iterator.next();
 
-            if (postTag.getPost().equals(this) && postTag.getTag().equals(tag)) {
+            if (postTagEntity.getPostEntity().equals(this)
+                    && postTagEntity.getTagEntity().equals(tagEntity)) {
                 iterator.remove();
-                postTag.setPost(null);
-                postTag.setTag(null);
+                postTagEntity.setPostEntity(null);
+                postTagEntity.setTagEntity(null);
             }
         }
     }
@@ -114,11 +115,11 @@ public class PostEntity implements Serializable {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
-        PostEntity post = (PostEntity) o;
+        PostEntity postEntity = (PostEntity) o;
         return id != null
                 && title != null
-                && Objects.equals(id, post.id)
-                && Objects.equals(this.title, post.title);
+                && Objects.equals(id, postEntity.id)
+                && Objects.equals(this.title, postEntity.title);
     }
 
     @Override

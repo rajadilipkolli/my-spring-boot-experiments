@@ -28,8 +28,8 @@ public class TagService {
         return tagRepository.findById(id);
     }
 
-    public TagEntity saveTag(TagEntity tag) {
-        return tagRepository.save(tag);
+    public TagEntity saveTag(TagEntity tagEntity) {
+        return tagRepository.save(tagEntity);
     }
 
     public void deleteTagById(Long id) {
@@ -37,10 +37,11 @@ public class TagService {
     }
 
     public Map<Long, List<TagEntity>> getTagsByPostIdIn(List<Long> postIds) {
-        return postTagRepository.findByPost_IdIn(postIds).stream()
+        return postTagRepository.findByPostEntity_IdIn(postIds).stream()
                 .collect(
                         Collectors.groupingBy(
-                                postTag -> postTag.getPost().getId(),
-                                Collectors.mapping(PostTagEntity::getTag, Collectors.toList())));
+                                postTagEntity -> postTagEntity.getPostEntity().getId(),
+                                Collectors.mapping(
+                                        PostTagEntity::getTagEntity, Collectors.toList())));
     }
 }

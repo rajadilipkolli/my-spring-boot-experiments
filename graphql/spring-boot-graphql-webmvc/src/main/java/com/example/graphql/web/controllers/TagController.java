@@ -39,18 +39,19 @@ public class TagController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public TagEntity createTag(@RequestBody @Validated TagEntity tag) {
-        return tagService.saveTag(tag);
+    public TagEntity createTag(@RequestBody @Validated TagEntity tagEntity) {
+        return tagService.saveTag(tagEntity);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<TagEntity> updateTag(@PathVariable Long id, @RequestBody TagEntity tag) {
+    public ResponseEntity<TagEntity> updateTag(
+            @PathVariable Long id, @RequestBody TagEntity tagEntity) {
         return tagService
                 .findTagById(id)
                 .map(
                         tagObj -> {
-                            tag.setId(id);
-                            return ResponseEntity.ok(tagService.saveTag(tag));
+                            tagEntity.setId(id);
+                            return ResponseEntity.ok(tagService.saveTag(tagEntity));
                         })
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }

@@ -1,6 +1,7 @@
 package com.example.graphql.web.controllers;
 
-import com.example.graphql.entities.AuthorEntity;
+import com.example.graphql.model.request.AuthorRequest;
+import com.example.graphql.model.response.AuthorResponse;
 import com.example.graphql.services.AuthorService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -25,12 +26,12 @@ public class AuthorController {
     private final AuthorService authorService;
 
     @GetMapping
-    public List<AuthorEntity> getAllAuthors() {
+    public List<AuthorResponse> getAllAuthors() {
         return authorService.findAllAuthors();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<AuthorEntity> getAuthorById(@PathVariable Long id) {
+    public ResponseEntity<AuthorResponse> getAuthorById(@PathVariable Long id) {
         return authorService
                 .findAuthorById(id)
                 .map(ResponseEntity::ok)
@@ -39,25 +40,21 @@ public class AuthorController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public AuthorEntity createAuthor(@RequestBody @Validated AuthorEntity author) {
-        return authorService.saveAuthor(author);
+    public AuthorResponse createAuthor(@RequestBody @Validated AuthorRequest authorRequest) {
+        return authorService.saveAuthor(authorRequest);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<AuthorEntity> updateAuthor(
-            @PathVariable Long id, @RequestBody AuthorEntity author) {
+    public ResponseEntity<AuthorResponse> updateAuthor(
+            @PathVariable Long id, @RequestBody AuthorRequest authorRequest) {
         return authorService
-                .findAuthorById(id)
-                .map(
-                        authorObj -> {
-                            author.setId(id);
-                            return ResponseEntity.ok(authorService.saveAuthor(author));
-                        })
+                .updateAuthor(authorRequest, id)
+                .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<AuthorEntity> deleteAuthor(@PathVariable Long id) {
+    public ResponseEntity<AuthorResponse> deleteAuthor(@PathVariable Long id) {
         return authorService
                 .findAuthorById(id)
                 .map(

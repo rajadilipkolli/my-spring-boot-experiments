@@ -25,8 +25,8 @@ public class PostCommentService {
         return postCommentRepository.findById(id);
     }
 
-    public PostCommentEntity savePostComment(PostCommentEntity postComment) {
-        return postCommentRepository.save(postComment);
+    public PostCommentEntity savePostComment(PostCommentEntity postCommentEntity) {
+        return postCommentRepository.save(postCommentEntity);
     }
 
     public void deletePostCommentById(Long id) {
@@ -34,7 +34,7 @@ public class PostCommentService {
     }
 
     public Map<Long, List<PostCommentEntity>> getCommentsByPostIdIn(List<Long> postIds) {
-        return this.postCommentRepository.findByPost_IdIn(postIds).stream()
-                .collect(Collectors.groupingBy(postComment -> postComment.getPost().getId()));
+        return this.postCommentRepository.findByPostEntity_IdIn(postIds).stream()
+                .collect(Collectors.groupingBy(postComment -> postComment.getPostEntity().getId()));
     }
 }

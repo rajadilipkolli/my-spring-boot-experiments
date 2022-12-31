@@ -35,7 +35,7 @@ public class PostDetailsEntity {
     @OneToOne(fetch = FetchType.LAZY)
     @MapsId
     @JoinColumn(name = "id")
-    private PostEntity post;
+    private PostEntity postEntity;
 
     public PostDetailsEntity() {
         this.createdAt = LocalDateTime.now();

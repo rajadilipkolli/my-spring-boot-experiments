@@ -23,8 +23,8 @@ public class PostDetailsService {
         return postDetailsRepository.findById(id);
     }
 
-    public PostDetailsEntity savePostDetails(PostDetailsEntity postDetails) {
-        return postDetailsRepository.save(postDetails);
+    public PostDetailsEntity savePostDetails(PostDetailsEntity postDetailsEntity) {
+        return postDetailsRepository.save(postDetailsEntity);
     }
 
     public void deletePostDetailsById(Long id) {

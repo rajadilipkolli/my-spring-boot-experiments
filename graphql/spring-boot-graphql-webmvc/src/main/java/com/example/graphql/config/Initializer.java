@@ -44,19 +44,19 @@ public class Initializer implements CommandLineRunner {
                                             .createdAt(localDateTime1)
                                             .key("key" + i)
                                             .build();
-                            PostEntity post =
+                            PostEntity postEntity =
                                     PostEntity.builder()
                                             .title("Title" + i)
                                             .content("content" + 1)
                                             .createdAt(localDateTime1)
                                             .published(true)
                                             .build();
-                            post.setDetails(post1Details);
-                            post.addComment(post1Comment);
-                            post.addComment(post1Comment2);
+                            postEntity.setDetails(post1Details);
+                            postEntity.addComment(post1Comment);
+                            postEntity.addComment(post1Comment2);
 
                             LocalDateTime localDateTime2 = LocalDateTime.now();
-                            PostEntity post1 =
+                            PostEntity postEntity1 =
                                     PostEntity.builder()
                                             .title("Second Title" + i)
                                             .content("Second Content" + 1)
@@ -75,16 +75,16 @@ public class Initializer implements CommandLineRunner {
                                             .createdAt(localDateTime2)
                                             .key("keys" + i)
                                             .build();
-                            post1.setDetails(post2Details);
-                            post1.addComment(post2Comment);
+                            postEntity1.setDetails(post2Details);
+                            postEntity1.addComment(post2Comment);
                             AuthorEntity authorEntity =
                                     AuthorEntity.builder()
                                             .email("user" + i + "@example.com")
                                             .firstName("first name" + i)
                                             .lastName("last name" + i)
                                             .build();
-                            authorEntity.addPost(post);
-                            authorEntity.addPost(post1);
+                            authorEntity.addPost(postEntity);
+                            authorEntity.addPost(postEntity1);
                             this.authorRepository.save(authorEntity);
                         });
     }

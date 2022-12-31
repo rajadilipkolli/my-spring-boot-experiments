@@ -40,20 +40,20 @@ public class PostCommentController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public PostCommentEntity createPostComment(
-            @RequestBody @Validated PostCommentEntity postComment) {
-        return postCommentService.savePostComment(postComment);
+            @RequestBody @Validated PostCommentEntity postCommentEntity) {
+        return postCommentService.savePostComment(postCommentEntity);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<PostCommentEntity> updatePostComment(
-            @PathVariable Long id, @RequestBody PostCommentEntity postComment) {
+            @PathVariable Long id, @RequestBody PostCommentEntity postCommentEntity) {
         return postCommentService
                 .findPostCommentById(id)
                 .map(
                         postCommentObj -> {
-                            postComment.setId(id);
+                            postCommentEntity.setId(id);
                             return ResponseEntity.ok(
-                                    postCommentService.savePostComment(postComment));
+                                    postCommentService.savePostComment(postCommentEntity));
                         })
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
