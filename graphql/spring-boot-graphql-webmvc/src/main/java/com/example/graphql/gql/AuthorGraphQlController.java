@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -40,15 +41,16 @@ public class AuthorGraphQlController {
     private final TagService tagService;
 
     @BatchMapping(typeName = "Author")
-    public Map<AuthorResponse, List<PostInfo>> posts(List<AuthorResponse> authorEntities) {
-        List<Long> authorIds = authorEntities.stream().map(AuthorResponse::id).toList();
+    public Map<AuthorResponse, List<PostInfo>> posts(List<AuthorResponse> authorResponses) {
+        log.info("Fetching PostInformation by AuthodIds");
+        List<Long> authorIds = authorResponses.stream().map(AuthorResponse::id).toList();
 
         var authorPostsMap = this.postService.getPostByAuthorIdIn(authorIds);
 
-        return authorEntities.stream()
+        return authorResponses.stream()
                 .collect(
                         Collectors.toMap(
-                                author -> author,
+                                Function.identity(),
                                 author ->
                                         authorPostsMap.getOrDefault(
                                                 author.id(), new ArrayList<>())));
@@ -56,6 +58,7 @@ public class AuthorGraphQlController {
 
     @BatchMapping(typeName = "Post")
     public Map<PostInfo, List<PostCommentEntity>> comments(List<PostInfo> posts) {
+        log.info("Fetching PostComments by PostIds");
         List<Long> postIds = posts.stream().map(PostInfo::getId).toList();
 
         var postCommentsMap = this.postCommentService.getCommentsByPostIdIn(postIds);
@@ -63,7 +66,7 @@ public class AuthorGraphQlController {
         return posts.stream()
                 .collect(
                         Collectors.toMap(
-                                post -> post,
+                                Function.identity(),
                                 post ->
                                         postCommentsMap.getOrDefault(
                                                 post.getId(), new ArrayList<>())));
@@ -71,6 +74,7 @@ public class AuthorGraphQlController {
 
     @BatchMapping(typeName = "Post")
     public Map<PostInfo, List<TagEntity>> tags(List<PostInfo> posts) {
+        log.info("Fetching Tags by PostIds");
         List<Long> postIds = posts.stream().map(PostInfo::getId).toList();
 
         var postCommentsMap = this.tagService.getTagsByPostIdIn(postIds);
@@ -78,7 +82,7 @@ public class AuthorGraphQlController {
         return posts.stream()
                 .collect(
                         Collectors.toMap(
-                                post -> post,
+                                Function.identity(),
                                 post ->
                                         postCommentsMap.getOrDefault(
                                                 post.getId(), new ArrayList<>())));
