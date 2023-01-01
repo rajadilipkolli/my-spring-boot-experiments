@@ -50,4 +50,23 @@ public class TagService {
                 .findByTagName(tagName)
                 .orElseGet(() -> saveTag(new TagEntity(null, tagName, tagDescription)));
     }
+
+    public Optional<TagEntity> findTagByName(String tagName) {
+        return this.tagRepository.findByTagName(tagName);
+    }
+
+    public Optional<TagEntity> updateTag(String tagName, String tagDescription) {
+        return this.tagRepository
+                .findByTagName(tagName)
+                .map(
+                        tagEntity -> {
+                            tagEntity.setTagDescription(tagDescription);
+                            return saveTag(tagEntity);
+                        });
+    }
+
+    public void deleteTagByName(String tagName) {
+        TagEntity tagEntity = this.tagRepository.findByTagName(tagName).orElseThrow();
+        this.tagRepository.delete(tagEntity);
+    }
 }

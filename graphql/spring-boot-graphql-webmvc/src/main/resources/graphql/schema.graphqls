@@ -44,11 +44,15 @@ type PostDetails {
 type Query {
     allAuthors: [Author!]
     findAuthorByEmailId(email: String!): Author
+    allTags: [Tags!]
+    findTagByName(tagName: String!) : Tags
 }
 
 type Mutation {
     createAuthor(authorInput: AuthorInput!): Author
     createTag(tagName: String!, tagDescription: String) : Tags
+    updateTagDescription(tagName: String!, tagDescription: String!) : Tags
+    deleteTag(tagName: String!) : Boolean
 }
 
 input AuthorInput {
