@@ -1,9 +1,9 @@
 package com.example.graphql.web.controllers;
 
-import com.example.graphql.entities.Post;
+import com.example.graphql.entities.PostEntity;
 import com.example.graphql.services.PostService;
 import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -19,22 +19,18 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/posts")
+@RequiredArgsConstructor
 public class PostController {
 
     private final PostService postService;
 
-    @Autowired
-    public PostController(PostService postService) {
-        this.postService = postService;
-    }
-
     @GetMapping
-    public List<Post> getAllPosts() {
+    public List<PostEntity> getAllPosts() {
         return postService.findAllPosts();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Post> getPostById(@PathVariable Long id) {
+    public ResponseEntity<PostEntity> getPostById(@PathVariable Long id) {
         return postService
                 .findPostById(id)
                 .map(ResponseEntity::ok)
@@ -43,24 +39,25 @@ public class PostController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Post createPost(@RequestBody @Validated Post post) {
-        return postService.savePost(post);
+    public PostEntity createPost(@RequestBody @Validated PostEntity postEntity) {
+        return postService.savePost(postEntity);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Post> updatePost(@PathVariable Long id, @RequestBody Post post) {
+    public ResponseEntity<PostEntity> updatePost(
+            @PathVariable Long id, @RequestBody PostEntity postEntity) {
         return postService
                 .findPostById(id)
                 .map(
                         postObj -> {
-                            post.setId(id);
-                            return ResponseEntity.ok(postService.savePost(post));
+                            postEntity.setId(id);
+                            return ResponseEntity.ok(postService.savePost(postEntity));
                         })
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Post> deletePost(@PathVariable Long id) {
+    public ResponseEntity<PostEntity> deletePost(@PathVariable Long id) {
         return postService
                 .findPostById(id)
                 .map(

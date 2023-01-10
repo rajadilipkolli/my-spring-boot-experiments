@@ -1,7 +1,11 @@
 package com.example.graphql.config;
 
-import com.example.graphql.entities.Author;
+import com.example.graphql.entities.AuthorEntity;
+import com.example.graphql.entities.PostCommentEntity;
+import com.example.graphql.entities.PostDetailsEntity;
+import com.example.graphql.entities.PostEntity;
 import com.example.graphql.repositories.AuthorRepository;
+import java.time.LocalDateTime;
 import java.util.stream.LongStream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,8 +27,65 @@ public class Initializer implements CommandLineRunner {
         LongStream.range(1, 5)
                 .forEach(
                         i -> {
-                            Author author = new Author(i, "user", "user@example.com");
-                            this.authorRepository.save(author);
+                            LocalDateTime localDateTime1 = LocalDateTime.now();
+                            PostCommentEntity post1Comment =
+                                    PostCommentEntity.builder()
+                                            .title("Sample Review" + i)
+                                            .published(true)
+                                            .build();
+                            PostCommentEntity post1Comment2 =
+                                    PostCommentEntity.builder()
+                                            .title("Complicated Review" + i)
+                                            .published(false)
+                                            .build();
+                            PostDetailsEntity post1Details =
+                                    PostDetailsEntity.builder()
+                                            .createdBy("user" + i)
+                                            .createdAt(localDateTime1)
+                                            .key("key" + i)
+                                            .build();
+                            PostEntity postEntity =
+                                    PostEntity.builder()
+                                            .title("Title" + i)
+                                            .content("content" + 1)
+                                            .createdAt(localDateTime1)
+                                            .published(true)
+                                            .build();
+                            postEntity.setDetails(post1Details);
+                            postEntity.addComment(post1Comment);
+                            postEntity.addComment(post1Comment2);
+
+                            LocalDateTime localDateTime2 = LocalDateTime.now();
+                            PostEntity postEntity1 =
+                                    PostEntity.builder()
+                                            .title("Second Title" + i)
+                                            .content("Second Content" + 1)
+                                            .createdAt(localDateTime2)
+                                            .published(false)
+                                            .build();
+                            PostCommentEntity post2Comment =
+                                    PostCommentEntity.builder()
+                                            .title("Complicated Title" + i)
+                                            .published(true)
+                                            .publishedAt(localDateTime2)
+                                            .build();
+                            PostDetailsEntity post2Details =
+                                    PostDetailsEntity.builder()
+                                            .createdBy("user" + i)
+                                            .createdAt(localDateTime2)
+                                            .key("keys" + i)
+                                            .build();
+                            postEntity1.setDetails(post2Details);
+                            postEntity1.addComment(post2Comment);
+                            AuthorEntity authorEntity =
+                                    AuthorEntity.builder()
+                                            .email("user" + i + "@example.com")
+                                            .firstName("first name" + i)
+                                            .lastName("last name" + i)
+                                            .build();
+                            authorEntity.addPost(postEntity);
+                            authorEntity.addPost(postEntity1);
+                            this.authorRepository.save(authorEntity);
                         });
     }
 }

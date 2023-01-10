@@ -1,0 +1,11 @@
+{
+  "generator-springboot": {
+    "appName": "web-client-webflux",
+    "packageName": "com.example.rest.webclient",
+    "databaseType": "postgresql",
+    "dbMigrationTool": "none",
+    "features": [],
+    "buildTool": "maven",
+    "packageFolder": "com/example/rest/webclient"
+  }
+}

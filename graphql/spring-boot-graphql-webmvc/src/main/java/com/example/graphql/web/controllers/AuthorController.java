@@ -1,9 +1,10 @@
 package com.example.graphql.web.controllers;
 
-import com.example.graphql.entities.Author;
+import com.example.graphql.model.request.AuthorRequest;
+import com.example.graphql.model.response.AuthorResponse;
 import com.example.graphql.services.AuthorService;
 import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -19,22 +20,18 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/authors")
+@RequiredArgsConstructor
 public class AuthorController {
 
     private final AuthorService authorService;
 
-    @Autowired
-    public AuthorController(AuthorService authorService) {
-        this.authorService = authorService;
-    }
-
     @GetMapping
-    public List<Author> getAllAuthors() {
+    public List<AuthorResponse> getAllAuthors() {
         return authorService.findAllAuthors();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Author> getAuthorById(@PathVariable Long id) {
+    public ResponseEntity<AuthorResponse> getAuthorById(@PathVariable Long id) {
         return authorService
                 .findAuthorById(id)
                 .map(ResponseEntity::ok)
@@ -43,24 +40,21 @@ public class AuthorController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Author createAuthor(@RequestBody @Validated Author author) {
-        return authorService.saveAuthor(author);
+    public AuthorResponse createAuthor(@RequestBody @Validated AuthorRequest authorRequest) {
+        return authorService.saveAuthor(authorRequest);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Author> updateAuthor(@PathVariable Long id, @RequestBody Author author) {
+    public ResponseEntity<AuthorResponse> updateAuthor(
+            @PathVariable Long id, @RequestBody AuthorRequest authorRequest) {
         return authorService
-                .findAuthorById(id)
-                .map(
-                        authorObj -> {
-                            author.setId(id);
-                            return ResponseEntity.ok(authorService.saveAuthor(author));
-                        })
+                .updateAuthor(authorRequest, id)
+                .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Author> deleteAuthor(@PathVariable Long id) {
+    public ResponseEntity<AuthorResponse> deleteAuthor(@PathVariable Long id) {
         return authorService
                 .findAuthorById(id)
                 .map(

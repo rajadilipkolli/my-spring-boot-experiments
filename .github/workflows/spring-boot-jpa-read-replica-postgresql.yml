@@ -1,0 +1,40 @@
+name: spring-boot-read-replica-postgresql
+
+on:
+  push:
+    paths:
+      - "jpa/spring-boot-read-replica-postgresql/**"
+    branches: [main]
+  pull_request:
+    paths:
+      - "jpa/spring-boot-read-replica-postgresql/**"
+    types:
+      - opened
+      - synchronize
+      - reopened
+
+jobs:
+  build:
+    name: Run Unit & Integration Tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: "jpa/spring-boot-read-replica-postgresql"
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
+
+      - name: Set up JDK
+        uses: actions/setup-java@v3.9.0
+        with:
+          java-version: 17
+          distribution: "zulu"
+          cache: "maven"
+      - name: Start up databases via docker compose
+        run: |
+          docker compose up -d
+          sleep 5
+          docker ps -a
+      - name: Build and analyze
+        run: ./mvnw clean package

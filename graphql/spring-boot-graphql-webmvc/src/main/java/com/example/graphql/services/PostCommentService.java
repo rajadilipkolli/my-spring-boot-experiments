@@ -1,37 +1,40 @@
 package com.example.graphql.services;
 
-import com.example.graphql.entities.PostComment;
+import com.example.graphql.entities.PostCommentEntity;
 import com.example.graphql.repositories.PostCommentRepository;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
-import org.springframework.beans.factory.annotation.Autowired;
+import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class PostCommentService {
 
     private final PostCommentRepository postCommentRepository;
 
-    @Autowired
-    public PostCommentService(PostCommentRepository postCommentRepository) {
-        this.postCommentRepository = postCommentRepository;
-    }
-
-    public List<PostComment> findAllPostComments() {
+    public List<PostCommentEntity> findAllPostComments() {
         return postCommentRepository.findAll();
     }
 
-    public Optional<PostComment> findPostCommentById(Long id) {
+    public Optional<PostCommentEntity> findPostCommentById(Long id) {
         return postCommentRepository.findById(id);
     }
 
-    public PostComment savePostComment(PostComment postComment) {
-        return postCommentRepository.save(postComment);
+    public PostCommentEntity savePostComment(PostCommentEntity postCommentEntity) {
+        return postCommentRepository.save(postCommentEntity);
     }
 
     public void deletePostCommentById(Long id) {
         postCommentRepository.deleteById(id);
+    }
+
+    public Map<Long, List<PostCommentEntity>> getCommentsByPostIdIn(List<Long> postIds) {
+        return this.postCommentRepository.findByPostEntity_IdIn(postIds).stream()
+                .collect(Collectors.groupingBy(postComment -> postComment.getPostEntity().getId()));
     }
 }

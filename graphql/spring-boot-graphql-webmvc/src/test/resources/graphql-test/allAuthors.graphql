@@ -1,0 +1,21 @@
+query authorEntities {
+    allAuthors{
+        id
+        firstName
+        lastName
+        email
+        posts {
+        title
+        content
+        comments {
+            title
+            content
+        }
+        details {
+            createdAt
+            id
+        }
+        createdAt
+        }
+    }
+}

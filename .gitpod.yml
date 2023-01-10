@@ -16,6 +16,8 @@ vscode:
     - redhat.java
     - ms-azuretools.vscode-docker
 
+    - GraphQL.vscode-graphql
+
 
 ports:
   - port: 3100
