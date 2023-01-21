@@ -10,7 +10,7 @@
     <property name="now" value="sysdate" dbms="oracle"/>
     <property name="now" value="getdate()" dbms="mssql"/>
     <property name="string.type" dbms="postgresql" value="text"/>
-    <property name="string.type" dbms="h2" value="varchar2(255)"/>
+    <property name="string.type" dbms="!postgresql" value="varchar2(255)"/>
 
     <changeSet author="appUser" id="createTable-post-details">
 
