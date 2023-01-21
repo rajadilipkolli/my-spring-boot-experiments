@@ -10,5 +10,4 @@ public interface PostDetailsInfo {
     String getDetailsKey();
 
     LocalDateTime getCreatedAt();
-
 }
