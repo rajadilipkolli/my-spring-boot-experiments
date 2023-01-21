@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@Transactional
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class PostService {
 
@@ -22,14 +22,20 @@ public class PostService {
         return postRepository.findAll();
     }
 
+    public List<PostInfo> findAllPostsByAuthorEmail(String emailId) {
+        return postRepository.findByAuthorEntity_EmailIgnoreCase(emailId);
+    }
+
     public Optional<PostEntity> findPostById(Long id) {
         return postRepository.findById(id);
     }
 
+    @Transactional
     public PostEntity savePost(PostEntity postEntity) {
         return postRepository.save(postEntity);
     }
 
+    @Transactional
     public void deletePostById(Long id) {
         postRepository.deleteById(id);
     }

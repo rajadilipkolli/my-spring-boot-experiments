@@ -37,7 +37,7 @@ type PostComments {
 
 type PostDetails {
     id:ID!
-    key:String
+    detailsKey:String
     createdAt:String!
 }
 
@@ -46,6 +46,7 @@ type Query {
     findAuthorByEmailId(email: String!): Author
     allTags: [Tags!]
     findTagByName(tagName: String!) : Tags
+    allPostsByEmail(email: String!): [Post]
 }
 
 type Mutation {

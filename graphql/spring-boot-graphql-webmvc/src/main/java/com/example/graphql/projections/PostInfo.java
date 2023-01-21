@@ -11,7 +11,11 @@ public interface PostInfo {
 
     String getContent();
 
+    boolean isPublished();
+
     LocalDateTime getCreatedAt();
+
+    LocalDateTime getModifiedAt();
 
     PostDetailsInfo getDetails();
 
