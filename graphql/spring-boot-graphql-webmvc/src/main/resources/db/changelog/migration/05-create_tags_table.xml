@@ -1,23 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <databaseChangeLog
-        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
-        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
          http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.2.xsd">
+
+    <property name="string.type" dbms="postgresql" value="text"/>
+    <property name="string.type" dbms="h2" value="varchar2(255)"/>
+
     <changeSet author="appUser" id="createTable-tags">
         <createSequence
-                        sequenceName="tags_seq"
-                        incrementBy="50"
-                        startValue="1"
-                        />
+            sequenceName="tags_seq"
+            incrementBy="50"
+            startValue="1"
+        />
         <createTable tableName="tags">
             <column name="id" type="bigint" defaultValueSequenceNext="tags_seq">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
-            <column name="tag_name" type="text">
+            <column name="tag_name" type="${string.type}">
                 <constraints nullable="false"/>
             </column>
-            <column name="tag_description" type="text" />
+            <column name="tag_description" type="${string.type}"/>
         </createTable>
         <addUniqueConstraint columnNames="tag_name" constraintName="uc_tag_name" tableName="tags"/>
     </changeSet>
