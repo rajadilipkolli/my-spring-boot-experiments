@@ -25,7 +25,7 @@ public class PostDetailsEntity {
 
     @Id private Long id;
 
-    private String key;
+    private String detailsKey;
 
     private LocalDateTime createdAt;
 

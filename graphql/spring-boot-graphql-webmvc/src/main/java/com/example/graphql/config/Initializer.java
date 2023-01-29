@@ -42,7 +42,7 @@ public class Initializer implements CommandLineRunner {
                                     PostDetailsEntity.builder()
                                             .createdBy("user" + i)
                                             .createdAt(localDateTime1)
-                                            .key("key" + i)
+                                            .detailsKey("key" + i)
                                             .build();
                             PostEntity postEntity =
                                     PostEntity.builder()
@@ -73,7 +73,7 @@ public class Initializer implements CommandLineRunner {
                                     PostDetailsEntity.builder()
                                             .createdBy("user" + i)
                                             .createdAt(localDateTime2)
-                                            .key("keys" + i)
+                                            .detailsKey("keys" + i)
                                             .build();
                             postEntity1.setDetails(post2Details);
                             postEntity1.addComment(post2Comment);

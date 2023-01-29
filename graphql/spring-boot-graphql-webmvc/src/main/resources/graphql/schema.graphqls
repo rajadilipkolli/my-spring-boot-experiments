@@ -37,7 +37,7 @@ type PostComments {
 
 type PostDetails {
     id:ID!
-    key:String
+    detailsKey:String
     createdAt:String!
 }
 
@@ -46,6 +46,7 @@ type Query {
     findAuthorByEmailId(email: String!): Author
     allTags: [Tags!]
     findTagByName(tagName: String!) : Tags
+    allPostsByEmail(email: String!): [Post]
 }
 
 type Mutation {
@@ -53,6 +54,31 @@ type Mutation {
     createTag(tagName: String!, tagDescription: String) : Tags
     updateTagDescription(tagName: String!, tagDescription: String!) : Tags
     deleteTag(tagName: String!) : Boolean
+    createPost(newPostRequest: newPostRequest!): Post
+}
+
+input newPostRequest {
+    title:String!
+    content:String!
+    email:String!
+    published:Boolean
+    details: PostDetailsInput
+    tags:[TagsInput]
+}
+
+input TagsInput {
+    tagName:String!
+    tagDescription:String
+}
+
+input PostDetailsInput {
+    detailsKey:String
+}
+
+input PostCommentsInput {
+    title:String!
+    content:String
+    published:Boolean
 }
 
 input AuthorInput {

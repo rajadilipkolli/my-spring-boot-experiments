@@ -1,23 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <databaseChangeLog
-        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
-        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
          http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.2.xsd">
+
+    <property name="string.type" dbms="postgresql" value="text"/>
+    <property name="string.type" dbms="!postgresql" value="varchar2(255)"/>
+
     <changeSet author="appUser" id="createTable-post-comments">
         <createSequence
-                        sequenceName="post_comments_seq"
-                        incrementBy="50"
-                        startValue="1"
-                        />
+            sequenceName="post_comments_seq"
+            incrementBy="50"
+            startValue="1"
+        />
         <createTable tableName="post_comments">
             <column name="id" type="bigint" defaultValueSequenceNext="post_comments_seq">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
-            <column name="title" type="text">
+            <column name="title" type="${string.type}">
                 <constraints nullable="false"/>
             </column>
-            <column name="content" type="text"/>
+            <column name="content" type="${string.type}"/>
             <column name="published" type="boolean"/>
             <column name="published_at" type="timestamptz"/>
             <column name="post_id" type="BIGINT"/>

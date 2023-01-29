@@ -1,6 +1,10 @@
 image:
   file: .gitpod.Dockerfile
 
+tasks:
+  - before: sdk install mvnd
+    init: mvnd verify -DskipTests=true
+
 vscode:
   extensions:
     - vscjava.vscode-java-pack
@@ -15,7 +19,6 @@ vscode:
     - GabrielBB.vscode-lombok
     - redhat.java
     - ms-azuretools.vscode-docker
-
     - GraphQL.vscode-graphql
 
 

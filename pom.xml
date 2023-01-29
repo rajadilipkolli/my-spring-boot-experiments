@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.example</groupId>
+    <artifactId>my-spring-boot-experiments</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <packaging>pom</packaging>
+
+    <modules>
+        <module>graphql/spring-boot-graphql-webmvc</module>
+        <module>httpClients/http-proxy</module>
+        <module>httpClients/rest-template</module>
+        <module>httpClients/web-client-mvc</module>
+        <module>httpClients/web-client-webflux</module>
+        <module>jpa/spring-boot-hibernate2ndlevelcache-sample</module>
+        <module>jpa/spring-boot-jpa-customsequence</module>
+        <module>jpa/spring-boot-multipledatasources</module>
+        <module>jpa/spring-boot-read-replica-postgresql</module>
+        <module>jpa/spring-boot-jpa-multitenancy/db</module>
+        <module>jpa/spring-boot-jpa-multitenancy/multidatasource-multitenancy</module>
+        <module>jpa/spring-boot-jpa-multitenancy/partition</module>
+        <module>jpa/spring-boot-jpa-multitenancy/schema</module>
+        <module>r2dbc/spring-boot-jooq-r2dbc-sample</module>
+        <module>spring-boot-api-archunit-sample</module>
+        <module>spring-boot-choas-monkey</module>
+        <module>spring-boot-jobrunr-sample</module>
+        <module>spring-boot-mongodb-elasticsearch</module>
+        <module>spring-boot-rabbitmq-thymeleaf</module>
+        <module>spring-boot-togglz-sample</module>
+        <module>spring-boot-ultimate-redis</module>
+    </modules>
+
+</project>

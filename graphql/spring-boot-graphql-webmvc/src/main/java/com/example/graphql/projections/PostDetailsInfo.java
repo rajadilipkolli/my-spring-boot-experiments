@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 public interface PostDetailsInfo {
     Long getId();
 
-    LocalDateTime getCreatedAt();
+    String getDetailsKey();
 
-    String getCreatedBy();
+    LocalDateTime getCreatedAt();
 }

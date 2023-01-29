@@ -95,6 +95,9 @@ public class PostEntity implements Serializable {
 
     public void addTag(TagEntity tagEntity) {
         PostTagEntity postTagEntity = new PostTagEntity(this, tagEntity);
+        if (null == tags) {
+            tags = new ArrayList<>();
+        }
         this.tags.add(postTagEntity);
     }
 

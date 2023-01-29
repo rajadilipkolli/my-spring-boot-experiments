@@ -5,6 +5,7 @@ import static com.example.jooq.r2dbc.testcontainersflyway.db.tables.PostComment.
 import static org.jooq.impl.DSL.multiset;
 import static org.jooq.impl.DSL.select;
 
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jooq.DSLContext;
@@ -25,16 +26,23 @@ public class Initializer implements CommandLineRunner {
         Mono.from(
                         dslContext
                                 .insertInto(POST)
-                                .columns(POST.TITLE, POST.CONTENT)
-                                .values("jooq test", "content of Jooq test")
+                                .columns(POST.TITLE, POST.CONTENT, POST.ID)
+                                .values("jooq test", "content of Jooq test", UUID.randomUUID())
                                 .returningResult(POST.ID))
                 .flatMapMany(
                         id ->
                                 dslContext
                                         .insertInto(POST_COMMENT)
-                                        .columns(POST_COMMENT.POST_ID, POST_COMMENT.CONTENT)
-                                        .values(id.component1(), "test comments")
-                                        .values(id.component1(), "test comments 2"))
+                                        .columns(
+                                                POST_COMMENT.POST_ID,
+                                                POST_COMMENT.CONTENT,
+                                                POST_COMMENT.ID)
+                                        .values(id.component1(), "test comments", UUID.randomUUID())
+                                        .values(
+                                                id.component1(),
+                                                "test comments 2",
+                                                UUID.randomUUID())
+                                        .returningResult(POST_COMMENT.ID))
                 .flatMap(
                         it ->
                                 dslContext

@@ -3,8 +3,12 @@
     xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
-         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
-    <changeSet author="sivalabs" id="createTable-authors">
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.2.xsd">
+
+    <property name="string.type" dbms="postgresql" value="text"/>
+    <property name="string.type" dbms="!postgresql" value="varchar2(255)"/>
+
+    <changeSet author="appUser" id="createTable-authors">
         <createSequence
             sequenceName="authors_seq"
             incrementBy="50"
@@ -14,16 +18,16 @@
             <column name="id" type="bigint" defaultValueSequenceNext="authors_seq">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
-            <column name="first_name" type="text">
+            <column name="first_name" type="${string.type}">
                 <constraints nullable="false"/>
             </column>
-            <column name="middle_name" type="text"/>
-            <column name="last_name" type="text">
+            <column name="middle_name" type="${string.type}"/>
+            <column name="last_name" type="${string.type}">
                 <constraints nullable="false"/>
             </column>
-            <column name="mobile" type="text"/>
-            <column name="email" type="text">
-                <constraints nullable="false" unique="true" uniqueConstraintName="uc_authors_email" />
+            <column name="mobile" type="${string.type}"/>
+            <column name="email" type="${string.type}">
+                <constraints nullable="false" unique="true" uniqueConstraintName="uc_authors_email"/>
             </column>
             <column name="registered_at" type="timestamptz"/>
             <column name="version" type="bigint">

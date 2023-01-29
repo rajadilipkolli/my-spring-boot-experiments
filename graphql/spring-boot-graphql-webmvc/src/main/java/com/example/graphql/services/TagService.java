@@ -47,17 +47,17 @@ public class TagService {
 
     public TagEntity saveTag(String tagName, String tagDescription) {
         return this.tagRepository
-                .findByTagName(tagName)
+                .findByTagNameIgnoreCase(tagName)
                 .orElseGet(() -> saveTag(new TagEntity(null, tagName, tagDescription)));
     }
 
     public Optional<TagEntity> findTagByName(String tagName) {
-        return this.tagRepository.findByTagName(tagName);
+        return this.tagRepository.findByTagNameIgnoreCase(tagName);
     }
 
     public Optional<TagEntity> updateTag(String tagName, String tagDescription) {
         return this.tagRepository
-                .findByTagName(tagName)
+                .findByTagNameIgnoreCase(tagName)
                 .map(
                         tagEntity -> {
                             tagEntity.setTagDescription(tagDescription);
@@ -66,7 +66,7 @@ public class TagService {
     }
 
     public void deleteTagByName(String tagName) {
-        TagEntity tagEntity = this.tagRepository.findByTagName(tagName).orElseThrow();
+        TagEntity tagEntity = this.tagRepository.findByTagNameIgnoreCase(tagName).orElseThrow();
         this.tagRepository.delete(tagEntity);
     }
 }
