@@ -34,6 +34,11 @@ public class TagEntity {
 
     private String tagDescription;
 
+    public TagEntity(String tagName, String tagDescription) {
+        this.tagName = tagName;
+        this.tagDescription = tagDescription;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {

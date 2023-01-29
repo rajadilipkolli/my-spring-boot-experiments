@@ -1,7 +1,10 @@
 package com.example.graphql.services;
 
 import com.example.graphql.entities.PostEntity;
+import com.example.graphql.mapper.adapter.ConversionServiceAdapter;
+import com.example.graphql.model.request.NewPostRequest;
 import com.example.graphql.projections.PostInfo;
+import com.example.graphql.repositories.AuthorRepository;
 import com.example.graphql.repositories.PostRepository;
 import java.util.List;
 import java.util.Map;
@@ -17,6 +20,9 @@ import org.springframework.transaction.annotation.Transactional;
 public class PostService {
 
     private final PostRepository postRepository;
+
+    private final AuthorRepository authorRepository;
+    private final ConversionServiceAdapter conversionServiceAdapter;
 
     public List<PostEntity> findAllPosts() {
         return postRepository.findAll();
@@ -43,5 +49,14 @@ public class PostService {
     public Map<Long, List<PostInfo>> getPostByAuthorIdIn(List<Long> authorIds) {
         return this.postRepository.findByAuthorEntity_IdIn(authorIds).stream()
                 .collect(Collectors.groupingBy(postInfo -> postInfo.getAuthorEntity().getId()));
+    }
+
+    @Transactional
+    public PostEntity createPost(NewPostRequest newPostRequest) {
+        PostEntity postEntity =
+                this.conversionServiceAdapter.mapNewPostRequestToPostEntity(newPostRequest);
+        postEntity.setAuthorEntity(
+                this.authorRepository.getReferenceByEmail(newPostRequest.email()));
+        return this.postRepository.save(postEntity);
     }
 }
