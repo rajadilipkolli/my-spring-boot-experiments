@@ -1,0 +1,13 @@
+mutation createPost($newPostRequest: newPostRequest!) {
+    createPost(newPostRequest: $newPostRequest) {
+        id
+        title
+        content
+        published
+        publishedAt
+        details {
+            detailsKey
+            createdAt
+        }
+    }
+}

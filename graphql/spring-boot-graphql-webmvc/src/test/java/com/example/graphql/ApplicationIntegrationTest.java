@@ -95,4 +95,36 @@ class ApplicationIntegrationTest extends AbstractIntegrationTest {
                 .entityList(String.class)
                 .hasSize(0);
     }
+
+    @Test
+    void createPost() {
+        Map<String, Object> inputValues = new HashMap<>();
+        inputValues.put("title", "JunitTitle");
+        inputValues.put("content", "JunitContent");
+        inputValues.put("email", "Junit@email.com");
+        inputValues.put("published", true);
+        Map<String, String> detailsValues = new HashMap<>();
+        detailsValues.put("detailsKey", "newPost");
+        inputValues.put("details", detailsValues);
+
+        graphQlTester
+                .documentName("createPost")
+                .variable("newPostRequest", inputValues)
+                .execute()
+                .path("createPost.id")
+                .entity(Long.class)
+                .satisfies(id -> assertThat(id).isGreaterThan(0))
+                .path("createPost.published")
+                .entity(Boolean.class)
+                .satisfies(published -> assertThat(published).isTrue())
+                .path("createPost.title")
+                .entity(String.class)
+                .satisfies(title -> assertThat(title).isEqualTo("JunitTitle"))
+                .path("createPost.content")
+                .entity(String.class)
+                .satisfies(content -> assertThat(content).isEqualTo("JunitContent"))
+                .path("createPost.details.detailsKey")
+                .entity(String.class)
+                .satisfies(detailsKey -> assertThat(detailsKey).isEqualTo("newPost"));
+    }
 }
