@@ -18,10 +18,13 @@ import org.springframework.core.convert.converter.Converter;
 @Mapper(
         config = MapperSpringConfig.class,
         builder = @Builder(disableBuilder = true),
-        uses = EntityManagerFactory.class)
+        uses = {EntityManagerFactory.class})
 public interface NewPostRequestToPostEntityMapper extends Converter<NewPostRequest, PostEntity> {
 
     @Mapping(target = "tags", ignore = true)
+    @Mapping(
+            target = "publishedAt",
+            expression = "java(newPostRequest.published() ? java.time.LocalDateTime.now() : null)")
     PostEntity convert(NewPostRequest newPostRequest);
 
     @AfterMapping

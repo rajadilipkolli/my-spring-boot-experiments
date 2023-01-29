@@ -3,6 +3,7 @@ package com.example.graphql;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.example.graphql.common.AbstractIntegrationTest;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
@@ -117,14 +118,17 @@ class ApplicationIntegrationTest extends AbstractIntegrationTest {
                 .path("createPost.published")
                 .entity(Boolean.class)
                 .satisfies(published -> assertThat(published).isTrue())
+                .path("createPost.publishedAt")
+                .entity(LocalDateTime.class)
+                .satisfies(localDateTime -> assertThat(localDateTime).isNotNull())
                 .path("createPost.title")
                 .entity(String.class)
-                .satisfies(title -> assertThat(title).isEqualTo("JunitTitle"))
+                .isEqualTo("JunitTitle")
                 .path("createPost.content")
                 .entity(String.class)
-                .satisfies(content -> assertThat(content).isEqualTo("JunitContent"))
+                .isEqualTo("JunitContent")
                 .path("createPost.details.detailsKey")
                 .entity(String.class)
-                .satisfies(detailsKey -> assertThat(detailsKey).isEqualTo("newPost"));
+                .isEqualTo("newPost");
     }
 }

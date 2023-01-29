@@ -8,7 +8,7 @@ public record NewPostRequest(
         @NotBlank String title,
         @NotBlank String content,
         @NotBlank String email,
-        Boolean published,
+        boolean published,
         PostDetailsRequest details,
         List<TagsRequest> tags)
         implements Serializable {}
