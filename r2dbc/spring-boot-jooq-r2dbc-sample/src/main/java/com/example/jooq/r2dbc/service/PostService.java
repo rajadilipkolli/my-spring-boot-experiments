@@ -11,10 +11,7 @@ import com.example.jooq.r2dbc.entities.Post;
 import com.example.jooq.r2dbc.model.request.CreatePostCommand;
 import com.example.jooq.r2dbc.model.response.PaginatedResult;
 import com.example.jooq.r2dbc.model.response.PostSummary;
-import com.example.jooq.r2dbc.repository.CommentRepository;
 import com.example.jooq.r2dbc.repository.PostRepository;
-import com.example.jooq.r2dbc.repository.PostTagRelationRepository;
-import com.example.jooq.r2dbc.repository.TagRepository;
 import com.example.jooq.r2dbc.testcontainersflyway.db.tables.records.PostsTagsRecord;
 import java.util.List;
 import java.util.UUID;
@@ -38,9 +35,6 @@ public class PostService {
 
     private final DSLContext dslContext;
     private final PostRepository postRepository;
-    private final CommentRepository commentRepository;
-    private final TagRepository tagRepository;
-    private final PostTagRelationRepository postTagRelRepository;
 
     public Flux<PostSummary> findAll() {
         var post = POSTS;
@@ -111,6 +105,11 @@ public class PostService {
     }
 
     public Mono<PaginatedResult> findByKeyword(String keyword, int offset, int limit) {
+        log.debug(
+                "findByKeyword with keyword :{} with offset :{} and limit :{}",
+                keyword,
+                offset,
+                limit);
         var posts = POSTS;
         var postsTags = POSTS_TAGS;
         var tags = TAGS;
