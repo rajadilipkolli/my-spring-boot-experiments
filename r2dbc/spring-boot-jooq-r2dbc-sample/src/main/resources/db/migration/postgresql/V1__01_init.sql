@@ -1,4 +1,4 @@
-CREATE TABLE POSTS
+CREATE TABLE posts
 (
     ID uuid NOT NULL,
     TITLE text,
@@ -7,10 +7,11 @@ CREATE TABLE POSTS
     created_at timestamp,
     created_by text,
     updated_at timestamp,
+    version BIGINT,
     PRIMARY KEY   (ID)
 );
 
-create table POST_COMMENTS
+create table post_comments
 (
     id uuid not null,
     content text,

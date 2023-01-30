@@ -60,7 +60,7 @@ public class Initializer implements CommandLineRunner {
                                                                                         POSTS.ID)))
                                                         .as("comments"))
                                         .from(POSTS)
-                                        .orderBy(POST_COMMENTS.CREATED_AT))
+                                        .orderBy(POSTS.CREATED_AT))
                 .subscribe(
                         data -> log.debug("Retrieved data: {}", data.formatJSON()),
                         error -> log.debug("error: " + error),
