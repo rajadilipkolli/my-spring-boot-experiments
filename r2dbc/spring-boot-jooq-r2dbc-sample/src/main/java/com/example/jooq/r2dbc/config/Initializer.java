@@ -5,6 +5,7 @@ import static com.example.jooq.r2dbc.testcontainersflyway.db.tables.PostComment.
 import static org.jooq.impl.DSL.multiset;
 import static org.jooq.impl.DSL.select;
 
+import com.example.jooq.r2dbc.config.logging.Loggable;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +22,7 @@ public class Initializer implements CommandLineRunner {
     private final DSLContext dslContext;
 
     @Override
+    @Loggable
     public void run(String... args) {
         log.info("Running Initializer.....");
         Mono.from(
@@ -60,7 +62,7 @@ public class Initializer implements CommandLineRunner {
                                         .from(POST)
                                         .orderBy(POST.CREATED_AT))
                 .subscribe(
-                        data -> log.debug("saving data: {}", data.formatJSON()),
+                        data -> log.debug("Retrieved data: {}", data.formatJSON()),
                         error -> log.debug("error: " + error),
                         () -> log.debug("done"));
     }

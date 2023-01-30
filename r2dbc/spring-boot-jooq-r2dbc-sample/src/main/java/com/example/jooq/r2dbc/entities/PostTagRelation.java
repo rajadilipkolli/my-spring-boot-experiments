@@ -17,7 +17,7 @@ import org.springframework.data.relational.core.mapping.Table;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(value = "posts_tags")
-class PostTagRelation {
+public class PostTagRelation {
 
     @Column("post_id")
     private UUID postId;
