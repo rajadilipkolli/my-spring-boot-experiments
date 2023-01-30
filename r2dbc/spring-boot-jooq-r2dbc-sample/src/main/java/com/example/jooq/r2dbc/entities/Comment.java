@@ -19,7 +19,7 @@ import org.springframework.data.relational.core.mapping.Table;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(value = "comments")
+@Table(value = "post_comments")
 public class Comment {
 
     @Id

@@ -1,8 +1,8 @@
 package com.example.jooq.r2dbc.service;
 
-import static com.example.jooq.r2dbc.testcontainersflyway.db.Tables.POST;
+import static com.example.jooq.r2dbc.testcontainersflyway.db.Tables.POSTS;
 import static com.example.jooq.r2dbc.testcontainersflyway.db.Tables.POSTS_TAGS;
-import static com.example.jooq.r2dbc.testcontainersflyway.db.Tables.POST_COMMENT;
+import static com.example.jooq.r2dbc.testcontainersflyway.db.Tables.POST_COMMENTS;
 import static com.example.jooq.r2dbc.testcontainersflyway.db.Tables.TAGS;
 import static org.jooq.impl.DSL.multiset;
 import static org.jooq.impl.DSL.select;
@@ -42,16 +42,16 @@ public class PostService {
     private final PostTagRelationRepository postTagRelRepository;
 
     public Flux<PostSummary> findAll() {
-        var post = POST;
+        var post = POSTS;
         var postsTags = POSTS_TAGS;
         var tags = TAGS;
-        var postComment = POST_COMMENT;
+        var postComment = POST_COMMENTS;
         var sql =
                 dslContext
                         .select(
                                 post.ID,
                                 post.TITLE,
-                                DSL.field("count(comments.id)", SQLDataType.BIGINT),
+                                DSL.field("count(post_comments.id)", SQLDataType.BIGINT),
                                 multiset(
                                                 select(tags.NAME)
                                                         .from(tags)
@@ -73,7 +73,7 @@ public class PostService {
     }
 
     public Mono<UUID> create(CreatePostCommand createPostCommand) {
-        var post = POST;
+        var post = POSTS;
         var postsTags = POSTS_TAGS;
         var sqlInsertPost =
                 dslContext
@@ -109,10 +109,10 @@ public class PostService {
     }
 
     public Mono<PaginatedResult> findByKeyword(String keyword, int offset, int limit) {
-        var p = POST;
+        var p = POSTS;
         var pt = POSTS_TAGS;
         var t = TAGS;
-        var c = POST_COMMENT;
+        var c = POST_COMMENTS;
 
         Condition where = DSL.trueCondition();
         if (StringUtils.hasText(keyword)) {

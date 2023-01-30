@@ -1,7 +1,7 @@
 package com.example.jooq.r2dbc.config;
 
-import static com.example.jooq.r2dbc.testcontainersflyway.db.tables.Post.POST;
-import static com.example.jooq.r2dbc.testcontainersflyway.db.tables.PostComment.POST_COMMENT;
+import static com.example.jooq.r2dbc.testcontainersflyway.db.tables.PostComments.POST_COMMENTS;
+import static com.example.jooq.r2dbc.testcontainersflyway.db.tables.Posts.POSTS;
 import static org.jooq.impl.DSL.multiset;
 import static org.jooq.impl.DSL.select;
 
@@ -27,40 +27,40 @@ public class Initializer implements CommandLineRunner {
         log.info("Running Initializer.....");
         Mono.from(
                         dslContext
-                                .insertInto(POST)
-                                .columns(POST.TITLE, POST.CONTENT, POST.ID)
+                                .insertInto(POSTS)
+                                .columns(POSTS.TITLE, POSTS.CONTENT, POSTS.ID)
                                 .values("jooq test", "content of Jooq test", UUID.randomUUID())
-                                .returningResult(POST.ID))
+                                .returningResult(POSTS.ID))
                 .flatMapMany(
                         id ->
                                 dslContext
-                                        .insertInto(POST_COMMENT)
+                                        .insertInto(POST_COMMENTS)
                                         .columns(
-                                                POST_COMMENT.POST_ID,
-                                                POST_COMMENT.CONTENT,
-                                                POST_COMMENT.ID)
+                                                POST_COMMENTS.POST_ID,
+                                                POST_COMMENTS.CONTENT,
+                                                POST_COMMENTS.ID)
                                         .values(id.component1(), "test comments", UUID.randomUUID())
                                         .values(
                                                 id.component1(),
                                                 "test comments 2",
                                                 UUID.randomUUID())
-                                        .returningResult(POST_COMMENT.ID))
+                                        .returningResult(POST_COMMENTS.ID))
                 .flatMap(
                         it ->
                                 dslContext
                                         .select(
-                                                POST.TITLE,
-                                                POST.CONTENT,
+                                                POSTS.TITLE,
+                                                POSTS.CONTENT,
                                                 multiset(
-                                                                select(POST_COMMENT.CONTENT)
-                                                                        .from(POST_COMMENT)
+                                                                select(POST_COMMENTS.CONTENT)
+                                                                        .from(POST_COMMENTS)
                                                                         .where(
-                                                                                POST_COMMENT.POST_ID
-                                                                                        .eq(
-                                                                                                POST.ID)))
+                                                                                POST_COMMENTS
+                                                                                        .POST_ID.eq(
+                                                                                        POSTS.ID)))
                                                         .as("comments"))
-                                        .from(POST)
-                                        .orderBy(POST.CREATED_AT))
+                                        .from(POSTS)
+                                        .orderBy(POST_COMMENTS.CREATED_AT))
                 .subscribe(
                         data -> log.debug("Retrieved data: {}", data.formatJSON()),
                         error -> log.debug("error: " + error),

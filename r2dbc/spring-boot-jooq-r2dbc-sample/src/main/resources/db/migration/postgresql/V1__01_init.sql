@@ -1,4 +1,4 @@
-CREATE TABLE POST
+CREATE TABLE POSTS
 (
     ID uuid NOT NULL,
     TITLE text,
@@ -10,14 +10,14 @@ CREATE TABLE POST
     PRIMARY KEY   (ID)
 );
 
-create table POST_COMMENT
+create table POST_COMMENTS
 (
     id uuid not null,
     content text,
     created_at timestamp,
     POST_ID uuid,
     primary key (id),
-    CONSTRAINT FK_POST_COMMENT FOREIGN KEY (POST_ID) REFERENCES POST(ID)
+    CONSTRAINT FK_POST_COMMENTS FOREIGN KEY (POST_ID) REFERENCES POSTS(ID)
 );
 
 create table tags
