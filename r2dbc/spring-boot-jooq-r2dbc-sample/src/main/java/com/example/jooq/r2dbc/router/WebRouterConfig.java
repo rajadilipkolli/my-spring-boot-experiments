@@ -9,6 +9,7 @@ import com.example.jooq.r2dbc.handler.PostHandler;
 import com.example.jooq.r2dbc.handler.TagHandler;
 import com.example.jooq.r2dbc.model.request.CreatePostCommand;
 import com.example.jooq.r2dbc.model.request.TagDto;
+import com.example.jooq.r2dbc.model.response.PaginatedResult;
 import com.example.jooq.r2dbc.model.response.PostSummary;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -53,6 +54,39 @@ public class WebRouterConfig {
                                                                                                 implementation =
                                                                                                         PostSummary
                                                                                                                 .class)))))),
+        @RouterOperation(
+                path = "/posts/search",
+                method = RequestMethod.GET,
+                operation =
+                        @Operation(
+                                operationId = "search",
+                                parameters = {
+                                    @Parameter(
+                                            name = "keyword",
+                                            description = "keyword for searching",
+                                            in = ParameterIn.QUERY,
+                                            required = true),
+                                    @Parameter(
+                                            name = "offset",
+                                            description = "offset value of page",
+                                            in = ParameterIn.QUERY,
+                                            example = "0"),
+                                    @Parameter(
+                                            name = "limit",
+                                            description = "max Number of records per page",
+                                            in = ParameterIn.QUERY,
+                                            example = "10")
+                                },
+                                responses =
+                                        @ApiResponse(
+                                                responseCode = "200",
+                                                content =
+                                                        @Content(
+                                                                schema =
+                                                                        @Schema(
+                                                                                implementation =
+                                                                                        PaginatedResult
+                                                                                                .class))))),
         @RouterOperation(
                 path = "/posts",
                 method = RequestMethod.POST,
@@ -107,6 +141,7 @@ public class WebRouterConfig {
     @Bean
     RouterFunction<ServerResponse> postsRouterFunction(PostHandler handler) {
         return route(GET("/posts"), handler::getAll)
+                .andRoute(GET("/posts/search"), handler::search)
                 .andRoute(POST("/posts"), handler::create)
                 .andRoute(GET("/posts/{id}"), handler::get)
                 .andRoute(PUT("/posts/{id}"), handler::update);

@@ -90,7 +90,7 @@ public class PostService {
                                             .map(
                                                     tag -> {
                                                         PostsTagsRecord r = postsTags.newRecord();
-                                                        r.setPostId(id.value1());
+                                                        r.setPostId(id.component1());
                                                         r.setTagId(tag);
                                                         return r;
                                                     })
@@ -111,36 +111,39 @@ public class PostService {
     }
 
     public Mono<PaginatedResult> findByKeyword(String keyword, int offset, int limit) {
-        var p = POSTS;
-        var pt = POSTS_TAGS;
-        var t = TAGS;
-        var c = POST_COMMENTS;
+        var posts = POSTS;
+        var postsTags = POSTS_TAGS;
+        var tags = TAGS;
+        var postComments = POST_COMMENTS;
 
         Condition where = DSL.trueCondition();
         if (StringUtils.hasText(keyword)) {
-            where = where.and(p.TITLE.likeIgnoreCase("%" + keyword + "%"));
+            where = where.and(posts.TITLE.likeIgnoreCase("%" + keyword + "%"));
         }
         var dataSql =
                 dslContext
                         .select(
-                                p.ID,
-                                p.TITLE,
-                                DSL.field("count(comments.id)", SQLDataType.BIGINT),
+                                posts.ID,
+                                posts.TITLE,
+                                DSL.field("count(post_comments.id)", SQLDataType.BIGINT),
                                 multiset(
-                                                select(t.NAME)
-                                                        .from(t)
-                                                        .join(pt)
-                                                        .on(t.ID.eq(pt.TAG_ID))
-                                                        .where(pt.POST_ID.eq(p.ID)))
+                                                select(tags.NAME)
+                                                        .from(tags)
+                                                        .join(postsTags)
+                                                        .on(tags.ID.eq(postsTags.TAG_ID))
+                                                        .where(postsTags.POST_ID.eq(posts.ID)))
                                         .as("tags"))
-                        .from(p.leftJoin(c).on(c.POST_ID.eq(p.ID)))
+                        .from(posts.leftJoin(postComments).on(postComments.POST_ID.eq(posts.ID)))
                         .where(where)
-                        .groupBy(p.ID)
-                        .orderBy(p.CREATED_AT)
+                        .groupBy(posts.ID)
+                        .orderBy(posts.CREATED_AT)
                         .limit(offset, limit);
 
         val countSql =
-                dslContext.select(DSL.field("count(*)", SQLDataType.BIGINT)).from(p).where(where);
+                dslContext
+                        .select(DSL.field("count(1)", SQLDataType.BIGINT))
+                        .from(posts)
+                        .where(where);
 
         return Mono.zip(
                         Flux.from(dataSql)
@@ -157,7 +160,11 @@ public class PostService {
     }
 
     public Mono<Post> findById(String id) {
-        return this.postRepository.findById(UUID.fromString(id));
+        return Mono.justOrEmpty(
+                dslContext
+                        .selectFrom(POSTS)
+                        .where(POSTS.ID.eq(UUID.fromString(id)))
+                        .fetchOneInto(Post.class));
     }
 
     public Mono<Post> save(Post post) {

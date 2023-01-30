@@ -9,7 +9,7 @@ CREATE TABLE posts
     created_at timestamptz DEFAULT NOW(),
     created_by text,
     updated_at timestamptz,
-    version BIGINT,
+    version BIGINT DEFAULT 0,
     PRIMARY KEY   (ID)
 );
 

@@ -6,6 +6,7 @@ import static org.springframework.web.reactive.function.server.ServerResponse.ok
 import com.example.jooq.r2dbc.config.logging.Loggable;
 import com.example.jooq.r2dbc.entities.Post;
 import com.example.jooq.r2dbc.model.request.CreatePostCommand;
+import com.example.jooq.r2dbc.model.response.PaginatedResult;
 import com.example.jooq.r2dbc.model.response.PostSummary;
 import com.example.jooq.r2dbc.service.PostService;
 import java.net.URI;
@@ -56,5 +57,18 @@ public class PostHandler {
                 .cast(Post.class)
                 .flatMap(this.postService::save)
                 .flatMap(post -> ServerResponse.noContent().build());
+    }
+
+    @Loggable
+    public Mono<ServerResponse> search(ServerRequest req) {
+        return postService
+                .findByKeyword(
+                        req.queryParam("keyword").orElse(""),
+                        req.queryParam("offset").map(Integer::parseInt).orElse(0),
+                        req.queryParam("limit").map(Integer::parseInt).orElse(10))
+                .flatMap(
+                        paginatedResult ->
+                                ServerResponse.ok()
+                                        .body(Mono.just(paginatedResult), PaginatedResult.class));
     }
 }
