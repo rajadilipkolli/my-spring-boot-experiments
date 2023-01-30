@@ -16,7 +16,7 @@ import com.example.jooq.r2dbc.repository.PostRepository;
 import com.example.jooq.r2dbc.repository.PostTagRelationRepository;
 import com.example.jooq.r2dbc.repository.TagRepository;
 import com.example.jooq.r2dbc.testcontainersflyway.db.tables.records.PostsTagsRecord;
-import java.util.Collection;
+import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -85,7 +85,7 @@ public class PostService {
         return Mono.from(sqlInsertPost)
                 .flatMap(
                         id -> {
-                            Collection<?> tags =
+                            List<PostsTagsRecord> tags =
                                     createPostCommand.tagId().stream()
                                             .map(
                                                     tag -> {
@@ -99,7 +99,8 @@ public class PostService {
                                             dslContext
                                                     .insertInto(postsTags)
                                                     .columns(postsTags.POST_ID, postsTags.TAG_ID)
-                                                    .values(tags))
+                                                    .valuesOfRecords(tags)
+                                                    .returning())
                                     .map(
                                             r -> {
                                                 log.debug("inserted tags:: {}", r);
