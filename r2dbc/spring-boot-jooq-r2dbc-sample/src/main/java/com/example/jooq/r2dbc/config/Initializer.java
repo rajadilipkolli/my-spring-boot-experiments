@@ -6,7 +6,6 @@ import static org.jooq.impl.DSL.multiset;
 import static org.jooq.impl.DSL.select;
 
 import com.example.jooq.r2dbc.config.logging.Loggable;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jooq.DSLContext;
@@ -28,22 +27,16 @@ public class Initializer implements CommandLineRunner {
         Mono.from(
                         dslContext
                                 .insertInto(POSTS)
-                                .columns(POSTS.TITLE, POSTS.CONTENT, POSTS.ID)
-                                .values("jooq test", "content of Jooq test", UUID.randomUUID())
+                                .columns(POSTS.TITLE, POSTS.CONTENT)
+                                .values("jooq test", "content of Jooq test")
                                 .returningResult(POSTS.ID))
                 .flatMapMany(
                         id ->
                                 dslContext
                                         .insertInto(POST_COMMENTS)
-                                        .columns(
-                                                POST_COMMENTS.POST_ID,
-                                                POST_COMMENTS.CONTENT,
-                                                POST_COMMENTS.ID)
-                                        .values(id.component1(), "test comments", UUID.randomUUID())
-                                        .values(
-                                                id.component1(),
-                                                "test comments 2",
-                                                UUID.randomUUID())
+                                        .columns(POST_COMMENTS.POST_ID, POST_COMMENTS.CONTENT)
+                                        .values(id.component1(), "test comments")
+                                        .values(id.component1(), "test comments 2")
                                         .returningResult(POST_COMMENTS.ID))
                 .flatMap(
                         it ->

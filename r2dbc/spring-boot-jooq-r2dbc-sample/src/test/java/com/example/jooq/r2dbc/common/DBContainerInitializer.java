@@ -4,6 +4,7 @@ import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.utility.MountableFile;
 
 public class DBContainerInitializer
         implements ApplicationContextInitializer<ConfigurableApplicationContext> {
@@ -12,7 +13,11 @@ public class DBContainerInitializer
             new PostgreSQLContainer<>("postgres:15-alpine")
                     .withDatabaseName("integration-tests-db")
                     .withUsername("username")
-                    .withPassword("password");
+                    .withPassword("password")
+                    .withCopyFileToContainer(
+                            MountableFile.forClasspathResource("init.sql"),
+                            "/docker-entrypoint-initdb.d/init.sql");
+    ;
 
     static {
         postgreSQLContainer.start();

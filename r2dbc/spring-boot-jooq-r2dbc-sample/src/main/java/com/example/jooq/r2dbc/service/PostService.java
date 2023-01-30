@@ -7,6 +7,7 @@ import static com.example.jooq.r2dbc.testcontainersflyway.db.Tables.TAGS;
 import static org.jooq.impl.DSL.multiset;
 import static org.jooq.impl.DSL.select;
 
+import com.example.jooq.r2dbc.entities.Post;
 import com.example.jooq.r2dbc.model.request.CreatePostCommand;
 import com.example.jooq.r2dbc.model.response.PaginatedResult;
 import com.example.jooq.r2dbc.model.response.PostSummary;
@@ -152,5 +153,13 @@ public class PostService {
                                 .collectList(),
                         Mono.from(countSql).map(Record1::value1))
                 .map(it -> new PaginatedResult(it.getT1(), it.getT2()));
+    }
+
+    public Mono<Post> findById(String id) {
+        return this.postRepository.findById(UUID.fromString(id));
+    }
+
+    public Mono<Post> save(Post post) {
+        return this.postRepository.save(post);
     }
 }

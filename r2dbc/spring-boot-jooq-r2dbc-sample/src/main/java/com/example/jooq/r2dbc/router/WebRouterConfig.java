@@ -1,25 +1,111 @@
 package com.example.jooq.r2dbc.router;
 
+import static org.springframework.web.reactive.function.server.RequestPredicates.*;
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 
+import com.example.jooq.r2dbc.entities.Post;
 import com.example.jooq.r2dbc.handler.PostHandler;
-import com.example.jooq.r2dbc.service.PostService;
+import com.example.jooq.r2dbc.model.request.CreatePostCommand;
+import com.example.jooq.r2dbc.model.response.PostSummary;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springdoc.core.annotations.RouterOperation;
 import org.springdoc.core.annotations.RouterOperations;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
 @Configuration(proxyBeanMethods = false)
 public class WebRouterConfig {
 
-    @Bean
     @RouterOperations({
-        @RouterOperation(path = "/posts", beanClass = PostService.class, beanMethod = "findAll"),
-        @RouterOperation(path = "/posts", beanClass = PostService.class, beanMethod = "create")
+        @RouterOperation(
+                path = "/posts",
+                method = RequestMethod.GET,
+                headers = {"x-header1=test1", "x-header2=test2"},
+                operation =
+                        @Operation(
+                                operationId = "all",
+                                parameters = {
+                                    @Parameter(name = "key", description = "sample description"),
+                                    @Parameter(name = "test", description = "sample desc")
+                                },
+                                responses =
+                                        @ApiResponse(
+                                                responseCode = "200",
+                                                content =
+                                                        @Content(
+                                                                array =
+                                                                        @ArraySchema(
+                                                                                schema =
+                                                                                        @Schema(
+                                                                                                implementation =
+                                                                                                        PostSummary
+                                                                                                                .class)))))),
+        @RouterOperation(
+                path = "/posts",
+                method = RequestMethod.POST,
+                operation =
+                        @Operation(
+                                operationId = "create",
+                                requestBody =
+                                        @RequestBody(
+                                                content =
+                                                        @Content(
+                                                                schema =
+                                                                        @Schema(
+                                                                                implementation =
+                                                                                        CreatePostCommand
+                                                                                                .class))),
+                                responses = @ApiResponse(responseCode = "201"))),
+        @RouterOperation(
+                path = "/posts/{id}",
+                method = RequestMethod.GET,
+                operation =
+                        @Operation(
+                                operationId = "get",
+                                parameters = @Parameter(name = "id", in = ParameterIn.PATH),
+                                responses =
+                                        @ApiResponse(
+                                                responseCode = "200",
+                                                content =
+                                                        @Content(
+                                                                schema =
+                                                                        @Schema(
+                                                                                implementation =
+                                                                                        Post
+                                                                                                .class))))),
+        @RouterOperation(
+                path = "/posts/{id}",
+                method = RequestMethod.PUT,
+                operation =
+                        @Operation(
+                                operationId = "update",
+                                parameters = @Parameter(name = "id", in = ParameterIn.PATH),
+                                responses =
+                                        @ApiResponse(
+                                                responseCode = "202",
+                                                content =
+                                                        @Content(
+                                                                schema =
+                                                                        @Schema(
+                                                                                implementation =
+                                                                                        Post
+                                                                                                .class)))))
     })
+    @Bean
     RouterFunction<ServerResponse> routerFunction(PostHandler handler) {
-        return route().GET("/posts", handler::getAll).POST("/posts", handler::create).build();
+        return route(GET("/posts"), handler::getAll)
+                .andRoute(POST("/posts"), handler::create)
+                .andRoute(GET("/posts/{id}"), handler::get)
+                .andRoute(PUT("/posts/{id}"), handler::update);
     }
 }
