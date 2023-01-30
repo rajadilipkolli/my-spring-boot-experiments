@@ -4,9 +4,7 @@ import com.example.graphql.entities.PostEntity;
 import com.example.graphql.entities.TagEntity;
 import com.example.graphql.model.request.NewPostRequest;
 import com.example.graphql.model.request.TagsRequest;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityManagerFactory;
-import jakarta.persistence.TypedQuery;
+import com.example.graphql.repositories.TagRepository;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Builder;
 import org.mapstruct.Context;
@@ -18,42 +16,37 @@ import org.springframework.core.convert.converter.Converter;
 @Mapper(
         config = MapperSpringConfig.class,
         builder = @Builder(disableBuilder = true),
-        uses = {EntityManagerFactory.class})
+        uses = {TagRepository.class})
 public interface NewPostRequestToPostEntityMapper extends Converter<NewPostRequest, PostEntity> {
 
     @Mapping(target = "tags", ignore = true)
     @Mapping(
             target = "publishedAt",
             expression = "java(newPostRequest.published() ? java.time.LocalDateTime.now() : null)")
-    PostEntity convert(NewPostRequest newPostRequest);
+    PostEntity convert(NewPostRequest newPostRequest, @Context TagRepository tagRepository);
 
     @AfterMapping
     default void afterMapping(
             NewPostRequest newPostRequest,
             @MappingTarget PostEntity postEntity,
-            @Context EntityManager entityManager) {
-        newPostRequest
-                .tags()
-                .forEach(
-                        tagsRequest -> postEntity.addTag(getTagEntity(entityManager, tagsRequest)));
+            @Context TagRepository tagRepository) {
+        if (null != newPostRequest.tags()) {
+            newPostRequest
+                    .tags()
+                    .forEach(
+                            tagsRequest ->
+                                    postEntity.addTag(getTagEntity(tagRepository, tagsRequest)));
+        }
     }
 
-    default TagEntity getTagEntity(EntityManager entityManager, TagsRequest tagsRequest) {
-
-        TypedQuery<TagEntity> query =
-                entityManager.createQuery(
-                        "SELECT b FROM TagEntity b WHERE b.tagName = :name", TagEntity.class);
-        query.setParameter("name", tagsRequest.tagName());
-        TagEntity result = query.getSingleResult();
-        if (null == result) {
-            TagEntity tag = new TagEntity(tagsRequest.tagName(), tagsRequest.tagDescription());
-            entityManager.getTransaction().begin();
-            entityManager.persist(tag);
-            entityManager.flush();
-            entityManager.refresh(tag);
-            entityManager.getTransaction().commit();
-            result = tag;
-        }
-        return result;
+    default TagEntity getTagEntity(TagRepository tagRepository, TagsRequest tagsRequest) {
+        return tagRepository
+                .findByTagNameIgnoreCase(tagsRequest.tagName())
+                .orElseGet(
+                        () ->
+                                tagRepository.save(
+                                        new TagEntity(
+                                                tagsRequest.tagName(),
+                                                tagsRequest.tagDescription())));
     }
 }

@@ -1,10 +1,8 @@
 package com.example.graphql.services;
 
 import com.example.graphql.entities.PostEntity;
-import com.example.graphql.entities.TagEntity;
-import com.example.graphql.mapper.adapter.ConversionServiceAdapter;
+import com.example.graphql.mapper.NewPostRequestToPostEntityMapper;
 import com.example.graphql.model.request.NewPostRequest;
-import com.example.graphql.model.request.TagsRequest;
 import com.example.graphql.projections.PostInfo;
 import com.example.graphql.repositories.AuthorRepository;
 import com.example.graphql.repositories.PostRepository;
@@ -26,7 +24,7 @@ public class PostService {
     private final AuthorRepository authorRepository;
     private final TagRepository tagRepository;
 
-    private final ConversionServiceAdapter conversionServiceAdapter;
+    private final NewPostRequestToPostEntityMapper mapNewPostRequestToPostEntityMapper;
 
     public List<PostEntity> findAllPosts() {
         return postRepository.findAll();
@@ -58,26 +56,9 @@ public class PostService {
     @Transactional
     public PostEntity createPost(NewPostRequest newPostRequest) {
         PostEntity postEntity =
-                this.conversionServiceAdapter.mapNewPostRequestToPostEntity(newPostRequest);
-        // handle Tags till bug is fixed, Ideally this should be handled in Mapper
-        if (null != newPostRequest.tags()) {
-            newPostRequest
-                    .tags()
-                    .forEach(tagsRequest -> postEntity.addTag(getTagEntity(tagsRequest)));
-        }
+                this.mapNewPostRequestToPostEntityMapper.convert(newPostRequest, tagRepository);
         postEntity.setAuthorEntity(
                 this.authorRepository.getReferenceByEmail(newPostRequest.email()));
         return this.postRepository.save(postEntity);
-    }
-
-    private TagEntity getTagEntity(TagsRequest tagsRequest) {
-        return this.tagRepository
-                .findByTagNameIgnoreCase(tagsRequest.tagName())
-                .orElseGet(
-                        () ->
-                                this.tagRepository.save(
-                                        new TagEntity(
-                                                tagsRequest.tagName(),
-                                                tagsRequest.tagDescription())));
     }
 }
