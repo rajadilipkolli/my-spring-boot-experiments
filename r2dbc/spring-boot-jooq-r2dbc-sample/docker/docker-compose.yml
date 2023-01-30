@@ -7,8 +7,6 @@ services:
       - POSTGRES_USER=appuser
       - POSTGRES_PASSWORD=secret
       - POSTGRES_DB=appdb
-    volumes:
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     ports:
       - "5432:5432"
 

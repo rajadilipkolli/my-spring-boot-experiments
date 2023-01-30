@@ -4,8 +4,11 @@ import static org.springframework.web.reactive.function.server.RequestPredicates
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 
 import com.example.jooq.r2dbc.entities.Post;
+import com.example.jooq.r2dbc.entities.Tags;
 import com.example.jooq.r2dbc.handler.PostHandler;
+import com.example.jooq.r2dbc.handler.TagHandler;
 import com.example.jooq.r2dbc.model.request.CreatePostCommand;
+import com.example.jooq.r2dbc.model.request.TagDto;
 import com.example.jooq.r2dbc.model.response.PostSummary;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -102,10 +105,70 @@ public class WebRouterConfig {
                                                                                                 .class)))))
     })
     @Bean
-    RouterFunction<ServerResponse> routerFunction(PostHandler handler) {
+    RouterFunction<ServerResponse> postsRouterFunction(PostHandler handler) {
         return route(GET("/posts"), handler::getAll)
                 .andRoute(POST("/posts"), handler::create)
                 .andRoute(GET("/posts/{id}"), handler::get)
                 .andRoute(PUT("/posts/{id}"), handler::update);
+    }
+
+    @RouterOperations({
+        @RouterOperation(
+                path = "/tags",
+                method = RequestMethod.GET,
+                operation =
+                        @Operation(
+                                operationId = "all",
+                                responses =
+                                        @ApiResponse(
+                                                responseCode = "200",
+                                                content =
+                                                        @Content(
+                                                                array =
+                                                                        @ArraySchema(
+                                                                                schema =
+                                                                                        @Schema(
+                                                                                                implementation =
+                                                                                                        Tags
+                                                                                                                .class)))))),
+        @RouterOperation(
+                path = "/tags",
+                method = RequestMethod.POST,
+                operation =
+                        @Operation(
+                                operationId = "create",
+                                requestBody =
+                                        @RequestBody(
+                                                content =
+                                                        @Content(
+                                                                schema =
+                                                                        @Schema(
+                                                                                implementation =
+                                                                                        TagDto
+                                                                                                .class))),
+                                responses = @ApiResponse(responseCode = "201"))),
+        @RouterOperation(
+                path = "/tags/{id}",
+                method = RequestMethod.GET,
+                operation =
+                        @Operation(
+                                operationId = "get",
+                                parameters = @Parameter(name = "id", in = ParameterIn.PATH),
+                                responses =
+                                        @ApiResponse(
+                                                responseCode = "200",
+                                                content =
+                                                        @Content(
+                                                                schema =
+                                                                        @Schema(
+                                                                                implementation =
+                                                                                        Tags
+                                                                                                .class)))))
+    })
+    @Bean
+    RouterFunction<ServerResponse> tagsRouterFunction(TagHandler handler) {
+        return route(GET("/tags"), handler::getAll)
+                .andRoute(POST("/tags"), handler::create)
+                .andRoute(GET("/tags/{id}"), handler::get);
     }
 }
