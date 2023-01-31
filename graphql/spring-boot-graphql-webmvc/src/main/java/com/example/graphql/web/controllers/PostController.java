@@ -1,6 +1,6 @@
 package com.example.graphql.web.controllers;
 
-import com.example.graphql.entities.PostEntity;
+import com.example.graphql.model.request.NewPostRequest;
 import com.example.graphql.model.response.PostResponse;
 import com.example.graphql.services.PostService;
 import java.util.List;
@@ -40,20 +40,16 @@ public class PostController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public PostResponse createPost(@RequestBody @Validated PostEntity postEntity) {
-        return postService.savePost(postEntity);
+    public PostResponse createPost(@RequestBody @Validated NewPostRequest newPostRequest) {
+        return postService.savePost(newPostRequest);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<PostResponse> updatePost(
-            @PathVariable Long id, @RequestBody PostEntity postEntity) {
+            @PathVariable Long id, @RequestBody NewPostRequest newPostRequest) {
         return postService
-                .findPostById(id)
-                .map(
-                        postObj -> {
-                            postEntity.setId(id);
-                            return ResponseEntity.ok(postService.savePost(postEntity));
-                        })
+                .updatePost(id, newPostRequest)
+                .map(body -> ResponseEntity.ok(body))
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 

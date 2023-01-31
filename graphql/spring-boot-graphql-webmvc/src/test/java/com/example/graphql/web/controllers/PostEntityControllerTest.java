@@ -13,6 +13,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.example.graphql.entities.PostEntity;
+import com.example.graphql.model.request.NewPostRequest;
+import com.example.graphql.model.request.PostDetailsRequest;
 import com.example.graphql.model.response.PostResponse;
 import com.example.graphql.services.PostService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -85,33 +87,47 @@ class PostEntityControllerTest {
 
     @Test
     void shouldCreateNewPost() throws Exception {
-        given(postService.savePost(any(PostEntity.class))).willReturn(postResponseList.get(0));
+        given(postService.savePost(any(NewPostRequest.class))).willReturn(postResponseList.get(0));
 
-        PostEntity postEntity = PostEntity.builder().id(1L).content("First Post").build();
+        NewPostRequest postEntity =
+                new NewPostRequest(
+                        "First Title",
+                        "First Post",
+                        "junit1@email.com",
+                        false,
+                        new PostDetailsRequest("detailsKey"),
+                        null);
         this.mockMvc
                 .perform(
                         post("/api/posts")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(postEntity)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.content", is(postEntity.getContent())));
+                .andExpect(jsonPath("$.content", is(postEntity.content())));
     }
 
     @Test
     void shouldUpdatePost() throws Exception {
         Long postId = 1L;
-        PostEntity postEntity = PostEntity.builder().id(postId).content("Updated Post").build();
-        PostResponse value = new PostResponse(null, "Updated Post", false, null, null, null, null);
-        given(postService.findPostById(postId)).willReturn(Optional.of(value));
-        given(postService.savePost(any(PostEntity.class))).willReturn(value);
+        NewPostRequest postEntity =
+                new NewPostRequest(
+                        "First Title",
+                        "Updated Content",
+                        "junit1@email.com",
+                        false,
+                        new PostDetailsRequest("detailsKey"),
+                        null);
+        PostResponse value =
+                new PostResponse(null, "Updated Content", false, null, null, null, null);
+        given(postService.updatePost(postId, postEntity)).willReturn(Optional.of(value));
 
         this.mockMvc
                 .perform(
-                        put("/api/posts/{id}", postEntity.getId())
+                        put("/api/posts/{id}", postId)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(postEntity)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content", is(postEntity.getContent())));
+                .andExpect(jsonPath("$.content", is(postEntity.content())));
     }
 
     @Test

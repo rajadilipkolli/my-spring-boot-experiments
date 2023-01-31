@@ -23,6 +23,8 @@ public interface NewPostRequestToPostEntityMapper {
             expression = "java(newPostRequest.published() ? java.time.LocalDateTime.now() : null)")
     PostEntity convert(NewPostRequest newPostRequest, @Context TagRepository tagRepository);
 
+    void updatePostEntity(NewPostRequest newPostRequest, @MappingTarget PostEntity postEntity);
+
     @AfterMapping
     default void afterMapping(
             NewPostRequest newPostRequest,

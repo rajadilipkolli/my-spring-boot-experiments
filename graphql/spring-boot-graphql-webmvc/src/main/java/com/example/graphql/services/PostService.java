@@ -46,8 +46,8 @@ public class PostService {
     }
 
     @Transactional
-    public PostResponse savePost(PostEntity postEntity) {
-        return myConversionService.convert(postRepository.save(postEntity), PostResponse.class);
+    public PostResponse savePost(NewPostRequest newPostRequest) {
+        return myConversionService.convert(createPost(newPostRequest), PostResponse.class);
     }
 
     @Transactional
@@ -67,5 +67,18 @@ public class PostService {
         postEntity.setAuthorEntity(
                 this.authorRepository.getReferenceByEmail(newPostRequest.email()));
         return this.postRepository.save(postEntity);
+    }
+
+    public Optional<PostResponse> updatePost(Long id, NewPostRequest newPostRequest) {
+        return postRepository
+                .findById(id)
+                .map(
+                        postEntity -> {
+                            mapNewPostRequestToPostEntityMapper.updatePostEntity(
+                                    newPostRequest, postEntity);
+                            PostEntity updatedPostEntity = postRepository.save(postEntity);
+                            return myConversionService.convert(
+                                    updatedPostEntity, PostResponse.class);
+                        });
     }
 }
