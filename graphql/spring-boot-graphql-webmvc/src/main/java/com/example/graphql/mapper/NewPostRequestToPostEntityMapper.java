@@ -11,13 +11,12 @@ import org.mapstruct.Context;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
-import org.springframework.core.convert.converter.Converter;
 
 @Mapper(
         config = MapperSpringConfig.class,
         builder = @Builder(disableBuilder = true),
         uses = {TagRepository.class})
-public interface NewPostRequestToPostEntityMapper extends Converter<NewPostRequest, PostEntity> {
+public interface NewPostRequestToPostEntityMapper {
 
     @Mapping(target = "tags", ignore = true)
     @Mapping(
