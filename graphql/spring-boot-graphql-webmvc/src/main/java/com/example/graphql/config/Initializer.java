@@ -82,6 +82,7 @@ public class Initializer implements CommandLineRunner {
                                             .email("user" + i + "@example.com")
                                             .firstName("first name" + i)
                                             .lastName("last name" + i)
+                                            .mobile(9848922338L)
                                             .build();
                             authorEntity.addPost(postEntity);
                             authorEntity.addPost(postEntity1);
