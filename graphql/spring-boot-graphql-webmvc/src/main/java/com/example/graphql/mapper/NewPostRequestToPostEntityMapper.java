@@ -13,7 +13,6 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
 @Mapper(
-        config = MapperSpringConfig.class,
         builder = @Builder(disableBuilder = true),
         uses = {TagRepository.class})
 public interface NewPostRequestToPostEntityMapper {

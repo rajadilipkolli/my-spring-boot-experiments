@@ -74,11 +74,9 @@ class AuthorEntityControllerIT extends AbstractIntegrationTest {
     @Test
     void shouldCreateNewAuthor() throws Exception {
         AuthorRequest authorRequest =
-                AuthorRequest.builder()
-                        .firstName("New Author")
-                        .lastName("lastName")
-                        .email("junit4@email.com")
-                        .build();
+                new AuthorRequest(
+                        "New Author", "middleName", "lastName", 9848022338L, "junit4@email.com");
+
         this.mockMvc
                 .perform(
                         post("/api/authors")
