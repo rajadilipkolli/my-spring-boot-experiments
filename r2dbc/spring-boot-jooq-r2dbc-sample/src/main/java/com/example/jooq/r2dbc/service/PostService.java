@@ -9,6 +9,7 @@ import static org.jooq.impl.DSL.select;
 
 import com.example.jooq.r2dbc.entities.Post;
 import com.example.jooq.r2dbc.model.request.CreatePostCommand;
+import com.example.jooq.r2dbc.model.request.CreatePostComment;
 import com.example.jooq.r2dbc.model.response.PaginatedResult;
 import com.example.jooq.r2dbc.model.response.PostSummary;
 import com.example.jooq.r2dbc.repository.PostRepository;
@@ -159,14 +160,22 @@ public class PostService {
     }
 
     public Mono<Post> findById(String id) {
-        return Mono.justOrEmpty(
-                dslContext
-                        .selectFrom(POSTS)
-                        .where(POSTS.ID.eq(UUID.fromString(id)))
-                        .fetchOneInto(Post.class));
+        return this.postRepository.findById(UUID.fromString(id));
     }
 
     public Mono<Post> save(Post post) {
         return this.postRepository.save(post);
+    }
+
+    public Mono<UUID> addCommentToPostId(String postId, CreatePostComment createPostComment) {
+        return findById(postId)
+                .map(
+                        post ->
+                                dslContext
+                                        .insertInto(POST_COMMENTS)
+                                        .columns(POST_COMMENTS.CONTENT, POST_COMMENTS.POST_ID)
+                                        .values(createPostComment.content(), post.getId())
+                                        .returningResult(POST_COMMENTS.ID))
+                .map(r -> r.fetchAny().value1());
     }
 }

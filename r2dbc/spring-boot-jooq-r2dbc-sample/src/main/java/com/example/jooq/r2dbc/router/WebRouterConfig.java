@@ -143,6 +143,7 @@ public class WebRouterConfig {
         return route(GET("/posts"), handler::getAll)
                 .andRoute(GET("/posts/search"), handler::search)
                 .andRoute(POST("/posts"), handler::create)
+                .andRoute(POST("/posts/comments/{id}"), handler::createComments)
                 .andRoute(GET("/posts/{id}"), handler::get)
                 .andRoute(PUT("/posts/{id}"), handler::update);
     }

@@ -6,10 +6,12 @@ import static org.springframework.web.reactive.function.server.ServerResponse.ok
 import com.example.jooq.r2dbc.config.logging.Loggable;
 import com.example.jooq.r2dbc.entities.Post;
 import com.example.jooq.r2dbc.model.request.CreatePostCommand;
+import com.example.jooq.r2dbc.model.request.CreatePostComment;
 import com.example.jooq.r2dbc.model.response.PaginatedResult;
 import com.example.jooq.r2dbc.model.response.PostSummary;
 import com.example.jooq.r2dbc.service.PostService;
 import java.net.URI;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
@@ -70,5 +72,18 @@ public class PostHandler {
                         paginatedResult ->
                                 ServerResponse.ok()
                                         .body(Mono.just(paginatedResult), PaginatedResult.class));
+    }
+
+    @Loggable
+    public Mono<ServerResponse> createComments(ServerRequest req) {
+
+        return req.bodyToMono(CreatePostComment.class)
+                .flatMap(
+                        createPostComment ->
+                                postService.addCommentToPostId(
+                                        req.pathVariable("id"), createPostComment))
+                .flatMap(
+                        postCommentId ->
+                                ServerResponse.ok().body(Mono.just(postCommentId), UUID.class));
     }
 }
