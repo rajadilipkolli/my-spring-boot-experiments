@@ -11,7 +11,6 @@ import com.example.jooq.r2dbc.model.response.PaginatedResult;
 import com.example.jooq.r2dbc.model.response.PostSummary;
 import com.example.jooq.r2dbc.service.PostService;
 import java.net.URI;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
@@ -82,8 +81,6 @@ public class PostHandler {
                         createPostComment ->
                                 postService.addCommentToPostId(
                                         req.pathVariable("id"), createPostComment))
-                .flatMap(
-                        postCommentId ->
-                                ServerResponse.ok().body(Mono.just(postCommentId), UUID.class));
+                .flatMap(id -> created(URI.create("/posts/comments/" + id)).build());
     }
 }

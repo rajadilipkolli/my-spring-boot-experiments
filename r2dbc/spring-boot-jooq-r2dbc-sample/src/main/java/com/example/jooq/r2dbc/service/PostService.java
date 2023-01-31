@@ -106,6 +106,11 @@ public class PostService {
     }
 
     public Mono<PaginatedResult> findByKeyword(String keyword, int offset, int limit) {
+        log.debug(
+                "findByKeyword with keyword :{} with offset :{} and limit :{}",
+                keyword,
+                offset,
+                limit);
         var posts = POSTS;
         var postsTags = POSTS_TAGS;
         var tags = TAGS;
@@ -170,14 +175,12 @@ public class PostService {
                             r.setContent(createPostComment.content());
                             r.setPostId(post.getId());
 
-                            return Mono.fromSupplier(
-                                    () ->
-                                            dslContext
-                                                    .insertInto(POST_COMMENTS)
-                                                    .set(r)
-                                                    .returningResult(POST_COMMENTS.ID)
-                                                    .fetchOne()
-                                                    .getValue(POST_COMMENTS.ID));
-                        });
+                            return Mono.from(
+                                    dslContext
+                                            .insertInto(POST_COMMENTS)
+                                            .set(r)
+                                            .returningResult(POST_COMMENTS.ID));
+                        })
+                .map(Record1::component1);
     }
 }
