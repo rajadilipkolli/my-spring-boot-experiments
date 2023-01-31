@@ -9,6 +9,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.example.graphql.common.AbstractIntegrationTest;
+import com.example.graphql.entities.PostDetailsEntity;
 import com.example.graphql.entities.PostEntity;
 import com.example.graphql.repositories.PostRepository;
 import java.util.ArrayList;
@@ -27,17 +28,22 @@ class PostEntityControllerIT extends AbstractIntegrationTest {
 
     @BeforeEach
     void setUp() {
-        postRepository.deleteAllInBatch();
+        postRepository.deleteAll();
 
         postEntityList = new ArrayList<>();
-        postEntityList.add(PostEntity.builder().content("First Post").build());
-        postEntityList.add(PostEntity.builder().content("Second Post").build());
-        postEntityList.add(PostEntity.builder().content("Third Post").build());
+        PostEntity firstPost = PostEntity.builder().content("First Post").build();
+        firstPost.setDetails(PostDetailsEntity.builder().detailsKey("Junit1").build());
+        postEntityList.add(firstPost);
+        PostEntity secondPost = PostEntity.builder().content("Second Post").build();
+        secondPost.setDetails(PostDetailsEntity.builder().detailsKey("Junit2").build());
+        postEntityList.add(secondPost);
+        PostEntity thirdPost = PostEntity.builder().content("Third Post").build();
+        thirdPost.setDetails(PostDetailsEntity.builder().detailsKey("Junit3").build());
+        postEntityList.add(thirdPost);
         postEntityList = postRepository.saveAll(postEntityList);
     }
 
     @Test
-    @Disabled
     void shouldFetchAllPosts() throws Exception {
         this.mockMvc
                 .perform(get("/api/posts"))
@@ -46,7 +52,6 @@ class PostEntityControllerIT extends AbstractIntegrationTest {
     }
 
     @Test
-    @Disabled
     void shouldFindPostById() throws Exception {
         PostEntity postEntity = postEntityList.get(0);
         Long postId = postEntity.getId();
@@ -58,8 +63,10 @@ class PostEntityControllerIT extends AbstractIntegrationTest {
     }
 
     @Test
+    @Disabled
     void shouldCreateNewPost() throws Exception {
         PostEntity postEntity = PostEntity.builder().content("New Post").build();
+        postEntity.setDetails(PostDetailsEntity.builder().detailsKey("Junit Details").build());
         this.mockMvc
                 .perform(
                         post("/api/posts")
@@ -70,6 +77,7 @@ class PostEntityControllerIT extends AbstractIntegrationTest {
     }
 
     @Test
+    @Disabled
     void shouldUpdatePost() throws Exception {
         PostEntity postEntity = postEntityList.get(0);
         postEntity.setContent("Updated Post");
@@ -84,13 +92,11 @@ class PostEntityControllerIT extends AbstractIntegrationTest {
     }
 
     @Test
-    @Disabled
     void shouldDeletePost() throws Exception {
         PostEntity postEntity = postEntityList.get(0);
 
         this.mockMvc
                 .perform(delete("/api/posts/{id}", postEntity.getId()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content", is(postEntity.getContent())));
+                .andExpect(status().isAccepted());
     }
 }

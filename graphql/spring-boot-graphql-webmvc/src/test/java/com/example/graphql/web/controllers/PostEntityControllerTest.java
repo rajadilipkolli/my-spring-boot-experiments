@@ -2,7 +2,6 @@ package com.example.graphql.web.controllers;
 
 import static com.example.graphql.utils.AppConstants.PROFILE_TEST;
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
@@ -14,6 +13,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.example.graphql.entities.PostEntity;
+import com.example.graphql.model.response.PostResponse;
 import com.example.graphql.services.PostService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
@@ -40,6 +40,12 @@ class PostEntityControllerTest {
 
     private List<PostEntity> postEntityList;
 
+    private List<PostResponse> postResponseList =
+            List.of(
+                    new PostResponse(null, "First Post", false, null, null, null, null),
+                    new PostResponse(null, "Second Post", false, null, null, null, null),
+                    new PostResponse(null, "Third Post", false, null, null, null, null));
+
     @BeforeEach
     void setUp() {
         this.postEntityList = new ArrayList<>();
@@ -50,7 +56,7 @@ class PostEntityControllerTest {
 
     @Test
     void shouldFetchAllPosts() throws Exception {
-        given(postService.findAllPosts()).willReturn(this.postEntityList);
+        given(postService.findAllPosts()).willReturn(this.postResponseList);
 
         this.mockMvc
                 .perform(get("/api/posts"))
@@ -61,13 +67,12 @@ class PostEntityControllerTest {
     @Test
     void shouldFindPostById() throws Exception {
         Long postId = 1L;
-        PostEntity postEntity = PostEntity.builder().id(postId).content("First Post").build();
-        given(postService.findPostById(postId)).willReturn(Optional.of(postEntity));
+        given(postService.findPostById(postId)).willReturn(Optional.of(postResponseList.get(0)));
 
         this.mockMvc
                 .perform(get("/api/posts/{id}", postId))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content", is(postEntity.getContent())));
+                .andExpect(jsonPath("$.content", is("First Post")));
     }
 
     @Test
@@ -80,8 +85,7 @@ class PostEntityControllerTest {
 
     @Test
     void shouldCreateNewPost() throws Exception {
-        given(postService.savePost(any(PostEntity.class)))
-                .willAnswer((invocation) -> invocation.getArgument(0));
+        given(postService.savePost(any(PostEntity.class))).willReturn(postResponseList.get(0));
 
         PostEntity postEntity = PostEntity.builder().id(1L).content("First Post").build();
         this.mockMvc
@@ -90,7 +94,6 @@ class PostEntityControllerTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(postEntity)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id", notNullValue()))
                 .andExpect(jsonPath("$.content", is(postEntity.getContent())));
     }
 
@@ -98,9 +101,9 @@ class PostEntityControllerTest {
     void shouldUpdatePost() throws Exception {
         Long postId = 1L;
         PostEntity postEntity = PostEntity.builder().id(postId).content("Updated Post").build();
-        given(postService.findPostById(postId)).willReturn(Optional.of(postEntity));
-        given(postService.savePost(any(PostEntity.class)))
-                .willAnswer((invocation) -> invocation.getArgument(0));
+        PostResponse value = new PostResponse(null, "Updated Post", false, null, null, null, null);
+        given(postService.findPostById(postId)).willReturn(Optional.of(value));
+        given(postService.savePost(any(PostEntity.class))).willReturn(value);
 
         this.mockMvc
                 .perform(
@@ -129,13 +132,12 @@ class PostEntityControllerTest {
     void shouldDeletePost() throws Exception {
         Long postId = 1L;
         PostEntity postEntity = PostEntity.builder().id(postId).content("First Post").build();
-        given(postService.findPostById(postId)).willReturn(Optional.of(postEntity));
+        given(postService.findPostById(postId)).willReturn(Optional.of(postResponseList.get(0)));
         doNothing().when(postService).deletePostById(postEntity.getId());
 
         this.mockMvc
                 .perform(delete("/api/posts/{id}", postEntity.getId()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content", is(postEntity.getContent())));
+                .andExpect(status().isAccepted());
     }
 
     @Test

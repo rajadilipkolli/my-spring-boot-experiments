@@ -3,6 +3,7 @@ package com.example.graphql.services;
 import com.example.graphql.entities.PostEntity;
 import com.example.graphql.mapper.NewPostRequestToPostEntityMapper;
 import com.example.graphql.model.request.NewPostRequest;
+import com.example.graphql.model.response.PostResponse;
 import com.example.graphql.projections.PostInfo;
 import com.example.graphql.repositories.AuthorRepository;
 import com.example.graphql.repositories.PostRepository;
@@ -12,6 +13,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,23 +26,28 @@ public class PostService {
     private final AuthorRepository authorRepository;
     private final TagRepository tagRepository;
 
+    private final ConversionService myConversionService;
     private final NewPostRequestToPostEntityMapper mapNewPostRequestToPostEntityMapper;
 
-    public List<PostEntity> findAllPosts() {
-        return postRepository.findAll();
+    public List<PostResponse> findAllPosts() {
+        return postRepository.findAll().stream()
+                .map(post -> myConversionService.convert(post, PostResponse.class))
+                .toList();
     }
 
     public List<PostInfo> findAllPostsByAuthorEmail(String emailId) {
         return postRepository.findByAuthorEntity_EmailIgnoreCase(emailId);
     }
 
-    public Optional<PostEntity> findPostById(Long id) {
-        return postRepository.findById(id);
+    public Optional<PostResponse> findPostById(Long id) {
+        return postRepository
+                .findById(id)
+                .map(post -> myConversionService.convert(post, PostResponse.class));
     }
 
     @Transactional
-    public PostEntity savePost(PostEntity postEntity) {
-        return postRepository.save(postEntity);
+    public PostResponse savePost(PostEntity postEntity) {
+        return myConversionService.convert(postRepository.save(postEntity), PostResponse.class);
     }
 
     @Transactional

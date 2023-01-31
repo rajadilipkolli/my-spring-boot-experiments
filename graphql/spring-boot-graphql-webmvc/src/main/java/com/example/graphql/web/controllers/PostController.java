@@ -1,6 +1,7 @@
 package com.example.graphql.web.controllers;
 
 import com.example.graphql.entities.PostEntity;
+import com.example.graphql.model.response.PostResponse;
 import com.example.graphql.services.PostService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -25,12 +26,12 @@ public class PostController {
     private final PostService postService;
 
     @GetMapping
-    public List<PostEntity> getAllPosts() {
+    public List<PostResponse> getAllPosts() {
         return postService.findAllPosts();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<PostEntity> getPostById(@PathVariable Long id) {
+    public ResponseEntity<PostResponse> getPostById(@PathVariable Long id) {
         return postService
                 .findPostById(id)
                 .map(ResponseEntity::ok)
@@ -39,12 +40,12 @@ public class PostController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public PostEntity createPost(@RequestBody @Validated PostEntity postEntity) {
+    public PostResponse createPost(@RequestBody @Validated PostEntity postEntity) {
         return postService.savePost(postEntity);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<PostEntity> updatePost(
+    public ResponseEntity<PostResponse> updatePost(
             @PathVariable Long id, @RequestBody PostEntity postEntity) {
         return postService
                 .findPostById(id)
@@ -57,13 +58,13 @@ public class PostController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<PostEntity> deletePost(@PathVariable Long id) {
+    public ResponseEntity<Object> deletePost(@PathVariable Long id) {
         return postService
                 .findPostById(id)
                 .map(
                         post -> {
                             postService.deletePostById(id);
-                            return ResponseEntity.ok(post);
+                            return ResponseEntity.accepted().build();
                         })
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
