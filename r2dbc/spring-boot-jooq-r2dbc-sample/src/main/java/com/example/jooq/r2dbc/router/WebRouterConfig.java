@@ -8,6 +8,7 @@ import com.example.jooq.r2dbc.entities.Tags;
 import com.example.jooq.r2dbc.handler.PostHandler;
 import com.example.jooq.r2dbc.handler.TagHandler;
 import com.example.jooq.r2dbc.model.request.CreatePostCommand;
+import com.example.jooq.r2dbc.model.request.CreatePostComment;
 import com.example.jooq.r2dbc.model.request.TagDto;
 import com.example.jooq.r2dbc.model.response.PaginatedResult;
 import com.example.jooq.r2dbc.model.response.PostSummary;
@@ -104,6 +105,23 @@ public class WebRouterConfig {
                                                                                                 .class))),
                                 responses = @ApiResponse(responseCode = "201"))),
         @RouterOperation(
+                path = "/posts/comments/{id}",
+                method = RequestMethod.POST,
+                operation =
+                        @Operation(
+                                operationId = "createComment",
+                                parameters = @Parameter(name = "id", in = ParameterIn.PATH),
+                                requestBody =
+                                        @RequestBody(
+                                                content =
+                                                        @Content(
+                                                                schema =
+                                                                        @Schema(
+                                                                                implementation =
+                                                                                        CreatePostComment
+                                                                                                .class))),
+                                responses = @ApiResponse(responseCode = "201"))),
+        @RouterOperation(
                 path = "/posts/{id}",
                 method = RequestMethod.GET,
                 operation =
@@ -143,9 +161,9 @@ public class WebRouterConfig {
         return route(GET("/posts"), handler::getAll)
                 .andRoute(GET("/posts/search"), handler::search)
                 .andRoute(POST("/posts"), handler::create)
-                .andRoute(POST("/posts/comments/{id}"), handler::createComments)
                 .andRoute(GET("/posts/{id}"), handler::get)
-                .andRoute(PUT("/posts/{id}"), handler::update);
+                .andRoute(PUT("/posts/{id}"), handler::update)
+                .andRoute(POST("/posts/comments/{id}"), handler::createComments);
     }
 
     @RouterOperations({

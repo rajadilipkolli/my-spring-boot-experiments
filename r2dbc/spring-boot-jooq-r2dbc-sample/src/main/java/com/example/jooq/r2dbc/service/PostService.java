@@ -4,8 +4,7 @@ import static com.example.jooq.r2dbc.testcontainersflyway.db.Tables.POSTS;
 import static com.example.jooq.r2dbc.testcontainersflyway.db.Tables.POSTS_TAGS;
 import static com.example.jooq.r2dbc.testcontainersflyway.db.Tables.POST_COMMENTS;
 import static com.example.jooq.r2dbc.testcontainersflyway.db.Tables.TAGS;
-import static org.jooq.impl.DSL.multiset;
-import static org.jooq.impl.DSL.select;
+import static org.jooq.impl.DSL.*;
 
 import com.example.jooq.r2dbc.entities.Post;
 import com.example.jooq.r2dbc.model.request.CreatePostCommand;
@@ -13,6 +12,7 @@ import com.example.jooq.r2dbc.model.request.CreatePostComment;
 import com.example.jooq.r2dbc.model.response.PaginatedResult;
 import com.example.jooq.r2dbc.model.response.PostSummary;
 import com.example.jooq.r2dbc.repository.PostRepository;
+import com.example.jooq.r2dbc.testcontainersflyway.db.tables.records.PostCommentsRecord;
 import com.example.jooq.r2dbc.testcontainersflyway.db.tables.records.PostsTagsRecord;
 import java.util.List;
 import java.util.UUID;
@@ -106,11 +106,6 @@ public class PostService {
     }
 
     public Mono<PaginatedResult> findByKeyword(String keyword, int offset, int limit) {
-        log.debug(
-                "findByKeyword with keyword :{} with offset :{} and limit :{}",
-                keyword,
-                offset,
-                limit);
         var posts = POSTS;
         var postsTags = POSTS_TAGS;
         var tags = TAGS;
@@ -169,13 +164,20 @@ public class PostService {
 
     public Mono<UUID> addCommentToPostId(String postId, CreatePostComment createPostComment) {
         return findById(postId)
-                .map(
-                        post ->
-                                dslContext
-                                        .insertInto(POST_COMMENTS)
-                                        .columns(POST_COMMENTS.CONTENT, POST_COMMENTS.POST_ID)
-                                        .values(createPostComment.content(), post.getId())
-                                        .returningResult(POST_COMMENTS.ID))
-                .map(r -> r.fetchAny().value1());
+                .flatMap(
+                        post -> {
+                            PostCommentsRecord r = POST_COMMENTS.newRecord();
+                            r.setContent(createPostComment.content());
+                            r.setPostId(post.getId());
+
+                            return Mono.fromSupplier(
+                                    () ->
+                                            dslContext
+                                                    .insertInto(POST_COMMENTS)
+                                                    .set(r)
+                                                    .returningResult(POST_COMMENTS.ID)
+                                                    .fetchOne()
+                                                    .getValue(POST_COMMENTS.ID));
+                        });
     }
 }
