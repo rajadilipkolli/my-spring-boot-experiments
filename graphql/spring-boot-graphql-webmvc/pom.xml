@@ -23,7 +23,7 @@
         <spring-cloud.version>2022.0.1</spring-cloud.version>
         <springdoc-openapi.version>2.0.2</springdoc-openapi.version>
         <commons-io.version>2.11.0</commons-io.version>
-        <org.mapstruct.extensions.spring.version>0.1.2</org.mapstruct.extensions.spring.version>
+        <org.mapstruct.extensions.spring.version>1.0.0</org.mapstruct.extensions.spring.version>
         <org.mapstruct.version>1.5.3.Final</org.mapstruct.version>
 
         <testcontainers.version>1.17.6</testcontainers.version>
