@@ -6,7 +6,4 @@ import org.mapstruct.Mapper;
 import org.springframework.core.convert.converter.Converter;
 
 @Mapper(config = MapperSpringConfig.class)
-public interface AuthorEntityToResponseMapper extends Converter<AuthorEntity, AuthorResponse> {
-
-    AuthorResponse convert(AuthorEntity authorEntity);
-}
+public interface AuthorEntityToResponseMapper extends Converter<AuthorEntity, AuthorResponse> {}

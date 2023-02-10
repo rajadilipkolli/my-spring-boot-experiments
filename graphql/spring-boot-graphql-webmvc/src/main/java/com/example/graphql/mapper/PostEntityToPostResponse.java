@@ -6,7 +6,4 @@ import org.mapstruct.Mapper;
 import org.springframework.core.convert.converter.Converter;
 
 @Mapper(config = MapperSpringConfig.class)
-public interface PostEntityToPostResponse extends Converter<PostEntity, PostResponse> {
-
-    PostResponse convert(PostEntity postEntity);
-}
+public interface PostEntityToPostResponse extends Converter<PostEntity, PostResponse> {}
