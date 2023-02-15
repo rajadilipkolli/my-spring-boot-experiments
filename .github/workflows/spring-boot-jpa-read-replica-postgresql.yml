@@ -37,4 +37,4 @@ jobs:
           sleep 5
           docker ps -a
       - name: Build and analyze
-        run: ./mvnw clean package
+        run: ./mvnw clean verify
