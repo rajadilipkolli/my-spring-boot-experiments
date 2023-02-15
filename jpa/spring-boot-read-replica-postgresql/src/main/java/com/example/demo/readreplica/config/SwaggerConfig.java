@@ -5,7 +5,7 @@ import io.swagger.v3.oas.annotations.info.Info;
 import io.swagger.v3.oas.annotations.servers.Server;
 import org.springframework.context.annotation.Configuration;
 
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @OpenAPIDefinition(
         info = @Info(title = "spring-boot-read-replica", version = "v1"),
         servers = @Server(url = "/"))
