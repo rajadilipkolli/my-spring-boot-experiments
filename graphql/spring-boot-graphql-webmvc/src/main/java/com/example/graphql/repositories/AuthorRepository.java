@@ -1,6 +1,12 @@
 package com.example.graphql.repositories;
 
-import com.example.graphql.entities.Author;
+import com.example.graphql.entities.AuthorEntity;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface AuthorRepository extends JpaRepository<Author, Long> {}
+public interface AuthorRepository extends JpaRepository<AuthorEntity, Long> {
+
+    Optional<AuthorEntity> findByEmailAllIgnoreCase(String email);
+
+    AuthorEntity getReferenceByEmail(String email);
+}

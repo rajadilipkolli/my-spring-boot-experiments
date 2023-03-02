@@ -2,7 +2,7 @@ version: '3.7'
 
 services:
   redis:
-    image: 'redis:7.0.5'
+    image: 'redis:7.0.9'
     ports:
       - '127.0.0.1:6379:6379/tcp'
     volumes:

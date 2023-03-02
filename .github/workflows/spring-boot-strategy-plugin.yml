@@ -66,7 +66,7 @@ jobs:
           severity-cutoff: high
       - if: ${{ github.ref == 'refs/heads/main' }}
         name: Log in to the Container registry
-        uses: docker/login-action@f75d088332b07a08afadf6ac53c74509b9453f12
+        uses: docker/login-action@ec9cdf07d570632daeb912f5b2099cb9ec1d01e6
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}

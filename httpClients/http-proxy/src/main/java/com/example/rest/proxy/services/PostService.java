@@ -4,7 +4,7 @@ import com.example.rest.proxy.entities.Post;
 import com.example.rest.proxy.model.response.PagedResult;
 import com.example.rest.proxy.repositories.PostRepository;
 import java.util.Optional;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -14,14 +14,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class PostService {
 
     private final PostRepository postRepository;
-
-    @Autowired
-    public PostService(PostRepository postRepository) {
-        this.postRepository = postRepository;
-    }
 
     public PagedResult<Post> findAllPosts(int pageNo, int pageSize, String sortBy, String sortDir) {
         Sort sort =

@@ -1,6 +1,6 @@
 package com.example.graphql.web.controllers;
 
-import com.example.graphql.entities.Tag;
+import com.example.graphql.entities.TagEntity;
 import com.example.graphql.services.TagService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -25,12 +25,12 @@ public class TagController {
     private final TagService tagService;
 
     @GetMapping
-    public List<Tag> getAllTags() {
+    public List<TagEntity> getAllTags() {
         return tagService.findAllTags();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Tag> getTagById(@PathVariable Long id) {
+    public ResponseEntity<TagEntity> getTagById(@PathVariable Long id) {
         return tagService
                 .findTagById(id)
                 .map(ResponseEntity::ok)
@@ -39,24 +39,25 @@ public class TagController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Tag createTag(@RequestBody @Validated Tag tag) {
-        return tagService.saveTag(tag);
+    public TagEntity createTag(@RequestBody @Validated TagEntity tagEntity) {
+        return tagService.saveTag(tagEntity);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Tag> updateTag(@PathVariable Long id, @RequestBody Tag tag) {
+    public ResponseEntity<TagEntity> updateTag(
+            @PathVariable Long id, @RequestBody TagEntity tagEntity) {
         return tagService
                 .findTagById(id)
                 .map(
                         tagObj -> {
-                            tag.setId(id);
-                            return ResponseEntity.ok(tagService.saveTag(tag));
+                            tagEntity.setId(id);
+                            return ResponseEntity.ok(tagService.saveTag(tagEntity));
                         })
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Tag> deleteTag(@PathVariable Long id) {
+    public ResponseEntity<TagEntity> deleteTag(@PathVariable Long id) {
         return tagService
                 .findTagById(id)
                 .map(

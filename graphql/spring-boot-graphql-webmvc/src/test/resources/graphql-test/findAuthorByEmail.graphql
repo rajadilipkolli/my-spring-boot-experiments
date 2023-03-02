@@ -1,0 +1,21 @@
+query findAuthorByEmailId($emailId: String!) {
+    findAuthorByEmailId(email: $emailId) {
+        id
+        firstName
+        lastName
+        email
+        posts {
+            title
+            content
+            comments {
+                title
+                content
+            }
+            details {
+                createdAt
+                id
+            }
+            createdAt
+        }
+    }
+}

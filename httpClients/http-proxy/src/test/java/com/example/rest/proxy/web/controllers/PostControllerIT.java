@@ -81,8 +81,8 @@ class PostControllerIT extends AbstractIntegrationTest {
     }
 
     @Test
-    void shouldReturn400WhenCreateNewPostWithoutText() throws Exception {
-        Post post = new Post(null, null, null, null);
+    void shouldReturn400WhenCreateNewPostWithoutTitleAndBody() throws Exception {
+        Post post = new Post(null, null, 0L, null);
 
         this.mockMvc
                 .perform(
@@ -96,11 +96,14 @@ class PostControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.status", is(400)))
                 .andExpect(jsonPath("$.detail", is("Invalid request content.")))
                 .andExpect(jsonPath("$.instance", is("/api/posts")))
-                .andExpect(jsonPath("$.violations", hasSize(2)))
-                .andExpect(jsonPath("$.violations[1].field", is("title")))
-                .andExpect(jsonPath("$.violations[1].message", is("Title cannot be empty")))
+                .andExpect(jsonPath("$.violations", hasSize(3)))
                 .andExpect(jsonPath("$.violations[0].field", is("body")))
                 .andExpect(jsonPath("$.violations[0].message", is("Body cannot be empty")))
+                .andExpect(jsonPath("$.violations[1].field", is("title")))
+                .andExpect(jsonPath("$.violations[1].message", is("Title cannot be empty")))
+                .andExpect(jsonPath("$.violations[2].field", is("userId")))
+                .andExpect(
+                        jsonPath("$.violations[2].message", is("UserId Should be positive Number")))
                 .andReturn();
     }
 

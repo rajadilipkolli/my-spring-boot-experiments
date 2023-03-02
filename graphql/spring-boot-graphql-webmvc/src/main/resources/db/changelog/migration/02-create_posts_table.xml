@@ -1,23 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <databaseChangeLog
-        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
-        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
-         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
-    <changeSet author="sivalabs" id="createTable-posts">
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.2.xsd">
+
+    <property name="string.type" dbms="postgresql" value="text"/>
+    <property name="string.type" dbms="!postgresql" value="varchar2(255)"/>
+
+    <changeSet author="appUser" id="createTable-posts">
         <createSequence
-                        sequenceName="post_id_seq"
-                        incrementBy="100"
-                        startValue="1"
-                        />
+            sequenceName="posts_seq"
+            incrementBy="50"
+            startValue="1"
+        />
         <createTable tableName="posts">
-            <column name="id" type="bigint" defaultValueSequenceNext="post_id_seq">
+            <column name="id" type="bigint" defaultValueSequenceNext="posts_seq">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
-            <column name="title" type="VARCHAR(255)"/>
-            <column name="content" type="VARCHAR(4096)"/>
-            <column name="created_on" type="DATETIME"/>
-            <column name="details_id" type="BIGINT"/>
+            <column name="title" type="${string.type}"/>
+            <column name="content" type="${string.type}"/>
+            <column name="published" type="boolean"/>
+            <column name="published_at" type="timestamptz"/>
+            <column name="created_at" type="timestamptz"/>
+            <column name="modified_at" type="timestamptz"/>
+            <column name="author_id" type="BIGINT"/>
         </createTable>
     </changeSet>
 </databaseChangeLog>

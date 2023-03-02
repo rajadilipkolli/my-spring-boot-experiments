@@ -32,7 +32,7 @@ public class Post {
     private String title;
 
     @Column(nullable = false)
-    @Positive(message = "Title cannot be empty")
+    @Positive(message = "UserId Should be positive Number")
     private Long userId;
 
     @Column(nullable = false)

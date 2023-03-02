@@ -4,8 +4,7 @@ import com.example.rest.proxy.entities.Post;
 import com.example.rest.proxy.model.response.PagedResult;
 import com.example.rest.proxy.services.PostService;
 import com.example.rest.proxy.utils.AppConstants;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -22,15 +21,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/posts")
-@Slf4j
+@RequiredArgsConstructor
 public class PostController {
 
     private final PostService postService;
-
-    @Autowired
-    public PostController(PostService postService) {
-        this.postService = postService;
-    }
 
     @GetMapping
     public PagedResult<Post> getAllPosts(

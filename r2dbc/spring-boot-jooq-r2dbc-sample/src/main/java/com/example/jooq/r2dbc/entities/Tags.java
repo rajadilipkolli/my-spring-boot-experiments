@@ -26,4 +26,8 @@ public class Tags {
 
     @Column("name")
     private String name;
+
+    public Tags(String name) {
+        this.name = name;
+    }
 }

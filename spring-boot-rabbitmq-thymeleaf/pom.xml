@@ -7,7 +7,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.0.0</version>
+        <version>3.0.3</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.example</groupId>
@@ -19,7 +19,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<java.version>17</java.version>
-		<maven-checkstyle-plugin.version>3.2.0</maven-checkstyle-plugin.version>
+		<maven-checkstyle-plugin.version>3.2.1</maven-checkstyle-plugin.version>
 
 		<jacoco-maven-plugin.version>0.8.8</jacoco-maven-plugin.version>
 		<jacoco.minimum.coverage>0.80</jacoco.minimum.coverage>
@@ -63,7 +63,7 @@
         <dependency>
             <groupId>org.webjars</groupId>
             <artifactId>jquery</artifactId>
-            <version>3.6.1</version>
+            <version>3.6.3</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -148,7 +148,7 @@
 					<dependency>
 						<groupId>com.puppycrawl.tools</groupId>
 						<artifactId>checkstyle</artifactId>
-						<version>10.5.0</version>
+						<version>10.8.0</version>
 					</dependency>
 				</dependencies>
 				<configuration>

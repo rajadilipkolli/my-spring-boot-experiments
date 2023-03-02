@@ -42,7 +42,7 @@
             "cwd": "${workspaceFolder}",
             "mainClass": "com.example.jooq.r2dbc.Application",
             "projectName": "spring-boot-jooq-r2dbc-sample",
-            "args": "",
+            "args": "--spring.profiles.active=local",
             "envFile": "${workspaceFolder}/.env"
         },
         {
@@ -84,6 +84,26 @@
             "mainClass": "com.example.rest.template.Application",
             "projectName": "rest-template",
             "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-Application<web-client-webflux>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.example.rest.webclient.Application",
+            "projectName": "web-client-webflux",
+            "args": "--spring.profiles.active=local",
+            "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-Application<spring-boot-graphql-webmvc>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.example.graphql.Application",
+            "projectName": "spring-boot-graphql-webmvc",
+            "args": "--spring.profiles.active=local",
             "envFile": "${workspaceFolder}/.env"
         }
     ]

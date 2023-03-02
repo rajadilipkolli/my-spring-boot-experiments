@@ -1,6 +1,7 @@
 package com.example.graphql.web.controllers;
 
-import com.example.graphql.entities.Post;
+import com.example.graphql.model.request.NewPostRequest;
+import com.example.graphql.model.response.PostResponse;
 import com.example.graphql.services.PostService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -25,12 +26,12 @@ public class PostController {
     private final PostService postService;
 
     @GetMapping
-    public List<Post> getAllPosts() {
+    public List<PostResponse> getAllPosts() {
         return postService.findAllPosts();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Post> getPostById(@PathVariable Long id) {
+    public ResponseEntity<PostResponse> getPostById(@PathVariable Long id) {
         return postService
                 .findPostById(id)
                 .map(ResponseEntity::ok)
@@ -39,30 +40,27 @@ public class PostController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Post createPost(@RequestBody @Validated Post post) {
-        return postService.savePost(post);
+    public PostResponse createPost(@RequestBody @Validated NewPostRequest newPostRequest) {
+        return postService.savePost(newPostRequest);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Post> updatePost(@PathVariable Long id, @RequestBody Post post) {
+    public ResponseEntity<PostResponse> updatePost(
+            @PathVariable Long id, @RequestBody NewPostRequest newPostRequest) {
         return postService
-                .findPostById(id)
-                .map(
-                        postObj -> {
-                            post.setId(id);
-                            return ResponseEntity.ok(postService.savePost(post));
-                        })
+                .updatePost(id, newPostRequest)
+                .map(body -> ResponseEntity.ok(body))
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Post> deletePost(@PathVariable Long id) {
+    public ResponseEntity<Object> deletePost(@PathVariable Long id) {
         return postService
                 .findPostById(id)
                 .map(
                         post -> {
                             postService.deletePostById(id);
-                            return ResponseEntity.ok(post);
+                            return ResponseEntity.accepted().build();
                         })
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
