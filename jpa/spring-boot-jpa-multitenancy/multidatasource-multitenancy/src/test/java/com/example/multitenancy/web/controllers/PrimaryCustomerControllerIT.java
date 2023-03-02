@@ -20,7 +20,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 
-class PrimaryPrimaryCustomerControllerIT extends AbstractIntegrationTest {
+class PrimaryCustomerControllerIT extends AbstractIntegrationTest {
 
     @Autowired private PrimaryCustomerRepository primaryCustomerRepository;
     @Autowired private TenantIdentifierResolver tenantIdentifierResolver;
