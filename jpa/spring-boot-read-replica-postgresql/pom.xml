@@ -17,7 +17,7 @@
     <properties>
         <java.version>17</java.version>
         <spotless.version>2.35.0</spotless.version>
-        <springdoc-openapi.version>2.0.3</springdoc-openapi.version>
+        <springdoc-openapi.version>2.0.4</springdoc-openapi.version>
         <maven-surefire-plugin.version>3.0.0-M9</maven-surefire-plugin.version>
         <maven-failsafe-plugin.version>3.0.0-M9</maven-failsafe-plugin.version>
     </properties>
