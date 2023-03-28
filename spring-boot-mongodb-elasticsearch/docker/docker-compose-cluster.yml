@@ -3,7 +3,7 @@ version: '3.8'
 services:
   mongo1:
     container_name: mongo1
-    image: mongo:5.0.14
+    image: mongo:5.0.15
     extra_hosts:
       - "host.docker.internal:host-gateway"
       - "docker.for.win.host.internal:host-gateway"
@@ -18,7 +18,7 @@ services:
     entrypoint: [ "/usr/bin/mongod", "--replSet", "myReplicaSet", "--bind_ip", "localhost,mongo1" ]
   mongo2:
     container_name: mongo2
-    image: mongo:5.0.14
+    image: mongo:5.0.15
     extra_hosts:
       - "host.docker.internal:host-gateway"
       - "docker.for.win.host.internal:host-gateway"
@@ -30,7 +30,7 @@ services:
     entrypoint: [ "/usr/bin/mongod", "--replSet", "myReplicaSet", "--bind_ip", "localhost,mongo2" ]
   mongo3:
     container_name: mongo3
-    image: mongo:5.0.14
+    image: mongo:5.0.15
     extra_hosts:
       - "host.docker.internal:host-gateway"
       - "docker.for.win.host.internal:host-gateway"
@@ -55,7 +55,7 @@ services:
     restart: unless-stopped
 
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.8
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.9
     container_name: elasticsearch
     environment:
       - discovery.type=single-node
@@ -69,7 +69,7 @@ services:
       - esdata1:/usr/share/elasticsearch/data
 
   kibana:
-    image: docker.elastic.co/kibana/kibana:7.17.8
+    image: docker.elastic.co/kibana/kibana:7.17.9
     restart: always
     ports:
       - 5601:5601

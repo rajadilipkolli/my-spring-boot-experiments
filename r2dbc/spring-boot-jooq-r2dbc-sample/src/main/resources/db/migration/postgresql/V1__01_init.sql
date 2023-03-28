@@ -1,30 +1,33 @@
-CREATE TABLE POST
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+CREATE TABLE posts
 (
-    ID uuid NOT NULL,
-    TITLE VARCHAR(255),
-    CONTENT VARCHAR(255),
+    ID uuid NOT NULL DEFAULT uuid_generate_v4 (),
+    TITLE text,
+    CONTENT text,
     STATUS varchar(50),
-    created_at timestamp,
-    created_by varchar(255),
-    updated_at timestamp,
-    version BIGINT,
+    created_at timestamptz DEFAULT NOW(),
+    created_by text,
+    updated_at timestamptz,
+    version BIGINT DEFAULT 0,
     PRIMARY KEY   (ID)
 );
 
-create table POST_COMMENT
+create table post_comments
 (
-    id uuid not null,
-    content varchar(255),
-    created_at timestamp,
+    id uuid not null DEFAULT uuid_generate_v4 (),
+    content text,
+    created_at timestamptz DEFAULT NOW(),
     POST_ID uuid,
     primary key (id),
-    CONSTRAINT FK_POST_COMMENT FOREIGN KEY (POST_ID) REFERENCES POST(ID)
+    CONSTRAINT FK_POST_COMMENTS FOREIGN KEY (POST_ID) REFERENCES POSTS(ID)
 );
 
 create table tags
 (
-    id uuid not null,
-    name varchar(255),
+    id uuid not null DEFAULT uuid_generate_v4 (),
+    name text,
+    created_at timestamptz DEFAULT NOW(),
     primary key (id)
 );
 

@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.0.2</version>
+        <version>3.0.5</version>
         <relativePath /> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.example</groupId>
@@ -17,12 +17,12 @@
     <properties>
         <java.version>17</java.version>
         <testcontainers.version>1.17.6</testcontainers.version>
-        <spotless.version>2.31.0</spotless.version>
-        <springdoc-openapi.version>2.0.2</springdoc-openapi.version>
+        <spotless.version>2.35.0</spotless.version>
+        <springdoc-openapi.version>2.0.4</springdoc-openapi.version>
 
         <project.testresult.directory>${project.build.directory}/test-results</project.testresult.directory>
-        <maven-surefire-plugin.version>3.0.0-M8</maven-surefire-plugin.version>
-        <maven-failsafe-plugin.version>3.0.0-M8</maven-failsafe-plugin.version>
+        <maven-surefire-plugin.version>3.0.0</maven-surefire-plugin.version>
+        <maven-failsafe-plugin.version>3.0.0</maven-failsafe-plugin.version>
         <jacoco-maven-plugin.version>0.8.8</jacoco-maven-plugin.version>
         <jacoco.minimum.coverage>0.80</jacoco.minimum.coverage>
         <jacoco.utReportFolder>${project.build.directory}/jacoco/test</jacoco.utReportFolder>

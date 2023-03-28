@@ -46,23 +46,32 @@ class AuthorEntityControllerTest {
     void setUp() {
         this.authorEntityList = new ArrayList<>();
         this.authorEntityList.add(
-                AuthorResponse.builder()
-                        .firstName("First Author")
-                        .lastName("lastName")
-                        .email("junit1@email.com")
-                        .build());
+                new AuthorResponse(
+                        1L,
+                        "First Author",
+                        "middleName",
+                        "lastName",
+                        9848022338L,
+                        "junit1@email.com",
+                        LocalDateTime.now()));
         this.authorEntityList.add(
-                AuthorResponse.builder()
-                        .firstName("Second Author")
-                        .lastName("lastName")
-                        .email("junit2@email.com")
-                        .build());
+                new AuthorResponse(
+                        2L,
+                        "Second Author",
+                        "middleName",
+                        "lastName",
+                        9848022338L,
+                        "junit2@email.com",
+                        LocalDateTime.now()));
         this.authorEntityList.add(
-                AuthorResponse.builder()
-                        .firstName("Third Author")
-                        .lastName("lastName")
-                        .email("junit3@email.com")
-                        .build());
+                new AuthorResponse(
+                        3L,
+                        "Third Author",
+                        "middleName",
+                        "lastName",
+                        9848022338L,
+                        "junit3@email.com",
+                        LocalDateTime.now()));
     }
 
     @Test
@@ -87,12 +96,14 @@ class AuthorEntityControllerTest {
                         .email("junit1@email.com")
                         .build();
         AuthorResponse authorResponse =
-                AuthorResponse.builder()
-                        .firstName("First Author")
-                        .lastName("lastName")
-                        .email("junit1@email.com")
-                        .registeredAt(LocalDateTime.now())
-                        .build();
+                new AuthorResponse(
+                        1L,
+                        "First Author",
+                        "middleName",
+                        "lastName",
+                        9848022338L,
+                        "junit1@email.com",
+                        LocalDateTime.now());
         given(authorService.findAuthorById(authorId)).willReturn(Optional.of(authorResponse));
 
         this.mockMvc
@@ -113,19 +124,18 @@ class AuthorEntityControllerTest {
     void shouldCreateNewAuthor() throws Exception {
 
         AuthorRequest authorRequest =
-                AuthorRequest.builder()
-                        .firstName("First Author")
-                        .lastName("lastName")
-                        .email("junit1@email.com")
-                        .build();
+                new AuthorRequest(
+                        "First Author", "middleName", "lastName", 9848022338L, "junit1@email.com");
 
         AuthorResponse authorResponse =
-                AuthorResponse.builder()
-                        .firstName("First Author")
-                        .lastName("lastName")
-                        .email("junit1@email.com")
-                        .registeredAt(LocalDateTime.now())
-                        .build();
+                new AuthorResponse(
+                        1L,
+                        "First Author",
+                        "middleName",
+                        "lastName",
+                        9848022338L,
+                        "junit1@email.com",
+                        LocalDateTime.now());
 
         given(authorService.saveAuthor(authorRequest)).willReturn(authorResponse);
 
@@ -151,19 +161,22 @@ class AuthorEntityControllerTest {
                         .build();
 
         AuthorRequest authorRequest =
-                AuthorRequest.builder()
-                        .firstName("Updated Author")
-                        .lastName("lastName")
-                        .email("junit1@email.com")
-                        .build();
+                new AuthorRequest(
+                        "Updated Author",
+                        "middleName",
+                        "lastName",
+                        9848022338L,
+                        "junit1@email.com");
 
         AuthorResponse authorResponse =
-                AuthorResponse.builder()
-                        .firstName("Updated Author")
-                        .lastName("lastName")
-                        .email("junit1@email.com")
-                        .registeredAt(LocalDateTime.now())
-                        .build();
+                new AuthorResponse(
+                        1L,
+                        "Updated Author",
+                        "middleName",
+                        "lastName",
+                        9848022338L,
+                        "junit1@email.com",
+                        LocalDateTime.now());
         given(authorService.updateAuthor(authorRequest, authorEntity.getId()))
                 .willReturn(Optional.of(authorResponse));
 
@@ -180,11 +193,9 @@ class AuthorEntityControllerTest {
     void shouldReturn404WhenUpdatingNonExistingAuthor() throws Exception {
         Long authorId = 100L;
         AuthorRequest authorRequest =
-                AuthorRequest.builder()
-                        .firstName("First Author")
-                        .lastName("lastName")
-                        .email("junit1@email.com")
-                        .build();
+                new AuthorRequest(
+                        "First Author", "middleName", "lastName", 9848022338L, "junit4@email.com");
+
         given(authorService.updateAuthor(authorRequest, authorId)).willReturn(Optional.empty());
         this.mockMvc
                 .perform(
@@ -198,12 +209,14 @@ class AuthorEntityControllerTest {
     void shouldDeleteAuthor() throws Exception {
         Long authorId = 1L;
         AuthorResponse authorResponse =
-                AuthorResponse.builder()
-                        .firstName("Updated Author")
-                        .lastName("lastName")
-                        .email("junit1@email.com")
-                        .registeredAt(LocalDateTime.now())
-                        .build();
+                new AuthorResponse(
+                        1L,
+                        "First Author",
+                        "middleName",
+                        "lastName",
+                        9848022338L,
+                        "junit1@email.com",
+                        LocalDateTime.now());
         given(authorService.findAuthorById(authorId)).willReturn(Optional.of(authorResponse));
         doNothing().when(authorService).deleteAuthorById(authorId);
 

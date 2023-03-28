@@ -49,7 +49,7 @@
             "cwd": "${workspaceFolder}",
             "mainClass": "com.example.jooq.r2dbc.Application",
             "projectName": "spring-boot-jooq-r2dbc-sample",
-            "args": "",
+            "args": "--spring.profiles.active=local",
             "envFile": "${workspaceFolder}/.env"
         },
         {

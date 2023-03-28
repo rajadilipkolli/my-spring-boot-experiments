@@ -62,8 +62,8 @@ public class LoggingAspect {
 
     @Around("applicationPackagePointcut()")
     public Object logAround(ProceedingJoinPoint joinPoint) throws Throwable {
-        if (log.isTraceEnabled()) {
-            log.trace(
+        if (log.isDebugEnabled()) {
+            log.debug(
                     "Enter: {}.{}()",
                     joinPoint.getSignature().getDeclaringTypeName(),
                     joinPoint.getSignature().getName());
@@ -71,8 +71,8 @@ public class LoggingAspect {
         long start = System.currentTimeMillis();
         Object result = joinPoint.proceed();
         long end = System.currentTimeMillis();
-        if (log.isTraceEnabled()) {
-            log.trace(
+        if (log.isDebugEnabled()) {
+            log.debug(
                     "Exit: {}.{}(). Time taken: {} millis",
                     joinPoint.getSignature().getDeclaringTypeName(),
                     joinPoint.getSignature().getName(),

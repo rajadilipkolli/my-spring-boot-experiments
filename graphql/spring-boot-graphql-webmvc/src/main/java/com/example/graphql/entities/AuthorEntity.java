@@ -41,7 +41,7 @@ public class AuthorEntity {
     private String lastName;
 
     @Column(nullable = false, length = 15)
-    private String mobile;
+    private Long mobile;
 
     @Column(nullable = false, unique = true, length = 50)
     private String email;

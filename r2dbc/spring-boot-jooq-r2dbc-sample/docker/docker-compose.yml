@@ -10,3 +10,12 @@ services:
     ports:
       - "5432:5432"
 
+  pgadmin4:
+    image: dpage/pgadmin4
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgresqldb
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=pgadmin4@pgadmin.org
+      - PGADMIN_DEFAULT_PASSWORD=admin

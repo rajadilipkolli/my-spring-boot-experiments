@@ -24,6 +24,8 @@ public class ReadOnlyRouteInterceptor {
             if (transactional.readOnly()) {
                 RoutingDataSource.setReplicaRoute();
                 LOGGER.info("Routing database call to the read replica");
+            } else {
+                LOGGER.info("Routing database call to the write replica");
             }
             return proceedingJoinPoint.proceed();
         } finally {

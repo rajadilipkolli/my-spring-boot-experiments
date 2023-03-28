@@ -1,10 +1,9 @@
 package com.example.graphql.services;
 
 import com.example.graphql.entities.PostEntity;
-import com.example.graphql.entities.TagEntity;
-import com.example.graphql.mapper.adapter.ConversionServiceAdapter;
+import com.example.graphql.mapper.NewPostRequestToPostEntityMapper;
 import com.example.graphql.model.request.NewPostRequest;
-import com.example.graphql.model.request.TagsRequest;
+import com.example.graphql.model.response.PostResponse;
 import com.example.graphql.projections.PostInfo;
 import com.example.graphql.repositories.AuthorRepository;
 import com.example.graphql.repositories.PostRepository;
@@ -14,6 +13,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,23 +26,28 @@ public class PostService {
     private final AuthorRepository authorRepository;
     private final TagRepository tagRepository;
 
-    private final ConversionServiceAdapter conversionServiceAdapter;
+    private final ConversionService myConversionService;
+    private final NewPostRequestToPostEntityMapper mapNewPostRequestToPostEntityMapper;
 
-    public List<PostEntity> findAllPosts() {
-        return postRepository.findAll();
+    public List<PostResponse> findAllPosts() {
+        return postRepository.findAll().stream()
+                .map(post -> myConversionService.convert(post, PostResponse.class))
+                .toList();
     }
 
     public List<PostInfo> findAllPostsByAuthorEmail(String emailId) {
         return postRepository.findByAuthorEntity_EmailIgnoreCase(emailId);
     }
 
-    public Optional<PostEntity> findPostById(Long id) {
-        return postRepository.findById(id);
+    public Optional<PostResponse> findPostById(Long id) {
+        return postRepository
+                .findById(id)
+                .map(post -> myConversionService.convert(post, PostResponse.class));
     }
 
     @Transactional
-    public PostEntity savePost(PostEntity postEntity) {
-        return postRepository.save(postEntity);
+    public PostResponse savePost(NewPostRequest newPostRequest) {
+        return myConversionService.convert(createPost(newPostRequest), PostResponse.class);
     }
 
     @Transactional
@@ -58,26 +63,22 @@ public class PostService {
     @Transactional
     public PostEntity createPost(NewPostRequest newPostRequest) {
         PostEntity postEntity =
-                this.conversionServiceAdapter.mapNewPostRequestToPostEntity(newPostRequest);
-        // handle Tags till bug is fixed, Ideally this should be handled in Mapper
-        if (null != newPostRequest.tags()) {
-            newPostRequest
-                    .tags()
-                    .forEach(tagsRequest -> postEntity.addTag(getTagEntity(tagsRequest)));
-        }
+                this.mapNewPostRequestToPostEntityMapper.convert(newPostRequest, tagRepository);
         postEntity.setAuthorEntity(
                 this.authorRepository.getReferenceByEmail(newPostRequest.email()));
         return this.postRepository.save(postEntity);
     }
 
-    private TagEntity getTagEntity(TagsRequest tagsRequest) {
-        return this.tagRepository
-                .findByTagNameIgnoreCase(tagsRequest.tagName())
-                .orElseGet(
-                        () ->
-                                this.tagRepository.save(
-                                        new TagEntity(
-                                                tagsRequest.tagName(),
-                                                tagsRequest.tagDescription())));
+    public Optional<PostResponse> updatePost(Long id, NewPostRequest newPostRequest) {
+        return postRepository
+                .findById(id)
+                .map(
+                        postEntity -> {
+                            mapNewPostRequestToPostEntityMapper.updatePostEntity(
+                                    newPostRequest, postEntity);
+                            PostEntity updatedPostEntity = postRepository.save(postEntity);
+                            return myConversionService.convert(
+                                    updatedPostEntity, PostResponse.class);
+                        });
     }
 }

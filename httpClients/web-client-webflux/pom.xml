@@ -6,7 +6,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.0.2</version>
+        <version>3.0.5</version>
         <relativePath /> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.example.rest.webclient</groupId>
@@ -21,17 +21,17 @@
 
         <java.version>17</java.version>
         <spring-cloud.version>2022.0.1</spring-cloud.version>
-        <springdoc-openapi.version>2.0.2</springdoc-openapi.version>
+        <springdoc-openapi.version>2.0.4</springdoc-openapi.version>
         <commons-io.version>2.11.0</commons-io.version>
         <org.mapstruct.version>1.5.3.Final</org.mapstruct.version>
 
         <project.testresult.directory>${project.build.directory}/test-results</project.testresult.directory>
-        <spotless.version>2.31.0</spotless.version>
+        <spotless.version>2.35.0</spotless.version>
         <testcontainers.version>1.17.6</testcontainers.version>
-        <dependency-check-maven.version>8.0.2</dependency-check-maven.version>
+        <dependency-check-maven.version>8.2.1</dependency-check-maven.version>
         <properties-maven-plugin.version>1.1.0</properties-maven-plugin.version>
-        <maven-surefire-plugin.version>3.0.0-M8</maven-surefire-plugin.version>
-        <maven-failsafe-plugin.version>3.0.0-M8</maven-failsafe-plugin.version>
+        <maven-surefire-plugin.version>3.0.0</maven-surefire-plugin.version>
+        <maven-failsafe-plugin.version>3.0.0</maven-failsafe-plugin.version>
         <sonar-maven-plugin.version>3.9.1.2184</sonar-maven-plugin.version>
         <jacoco-maven-plugin.version>0.8.8</jacoco-maven-plugin.version>
         <jacoco.minimum.coverage>0.80</jacoco.minimum.coverage>
@@ -150,6 +150,13 @@
             <artifactId>r2dbc</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.github.tomakehurst</groupId>
+            <artifactId>wiremock-jre8</artifactId>
+            <version>2.35.0</version>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
 
     <dependencyManagement>

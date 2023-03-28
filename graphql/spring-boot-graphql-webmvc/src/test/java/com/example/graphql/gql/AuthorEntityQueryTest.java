@@ -10,6 +10,7 @@ import com.example.graphql.services.AuthorService;
 import com.example.graphql.services.PostCommentService;
 import com.example.graphql.services.PostService;
 import com.example.graphql.services.TagService;
+import java.time.LocalDateTime;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.mockito.BDDMockito;
@@ -33,16 +34,22 @@ class AuthorEntityQueryTest {
         BDDMockito.given(authorService.findAllAuthors())
                 .willReturn(
                         List.of(
-                                AuthorResponse.builder()
-                                        .id(1L)
-                                        .firstName("test title")
-                                        .email("junit1@email.com")
-                                        .build(),
-                                AuthorResponse.builder()
-                                        .id(2L)
-                                        .firstName("test title2")
-                                        .email("junit2@email.com")
-                                        .build()));
+                                new AuthorResponse(
+                                        1L,
+                                        "firstName",
+                                        "middleName",
+                                        "lastName",
+                                        9848022338L,
+                                        "junit1@email.com",
+                                        LocalDateTime.now()),
+                                new AuthorResponse(
+                                        2L,
+                                        "secondName",
+                                        "middleName",
+                                        "lastName",
+                                        9848022338L,
+                                        "junit2@email.com",
+                                        LocalDateTime.now())));
 
         var allAuthors =
                 """
@@ -64,9 +71,7 @@ class AuthorEntityQueryTest {
                 .path("allAuthors[*].firstName")
                 .entityList(String.class)
                 .satisfies(
-                        names ->
-                                assertThat(names)
-                                        .containsAll(List.of("test title", "test title2")));
+                        names -> assertThat(names).containsAll(List.of("firstName", "secondName")));
 
         verify(authorService, times(1)).findAllAuthors();
         verifyNoMoreInteractions(authorService);

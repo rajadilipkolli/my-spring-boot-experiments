@@ -36,18 +36,21 @@ class AuthorEntityControllerIT extends AbstractIntegrationTest {
                         .firstName("First Author")
                         .lastName("lastName")
                         .email("junit1@email.com")
+                        .mobile(9848022338L)
                         .build());
         authorEntityList.add(
                 AuthorEntity.builder()
                         .firstName("Second Author")
                         .lastName("lastName")
                         .email("junit2@email.com")
+                        .mobile(9848022339L)
                         .build());
         authorEntityList.add(
                 AuthorEntity.builder()
                         .firstName("Third Author")
                         .lastName("lastName")
                         .email("junit3@email.com")
+                        .mobile(9848022340L)
                         .build());
         authorEntityList = authorRepository.saveAll(authorEntityList);
     }
@@ -74,11 +77,9 @@ class AuthorEntityControllerIT extends AbstractIntegrationTest {
     @Test
     void shouldCreateNewAuthor() throws Exception {
         AuthorRequest authorRequest =
-                AuthorRequest.builder()
-                        .firstName("New Author")
-                        .lastName("lastName")
-                        .email("junit4@email.com")
-                        .build();
+                new AuthorRequest(
+                        "New Author", "middleName", "lastName", 9848022338L, "junit4@email.com");
+
         this.mockMvc
                 .perform(
                         post("/api/authors")

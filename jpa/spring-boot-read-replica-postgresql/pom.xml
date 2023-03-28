@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.0.2</version>
+        <version>3.0.5</version>
         <relativePath /> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.example.demo</groupId>
@@ -16,8 +16,10 @@
 
     <properties>
         <java.version>17</java.version>
-        <spotless.version>2.31.0</spotless.version>
-        <springdoc-openapi.version>2.0.2</springdoc-openapi.version>
+        <spotless.version>2.35.0</spotless.version>
+        <springdoc-openapi.version>2.0.4</springdoc-openapi.version>
+        <maven-surefire-plugin.version>3.0.0-M9</maven-surefire-plugin.version>
+        <maven-failsafe-plugin.version>3.0.0-M9</maven-failsafe-plugin.version>
     </properties>
 
     <dependencies>
@@ -80,7 +82,7 @@
             <plugin>
                 <groupId>org.liquibase</groupId>
                 <artifactId>liquibase-maven-plugin</artifactId>
-                <version>4.19.0</version>
+                <version>4.20.0</version>
                 <configuration>
                     <propertyFile>
                         src/main/resources/liquibase.properties

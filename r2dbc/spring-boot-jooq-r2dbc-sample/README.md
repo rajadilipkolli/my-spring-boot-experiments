@@ -13,3 +13,8 @@ $ ./mvnw spring-boot:run -Dspring-boot.run.profiles=local
 ### Useful Links
 * Swagger UI: http://localhost:8080/swagger-ui.html
 * Actuator Endpoint: http://localhost:8080/actuator
+
+
+### Notes
+ * When using `RouterFunction` ordering is important
+ * Postgres `uuid-ossp` extension is used for autogenerating functions for uuid
