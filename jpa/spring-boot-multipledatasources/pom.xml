@@ -6,7 +6,7 @@
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>3.0.5</version>
-        <relativePath /> <!-- lookup parent from repository -->
+        <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.example</groupId>
     <artifactId>spring-boot-multipledatasources</artifactId>
@@ -18,7 +18,7 @@
         <java.version>17</java.version>
         <testcontainers.version>1.17.6</testcontainers.version>
         <spotless.version>2.35.0</spotless.version>
-        <springdoc-openapi.version>2.0.4</springdoc-openapi.version>
+        <springdoc-openapi.version>2.1.0</springdoc-openapi.version>
 
         <project.testresult.directory>${project.build.directory}/test-results</project.testresult.directory>
         <maven-surefire-plugin.version>3.0.0</maven-surefire-plugin.version>
