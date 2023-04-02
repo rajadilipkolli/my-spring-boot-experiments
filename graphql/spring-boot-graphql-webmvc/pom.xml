@@ -7,7 +7,7 @@
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>3.0.5</version>
-        <relativePath /> <!-- lookup parent from repository -->
+        <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.example.graphql</groupId>
     <artifactId>spring-boot-graphql-webmvc</artifactId>
@@ -21,7 +21,7 @@
 
         <java.version>17</java.version>
         <spring-cloud.version>2022.0.2</spring-cloud.version>
-        <springdoc-openapi.version>2.0.4</springdoc-openapi.version>
+        <springdoc-openapi.version>2.1.0</springdoc-openapi.version>
         <commons-io.version>2.11.0</commons-io.version>
         <org.mapstruct.extensions.spring.version>1.0.0</org.mapstruct.extensions.spring.version>
         <org.mapstruct.version>1.5.3.Final</org.mapstruct.version>
