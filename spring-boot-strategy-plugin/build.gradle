@@ -36,7 +36,7 @@ dependencies {
     runtimeOnly 'com.github.loki4j:loki-logback-appender:1.4.0'
 
     //Swagger
-    implementation "org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.4"
+    implementation "org.springdoc:springdoc-openapi-starter-webmvc-ui:2.1.0"
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
