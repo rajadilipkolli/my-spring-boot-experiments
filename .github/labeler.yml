@@ -2,8 +2,6 @@
  - spring-boot-api-archunit-sample/**/*
 "component : choas-monkey":
  - spring-boot-choas-monkey/**/*
-"component: data-envers":
-  - jpa/spring-boot-data-envers-sample/**/*
 "component: graphql-webflux":
   - graphql/spring-boot-graphql-webflux/**/*
 "component: graphql-webmvc":
@@ -14,14 +12,18 @@
   - jpa/spring-boot-hibernate2ndlevelcache-sample/**/*
 "component: jobrunr":
   - spring-boot-jobrunr-sample/**/*
+"component: data-envers":
+  - jpa/spring-boot-data-envers-sample/**/*
 "component: jpa-multitenancy":
   - jpa/spring-boot-jpa-multitenancy/**/*
-"component: mongodb-elasticsearch":
-  - spring-boot-mongodb-elasticsearch/**/*
 "component: multiple-datasources":
-  - jpa'/spring-boot-multipledatasources/**/*
+  - jpa/spring-boot-multipledatasources/**/*
 "component: read-replica-postgres":
   - jpa/spring-boot-read-replica-postgresql/**/*
+"component: customsequence":
+ - jpa/spring-boot-jpa-customsequence/**/*
+"component: mongodb-elasticsearch":
+  - spring-boot-mongodb-elasticsearch/**/*
 "component: strategy-plugin":
   - spring-boot-strategy-plugin/**/*
 "component: togglz":
@@ -30,6 +32,10 @@
   - spring-boot-ultimate-redis/**/*
 "component: rabbitmq-thymeleaf":
   - spring-boot-rabbitmq-thymeleaf/**/*
+"component: r2dbc":
+  - r2dbc/spring-boot-jooq-r2dbc-sample/**/*
+"component: httpclients":
+  - httpClients/web-client-webflux/**/*
 "status: waiting-for-triage":
   - ./*
   - ./**/*
@@ -46,6 +52,7 @@
   - jpa/spring-boot-jpa-multitenancy/schema/pom.xml
   - jpa/spring-boot-multipledatasources/pom.xml
   - jpa/spring-boot-read-replica-postgresql/pom.xml
+  - jpa/spring-boot-jpa-customsequence/pom.xml
   - spring-boot-jobrunr-sample/pom.xml
   - spring-boot-mongodb-elasticsearch/pom.xml
   - graphql/spring-boot-graphql-webflux/build.gradle
@@ -57,3 +64,5 @@
   - spring-boot-togglz-sample/pom.xml
   - spring-boot-ultimate-redis/pom.xml
   - spring-boot-rabbitmq-thymeleaf/pom.xml
+  - r2dbc/spring-boot-jooq-r2dbc-sample/pom.xml
+  - httpClients/web-client-webflux/pom.xml
