@@ -36,6 +36,9 @@
   - r2dbc/spring-boot-jooq-r2dbc-sample/**/*
 "component: httpclients":
   - httpClients/web-client-webflux/**/*
+  - httpClients/http-proxy/**/*
+  - httpClients/rest-template/**/*
+  - httpClients/web-client-mvc/**/*
 "status: waiting-for-triage":
   - ./*
   - ./**/*
@@ -65,4 +68,7 @@
   - spring-boot-ultimate-redis/pom.xml
   - spring-boot-rabbitmq-thymeleaf/pom.xml
   - r2dbc/spring-boot-jooq-r2dbc-sample/pom.xml
+  - httpClients/http-proxy/pom.xml
+  - httpClients/rest-template/pom.xml
+  - httpClients/web-client-webmvc/pom.xml
   - httpClients/web-client-webflux/pom.xml

@@ -16,7 +16,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 @ActiveProfiles({PROFILE_TEST})
 @SpringBootTest(webEnvironment = RANDOM_PORT)
-@Testcontainers
+@Testcontainers(disabledWithoutDocker = true)
 @AutoConfigureMockMvc
 public abstract class AbstractIntegrationTest {
 
