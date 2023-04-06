@@ -1,7 +1,9 @@
 package com.example.multitenancy.config;
 
 import com.example.multitenancy.config.multitenant.MultiTenantInterceptor;
+
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;

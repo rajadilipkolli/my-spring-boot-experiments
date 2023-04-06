@@ -4,7 +4,9 @@ import com.example.rest.template.entities.Post;
 import com.example.rest.template.model.response.PagedResult;
 import com.example.rest.template.services.PostService;
 import com.example.rest.template.utils.AppConstants;
+
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

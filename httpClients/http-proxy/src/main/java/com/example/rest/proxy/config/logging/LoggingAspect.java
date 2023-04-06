@@ -1,6 +1,7 @@
 package com.example.rest.proxy.config.logging;
 
 import com.example.rest.proxy.utils.AppConstants;
+
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.AfterThrowing;
