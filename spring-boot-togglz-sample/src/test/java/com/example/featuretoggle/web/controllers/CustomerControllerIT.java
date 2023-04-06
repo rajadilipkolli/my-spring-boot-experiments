@@ -12,13 +12,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.example.featuretoggle.common.AbstractIntegrationTest;
 import com.example.featuretoggle.entities.Customer;
 import com.example.featuretoggle.repositories.CustomerRepository;
-import java.util.ArrayList;
-import java.util.List;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @TestPropertySource(properties = {"togglz.features.ADD_NEW_FIELDS.enabled=false"})
 class CustomerControllerIT extends AbstractIntegrationTest {

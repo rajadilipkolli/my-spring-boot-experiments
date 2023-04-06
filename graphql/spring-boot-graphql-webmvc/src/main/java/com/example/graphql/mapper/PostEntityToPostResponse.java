@@ -2,6 +2,7 @@ package com.example.graphql.mapper;
 
 import com.example.graphql.entities.PostEntity;
 import com.example.graphql.model.response.PostResponse;
+
 import org.mapstruct.Mapper;
 import org.springframework.core.convert.converter.Converter;
 

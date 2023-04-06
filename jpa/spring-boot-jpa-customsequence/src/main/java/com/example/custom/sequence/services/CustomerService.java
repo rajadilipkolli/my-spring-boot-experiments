@@ -3,14 +3,17 @@ package com.example.custom.sequence.services;
 import com.example.custom.sequence.entities.Customer;
 import com.example.custom.sequence.model.response.PagedResult;
 import com.example.custom.sequence.repositories.CustomerRepository;
-import java.util.Optional;
+
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
 
 @Service
 @Transactional
