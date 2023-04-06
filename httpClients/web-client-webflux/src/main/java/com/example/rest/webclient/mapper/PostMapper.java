@@ -2,6 +2,7 @@ package com.example.rest.webclient.mapper;
 
 import com.example.rest.webclient.entity.Post;
 import com.example.rest.webclient.model.PostDto;
+
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.NullValueCheckStrategy;

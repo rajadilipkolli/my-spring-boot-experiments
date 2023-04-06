@@ -1,6 +1,7 @@
 package com.example.rest.webclient.model;
 
 import jakarta.validation.constraints.NotBlank;
+
 import org.springframework.data.annotation.Id;
 
 public record PostDto(

@@ -2,14 +2,17 @@ package com.example.featuretoggle.services;
 
 import com.example.featuretoggle.entities.Customer;
 import com.example.featuretoggle.repositories.CustomerRepository;
-import java.util.List;
-import java.util.Optional;
+
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.togglz.core.Feature;
 import org.togglz.core.manager.FeatureManager;
 import org.togglz.core.util.NamedFeature;
+
+import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional

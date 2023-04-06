@@ -1,9 +1,11 @@
 package com.example.jooq.r2dbc;
 
 import com.example.jooq.r2dbc.common.AbstractIntegrationTest;
-import java.util.List;
+
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import java.util.List;
 
 class ApplicationIntegrationTest extends AbstractIntegrationTest {
 

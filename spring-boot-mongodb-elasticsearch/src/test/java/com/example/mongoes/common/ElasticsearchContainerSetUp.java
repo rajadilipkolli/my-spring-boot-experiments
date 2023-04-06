@@ -1,10 +1,11 @@
 package com.example.mongoes.common;
 
-import java.util.Map;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.elasticsearch.ElasticsearchContainer;
 import org.testcontainers.lifecycle.Startables;
+
+import java.util.Map;
 
 public class ElasticsearchContainerSetUp {
 

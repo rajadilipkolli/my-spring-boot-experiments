@@ -4,14 +4,18 @@ import com.example.graphql.entities.PostEntity;
 import com.example.graphql.model.request.NewPostRequest;
 import com.example.graphql.projections.PostInfo;
 import com.example.graphql.services.PostService;
+
 import jakarta.validation.Valid;
-import java.util.List;
+
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
+
+import java.util.List;
 
 @Controller
 @Validated

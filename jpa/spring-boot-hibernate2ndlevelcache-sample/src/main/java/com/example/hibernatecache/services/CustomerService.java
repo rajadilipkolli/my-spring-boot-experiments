@@ -2,11 +2,14 @@ package com.example.hibernatecache.services;
 
 import com.example.hibernatecache.entities.Customer;
 import com.example.hibernatecache.repositories.CustomerRepository;
-import java.util.List;
-import java.util.Optional;
+
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional

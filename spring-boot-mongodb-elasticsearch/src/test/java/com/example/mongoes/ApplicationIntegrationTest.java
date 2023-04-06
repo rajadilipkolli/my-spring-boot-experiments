@@ -3,12 +3,14 @@ package com.example.mongoes;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.example.mongoes.common.AbstractIntegrationTest;
-import java.net.URI;
-import java.util.function.Function;
+
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.web.util.UriBuilder;
+
+import java.net.URI;
+import java.util.function.Function;
 
 class ApplicationIntegrationTest extends AbstractIntegrationTest {
 

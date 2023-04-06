@@ -4,13 +4,16 @@ import com.example.graphql.entities.PostTagEntity;
 import com.example.graphql.entities.TagEntity;
 import com.example.graphql.repositories.PostTagRepository;
 import com.example.graphql.repositories.TagRepository;
+
+import lombok.RequiredArgsConstructor;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Transactional

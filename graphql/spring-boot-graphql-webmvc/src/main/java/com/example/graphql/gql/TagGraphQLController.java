@@ -2,16 +2,20 @@ package com.example.graphql.gql;
 
 import com.example.graphql.entities.TagEntity;
 import com.example.graphql.services.TagService;
+
 import jakarta.validation.constraints.NotBlank;
-import java.util.List;
-import java.util.Optional;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
+
+import java.util.List;
+import java.util.Optional;
 
 @Controller
 @Validated

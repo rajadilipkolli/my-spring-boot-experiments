@@ -3,14 +3,18 @@ package com.example.multitenancy.schema.config.multitenancy;
 import static org.springframework.http.HttpStatus.FORBIDDEN;
 
 import com.example.multitenancy.schema.utils.TenantName;
+
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.util.List;
+
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.HandlerInterceptor;
+
+import java.io.IOException;
+import java.util.List;
 
 @Configuration(proxyBeanMethods = false)
 @RequiredArgsConstructor

@@ -1,13 +1,14 @@
 package com.example.ultimateredis.config;
 
+import org.apache.commons.io.IOUtils;
+import org.springframework.data.redis.serializer.JdkSerializationRedisSerializer;
+import org.springframework.data.redis.serializer.SerializationException;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
-import org.apache.commons.io.IOUtils;
-import org.springframework.data.redis.serializer.JdkSerializationRedisSerializer;
-import org.springframework.data.redis.serializer.SerializationException;
 
 public class RedisCacheGZIPSerializer extends JdkSerializationRedisSerializer {
 

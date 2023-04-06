@@ -2,11 +2,13 @@ package com.example.multitenancy.secondary.services;
 
 import com.example.multitenancy.secondary.entities.SecondaryCustomer;
 import com.example.multitenancy.secondary.repositories.SecondaryCustomerRepository;
-import java.util.List;
-import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional(transactionManager = "secondaryTransactionManager")

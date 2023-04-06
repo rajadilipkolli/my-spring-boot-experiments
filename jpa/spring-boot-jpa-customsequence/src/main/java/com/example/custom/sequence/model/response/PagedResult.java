@@ -1,8 +1,10 @@
 package com.example.custom.sequence.model.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import java.util.List;
+
 import org.springframework.data.domain.Page;
+
+import java.util.List;
 
 public record PagedResult<T>(
         List<T> data,

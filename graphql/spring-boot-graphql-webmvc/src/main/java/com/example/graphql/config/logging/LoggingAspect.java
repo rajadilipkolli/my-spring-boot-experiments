@@ -1,6 +1,7 @@
 package com.example.graphql.config.logging;
 
 import com.example.graphql.utils.AppConstants;
+
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.AfterThrowing;

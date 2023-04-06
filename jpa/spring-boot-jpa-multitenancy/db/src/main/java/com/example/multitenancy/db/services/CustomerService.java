@@ -2,11 +2,13 @@ package com.example.multitenancy.db.services;
 
 import com.example.multitenancy.db.entities.Customer;
 import com.example.multitenancy.db.repositories.CustomerRepository;
-import java.util.List;
-import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional

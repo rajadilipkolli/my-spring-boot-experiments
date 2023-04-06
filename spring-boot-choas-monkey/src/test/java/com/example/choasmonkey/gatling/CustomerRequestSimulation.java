@@ -10,6 +10,7 @@ import io.gatling.javaapi.core.CoreDsl;
 import io.gatling.javaapi.core.ScenarioBuilder;
 import io.gatling.javaapi.core.Simulation;
 import io.gatling.javaapi.http.HttpProtocolBuilder;
+
 import java.time.Duration;
 import java.util.Collections;
 import java.util.Iterator;

@@ -2,14 +2,17 @@ package com.example.rest.webclient.config;
 
 import com.example.rest.webclient.entities.Post;
 import com.example.rest.webclient.repositories.PostRepository;
-import java.util.List;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
