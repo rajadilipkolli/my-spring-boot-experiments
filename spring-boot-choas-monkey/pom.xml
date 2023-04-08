@@ -25,7 +25,7 @@
 
         <testcontainers.version>1.18.0</testcontainers.version>
         <gatling.version>3.9.3</gatling.version>
-        <gatling-maven-plugin.version>4.3.0</gatling-maven-plugin.version>
+        <gatling-maven-plugin.version>4.3.1</gatling-maven-plugin.version>
 
         <project.testresult.directory>${project.build.directory}/test-results</project.testresult.directory>
         <spotless.version>2.36.0</spotless.version>
