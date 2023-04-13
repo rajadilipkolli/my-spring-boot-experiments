@@ -10,7 +10,7 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>org.example</groupId>
-    <artifactId>openapi</artifactId>
+    <artifactId>open-api-spring-boot</artifactId>
     <version>0.0.1-SNAPSHOT</version>
 
     <properties>
@@ -127,11 +127,11 @@
                             <apiPackage>org.example.openapi.api</apiPackage>
                             <modelPackage>org.example.openapi.model</modelPackage>
                             <supportingFilesToGenerate>
-                               ApiUtil.java
+                               ApiUtil.java,RFC3339DateFormat.java
                                 <!-- ClientConfiguration.java,ApiKeyRequestInterceptor.java -->
                             </supportingFilesToGenerate>
                             <configOptions>
-                               <delegatePattern>true</delegatePattern>
+                                <delegatePattern>true</delegatePattern>
                                 <useSpringBoot3>true</useSpringBoot3>
                                 <!-- <async>true</async> -->
                                 <serializableModel>true</serializableModel>
