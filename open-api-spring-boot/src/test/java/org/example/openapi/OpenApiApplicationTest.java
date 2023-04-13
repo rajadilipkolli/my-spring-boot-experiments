@@ -21,4 +21,10 @@ class OpenApiApplicationTest {
             .andExpect(status().isNotImplemented());
     }
 
+    @Test
+    public void whenReadCustomerById_thenStatusIsNotImplemented() throws Exception {
+        this.mockMvc.perform(get("/api/customers/1"))
+            .andExpect(status().isNotImplemented());
+    }
+
 }

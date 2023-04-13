@@ -18,7 +18,7 @@
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <spring-cloud.version>2022.0.2</spring-cloud.version>
-        <openapi-generator.version>6.2.1</openapi-generator.version>
+        <openapi-generator.version>6.5.0</openapi-generator.version>
     </properties>
 
     <dependencies>
@@ -46,6 +46,13 @@
             <groupId>org.openapitools</groupId>
             <artifactId>openapi-generator</artifactId>
             <version>${openapi-generator.version}</version>
+            <exclusions>
+                <!-- Since springdoc-openapi-starter-webmvc-ui requires swagger-annotations-jakarta ignoring -->
+                <exclusion>
+                    <groupId>io.swagger.core.v3</groupId>
+                    <artifactId>swagger-annotations</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <!-- @Nullable annotation -->
