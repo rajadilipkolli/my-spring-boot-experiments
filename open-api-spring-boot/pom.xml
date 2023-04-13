@@ -116,13 +116,13 @@
                         <configuration>
                             <inputSpec>${project.basedir}/src/main/resources/app.yml</inputSpec>
                             <generatorName>spring</generatorName>
-                            <library>spring-cloud</library>
+                            <!-- <library>spring-cloud</library> -->
                             <supportingFilesToGenerate>
-<!--                                ApiUtil.java-->
-                                ClientConfiguration.java,ApiKeyRequestInterceptor.java
+                               ApiUtil.java
+                                <!-- ClientConfiguration.java,ApiKeyRequestInterceptor.java -->
                             </supportingFilesToGenerate>
                             <configOptions>
-<!--                                <delegatePattern>true</delegatePattern>-->
+                               <delegatePattern>true</delegatePattern>
                                 <useSpringBoot3>true</useSpringBoot3>
                                 <async>true</async>
                                 <serializableModel>true</serializableModel>
