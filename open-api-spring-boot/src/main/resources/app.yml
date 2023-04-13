@@ -1,7 +1,10 @@
-openapi: 3.0.1
+openapi: 3.0.3
 info:
   title: spring-boot-jpa-customsequence
-  version: v1
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 0.0.1
 servers:
   - url: /
 paths:
