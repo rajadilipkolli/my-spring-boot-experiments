@@ -46,6 +46,13 @@
             <groupId>org.openapitools</groupId>
             <artifactId>openapi-generator</artifactId>
             <version>${openapi-generator.version}</version>
+            <exclusions>
+                <!-- Since springdoc-openapi-starter-webmvc-ui requires swagger-annotations-jakarta ignoring -->
+                <exclusion>
+                    <groupId>io.swagger.core.v3</groupId>
+                    <artifactId>swagger-annotations</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <!-- @Nullable annotation -->

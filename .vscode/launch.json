@@ -102,6 +102,16 @@
             "projectName": "spring-boot-graphql-webmvc",
             "args": "--spring.profiles.active=local",
             "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-OpenApiApplication<openapi>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "org.example.openapi.OpenApiApplication",
+            "projectName": "openapi",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
         }
     ]
 }

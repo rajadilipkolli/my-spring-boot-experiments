@@ -8,7 +8,7 @@ paths:
   /api/customers/{id}:
     get:
       tags:
-        - customer-controller
+        - customer-api
       operationId: getCustomerById
       parameters:
         - name: id
@@ -31,7 +31,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
     put:
       tags:
-        - customer-controller
+        - customer-api
       operationId: updateCustomer
       parameters:
         - name: id
@@ -60,7 +60,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
     delete:
       tags:
-        - customer-controller
+        - customer-api
       operationId: deleteCustomer
       parameters:
         - name: id
@@ -84,7 +84,7 @@ paths:
   /api/customers:
     get:
       tags:
-        - customer-controller
+        - customer-api
       operationId: getAllCustomers
       parameters:
         - name: pageNo
@@ -128,7 +128,7 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
     post:
       tags:
-        - customer-controller
+        - customer-api
       operationId: createCustomer
       requestBody:
         content:
