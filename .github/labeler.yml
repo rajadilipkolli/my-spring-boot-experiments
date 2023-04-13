@@ -34,6 +34,8 @@
   - spring-boot-rabbitmq-thymeleaf/**/*
 "component: r2dbc":
   - r2dbc/spring-boot-jooq-r2dbc-sample/**/*
+"component: openapi":
+  - open-api-spring-boot/**/*
 "component: httpclients":
   - httpClients/web-client-webflux/**/*
   - httpClients/http-proxy/**/*
@@ -72,3 +74,4 @@
   - httpClients/rest-template/pom.xml
   - httpClients/web-client-webmvc/pom.xml
   - httpClients/web-client-webflux/pom.xml
+  - open-api-spring-boot/pom.xml
