@@ -105,11 +105,11 @@
         },
         {
             "type": "java",
-            "name": "Spring Boot-OpenApiApplication<openapi>",
+            "name": "Spring Boot-OpenApiApplication<open-api-spring-boot>",
             "request": "launch",
             "cwd": "${workspaceFolder}",
             "mainClass": "org.example.openapi.OpenApiApplication",
-            "projectName": "openapi",
+            "projectName": "open-api-spring-boot",
             "args": "",
             "envFile": "${workspaceFolder}/.env"
         }

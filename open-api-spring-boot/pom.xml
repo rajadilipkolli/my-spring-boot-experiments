@@ -132,6 +132,7 @@
                             </supportingFilesToGenerate>
                             <configOptions>
                                 <delegatePattern>true</delegatePattern>
+                                <performBeanValidation>true</performBeanValidation>
                                 <useSpringBoot3>true</useSpringBoot3>
                                 <!-- <async>true</async> -->
                                 <serializableModel>true</serializableModel>
