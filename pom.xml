@@ -30,6 +30,8 @@
         <module>spring-boot-rabbitmq-thymeleaf</module>
         <module>spring-boot-togglz-sample</module>
         <module>spring-boot-ultimate-redis</module>
+        <module>open-api-spring-boot</module>
+        <module>jmh-benchmark</module>
     </modules>
 
 </project>

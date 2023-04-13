@@ -11,7 +11,7 @@
     </parent>
     <groupId>org.example</groupId>
     <artifactId>openapi</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>0.0.1-SNAPSHOT</version>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
@@ -57,17 +57,17 @@
         <dependency>
             <groupId>org.openapitools</groupId>
             <artifactId>jackson-databind-nullable</artifactId>
-            <version>0.2.4</version>
+            <version>0.2.6</version>
         </dependency>
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
             <version>2.1.0</version>
         </dependency>
-        <dependency>
+        <!-- <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-openfeign</artifactId>
-        </dependency>
+        </dependency> -->
 
         <!-- API, java.xml.bind module -->
         <dependency>
@@ -117,6 +117,8 @@
                             <inputSpec>${project.basedir}/src/main/resources/app.yml</inputSpec>
                             <generatorName>spring</generatorName>
                             <!-- <library>spring-cloud</library> -->
+                            <apiPackage>org.example.openapi.api</apiPackage>
+                            <modelPackage>org.example.openapi.model</modelPackage>
                             <supportingFilesToGenerate>
                                ApiUtil.java
                                 <!-- ClientConfiguration.java,ApiKeyRequestInterceptor.java -->
@@ -124,7 +126,7 @@
                             <configOptions>
                                <delegatePattern>true</delegatePattern>
                                 <useSpringBoot3>true</useSpringBoot3>
-                                <async>true</async>
+                                <!-- <async>true</async> -->
                                 <serializableModel>true</serializableModel>
                             </configOptions>
                         </configuration>
