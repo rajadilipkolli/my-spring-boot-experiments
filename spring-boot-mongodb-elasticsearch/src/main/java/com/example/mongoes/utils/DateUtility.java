@@ -1,9 +1,10 @@
 package com.example.mongoes.utils;
 
+import lombok.experimental.UtilityClass;
+
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
-import lombok.experimental.UtilityClass;
 
 @UtilityClass
 public class DateUtility {

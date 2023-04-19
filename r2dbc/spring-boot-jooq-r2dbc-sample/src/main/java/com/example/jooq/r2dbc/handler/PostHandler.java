@@ -10,12 +10,16 @@ import com.example.jooq.r2dbc.model.request.CreatePostComment;
 import com.example.jooq.r2dbc.model.response.PaginatedResult;
 import com.example.jooq.r2dbc.model.response.PostSummary;
 import com.example.jooq.r2dbc.service.PostService;
-import java.net.URI;
+
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
+
 import reactor.core.publisher.Mono;
+
+import java.net.URI;
 
 @Component
 @RequiredArgsConstructor

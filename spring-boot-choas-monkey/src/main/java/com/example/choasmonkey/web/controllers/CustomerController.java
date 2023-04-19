@@ -4,10 +4,13 @@ import com.example.choasmonkey.entities.Customer;
 import com.example.choasmonkey.model.response.CustomerResponse;
 import com.example.choasmonkey.services.CustomerService;
 import com.example.choasmonkey.utils.AppConstants;
+
 import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationRegistry;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;

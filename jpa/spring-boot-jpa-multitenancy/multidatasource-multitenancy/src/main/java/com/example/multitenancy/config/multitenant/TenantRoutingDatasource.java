@@ -1,11 +1,14 @@
 package com.example.multitenancy.config.multitenant;
 
 import com.example.multitenancy.utils.DatabaseType;
-import java.util.HashMap;
-import javax.sql.DataSource;
+
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.datasource.lookup.AbstractRoutingDataSource;
 import org.springframework.stereotype.Component;
+
+import java.util.HashMap;
+
+import javax.sql.DataSource;
 
 @Component
 public class TenantRoutingDatasource extends AbstractRoutingDataSource {

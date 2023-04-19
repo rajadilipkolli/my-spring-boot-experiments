@@ -7,12 +7,16 @@ import com.example.jooq.r2dbc.config.logging.Loggable;
 import com.example.jooq.r2dbc.entities.Tags;
 import com.example.jooq.r2dbc.model.request.TagDto;
 import com.example.jooq.r2dbc.service.TagService;
-import java.net.URI;
+
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
+
 import reactor.core.publisher.Mono;
+
+import java.net.URI;
 
 @Component
 @RequiredArgsConstructor

@@ -3,15 +3,17 @@ package com.example.graphql;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.example.graphql.common.AbstractIntegrationTest;
-import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.graphql.tester.AutoConfigureHttpGraphQlTester;
 import org.springframework.graphql.test.tester.HttpGraphQlTester;
+
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 
 @AutoConfigureHttpGraphQlTester
 class ApplicationIntegrationTest extends AbstractIntegrationTest {

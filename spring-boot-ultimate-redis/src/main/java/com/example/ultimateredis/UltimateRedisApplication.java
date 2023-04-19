@@ -2,13 +2,16 @@ package com.example.ultimateredis;
 
 import com.example.ultimateredis.service.CacheService;
 import com.example.ultimateredis.service.ControlledCacheService;
-import java.util.UUID;
+
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cache.annotation.EnableCaching;
+
+import java.util.UUID;
 
 @EnableCaching
 @SpringBootApplication

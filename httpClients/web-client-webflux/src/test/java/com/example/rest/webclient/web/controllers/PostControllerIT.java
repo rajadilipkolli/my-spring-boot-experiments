@@ -6,16 +6,19 @@ import com.example.rest.webclient.common.AbstractIntegrationTest;
 import com.example.rest.webclient.model.PostDto;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.github.tomakehurst.wiremock.WireMockServer;
-import java.util.Arrays;
-import java.util.List;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+
 import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
+
+import java.util.Arrays;
+import java.util.List;
 
 class PostControllerIT extends AbstractIntegrationTest {
 

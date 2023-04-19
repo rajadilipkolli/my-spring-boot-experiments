@@ -1,0 +1,253 @@
+openapi: 3.0.1
+info:
+  title: spring-boot-jpa-customsequence
+  version: v1
+servers:
+- url: /
+paths:
+  /api/customers/{id}:
+    delete:
+      operationId: deleteCustomer
+      parameters:
+      - explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Customer'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+          description: Bad Request
+      tags:
+      - customer-api
+      x-accepts: application/json
+      x-tags:
+      - tag: customer-api
+    get:
+      operationId: getCustomerById
+      parameters:
+      - explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/Customer'
+          description: OK
+        "400":
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+          description: Bad Request
+      tags:
+      - customer-api
+      x-accepts: '*/*'
+      x-tags:
+      - tag: customer-api
+    put:
+      operationId: updateCustomer
+      parameters:
+      - explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Customer'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Customer'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+          description: Bad Request
+      tags:
+      - customer-api
+      x-content-type: application/json
+      x-accepts: application/json
+      x-tags:
+      - tag: customer-api
+  /api/customers:
+    get:
+      operationId: getAllCustomers
+      parameters:
+      - explode: true
+        in: query
+        name: pageNo
+        required: false
+        schema:
+          default: 0
+          format: int32
+          type: integer
+        style: form
+      - explode: true
+        in: query
+        name: pageSize
+        required: false
+        schema:
+          default: 10
+          format: int32
+          type: integer
+        style: form
+      - explode: true
+        in: query
+        name: sortBy
+        required: false
+        schema:
+          default: id
+          type: string
+        style: form
+      - explode: true
+        in: query
+        name: sortDir
+        required: false
+        schema:
+          default: asc
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedResultCustomer'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+          description: Bad Request
+      tags:
+      - customer-api
+      x-accepts: application/json
+      x-tags:
+      - tag: customer-api
+    post:
+      operationId: createCustomer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Customer'
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Customer'
+          description: Created
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+          description: Bad Request
+      tags:
+      - customer-api
+      x-content-type: application/json
+      x-accepts: application/json
+      x-tags:
+      - tag: customer-api
+components:
+  schemas:
+    ProblemDetail:
+      properties:
+        type:
+          format: uri
+          type: string
+        title:
+          type: string
+        status:
+          format: int32
+          type: integer
+        detail:
+          type: string
+        instance:
+          format: uri
+          type: string
+        properties:
+          additionalProperties:
+            type: object
+          type: object
+      type: object
+    Customer:
+      example:
+        id: id
+        text: text
+      properties:
+        id:
+          type: string
+        text:
+          type: string
+      required:
+      - text
+      type: object
+    PagedResultCustomer:
+      example:
+        isFirst: true
+        pageNumber: 6
+        data:
+        - id: id
+          text: text
+        - id: id
+          text: text
+        isLast: true
+        totalPages: 1
+        hasPrevious: true
+        hasNext: true
+        totalElements: 0
+      properties:
+        data:
+          items:
+            $ref: '#/components/schemas/Customer'
+          type: array
+        totalElements:
+          format: int64
+          type: integer
+        pageNumber:
+          format: int32
+          type: integer
+        totalPages:
+          format: int32
+          type: integer
+        isFirst:
+          type: boolean
+        isLast:
+          type: boolean
+        hasNext:
+          type: boolean
+        hasPrevious:
+          type: boolean
+      type: object

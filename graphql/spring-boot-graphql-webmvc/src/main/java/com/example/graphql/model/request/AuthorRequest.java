@@ -3,6 +3,7 @@ package com.example.graphql.model.request;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
+
 import java.io.Serializable;
 
 public record AuthorRequest(

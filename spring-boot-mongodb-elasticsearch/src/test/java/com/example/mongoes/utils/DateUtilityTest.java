@@ -2,8 +2,9 @@ package com.example.mongoes.utils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.Date;
 import org.junit.jupiter.api.Test;
+
+import java.util.Date;
 
 class DateUtilityTest {
 

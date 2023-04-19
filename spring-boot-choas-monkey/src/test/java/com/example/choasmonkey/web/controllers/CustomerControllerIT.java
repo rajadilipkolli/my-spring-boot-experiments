@@ -14,12 +14,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.example.choasmonkey.common.AbstractIntegrationTest;
 import com.example.choasmonkey.entities.Customer;
 import com.example.choasmonkey.repositories.CustomerRepository;
-import java.util.ArrayList;
-import java.util.List;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+
+import java.util.ArrayList;
+import java.util.List;
 
 class CustomerControllerIT extends AbstractIntegrationTest {
 

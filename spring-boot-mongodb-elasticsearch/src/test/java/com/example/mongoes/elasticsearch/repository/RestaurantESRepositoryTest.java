@@ -7,10 +7,7 @@ import com.example.mongoes.config.DataStoreConfiguration;
 import com.example.mongoes.document.Address;
 import com.example.mongoes.document.Grades;
 import com.example.mongoes.document.Restaurant;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
+
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -26,9 +23,15 @@ import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchPage;
 import org.springframework.data.elasticsearch.core.geo.GeoPoint;
 import org.springframework.data.geo.Point;
+
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 @DataElasticsearchTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)

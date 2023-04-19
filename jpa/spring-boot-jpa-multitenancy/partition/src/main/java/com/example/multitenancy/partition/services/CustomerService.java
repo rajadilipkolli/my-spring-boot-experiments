@@ -2,11 +2,14 @@ package com.example.multitenancy.partition.services;
 
 import com.example.multitenancy.partition.entities.Customer;
 import com.example.multitenancy.partition.repositories.CustomerRepository;
-import java.util.List;
-import java.util.Optional;
+
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional

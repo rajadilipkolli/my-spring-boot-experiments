@@ -2,17 +2,21 @@ package com.example.multitenancy.config.multitenant;
 
 import com.example.multitenancy.utils.AppConstants;
 import com.example.multitenancy.utils.DatabaseType;
+
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
 import org.springframework.web.servlet.HandlerInterceptor;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 @Configuration(proxyBeanMethods = false)
 @RequiredArgsConstructor

@@ -1,9 +1,8 @@
 package com.example.custom.sequence.exception;
 
-import java.util.List;
-import java.util.Objects;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
@@ -12,6 +11,9 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
+
+import java.util.List;
+import java.util.Objects;
 
 @ControllerAdvice
 public class ErrorDetailProblemHandlingControllerAdvice {

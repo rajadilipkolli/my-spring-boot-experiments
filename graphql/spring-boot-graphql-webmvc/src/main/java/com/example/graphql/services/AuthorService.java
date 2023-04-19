@@ -5,12 +5,15 @@ import com.example.graphql.mapper.AuthorRequestToEntityMapper;
 import com.example.graphql.model.request.AuthorRequest;
 import com.example.graphql.model.response.AuthorResponse;
 import com.example.graphql.repositories.AuthorRepository;
-import java.util.List;
-import java.util.Optional;
+
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional

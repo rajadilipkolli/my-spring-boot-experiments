@@ -3,14 +3,17 @@ package com.example.demo.readreplica.config;
 import com.example.demo.readreplica.config.routing.RoutingDataSource;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
-import java.util.HashMap;
-import java.util.Map;
-import javax.sql.DataSource;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.env.Environment;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.sql.DataSource;
 
 @Configuration(proxyBeanMethods = false)
 public class DatabaseConfig {
