@@ -22,7 +22,7 @@ import org.springframework.http.MediaType;
 import java.util.ArrayList;
 import java.util.List;
 
-class PrimaryPrimaryCustomerControllerIT extends AbstractIntegrationTest {
+class PrimaryCustomerControllerIT extends AbstractIntegrationTest {
 
     @Autowired private PrimaryCustomerRepository primaryCustomerRepository;
     @Autowired private TenantIdentifierResolver tenantIdentifierResolver;
