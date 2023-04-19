@@ -42,10 +42,6 @@ repositories {
     maven { url 'https://repo.spring.io/milestone' }
 }
 
-ext {
-    set('testcontainers_version', "1.18.0")
-}
-
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-graphql'
 
@@ -78,12 +74,6 @@ dependencies {
     testImplementation 'org.testcontainers:postgresql'
     testImplementation 'org.testcontainers:r2dbc'
     testImplementation 'org.springframework.graphql:spring-graphql-test'
-}
-
-dependencyManagement {
-    imports {
-        mavenBom "org.testcontainers:testcontainers-bom:${testcontainers_version}"
-    }
 }
 
 defaultTasks "bootRun"

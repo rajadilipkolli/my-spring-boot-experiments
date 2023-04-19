@@ -23,7 +23,6 @@
         <springdoc-openapi.version>2.1.0</springdoc-openapi.version>
         <commons-io.version>2.11.0</commons-io.version>
 
-        <testcontainers.version>1.18.0</testcontainers.version>
         <gatling.version>3.9.3</gatling.version>
         <gatling-maven-plugin.version>4.3.1</gatling-maven-plugin.version>
 
@@ -140,13 +139,6 @@
                 <groupId>org.springframework.cloud</groupId>
                 <artifactId>spring-cloud-dependencies</artifactId>
                 <version>${spring-cloud.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.testcontainers</groupId>
-                <artifactId>testcontainers-bom</artifactId>
-                <version>${testcontainers.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
