@@ -2,6 +2,7 @@ package com.example.multitenancy.partition.web.controllers;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -10,6 +11,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.example.multitenancy.partition.common.AbstractIntegrationTest;
 import com.example.multitenancy.partition.config.tenant.TenantIdentifierResolver;
+import com.example.multitenancy.partition.dto.CustomerDTO;
 import com.example.multitenancy.partition.entities.Customer;
 import com.example.multitenancy.partition.repositories.CustomerRepository;
 
@@ -65,29 +67,31 @@ class CustomerControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldCreateNewCustomer() throws Exception {
-        Customer customer = new Customer(null, "New Customer", null);
+        CustomerDTO customerDTO = new CustomerDTO("New Customer");
         long count = this.customerRepository.countByTenant("dbsystc");
         this.mockMvc
                 .perform(
                         post("/api/customers")
                                 .param("tenant", "dbsystc")
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(customer)))
+                                .content(objectMapper.writeValueAsString(customerDTO)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.text", is(customer.getText())));
+                .andExpect(jsonPath("$.id", notNullValue()))
+                .andExpect(jsonPath("$.text", is(customerDTO.text())))
+                .andExpect(jsonPath("$.tenant", is("dbsystc")));
         assertThat(this.customerRepository.countByTenant("dbsystc")).isEqualTo(count + 1);
     }
 
     @Test
     void shouldReturn400WhenCreateNewCustomerWithoutText() throws Exception {
-        Customer customer = new Customer(null, null, null);
+        CustomerDTO customerDTO = new CustomerDTO(null);
 
         this.mockMvc
                 .perform(
                         post("/api/customers")
                                 .param("tenant", "dbsystc")
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(customer)))
+                                .content(objectMapper.writeValueAsString(customerDTO)))
                 .andExpect(status().isBadRequest())
                 .andExpect(header().string("Content-Type", is("application/problem+json")))
                 .andExpect(jsonPath("$.type", is("about:blank")))

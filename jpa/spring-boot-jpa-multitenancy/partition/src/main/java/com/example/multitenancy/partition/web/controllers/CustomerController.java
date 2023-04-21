@@ -1,5 +1,6 @@
 package com.example.multitenancy.partition.web.controllers;
 
+import com.example.multitenancy.partition.dto.CustomerDTO;
 import com.example.multitenancy.partition.entities.Customer;
 import com.example.multitenancy.partition.services.CustomerService;
 
@@ -53,9 +54,9 @@ public class CustomerController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public Customer createCustomer(
-            @RequestBody @Validated Customer customer, @RequestParam String tenant) {
+            @RequestBody @Validated CustomerDTO customerDTO, @RequestParam String tenant) {
         log.info("creating customer by for tenant : {}", tenant);
-        return customerService.saveCustomer(customer);
+        return customerService.saveCustomer(customerDTO);
     }
 
     @PutMapping("/{id}")
