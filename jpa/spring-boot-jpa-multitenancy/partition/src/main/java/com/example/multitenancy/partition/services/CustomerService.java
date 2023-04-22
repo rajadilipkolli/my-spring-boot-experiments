@@ -1,5 +1,6 @@
 package com.example.multitenancy.partition.services;
 
+import com.example.multitenancy.partition.dto.CustomerDTO;
 import com.example.multitenancy.partition.entities.Customer;
 import com.example.multitenancy.partition.repositories.CustomerRepository;
 
@@ -28,6 +29,16 @@ public class CustomerService {
 
     public Customer saveCustomer(Customer customer) {
         return customerRepository.save(customer);
+    }
+
+    public Customer saveCustomer(CustomerDTO customerDTO) {
+        return customerRepository.save(maptoEntity(customerDTO));
+    }
+
+    private Customer maptoEntity(CustomerDTO customerDTO) {
+        Customer customer = new Customer();
+        customer.setText(customerDTO.text());
+        return customer;
     }
 
     public void deleteCustomerById(Long id) {

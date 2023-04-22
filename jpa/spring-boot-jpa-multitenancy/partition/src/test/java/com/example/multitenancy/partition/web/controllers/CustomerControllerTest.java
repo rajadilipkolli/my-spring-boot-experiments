@@ -3,7 +3,6 @@ package com.example.multitenancy.partition.web.controllers;
 import static com.example.multitenancy.partition.utils.AppConstants.PROFILE_TEST;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
@@ -14,6 +13,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import com.example.multitenancy.partition.config.tenant.TenantIdentifierResolver;
+import com.example.multitenancy.partition.dto.CustomerDTO;
 import com.example.multitenancy.partition.entities.Customer;
 import com.example.multitenancy.partition.services.CustomerService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -87,31 +87,30 @@ class CustomerControllerTest {
 
     @Test
     void shouldCreateNewCustomer() throws Exception {
-        given(customerService.saveCustomer(any(Customer.class)))
-                .willAnswer((invocation) -> invocation.getArgument(0));
+        Customer customer = new Customer(1L, "some text", "dbsystc");
+        given(customerService.saveCustomer(any(CustomerDTO.class))).willReturn(customer);
 
-        Customer customer = new Customer(1L, "some text");
+        CustomerDTO customerDTO = new CustomerDTO("some text");
         this.mockMvc
                 .perform(
                         post("/api/customers")
                                 .param("tenant", "dbsystc")
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(customer)))
+                                .content(objectMapper.writeValueAsString(customerDTO)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id", notNullValue()))
-                .andExpect(jsonPath("$.text", is(customer.getText())));
+                .andExpect(jsonPath("$.text", is(customerDTO.text())));
     }
 
     @Test
     void shouldReturn400WhenCreateNewCustomerWithoutText() throws Exception {
-        Customer customer = new Customer(null, null, null);
+        CustomerDTO customerDTO = new CustomerDTO(null);
 
         this.mockMvc
                 .perform(
                         post("/api/customers")
                                 .param("tenant", "dbsystc")
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(customer)))
+                                .content(objectMapper.writeValueAsString(customerDTO)))
                 .andExpect(header().string("Content-Type", is("application/problem+json")))
                 .andExpect(jsonPath("$.type", is("about:blank")))
                 .andExpect(jsonPath("$.title", is("Bad Request")))

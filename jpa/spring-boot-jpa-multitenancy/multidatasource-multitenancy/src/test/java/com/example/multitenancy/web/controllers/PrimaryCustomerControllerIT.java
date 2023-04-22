@@ -143,4 +143,6 @@ class PrimaryCustomerControllerIT extends AbstractIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.text", is(primaryCustomer.getText())));
     }
+
 }
+
