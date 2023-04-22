@@ -50,7 +50,7 @@ jobs:
           gu --version
           native-image --version
 
-      - name: Start up redis & postgres via Docker Compose
+      - name: Start up infra via Docker Compose
         run: |
           docker compose up -d
           sleep 5
