@@ -4,9 +4,9 @@ import com.example.multitenancy.partition.dto.CustomerDTO;
 import com.example.multitenancy.partition.entities.Customer;
 import com.example.multitenancy.partition.services.CustomerService;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -26,14 +26,10 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/customers")
 @Slf4j
+@RequiredArgsConstructor
 public class CustomerController {
 
     private final CustomerService customerService;
-
-    @Autowired
-    public CustomerController(CustomerService customerService) {
-        this.customerService = customerService;
-    }
 
     @GetMapping
     public List<Customer> getAllCustomers(@RequestParam String tenant) {

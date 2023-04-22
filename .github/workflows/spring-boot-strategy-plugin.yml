@@ -50,6 +50,11 @@ jobs:
           gu --version
           native-image --version
 
+      - name: Start up redis & postgres via Docker Compose
+        run: |
+          docker compose up -d
+          sleep 5
+          docker ps -a
       - name: Build and analyze
         run: ./gradlew clean build --info
 
