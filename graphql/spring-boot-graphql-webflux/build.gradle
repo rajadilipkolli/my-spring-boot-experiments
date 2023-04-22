@@ -67,6 +67,7 @@ dependencies {
     implementation "commons-io:commons-io:${commons_io_version}"
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.boot:spring-boot-testcontainers'
     testImplementation 'io.projectreactor:reactor-test'
     testImplementation "org.projectlombok:lombok"
     testImplementation "org.awaitility:awaitility"
