@@ -8,6 +8,13 @@
             "type": "java",
             "name": "TestApplication",
             "request": "launch",
+            "mainClass": "com.example.rest.proxy.TestApplication",
+            "projectName": "http-proxy"
+        },
+        {
+            "type": "java",
+            "name": "TestApplication",
+            "request": "launch",
             "mainClass": "com.example.choasmonkey.TestApplication",
             "projectName": "spring-boot-choas-monkey"
         },
@@ -117,6 +124,16 @@
             "cwd": "${workspaceFolder}",
             "mainClass": "org.example.openapi.OpenApiApplication",
             "projectName": "open-api-spring-boot",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-Application<http-proxy>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.example.rest.proxy.Application",
+            "projectName": "http-proxy",
             "args": "",
             "envFile": "${workspaceFolder}/.env"
         }
