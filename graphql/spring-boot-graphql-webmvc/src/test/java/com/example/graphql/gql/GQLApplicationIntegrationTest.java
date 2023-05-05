@@ -1,4 +1,4 @@
-package com.example.graphql;
+package com.example.graphql.gql;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -16,7 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @AutoConfigureHttpGraphQlTester
-class ApplicationIntegrationTest extends AbstractIntegrationTest {
+class GQLApplicationIntegrationTest extends AbstractIntegrationTest {
 
     @Autowired private HttpGraphQlTester graphQlTester;
 
