@@ -17,7 +17,7 @@
             <column name="title" type="varchar(1024)">
                 <constraints nullable="false"/>
             </column>
-            <column name="user_id" type="int">
+            <column name="user_id" type="bigint">
                 <constraints nullable="false"/>
             </column>
             <column name="body" type="varchar(1024)">
