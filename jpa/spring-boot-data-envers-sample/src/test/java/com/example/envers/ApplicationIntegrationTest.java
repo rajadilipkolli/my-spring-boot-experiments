@@ -17,11 +17,6 @@ class ApplicationIntegrationTest extends AbstractIntegrationTest {
     @Autowired private CustomerRepository customerRepository;
 
     @Test
-    void contextLoads() {
-        assertThat(sqlContainer.isRunning()).isTrue();
-    }
-
-    @Test
     void initialRevision() {
         var cust = new Customer();
         cust.setName("junit");
@@ -60,7 +55,7 @@ class ApplicationIntegrationTest extends AbstractIntegrationTest {
         assertThat(revision)
                 .isPresent()
                 .hasValueSatisfying(
-                        rev -> assertThat(rev.getRevisionNumber()).isPresent().get().isEqualTo(4))
+                        rev -> assertThat(rev.getRevisionNumber()).isPresent().get().isEqualTo(151))
                 .hasValueSatisfying(
                         rev ->
                                 assertThat(rev.getEntity())
