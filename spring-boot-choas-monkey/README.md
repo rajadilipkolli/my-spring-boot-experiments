@@ -17,6 +17,8 @@ Using Springframework 6.0 `ProblemDetails` and spring boot micrometer Observabil
 
 ### Run Gatling
 
+Bring the application up and then start Gatling
+
 ```shell
 ./mvnw gatling:test
 ```

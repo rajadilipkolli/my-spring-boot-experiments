@@ -2,6 +2,7 @@ package com.example.choasmonkey.gatling;
 
 import static io.gatling.javaapi.core.CoreDsl.StringBody;
 import static io.gatling.javaapi.core.CoreDsl.constantUsersPerSec;
+import static io.gatling.javaapi.core.CoreDsl.global;
 import static io.gatling.javaapi.http.HttpDsl.header;
 import static io.gatling.javaapi.http.HttpDsl.http;
 import static io.gatling.javaapi.http.HttpDsl.status;
@@ -51,6 +52,7 @@ public class CustomerRequestSimulation extends Simulation {
 
     public CustomerRequestSimulation() {
         this.setUp(scn.injectOpen(constantUsersPerSec(100).during(Duration.ofSeconds(30))))
-                .protocols(httpProtocol);
+                .protocols(httpProtocol)
+                .assertions(global().failedRequests().count().is(0L));
     }
 }
