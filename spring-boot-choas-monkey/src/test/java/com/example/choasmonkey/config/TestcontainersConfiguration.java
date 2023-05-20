@@ -1,4 +1,4 @@
-package com.example.choasmonkey;
+package com.example.choasmonkey.config;
 
 import org.springframework.boot.devtools.restart.RestartScope;
 import org.springframework.boot.test.context.TestConfiguration;
