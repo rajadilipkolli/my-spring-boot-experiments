@@ -4,6 +4,7 @@ import static com.example.graphql.utils.AppConstants.PROFILE_TEST;
 
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
+import com.example.graphql.config.MyContainersConfiguration;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.springframework.beans.factory.annotation.Autowired;

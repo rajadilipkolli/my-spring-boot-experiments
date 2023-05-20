@@ -1,6 +1,6 @@
 package com.example.graphql;
 
-import com.example.graphql.common.MyContainersConfiguration;
+import com.example.graphql.config.MyContainersConfiguration;
 
 import org.springframework.boot.SpringApplication;
 
