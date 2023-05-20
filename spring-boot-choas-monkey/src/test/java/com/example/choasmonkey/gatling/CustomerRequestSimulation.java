@@ -41,7 +41,7 @@ public class CustomerRequestSimulation extends Simulation {
                             http("create-customer-request")
                                     .post("/api/customers")
                                     .header("Content-Type", "application/json")
-                                    .body(StringBody("{ \"text\": \"${text}\" }"))
+                                    .body(StringBody("{ \"text\": \"#{text}\" }"))
                                     .check(status().is(201))
                                     .check(header("Location").saveAs("location")))
                     .exec(

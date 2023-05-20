@@ -1,5 +1,6 @@
 package com.example.choasmonkey;
 
+import org.springframework.boot.devtools.restart.RestartScope;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.context.annotation.Bean;
@@ -10,7 +11,8 @@ public class TestcontainersConfiguration {
 
     @Bean
     @ServiceConnection
+    @RestartScope
     public PostgreSQLContainer<?> postgreSQLContainer() {
-        return new PostgreSQLContainer<>("postgres:15.2-alpine");
+        return new PostgreSQLContainer<>("postgres:15.3-alpine");
     }
 }
