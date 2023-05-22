@@ -10,7 +10,7 @@ import java.util.Map;
 public class ElasticsearchContainerSetUp {
 
     protected static final ElasticsearchContainer ELASTICSEARCH_CONTAINER =
-            new ElasticsearchContainer("docker.elastic.co/elasticsearch/elasticsearch:8.5.2")
+            new ElasticsearchContainer("docker.elastic.co/elasticsearch/elasticsearch:8.7.1")
                     .withEnv(
                             Map.of(
                                     "discovery.type",
