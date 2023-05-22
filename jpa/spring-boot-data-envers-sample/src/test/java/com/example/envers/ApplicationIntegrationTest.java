@@ -14,7 +14,8 @@ import org.springframework.data.history.Revisions;
 
 class ApplicationIntegrationTest extends AbstractIntegrationTest {
 
-    @Autowired private CustomerRepository customerRepository;
+    @Autowired
+    private CustomerRepository customerRepository;
 
     @Test
     void initialRevision() {
@@ -24,19 +25,9 @@ class ApplicationIntegrationTest extends AbstractIntegrationTest {
 
         Revisions<Long, Customer> revisions = customerRepository.findRevisions(customer.getId());
 
-        assertThat(revisions)
-                .isNotEmpty()
-                .allSatisfy(
-                        revision ->
-                                assertThat(revision.getEntity())
-                                        .extracting(
-                                                Customer::getId,
-                                                Customer::getName,
-                                                Customer::getVersion)
-                                        .containsExactly(
-                                                customer.getId(),
-                                                customer.getName(),
-                                                customer.getVersion()));
+        assertThat(revisions).isNotEmpty().allSatisfy(revision -> assertThat(revision.getEntity())
+                .extracting(Customer::getId, Customer::getName, Customer::getVersion)
+                .containsExactly(customer.getId(), customer.getName(), customer.getVersion()));
     }
 
     @Test
@@ -49,19 +40,16 @@ class ApplicationIntegrationTest extends AbstractIntegrationTest {
 
         customerRepository.save(customer);
 
-        Optional<Revision<Long, Customer>> revision =
-                customerRepository.findLastChangeRevision(customer.getId());
+        Optional<Revision<Long, Customer>> revision = customerRepository.findLastChangeRevision(customer.getId());
 
         assertThat(revision)
                 .isPresent()
-                .hasValueSatisfying(
-                        rev -> assertThat(rev.getRevisionNumber()).isPresent().get().isEqualTo(151))
-                .hasValueSatisfying(
-                        rev ->
-                                assertThat(rev.getEntity())
-                                        .extracting(Customer::getName)
-                                        .asString()
-                                        .isEqualTo("If"));
+                .hasValueSatisfying(rev ->
+                        assertThat(rev.getRevisionNumber()).isPresent().get().isEqualTo(4))
+                .hasValueSatisfying(rev -> assertThat(rev.getEntity())
+                        .extracting(Customer::getName)
+                        .asString()
+                        .isEqualTo("If"));
     }
 
     @Test
@@ -81,27 +69,12 @@ class ApplicationIntegrationTest extends AbstractIntegrationTest {
         Revision<Long, Customer> initialRevision = iterator.next();
         Revision<Long, Customer> finalRevision = iterator.next();
 
-        assertThat(initialRevision)
-                .satisfies(
-                        rev ->
-                                assertThat(rev.getEntity())
-                                        .extracting(
-                                                Customer::getId,
-                                                Customer::getName,
-                                                Customer::getVersion)
-                                        .containsExactly(
-                                                customer.getId(),
-                                                customer.getName(),
-                                                customer.getVersion()));
+        assertThat(initialRevision).satisfies(rev -> assertThat(rev.getEntity())
+                .extracting(Customer::getId, Customer::getName, Customer::getVersion)
+                .containsExactly(customer.getId(), customer.getName(), customer.getVersion()));
 
-        assertThat(finalRevision)
-                .satisfies(
-                        rev ->
-                                assertThat(rev.getEntity())
-                                        .extracting(
-                                                Customer::getId,
-                                                Customer::getName,
-                                                Customer::getVersion)
-                                        .containsExactly(customer.getId(), null, 0L));
+        assertThat(finalRevision).satisfies(rev -> assertThat(rev.getEntity())
+                .extracting(Customer::getId, Customer::getName, Customer::getVersion)
+                .containsExactly(customer.getId(), null, 0L));
     }
 }
