@@ -77,6 +77,10 @@ tasks.named("compileJava") {
     dependsOn("processResources")
 }
 
+tasks.named("spotlessJava") {
+    dependsOn(tasks.named("compileJava"))
+}
+
 tasks.withType<Test> {
 	useJUnitPlatform()
 
