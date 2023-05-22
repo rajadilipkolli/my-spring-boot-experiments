@@ -134,10 +134,6 @@ spotless {
 	}
 }
 
-tasks.named<SpotlessTask>("spotlessJava") {
-    dependsOn(tasks.named("compileJava"))
-}
-
 // Reference doc : https://jeremylong.github.io/DependencyCheck/dependency-check-gradle/configuration.html
 dependencyCheck {
 	// the default artifact types that will be analyzed.
