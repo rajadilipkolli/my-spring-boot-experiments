@@ -36,10 +36,10 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.liquibase:liquibase-core")
-	// Printing Queries effectively
+    // Printing Queries effectively
     implementation("net.ttddyy:datasource-proxy:1.9")
 
-	// QueryDSL for JPA
+    // QueryDSL for JPA
     compileOnly("com.querydsl:querydsl-jpa-codegen:5.0.0:jakarta")
     implementation("com.querydsl:querydsl-jpa:5.0.0:jakarta")
 
@@ -56,7 +56,7 @@ dependencies {
     annotationProcessor("jakarta.annotation:jakarta.annotation-api:2.1.1")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
-	testImplementation("org.springframework.boot:spring-boot-testcontainers")
+    testImplementation("org.springframework.boot:spring-boot-testcontainers")
     testImplementation("io.projectreactor:reactor-test")
     testImplementation("org.testcontainers:junit-jupiter")
     testImplementation("org.testcontainers:postgresql")
@@ -75,10 +75,6 @@ sourceSets {
 
 tasks.named("compileJava") {
     dependsOn("processResources")
-}
-
-tasks.named("spotlessJava") {
-    dependsOn(tasks.named("compileJava"))
 }
 
 tasks.withType<Test> {
@@ -136,6 +132,10 @@ spotless {
 		palantirJavaFormat("2.30.0")
 		formatAnnotations()
 	}
+}
+
+tasks.named<SpotlessTask>("spotlessJava") {
+    dependsOn(tasks.named("compileJava"))
 }
 
 // Reference doc : https://jeremylong.github.io/DependencyCheck/dependency-check-gradle/configuration.html
