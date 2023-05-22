@@ -136,6 +136,16 @@
             "projectName": "http-proxy",
             "args": "",
             "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-UltimateRedisApplication<spring-boot-ultimate-redis>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.example.ultimateredis.UltimateRedisApplication",
+            "projectName": "spring-boot-ultimate-redis",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
         }
     ]
 }
