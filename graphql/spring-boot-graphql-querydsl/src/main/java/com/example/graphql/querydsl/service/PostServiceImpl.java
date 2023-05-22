@@ -38,10 +38,7 @@ public class PostServiceImpl implements PostService {
     @Override
     @Transactional
     public PostResponse addTagsToPost(AddTagRequestDTO addTagRequestDTO) {
-        Post post =
-                this.postRepository
-                        .findById(addTagRequestDTO.postId())
-                        .orElseThrow(PostNotFoundException::new);
+        Post post = this.postRepository.findById(addTagRequestDTO.postId()).orElseThrow(PostNotFoundException::new);
         addPostTagsToPost(addTagRequestDTO.tagNames(), post);
         return convertToPostDTO(postRepository.save(post));
     }
@@ -85,17 +82,16 @@ public class PostServiceImpl implements PostService {
 
     private void addPostTagsToPost(List<TagDTO> tags, Post post) {
         if (!CollectionUtils.isEmpty(tags)) {
-            tags.forEach(
-                    tagDTO -> {
-                        Predicate predicate = QTag.tag.name.eq(tagDTO.name());
-                        Optional<Tag> tag = this.tagRepository.findOne(predicate);
-                        if (tag.isPresent()) {
-                            PostTag postTag = new PostTag(post, tag.get());
-                            post.getTags().add(postTag);
-                        } else {
-                            post.addTag(tagRequestDTOToTag(tagDTO));
-                        }
-                    });
+            tags.forEach(tagDTO -> {
+                Predicate predicate = QTag.tag.name.eq(tagDTO.name());
+                Optional<Tag> tag = this.tagRepository.findOne(predicate);
+                if (tag.isPresent()) {
+                    PostTag postTag = new PostTag(post, tag.get());
+                    post.getTags().add(postTag);
+                } else {
+                    post.addTag(tagRequestDTOToTag(tagDTO));
+                }
+            });
         }
     }
 
@@ -107,9 +103,7 @@ public class PostServiceImpl implements PostService {
 
     private void addPostCommentsToPost(List<PostCommentsDTO> comments, Post post) {
         if (!CollectionUtils.isEmpty(comments)) {
-            comments.forEach(
-                    postCommentsDTO ->
-                            post.addComment(postRequestDTOToPostComment(postCommentsDTO)));
+            comments.forEach(postCommentsDTO -> post.addComment(postRequestDTOToPostComment(postCommentsDTO)));
         }
     }
 

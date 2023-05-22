@@ -16,15 +16,14 @@ import org.springframework.boot.test.json.JsonContent;
 @JsonTest
 class SerializationTest {
 
-    @Autowired private JacksonTester<PostRequestDTO> jacksonTester;
+    @Autowired
+    private JacksonTester<PostRequestDTO> jacksonTester;
 
     @Test
     void testJson() throws IOException {
-        List<PostCommentsDTO> comments =
-                List.of(new PostCommentsDTO("review1"), new PostCommentsDTO("review2"));
+        List<PostCommentsDTO> comments = List.of(new PostCommentsDTO("review1"), new PostCommentsDTO("review2"));
         List<TagDTO> tags = List.of(new TagDTO("java"));
-        PostRequestDTO postRequestDTO =
-                new PostRequestDTO("junit", "title", "content", comments, tags);
+        PostRequestDTO postRequestDTO = new PostRequestDTO("junit", "title", "content", comments, tags);
         JsonContent<PostRequestDTO> json = jacksonTester.write(postRequestDTO);
         assertThat(json.getJson())
                 .isEqualTo(
