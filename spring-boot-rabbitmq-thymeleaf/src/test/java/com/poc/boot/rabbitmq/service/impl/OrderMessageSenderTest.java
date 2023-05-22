@@ -12,7 +12,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.poc.boot.rabbitmq.config.RabbitMQConfig;
 import com.poc.boot.rabbitmq.util.MockObjectCreator;
-import java.io.Serial;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -20,6 +20,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.amqp.rabbit.connection.CorrelationData;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+
+import java.io.Serial;
 
 @ExtendWith(MockitoExtension.class)
 class OrderMessageSenderTest {

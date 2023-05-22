@@ -19,8 +19,9 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<java.version>17</java.version>
-		<maven-checkstyle-plugin.version>3.3.0</maven-checkstyle-plugin.version>
 
+		<maven-checkstyle-plugin.version>3.3.0</maven-checkstyle-plugin.version>
+		<spotless.version>2.36.0</spotless.version>
 		<jacoco-maven-plugin.version>0.8.10</jacoco-maven-plugin.version>
 		<jacoco.minimum.coverage>0.80</jacoco.minimum.coverage>
 		<project.testresult.directory>${project.build.directory}/test-results</project.testresult.directory>
@@ -50,6 +51,12 @@
             <artifactId>spring-boot-devtools</artifactId>
             <optional>true</optional>
         </dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-docker-compose</artifactId>
+			<optional>true</optional>
+		</dependency>
+
         <dependency>
             <groupId>org.webjars</groupId>
             <artifactId>webjars-locator-core</artifactId>
@@ -270,6 +277,27 @@
 					</execution>
 				</executions>
 			</plugin>
+			<plugin>
+                <groupId>com.diffplug.spotless</groupId>
+                <artifactId>spotless-maven-plugin</artifactId>
+                <version>${spotless.version}</version>
+                <configuration>
+                    <java>
+                        <googleJavaFormat>
+                            <version>1.17.0</version>
+                            <style>AOSP</style>
+                        </googleJavaFormat>
+                    </java>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
 		</plugins>
 	</build>
 

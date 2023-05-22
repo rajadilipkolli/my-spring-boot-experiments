@@ -145,6 +145,17 @@
             "mainClass": "com.example.ultimateredis.UltimateRedisApplication",
             "projectName": "spring-boot-ultimate-redis",
             "args": "",
+            "envFile": "${workspaceFolder}/.env",
+            "vmArgs": " -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=42059 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dspring.jmx.enabled=true -Djava.rmi.server.hostname=localhost -Dspring.application.admin.enabled=true -Dspring.boot.project.name=spring-boot-ultimate-redis"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-RabbitMQApplication<spring-boot-rabbitmq-thymeleaf>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.poc.boot.rabbitmq.RabbitMQApplication",
+            "projectName": "spring-boot-rabbitmq-thymeleaf",
+            "args": "",
             "envFile": "${workspaceFolder}/.env"
         }
     ]

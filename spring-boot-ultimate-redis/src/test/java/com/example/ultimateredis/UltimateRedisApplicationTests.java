@@ -6,6 +6,7 @@ import org.springframework.boot.testcontainers.service.connection.ServiceConnect
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.utility.DockerImageName;
 
 @SpringBootTest
 @Testcontainers
@@ -13,7 +14,8 @@ class UltimateRedisApplicationTests {
 
     @Container
     @ServiceConnection(name = "redis")
-    static final GenericContainer redisContainer = new GenericContainer("redis:7.0.11");
+    static final GenericContainer redisContainer =
+            new GenericContainer(DockerImageName.parse("redis").withTag("7.0.11"));
 
     @Test
     void contextLoads() {}
