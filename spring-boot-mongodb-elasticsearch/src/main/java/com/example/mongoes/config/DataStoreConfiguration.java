@@ -29,7 +29,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
                         value = ReactiveElasticsearchRepository.class))
 public class DataStoreConfiguration extends AbstractReactiveMongoConfiguration {
 
-    @Value("${spring.data.mongodb.database}")
+    @Value("${spring.data.mongodb.database:mongoes}")
     private String databaseName;
 
     @Bean

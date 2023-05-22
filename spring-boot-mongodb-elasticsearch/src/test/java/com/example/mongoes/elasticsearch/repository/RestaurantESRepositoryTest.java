@@ -253,7 +253,10 @@ class RestaurantESRepositoryTest extends ElasticsearchContainerSetUp {
     void testQueryBoolWithShould() {
         Mono<SearchPage<Restaurant>> queryBoolWithShouldMono =
                 this.restaurantESRepository.queryBoolWithShould(
-                        BOROUGH_NAME, CUISINE_NAME, RESTAURANT_NAME, PageRequest.of(0, 5));
+                        BOROUGH_NAME,
+                        CUISINE_NAME,
+                        RESTAURANT_NAME,
+                        PageRequest.of(0, 5, Sort.by(Sort.Direction.ASC, "restaurant_id")));
 
         StepVerifier.create(queryBoolWithShouldMono)
                 .consumeNextWith(
