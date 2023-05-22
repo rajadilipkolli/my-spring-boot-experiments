@@ -14,7 +14,7 @@ plugins {
 	id("org.sonarqube") version "4.0.0.2929"
 }
 
-group = "com.example.envers"
+group = "com.example.graphql"
 version = "0.0.1-SNAPSHOT"
 java.sourceCompatibility = JavaVersion.VERSION_17
 
@@ -30,27 +30,39 @@ repositories {
 }
 
 dependencies {
-	implementation("org.springframework.boot:spring-boot-starter-web")
-	implementation("org.springframework.boot:spring-boot-starter-validation")
-	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-    implementation("org.springframework.data:spring-data-envers")
-	implementation("org.liquibase:liquibase-core")
-	runtimeOnly("org.postgresql:postgresql")
-	implementation("org.springframework.boot:spring-boot-starter-actuator")
-	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.1.0")
-
-    developmentOnly("org.springframework.boot:spring-boot-devtools")
-	developmentOnly("org.springframework.boot:spring-boot-docker-compose")
+    implementation("org.springframework.boot:spring-boot-starter-graphql")
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
+    implementation("org.springframework.boot:spring-boot-starter-webflux")
 
     compileOnly("org.projectlombok:lombok")
-
     annotationProcessor("org.projectlombok:lombok")
-    annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
+    implementation("org.springframework.boot:spring-boot-starter-data-r2dbc")
+    // Needed to run liquibase
+    implementation("org.springframework:spring-jdbc")
+    // Needed for pointcut
+    implementation("org.springframework.boot:spring-boot-starter-aop")
 
-	testImplementation("org.springframework.boot:spring-boot-starter-test")
-	testImplementation("org.springframework.boot:spring-boot-testcontainers")
-	testImplementation("org.testcontainers:junit-jupiter")
-	testImplementation("org.testcontainers:postgresql")
+    runtimeOnly ("org.postgresql:r2dbc-postgresql")
+    runtimeOnly ("org.postgresql:postgresql")
+    implementation("org.liquibase:liquibase-core")
+    implementation("org.springdoc:springdoc-openapi-starter-webflux-ui:2.1.0")
+    implementation("org.apache.commons:commons-lang3")
+
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.springframework.boot:spring-boot-testcontainers")
+    testImplementation("io.projectreactor:reactor-test")
+    testImplementation("org.projectlombok:lombok")
+    testImplementation("org.awaitility:awaitility")
+    testImplementation("org.testcontainers:junit-jupiter")
+    testImplementation("org.testcontainers:postgresql")
+    testImplementation("org.testcontainers:r2dbc")
+    testImplementation("org.springframework.graphql:spring-graphql-test")
+}
+
+defaultTasks "bootRun"
+
+springBoot {
+    buildInfo()
 }
 
 tasks.withType<Test> {
@@ -87,7 +99,7 @@ tasks.jacocoTestCoverageVerification {
 			limit {
 				counter = "LINE"
 				value = "COVEREDRATIO"
-				minimum = "0.6".toBigDecimal()
+				minimum = "0.63".toBigDecimal()
 			}
 		}
 	}

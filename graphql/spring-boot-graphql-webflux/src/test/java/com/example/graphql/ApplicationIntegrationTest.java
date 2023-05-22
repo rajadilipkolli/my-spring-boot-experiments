@@ -14,7 +14,8 @@ import org.springframework.graphql.test.tester.GraphQlTester;
 @AutoConfigureGraphQlTester
 class ApplicationIntegrationTest extends AbstractIntegrationTest {
 
-    @Autowired private GraphQlTester graphQlTester;
+    @Autowired
+    private GraphQlTester graphQlTester;
 
     @Test
     void contextLoads() {
