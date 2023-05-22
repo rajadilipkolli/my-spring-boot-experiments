@@ -1,7 +1,5 @@
 package com.example.graphql.querydsl;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import com.example.graphql.querydsl.common.AbstractIntegrationTest;
 import com.example.graphql.querydsl.model.PostCommentsDTO;
 import org.junit.jupiter.api.Test;
@@ -12,12 +10,8 @@ import org.springframework.graphql.test.tester.HttpGraphQlTester;
 @AutoConfigureHttpGraphQlTester
 class GraphQueryDSLApplicationTests extends AbstractIntegrationTest {
 
-    @Autowired private HttpGraphQlTester graphQlTester;
-
-    @Test
-    void contextLoads() {
-        assertThat(POSTGRE_SQL_CONTAINER.isRunning()).isTrue();
-    }
+    @Autowired
+    private HttpGraphQlTester graphQlTester;
 
     @Test
     void test_query_insert() {

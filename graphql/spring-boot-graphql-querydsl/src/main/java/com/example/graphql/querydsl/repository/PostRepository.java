@@ -9,8 +9,7 @@ import org.springframework.graphql.data.GraphQlRepository;
 import org.springframework.lang.NonNull;
 
 @GraphQlRepository
-public interface PostRepository
-        extends CrudRepository<Post, Long>, QuerydslPredicateExecutor<Post> {
+public interface PostRepository extends CrudRepository<Post, Long>, QuerydslPredicateExecutor<Post> {
     @EntityGraph(attributePaths = {"details", "comments"})
     List<Post> findByDetails_CreatedByEqualsIgnoreCase(@NonNull String createdBy);
 
