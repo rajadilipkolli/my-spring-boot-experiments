@@ -36,11 +36,14 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.liquibase:liquibase-core")
+	// Printing Queries effectively
     implementation("net.ttddyy:datasource-proxy:1.9")
 
+	// QueryDSL for JPA
     compileOnly("com.querydsl:querydsl-jpa-codegen:5.0.0:jakarta")
     implementation("com.querydsl:querydsl-jpa:5.0.0:jakarta")
 
+    // Jakarta EE 10 as SB is using Jakarta EE 
     implementation("jakarta.persistence:jakarta.persistence-api:3.1.0")
     implementation("jakarta.inject:jakarta.inject-api:2.0.1")
     implementation("jakarta.annotation:jakarta.annotation-api:2.1.1")
@@ -103,7 +106,7 @@ tasks.jacocoTestCoverageVerification {
 	violationRules {
 		rule {
 			element = "BUNDLE"
-			//includes = listOf("com.sivalabs.*")
+			//includes = listOf("com.example.graphql.*")
 
 			limit {
 				counter = "LINE"
