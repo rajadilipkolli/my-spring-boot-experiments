@@ -37,29 +37,17 @@ public class CustomerGraphQLServiceImpl implements CustomerGraphQLService {
         return this.ordersRepository
                 .findByCustomerIdIn(keys)
                 .collectMultimap(Orders::customerId)
-                .map(
-                        customerOrderMap -> {
-                            var result = new HashMap<Customer, List<Orders>>();
-                            customerOrderMap
-                                    .keySet()
-                                    .forEach(
-                                            customerId -> {
-                                                var customer =
-                                                        customers.stream()
-                                                                .filter(
-                                                                        cust ->
-                                                                                cust.id()
-                                                                                        .equals(
-                                                                                                customerId))
-                                                                .findAny()
-                                                                .orElseThrow();
-                                                result.put(
-                                                        customer,
-                                                        new ArrayList<>(
-                                                                customerOrderMap.get(customerId)));
-                                            });
-                            return result;
-                        });
+                .map(customerOrderMap -> {
+                    var result = new HashMap<Customer, List<Orders>>();
+                    customerOrderMap.keySet().forEach(customerId -> {
+                        var customer = customers.stream()
+                                .filter(cust -> cust.id().equals(customerId))
+                                .findAny()
+                                .orElseThrow();
+                        result.put(customer, new ArrayList<>(customerOrderMap.get(customerId)));
+                    });
+                    return result;
+                });
     }
 
     @Override
