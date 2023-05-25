@@ -1,17 +1,14 @@
 package com.example.multitenancy.schema.config.multitenancy;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.Map;
+import javax.sql.DataSource;
 import lombok.RequiredArgsConstructor;
-
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.engine.jdbc.connections.spi.MultiTenantConnectionProvider;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernatePropertiesCustomizer;
 import org.springframework.stereotype.Component;
-
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.Map;
-
-import javax.sql.DataSource;
 
 @Component
 @RequiredArgsConstructor
