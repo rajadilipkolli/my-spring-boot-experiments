@@ -4,21 +4,16 @@ import com.example.mongoes.document.Restaurant;
 import com.example.mongoes.response.AggregationSearchResponse;
 import com.example.mongoes.response.ResultData;
 import com.example.mongoes.web.service.SearchService;
-
 import io.micrometer.core.annotation.Timed;
-
+import java.util.List;
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.data.elasticsearch.core.SearchPage;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import java.util.List;
 
 @RestController
 @Timed

@@ -1,7 +1,6 @@
 package com.example.jobrunr.config;
 
 import lombok.Data;
-
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @Data

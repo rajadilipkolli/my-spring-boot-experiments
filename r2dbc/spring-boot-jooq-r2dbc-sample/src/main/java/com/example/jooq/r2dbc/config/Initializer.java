@@ -2,19 +2,15 @@ package com.example.jooq.r2dbc.config;
 
 import static com.example.jooq.r2dbc.testcontainersflyway.db.tables.PostComments.POST_COMMENTS;
 import static com.example.jooq.r2dbc.testcontainersflyway.db.tables.Posts.POSTS;
-
 import static org.jooq.impl.DSL.multiset;
 import static org.jooq.impl.DSL.select;
 
 import com.example.jooq.r2dbc.config.logging.Loggable;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
 import org.jooq.DSLContext;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
-
 import reactor.core.publisher.Mono;
 
 @Component

@@ -1,7 +1,6 @@
 package com.example.jooq.r2dbc.config.logging;
 
 import com.example.jooq.r2dbc.utils.AppConstants;
-
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.AfterThrowing;
