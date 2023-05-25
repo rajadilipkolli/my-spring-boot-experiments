@@ -4,7 +4,6 @@ import static com.example.jooq.r2dbc.testcontainersflyway.db.Tables.POSTS;
 import static com.example.jooq.r2dbc.testcontainersflyway.db.Tables.POSTS_TAGS;
 import static com.example.jooq.r2dbc.testcontainersflyway.db.Tables.POST_COMMENTS;
 import static com.example.jooq.r2dbc.testcontainersflyway.db.Tables.TAGS;
-
 import static org.jooq.impl.DSL.*;
 
 import com.example.jooq.r2dbc.entities.Post;
@@ -15,11 +14,11 @@ import com.example.jooq.r2dbc.model.response.PostSummary;
 import com.example.jooq.r2dbc.repository.PostRepository;
 import com.example.jooq.r2dbc.testcontainersflyway.db.tables.records.PostCommentsRecord;
 import com.example.jooq.r2dbc.testcontainersflyway.db.tables.records.PostsTagsRecord;
-
+import java.util.List;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Record1;
@@ -27,12 +26,8 @@ import org.jooq.impl.DSL;
 import org.jooq.impl.SQLDataType;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
-
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import java.util.List;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor

@@ -1,7 +1,6 @@
 package com.example.jobrunr.config.logging;
 
 import com.example.jobrunr.utils.AppConstants;
-
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.AfterThrowing;

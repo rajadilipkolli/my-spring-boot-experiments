@@ -5,7 +5,6 @@ import com.example.graphql.entities.TagEntity;
 import com.example.graphql.model.request.NewPostRequest;
 import com.example.graphql.model.request.TagsRequest;
 import com.example.graphql.repositories.TagRepository;
-
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Builder;
 import org.mapstruct.Context;

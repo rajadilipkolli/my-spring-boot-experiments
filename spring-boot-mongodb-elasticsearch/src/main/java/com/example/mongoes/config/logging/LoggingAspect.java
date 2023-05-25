@@ -1,7 +1,6 @@
 package com.example.mongoes.config.logging;
 
 import com.example.mongoes.utils.AppConstants;
-
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.AfterThrowing;

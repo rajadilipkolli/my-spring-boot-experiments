@@ -1,5 +1,9 @@
 package com.example.custom.sequence.config;
 
+import java.io.Serializable;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.util.Properties;
 import org.hibernate.HibernateException;
 import org.hibernate.MappingException;
 import org.hibernate.engine.spi.SharedSessionContractImplementor;
@@ -15,11 +19,6 @@ import org.hibernate.type.descriptor.jdbc.JdbcType;
 import org.hibernate.type.descriptor.jdbc.JdbcTypeIndicators;
 import org.hibernate.type.descriptor.jdbc.JdbcTypeJavaClassMappings;
 import org.hibernate.type.descriptor.jdbc.LongVarcharJdbcType;
-
-import java.io.Serializable;
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.util.Properties;
 
 public class StringPrefixedSequenceIdGenerator extends SequenceStyleGenerator {
 

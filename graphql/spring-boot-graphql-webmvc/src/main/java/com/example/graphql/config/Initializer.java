@@ -5,15 +5,12 @@ import com.example.graphql.entities.PostCommentEntity;
 import com.example.graphql.entities.PostDetailsEntity;
 import com.example.graphql.entities.PostEntity;
 import com.example.graphql.repositories.AuthorRepository;
-
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-
-import org.springframework.boot.CommandLineRunner;
-import org.springframework.stereotype.Component;
-
 import java.time.LocalDateTime;
 import java.util.stream.LongStream;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor

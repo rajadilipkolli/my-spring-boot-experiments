@@ -1,7 +1,6 @@
 package com.example.choasmonkey;
 
 import com.example.choasmonkey.config.ApplicationProperties;
-
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;

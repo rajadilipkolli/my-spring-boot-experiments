@@ -1,7 +1,6 @@
 package com.example.choasmonkey.web.controllers;
 
 import static com.example.choasmonkey.utils.AppConstants.PROFILE_TEST;
-
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.Matchers.hasSize;
@@ -20,9 +19,10 @@ import com.example.choasmonkey.entities.Customer;
 import com.example.choasmonkey.model.response.CustomerResponse;
 import com.example.choasmonkey.services.CustomerService;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import io.micrometer.observation.ObservationRegistry;
-
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,10 +31,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
 
 @WebMvcTest(controllers = CustomerController.class)
 @ActiveProfiles(PROFILE_TEST)
