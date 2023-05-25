@@ -30,7 +30,7 @@ dependencies {
     //For Latency Visualization
     implementation ("io.opentelemetry:opentelemetry-exporter-zipkin")
     // For pushing logs out
-    runtimeOnly ("com.github.loki4j:loki-logback-appender:1.4.0")
+    runtimeOnly ("com.github.loki4j:loki-logback-appender:1.4.1")
 	runtimeOnly("io.micrometer:micrometer-registry-prometheus")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 }
