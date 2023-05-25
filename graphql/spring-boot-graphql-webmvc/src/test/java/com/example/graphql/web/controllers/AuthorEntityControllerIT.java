@@ -13,14 +13,12 @@ import com.example.graphql.common.AbstractIntegrationTest;
 import com.example.graphql.entities.AuthorEntity;
 import com.example.graphql.model.request.AuthorRequest;
 import com.example.graphql.repositories.AuthorRepository;
-
+import java.util.ArrayList;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-
-import java.util.ArrayList;
-import java.util.List;
 
 class AuthorEntityControllerIT extends AbstractIntegrationTest {
 

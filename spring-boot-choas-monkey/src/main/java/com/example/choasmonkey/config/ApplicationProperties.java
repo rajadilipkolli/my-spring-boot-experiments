@@ -1,7 +1,6 @@
 package com.example.choasmonkey.config;
 
 import lombok.Data;
-
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @Data

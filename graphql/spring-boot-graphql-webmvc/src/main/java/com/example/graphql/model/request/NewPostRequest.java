@@ -1,7 +1,6 @@
 package com.example.graphql.model.request;
 
 import jakarta.validation.constraints.NotBlank;
-
 import java.io.Serializable;
 import java.util.List;
 

@@ -11,14 +11,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.example.graphql.common.AbstractIntegrationTest;
 import com.example.graphql.entities.PostCommentEntity;
 import com.example.graphql.repositories.PostCommentRepository;
-
+import java.util.ArrayList;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-
-import java.util.ArrayList;
-import java.util.List;
 
 class PostEntityCommentControllerIT extends AbstractIntegrationTest {
 
