@@ -1,9 +1,7 @@
 package com.poc.boot.rabbitmq.config;
 
 import com.poc.boot.rabbitmq.model.Order;
-
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.context.annotation.Configuration;
 

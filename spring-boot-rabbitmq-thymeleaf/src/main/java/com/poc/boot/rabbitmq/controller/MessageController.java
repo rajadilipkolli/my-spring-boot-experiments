@@ -3,9 +3,7 @@ package com.poc.boot.rabbitmq.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.poc.boot.rabbitmq.model.Order;
 import com.poc.boot.rabbitmq.service.OrderMessageSender;
-
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ModelAttribute;

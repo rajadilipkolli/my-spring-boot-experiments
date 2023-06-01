@@ -6,6 +6,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "TestRabbitMQApplication",
+            "request": "launch",
+            "mainClass": "com.poc.boot.rabbitmq.TestRabbitMQApplication",
+            "projectName": "spring-boot-rabbitmq-thymeleaf"
+        },
+        {
+            "type": "java",
             "name": "TestApplication",
             "request": "launch",
             "mainClass": "com.example.rest.proxy.TestApplication",

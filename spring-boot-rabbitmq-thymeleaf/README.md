@@ -10,4 +10,9 @@ Windows
     https://www.rabbitmq.com/which-erlang.html
     http://www.erlang.org/downloads
     Video - https://www.youtube.com/watch?v=gKzKUmtOwR4
+
+# Important links
+
+Home Page : http://localhost:8080/index.html
+
 	
