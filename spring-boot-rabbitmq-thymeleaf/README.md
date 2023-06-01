@@ -13,6 +13,6 @@ Windows
 
 # Important links
 
-Home Page : http://localhost:8080/index.html
+Home Page : http://localhost:8080
 
 	
