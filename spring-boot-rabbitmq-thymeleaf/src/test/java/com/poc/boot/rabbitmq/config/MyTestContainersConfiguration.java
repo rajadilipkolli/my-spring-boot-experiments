@@ -13,6 +13,6 @@ public class MyTestContainersConfiguration {
     @ServiceConnection
     RabbitMQContainer rabbitMQContainer() {
         return new RabbitMQContainer(
-                DockerImageName.parse("rabbitmq").withTag("3.11.17-management"));
+                DockerImageName.parse("rabbitmq").withTag("3.12.0-management"));
     }
 }
