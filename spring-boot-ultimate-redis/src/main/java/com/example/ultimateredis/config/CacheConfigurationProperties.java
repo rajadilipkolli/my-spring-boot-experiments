@@ -1,11 +1,9 @@
 package com.example.ultimateredis.config;
 
-import lombok.Data;
-
-import org.springframework.boot.context.properties.ConfigurationProperties;
-
 import java.util.HashMap;
 import java.util.Map;
+import lombok.Data;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties(prefix = "cache")
 @Data
