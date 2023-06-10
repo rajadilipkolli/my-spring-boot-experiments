@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.0.6</version>
+        <version>3.1.0</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.example.jooq.r2dbc</groupId>
@@ -19,20 +19,16 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
         <java.version>17</java.version>
-        <spring-cloud.version>2022.0.2</spring-cloud.version>
         <springdoc-openapi.version>2.1.0</springdoc-openapi.version>
-        <commons-io.version>2.11.0</commons-io.version>
-
-        <testcontainers.version>1.18.0</testcontainers.version>
+        <commons-io.version>2.13.0</commons-io.version>
+        <jooq-testcontainers-codegen-maven-plugin.version>0.0.1</jooq-testcontainers-codegen-maven-plugin.version>
 
         <project.testresult.directory>${project.build.directory}/test-results</project.testresult.directory>
-        <spotless.version>2.36.0</spotless.version>
+        <spotless.version>2.37.0</spotless.version>
         <dependency-check-maven.version>8.2.1</dependency-check-maven.version>
         <properties-maven-plugin.version>1.1.0</properties-maven-plugin.version>
-        <maven-surefire-plugin.version>3.0.0</maven-surefire-plugin.version>
-        <maven-failsafe-plugin.version>3.0.0</maven-failsafe-plugin.version>
         <sonar-maven-plugin.version>3.9.1.2184</sonar-maven-plugin.version>
-        <jacoco-maven-plugin.version>0.8.9</jacoco-maven-plugin.version>
+        <jacoco-maven-plugin.version>0.8.10</jacoco-maven-plugin.version>
         <jacoco.minimum.coverage>0.80</jacoco.minimum.coverage>
         <jacoco.utReportFolder>${project.build.directory}/jacoco/test</jacoco.utReportFolder>
         <jacoco.utReportFile>${jacoco.utReportFolder}/test.exec</jacoco.utReportFile>
@@ -126,6 +122,11 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-testcontainers</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>io.projectreactor</groupId>
             <artifactId>reactor-test</artifactId>
             <scope>test</scope>
@@ -151,25 +152,6 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>org.springframework.cloud</groupId>
-                <artifactId>spring-cloud-dependencies</artifactId>
-                <version>${spring-cloud.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.testcontainers</groupId>
-                <artifactId>testcontainers-bom</artifactId>
-                <version>${testcontainers.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
 
     <build>
         <plugins>
@@ -206,82 +188,62 @@
                     </includeOnlyProperties>
                 </configuration>
             </plugin>
-            <!-- Much better if there was a testcontainers lifecycle management plugin!
-                 Upvote here if you like the idea: https://github.com/testcontainers/testcontainers-java/issues/4397 -->
-            <plugin>
-                <groupId>org.codehaus.gmaven</groupId>
-                <artifactId>groovy-maven-plugin</artifactId>
-                <version>2.1.1</version>
-                <executions>
-                    <execution>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>execute</goal>
-                        </goals>
-                        <configuration>
-                            <source>
-                                db = new org.testcontainers.containers.PostgreSQLContainer("postgres:15-alpine")
-                                    .withUsername("${db.username}")
-                                    .withDatabaseName("rest")
-                                    .withPassword("${db.password}");
-                                db.start();
-                                project.properties.setProperty('db.url', db.getJdbcUrl());
-                            </source>
-                        </configuration>
-                    </execution>
-                </executions>
 
+            <plugin>
+                <groupId>org.testcontainers</groupId>
+                <artifactId>jooq-testcontainers-codegen-maven-plugin</artifactId>
+                <version>${jooq-testcontainers-codegen-maven-plugin.version}</version>
                 <dependencies>
                     <dependency>
                         <groupId>org.testcontainers</groupId>
                         <artifactId>postgresql</artifactId>
                         <version>${testcontainers.version}</version>
                     </dependency>
+                    <dependency>
+                        <groupId>org.postgresql</groupId>
+                        <artifactId>postgresql</artifactId>
+                        <version>${postgresql.version}</version>
+                    </dependency>
                 </dependencies>
-            </plugin>
-
-            <plugin>
-                <groupId>org.flywaydb</groupId>
-                <artifactId>flyway-maven-plugin</artifactId>
-                <version>${flyway.version}</version>
                 <executions>
                     <execution>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>migrate</goal>
-                        </goals>
-                        <configuration>
-                            <url>${db.url}</url>
-                            <user>${db.username}</user>
-                            <password>${db.password}</password>
-                            <locations>
-                                <location>filesystem:src/main/resources/db/migration/postgresql</location>
-                            </locations>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
-                <groupId>org.jooq</groupId>
-                <artifactId>jooq-codegen-maven</artifactId>
-
-                <executions>
-                    <execution>
-                        <id>java-generator</id>
-                        <phase>generate-sources</phase>
+                        <id>generate-jooq-sources</id>
                         <goals>
                             <goal>generate</goal>
                         </goals>
-
+                        <phase>generate-sources</phase>
                         <configuration>
-                            <jdbc>
-                                <url>${db.url}</url>
-                                <user>${db.username}</user>
-                                <password>${db.password}</password>
-                            </jdbc>
+                            <database>
+                                <!--
+                                "type" can be: POSTGRES, MYSQL, MARIADB
+                                -->
+                                <type>POSTGRES</type>
+                                <!--
+                                "containerImage" is optional.
+                                The defaults are 
+                                    POSTGRES: postgres:15.2-alpine
+                                    MYSQL: mysql:8.0.33
+                                    MARIADB: mariadb:10.11
+                                -->
+                                <containerImage>postgres:15.3-alpine</containerImage>
+                            </database>
+                            <flyway>
+                                <!--
+                                You can configure any supporting flyway config here.
+                                see https://flywaydb.org/documentation/configuration/parameters/ 
+                                -->
+                                <locations> <!-- optional -->
+                                    filesystem:src/main/resources/db/migration/postgresql
+                                </locations>
+                            </flyway>
+                            <!-- 
+                                You can configure any supporting jooq config here. 
+                                see https://www.jooq.org/doc/latest/manual/code-generation/codegen-configuration/
+                            -->
                             <generator>
                                 <database>
+                                    <includes>.*</includes>
+                                    <excludes>flyway_schema_history</excludes>
                                     <inputSchema>public</inputSchema>
                                 </database>
                                 <target>
@@ -310,7 +272,7 @@
                     </configuration>
                   </execution>
                 </executions>
-              </plugin>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
@@ -379,7 +341,7 @@
                 <configuration>
                     <java>
                         <googleJavaFormat>
-                            <version>1.15.0</version>
+                            <version>1.17.0</version>
                             <style>AOSP</style>
                         </googleJavaFormat>
                     </java>

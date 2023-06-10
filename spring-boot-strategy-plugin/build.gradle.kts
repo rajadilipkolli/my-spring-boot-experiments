@@ -1,8 +1,8 @@
 plugins {
 	java
-	id("org.springframework.boot") version "3.0.6"
+	id("org.springframework.boot") version "3.1.0"
 	id("io.spring.dependency-management") version "1.1.0"
-	id("org.graalvm.buildtools.native") version "0.9.21"
+	// id("org.graalvm.buildtools.native") version "0.9.21"
 }
 
 group = "com.example.strategy.plugin"
@@ -30,7 +30,7 @@ dependencies {
     //For Latency Visualization
     implementation ("io.opentelemetry:opentelemetry-exporter-zipkin")
     // For pushing logs out
-    runtimeOnly ("com.github.loki4j:loki-logback-appender:1.4.0")
+    runtimeOnly ("com.github.loki4j:loki-logback-appender:1.4.1")
 	runtimeOnly("io.micrometer:micrometer-registry-prometheus")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 }

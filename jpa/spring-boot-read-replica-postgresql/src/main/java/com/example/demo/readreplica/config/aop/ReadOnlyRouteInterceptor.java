@@ -1,7 +1,6 @@
 package com.example.demo.readreplica.config.aop;
 
 import com.example.demo.readreplica.config.routing.RoutingDataSource;
-
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;

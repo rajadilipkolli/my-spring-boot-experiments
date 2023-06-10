@@ -33,7 +33,8 @@ public class Customer {
     @NotEmpty(message = "Name cannot be empty")
     private String name;
 
-    @Version Long version = 0L;
+    @Version
+    Long version = 0L;
 
     public Customer(String name) {
         this.name = name;

@@ -5,9 +5,8 @@ import static com.example.graphql.utils.AppConstants.PROFILE_TEST;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.JdbcServiceConnection;
-import org.springframework.boot.test.autoconfigure.r2dbc.R2dbcServiceConnection;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.test.context.ActiveProfiles;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
@@ -18,12 +17,11 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @Testcontainers(disabledWithoutDocker = true)
 public abstract class AbstractIntegrationTest {
 
-    @Autowired protected ObjectMapper objectMapper;
+    @Autowired
+    protected ObjectMapper objectMapper;
 
-    @Container @JdbcServiceConnection @R2dbcServiceConnection
+    @Container
+    @ServiceConnection
     protected static final PostgreSQLContainer<?> postgreSQLContainer =
-            new PostgreSQLContainer<>("postgres:15-alpine")
-                    .withDatabaseName("integration-tests-db")
-                    .withUsername("username")
-                    .withPassword("password");
+            new PostgreSQLContainer<>("postgres:15.3-alpine");
 }

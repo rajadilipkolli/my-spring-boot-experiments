@@ -1,10 +1,8 @@
 package com.example.mongoes.elasticsearch.repository;
 
 import com.example.mongoes.document.Restaurant;
-
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.elasticsearch.repository.ReactiveElasticsearchRepository;
-
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 

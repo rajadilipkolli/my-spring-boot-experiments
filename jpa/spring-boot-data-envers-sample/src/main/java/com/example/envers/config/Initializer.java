@@ -24,8 +24,7 @@ public class Initializer implements CommandLineRunner {
         persistedCustomer.setName("updatedCustomer");
         this.customerRepository.save(persistedCustomer);
 
-        Revisions<Long, Customer> revisions =
-                this.customerRepository.findRevisions(persistedCustomer.getId());
+        Revisions<Long, Customer> revisions = this.customerRepository.findRevisions(persistedCustomer.getId());
         log.info("revisions ");
         for (Revision<Long, Customer> content : revisions.getContent()) {
             log.info("Revision History Metadata :{}", content.getMetadata());

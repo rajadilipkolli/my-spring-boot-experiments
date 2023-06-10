@@ -2,7 +2,7 @@ version: "3.2"
 services:
   rabbitmq:
     container_name: rabbitmq
-    image: rabbitmq:3.11.13-management
+    image: rabbitmq:3.12.0-management
     expose:
       - "5672"
       - "15672"

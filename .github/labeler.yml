@@ -48,8 +48,7 @@
 "type: dependency-upgrade":
   - spring-boot-api-archunit-sample/pom.xml
   - spring-boot-choas-monkey/pom.xml
-  - jpa/spring-boot-data-envers-sample/build.gradle
-  - jpa/spring-boot-data-envers-sample/gradle.properties
+  - jpa/spring-boot-data-envers-sample/build.gradle.kts
   - jpa/spring-boot-hibernate2ndlevelcache-sample/pom.xml
   - jpa/spring-boot-jpa-multitenancy/db/pom.xml
   - jpa/spring-boot-jpa-multitenancy/multidatasource-multitenancy/pom.xml
@@ -60,10 +59,8 @@
   - jpa/spring-boot-jpa-customsequence/pom.xml
   - spring-boot-jobrunr-sample/pom.xml
   - spring-boot-mongodb-elasticsearch/pom.xml
-  - graphql/spring-boot-graphql-webflux/build.gradle
-  - graphql/spring-boot-graphql-webflux/gradle.properties
-  - graphql/spring-boot-graphql-querydsl/build.gradle
-  - graphql/spring-boot-graphql-querydsl/gradle.properties
+  - graphql/spring-boot-graphql-webflux/build.gradle.kts
+  - graphql/spring-boot-graphql-querydsl/build.gradle.kts
   - graphql/spring-boot-graphql-webmvc/pom.xml
   - spring-boot-strategy-plugin/build.gradle
   - spring-boot-togglz-sample/pom.xml

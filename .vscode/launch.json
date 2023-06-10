@@ -6,6 +6,27 @@
     "configurations": [
         {
             "type": "java",
+            "name": "TestRabbitMQApplication",
+            "request": "launch",
+            "mainClass": "com.poc.boot.rabbitmq.TestRabbitMQApplication",
+            "projectName": "spring-boot-rabbitmq-thymeleaf"
+        },
+        {
+            "type": "java",
+            "name": "TestApplication",
+            "request": "launch",
+            "mainClass": "com.example.rest.proxy.TestApplication",
+            "projectName": "http-proxy"
+        },
+        {
+            "type": "java",
+            "name": "TestApplication",
+            "request": "launch",
+            "mainClass": "com.example.choasmonkey.TestApplication",
+            "projectName": "spring-boot-choas-monkey"
+        },
+        {
+            "type": "java",
             "name": "Launch Application",
             "request": "launch",
             "mainClass": "com.example.featuretoggle.Application",
@@ -120,6 +141,37 @@
             "cwd": "${workspaceFolder}",
             "mainClass": "org.example.openapi.OpenApiApplication",
             "projectName": "open-api-spring-boot",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-Application<http-proxy>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.example.rest.proxy.Application",
+            "projectName": "http-proxy",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-UltimateRedisApplication<spring-boot-ultimate-redis>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.example.ultimateredis.UltimateRedisApplication",
+            "projectName": "spring-boot-ultimate-redis",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env",
+            "vmArgs": " -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=42059 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dspring.jmx.enabled=true -Djava.rmi.server.hostname=localhost -Dspring.application.admin.enabled=true -Dspring.boot.project.name=spring-boot-ultimate-redis"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-RabbitMQApplication<spring-boot-rabbitmq-thymeleaf>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.poc.boot.rabbitmq.RabbitMQApplication",
+            "projectName": "spring-boot-rabbitmq-thymeleaf",
             "args": "",
             "envFile": "${workspaceFolder}/.env"
         }

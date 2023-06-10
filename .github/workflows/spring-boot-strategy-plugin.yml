@@ -50,7 +50,7 @@ jobs:
           gu --version
           native-image --version
 
-      - name: Start up redis & postgres via Docker Compose
+      - name: Start up infra via Docker Compose
         run: |
           docker compose up -d
           sleep 5
@@ -71,7 +71,7 @@ jobs:
           severity-cutoff: high
       - if: ${{ github.ref == 'refs/heads/main' }}
         name: Log in to the Container registry
-        uses: docker/login-action@40891eba8c2bcd1309b07ba8b11232f313e86779
+        uses: docker/login-action@465a07811f14bebb1938fbed4728c6a1ff8901fc
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}

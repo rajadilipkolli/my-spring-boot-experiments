@@ -1,12 +1,16 @@
 package com.example.mongoes.web.service;
 
+import co.elastic.clients.elasticsearch._types.aggregations.Aggregate;
+import co.elastic.clients.elasticsearch._types.aggregations.RangeBucket;
 import com.example.mongoes.document.Restaurant;
 import com.example.mongoes.elasticsearch.repository.RestaurantESRepository;
 import com.example.mongoes.response.AggregationSearchResponse;
 import com.example.mongoes.response.ResultData;
-
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 import lombok.RequiredArgsConstructor;
-
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -16,14 +20,8 @@ import org.springframework.data.elasticsearch.client.elc.ElasticsearchAggregatio
 import org.springframework.data.elasticsearch.core.SearchPage;
 import org.springframework.data.elasticsearch.core.geo.GeoPoint;
 import org.springframework.stereotype.Service;
-
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
 
 @Service
 @RequiredArgsConstructor
@@ -142,42 +140,34 @@ public class SearchService {
                         aggregationMap.forEach(
                                 (String aggregateKey, ElasticsearchAggregation aggregation) -> {
                                     Map<String, Long> countMap = new HashMap<>();
-                                    //     if (aggregation instanceof ParsedStringTerms
-                                    // parsedStringTerms) {
-                                    //         countMap =
-                                    //                 parsedStringTerms.getBuckets().stream()
-                                    //                         .collect(
-                                    //                                 Collectors.toMap(
-                                    //
-                                    // MultiBucketsAggregation.Bucket
-                                    //
-                                    // ::getKeyAsString,
-                                    //
-                                    // MultiBucketsAggregation.Bucket
-                                    //
-                                    // ::getDocCount));
-                                    //     } else if (aggregation instanceof ParsedDateRange
-                                    // parsedDateRange) {
-                                    //         countMap =
-                                    //                 parsedDateRange.getBuckets().stream()
-                                    //                         .filter(bucket ->
-                                    // bucket.getDocCount() != 0)
-                                    //                         .collect(
-                                    //                                 Collectors.toMap(
-                                    //                                         bucket ->
-                                    //
-                                    // bucket.getFromAsString()
-                                    //                                                         + " -
-                                    // "
-                                    //                                                         +
-                                    // bucket
-                                    //
-                                    //   .getToAsString(),
-                                    //
-                                    // MultiBucketsAggregation.Bucket
-                                    //
-                                    // ::getDocCount));
-                                    //     }
+                                    Aggregate aggregate = aggregation.aggregation().getAggregate();
+                                    if (aggregate.isSterms()) {
+                                        aggregate
+                                                .sterms()
+                                                .buckets()
+                                                .array()
+                                                .forEach(
+                                                        stringTermsBucket ->
+                                                                countMap.put(
+                                                                        stringTermsBucket
+                                                                                .key()
+                                                                                .stringValue(),
+                                                                        stringTermsBucket
+                                                                                .docCount()));
+                                    } else if (aggregate.isDateRange()) {
+                                        List<RangeBucket> bucketList =
+                                                aggregate.dateRange().buckets().array();
+                                        bucketList.forEach(
+                                                rangeBucket -> {
+                                                    if (rangeBucket.docCount() != 0) {
+                                                        countMap.put(
+                                                                rangeBucket.fromAsString()
+                                                                        + " - "
+                                                                        + rangeBucket.toAsString(),
+                                                                rangeBucket.docCount());
+                                                    }
+                                                });
+                                    }
                                     resultMap.put(aggregateKey, countMap);
                                 });
 

@@ -2,6 +2,7 @@ package com.example.choasmonkey.gatling;
 
 import static io.gatling.javaapi.core.CoreDsl.StringBody;
 import static io.gatling.javaapi.core.CoreDsl.constantUsersPerSec;
+import static io.gatling.javaapi.core.CoreDsl.global;
 import static io.gatling.javaapi.http.HttpDsl.header;
 import static io.gatling.javaapi.http.HttpDsl.http;
 import static io.gatling.javaapi.http.HttpDsl.status;
@@ -10,7 +11,6 @@ import io.gatling.javaapi.core.CoreDsl;
 import io.gatling.javaapi.core.ScenarioBuilder;
 import io.gatling.javaapi.core.Simulation;
 import io.gatling.javaapi.http.HttpProtocolBuilder;
-
 import java.time.Duration;
 import java.util.Collections;
 import java.util.Iterator;
@@ -41,7 +41,7 @@ public class CustomerRequestSimulation extends Simulation {
                             http("create-customer-request")
                                     .post("/api/customers")
                                     .header("Content-Type", "application/json")
-                                    .body(StringBody("{ \"text\": \"${text}\" }"))
+                                    .body(StringBody("{ \"text\": \"#{text}\" }"))
                                     .check(status().is(201))
                                     .check(header("Location").saveAs("location")))
                     .exec(
@@ -51,6 +51,7 @@ public class CustomerRequestSimulation extends Simulation {
 
     public CustomerRequestSimulation() {
         this.setUp(scn.injectOpen(constantUsersPerSec(100).during(Duration.ofSeconds(30))))
-                .protocols(httpProtocol);
+                .protocols(httpProtocol)
+                .assertions(global().failedRequests().count().is(0L));
     }
 }

@@ -1,7 +1,6 @@
 package com.example.graphql.projections;
 
 import com.example.graphql.entities.PostEntity;
-
 import java.time.LocalDateTime;
 
 /** A Projection for the {@link PostEntity} entity */

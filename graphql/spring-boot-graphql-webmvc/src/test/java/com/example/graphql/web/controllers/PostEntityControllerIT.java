@@ -15,14 +15,12 @@ import com.example.graphql.entities.PostEntity;
 import com.example.graphql.model.request.NewPostRequest;
 import com.example.graphql.model.request.PostDetailsRequest;
 import com.example.graphql.repositories.PostRepository;
-
+import java.util.ArrayList;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-
-import java.util.ArrayList;
-import java.util.List;
 
 class PostEntityControllerIT extends AbstractIntegrationTest {
 

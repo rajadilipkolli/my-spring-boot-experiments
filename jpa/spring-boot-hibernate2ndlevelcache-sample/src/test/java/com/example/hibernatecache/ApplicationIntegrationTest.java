@@ -2,7 +2,6 @@ package com.example.hibernatecache;
 
 import static io.hypersistence.utils.jdbc.validator.SQLStatementCountValidator.assertInsertCount;
 import static io.hypersistence.utils.jdbc.validator.SQLStatementCountValidator.assertSelectCount;
-
 import static org.hamcrest.CoreMatchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -11,9 +10,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.example.hibernatecache.common.AbstractIntegrationTest;
 import com.example.hibernatecache.entities.Customer;
-
 import io.hypersistence.utils.jdbc.validator.SQLStatementCountValidator;
-
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 

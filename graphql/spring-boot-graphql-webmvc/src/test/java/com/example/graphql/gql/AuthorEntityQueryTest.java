@@ -10,16 +10,14 @@ import com.example.graphql.services.AuthorService;
 import com.example.graphql.services.PostCommentService;
 import com.example.graphql.services.PostService;
 import com.example.graphql.services.TagService;
-
+import java.time.LocalDateTime;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.mockito.BDDMockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.graphql.GraphQlTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.graphql.test.tester.GraphQlTester;
-
-import java.time.LocalDateTime;
-import java.util.List;
 
 @GraphQlTest(AuthorGraphQlController.class)
 class AuthorEntityQueryTest {

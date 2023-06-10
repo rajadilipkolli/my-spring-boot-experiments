@@ -39,11 +39,7 @@ public class Post {
     private List<PostComment> comments = new ArrayList<>();
 
     @JoinColumn(name = "details_ID")
-    @OneToOne(
-            cascade = CascadeType.ALL,
-            mappedBy = "post",
-            orphanRemoval = true,
-            fetch = FetchType.LAZY)
+    @OneToOne(cascade = CascadeType.ALL, mappedBy = "post", orphanRemoval = true, fetch = FetchType.LAZY)
     private PostDetails details;
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -112,8 +108,7 @@ public class Post {
             return false;
         }
         Post other = (Post) obj;
-        return Objects.equals(this.details, other.details)
-                && Objects.equals(this.title, other.title);
+        return Objects.equals(this.details, other.details) && Objects.equals(this.title, other.title);
     }
 
     @Override

@@ -1,7 +1,7 @@
 package com.example.custom.sequence.web.controllers;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -14,14 +14,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.example.custom.sequence.common.AbstractIntegrationTest;
 import com.example.custom.sequence.entities.Customer;
 import com.example.custom.sequence.repositories.CustomerRepository;
-
+import java.util.ArrayList;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-
-import java.util.ArrayList;
-import java.util.List;
 
 class CustomerControllerIT extends AbstractIntegrationTest {
 
@@ -76,7 +74,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(customer)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id", notNullValue()))
+                .andExpect(jsonPath("$.id", containsString("CUS_")))
                 .andExpect(jsonPath("$.text", is(customer.getText())));
     }
 

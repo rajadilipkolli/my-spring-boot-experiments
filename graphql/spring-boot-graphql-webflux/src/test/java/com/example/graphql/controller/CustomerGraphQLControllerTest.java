@@ -19,9 +19,11 @@ import reactor.core.publisher.Mono;
 @GraphQlTest(CustomerGraphQLController.class)
 class CustomerGraphQLControllerTest {
 
-    @Autowired private GraphQlTester graphQlTester;
+    @Autowired
+    private GraphQlTester graphQlTester;
 
-    @MockBean private CustomerGraphQLService customerGraphQLService;
+    @MockBean
+    private CustomerGraphQLService customerGraphQLService;
 
     @Test
     void test_query_all_customers() {
