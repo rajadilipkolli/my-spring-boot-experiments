@@ -14,5 +14,5 @@ $ ./gradlew bootRun -Plocal
 ### Useful Links
 * Swagger UI: http://localhost:8080/swagger-ui.html
 * Actuator Endpoint: http://localhost:8080/actuator
-* Prometheus: http://localhost:9090/
+* Prometheus: http://localhost:9090/graph
 * Grafana: http://localhost:3000/ (user/password)

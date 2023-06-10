@@ -6,7 +6,7 @@ services:
         command: [ "-config.file=/etc/tempo.yaml" ]
         volumes:
             - ./docker/tempo/tempo-local.yaml:/etc/tempo.yaml:ro
-            - ./tempo-data:/tmp/tempo
+            - ./docker/tempo/tempo-data:/tmp/tempo
         ports:
             - "14268"  # jaeger ingest
             - "9411:9411" # zipkin
