@@ -1,7 +1,6 @@
 package com.example.rest.webclient.config.logging;
 
 import com.example.rest.webclient.utils.AppConstants;
-
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.AfterThrowing;

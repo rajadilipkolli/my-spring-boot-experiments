@@ -1,7 +1,6 @@
 package com.example.rest.webclient.common;
 
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
