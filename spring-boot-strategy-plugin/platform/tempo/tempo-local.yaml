@@ -2,9 +2,6 @@ server:
     http_listen_port: 3200
 
 distributor:
-    search_tags_deny_list:
-        - "instance"
-        - "version"
     receivers:
         otlp:
             protocols:
@@ -30,8 +27,6 @@ compactor:
         block_retention: 1h
         compacted_block_retention: 10m
 
-metrics_generator_enabled: true
-
 metrics_generator:
     registry:
         collection_interval: 5s
@@ -48,11 +43,8 @@ storage:
         backend: local
         block:
             bloom_filter_false_positive: .05
-            index_downsample_bytes: 1000
-            encoding: zstd
         wal:
             path: /tmp/tempo/wal
-            encoding: snappy
         local:
             path: /tmp/tempo/blocks
         pool:
