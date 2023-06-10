@@ -1,7 +1,6 @@
 package com.example.rest.webclient.web.controllers;
 
 import static com.example.rest.webclient.utils.AppConstants.PROFILE_TEST;
-
 import static org.hamcrest.Matchers.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
@@ -10,7 +9,9 @@ import com.example.rest.webclient.model.PostDto;
 import com.example.rest.webclient.service.PostService;
 import com.example.rest.webclient.web.controller.PostController;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,13 +22,8 @@ import org.springframework.http.ProblemDetail;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.function.BodyInserters;
-
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
 
 @WebFluxTest(controllers = PostController.class)
 @ActiveProfiles(PROFILE_TEST)
