@@ -1,5 +1,6 @@
 package com.example.plugin.strategyplugin.service;
 
+import com.example.plugin.strategyplugin.domain.GenericDTO;
 import com.example.plugin.strategyplugin.plugin.WriterPlugin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,7 +18,7 @@ public class StrategyService {
         this.plugins = plugins;
     }
 
-    public String fetchData(String type) {
+    public GenericDTO fetchData(String type) {
         logger.info("fetching data for type :{}", type);
         return plugins.getPluginFor(type).get().write("Hello ");
     }

@@ -27,7 +27,9 @@ class StrategyPluginApplicationTests {
                 .accept(MediaType.APPLICATION_JSON))
         .andDo(print())
         .andExpect(status().isOk())
-        .andExpect(content().string("Writing pdf Hello "));
+        .andExpect(content().json("""
+          {"message":"Writing pdf Hello "}
+          """));
   }
 
   @Test
@@ -39,6 +41,8 @@ class StrategyPluginApplicationTests {
                 .accept(MediaType.APPLICATION_JSON))
         .andDo(print())
         .andExpect(status().isOk())
-        .andExpect(content().string("Writing CSV Hello "));
+        .andExpect(content().json("""
+          {"message":"Writing CSV Hello "}
+          """));
   }
 }

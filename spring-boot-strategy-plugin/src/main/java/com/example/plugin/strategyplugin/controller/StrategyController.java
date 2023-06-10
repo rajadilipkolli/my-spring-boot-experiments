@@ -1,5 +1,6 @@
 package com.example.plugin.strategyplugin.controller;
 
+import com.example.plugin.strategyplugin.domain.GenericDTO;
 import com.example.plugin.strategyplugin.service.StrategyService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,7 +20,7 @@ public class StrategyController {
     }
 
     @GetMapping("/fetch")
-    public String fetchData(@RequestParam("type") String type) {
+    public GenericDTO fetchData(@RequestParam("type") String type) {
         logger.info("Requested to fetch of type :{}", type);
         return this.strategyService.fetchData(type);
     }
