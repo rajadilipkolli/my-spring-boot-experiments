@@ -4,14 +4,18 @@ services:
         image: grafana/tempo
         extra_hosts: ['host.docker.internal:host-gateway']
         container_name: tempo
-        command: [ "-config.file=/etc/tempo.yaml" ]
+        command: [ "-search.enabled=true", "-config.file=/etc/tempo.yaml" ]
         volumes:
-            - ./docker/tempo/tempo-local.yaml:/etc/tempo.yaml:ro
-            - ./docker/tempo/tempo-data:/tmp/tempo
+            - ./platform/tempo/tempo-local.yaml:/etc/tempo.yaml:ro
+            - ./platform/tempo/tempo-data:/tmp/tempo
         ports:
-            - "3110:3100"     # Tempo
+            - "3200:3200"     # Tempo
             - "4317:4317"     # OTLP
             - "9411:9411"     # Zipkin
+        healthcheck:
+            interval: 5s
+            retries: 10
+            test: wget --no-verbose --tries=1 --spider http://localhost:3200/status || exit 1
 
     loki:
         image: grafana/loki
@@ -30,25 +34,37 @@ services:
             - --config.file=/etc/prometheus/prometheus.yml
             - --web.enable-remote-write-receiver
         volumes:
-            - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+            - ./platform/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
         ports:
             - "9090:9090"
+        healthcheck:
+            interval: 5s
+            retries: 10
+            test: wget --no-verbose --tries=1 --spider http://localhost:9090/status || exit 1
 
     grafana:
         image: grafana/grafana
         extra_hosts: ['host.docker.internal:host-gateway']
         container_name: grafana
         depends_on:
-            - loki
-            - prometheus
-            - tempo
+            tempo:
+                condition: service_healthy
+            prometheus:
+                condition: service_healthy
+            loki:
+                condition: service_started
         volumes:
-            - ./docker/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
-            - ./docker/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards:ro
-            - ./docker/grafana/provisioning/grafana.ini:/etc/grafana/grafana.ini
+            - ./platform/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
+            - ./platform/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards:ro
+            - ./platform/grafana/provisioning/grafana.ini:/etc/grafana/grafana.ini
         environment:
             - GF_AUTH_ANONYMOUS_ENABLED=true
             - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
             - GF_AUTH_DISABLE_LOGIN_FORM=true
         ports:
             - "3000:3000"
+        healthcheck:
+            interval: 5s
+            retries: 10
+            test: wget --no-verbose --tries=1 --spider http://localhost:3000 || exit 1
+
