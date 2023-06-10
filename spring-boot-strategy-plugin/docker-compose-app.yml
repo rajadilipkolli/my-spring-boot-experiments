@@ -1,0 +1,11 @@
+version: "3.8"
+services:
+  strategy-plugin-service:
+    # Build image with "./gradlew bootBuildImage from book-service project"
+    image: ghcr.io/rajadilipkolli/my-spring-boot-experiments/spring-boot-strategy-plugin:latest
+    container_name: strategy-plugin-service
+    ports:
+      - 8080:8080
+    environment:
+      - LOKI_URI=http://loki:3100/loki/api/v1/push
+      - MANAGEMENT_ZIPKIN_TRACING_ENDPOINT=http://tempo:9411
