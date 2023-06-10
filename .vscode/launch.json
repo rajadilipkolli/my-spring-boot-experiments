@@ -6,6 +6,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "TestApplication",
+            "request": "launch",
+            "mainClass": "com.example.multitenancy.TestApplication",
+            "projectName": "multidatasource-multitenancy"
+        },
+        {
+            "type": "java",
             "name": "TestRabbitMQApplication",
             "request": "launch",
             "mainClass": "com.poc.boot.rabbitmq.TestRabbitMQApplication",

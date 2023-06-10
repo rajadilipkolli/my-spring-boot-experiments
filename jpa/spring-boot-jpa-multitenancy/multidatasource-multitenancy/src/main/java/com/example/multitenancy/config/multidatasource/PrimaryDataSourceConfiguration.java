@@ -1,7 +1,10 @@
 package com.example.multitenancy.config.multidatasource;
 
 import com.example.multitenancy.primary.entities.PrimaryCustomer;
-
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import javax.sql.DataSource;
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.context.spi.CurrentTenantIdentifierResolver;
 import org.hibernate.engine.jdbc.connections.spi.MultiTenantConnectionProvider;
@@ -15,12 +18,6 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.transaction.PlatformTransactionManager;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-
-import javax.sql.DataSource;
 
 @Configuration
 @EnableJpaRepositories(

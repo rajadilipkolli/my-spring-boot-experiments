@@ -1,7 +1,6 @@
 package com.example.multitenancy.secondary.repositories;
 
 import com.example.multitenancy.secondary.entities.SecondaryCustomer;
-
 import org.springframework.stereotype.Repository;
 
 @Repository("secondaryCustomerRepository")

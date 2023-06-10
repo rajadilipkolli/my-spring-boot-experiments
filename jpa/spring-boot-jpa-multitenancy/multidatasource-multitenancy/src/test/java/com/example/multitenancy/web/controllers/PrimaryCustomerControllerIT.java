@@ -13,14 +13,12 @@ import com.example.multitenancy.common.AbstractIntegrationTest;
 import com.example.multitenancy.config.multitenant.TenantIdentifierResolver;
 import com.example.multitenancy.primary.entities.PrimaryCustomer;
 import com.example.multitenancy.primary.repositories.PrimaryCustomerRepository;
-
+import java.util.ArrayList;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-
-import java.util.ArrayList;
-import java.util.List;
 
 class PrimaryCustomerControllerIT extends AbstractIntegrationTest {
 
