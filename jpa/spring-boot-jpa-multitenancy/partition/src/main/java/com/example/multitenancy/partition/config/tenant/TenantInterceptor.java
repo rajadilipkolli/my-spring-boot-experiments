@@ -4,14 +4,11 @@ import static org.springframework.http.HttpStatus.FORBIDDEN;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
+import java.io.IOException;
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.HandlerInterceptor;
-
-import java.io.IOException;
 
 @Configuration(proxyBeanMethods = false)
 @RequiredArgsConstructor

@@ -1,9 +1,7 @@
 package com.example.multitenancy.partition.config;
 
 import com.example.multitenancy.partition.config.tenant.TenantInterceptor;
-
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;

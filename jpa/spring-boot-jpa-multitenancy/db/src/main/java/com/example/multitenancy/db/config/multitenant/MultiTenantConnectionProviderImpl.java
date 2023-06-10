@@ -1,16 +1,14 @@
 package com.example.multitenancy.db.config.multitenant;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.Map;
+import javax.sql.DataSource;
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.engine.jdbc.connections.spi.MultiTenantConnectionProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernatePropertiesCustomizer;
 import org.springframework.stereotype.Component;
-
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.Map;
-
-import javax.sql.DataSource;
 
 @Component
 public class MultiTenantConnectionProviderImpl
