@@ -6,7 +6,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 @Service
-public class ControlledCacheService {
+public class ControlledCacheServiceWithGenericKey {
 
     private static final String CONTROLLED_PREFIX = "myControlledPrefix_";
 
@@ -17,7 +17,7 @@ public class ControlledCacheService {
     @Cacheable(
             cacheNames = "myControlledCache",
             key =
-                    "T(com.example.ultimateredis.service.ControlledCacheService).getCacheKey(#relevant)")
+                    "T(com.example.ultimateredis.service.ControlledCacheServiceWithGenericKey).getCacheKey(#relevant)")
     public String getFromCache(String relevant) {
         return null;
     }
@@ -25,7 +25,7 @@ public class ControlledCacheService {
     @CachePut(
             cacheNames = "myControlledCache",
             key =
-                    "T(com.example.ultimateredis.service.ControlledCacheService).getCacheKey(#relevant)")
+                    "T(com.example.ultimateredis.service.ControlledCacheServiceWithGenericKey).getCacheKey(#relevant)")
     public String populateCache(String relevant, String unrelevantTrackingId) {
         return "this is it again!";
     }
@@ -33,6 +33,6 @@ public class ControlledCacheService {
     @CacheEvict(
             cacheNames = "myControlledCache",
             key =
-                    "T(com.example.ultimateredis.service.ControlledCacheService).getCacheKey(#relevant)")
+                    "T(com.example.ultimateredis.service.ControlledCacheServiceWithGenericKey).getCacheKey(#relevant)")
     public void removeFromCache(String relevant) {}
 }

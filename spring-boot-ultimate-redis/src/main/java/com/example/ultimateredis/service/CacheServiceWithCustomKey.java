@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service
-public class CacheService {
+public class CacheServiceWithCustomKey {
 
     @Cacheable(cacheNames = "myCache", key = "'myPrefix_'.concat(#relevant)")
     public String cacheThis(String relevant, String unRelevantTrackingId) {
