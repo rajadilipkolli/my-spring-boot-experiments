@@ -8,14 +8,12 @@ import com.example.multipledatasources.model.cardholder.CardHolder;
 import com.example.multipledatasources.model.member.Member;
 import com.example.multipledatasources.repository.cardholder.CardHolderRepository;
 import com.example.multipledatasources.repository.member.MemberRepository;
-
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.Optional;
 
 @ExtendWith(MockitoExtension.class)
 class DetailsServiceImplTest {
