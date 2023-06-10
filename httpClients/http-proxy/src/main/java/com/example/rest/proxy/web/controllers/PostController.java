@@ -4,9 +4,7 @@ import com.example.rest.proxy.entities.Post;
 import com.example.rest.proxy.model.response.PagedResult;
 import com.example.rest.proxy.services.PostService;
 import com.example.rest.proxy.utils.AppConstants;
-
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;

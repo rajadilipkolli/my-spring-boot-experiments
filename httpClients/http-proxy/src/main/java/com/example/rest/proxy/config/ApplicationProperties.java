@@ -1,7 +1,6 @@
 package com.example.rest.proxy.config;
 
 import lombok.Data;
-
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @Data

@@ -3,14 +3,11 @@ package com.example.rest.proxy.config;
 import com.example.rest.proxy.client.JsonPlaceholderService;
 import com.example.rest.proxy.entities.Post;
 import com.example.rest.proxy.repositories.PostRepository;
-
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 @Component
 @RequiredArgsConstructor
