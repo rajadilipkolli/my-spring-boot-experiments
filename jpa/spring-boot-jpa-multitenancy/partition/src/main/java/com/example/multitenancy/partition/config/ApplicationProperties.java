@@ -1,7 +1,6 @@
 package com.example.multitenancy.partition.config;
 
 import lombok.Data;
-
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
 

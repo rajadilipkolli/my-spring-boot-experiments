@@ -1,7 +1,6 @@
 package com.example.multitenancy.db.config.logging;
 
 import com.example.multitenancy.db.utils.AppConstants;
-
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.AfterThrowing;
