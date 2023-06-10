@@ -10,6 +10,7 @@ services:
         ports:
             - "14268"  # jaeger ingest
             - "9411:9411" # zipkin
+            - "3110:3100" # tempo
 
     loki:
         image: grafana/loki
