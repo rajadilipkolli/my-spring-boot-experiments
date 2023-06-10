@@ -5,15 +5,12 @@ import com.example.demo.readreplica.domain.CommentDTO;
 import com.example.demo.readreplica.entities.Article;
 import com.example.demo.readreplica.entities.Comment;
 import com.example.demo.readreplica.repository.ArticleRepository;
-
-import lombok.RequiredArgsConstructor;
-
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
