@@ -119,7 +119,7 @@
         "text": {},
         "textMode": "auto"
       },
-      "pluginVersion": "9.5.2",
+      "pluginVersion": "9.5.3",
       "targets": [
         {
           "datasource": {
@@ -190,7 +190,7 @@
         "text": {},
         "textMode": "auto"
       },
-      "pluginVersion": "9.5.2",
+      "pluginVersion": "9.5.3",
       "targets": [
         {
           "datasource": {
@@ -266,7 +266,7 @@
         "text": {},
         "textMode": "auto"
       },
-      "pluginVersion": "9.5.2",
+      "pluginVersion": "9.5.3",
       "targets": [
         {
           "datasource": {
@@ -341,7 +341,7 @@
         "text": {},
         "textMode": "auto"
       },
-      "pluginVersion": "9.5.2",
+      "pluginVersion": "9.5.3",
       "targets": [
         {
           "datasource": {
@@ -421,7 +421,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "9.5.2",
+      "pluginVersion": "9.5.3",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -512,7 +512,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "9.5.2",
+      "pluginVersion": "9.5.3",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -600,7 +600,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "9.5.2",
+      "pluginVersion": "9.5.3",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -703,7 +703,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "9.5.2",
+      "pluginVersion": "9.5.3",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -884,7 +884,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.0.1",
+      "pluginVersion": "9.5.3",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -1011,7 +1011,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.0.1",
+      "pluginVersion": "9.5.3",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -1140,7 +1140,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.0.1",
+      "pluginVersion": "9.5.3",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -1268,7 +1268,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.0.1",
+      "pluginVersion": "9.5.3",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -1432,7 +1432,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.0.1",
+      "pluginVersion": "9.5.3",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -1563,7 +1563,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.0.1",
+      "pluginVersion": "9.5.3",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -1679,7 +1679,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.0.1",
+      "pluginVersion": "9.5.3",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -1824,7 +1824,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.0.1",
+      "pluginVersion": "9.5.3",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -1928,7 +1928,7 @@
         "alertThreshold": true
       },
       "percentage": true,
-      "pluginVersion": "8.0.1",
+      "pluginVersion": "9.5.3",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -2042,7 +2042,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.0.1",
+      "pluginVersion": "9.5.3",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -2191,7 +2191,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.0.1",
+      "pluginVersion": "9.5.3",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -2460,7 +2460,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 51
+        "y": 58
       },
       "id": 131,
       "panels": [],
@@ -2491,7 +2491,7 @@
         "h": 7,
         "w": 8,
         "x": 0,
-        "y": 52
+        "y": 59
       },
       "hiddenSeries": false,
       "id": 98,
@@ -2581,7 +2581,7 @@
         "h": 7,
         "w": 8,
         "x": 8,
-        "y": 52
+        "y": 59
       },
       "hiddenSeries": false,
       "id": 101,
@@ -2685,7 +2685,7 @@
         "h": 7,
         "w": 8,
         "x": 16,
-        "y": 52
+        "y": 59
       },
       "hiddenSeries": false,
       "id": 99,
@@ -2781,7 +2781,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 59
+        "y": 66
       },
       "id": 132,
       "panels": [],
@@ -2818,7 +2818,7 @@
         "h": 7,
         "w": 12,
         "x": 0,
-        "y": 60
+        "y": 67
       },
       "hiddenSeries": false,
       "id": 37,
@@ -2921,7 +2921,7 @@
         "h": 7,
         "w": 12,
         "x": 12,
-        "y": 60
+        "y": 67
       },
       "hiddenSeries": false,
       "id": 38,
@@ -3015,7 +3015,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 67
+        "y": 74
       },
       "id": 133,
       "panels": [],
@@ -3052,7 +3052,7 @@
         "h": 7,
         "w": 6,
         "x": 0,
-        "y": 68
+        "y": 75
       },
       "hiddenSeries": false,
       "id": 33,
@@ -3168,7 +3168,7 @@
         "h": 7,
         "w": 6,
         "x": 6,
-        "y": 68
+        "y": 75
       },
       "hiddenSeries": false,
       "id": 83,
@@ -3272,7 +3272,7 @@
         "h": 7,
         "w": 6,
         "x": 12,
-        "y": 68
+        "y": 75
       },
       "hiddenSeries": false,
       "id": 85,
@@ -3388,7 +3388,7 @@
         "h": 7,
         "w": 6,
         "x": 18,
-        "y": 68
+        "y": 75
       },
       "hiddenSeries": false,
       "id": 84,
@@ -3480,10 +3480,9 @@
     "list": [
       {
         "current": {
-          "isNone": true,
           "selected": false,
-          "text": "None",
-          "value": ""
+          "text": "strategy-plugin-service",
+          "value": "strategy-plugin-service"
         },
         "datasource": {
           "type": "prometheus",
@@ -3512,10 +3511,9 @@
       {
         "allFormat": "glob",
         "current": {
-          "isNone": true,
           "selected": false,
-          "text": "None",
-          "value": ""
+          "text": "host.docker.internal:8080",
+          "value": "host.docker.internal:8080"
         },
         "datasource": {
           "type": "prometheus",
