@@ -1,0 +1,9 @@
+{
+  "properties": [
+    {
+      "name": "loki.uri",
+      "type": "java.lang.String",
+      "description": "Loki URL to which logs should be pushed"
+    }
+  ]
+}

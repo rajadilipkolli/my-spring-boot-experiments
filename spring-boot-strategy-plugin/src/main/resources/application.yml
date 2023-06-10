@@ -40,3 +40,6 @@ management:
 spring:
   application:
     name: strategy-plugin-service
+
+loki:
+  uri: http://localhost:3100/loki/api/v1/push

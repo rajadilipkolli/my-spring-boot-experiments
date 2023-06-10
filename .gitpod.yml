@@ -18,6 +18,8 @@ ports:
     onOpen: open-browser
   - port: 3100
     visibility: public
+  - port: 3110
+    visibility: public
   - port: 3306
     visibility: public
   - port: 4317
