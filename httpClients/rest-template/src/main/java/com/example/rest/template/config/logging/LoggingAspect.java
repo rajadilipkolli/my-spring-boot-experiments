@@ -1,7 +1,6 @@
 package com.example.rest.template.config.logging;
 
 import com.example.rest.template.utils.AppConstants;
-
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.AfterThrowing;

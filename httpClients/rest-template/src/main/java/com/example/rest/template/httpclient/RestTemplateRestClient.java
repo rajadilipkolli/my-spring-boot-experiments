@@ -2,9 +2,9 @@ package com.example.rest.template.httpclient;
 
 import com.example.rest.template.model.request.ApplicationRestRequest;
 import com.example.rest.template.model.response.ApplicationRestResponse;
-
+import java.net.URI;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -16,9 +16,6 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
-
-import java.net.URI;
-import java.util.Map;
 
 @Service
 @RequiredArgsConstructor

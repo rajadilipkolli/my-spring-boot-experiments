@@ -8,6 +8,13 @@
             "type": "java",
             "name": "TestApplication",
             "request": "launch",
+            "mainClass": "com.example.rest.template.TestApplication",
+            "projectName": "rest-template"
+        },
+        {
+            "type": "java",
+            "name": "TestApplication",
+            "request": "launch",
             "mainClass": "com.example.multitenancy.TestApplication",
             "projectName": "multidatasource-multitenancy"
         },

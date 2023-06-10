@@ -4,7 +4,6 @@ import com.example.rest.template.entities.Post;
 import com.example.rest.template.model.response.PagedResult;
 import com.example.rest.template.services.PostService;
 import com.example.rest.template.utils.AppConstants;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;

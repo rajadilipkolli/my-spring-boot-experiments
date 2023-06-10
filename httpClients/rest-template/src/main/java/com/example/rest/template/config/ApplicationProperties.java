@@ -1,7 +1,6 @@
 package com.example.rest.template.config;
 
 import lombok.Data;
-
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @Data

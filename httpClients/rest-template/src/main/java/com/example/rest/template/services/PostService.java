@@ -3,17 +3,14 @@ package com.example.rest.template.services;
 import com.example.rest.template.entities.Post;
 import com.example.rest.template.model.response.PagedResult;
 import com.example.rest.template.repositories.PostRepository;
-
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Optional;
 
 @Service
 @Transactional

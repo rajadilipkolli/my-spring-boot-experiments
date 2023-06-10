@@ -1,13 +1,11 @@
 package com.example.rest.template.model.request;
 
+import java.util.HashMap;
+import java.util.Map;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
-
 import org.springframework.http.MediaType;
-
-import java.util.HashMap;
-import java.util.Map;
 
 @Getter
 @Setter
