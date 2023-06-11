@@ -15,3 +15,5 @@ $ ./mvnw spring-boot:run -Dspring-boot.run.profiles=local
 * Actuator Endpoint: http://localhost:8080/actuator
 * GraphQlUI : http://localhost:8080/graphiql
 * PgAdmin : http://localhost:5050
+* Prometheus : http://localhost:9090
+* Grafana : http://localhost:3000 (admin/admin)

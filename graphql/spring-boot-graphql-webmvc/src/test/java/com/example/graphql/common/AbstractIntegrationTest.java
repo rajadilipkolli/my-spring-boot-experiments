@@ -3,7 +3,7 @@ package com.example.graphql.common;
 import static com.example.graphql.utils.AppConstants.PROFILE_TEST;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
-import com.example.graphql.config.MyContainersConfiguration;
+import com.example.graphql.TestApplication;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -15,7 +15,7 @@ import org.springframework.test.web.servlet.MockMvc;
 @ActiveProfiles({PROFILE_TEST})
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 @AutoConfigureMockMvc
-@Import(MyContainersConfiguration.class)
+@Import(TestApplication.class)
 public abstract class AbstractIntegrationTest {
 
     @Autowired protected MockMvc mockMvc;
