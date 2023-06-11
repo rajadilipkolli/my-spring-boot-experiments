@@ -29,7 +29,7 @@ public class Customer {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "custom_seq")
     @GenericGenerator(
             name = "custom_seq",
-            strategy = "com.example.custom.sequence.config.StringPrefixedSequenceIdGenerator",
+            type = StringPrefixedSequenceIdGenerator.class,
             parameters = {
                 @Parameter(name = StringPrefixedSequenceIdGenerator.INCREMENT_PARAM, value = "50"),
                 @Parameter(
