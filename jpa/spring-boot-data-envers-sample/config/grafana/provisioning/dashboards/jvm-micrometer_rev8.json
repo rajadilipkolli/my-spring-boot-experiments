@@ -2556,7 +2556,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 51
+        "y": 58
       },
       "id": 131,
       "panels": [],
@@ -2587,7 +2587,7 @@
         "h": 7,
         "w": 8,
         "x": 0,
-        "y": 52
+        "y": 59
       },
       "hiddenSeries": false,
       "id": 98,
@@ -2677,7 +2677,7 @@
         "h": 7,
         "w": 8,
         "x": 8,
-        "y": 52
+        "y": 59
       },
       "hiddenSeries": false,
       "id": 101,
@@ -2781,7 +2781,7 @@
         "h": 7,
         "w": 8,
         "x": 16,
-        "y": 52
+        "y": 59
       },
       "hiddenSeries": false,
       "id": 99,
@@ -2877,7 +2877,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 59
+        "y": 66
       },
       "id": 132,
       "panels": [],
@@ -2914,7 +2914,7 @@
         "h": 7,
         "w": 12,
         "x": 0,
-        "y": 60
+        "y": 67
       },
       "hiddenSeries": false,
       "id": 37,
@@ -3017,7 +3017,7 @@
         "h": 7,
         "w": 12,
         "x": 12,
-        "y": 60
+        "y": 67
       },
       "hiddenSeries": false,
       "id": 38,
@@ -3111,7 +3111,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 67
+        "y": 74
       },
       "id": 133,
       "panels": [],
@@ -3148,7 +3148,7 @@
         "h": 7,
         "w": 6,
         "x": 0,
-        "y": 68
+        "y": 75
       },
       "hiddenSeries": false,
       "id": 33,
@@ -3264,7 +3264,7 @@
         "h": 7,
         "w": 6,
         "x": 6,
-        "y": 68
+        "y": 75
       },
       "hiddenSeries": false,
       "id": 83,
@@ -3368,7 +3368,7 @@
         "h": 7,
         "w": 6,
         "x": 12,
-        "y": 68
+        "y": 75
       },
       "hiddenSeries": false,
       "id": 85,
@@ -3484,7 +3484,7 @@
         "h": 7,
         "w": 6,
         "x": 18,
-        "y": 68
+        "y": 75
       },
       "hiddenSeries": false,
       "id": 84,
@@ -3605,10 +3605,9 @@
       {
         "allFormat": "glob",
         "current": {
-          "isNone": true,
           "selected": false,
-          "text": "None",
-          "value": ""
+          "text": "host.docker.internal:8080",
+          "value": "host.docker.internal:8080"
         },
         "datasource": {
           "type": "prometheus",
@@ -3725,6 +3724,6 @@
   "timezone": "browser",
   "title": "SpringBoot Micrometer",
   "uid": "RDBComTZz1",
-  "version": 1,
+  "version": 2,
   "weekStart": ""
 }

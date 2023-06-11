@@ -643,12 +643,14 @@
         "uid": "prometheus"
       },
       "fill": 1,
+      "fillGradient": 0,
       "gridPos": {
         "h": 7,
         "w": 16,
         "x": 0,
         "y": 13
       },
+      "hiddenSeries": false,
       "id": 16,
       "legend": {
         "alignAsTable": true,
@@ -664,7 +666,11 @@
       "linewidth": 1,
       "links": [],
       "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
       "percentage": false,
+      "pluginVersion": "9.5.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -762,12 +768,14 @@
         "uid": "prometheus"
       },
       "fill": 1,
+      "fillGradient": 0,
       "gridPos": {
         "h": 7,
         "w": 24,
         "x": 0,
         "y": 21
       },
+      "hiddenSeries": false,
       "id": 2,
       "legend": {
         "alignAsTable": true,
@@ -784,7 +792,11 @@
       "linewidth": 1,
       "links": [],
       "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
       "percentage": false,
+      "pluginVersion": "9.5.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -845,12 +857,14 @@
         "uid": "prometheus"
       },
       "fill": 1,
+      "fillGradient": 0,
       "gridPos": {
         "h": 8,
         "w": 24,
         "x": 0,
         "y": 28
       },
+      "hiddenSeries": false,
       "id": 18,
       "legend": {
         "alignAsTable": true,
@@ -867,7 +881,11 @@
       "linewidth": 1,
       "links": [],
       "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
       "percentage": false,
+      "pluginVersion": "9.5.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -928,7 +946,7 @@
       {
         "current": {
           "isNone": true,
-          "selected": true,
+          "selected": false,
           "text": "None",
           "value": ""
         },
@@ -955,10 +973,9 @@
       },
       {
         "current": {
-          "isNone": true,
-          "selected": true,
-          "text": "None",
-          "value": ""
+          "selected": false,
+          "text": "host.docker.internal:8080",
+          "value": "host.docker.internal:8080"
         },
         "datasource": {
           "type": "prometheus",
@@ -1013,8 +1030,8 @@
     ]
   },
   "timezone": "browser",
-  "title": "Siva Dashboard",
+  "title": "App Dashboard",
   "uid": "LmyyfmTZkj",
-  "version": 1,
+  "version": 2,
   "weekStart": ""
 }
