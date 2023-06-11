@@ -18,9 +18,10 @@ docker-compose -f docker/docker-compose.yml up -d
 * Swagger UI: http://localhost:8080/swagger-ui.html
 * Actuator Endpoint: http://localhost:8080/actuator
 * Grafana : http://localhost:3000 (admin/admin)
+* Prometheus : http://localhost:9000/graph
 
 ### Update to Spring Boot 3
 
 * Removed problem-spring-web-starter and replaced with Spring OOTB `spring.mvc.problemdetails.enabled=true`
 * Migrated from javax namespace to jakarta namespace
-* By Default hibernate\_sequence is not used instead tablename\_seq is used while mapping sequence name and `pooled-lo` generation strategy is used OOTB
+* By Default `hibernate\_sequence` is not used instead `tablename\_seq` is used while mapping sequence name and `pooled-lo` generation strategy is used OOTB
