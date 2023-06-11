@@ -4,16 +4,16 @@ services:
   grafana:
     image: grafana/grafana
     ports:
-    - "3000:3000"
+      - "3000:3000"
     volumes:
-    - grafana_data:/var/lib/grafana
-    - ../config/grafana/provisioning/:/etc/grafana/provisioning/
+      - grafana_data:/var/lib/grafana
+      - ../config/grafana/provisioning/:/etc/grafana/provisioning/
     environment:
-    - GF_SECURITY_ADMIN_PASSWORD=admin
-    - GF_SECURITY_ADMIN_USER=admin
-    - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
     depends_on:
-    - prometheus
+      - prometheus
 
   prometheus:
     image: prom/prometheus
