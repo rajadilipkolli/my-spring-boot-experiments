@@ -44,6 +44,8 @@ dependencies {
 
     compileOnly("org.projectlombok:lombok")
 
+	runtimeOnly("io.micrometer:micrometer-registry-prometheus")
+
     annotationProcessor("org.projectlombok:lombok")
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
