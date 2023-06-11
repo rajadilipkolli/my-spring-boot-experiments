@@ -17,6 +17,7 @@ docker-compose -f docker/docker-compose.yml up -d
 
 * Swagger UI: http://localhost:8080/swagger-ui.html
 * Actuator Endpoint: http://localhost:8080/actuator
+* Grafana : http://localhost:3000 (admin/admin)
 
 ### Update to Spring Boot 3
 
