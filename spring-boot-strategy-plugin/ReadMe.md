@@ -16,3 +16,4 @@ $ ./gradlew bootRun -Plocal
 * Actuator Endpoint: http://localhost:8080/actuator
 * Prometheus: http://localhost:9090/graph
 * Grafana: http://localhost:3000/ (user/password)
+* Navigate to http://localhost:3100/metrics to view the metrics and http://localhost:3100/ready for readiness.
