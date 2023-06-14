@@ -33,4 +33,4 @@ spring-boot-mongodb-elasticsearch/docker/data/
 .rewrite-cache/
 spring-boot-togglz-sample/SPRING_BOOT_3_UPGRADE_REPORT.html
 target/resume.properties
-spring-boot-strategy-plugin/docker/tempo/tempo-data/
+spring-boot-strategy-plugin/platform/tempo/tempo-data/

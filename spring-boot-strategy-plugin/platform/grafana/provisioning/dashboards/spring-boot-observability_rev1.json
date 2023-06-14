@@ -71,7 +71,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "9.5.3",
+      "pluginVersion": "10.0.0",
       "targets": [
         {
           "datasource": {
@@ -133,7 +133,7 @@
         },
         "textMode": "value_and_name"
       },
-      "pluginVersion": "9.5.3",
+      "pluginVersion": "10.0.0",
       "targets": [
         {
           "datasource": {
@@ -203,7 +203,7 @@
         "showUnfilled": true,
         "valueMode": "color"
       },
-      "pluginVersion": "9.5.3",
+      "pluginVersion": "10.0.0",
       "targets": [
         {
           "datasource": {
@@ -270,7 +270,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "9.5.3",
+      "pluginVersion": "10.0.0",
       "targets": [
         {
           "datasource": {
@@ -812,8 +812,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",

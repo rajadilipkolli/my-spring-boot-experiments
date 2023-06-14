@@ -11,6 +11,7 @@ vscode:
     - Pivotal.vscode-boot-dev-pack
     - GabrielBB.vscode-lombok
     - GraphQL.vscode-graphql
+    - richardwillis.vscode-gradle
 
 ports:
   - port: 3000
