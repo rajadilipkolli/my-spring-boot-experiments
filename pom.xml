@@ -18,10 +18,10 @@
         <module>jpa/spring-boot-jpa-customsequence</module>
         <module>jpa/spring-boot-multipledatasources</module>
         <module>jpa/spring-boot-read-replica-postgresql</module>
-        <module>jpa/spring-boot-jpa-multitenancy/db</module>
-        <module>jpa/spring-boot-jpa-multitenancy/multidatasource-multitenancy</module>
-        <module>jpa/spring-boot-jpa-multitenancy/partition</module>
-        <module>jpa/spring-boot-jpa-multitenancy/schema</module>
+        <module>jpa/multitenancy/db</module>
+        <module>jpa/multitenancy/multidatasource-multitenancy</module>
+        <module>jpa/multitenancy/partition</module>
+        <module>jpa/multitenancy/schema</module>
         <module>r2dbc/spring-boot-jooq-r2dbc-sample</module>
         <module>spring-boot-api-archunit-sample</module>
         <module>spring-boot-choas-monkey</module>

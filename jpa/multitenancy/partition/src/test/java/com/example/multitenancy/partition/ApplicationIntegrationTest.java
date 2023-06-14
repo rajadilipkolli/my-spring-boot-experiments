@@ -68,6 +68,7 @@ class ApplicationIntegrationTest extends AbstractIntegrationTest {
                             .andExpect(status().isCreated())
                             .andExpect(jsonPath("$.text", is(customer.getText())))
                             .andExpect(jsonPath("$.id", notNullValue()))
+                            .andExpect(jsonPath("$.tenant", is(tenant)))
                             .andReturn()
                             .getResponse()
                             .getContentAsString(StandardCharsets.UTF_8);
@@ -155,6 +156,7 @@ class ApplicationIntegrationTest extends AbstractIntegrationTest {
                         });
 
         assertThat(customerObj.getId()).isNotNull();
+        assertThat(customerObj.getTenant()).isEqualTo(schema);
         return customerObj;
     }
 }
