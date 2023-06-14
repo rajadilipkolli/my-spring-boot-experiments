@@ -15,7 +15,7 @@
 "component: data-envers":
   - jpa/spring-boot-data-envers-sample/**/*
 "component: jpa-multitenancy":
-  - jpa/spring-boot-jpa-multitenancy/**/*
+  - jpa/multitenancy/**/*
 "component: multiple-datasources":
   - jpa/spring-boot-multipledatasources/**/*
 "component: read-replica-postgres":
@@ -50,10 +50,10 @@
   - spring-boot-choas-monkey/pom.xml
   - jpa/spring-boot-data-envers-sample/build.gradle.kts
   - jpa/spring-boot-hibernate2ndlevelcache-sample/pom.xml
-  - jpa/spring-boot-jpa-multitenancy/db/pom.xml
-  - jpa/spring-boot-jpa-multitenancy/multidatasource-multitenancy/pom.xml
-  - jpa/spring-boot-jpa-multitenancy/partition/pom.xml
-  - jpa/spring-boot-jpa-multitenancy/schema/pom.xml
+  - jpa/multitenancy/db/pom.xml
+  - jpa/multitenancy/multidatasource-multitenancy/pom.xml
+  - jpa/multitenancy/partition/pom.xml
+  - jpa/multitenancy/schema/pom.xml
   - jpa/spring-boot-multipledatasources/pom.xml
   - jpa/spring-boot-read-replica-postgresql/pom.xml
   - jpa/spring-boot-jpa-customsequence/pom.xml

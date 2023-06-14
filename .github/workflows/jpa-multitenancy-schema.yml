@@ -1,13 +1,13 @@
-name: spring-boot-jpa-multidatasource-multitenancy
+name: jpa-multitenancy-schema
 
 on:
   push:
     paths:
-      - "jpa/spring-boot-jpa-multitenancy/multidatasource-multitenancy/**"
+      - "jpa/multitenancy/schema/**"
     branches: [main]
   pull_request:
     paths:
-      - "jpa/spring-boot-jpa-multitenancy/multidatasource-multitenancy/**"
+      - "jpa/multitenancy/schema/**"
     types:
       - opened
       - synchronize
@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: "jpa/spring-boot-jpa-multitenancy/multidatasource-multitenancy"
+        working-directory: "jpa/multitenancy/schema"
 
     steps:
       - uses: actions/checkout@v3

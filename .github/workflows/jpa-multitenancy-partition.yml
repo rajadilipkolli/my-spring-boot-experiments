@@ -1,13 +1,13 @@
-name: spring-boot-jpa-multitenancy-schema
+name: jpa-multitenancy-partition
 
 on:
   push:
     paths:
-      - "jpa/spring-boot-jpa-multitenancy/schema/**"
+      - "jpa/multitenancy/partition/**"
     branches: [main]
   pull_request:
     paths:
-      - "jpa/spring-boot-jpa-multitenancy/schema/**"
+      - "jpa/multitenancy/partition/**"
     types:
       - opened
       - synchronize
@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: "jpa/spring-boot-jpa-multitenancy/schema"
+        working-directory: "jpa/multitenancy/partition"
 
     steps:
       - uses: actions/checkout@v3
