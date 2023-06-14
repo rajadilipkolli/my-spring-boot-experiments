@@ -4,8 +4,8 @@ import com.example.multitenancy.primary.entities.PrimaryCustomer;
 import com.example.multitenancy.primary.services.PrimaryCustomerService;
 import com.example.multitenancy.utils.AppConstants;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -23,14 +23,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/customers/primary")
 @Slf4j
+@RequiredArgsConstructor
 public class PrimaryCustomerController {
 
     private final PrimaryCustomerService primaryCustomerService;
-
-    @Autowired
-    public PrimaryCustomerController(PrimaryCustomerService primaryCustomerService) {
-        this.primaryCustomerService = primaryCustomerService;
-    }
 
     @GetMapping
     public List<PrimaryCustomer> getAllCustomers(

@@ -6,69 +6,6 @@
     "configurations": [
         {
             "type": "java",
-            "name": "TestApplication",
-            "request": "launch",
-            "mainClass": "com.example.rest.template.TestApplication",
-            "projectName": "rest-template"
-        },
-        {
-            "type": "java",
-            "name": "TestApplication",
-            "request": "launch",
-            "mainClass": "com.example.multitenancy.TestApplication",
-            "projectName": "multidatasource-multitenancy"
-        },
-        {
-            "type": "java",
-            "name": "TestRabbitMQApplication",
-            "request": "launch",
-            "mainClass": "com.poc.boot.rabbitmq.TestRabbitMQApplication",
-            "projectName": "spring-boot-rabbitmq-thymeleaf"
-        },
-        {
-            "type": "java",
-            "name": "TestApplication",
-            "request": "launch",
-            "mainClass": "com.example.rest.proxy.TestApplication",
-            "projectName": "http-proxy"
-        },
-        {
-            "type": "java",
-            "name": "TestApplication",
-            "request": "launch",
-            "mainClass": "com.example.choasmonkey.TestApplication",
-            "projectName": "spring-boot-choas-monkey"
-        },
-        {
-            "type": "java",
-            "name": "Launch Application",
-            "request": "launch",
-            "mainClass": "com.example.featuretoggle.Application",
-            "projectName": "spring-boot-togglz-sample"
-        },
-        {
-            "type": "java",
-            "name": "Launch Application",
-            "request": "launch",
-            "mainClass": "com.example.multitenancy.db.Application",
-            "projectName": "db"
-        },
-        {
-            "type": "java",
-            "name": "Launch MultipleDataSourcesApplication",
-            "request": "launch",
-            "mainClass": "com.example.multipledatasources.MultipleDataSourcesApplication",
-            "projectName": "spring-boot-multipledatasources"
-        },
-        {
-            "type": "java",
-            "name": "Launch StrategyPluginApplication",
-            "request": "launch",
-            "mainClass": "com.example.plugin.strategyplugin.StrategyPluginApplication",
-            "projectName": "spring-boot-strategy-plugin"
-        },
-        {
-            "type": "java",
             "name": "Spring Boot-Application<spring-boot-mongodb-elasticsearch>",
             "request": "launch",
             "cwd": "${workspaceFolder}",

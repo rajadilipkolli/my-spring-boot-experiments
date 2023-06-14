@@ -9,9 +9,9 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.example.multitenancy</groupId>
-    <artifactId>multidatasource-multitenancy</artifactId>
+    <artifactId>jpa-multidatasource-multitenancy</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>multidatasource-multitenancy</name>
+    <name>jpa-multidatasource-multitenancy</name>
     <description>Implementing multiple datasources with multitenancy</description>
 
     <properties>

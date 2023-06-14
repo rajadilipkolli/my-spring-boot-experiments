@@ -40,7 +40,7 @@ class PrimaryCustomerControllerIT extends AbstractIntegrationTest {
     }
 
     @Test
-    void shouldFetchAllCustomersWhenHeaderNotSet() throws Exception {
+    void shouldFailWhenHeaderNotSetForFetchAllCustomers() throws Exception {
         this.mockMvc
                 .perform(get("/api/customers/primary"))
                 .andExpect(status().isBadRequest())
@@ -53,7 +53,7 @@ class PrimaryCustomerControllerIT extends AbstractIntegrationTest {
     }
 
     @Test
-    void shouldFetchAllCustomersWhenWrongHeaderSet() throws Exception {
+    void shouldFailWhenWrongHeaderSetForFetchAllCustomers() throws Exception {
         this.mockMvc
                 .perform(get("/api/customers/primary").header("X-tenantId", "junk"))
                 .andExpect(status().isForbidden())
@@ -79,7 +79,8 @@ class PrimaryCustomerControllerIT extends AbstractIntegrationTest {
                         get("/api/customers/primary/{id}", customerId)
                                 .header("X-tenantId", "primary"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.text", is(primaryCustomer.getText())));
+                .andExpect(jsonPath("$.text", is(primaryCustomer.getText())))
+                .andExpect(jsonPath("$.tenant", is("primary")));
     }
 
     @Test
@@ -92,7 +93,8 @@ class PrimaryCustomerControllerIT extends AbstractIntegrationTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(primaryCustomer)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.text", is(primaryCustomer.getText())));
+                .andExpect(jsonPath("$.text", is(primaryCustomer.getText())))
+                .andExpect(jsonPath("$.tenant", is("primary")));
     }
 
     @Test
@@ -127,7 +129,8 @@ class PrimaryCustomerControllerIT extends AbstractIntegrationTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(primaryCustomer)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.text", is(primaryCustomer.getText())));
+                .andExpect(jsonPath("$.text", is(primaryCustomer.getText())))
+                .andExpect(jsonPath("$.tenant", is("primary")));
     }
 
     @Test
@@ -139,6 +142,7 @@ class PrimaryCustomerControllerIT extends AbstractIntegrationTest {
                         delete("/api/customers/primary/{id}", primaryCustomer.getId())
                                 .header("X-tenantId", "primary"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.text", is(primaryCustomer.getText())));
+                .andExpect(jsonPath("$.text", is(primaryCustomer.getText())))
+                .andExpect(jsonPath("$.tenant", is("primary")));
     }
 }
