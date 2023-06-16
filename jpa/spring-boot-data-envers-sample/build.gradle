@@ -79,7 +79,7 @@ bootJar {
 }
 
 bootBuildImage {
-    imageName = "DOCKER_USERNAME/myservice"
+    imageName = "dockertmt/spring-boot-data-envers-sample"
 }
 
 compileJava.dependsOn processResources
