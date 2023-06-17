@@ -1,35 +1,30 @@
 package com.example.multitenancy.common;
 
-import org.springframework.boot.test.util.TestPropertyValues;
-import org.springframework.context.ApplicationContextInitializer;
-import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.OracleContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.lifecycle.Startables;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
-public class DBContainerInitializer
-        implements ApplicationContextInitializer<ConfigurableApplicationContext> {
+@Testcontainers(disabledWithoutDocker = true, parallel = true)
+public class DBContainerInitializer {
 
-    private static final PostgreSQLContainer<?> PRIMARY_POSTGRE_SQL_CONTAINER =
+    @Container
+    private static final PostgreSQLContainer<?> POSTGRE_SQL_CONTAINER =
             new PostgreSQLContainer<>("postgres:15.3-alpine");
 
+    @Container
     private static final OracleContainer ORACLE_CONTAINER =
-            new OracleContainer("gvenzl/oracle-xe:21-slim");
+            new OracleContainer("gvenzl/oracle-xe:21.3.0-slim");
 
-    static {
-        Startables.deepStart(PRIMARY_POSTGRE_SQL_CONTAINER, ORACLE_CONTAINER).join();
-    }
-
-    public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
-        TestPropertyValues.of(
-                        "datasource.primary.url=" + ORACLE_CONTAINER.getJdbcUrl(),
-                        "datasource.primary.username=" + ORACLE_CONTAINER.getUsername(),
-                        "datasource.primary.password=" + ORACLE_CONTAINER.getPassword(),
-                        "datasource.secondary.url=" + PRIMARY_POSTGRE_SQL_CONTAINER.getJdbcUrl(),
-                        "datasource.secondary.username="
-                                + PRIMARY_POSTGRE_SQL_CONTAINER.getUsername(),
-                        "datasource.secondary.password="
-                                + PRIMARY_POSTGRE_SQL_CONTAINER.getPassword())
-                .applyTo(configurableApplicationContext.getEnvironment());
+    @DynamicPropertySource
+    static void addsDynamicProperties(DynamicPropertyRegistry propertyRegistry) {
+        propertyRegistry.add("datasource.primary.url", ORACLE_CONTAINER::getJdbcUrl);
+        propertyRegistry.add("datasource.primary.username", ORACLE_CONTAINER::getUsername);
+        propertyRegistry.add("datasource.primary.password", ORACLE_CONTAINER::getPassword);
+        propertyRegistry.add("datasource.secondary.url", POSTGRE_SQL_CONTAINER::getJdbcUrl);
+        propertyRegistry.add("datasource.secondary.username", POSTGRE_SQL_CONTAINER::getUsername);
+        propertyRegistry.add("datasource.secondary.password", POSTGRE_SQL_CONTAINER::getPassword);
     }
 }
