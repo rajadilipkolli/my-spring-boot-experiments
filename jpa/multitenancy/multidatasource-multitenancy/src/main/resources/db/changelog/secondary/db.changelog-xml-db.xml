@@ -7,46 +7,46 @@
 
     <changeSet id="create-schema" author="raja">
         <sql dbms="postgresql">
-            create schema if not exists test1;
-            create schema if not exists test2;
+            create schema if not exists schema1;
+            create schema if not exists schema2;
         </sql>
         <sql dbms="mariadb">
-            create schema test1;
-            create schema test2;
+            create schema schema1;
+            create schema schema2;
         </sql>
     </changeSet>
 
     <changeSet id="create-sequences" author="raja">
         <preConditions>
             <not>
-                <sequenceExists sequenceName="customers_seq" schemaName="test1"/>
-                <sequenceExists sequenceName="customers_seq" schemaName="test2"/>
+                <sequenceExists sequenceName="customers_seq" schemaName="schema1"/>
+                <sequenceExists sequenceName="customers_seq" schemaName="schema2"/>
             </not>
         </preConditions>
         <createSequence
             sequenceName="customers_seq"
             incrementBy="50"
-            startValue="1" schemaName="test1"
+            startValue="1" schemaName="schema1"
         />
         <createSequence
             sequenceName="customers_seq"
             incrementBy="50"
-            startValue="1" schemaName="test2"
+            startValue="1" schemaName="schema2"
         />
     </changeSet>
 
     <changeSet author="raja" id="createTable-customers" runOnChange="true">
         <preConditions onFail="MARK_RAN">
             <not>
-                <tableExists tableName="customers" schemaName="test1"/>
-                <tableExists tableName="customers" schemaName="test2"/>
+                <tableExists tableName="customers" schemaName="schema1"/>
+                <tableExists tableName="customers" schemaName="schema2"/>
             </not>
             <and>
-                <sequenceExists sequenceName="customers_seq" schemaName="test1"/>
-                <sequenceExists sequenceName="customers_seq" schemaName="test2"/>
+                <sequenceExists sequenceName="customers_seq" schemaName="schema1"/>
+                <sequenceExists sequenceName="customers_seq" schemaName="schema2"/>
             </and>
         </preConditions>
-        <createTable tableName="customers" schemaName="test1">
+        <createTable tableName="customers" schemaName="schema1">
             <column name="id" type="bigint">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
@@ -54,8 +54,8 @@
                 <constraints nullable="false"/>
             </column>
         </createTable>
-        <addDefaultValue tableName="customers" columnName="id" schemaName="test1" defaultValueSequenceNext="customers_seq"/>
-        <createTable tableName="customers" schemaName="test2">
+        <addDefaultValue tableName="customers" columnName="id" schemaName="schema1" defaultValueSequenceNext="customers_seq"/>
+        <createTable tableName="customers" schemaName="schema2">
             <column name="id" type="bigint">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
@@ -63,6 +63,6 @@
                 <constraints nullable="false"/>
             </column>
         </createTable>
-        <addDefaultValue tableName="customers" columnName="id" schemaName="test2" defaultValueSequenceNext="customers_seq"/>
+        <addDefaultValue tableName="customers" columnName="id" schemaName="schema2" defaultValueSequenceNext="customers_seq"/>
     </changeSet>
 </databaseChangeLog>

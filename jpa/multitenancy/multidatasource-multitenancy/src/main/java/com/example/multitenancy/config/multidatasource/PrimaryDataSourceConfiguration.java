@@ -1,14 +1,16 @@
 package com.example.multitenancy.config.multidatasource;
 
+import com.example.multitenancy.config.multitenant.TenantIdentifierResolver;
 import com.example.multitenancy.primary.entities.PrimaryCustomer;
+import com.example.multitenancy.utils.DatabaseType;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import javax.sql.DataSource;
+import lombok.RequiredArgsConstructor;
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.context.spi.CurrentTenantIdentifierResolver;
 import org.hibernate.engine.jdbc.connections.spi.MultiTenantConnectionProvider;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
 import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
@@ -24,9 +26,11 @@ import org.springframework.transaction.PlatformTransactionManager;
         basePackages = "com.example.multitenancy.primary.repositories",
         entityManagerFactoryRef = "primaryEntityManagerFactory",
         transactionManagerRef = "primaryTransactionManager")
+@RequiredArgsConstructor
 public class PrimaryDataSourceConfiguration {
 
-    @Autowired private JpaProperties jpaProperties;
+    private final JpaProperties jpaProperties;
+    private final TenantIdentifierResolver tenantIdentifierResolver;
 
     @Bean(name = "primaryEntityManagerFactory")
     public LocalContainerEntityManagerFactoryBean primaryEntityManagerFactory(
@@ -43,6 +47,9 @@ public class PrimaryDataSourceConfiguration {
                 AvailableSettings.MULTI_TENANT_IDENTIFIER_RESOLVER,
                 currentTenantIdentifierResolver);
         hibernateProps.putAll(this.jpaProperties.getProperties());
+        // needs to set tenantIdentifier for connecting to primary datasource and fetching the
+        // metadata
+        tenantIdentifierResolver.setCurrentTenant(DatabaseType.primary.name());
         return builder.dataSource(tenantRoutingDatasource)
                 .persistenceUnit("primary")
                 .properties(hibernateProps)
