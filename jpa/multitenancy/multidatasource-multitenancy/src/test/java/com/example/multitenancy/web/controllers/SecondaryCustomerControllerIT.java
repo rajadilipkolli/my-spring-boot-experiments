@@ -1,6 +1,7 @@
 package com.example.multitenancy.web.controllers;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -63,6 +64,11 @@ class SecondaryCustomerControllerIT extends AbstractIntegrationTest {
                 .perform(get("/api/customers/secondary").header("X-tenantId", "schema1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.size()", is(secondaryCustomerList.size())));
+
+        this.mockMvc
+                .perform(get("/api/customers/secondary").header("X-tenantId", "schema2"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.size()", is(0)));
     }
 
     @Test
@@ -76,6 +82,12 @@ class SecondaryCustomerControllerIT extends AbstractIntegrationTest {
                                 .header("X-tenantId", "schema1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name", is(secondaryCustomer.getName())));
+
+        this.mockMvc
+                .perform(
+                        get("/api/customers/secondary/{id}", customerId)
+                                .header("X-tenantId", "schema2"))
+                .andExpect(status().isNotFound());
     }
 
     @Test
@@ -105,10 +117,13 @@ class SecondaryCustomerControllerIT extends AbstractIntegrationTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(header().string("Content-Type", is("application/problem+json")))
                 .andExpect(jsonPath("$.type", is("about:blank")))
-                .andExpect(jsonPath("$.title", is("Bad Request")))
+                .andExpect(jsonPath("$.title", is("Constraint Violation")))
                 .andExpect(jsonPath("$.status", is(400)))
                 .andExpect(jsonPath("$.detail", is("Invalid request content.")))
                 .andExpect(jsonPath("$.instance", is("/api/customers/secondary")))
+                .andExpect(jsonPath("$.violations", hasSize(1)))
+                .andExpect(jsonPath("$.violations[0].field", is("name")))
+                .andExpect(jsonPath("$.violations[0].message", is("Name cannot be empty")))
                 .andReturn();
     }
 
