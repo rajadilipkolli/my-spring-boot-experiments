@@ -4,6 +4,25 @@ Multi-tenancy is a software architecture in which a single instance of a softwar
 
 Multidatabases is a similar concept, but applies to databases rather than software applications. In this architecture, multiple databases are used to store and manage data for different tenants. This allows for efficient resource utilization, as the same database server can be used to host multiple databases. It also allows for greater flexibility, as different tenants can have different database configurations and access controls.
 
+### Application Flow
+
+```mermaid
+---
+title: Application Data fetching strategy
+---
+flowchart TD
+    A[Application] -->|Get Data| B{Where should I get data}
+    B --> |primary| C[(PostGresql)]
+    B --> |secondary| D[(Maria)]
+    C --> |TenantId| E[Discriminator based MultiTenancy]
+    D --> |Schema| F[Schema based MultiTenancy]
+    E --> |Choose Tenant |G{tenant1 or tenenat2}
+    F --> |Choose Schema |H{schema1 or schema2}
+    G --> I(((END)))
+    H --> I
+```
+
+
 ### Run tests
 `$ ./mvnw clean verify`
 
