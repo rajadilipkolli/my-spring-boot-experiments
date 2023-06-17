@@ -33,7 +33,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(controllers = PrimaryCustomerController.class)
 @ActiveProfiles(PROFILE_TEST)
-class PrimaryPrimaryCustomerControllerTest {
+class PrimaryCustomerControllerTest {
 
     @Autowired private MockMvc mockMvc;
     @Autowired private ObjectMapper objectMapper;
