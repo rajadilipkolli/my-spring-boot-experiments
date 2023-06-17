@@ -11,7 +11,7 @@ Multidatabases is a similar concept, but applies to databases rather than softwa
 title: Application Data fetching strategy
 ---
 flowchart TD
-    A[Application] -->|Get Data| B{Where should I get data}
+    A([Appication]) -->|Get Data| B{Where should I get data}
     B --> |primary| C[(PostGresql)]
     B --> |secondary| D[(Maria)]
     C --> |TenantId| E[Discriminator based MultiTenancy]
