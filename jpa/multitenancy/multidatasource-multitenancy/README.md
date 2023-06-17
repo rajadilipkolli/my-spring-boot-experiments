@@ -12,8 +12,8 @@ title: Application Data fetching strategy
 ---
 flowchart TD
     A([Appication]) -->|Get Data| B{Where should I get data}
-    B --> |primary| C[(PostGresql)]
-    B --> |secondary| D[(Maria)]
+    B --> |primary| C[(Oracle)]
+    B --> |secondary| D[(Postgres)]
     C --> |TenantId| E[Discriminator based MultiTenancy]
     D --> |Schema| F[Schema based MultiTenancy]
     E --> |Choose Tenant |G{tenant1 or tenenat2}
