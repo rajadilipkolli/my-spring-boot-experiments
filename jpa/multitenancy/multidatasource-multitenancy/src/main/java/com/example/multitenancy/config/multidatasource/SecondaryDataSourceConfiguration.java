@@ -1,6 +1,8 @@
 package com.example.multitenancy.config.multidatasource;
 
+import com.example.multitenancy.config.multitenant.TenantIdentifierResolver;
 import com.example.multitenancy.secondary.entities.SecondaryCustomer;
+import com.example.multitenancy.utils.DatabaseType;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -28,6 +30,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 public class SecondaryDataSourceConfiguration {
 
     private final JpaProperties jpaProperties;
+    private final TenantIdentifierResolver tenantIdentifierResolver;
 
     @Bean(name = "secondaryEntityManagerFactory")
     public LocalContainerEntityManagerFactoryBean secondaryEntityManagerFactory(
@@ -44,6 +47,9 @@ public class SecondaryDataSourceConfiguration {
                 AvailableSettings.MULTI_TENANT_IDENTIFIER_RESOLVER,
                 currentTenantIdentifierResolver);
         hibernateProps.putAll(this.jpaProperties.getProperties());
+        // needs to set tenantIdentifier for connecting to secondary datasource and fetching the
+        // metadata
+        tenantIdentifierResolver.setCurrentTenant(DatabaseType.secondary.name());
         return builder.dataSource(tenantRoutingDatasource)
                 .properties(hibernateProps)
                 .persistenceUnit("secondary")

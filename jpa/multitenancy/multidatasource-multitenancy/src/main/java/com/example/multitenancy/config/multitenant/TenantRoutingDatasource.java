@@ -17,8 +17,8 @@ public class TenantRoutingDatasource extends AbstractRoutingDataSource {
             @Qualifier("primaryDataSource") DataSource primaryDataSource,
             @Qualifier("secondaryDataSource") DataSource secondaryDataSource) {
         this.tenantIdentifierResolver = tenantIdentifierResolver;
-
-        setDefaultTargetDataSource(primaryDataSource);
+        // commenting default so that db connection is made as per the required type
+        // setDefaultTargetDataSource(primaryDataSource);
 
         HashMap<Object, Object> targetDataSources = new HashMap<>();
         targetDataSources.put(DatabaseType.primary.name(), primaryDataSource);
