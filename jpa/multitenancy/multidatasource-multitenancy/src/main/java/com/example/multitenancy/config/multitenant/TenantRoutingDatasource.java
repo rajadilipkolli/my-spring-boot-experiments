@@ -25,8 +25,9 @@ public class TenantRoutingDatasource extends AbstractRoutingDataSource {
         targetDataSources.put(DatabaseType.dbsystc.name(), primaryDataSource);
         targetDataSources.put(DatabaseType.dbsystp.name(), primaryDataSource);
         targetDataSources.put(DatabaseType.dbsystv.name(), primaryDataSource);
-        targetDataSources.put(DatabaseType.test1.name(), secondaryDataSource);
-        targetDataSources.put(DatabaseType.test2.name(), secondaryDataSource);
+        targetDataSources.put(DatabaseType.secondary.name(), secondaryDataSource);
+        targetDataSources.put(DatabaseType.schema1.name(), secondaryDataSource);
+        targetDataSources.put(DatabaseType.schema2.name(), secondaryDataSource);
         setTargetDataSources(targetDataSources);
     }
 
