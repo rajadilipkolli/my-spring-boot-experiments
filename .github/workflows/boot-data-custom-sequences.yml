@@ -1,13 +1,13 @@
-name: spring-boot-jpa-customsequence
+name: boot-data-customsequence
 
 on:
   push:
     paths:
-      - "jpa/spring-boot-jpa-customsequence/**"
+      - "jpa/boot-data-customsequence/**"
     branches: [main]
   pull_request:
     paths:
-      - "jpa/spring-boot-jpa-customsequence/**"
+      - "jpa/boot-data-customsequence/**"
     types:
       - opened
       - synchronize
@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: "jpa/spring-boot-jpa-customsequence"
+        working-directory: "jpa/boot-data-customsequence"
     steps:
       - uses: actions/checkout@v3
         with:

@@ -15,7 +15,7 @@
         <module>httpClients/web-client-mvc</module>
         <module>httpClients/web-client-webflux</module>
         <module>jpa/spring-boot-hibernate2ndlevelcache-sample</module>
-        <module>jpa/spring-boot-jpa-customsequence</module>
+        <module>jpa/boot-data-customsequence</module>
         <module>jpa/boot-data-multipledatasources</module>
         <module>jpa/spring-boot-read-replica-postgresql</module>
         <module>jpa/multitenancy/db</module>

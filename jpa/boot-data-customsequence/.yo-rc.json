@@ -1,6 +1,6 @@
 {
   "generator-springboot": {
-    "appName": "spring-boot-jpa-customsequence",
+    "appName": "boot-data-customsequence",
     "packageName": "com.example.custom.sequence",
     "databaseType": "mariadb",
     "dbMigrationFormat": "sql",

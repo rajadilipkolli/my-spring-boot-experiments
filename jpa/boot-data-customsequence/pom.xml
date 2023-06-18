@@ -9,9 +9,9 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.example.custom.sequence</groupId>
-    <artifactId>spring-boot-jpa-customsequence</artifactId>
+    <artifactId>boot-data-customsequence</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>spring-boot-jpa-customsequence</name>
+    <name>boot-data-customsequence</name>
     <description>spring-boot-jpa-customsequence</description>
 
     <properties>
