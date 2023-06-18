@@ -1,6 +1,7 @@
 package com.example.custom.sequence.web.controllers;
 
 import com.example.custom.sequence.entities.Order;
+import com.example.custom.sequence.model.response.OrderDTO;
 import com.example.custom.sequence.model.response.PagedResult;
 import com.example.custom.sequence.services.OrderService;
 import com.example.custom.sequence.utils.AppConstants;
@@ -33,7 +34,7 @@ public class OrderController {
     }
 
     @GetMapping
-    public PagedResult<Order> getAllOrders(
+    public PagedResult<OrderDTO> getAllOrders(
             @RequestParam(
                             value = "pageNo",
                             defaultValue = AppConstants.DEFAULT_PAGE_NUMBER,
@@ -58,7 +59,7 @@ public class OrderController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Order> getOrderById(@PathVariable Long id) {
+    public ResponseEntity<OrderDTO> getOrderById(@PathVariable String id) {
         return orderService
                 .findOrderById(id)
                 .map(ResponseEntity::ok)
@@ -67,12 +68,12 @@ public class OrderController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Order createOrder(@RequestBody @Validated Order order) {
+    public OrderDTO createOrder(@RequestBody @Validated Order order) {
         return orderService.saveOrder(order);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Order> updateOrder(@PathVariable Long id, @RequestBody Order order) {
+    public ResponseEntity<OrderDTO> updateOrder(@PathVariable String id, @RequestBody Order order) {
         return orderService
                 .findOrderById(id)
                 .map(
@@ -84,7 +85,7 @@ public class OrderController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Order> deleteOrder(@PathVariable Long id) {
+    public ResponseEntity<OrderDTO> deleteOrder(@PathVariable String id) {
         return orderService
                 .findOrderById(id)
                 .map(

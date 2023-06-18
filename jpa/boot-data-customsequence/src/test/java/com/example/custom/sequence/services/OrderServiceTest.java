@@ -6,7 +6,9 @@ import static org.mockito.BDDMockito.times;
 import static org.mockito.BDDMockito.verify;
 import static org.mockito.BDDMockito.willDoNothing;
 
+import com.example.custom.sequence.entities.Customer;
 import com.example.custom.sequence.entities.Order;
+import com.example.custom.sequence.model.response.OrderDTO;
 import com.example.custom.sequence.model.response.PagedResult;
 import com.example.custom.sequence.repositories.OrderRepository;
 import java.util.List;
@@ -37,7 +39,7 @@ class OrderServiceTest {
         given(orderRepository.findAll(pageable)).willReturn(orderPage);
 
         // when
-        PagedResult<Order> pagedResult = orderService.findAllOrders(0, 10, "id", "asc");
+        PagedResult<OrderDTO> pagedResult = orderService.findAllOrders(0, 10, "id", "asc");
 
         // then
         assertThat(pagedResult).isNotNull();
@@ -54,14 +56,14 @@ class OrderServiceTest {
     @Test
     void findOrderById() {
         // given
-        given(orderRepository.findById(1L)).willReturn(Optional.of(getOrder()));
+        given(orderRepository.findById("1")).willReturn(Optional.of(getOrder()));
         // when
-        Optional<Order> optionalOrder = orderService.findOrderById(1L);
+        Optional<OrderDTO> optionalOrder = orderService.findOrderById("1");
         // then
         assertThat(optionalOrder).isPresent();
-        Order order = optionalOrder.get();
-        assertThat(order.getId()).isEqualTo(1L);
-        assertThat(order.getText()).isEqualTo("junitTest");
+        OrderDTO order = optionalOrder.get();
+        assertThat(order.id()).isEqualTo("1");
+        assertThat(order.text()).isEqualTo("junitText");
     }
 
     @Test
@@ -69,27 +71,31 @@ class OrderServiceTest {
         // given
         given(orderRepository.save(getOrder())).willReturn(getOrder());
         // when
-        Order persistedOrder = orderService.saveOrder(getOrder());
+        OrderDTO persistedOrder = orderService.saveOrder(getOrder());
         // then
         assertThat(persistedOrder).isNotNull();
-        assertThat(persistedOrder.getId()).isEqualTo(1L);
-        assertThat(persistedOrder.getText()).isEqualTo("junitTest");
+        assertThat(persistedOrder.id()).isEqualTo("1");
+        assertThat(persistedOrder.text()).isEqualTo("junitText");
     }
 
     @Test
     void deleteOrderById() {
         // given
-        willDoNothing().given(orderRepository).deleteById(1L);
+        willDoNothing().given(orderRepository).deleteById("1");
         // when
-        orderService.deleteOrderById(1L);
+        orderService.deleteOrderById("1");
         // then
-        verify(orderRepository, times(1)).deleteById(1L);
+        verify(orderRepository, times(1)).deleteById("1");
     }
 
     private Order getOrder() {
         Order order = new Order();
-        order.setId(1L);
-        order.setText("junitTest");
+        order.setId("1");
+        order.setText("junitText");
+        Customer customer = new Customer();
+        customer.setId("1");
+        customer.setText("custText");
+        order.setCustomer(customer);
         return order;
     }
 }

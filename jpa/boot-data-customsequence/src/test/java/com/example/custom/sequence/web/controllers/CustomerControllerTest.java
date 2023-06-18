@@ -48,9 +48,9 @@ class CustomerControllerTest {
     @BeforeEach
     void setUp() {
         this.customerList = new ArrayList<>();
-        this.customerList.add(new Customer("CUS_1", "text 1"));
-        this.customerList.add(new Customer("CUS_2", "text 2"));
-        this.customerList.add(new Customer("CUS_3", "text 3"));
+        this.customerList.add(new Customer("CUS_1", "text 1", new ArrayList<>()));
+        this.customerList.add(new Customer("CUS_2", "text 2", new ArrayList<>()));
+        this.customerList.add(new Customer("CUS_3", "text 3", new ArrayList<>()));
     }
 
     @Test
@@ -75,7 +75,7 @@ class CustomerControllerTest {
     @Test
     void shouldFindCustomerById() throws Exception {
         String customerId = "CUS_1";
-        Customer customer = new Customer(customerId, "text 1");
+        Customer customer = new Customer(customerId, "text 1", new ArrayList<>());
         given(customerService.findCustomerById(customerId)).willReturn(Optional.of(customer));
 
         this.mockMvc
@@ -99,7 +99,7 @@ class CustomerControllerTest {
         given(customerService.saveCustomer(any(Customer.class)))
                 .willAnswer((invocation) -> invocation.getArgument(0));
 
-        Customer customer = new Customer("CUS_1", "some text");
+        Customer customer = new Customer("CUS_1", "some text", new ArrayList<>());
         this.mockMvc
                 .perform(
                         post("/api/customers")
@@ -112,7 +112,7 @@ class CustomerControllerTest {
 
     @Test
     void shouldReturn400WhenCreateNewCustomerWithoutText() throws Exception {
-        Customer customer = new Customer(null, null);
+        Customer customer = new Customer(null, null, new ArrayList<>());
 
         this.mockMvc
                 .perform(
@@ -135,7 +135,7 @@ class CustomerControllerTest {
     @Test
     void shouldUpdateCustomer() throws Exception {
         String customerId = "CUS_1";
-        Customer customer = new Customer(customerId, "Updated text");
+        Customer customer = new Customer(customerId, "Updated text", new ArrayList<>());
         given(customerService.findCustomerById(customerId)).willReturn(Optional.of(customer));
         given(customerService.saveCustomer(any(Customer.class)))
                 .willAnswer((invocation) -> invocation.getArgument(0));
@@ -153,7 +153,7 @@ class CustomerControllerTest {
     void shouldReturn404WhenUpdatingNonExistingCustomer() throws Exception {
         String customerId = "CUS_1";
         given(customerService.findCustomerById(customerId)).willReturn(Optional.empty());
-        Customer customer = new Customer(customerId, "Updated text");
+        Customer customer = new Customer(customerId, "Updated text", new ArrayList<>());
 
         this.mockMvc
                 .perform(
@@ -166,7 +166,7 @@ class CustomerControllerTest {
     @Test
     void shouldDeleteCustomer() throws Exception {
         String customerId = "CUS_1";
-        Customer customer = new Customer(customerId, "Some text");
+        Customer customer = new Customer(customerId, "Some text", new ArrayList<>());
         given(customerService.findCustomerById(customerId)).willReturn(Optional.of(customer));
         doNothing().when(customerService).deleteCustomerById(customer.getId());
 

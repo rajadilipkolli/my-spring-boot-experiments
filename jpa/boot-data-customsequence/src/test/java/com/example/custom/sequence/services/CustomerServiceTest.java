@@ -16,7 +16,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -33,8 +32,10 @@ class CustomerServiceTest {
     void findAllCustomers() {
         // given
         Pageable pageable = PageRequest.of(0, 10, Sort.by(Sort.Direction.ASC, "id"));
-        Page<Customer> customerPage = new PageImpl<>(List.of(getCustomer()));
-        given(customerRepository.findAll(pageable)).willReturn(customerPage);
+        given(customerRepository.findAllCustomerIds(pageable))
+                .willReturn(new PageImpl<>(List.of("CUS_1")));
+        given(customerRepository.findAllByIdWithOrders(List.of("CUS_1")))
+                .willReturn(List.of(getCustomer()));
 
         // when
         PagedResult<Customer> pagedResult = customerService.findAllCustomers(0, 10, "id", "asc");

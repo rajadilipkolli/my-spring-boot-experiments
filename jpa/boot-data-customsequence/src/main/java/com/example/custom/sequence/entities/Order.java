@@ -1,10 +1,14 @@
 package com.example.custom.sequence.entities;
 
+import com.example.custom.sequence.config.StringPrefixedSequenceIdGenerator;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotEmpty;
 import java.util.Objects;
@@ -13,6 +17,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.Hibernate;
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Parameter;
 
 @Entity
 @Table(name = "orders")
@@ -23,12 +29,22 @@ import org.hibernate.Hibernate;
 public class Order {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "custom_seq")
+    @GenericGenerator(
+            name = "custom_seq",
+            type = StringPrefixedSequenceIdGenerator.class,
+            parameters = {
+                @Parameter(name = StringPrefixedSequenceIdGenerator.INCREMENT_PARAM, value = "50"),
+            })
+    private String id;
 
     @Column(nullable = false)
     @NotEmpty(message = "Text cannot be empty")
     private String text;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "customer_id")
+    private Customer customer;
 
     @Override
     public boolean equals(Object o) {
