@@ -1,13 +1,13 @@
-name: spring-boot-multipledatasources
+name: boot-data-multipledatasources
 
 on:
   push:
     paths:
-      - "jpa/spring-boot-multipledatasources/**"
+      - "jpa/boot-data-multipledatasources/**"
     branches: [main]
   pull_request:
     paths:
-      - "jpa/spring-boot-multipledatasources/**"
+      - "jpa/boot-data-multipledatasources/**"
     types:
       - opened
       - synchronize
@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: "jpa/spring-boot-multipledatasources"
+        working-directory: "jpa/boot-data-multipledatasources"
     steps:
       - uses: actions/checkout@v3
         with:

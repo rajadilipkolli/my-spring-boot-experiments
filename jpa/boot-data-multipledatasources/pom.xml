@@ -9,7 +9,7 @@
         <relativePath /> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.example</groupId>
-    <artifactId>spring-boot-multipledatasources</artifactId>
+    <artifactId>boot-data-multipledatasources</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>multipledatasources</name>
     <description>Demo project for using multiple datasource's in a Spring Boot Application</description>

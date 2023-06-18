@@ -17,7 +17,7 @@
 "component: jpa-multitenancy":
   - jpa/multitenancy/**/*
 "component: multiple-datasources":
-  - jpa/spring-boot-multipledatasources/**/*
+  - jpa/boot-data-multipledatasources/**/*
 "component: read-replica-postgres":
   - jpa/spring-boot-read-replica-postgresql/**/*
 "component: customsequence":
@@ -54,7 +54,7 @@
   - jpa/multitenancy/multidatasource-multitenancy/pom.xml
   - jpa/multitenancy/partition/pom.xml
   - jpa/multitenancy/schema/pom.xml
-  - jpa/spring-boot-multipledatasources/pom.xml
+  - jpa/boot-data-multipledatasources/pom.xml
   - jpa/spring-boot-read-replica-postgresql/pom.xml
   - jpa/spring-boot-jpa-customsequence/pom.xml
   - spring-boot-jobrunr-sample/pom.xml
