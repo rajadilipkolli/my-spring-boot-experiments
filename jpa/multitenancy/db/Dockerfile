@@ -1,6 +1,6 @@
 FROM eclipse-temurin:17.0.7_7-jre-focal as builder
 WORKDIR application
-ARG JAR_FILE=target/db-0.0.1-SNAPSHOT.jar
+ARG JAR_FILE=target/multitenancy-db-0.0.1-SNAPSHOT.jar
 COPY ${JAR_FILE} application.jar
 RUN java -Djarmode=layertools -jar application.jar extract
 
