@@ -1,8 +1,6 @@
 # Table of contents
 
 * [README](README.md)
-* [API Example for Archunit](spring-boot-api-archunit-sample/README.md)
-* [spring-boot-choas-monkey](spring-boot-choas-monkey/README.md)
 * [GraphQL](graphql/README.md)
   * [spring-boot-graphql-querydsl](graphql/spring-boot-graphql-querydsl/README.md)
   * [spring-boot-graphql-webflux](graphql/spring-boot-graphql-webflux/README.md)
@@ -14,6 +12,7 @@
   * [web-client-webflux](httpClients/web-client-webflux/README.md)
 * [jmh-benchmark](jmh-benchmark/README.md)
 * [open-api-spring-boot](open-api-spring-boot/README.md)
+* [r2dbc](r2dbc/spring-boot-jooq-r2dbc-sample/README.md)
 * [jpa](jpa/README.md)
   * [Custom Sequence](jpa/boot-data-customsequence/README.md)
   * [spring-boot-multipledatasources](jpa/boot-data-multipledatasources/README.md)
@@ -25,6 +24,8 @@
     * [schema](jpa/multitenancy/schema/README.md)
   * [spring-boot-hibernate2ndlevelcache-sample](jpa/spring-boot-hibernate2ndlevelcache-sample/README.md)
   * [read-replica-with-spring-boot](jpa/spring-boot-read-replica-postgresql/README.md)
+* [API Example for Archunit](spring-boot-api-archunit-sample/README.md)
+* [spring-boot-choas-monkey](spring-boot-choas-monkey/README.md)
 * [spring-boot-jobrunr-sample](spring-boot-jobrunr-sample/README.md)
 * [spring-boot-mongodb-elasticsearch](spring-boot-mongodb-elasticsearch/README.md)
 * [spring-boot-strategy-plugin](spring-boot-strategy-plugin/ReadMe.md)
