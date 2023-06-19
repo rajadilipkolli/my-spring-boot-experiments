@@ -6,7 +6,7 @@ pipeline {
     }
 
     environment {
-        APPLICATION_NAME = 'spring-boot-jpa-customsequence'
+        APPLICATION_NAME = 'boot-data-customsequence'
     }
 
     stages {
