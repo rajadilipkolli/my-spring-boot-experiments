@@ -13,7 +13,7 @@
 "component: jobrunr":
   - spring-boot-jobrunr-sample/**/*
 "component: data-envers":
-  - jpa/spring-boot-data-envers-sample/**/*
+  - jpa/boot-data-envers/**/*
 "component: jpa-multitenancy":
   - jpa/multitenancy/**/*
 "component: multiple-datasources":
@@ -48,7 +48,7 @@
 "type: dependency-upgrade":
   - spring-boot-api-archunit-sample/pom.xml
   - spring-boot-choas-monkey/pom.xml
-  - jpa/spring-boot-data-envers-sample/build.gradle
+  - jpa/boot-data-envers/build.gradle
   - jpa/spring-boot-hibernate2ndlevelcache-sample/pom.xml
   - jpa/multitenancy/db/pom.xml
   - jpa/multitenancy/multidatasource-multitenancy/pom.xml

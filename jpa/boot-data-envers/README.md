@@ -1,4 +1,4 @@
-# spring-boot-data-envers-sample
+# boot-data-envers
 
 Spring Data Envers is a tool for auditing changes made to persistent entities in a Spring-based application. It allows developers to track and log changes made to entities over time, providing a historical view of the data. This can be useful for compliance and regulatory purposes, as well as for debugging and performance analysis. Spring Data Envers integrates with the Hibernate Envers library and offers a convenient and declarative way to enable auditing in a Spring application.
 
