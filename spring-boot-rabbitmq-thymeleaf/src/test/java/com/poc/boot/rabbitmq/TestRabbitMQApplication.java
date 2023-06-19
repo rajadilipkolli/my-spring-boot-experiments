@@ -1,13 +1,23 @@
 package com.poc.boot.rabbitmq;
 
-import com.poc.boot.rabbitmq.config.MyTestContainersConfiguration;
 import org.springframework.boot.SpringApplication;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.springframework.context.annotation.Bean;
+import org.testcontainers.containers.RabbitMQContainer;
+import org.testcontainers.utility.DockerImageName;
 
+@TestConfiguration(proxyBeanMethods = false)
 public class TestRabbitMQApplication {
 
+    @Bean
+    @ServiceConnection
+    RabbitMQContainer rabbitMQContainer() {
+        return new RabbitMQContainer(
+                DockerImageName.parse("rabbitmq").withTag("3.12.0-management"));
+    }
+
     public static void main(String[] args) {
-        SpringApplication.from(RabbitMQApplication::main)
-                .with(MyTestContainersConfiguration.class)
-                .run();
+        SpringApplication.from(RabbitMQApplication::main).with(TestRabbitMQApplication.class).run();
     }
 }
