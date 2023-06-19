@@ -3,7 +3,7 @@ package com.example.custom.sequence.services;
 import com.example.custom.sequence.entities.Customer;
 import com.example.custom.sequence.entities.Order;
 import com.example.custom.sequence.model.response.CustomerDTO;
-import com.example.custom.sequence.model.response.OrderDTO;
+import com.example.custom.sequence.model.response.OrderResponse;
 import com.example.custom.sequence.model.response.PagedResult;
 import com.example.custom.sequence.repositories.OrderRepository;
 import java.util.List;
@@ -27,7 +27,7 @@ public class OrderService {
         this.orderRepository = orderRepository;
     }
 
-    public PagedResult<OrderDTO> findAllOrders(
+    public PagedResult<OrderResponse> findAllOrders(
             int pageNo, int pageSize, String sortBy, String sortDir) {
         Sort sort =
                 sortDir.equalsIgnoreCase(Sort.Direction.ASC.name())
@@ -38,11 +38,11 @@ public class OrderService {
         Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
         Page<Order> ordersPage = orderRepository.findAll(pageable);
 
-        List<OrderDTO> orderDTOList =
+        List<OrderResponse> orderResponseList =
                 ordersPage.getContent().stream().map(this::getOrderDTO).toList();
 
         return new PagedResult<>(
-                orderDTOList,
+                orderResponseList,
                 ordersPage.getTotalElements(),
                 ordersPage.getNumber() + 1,
                 ordersPage.getTotalPages(),
@@ -52,11 +52,11 @@ public class OrderService {
                 ordersPage.hasPrevious());
     }
 
-    public Optional<OrderDTO> findOrderById(String id) {
+    public Optional<OrderResponse> findOrderById(String id) {
         return convertToOrderDTO(orderRepository.findById(id));
     }
 
-    public OrderDTO saveOrder(Order order) {
+    public OrderResponse saveOrder(Order order) {
         return getOrderDTO(orderRepository.save(order));
     }
 
@@ -64,7 +64,7 @@ public class OrderService {
         orderRepository.deleteById(id);
     }
 
-    private Optional<OrderDTO> convertToOrderDTO(Optional<Order> optionalOrder) {
+    private Optional<OrderResponse> convertToOrderDTO(Optional<Order> optionalOrder) {
         if (optionalOrder.isEmpty()) {
             return Optional.empty();
         } else {
@@ -72,9 +72,9 @@ public class OrderService {
         }
     }
 
-    private OrderDTO getOrderDTO(Order order) {
+    private OrderResponse getOrderDTO(Order order) {
         Customer customer = order.getCustomer();
-        return new OrderDTO(
+        return new OrderResponse(
                 order.getId(),
                 order.getText(),
                 new CustomerDTO(customer.getId(), customer.getText()));

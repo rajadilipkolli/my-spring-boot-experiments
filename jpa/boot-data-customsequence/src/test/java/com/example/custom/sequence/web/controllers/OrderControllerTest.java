@@ -18,7 +18,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.example.custom.sequence.entities.Customer;
 import com.example.custom.sequence.entities.Order;
 import com.example.custom.sequence.model.response.CustomerDTO;
-import com.example.custom.sequence.model.response.OrderDTO;
+import com.example.custom.sequence.model.response.OrderResponse;
 import com.example.custom.sequence.model.response.PagedResult;
 import com.example.custom.sequence.services.OrderService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -60,12 +60,12 @@ class OrderControllerTest {
 
     @Test
     void shouldFetchAllOrders() throws Exception {
-        List<OrderDTO> orderDTOList = new ArrayList<>();
-        orderDTOList.add(new OrderDTO("1", "text 1", new CustomerDTO("1", "customer1")));
-        orderDTOList.add(new OrderDTO("2", "text 2", new CustomerDTO("1", "customer1")));
-        orderDTOList.add(new OrderDTO("3", "text 3", new CustomerDTO("1", "customer1")));
-        Page<OrderDTO> page = new PageImpl<>(orderDTOList);
-        PagedResult<OrderDTO> orderPagedResult = new PagedResult<>(page);
+        List<OrderResponse> orderResponseList = new ArrayList<>();
+        orderResponseList.add(new OrderResponse("1", "text 1", new CustomerDTO("1", "customer1")));
+        orderResponseList.add(new OrderResponse("2", "text 2", new CustomerDTO("1", "customer1")));
+        orderResponseList.add(new OrderResponse("3", "text 3", new CustomerDTO("1", "customer1")));
+        Page<OrderResponse> page = new PageImpl<>(orderResponseList);
+        PagedResult<OrderResponse> orderPagedResult = new PagedResult<>(page);
         given(orderService.findAllOrders(0, 10, "id", "asc")).willReturn(orderPagedResult);
 
         this.mockMvc
@@ -84,8 +84,8 @@ class OrderControllerTest {
     @Test
     void shouldFindOrderById() throws Exception {
         String orderId = "1";
-        OrderDTO order =
-                new OrderDTO(
+        OrderResponse order =
+                new OrderResponse(
                         orderId, "text 1", new CustomerDTO(customer.getId(), customer.getText()));
         given(orderService.findOrderById(orderId)).willReturn(Optional.of(order));
 
@@ -106,7 +106,7 @@ class OrderControllerTest {
     @Test
     void shouldCreateNewOrder() throws Exception {
         given(orderService.saveOrder(any(Order.class)))
-                .willReturn(new OrderDTO("1", "some text", null));
+                .willReturn(new OrderResponse("1", "some text", null));
 
         Order order = new Order("1", "some text", customer);
         this.mockMvc
@@ -144,22 +144,22 @@ class OrderControllerTest {
     @Test
     void shouldUpdateOrder() throws Exception {
         String orderId = "1";
-        OrderDTO orderDTO =
-                new OrderDTO(
+        OrderResponse orderResponse =
+                new OrderResponse(
                         orderId,
                         "Updated text",
                         new CustomerDTO(customer.getId(), customer.getText()));
-        given(orderService.findOrderById(orderId)).willReturn(Optional.of(orderDTO));
+        given(orderService.findOrderById(orderId)).willReturn(Optional.of(orderResponse));
         given(orderService.saveOrder(any(Order.class)))
-                .willReturn(new OrderDTO("1", "Updated text", null));
+                .willReturn(new OrderResponse("1", "Updated text", null));
 
         this.mockMvc
                 .perform(
-                        put("/api/orders/{id}", orderDTO.id())
+                        put("/api/orders/{id}", orderResponse.id())
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(orderDTO)))
+                                .content(objectMapper.writeValueAsString(orderResponse)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.text", is(orderDTO.text())));
+                .andExpect(jsonPath("$.text", is(orderResponse.text())));
     }
 
     @Test
@@ -179,8 +179,8 @@ class OrderControllerTest {
     @Test
     void shouldDeleteOrder() throws Exception {
         String orderId = "1";
-        OrderDTO order =
-                new OrderDTO(
+        OrderResponse order =
+                new OrderResponse(
                         orderId,
                         "Some text",
                         new CustomerDTO(customer.getId(), customer.getText()));

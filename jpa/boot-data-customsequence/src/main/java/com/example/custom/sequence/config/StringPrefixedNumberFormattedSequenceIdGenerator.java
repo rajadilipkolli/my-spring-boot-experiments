@@ -11,7 +11,7 @@ import org.hibernate.service.ServiceRegistry;
 import org.hibernate.type.Type;
 import org.hibernate.type.spi.TypeConfiguration;
 
-public class StringPrefixedSequenceIdGenerator extends SequenceStyleGenerator {
+public class StringPrefixedNumberFormattedSequenceIdGenerator extends SequenceStyleGenerator {
 
     public static final String VALUE_PREFIX_PARAMETER = "valuePrefix";
     public static final String VALUE_PREFIX_DEFAULT = "";

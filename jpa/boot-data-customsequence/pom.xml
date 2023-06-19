@@ -21,7 +21,8 @@
         <java.version>17</java.version>
         <springdoc-openapi.version>2.1.0</springdoc-openapi.version>
         <commons-io.version>2.13.0</commons-io.version>
-        
+        <ds-proxy-spring-boot-starter.version>1.9.0</ds-proxy-spring-boot-starter.version>
+
         <project.testresult.directory>${project.build.directory}/test-results</project.testresult.directory>
         <spotless.version>2.37.0</spotless.version>
         <dependency-check-maven.version>8.3.1</dependency-check-maven.version>
@@ -88,6 +89,11 @@
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
             <version>${springdoc-openapi.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.gavlyukovskiy</groupId>
+            <artifactId>datasource-proxy-spring-boot-starter</artifactId>
+            <version>${ds-proxy-spring-boot-starter.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>

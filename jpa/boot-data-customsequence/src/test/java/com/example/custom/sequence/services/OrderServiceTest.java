@@ -8,7 +8,7 @@ import static org.mockito.BDDMockito.willDoNothing;
 
 import com.example.custom.sequence.entities.Customer;
 import com.example.custom.sequence.entities.Order;
-import com.example.custom.sequence.model.response.OrderDTO;
+import com.example.custom.sequence.model.response.OrderResponse;
 import com.example.custom.sequence.model.response.PagedResult;
 import com.example.custom.sequence.repositories.OrderRepository;
 import java.util.List;
@@ -39,7 +39,7 @@ class OrderServiceTest {
         given(orderRepository.findAll(pageable)).willReturn(orderPage);
 
         // when
-        PagedResult<OrderDTO> pagedResult = orderService.findAllOrders(0, 10, "id", "asc");
+        PagedResult<OrderResponse> pagedResult = orderService.findAllOrders(0, 10, "id", "asc");
 
         // then
         assertThat(pagedResult).isNotNull();
@@ -58,10 +58,10 @@ class OrderServiceTest {
         // given
         given(orderRepository.findById("1")).willReturn(Optional.of(getOrder()));
         // when
-        Optional<OrderDTO> optionalOrder = orderService.findOrderById("1");
+        Optional<OrderResponse> optionalOrder = orderService.findOrderById("1");
         // then
         assertThat(optionalOrder).isPresent();
-        OrderDTO order = optionalOrder.get();
+        OrderResponse order = optionalOrder.get();
         assertThat(order.id()).isEqualTo("1");
         assertThat(order.text()).isEqualTo("junitText");
     }
@@ -71,7 +71,7 @@ class OrderServiceTest {
         // given
         given(orderRepository.save(getOrder())).willReturn(getOrder());
         // when
-        OrderDTO persistedOrder = orderService.saveOrder(getOrder());
+        OrderResponse persistedOrder = orderService.saveOrder(getOrder());
         // then
         assertThat(persistedOrder).isNotNull();
         assertThat(persistedOrder.id()).isEqualTo("1");

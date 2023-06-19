@@ -1,6 +1,6 @@
 package com.example.custom.sequence.entities;
 
-import com.example.custom.sequence.config.StringPrefixedSequenceIdGenerator;
+import com.example.custom.sequence.config.StringPrefixedNumberFormattedSequenceIdGenerator;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -33,14 +33,17 @@ public class Customer {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "custom_seq")
     @GenericGenerator(
             name = "custom_seq",
-            type = StringPrefixedSequenceIdGenerator.class,
+            type = StringPrefixedNumberFormattedSequenceIdGenerator.class,
             parameters = {
-                @Parameter(name = StringPrefixedSequenceIdGenerator.INCREMENT_PARAM, value = "50"),
                 @Parameter(
-                        name = StringPrefixedSequenceIdGenerator.VALUE_PREFIX_PARAMETER,
+                        name =
+                                StringPrefixedNumberFormattedSequenceIdGenerator
+                                        .VALUE_PREFIX_PARAMETER,
                         value = "CUS_"),
                 @Parameter(
-                        name = StringPrefixedSequenceIdGenerator.NUMBER_FORMAT_PARAMETER,
+                        name =
+                                StringPrefixedNumberFormattedSequenceIdGenerator
+                                        .NUMBER_FORMAT_PARAMETER,
                         value = "%05d")
             })
     private String id;
