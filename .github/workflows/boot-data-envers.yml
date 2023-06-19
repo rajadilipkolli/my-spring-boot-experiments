@@ -1,13 +1,13 @@
-name: spring-boot-data-envers-sample
+name: boot-data-envers
 
 on:
   push:
     paths:
-      - "jpa/spring-boot-data-envers-sample/**"
+      - "jpa/boot-data-envers/**"
     branches: [main]
   pull_request:
     paths:
-      - "jpa/spring-boot-data-envers-sample/**"
+      - "jpa/boot-data-envers/**"
     types:
       - opened
       - synchronize
@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: "jpa/spring-boot-data-envers-sample"
+        working-directory: "jpa/boot-data-envers"
     steps:
       - uses: actions/checkout@v3
         with:
