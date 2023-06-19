@@ -50,7 +50,7 @@
   - spring-boot-choas-monkey/pom.xml
   - jpa/boot-data-envers/build.gradle
   - jpa/spring-boot-hibernate2ndlevelcache-sample/pom.xml
-  - jpa/multitenancy/db/pom.xml
+  - jpa/multitenancy/multitenancy-db/pom.xml
   - jpa/multitenancy/multidatasource-multitenancy/pom.xml
   - jpa/multitenancy/partition/pom.xml
   - jpa/multitenancy/schema/pom.xml

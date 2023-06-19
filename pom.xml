@@ -18,7 +18,7 @@
         <module>jpa/boot-data-customsequence</module>
         <module>jpa/boot-data-multipledatasources</module>
         <module>jpa/spring-boot-read-replica-postgresql</module>
-        <module>jpa/multitenancy/db</module>
+        <module>jpa/multitenancy/multitenency-db</module>
         <module>jpa/multitenancy/multidatasource-multitenancy</module>
         <module>jpa/multitenancy/partition</module>
         <module>jpa/multitenancy/schema</module>

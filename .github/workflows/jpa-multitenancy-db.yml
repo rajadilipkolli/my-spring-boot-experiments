@@ -3,11 +3,11 @@ name: jpa-multitenancy-db
 on:
   push:
     paths:
-      - "jpa/multitenancy/db/**"
+      - "jpa/multitenancy/multitenancy-db/**"
     branches: [main]
   pull_request:
     paths:
-      - "jpa/multitenancy/db/**"
+      - "jpa/multitenancy/multitenancy-db/**"
     types:
       - opened
       - synchronize
@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: "jpa/multitenancy/db"
+        working-directory: "jpa/multitenancy/multitenancy-db"
 
     steps:
       - uses: actions/checkout@v3

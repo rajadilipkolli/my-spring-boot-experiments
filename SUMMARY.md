@@ -18,7 +18,7 @@
   * [spring-boot-multipledatasources](jpa/boot-data-multipledatasources/README.md)
   * [spring-boot-data-envers-sample](jpa/boot-data-envers/README.md)
   * [MultiTenancy using Hibernate in Spring Data JPA](jpa/multitenancy/README.md)
-    * [multitenancy-db](jpa/multitenancy/db/README.md)
+    * [multitenancy-db](jpa/multitenancy/multitenancy-db/README.md)
     * [multidatasource-multitenancy](jpa/multitenancy/multidatasource-multitenancy/README.md)
     * [Partitioned (Discriminator) Data – the data for each tenant is partitioned by a discriminator value](jpa/multitenancy/partition/README.md)
     * [schema](jpa/multitenancy/schema/README.md)
