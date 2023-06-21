@@ -118,11 +118,11 @@
         },
         {
             "type": "java",
-            "name": "Spring Boot-Application<spring-boot-data-envers-sample>",
+            "name": "Spring Boot-Application<boot-data-envers>",
             "request": "launch",
             "cwd": "${workspaceFolder}",
             "mainClass": "com.example.envers.Application",
-            "projectName": "spring-boot-data-envers-sample",
+            "projectName": "boot-data-envers",
             "args": "--spring.profiles.active=local",
             "envFile": "${workspaceFolder}/.env"
         }

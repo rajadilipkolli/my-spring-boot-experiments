@@ -128,7 +128,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "9.5.3",
+      "pluginVersion": "10.0.0",
       "targets": [
         {
           "datasource": {
@@ -208,7 +208,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "9.5.3",
+      "pluginVersion": "10.0.0",
       "targets": [
         {
           "datasource": {
@@ -293,7 +293,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "9.5.3",
+      "pluginVersion": "10.0.0",
       "targets": [
         {
           "datasource": {
@@ -387,7 +387,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "9.5.3",
+      "pluginVersion": "10.0.0",
       "targets": [
         {
           "datasource": {
@@ -467,7 +467,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "9.5.3",
+      "pluginVersion": "10.0.0",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -558,7 +558,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "9.5.3",
+      "pluginVersion": "10.0.0",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -646,7 +646,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "9.5.3",
+      "pluginVersion": "10.0.0",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -749,7 +749,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "9.5.3",
+      "pluginVersion": "10.0.0",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -926,7 +926,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "9.5.3",
+      "pluginVersion": "10.0.0",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -1053,7 +1053,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "9.5.3",
+      "pluginVersion": "10.0.0",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -1182,7 +1182,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "9.5.3",
+      "pluginVersion": "10.0.0",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -1310,7 +1310,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "9.5.3",
+      "pluginVersion": "10.0.0",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -1496,7 +1496,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "9.5.3",
+      "pluginVersion": "10.0.0",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -1627,7 +1627,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "9.5.3",
+      "pluginVersion": "10.0.0",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -1753,7 +1753,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "9.5.3",
+      "pluginVersion": "10.0.0",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -1898,7 +1898,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "9.5.3",
+      "pluginVersion": "10.0.0",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -2002,7 +2002,7 @@
         "alertThreshold": true
       },
       "percentage": true,
-      "pluginVersion": "9.5.3",
+      "pluginVersion": "10.0.0",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -2116,7 +2116,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "9.5.3",
+      "pluginVersion": "10.0.0",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -2287,7 +2287,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "9.5.3",
+      "pluginVersion": "10.0.0",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -2452,7 +2452,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "9.5.3",
+      "pluginVersion": "10.0.0",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -2608,7 +2608,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "9.5.3",
+      "pluginVersion": "10.0.0",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -2698,7 +2698,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "9.5.3",
+      "pluginVersion": "10.0.0",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -2802,7 +2802,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "9.5.3",
+      "pluginVersion": "10.0.0",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -2935,7 +2935,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "9.5.3",
+      "pluginVersion": "10.0.0",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -3038,7 +3038,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "9.5.3",
+      "pluginVersion": "10.0.0",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -3169,7 +3169,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "9.5.3",
+      "pluginVersion": "10.0.0",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -3285,7 +3285,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "9.5.3",
+      "pluginVersion": "10.0.0",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -3389,7 +3389,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "9.5.3",
+      "pluginVersion": "10.0.0",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -3505,7 +3505,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "9.5.3",
+      "pluginVersion": "10.0.0",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -3576,10 +3576,9 @@
     "list": [
       {
         "current": {
-          "isNone": true,
           "selected": false,
-          "text": "None",
-          "value": ""
+          "text": "boot-data-envers",
+          "value": "boot-data-envers"
         },
         "datasource": {
           "type": "prometheus",
@@ -3724,6 +3723,6 @@
   "timezone": "browser",
   "title": "SpringBoot Micrometer",
   "uid": "RDBComTZz1",
-  "version": 2,
+  "version": 1,
   "weekStart": ""
 }
