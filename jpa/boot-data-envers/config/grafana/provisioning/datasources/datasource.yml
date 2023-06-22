@@ -11,7 +11,7 @@ datasources:
     type: prometheus
     uid: prometheus
     access: proxy
-    url: http://prometheus:9090
+    url: http://host.docker.internal:9090
     basicAuth: false
     isDefault: false
     version: 1
