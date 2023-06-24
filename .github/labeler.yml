@@ -33,7 +33,7 @@
 "component: rabbitmq-thymeleaf":
   - spring-boot-rabbitmq-thymeleaf/**/*
 "component: r2dbc":
-  - r2dbc/spring-boot-jooq-r2dbc-sample/**/*
+  - r2dbc/boot-jooq-r2dbc-sample/**/*
 "component: openapi":
   - open-api-spring-boot/**/*
 "component: httpclients":
@@ -66,7 +66,7 @@
   - spring-boot-togglz-sample/pom.xml
   - spring-boot-ultimate-redis/pom.xml
   - spring-boot-rabbitmq-thymeleaf/pom.xml
-  - r2dbc/spring-boot-jooq-r2dbc-sample/pom.xml
+  - r2dbc/boot-jooq-r2dbc-sample/pom.xml
   - httpClients/http-proxy/pom.xml
   - httpClients/rest-template/pom.xml
   - httpClients/web-client-webmvc/pom.xml

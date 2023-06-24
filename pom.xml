@@ -22,7 +22,7 @@
         <module>jpa/multitenancy/multidatasource-multitenancy</module>
         <module>jpa/multitenancy/partition</module>
         <module>jpa/multitenancy/schema</module>
-        <module>r2dbc/spring-boot-jooq-r2dbc-sample</module>
+        <module>r2dbc/boot-jooq-r2dbc-sample</module>
         <module>spring-boot-api-archunit-sample</module>
         <module>spring-boot-choas-monkey</module>
         <module>spring-boot-jobrunr-sample</module>

@@ -9,10 +9,10 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.example.jooq.r2dbc</groupId>
-    <artifactId>spring-boot-jooq-r2dbc-sample</artifactId>
+    <artifactId>boot-jooq-r2dbc-sample</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>spring-boot-jooq-r2dbc-sample</name>
-    <description>spring-boot-jooq-r2dbc-sample</description>
+    <name>boot-jooq-r2dbc-sample</name>
+    <description>Spring boot jooq integration in reactive mode</description>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

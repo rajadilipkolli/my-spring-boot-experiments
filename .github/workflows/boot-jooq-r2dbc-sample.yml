@@ -1,13 +1,13 @@
-name: spring-boot-jooq-r2dbc-sample
+name: boot-jooq-r2dbc-sample
 
 on:
   push:
     paths:
-      - "r2dbc/spring-boot-jooq-r2dbc-sample/**"
+      - "r2dbc/boot-jooq-r2dbc-sample/**"
     branches: [main]
   pull_request:
     paths:
-      - "r2dbc/spring-boot-jooq-r2dbc-sample/**"
+      - "r2dbc/boot-jooq-r2dbc-sample/**"
     types:
       - opened
       - synchronize
@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: "r2dbc/spring-boot-jooq-r2dbc-sample"
+        working-directory: "r2dbc/boot-jooq-r2dbc-sample"
     steps:
       - uses: actions/checkout@v3
         with:

@@ -6,7 +6,7 @@ pipeline {
     }
 
     environment {
-        APPLICATION_NAME = 'spring-boot-jooq-r2dbc-sample'
+        APPLICATION_NAME = 'boot-jooq-r2dbc-sample'
     }
 
     stages {
