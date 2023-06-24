@@ -1,5 +1,6 @@
 package com.example.mongoes;
 
+import java.time.Duration;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.devtools.restart.RestartScope;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -16,7 +17,8 @@ public class TestApplication {
     @ServiceConnection
     @RestartScope
     ElasticsearchContainer elasticsearchContainer() {
-        return new ElasticsearchContainer("docker.elastic.co/elasticsearch/elasticsearch:8.8.1");
+        return new ElasticsearchContainer("docker.elastic.co/elasticsearch/elasticsearch:8.8.1")
+                .withStartupTimeout(Duration.ofMinutes(5));
     }
 
     @Bean
