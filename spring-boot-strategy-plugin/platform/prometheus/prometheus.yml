@@ -9,7 +9,9 @@ scrape_configs:
     static_configs:
       - targets: ['host.docker.internal:8080']
         labels:
-          application: 'strategy-plugin-service''
+          application: 'strategy-plugin-service'
   - job_name: 'prometheus'
     static_configs:
       - targets: ['host.docker.internal:9090']
+        labels:
+          application: 'prometheus'

@@ -8,6 +8,7 @@ deleteDatasources:
 datasources:
     - name: Prometheus
       type: prometheus
+      uid: prometheus
       access: proxy
       url: http://host.docker.internal:9090
       editable: false
