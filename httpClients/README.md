@@ -4,3 +4,12 @@ HTTP client is a utility that allows for sending HTTP requests and receiving HTT
 The HTTP client is built on top of the Java URLConnection class and provides a higher level of abstraction for handling HTTP requests and responses. 
 It also provides additional features such as automatic handling of authentication and redirects, support for HTTP proxies, and more.
 Overall, the HTTP client can help to make your application more efficient and easier to work with when it comes to sending and receiving HTTP requests.
+
+The following table list all sample codes related to the spring boot integrations with external system.
+
+| Name                                       | Description 		                                                                                                                                       |
+|--------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------|
+| [http proxy](./http-proxy)                 | The application, demonstrates the way spring boot application will connect with external system using spring 6 http proxy                            |
+| [rest template](./rest-template)           | The application, demonstrates the way spring boot application will connect with external system using rest template                                  |
+| [web-client-mvc](./web-client-mvc)         | The application, demonstrates the way spring boot application will connect with external system using spring 5's webclient in a servlet environment  |
+| [web-client-webflux](./web-client-webflux) | The application, demonstrates the way spring boot application will connect with external system using spring 5's webclient in a reactive environment |
