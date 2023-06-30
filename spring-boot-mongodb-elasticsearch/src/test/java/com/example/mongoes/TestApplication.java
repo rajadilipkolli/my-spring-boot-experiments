@@ -17,7 +17,8 @@ public class TestApplication {
     @ServiceConnection
     @RestartScope
     ElasticsearchContainer elasticsearchContainer() {
-        return new ElasticsearchContainer("docker.elastic.co/elasticsearch/elasticsearch:8.8.1")
+        return new ElasticsearchContainer("docker.elastic.co/elasticsearch/elasticsearch:8.8.2")
+                .withEnv("xpack.security.enabled", "false")
                 .withStartupTimeout(Duration.ofMinutes(5));
     }
 
