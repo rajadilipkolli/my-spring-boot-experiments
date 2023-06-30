@@ -1,13 +1,13 @@
-name: spring-boot-hibernate2ndlevelcache-sample
+name: boot-hibernate2ndlevelcache-sample
 
 on:
   push:
     paths:
-      - "jpa/spring-boot-hibernate2ndlevelcache-sample/**"
+      - "jpa/boot-hibernate2ndlevelcache-sample/**"
     branches: [main]
   pull_request:
     paths:
-      - "jpa/spring-boot-hibernate2ndlevelcache-sample/**"
+      - "jpa/boot-hibernate2ndlevelcache-sample/**"
     types:
       - opened
       - synchronize
@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: "jpa/spring-boot-hibernate2ndlevelcache-sample"
+        working-directory: "jpa/boot-hibernate2ndlevelcache-sample"
     steps:
       - uses: actions/checkout@v3
         with:

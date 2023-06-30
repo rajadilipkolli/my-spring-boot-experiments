@@ -9,7 +9,7 @@
 "component: graphql-querydsl":
   - graphql/spring-boot-graphql-querydsl/**/*
 "component: hibernate2ndlevelcache-sample":
-  - jpa/spring-boot-hibernate2ndlevelcache-sample/**/*
+  - jpa/boot-hibernate2ndlevelcache-sample/**/*
 "component: jobrunr":
   - boot-jobrunr-sample/**/*
 "component: data-envers":
@@ -49,7 +49,7 @@
   - spring-boot-api-archunit-sample/pom.xml
   - spring-boot-choas-monkey/pom.xml
   - jpa/boot-data-envers/build.gradle
-  - jpa/spring-boot-hibernate2ndlevelcache-sample/pom.xml
+  - jpa/boot-hibernate2ndlevelcache-sample/pom.xml
   - jpa/multitenancy/multitenancy-db/pom.xml
   - jpa/multitenancy/multidatasource-multitenancy/pom.xml
   - jpa/multitenancy/partition/pom.xml
