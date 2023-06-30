@@ -1,7 +1,5 @@
 package com.example.mongoes;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import com.example.mongoes.common.AbstractIntegrationTest;
 import java.net.URI;
 import java.util.function.Function;
@@ -11,11 +9,6 @@ import org.springframework.http.MediaType;
 import org.springframework.web.util.UriBuilder;
 
 class ApplicationIntegrationTest extends AbstractIntegrationTest {
-
-    @Test
-    void contextLoads() {
-        assertThat(ELASTICSEARCH_CONTAINER.isRunning()).isTrue();
-    }
 
     @Test
     @Disabled

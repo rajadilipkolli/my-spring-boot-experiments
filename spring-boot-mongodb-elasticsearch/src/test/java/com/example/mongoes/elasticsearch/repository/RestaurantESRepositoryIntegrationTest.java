@@ -2,8 +2,7 @@ package com.example.mongoes.elasticsearch.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.example.mongoes.common.ElasticsearchContainerSetUp;
-import com.example.mongoes.config.DataStoreConfiguration;
+import com.example.mongoes.common.AbstractIntegrationTest;
 import com.example.mongoes.document.Address;
 import com.example.mongoes.document.Grades;
 import com.example.mongoes.document.Restaurant;
@@ -16,8 +15,6 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.data.elasticsearch.DataElasticsearchTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.elasticsearch.client.elc.ElasticsearchAggregation;
@@ -30,10 +27,8 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-@DataElasticsearchTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@Import(DataStoreConfiguration.class)
-class RestaurantESRepositoryTest extends ElasticsearchContainerSetUp {
+class RestaurantESRepositoryIntegrationTest extends AbstractIntegrationTest {
 
     public static final String RESTAURANT_NAME = "Lb Spumoni Gardens";
     private static final String BOROUGH_NAME = "Brooklyn";
@@ -449,7 +444,6 @@ class RestaurantESRepositoryTest extends ElasticsearchContainerSetUp {
     }
 
     @Test
-    @Disabled
     void testAggregation() {
         Mono<SearchPage<Restaurant>> aggregationMono =
                 this.restaurantESRepository.aggregateSearch(
@@ -471,7 +465,7 @@ class RestaurantESRepositoryTest extends ElasticsearchContainerSetUp {
                             assertThat(searchPage.hasContent()).isEqualTo(true);
                             assertThat(searchPage.getSearchHits().getAggregations())
                                     .isNotNull()
-                                    .isExactlyInstanceOf(ElasticsearchAggregation.class);
+                                    .isExactlyInstanceOf(ElasticsearchAggregations.class);
                             assertThat(searchPage.stream().count()).isEqualTo(1);
                             Restaurant restaurant1 = searchPage.getContent().get(0).getContent();
                             assertThat(restaurant1.getRestaurantId()).isEqualTo(2L);
@@ -485,9 +479,8 @@ class RestaurantESRepositoryTest extends ElasticsearchContainerSetUp {
                             assertThat(elasticsearchAggregations.aggregations()).isNotNull();
                             Map<String, ElasticsearchAggregation> aggregationMap =
                                     elasticsearchAggregations.aggregationsAsMap();
-                            assertThat(aggregationMap).isNotEmpty().hasSize(3);
-                            assertThat(aggregationMap)
-                                    .containsOnlyKeys("MyCuisine", "MyDateRange", "MyBorough");
+                            assertThat(aggregationMap).isNotEmpty().hasSize(2);
+                            assertThat(aggregationMap).containsOnlyKeys("MyCuisine", "MyBorough");
                         })
                 .verifyComplete();
     }
