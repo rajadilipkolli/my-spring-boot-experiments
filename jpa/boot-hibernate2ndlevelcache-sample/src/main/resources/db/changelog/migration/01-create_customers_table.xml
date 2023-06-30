@@ -6,13 +6,13 @@
     <changeSet author="appuser" id="createTable-customers">
         <preConditions>
             <not>
-                <sequenceExists sequenceName="customer_id_seq" />
+                <sequenceExists sequenceName="customers_seq" />
                 <tableExists tableName="customers" />
             </not>
         </preConditions>
-        <createSequence sequenceName="customer_id_seq" incrementBy="100" startValue="1" />
+        <createSequence sequenceName="customers_seq" incrementBy="50" startValue="1" />
         <createTable tableName="customers">
-            <column name="id" type="bigint" defaultValueSequenceNext="customer_id_seq">
+            <column name="id" type="bigint" defaultValueSequenceNext="customers_seq">
                 <constraints primaryKey="true" nullable="false" />
             </column>
             <column name="first_name" type="varchar(1024)">
