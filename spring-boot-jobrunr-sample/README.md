@@ -4,20 +4,22 @@ JobRunr is a job scheduling and execution platform that enables businesses to au
 
 ### Run tests
 
-`$ ./mvnw clean verify`
+```shell
+./mvnw clean verify
+```
 
 ### Run locally
 
-```
-$ docker-compose -f docker/docker-compose.yml up -d
-$ ./mvnw spring-boot:run -Dspring-boot.run.profiles=local
+```shell
+docker-compose -f docker/docker-compose.yml up -d
+./mvnw spring-boot:run -Dspring-boot.run.profiles=local
 ```
 
 ### Run native
 
 Install GraalVM 22.3 or later verify with native-image --version
 
-```
+```shell
 ./mvnw native:compile -Pnative
 ```
 

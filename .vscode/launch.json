@@ -135,6 +135,16 @@
             "projectName": "boot-mongodb-elasticsearch",
             "args": "--spring.profiles.active=cluster",
             "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-Application<spring-boot-jobrunr-sample>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.example.jobrunr.Application",
+            "projectName": "spring-boot-jobrunr-sample",
+            "args": "--spring.profiles.active=local",
+            "envFile": "${workspaceFolder}/.env"
         }
     ]
 }
