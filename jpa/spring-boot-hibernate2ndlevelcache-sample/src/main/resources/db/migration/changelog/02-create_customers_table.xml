@@ -1,7 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
-         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
-    <changeSet author="sivalabs" id="createTable-customers">
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet author="appuser" id="createTable-customers">
+        <preConditions>
+            <not>
+                <sequenceExists sequenceName="customer_id_seq" />
+                <tableExists tableName="customers" />
+            </not>
+        </preConditions>
         <createSequence sequenceName="customer_id_seq" incrementBy="100" startValue="1" />
         <createTable tableName="customers">
             <column name="id" type="bigint" defaultValueSequenceNext="customer_id_seq">

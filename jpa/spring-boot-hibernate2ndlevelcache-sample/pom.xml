@@ -9,9 +9,9 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.example.hibernatecache</groupId>
-    <artifactId>spring-boot-hibernate2ndlevelcache-sample</artifactId>
+    <artifactId>boot-hibernate2ndlevelcache-sample</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>spring-boot-hibernate2ndlevelcache-sample</name>
+    <name>boot-hibernate2ndlevelcache-sample</name>
     <description>hibernate 2ndlevel cache Implementation</description>
 
     <properties>

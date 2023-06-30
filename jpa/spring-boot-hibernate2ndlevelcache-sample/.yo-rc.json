@@ -1,6 +1,6 @@
 {
   "generator-springboot": {
-    "appName": "spring-boot-hibernate2ndlevelcache-sample",
+    "appName": "boot-hibernate2ndlevelcache-sample",
     "packageName": "com.example.hibernatecache",
     "databaseType": "postgresql",
     "dbMigrationTool": "liquibase",
