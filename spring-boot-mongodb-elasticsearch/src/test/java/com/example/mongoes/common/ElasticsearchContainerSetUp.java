@@ -9,6 +9,9 @@ public class ElasticsearchContainerSetUp {
 
     protected static final ElasticsearchContainer ELASTICSEARCH_CONTAINER =
             new ElasticsearchContainer("docker.elastic.co/elasticsearch/elasticsearch:8.8.2")
+                    .withEnv(
+                            Map.of("xpack.security.enabled",
+                                    "false"))
                     .withReuse(true);
 
     static {
