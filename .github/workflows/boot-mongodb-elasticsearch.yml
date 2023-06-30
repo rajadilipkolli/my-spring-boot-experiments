@@ -1,13 +1,13 @@
-name: spring-boot-mongodb-elasticsearch
+name: boot-mongodb-elasticsearch
 
 on:
   push:
     paths:
-      - "spring-boot-mongodb-elasticsearch/**"
+      - "boot-mongodb-elasticsearch/**"
     branches: [main]
   pull_request:
     paths:
-      - "spring-boot-mongodb-elasticsearch/**"
+      - "boot-mongodb-elasticsearch/**"
     types:
       - opened
       - synchronize
@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: spring-boot-mongodb-elasticsearch
+        working-directory: boot-mongodb-elasticsearch
 
     steps:
       - uses: actions/checkout@v3

@@ -27,7 +27,7 @@
 * [API Example for Archunit](spring-boot-api-archunit-sample/README.md)
 * [spring-boot-choas-monkey](spring-boot-choas-monkey/README.md)
 * [spring-boot-jobrunr-sample](spring-boot-jobrunr-sample/README.md)
-* [spring-boot-mongodb-elasticsearch](spring-boot-mongodb-elasticsearch/README.md)
+* [MongoDb for insertion and search using elastic search](boot-mongodb-elasticsearch/README.md)
 * [spring-boot-strategy-plugin](spring-boot-strategy-plugin/ReadMe.md)
 * [spring-boot-togglz-sample](spring-boot-togglz-sample/README.md)
 * [spring-boot-ultimate-redis](spring-boot-ultimate-redis/README.md)

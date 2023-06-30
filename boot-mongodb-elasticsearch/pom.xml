@@ -9,10 +9,10 @@
         <relativePath /> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.example.mongoes</groupId>
-    <artifactId>spring-boot-mongodb-elasticsearch</artifactId>
+    <artifactId>boot-mongodb-elasticsearch</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>spring-boot-mongodb-elasticsearch</name>
-    <description>spring-boot-mongodb-elasticsearch</description>
+    <name>boot-mongodb-elasticsearch</name>
+    <description>mongodb integration with elasticsearch in reactive mode</description>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

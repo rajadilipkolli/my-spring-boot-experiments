@@ -26,7 +26,7 @@
         <module>spring-boot-api-archunit-sample</module>
         <module>spring-boot-choas-monkey</module>
         <module>spring-boot-jobrunr-sample</module>
-        <module>spring-boot-mongodb-elasticsearch</module>
+        <module>boot-mongodb-elasticsearch</module>
         <module>spring-boot-rabbitmq-thymeleaf</module>
         <module>spring-boot-togglz-sample</module>
         <module>spring-boot-ultimate-redis</module>

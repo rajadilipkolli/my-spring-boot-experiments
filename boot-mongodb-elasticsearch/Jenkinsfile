@@ -6,7 +6,7 @@ pipeline {
     }
 
     environment {
-        APPLICATION_NAME = 'spring-boot-mongodb-elasticsearch'
+        APPLICATION_NAME = 'boot-mongodb-elasticsearch'
     }
 
     stages {

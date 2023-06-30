@@ -23,7 +23,7 @@
 "component: customsequence":
  - jpa/boot-data-customsequence/**/*
 "component: mongodb-elasticsearch":
-  - spring-boot-mongodb-elasticsearch/**/*
+  - boot-mongodb-elasticsearch/**/*
 "component: strategy-plugin":
   - spring-boot-strategy-plugin/**/*
 "component: togglz":
@@ -58,7 +58,7 @@
   - jpa/spring-boot-read-replica-postgresql/pom.xml
   - jpa/boot-data-customsequence/pom.xml
   - spring-boot-jobrunr-sample/pom.xml
-  - spring-boot-mongodb-elasticsearch/pom.xml
+  - boot-mongodb-elasticsearch/pom.xml
   - graphql/spring-boot-graphql-webflux/build.gradle.kts
   - graphql/spring-boot-graphql-querydsl/build.gradle.kts
   - graphql/spring-boot-graphql-webmvc/pom.xml
