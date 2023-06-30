@@ -6,6 +6,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "TestApplication",
+            "request": "launch",
+            "mainClass": "com.example.jobrunr.TestApplication",
+            "projectName": "spring-boot-jobrunr-sample"
+        },
+        {
+            "type": "java",
             "name": "Spring Boot-Application<spring-boot-jooq-r2dbc-sample>",
             "request": "launch",
             "cwd": "${workspaceFolder}",
@@ -144,7 +151,8 @@
             "mainClass": "com.example.jobrunr.Application",
             "projectName": "spring-boot-jobrunr-sample",
             "args": "--spring.profiles.active=local",
-            "envFile": "${workspaceFolder}/.env"
+            "envFile": "${workspaceFolder}/.env",
+            "vmArgs": " -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=37537 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dspring.jmx.enabled=true -Djava.rmi.server.hostname=localhost -Dspring.application.admin.enabled=true -Dspring.boot.project.name=spring-boot-jobrunr-sample"
         }
     ]
 }
