@@ -8,10 +8,10 @@
         <relativePath /> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.example.jobrunr</groupId>
-    <artifactId>spring-boot-jobrunr-sample</artifactId>
+    <artifactId>boot-jobrunr-sample</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>spring-boot-jobrunr-sample</name>
-    <description>spring-boot-jobrunr-sample</description>
+    <name>boot-jobrunr-sample</name>
+    <description>Implementation sample of JobRunr in a spring boot Application</description>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
