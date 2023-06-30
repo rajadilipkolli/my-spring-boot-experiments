@@ -26,6 +26,8 @@ services:
     image: 'redislabs/redisinsight:latest'
     ports:
       - '127.0.0.1:8001:8001'
+    environment:
+      - RITRUSTEDORIGINS=http://localhost:8001 # This is the proxy origin from browser
 
 volumes:
   redis_data:

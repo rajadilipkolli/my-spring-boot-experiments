@@ -153,6 +153,16 @@
             "args": "--spring.profiles.active=local",
             "envFile": "${workspaceFolder}/.env",
             "vmArgs": " -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=37537 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dspring.jmx.enabled=true -Djava.rmi.server.hostname=localhost -Dspring.application.admin.enabled=true -Dspring.boot.project.name=spring-boot-jobrunr-sample"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-Application<boot-hibernate2ndlevelcache-sample>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.example.hibernatecache.Application",
+            "projectName": "boot-hibernate2ndlevelcache-sample",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
         }
     ]
 }
