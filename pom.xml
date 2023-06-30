@@ -25,7 +25,7 @@
         <module>r2dbc/boot-jooq-r2dbc-sample</module>
         <module>spring-boot-api-archunit-sample</module>
         <module>spring-boot-choas-monkey</module>
-        <module>spring-boot-jobrunr-sample</module>
+        <module>boot-jobrunr-sample</module>
         <module>boot-mongodb-elasticsearch</module>
         <module>spring-boot-rabbitmq-thymeleaf</module>
         <module>spring-boot-togglz-sample</module>

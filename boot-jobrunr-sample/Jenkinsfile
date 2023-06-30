@@ -6,7 +6,7 @@ pipeline {
     }
 
     environment {
-        APPLICATION_NAME = 'spring-boot-jobrunr-sample'
+        APPLICATION_NAME = 'boot-jobrunr-sample'
     }
 
     stages {

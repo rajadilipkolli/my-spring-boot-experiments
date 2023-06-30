@@ -11,7 +11,7 @@
 "component: hibernate2ndlevelcache-sample":
   - jpa/spring-boot-hibernate2ndlevelcache-sample/**/*
 "component: jobrunr":
-  - spring-boot-jobrunr-sample/**/*
+  - boot-jobrunr-sample/**/*
 "component: data-envers":
   - jpa/boot-data-envers/**/*
 "component: jpa-multitenancy":
@@ -57,7 +57,7 @@
   - jpa/boot-data-multipledatasources/pom.xml
   - jpa/spring-boot-read-replica-postgresql/pom.xml
   - jpa/boot-data-customsequence/pom.xml
-  - spring-boot-jobrunr-sample/pom.xml
+  - boot-jobrunr-sample/pom.xml
   - boot-mongodb-elasticsearch/pom.xml
   - graphql/spring-boot-graphql-webflux/build.gradle.kts
   - graphql/spring-boot-graphql-querydsl/build.gradle.kts

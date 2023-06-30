@@ -1,13 +1,13 @@
-name: spring-boot-jobrunr-sample
+name: boot-jobrunr-sample
 
 on:
   push:
     paths:
-      - "spring-boot-jobrunr-sample/**"
+      - "boot-jobrunr-sample/**"
     branches: [main]
   pull_request:
     paths:
-      - "spring-boot-jobrunr-sample/**"
+      - "boot-jobrunr-sample/**"
     types:
       - opened
       - synchronize
@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: spring-boot-jobrunr-sample
+        working-directory: boot-jobrunr-sample
     steps:
       - uses: actions/checkout@v3
         with:
