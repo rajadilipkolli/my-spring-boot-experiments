@@ -9,13 +9,8 @@ import org.testcontainers.lifecycle.Startables;
 public class ElasticsearchContainerSetUp {
 
     protected static final ElasticsearchContainer ELASTICSEARCH_CONTAINER =
-            new ElasticsearchContainer("docker.elastic.co/elasticsearch/elasticsearch:8.7.1")
-                    .withEnv(
-                            Map.of(
-                                    "discovery.type",
-                                    "single-node",
-                                    "xpack.security.enabled",
-                                    "false"))
+            new ElasticsearchContainer("docker.elastic.co/elasticsearch/elasticsearch:8.8.2")
+                    .withEnv(Map.of("xpack.security.enabled", "false"))
                     .withReuse(true);
 
     static {
