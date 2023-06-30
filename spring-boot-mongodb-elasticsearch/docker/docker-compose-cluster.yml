@@ -10,7 +10,7 @@ services:
     networks:
       - mongoCluster
     ports:
-      - 27017:27017
+      - "27017:27017"
     links:
       - mongo2
       - mongo3
@@ -25,7 +25,7 @@ services:
     networks:
       - mongoCluster
     ports:
-      - 27018:27017
+      - "27018:27017"
     restart: always
     entrypoint: [ "/usr/bin/mongod", "--replSet", "myReplicaSet", "--bind_ip", "localhost,mongo2" ]
   mongo3:
@@ -37,7 +37,7 @@ services:
     networks:
       - mongoCluster
     ports:
-      - 27019:27017
+      - "27019:27017"
     restart: always
     entrypoint: [ "/usr/bin/mongod", "--replSet", "myReplicaSet", "--bind_ip", "localhost,mongo3" ]
 
@@ -55,7 +55,7 @@ services:
     restart: unless-stopped
 
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.11
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.8.2
     container_name: elasticsearch
     environment:
       - discovery.type=single-node
@@ -70,10 +70,10 @@ services:
       - esdata1:/usr/share/elasticsearch/data
 
   kibana:
-    image: docker.elastic.co/kibana/kibana:7.17.11
+    image: docker.elastic.co/kibana/kibana:8.8.2
     restart: always
     ports:
-      - 5601:5601
+      - "5601:5601"
     networks:
       - mongoCluster
     environment:
