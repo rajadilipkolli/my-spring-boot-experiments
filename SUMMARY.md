@@ -23,7 +23,7 @@
     * [Partitioned (Discriminator) Data – the data for each tenant is partitioned by a discriminator value](jpa/multitenancy/partition/README.md)
     * [schema](jpa/multitenancy/schema/README.md)
   * [spring-boot-hibernate2ndlevelcache-sample](jpa/spring-boot-hibernate2ndlevelcache-sample/README.md)
-  * [read-replica-with-spring-boot](jpa/spring-boot-read-replica-postgresql/README.md)
+  * [read-replica-with-spring-boot](jpa/boot-read-replica-postgresql/README.md)
 * [API Example for Archunit](spring-boot-api-archunit-sample/README.md)
 * [spring-boot-choas-monkey](spring-boot-choas-monkey/README.md)
 * [Scheduling using JobRunr](boot-jobrunr-sample/README.md)

@@ -1,13 +1,13 @@
-name: spring-boot-read-replica-postgresql
+name: boot-read-replica-postgresql
 
 on:
   push:
     paths:
-      - "jpa/spring-boot-read-replica-postgresql/**"
+      - "jpa/boot-read-replica-postgresql/**"
     branches: [main]
   pull_request:
     paths:
-      - "jpa/spring-boot-read-replica-postgresql/**"
+      - "jpa/boot-read-replica-postgresql/**"
     types:
       - opened
       - synchronize
@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: "jpa/spring-boot-read-replica-postgresql"
+        working-directory: "jpa/boot-read-replica-postgresql"
     steps:
       - uses: actions/checkout@v3
         with:

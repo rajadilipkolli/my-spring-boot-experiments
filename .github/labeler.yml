@@ -19,7 +19,7 @@
 "component: multiple-datasources":
   - jpa/boot-data-multipledatasources/**/*
 "component: read-replica-postgres":
-  - jpa/spring-boot-read-replica-postgresql/**/*
+  - jpa/boot-read-replica-postgresql/**/*
 "component: customsequence":
  - jpa/boot-data-customsequence/**/*
 "component: mongodb-elasticsearch":
@@ -55,7 +55,7 @@
   - jpa/multitenancy/partition/pom.xml
   - jpa/multitenancy/schema/pom.xml
   - jpa/boot-data-multipledatasources/pom.xml
-  - jpa/spring-boot-read-replica-postgresql/pom.xml
+  - jpa/boot-read-replica-postgresql/pom.xml
   - jpa/boot-data-customsequence/pom.xml
   - boot-jobrunr-sample/pom.xml
   - boot-mongodb-elasticsearch/pom.xml
