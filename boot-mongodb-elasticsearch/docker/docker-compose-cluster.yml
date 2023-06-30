@@ -3,7 +3,8 @@ version: '3.8'
 services:
   mongo1:
     container_name: mongo1
-    image: mongo:5.0.18
+    hostname: mongo1
+    image: mongo:6.0.6
     extra_hosts:
       - "host.docker.internal:host-gateway"
       - "docker.for.win.host.internal:host-gateway"
@@ -18,7 +19,8 @@ services:
     entrypoint: [ "/usr/bin/mongod", "--replSet", "myReplicaSet", "--bind_ip", "localhost,mongo1" ]
   mongo2:
     container_name: mongo2
-    image: mongo:5.0.18
+    hostname: mongo2
+    image: mongo:6.0.6
     extra_hosts:
       - "host.docker.internal:host-gateway"
       - "docker.for.win.host.internal:host-gateway"
@@ -30,7 +32,8 @@ services:
     entrypoint: [ "/usr/bin/mongod", "--replSet", "myReplicaSet", "--bind_ip", "localhost,mongo2" ]
   mongo3:
     container_name: mongo3
-    image: mongo:5.0.18
+    hostname: mongo3
+    image: mongo:6.0.6
     extra_hosts:
       - "host.docker.internal:host-gateway"
       - "docker.for.win.host.internal:host-gateway"
@@ -71,6 +74,7 @@ services:
 
   kibana:
     image: docker.elastic.co/kibana/kibana:8.8.2
+    container_name: kibana
     restart: always
     ports:
       - "5601:5601"

@@ -6,16 +6,6 @@
     "configurations": [
         {
             "type": "java",
-            "name": "Spring Boot-Application<spring-boot-mongodb-elasticsearch>",
-            "request": "launch",
-            "cwd": "${workspaceFolder}",
-            "console": "internalConsole",
-            "mainClass": "com.example.mongoes.Application",
-            "projectName": "spring-boot-mongodb-elasticsearch",
-            "args": ""
-        },
-        {
-            "type": "java",
             "name": "Spring Boot-Application<spring-boot-jooq-r2dbc-sample>",
             "request": "launch",
             "cwd": "${workspaceFolder}",
@@ -134,6 +124,16 @@
             "mainClass": "com.example.plugin.strategyplugin.StrategyPluginApplication",
             "projectName": "boot-strategy-plugin",
             "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-Application<boot-mongodb-elasticsearch>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.example.mongoes.Application",
+            "projectName": "boot-mongodb-elasticsearch",
+            "args": "--spring.profiles.active=cluster",
             "envFile": "${workspaceFolder}/.env"
         }
     ]
