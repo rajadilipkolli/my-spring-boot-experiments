@@ -28,7 +28,7 @@
 * [spring-boot-choas-monkey](spring-boot-choas-monkey/README.md)
 * [Scheduling using JobRunr](boot-jobrunr-sample/README.md)
 * [MongoDb for insertion and search using elastic search](boot-mongodb-elasticsearch/README.md)
-* [spring-boot-strategy-plugin](spring-boot-strategy-plugin/ReadMe.md)
+* [boot-strategy-plugin](boot-strategy-plugin/ReadMe.md)
 * [spring-boot-togglz-sample](spring-boot-togglz-sample/README.md)
 * [spring-boot-ultimate-redis](spring-boot-ultimate-redis/README.md)
 * [spring-boot-rabbitmq-thymeleaf](spring-boot-rabbitmq-thymeleaf/README.md)
