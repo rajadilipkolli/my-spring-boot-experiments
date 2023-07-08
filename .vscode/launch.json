@@ -146,6 +146,16 @@
             "projectName": "boot-hibernate2ndlevelcache-sample",
             "args": "",
             "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-Application<boot-data-customsequence>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.example.custom.sequence.Application",
+            "projectName": "boot-data-customsequence",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
         }
     ]
 }
