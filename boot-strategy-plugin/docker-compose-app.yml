@@ -2,7 +2,7 @@ version: "3.8"
 services:
     strategy-plugin-service:
         # Build image with "./gradlew bootBuildImage from book-service project"
-        image: ghcr.io/rajadilipkolli/my-spring-boot-experiments/spring-boot-strategy-plugin:latest
+        image: ghcr.io/rajadilipkolli/my-spring-boot-experiments/boot-strategy-plugin:latest
         container_name: strategy-plugin-service
         ports:
             - 8080:8080
