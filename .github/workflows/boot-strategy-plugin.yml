@@ -1,13 +1,13 @@
-name: spring-boot-strategy-plugin-native
+name: boot-strategy-plugin-native
 
 on:
   push:
     paths:
-      - "spring-boot-strategy-plugin/**"
+      - "boot-strategy-plugin/**"
     branches: [main]
   pull_request:
     paths:
-      - "spring-boot-strategy-plugin/**"
+      - "boot-strategy-plugin/**"
     types:
       - opened
       - synchronize
@@ -27,7 +27,7 @@ jobs:
       packages: write
     defaults:
       run:
-        working-directory: spring-boot-strategy-plugin
+        working-directory: boot-strategy-plugin
     steps:
       - uses: actions/checkout@v3
         with:
@@ -60,13 +60,13 @@ jobs:
 
       - if: ${{ github.ref == 'refs/heads/main' }}
         name: Build container image
-        run: ./gradlew bootBuildImage --imageName ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/spring-boot-strategy-plugin:${{ env.VERSION }}
+        run: ./gradlew bootBuildImage --imageName ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/boot-strategy-plugin:${{ env.VERSION }}
       - if: ${{ github.ref == 'refs/heads/main' }}
         name: OCI image vulnerability scanning
         uses: anchore/scan-action@v3
         id: scan
         with:
-          image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/spring-boot-strategy-plugin:${{ env.VERSION }}
+          image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/boot-strategy-plugin:${{ env.VERSION }}
           fail-build: false
           severity-cutoff: high
       - if: ${{ github.ref == 'refs/heads/main' }}
@@ -78,4 +78,4 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       - if: ${{ github.ref == 'refs/heads/main' }}
         name: Publish container image
-        run: docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/spring-boot-strategy-plugin:${{ env.VERSION }}
+        run: docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/boot-strategy-plugin:${{ env.VERSION }}
