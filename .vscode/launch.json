@@ -6,29 +6,12 @@
     "configurations": [
         {
             "type": "java",
-            "name": "TestApplication",
-            "request": "launch",
-            "mainClass": "com.example.jobrunr.TestApplication",
-            "projectName": "boot-jobrunr-sample"
-        },
-        {
-            "type": "java",
             "name": "Spring Boot-Application<spring-boot-jooq-r2dbc-sample>",
             "request": "launch",
             "cwd": "${workspaceFolder}",
             "mainClass": "com.example.jooq.r2dbc.Application",
             "projectName": "spring-boot-jooq-r2dbc-sample",
             "args": "--spring.profiles.active=local",
-            "envFile": "${workspaceFolder}/.env"
-        },
-        {
-            "type": "java",
-            "name": "Spring Boot-Application<spring-boot-jpa-customsequence>",
-            "request": "launch",
-            "cwd": "${workspaceFolder}",
-            "mainClass": "com.example.custom.sequence.Application",
-            "projectName": "spring-boot-jpa-customsequence",
-            "args": "",
             "envFile": "${workspaceFolder}/.env"
         },
         {

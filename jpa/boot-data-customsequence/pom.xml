@@ -12,7 +12,7 @@
     <artifactId>boot-data-customsequence</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>boot-data-customsequence</name>
-    <description>spring-boot-jpa-customsequence</description>
+    <description>custom sequence implementation in Hibernate 6</description>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
