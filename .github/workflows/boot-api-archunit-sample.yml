@@ -1,13 +1,13 @@
-name: spring-boot-api-archunit-sample
+name: boot-api-archunit-sample
 
 on:
   push:
     paths:
-      - "spring-boot-api-archunit-sample/**"
+      - "boot-api-archunit-sample/**"
     branches: [main]
   pull_request:
     paths:
-      - "spring-boot-api-archunit-sample/**"
+      - "boot-api-archunit-sample/**"
     types:
       - opened
       - synchronize
@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: spring-boot-api-archunit-sample
+        working-directory: boot-api-archunit-sample
     steps:
       - uses: actions/checkout@v3
         with:

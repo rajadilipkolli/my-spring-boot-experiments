@@ -1,77 +1,124 @@
 openapi: 3.0.1
 info:
-  title: spring-boot-jpa-customsequence
+  title: boot-jpa-customsequence
   version: v1
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
 servers:
-- url: /
+  - url: /
+
 paths:
-  /api/customers/{id}:
-    delete:
-      operationId: deleteCustomer
+  /api/orders/{id}:
+    get:
+      tags:
+        - order-controller
+      operationId: getOrderById
       parameters:
-      - explode: false
-        in: path
-        name: id
-        required: true
-        schema:
-          type: string
-        style: simple
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
       responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Customer'
+        '200':
           description: OK
-        "400":
           content:
-            application/json:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/OrderResponse'
+        '400':
+          description: Bad Request
+          content:
+            '*/*':
               schema:
                 $ref: '#/components/schemas/ProblemDetail'
-          description: Bad Request
+    put:
       tags:
-      - customer-api
-      x-accepts: application/json
-      x-tags:
-      - tag: customer-api
+        - order-controller
+      operationId: updateOrder
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Order'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/OrderResponse'
+        '400':
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+    delete:
+      tags:
+        - order-controller
+      operationId: deleteOrder
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/OrderResponse'
+        '400':
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+  /api/customers/{id}:
     get:
+      tags:
+        - customer-controller
       operationId: getCustomerById
       parameters:
-      - explode: false
-        in: path
-        name: id
-        required: true
-        schema:
-          type: string
-        style: simple
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
       responses:
-        "200":
+        '200':
+          description: OK
           content:
             '*/*':
               schema:
                 $ref: '#/components/schemas/Customer'
-          description: OK
-        "400":
+        '400':
+          description: Bad Request
           content:
             '*/*':
               schema:
                 $ref: '#/components/schemas/ProblemDetail'
-          description: Bad Request
-      tags:
-      - customer-api
-      x-accepts: '*/*'
-      x-tags:
-      - tag: customer-api
     put:
+      tags:
+        - customer-controller
       operationId: updateCustomer
       parameters:
-      - explode: false
-        in: path
-        name: id
-        required: true
-        schema:
-          type: string
-        style: simple
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
       requestBody:
         content:
           application/json:
@@ -79,81 +126,157 @@ paths:
               $ref: '#/components/schemas/Customer'
         required: true
       responses:
-        "200":
+        '200':
+          description: OK
           content:
-            application/json:
+            '*/*':
               schema:
                 $ref: '#/components/schemas/Customer'
-          description: OK
-        "400":
+        '400':
+          description: Bad Request
           content:
-            application/json:
+            '*/*':
               schema:
                 $ref: '#/components/schemas/ProblemDetail'
-          description: Bad Request
+    delete:
       tags:
-      - customer-api
-      x-content-type: application/json
-      x-accepts: application/json
-      x-tags:
-      - tag: customer-api
+        - customer-controller
+      operationId: deleteCustomer
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/Customer'
+        '400':
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+  /api/orders:
+    get:
+      tags:
+        - order-controller
+      operationId: getAllOrders
+      parameters:
+        - name: pageNo
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+            default: 0
+        - name: pageSize
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+            default: 10
+        - name: sortBy
+          in: query
+          required: false
+          schema:
+            type: string
+            default: id
+        - name: sortDir
+          in: query
+          required: false
+          schema:
+            type: string
+            default: asc
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/PagedResultOrderResponse'
+        '400':
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+    post:
+      tags:
+        - order-controller
+      operationId: createOrder
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Order'
+        required: true
+      responses:
+        '201':
+          description: Created
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/OrderResponse'
+        '400':
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
   /api/customers:
     get:
+      tags:
+        - customer-controller
       operationId: getAllCustomers
       parameters:
-      - explode: true
-        in: query
-        name: pageNo
-        required: false
-        schema:
-          default: 0
-          format: int32
-          type: integer
-        style: form
-      - explode: true
-        in: query
-        name: pageSize
-        required: false
-        schema:
-          default: 10
-          format: int32
-          type: integer
-        style: form
-      - explode: true
-        in: query
-        name: sortBy
-        required: false
-        schema:
-          default: id
-          type: string
-        style: form
-      - explode: true
-        in: query
-        name: sortDir
-        required: false
-        schema:
-          default: asc
-          type: string
-        style: form
+        - name: pageNo
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+            default: 0
+        - name: pageSize
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+            default: 10
+        - name: sortBy
+          in: query
+          required: false
+          schema:
+            type: string
+            default: id
+        - name: sortDir
+          in: query
+          required: false
+          schema:
+            type: string
+            default: asc
       responses:
-        "200":
+        '200':
+          description: OK
           content:
-            application/json:
+            '*/*':
               schema:
                 $ref: '#/components/schemas/PagedResultCustomer'
-          description: OK
-        "400":
+        '400':
+          description: Bad Request
           content:
-            application/json:
+            '*/*':
               schema:
                 $ref: '#/components/schemas/ProblemDetail'
-          description: Bad Request
-      tags:
-      - customer-api
-      x-accepts: application/json
-      x-tags:
-      - tag: customer-api
     post:
+      tags:
+        - customer-controller
       operationId: createCustomer
       requestBody:
         content:
@@ -162,86 +285,83 @@ paths:
               $ref: '#/components/schemas/Customer'
         required: true
       responses:
-        "201":
+        '201':
+          description: Created
           content:
-            application/json:
+            '*/*':
               schema:
                 $ref: '#/components/schemas/Customer'
-          description: Created
-        "400":
+        '400':
+          description: Bad Request
           content:
-            application/json:
+            '*/*':
               schema:
                 $ref: '#/components/schemas/ProblemDetail'
-          description: Bad Request
-      tags:
-      - customer-api
-      x-content-type: application/json
-      x-accepts: application/json
-      x-tags:
-      - tag: customer-api
 components:
   schemas:
     ProblemDetail:
+      type: object
       properties:
         type:
-          format: uri
           type: string
+          format: uri
         title:
           type: string
         status:
-          format: int32
           type: integer
+          format: int32
         detail:
           type: string
         instance:
-          format: uri
           type: string
+          format: uri
         properties:
+          type: object
           additionalProperties:
             type: object
-          type: object
-      type: object
     Customer:
-      example:
-        id: id
-        text: text
+      required:
+        - text
+      type: object
       properties:
         id:
           type: string
         text:
           type: string
-      required:
-      - text
-      type: object
-    PagedResultCustomer:
-      example:
-        isFirst: true
-        pageNumber: 6
-        data:
-        - id: id
-          text: text
-        - id: id
-          text: text
-        isLast: true
-        totalPages: 1
-        hasPrevious: true
-        hasNext: true
-        totalElements: 0
-      properties:
-        data:
-          items:
-            $ref: '#/components/schemas/Customer'
+        orders:
           type: array
-        totalElements:
-          format: int64
-          type: integer
-        pageNumber:
-          format: int32
-          type: integer
-        totalPages:
-          format: int32
-          type: integer
+          items:
+            $ref: '#/components/schemas/Order'
+    Order:
+      required:
+        - text
+      type: object
+      properties:
+        id:
+          type: string
+        text:
+          type: string
+        customer:
+          $ref: '#/components/schemas/Customer'
+    CustomerDTO:
+      type: object
+      properties:
+        id:
+          type: string
+        text:
+          type: string
+    OrderResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        text:
+          type: string
+        customerDTO:
+          $ref: '#/components/schemas/CustomerDTO'
+    PagedResultOrderResponse:
+      type: object
+      properties:
         isFirst:
           type: boolean
         isLast:
@@ -250,4 +370,40 @@ components:
           type: boolean
         hasPrevious:
           type: boolean
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderResponse'
+        totalElements:
+          type: integer
+          format: int64
+        pageNumber:
+          type: integer
+          format: int32
+        totalPages:
+          type: integer
+          format: int32
+    PagedResultCustomer:
       type: object
+      properties:
+        isFirst:
+          type: boolean
+        isLast:
+          type: boolean
+        hasNext:
+          type: boolean
+        hasPrevious:
+          type: boolean
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Customer'
+        totalElements:
+          type: integer
+          format: int64
+        pageNumber:
+          type: integer
+          format: int32
+        totalPages:
+          type: integer
+          format: int32

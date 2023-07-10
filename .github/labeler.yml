@@ -1,5 +1,5 @@
 "component : archunit":
- - spring-boot-api-archunit-sample/**/*
+ - boot-api-archunit-sample/**/*
 "component : choas-monkey":
  - spring-boot-choas-monkey/**/*
 "component: graphql-webflux":
@@ -25,7 +25,7 @@
 "component: mongodb-elasticsearch":
   - boot-mongodb-elasticsearch/**/*
 "component: strategy-plugin":
-  - spring-boot-strategy-plugin/**/*
+  - boot-strategy-plugin/**/*
 "component: togglz":
   - spring-boot-togglz-sample/**/*
 "component: ultimate-redis":
@@ -46,7 +46,7 @@
   - ./**/*
 "type: documentation": docs/**/*
 "type: dependency-upgrade":
-  - spring-boot-api-archunit-sample/pom.xml
+  - boot-api-archunit-sample/pom.xml
   - spring-boot-choas-monkey/pom.xml
   - jpa/boot-data-envers/build.gradle
   - jpa/boot-hibernate2ndlevelcache-sample/pom.xml
@@ -62,7 +62,7 @@
   - graphql/spring-boot-graphql-webflux/build.gradle.kts
   - graphql/spring-boot-graphql-querydsl/build.gradle.kts
   - graphql/spring-boot-graphql-webmvc/pom.xml
-  - spring-boot-strategy-plugin/build.gradle
+  - boot-strategy-plugin/build.gradle
   - spring-boot-togglz-sample/pom.xml
   - spring-boot-ultimate-redis/pom.xml
   - spring-boot-rabbitmq-thymeleaf/pom.xml
