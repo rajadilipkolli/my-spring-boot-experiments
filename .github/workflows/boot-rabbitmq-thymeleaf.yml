@@ -1,13 +1,13 @@
-name: spring-boot-rabbitmq-thymeleaf CI
+name: boot-rabbitmq-thymeleaf CI
 on:
   push:
     paths:
-      - "spring-boot-rabbitmq-thymeleaf/**"
+      - "boot-rabbitmq-thymeleaf/**"
     branches:
       - main
   pull_request:
     paths:
-      - "spring-boot-rabbitmq-thymeleaf/**"
+      - "boot-rabbitmq-thymeleaf/**"
     types:
       - opened
       - synchronize
@@ -22,7 +22,7 @@ jobs:
         java: [ '17' ]
     defaults:
       run:
-        working-directory: "spring-boot-rabbitmq-thymeleaf"
+        working-directory: "boot-rabbitmq-thymeleaf"
     name: Build on Java ${{ matrix.Java }}
     steps:
       - uses: actions/checkout@v3

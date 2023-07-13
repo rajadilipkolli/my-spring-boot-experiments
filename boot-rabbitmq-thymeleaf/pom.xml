@@ -11,7 +11,7 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.example</groupId>
-    <artifactId>spring-boot-rabbitmq-thymeleaf</artifactId>
+    <artifactId>boot-rabbitmq-thymeleaf</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>Spring Boot RabbitMQ POC</name>
 

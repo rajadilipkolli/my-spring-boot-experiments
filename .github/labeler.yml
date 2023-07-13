@@ -31,7 +31,7 @@
 "component: ultimate-redis":
   - spring-boot-ultimate-redis/**/*
 "component: rabbitmq-thymeleaf":
-  - spring-boot-rabbitmq-thymeleaf/**/*
+  - boot-rabbitmq-thymeleaf/**/*
 "component: r2dbc":
   - r2dbc/boot-jooq-r2dbc-sample/**/*
 "component: openapi":
@@ -65,7 +65,7 @@
   - boot-strategy-plugin/build.gradle
   - spring-boot-togglz-sample/pom.xml
   - spring-boot-ultimate-redis/pom.xml
-  - spring-boot-rabbitmq-thymeleaf/pom.xml
+  - boot-rabbitmq-thymeleaf/pom.xml
   - r2dbc/boot-jooq-r2dbc-sample/pom.xml
   - httpClients/http-proxy/pom.xml
   - httpClients/rest-template/pom.xml
