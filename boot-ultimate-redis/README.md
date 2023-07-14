@@ -6,12 +6,12 @@ The blog post about this repository can be found [HERE](https://programmerfriend
 ![Spring Boot Redis](https://github.com/programmerfriend/programmerfriend.github.io/blob/master/img/content/robust-boot_title.png?raw=true "Spring Boot Redis")
 
 ## Run the service
-```
+```shell
 ./mvnw spring-boot:run
 ```
 
 ## What it is / What it does
-* A Spring Boot 2 Application
+* A Spring Boot 3 Application
 * Using @Cacheable, @CachePut, @CacheEvict to cache results of method invocations
 * Use Redis to store the cached results
 * Define different TTLs for different Caches

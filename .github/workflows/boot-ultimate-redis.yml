@@ -1,13 +1,13 @@
-name: spring-boot-ultimate-redis
+name: boot-ultimate-redis
 
 on:
   push:
     paths:
-      - "spring-boot-ultimate-redis/**"
+      - "boot-ultimate-redis/**"
     branches: [main]
   pull_request:
     paths:
-      - "spring-boot-ultimate-redis/**"
+      - "boot-ultimate-redis/**"
     types:
       - opened
       - synchronize
@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: spring-boot-ultimate-redis
+        working-directory: boot-ultimate-redis
 
     steps:
       - uses: actions/checkout@v3
@@ -31,4 +31,4 @@ jobs:
           distribution: "zulu"
           cache: "maven"
       - name: Build with Maven
-        run: ./mvnw clean verify package
+        run: ./mvnw clean verify
