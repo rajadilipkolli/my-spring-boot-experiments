@@ -1,4 +1,4 @@
-# spring-boot-ultimate-redis
+# boot-ultimate-redis
 This is an example repository to discover ways of interacting with Redis (from a Spring Boot 2 Application).
 
 The blog post about this repository can be found [HERE](https://programmerfriend.com/ultimate-guide-to-redis-cache-with-spring-boot-2-and-spring-data-redis/?gthb).
