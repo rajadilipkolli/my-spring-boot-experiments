@@ -6,7 +6,7 @@ pipeline {
     }
 
     environment {
-        APPLICATION_NAME = 'spring-boot-choas-monkey'
+        APPLICATION_NAME = 'boot-choas-monkey'
     }
 
     stages {

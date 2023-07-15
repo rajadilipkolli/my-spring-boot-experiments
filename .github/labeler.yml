@@ -1,7 +1,7 @@
 "component : archunit":
  - boot-api-archunit-sample/**/*
 "component : choas-monkey":
- - spring-boot-choas-monkey/**/*
+ - boot-choas-monkey/**/*
 "component: graphql-webflux":
   - graphql/spring-boot-graphql-webflux/**/*
 "component: graphql-webmvc":
@@ -47,7 +47,7 @@
 "type: documentation": docs/**/*
 "type: dependency-upgrade":
   - boot-api-archunit-sample/pom.xml
-  - spring-boot-choas-monkey/pom.xml
+  - boot-choas-monkey/pom.xml
   - jpa/boot-data-envers/build.gradle
   - jpa/boot-hibernate2ndlevelcache-sample/pom.xml
   - jpa/multitenancy/multitenancy-db/pom.xml

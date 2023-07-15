@@ -9,10 +9,10 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.example.choasmonkey</groupId>
-    <artifactId>spring-boot-choas-monkey</artifactId>
+    <artifactId>boot-choas-monkey</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>spring-boot-choas-monkey</name>
-    <description>spring-boot-choas-monkey</description>
+    <name>boot-choas-monkey</name>
+    <description>Choas Engineering Principles implementation using spring boot</description>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

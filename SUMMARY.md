@@ -25,7 +25,7 @@
   * [spring-boot-hibernate2ndlevelcache-sample](jpa/boot-hibernate2ndlevelcache-sample/README.md)
   * [read-replica-with-spring-boot](jpa/boot-read-replica-postgresql/README.md)
 * [API Example for Archunit](boot-api-archunit-sample/README.md)
-* [spring-boot-choas-monkey](spring-boot-choas-monkey/README.md)
+* [spring-boot-choas-monkey](boot-choas-monkey/README.md)
 * [Scheduling using JobRunr](boot-jobrunr-sample/README.md)
 * [MongoDb for insertion and search using elastic search](boot-mongodb-elasticsearch/README.md)
 * [boot-strategy-plugin](boot-strategy-plugin/ReadMe.md)

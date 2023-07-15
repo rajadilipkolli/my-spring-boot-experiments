@@ -1,6 +1,6 @@
 {
   "generator-springboot": {
-    "appName": "spring-boot-choas-monkey",
+    "appName": "boot-choas-monkey",
     "packageName": "com.example.choasmonkey",
     "databaseType": "postgresql",
     "dbMigrationTool": "liquibase",

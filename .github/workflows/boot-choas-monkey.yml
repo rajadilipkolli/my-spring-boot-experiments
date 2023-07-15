@@ -1,13 +1,13 @@
-name: spring-boot-choas-monkey
+name: boot-choas-monkey
 
 on:
   push:
     paths:
-      - "spring-boot-choas-monkey/**"
+      - "boot-choas-monkey/**"
     branches: [main]
   pull_request:
     paths:
-      - "spring-boot-choas-monkey/**"
+      - "boot-choas-monkey/**"
     types:
       - opened
       - synchronize
@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: spring-boot-choas-monkey
+        working-directory: boot-choas-monkey
     steps:
       - uses: actions/checkout@v3
         with:

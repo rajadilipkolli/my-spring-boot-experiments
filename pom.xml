@@ -10,6 +10,7 @@
 
     <modules>
         <module>boot-api-archunit-sample</module>
+        <module>boot-choas-monkey</module>
         <module>boot-jobrunr-sample</module>
         <module>boot-mongodb-elasticsearch</module>
         <module>boot-rabbitmq-thymeleaf</module>
@@ -28,7 +29,6 @@
         <module>jpa/multitenancy/partition</module>
         <module>jpa/multitenancy/schema</module>
         <module>r2dbc/boot-jooq-r2dbc-sample</module>
-        <module>spring-boot-choas-monkey</module>
         <module>spring-boot-togglz-sample</module>
         <module>open-api-spring-boot</module>
         <module>jmh-benchmark</module>
