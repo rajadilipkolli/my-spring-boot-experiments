@@ -99,11 +99,10 @@ public class RabbitMQConfig implements RabbitListenerConfigurer {
     }
 
     @Bean
-    MessageHandlerMethodFactory messageHandlerMethodFactory(
-            final MappingJackson2MessageConverter consumerJackson2MessageConverter) {
+    MessageHandlerMethodFactory messageHandlerMethodFactory() {
         DefaultMessageHandlerMethodFactory messageHandlerMethodFactory =
                 new DefaultMessageHandlerMethodFactory();
-        messageHandlerMethodFactory.setMessageConverter(consumerJackson2MessageConverter);
+        messageHandlerMethodFactory.setMessageConverter(consumerJackson2MessageConverter());
         return messageHandlerMethodFactory;
     }
 
