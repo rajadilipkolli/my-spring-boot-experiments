@@ -40,14 +40,14 @@ class OrderMessageSenderTest {
         willDoNothing()
                 .given(this.rabbitTemplate)
                 .convertAndSend(
-                        eq(RabbitMQConfig.QUEUE_ORDERS),
+                        eq(RabbitMQConfig.ORDERS_QUEUE),
                         eq(this.orderMessageSender.getRabbitMQMessage(convertedString)),
                         any(CorrelationData.class));
         // when
         this.orderMessageSender.sendOrder(MockObjectCreator.getOrder());
         verify(this.rabbitTemplate, times(1))
                 .convertAndSend(
-                        eq(RabbitMQConfig.QUEUE_ORDERS),
+                        eq(RabbitMQConfig.ORDERS_QUEUE),
                         eq(this.orderMessageSender.getRabbitMQMessage(convertedString)),
                         any(CorrelationData.class));
         verify(this.objectMapper, times(1)).writeValueAsString(MockObjectCreator.getOrder());

@@ -18,7 +18,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class OrderMessageSenderImpl implements OrderMessageSender {
 
-    private final RabbitTemplate rabbitTemplate;
+    private final RabbitTemplate templateWithConfirmsEnabled;
 
     private final ObjectMapper objectMapper;
 
@@ -28,8 +28,8 @@ public class OrderMessageSenderImpl implements OrderMessageSender {
 
         String orderJson = this.objectMapper.writeValueAsString(order);
         String correlationId = UUID.randomUUID().toString();
-        this.rabbitTemplate.convertAndSend(
-                RabbitMQConfig.QUEUE_ORDERS,
+        this.templateWithConfirmsEnabled.convertAndSend(
+                RabbitMQConfig.ORDERS_QUEUE,
                 getRabbitMQMessage(orderJson),
                 new CorrelationData(correlationId));
     }
