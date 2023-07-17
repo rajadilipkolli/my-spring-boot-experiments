@@ -3,11 +3,11 @@ package com.poc.boot.rabbitmq.config;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
-import org.springframework.amqp.core.Exchange;
+import org.springframework.amqp.core.DirectExchange;
 import org.springframework.amqp.core.ExchangeBuilder;
+import org.springframework.amqp.core.FanoutExchange;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.core.QueueBuilder;
-import org.springframework.amqp.core.TopicExchange;
 import org.springframework.amqp.rabbit.annotation.EnableRabbit;
 import org.springframework.amqp.rabbit.annotation.RabbitListenerConfigurer;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
@@ -28,23 +28,39 @@ import org.springframework.util.Assert;
 @Slf4j
 public class RabbitMQConfig implements RabbitListenerConfigurer {
 
-    /** Name of QUEUE_ORDERS. */
-    public static final String QUEUE_ORDERS = "orders-queue";
+    public static final String DLX_ORDERS_EXCHANGE = "DLX.ORDERS.EXCHANGE";
 
-    /** Name of QUEUE_DEAD_ORDERS. */
-    public static final String QUEUE_DEAD_ORDERS = "dead-orders-queue";
+    public static final String DLQ_ORDERS_QUEUE = "DLQ.ORDERS.QUEUE";
 
-    /** Name of EXCHANGE_ORDERS. */
-    public static final String EXCHANGE_ORDERS = "orders-exchange";
+    public static final String ORDERS_QUEUE = "ORDERS.QUEUE";
 
-    /* Creating a bean for the Message queue */
+    private static final String ORDERS_EXCHANGE = "ORDERS.EXCHANGE";
+
+    private static final String ROUTING_KEY_ORDERS_QUEUE = "ROUTING_KEY_ORDERS_QUEUE";
+
     @Bean
     Queue ordersQueue() {
-        return QueueBuilder.durable(QUEUE_ORDERS)
-                .withArgument("x-dead-letter-exchange", "")
-                .withArgument("x-dead-letter-routing-key", QUEUE_DEAD_ORDERS)
-                .withArgument("x-message-ttl", 5000)
+        return QueueBuilder.durable(ORDERS_QUEUE)
+                .withArgument("x-dead-letter-exchange", DLX_ORDERS_EXCHANGE)
                 .build();
+    }
+
+    @Bean
+    DirectExchange ordersExchange() {
+        return ExchangeBuilder.directExchange(ORDERS_EXCHANGE).build();
+    }
+
+    /* Binding between Exchange and Queue using routing key */
+    @Bean
+    Binding bindingMessages() {
+        return BindingBuilder.bind(ordersQueue())
+                .to(ordersExchange())
+                .with(ROUTING_KEY_ORDERS_QUEUE);
+    }
+
+    @Bean
+    FanoutExchange deadLetterExchange() {
+        return ExchangeBuilder.fanoutExchange(DLX_ORDERS_EXCHANGE).build();
     }
 
     /**
@@ -57,35 +73,30 @@ public class RabbitMQConfig implements RabbitListenerConfigurer {
      */
     @Bean
     Queue deadLetterQueue() {
-        return QueueBuilder.durable(QUEUE_DEAD_ORDERS).build();
+        return QueueBuilder.durable(DLQ_ORDERS_QUEUE).build();
     }
 
+    /* Binding between Exchange and Queue for Dead Letter */
     @Bean
-    Exchange ordersExchange() {
-        return ExchangeBuilder.topicExchange(EXCHANGE_ORDERS).build();
-    }
-
-    /* Binding between Exchange and Queue using routing key */
-    @Bean
-    Binding binding(Queue ordersQueue, TopicExchange ordersExchange) {
-        return BindingBuilder.bind(ordersQueue).to(ordersExchange).with(QUEUE_ORDERS);
+    Binding deadLetterBinding() {
+        return BindingBuilder.bind(deadLetterQueue()).to(deadLetterExchange());
     }
 
     /* Bean for rabbitTemplate */
     @Bean
-    RabbitTemplate rabbitTemplate(
+    RabbitTemplate templateWithConfirmsEnabled(
             final ConnectionFactory connectionFactory,
             final Jackson2JsonMessageConverter producerJackson2MessageConverter) {
-        final RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
+        final RabbitTemplate templateWithConfirmsEnabled = new RabbitTemplate(connectionFactory);
         RetryTemplate retryTemplate = new RetryTemplate();
         ExponentialBackOffPolicy backOffPolicy = new ExponentialBackOffPolicy();
         backOffPolicy.setInitialInterval(500);
         backOffPolicy.setMultiplier(10.0);
         backOffPolicy.setMaxInterval(10_000);
         retryTemplate.setBackOffPolicy(backOffPolicy);
-        rabbitTemplate.setRetryTemplate(retryTemplate);
-        rabbitTemplate.setMessageConverter(producerJackson2MessageConverter);
-        rabbitTemplate.setConfirmCallback(
+        templateWithConfirmsEnabled.setRetryTemplate(retryTemplate);
+        templateWithConfirmsEnabled.setMessageConverter(producerJackson2MessageConverter);
+        templateWithConfirmsEnabled.setConfirmCallback(
                 (correlationData, acknowledgement, cause) -> {
                     Assert.notNull(correlationData, () -> "correlationData can't be null");
                     log.info(
@@ -94,7 +105,7 @@ public class RabbitMQConfig implements RabbitListenerConfigurer {
                             acknowledgement,
                             cause);
                 });
-        return rabbitTemplate;
+        return templateWithConfirmsEnabled;
     }
 
     @Bean
