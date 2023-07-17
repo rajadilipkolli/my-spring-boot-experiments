@@ -19,6 +19,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.messaging.handler.annotation.support.DefaultMessageHandlerMethodFactory;
 import org.springframework.messaging.handler.annotation.support.MessageHandlerMethodFactory;
+import org.springframework.retry.backoff.ExponentialBackOffPolicy;
+import org.springframework.retry.support.RetryTemplate;
 import org.springframework.util.Assert;
 
 @EnableRabbit
@@ -75,12 +77,19 @@ public class RabbitMQConfig implements RabbitListenerConfigurer {
             final ConnectionFactory connectionFactory,
             final Jackson2JsonMessageConverter producerJackson2MessageConverter) {
         final RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
+        RetryTemplate retryTemplate = new RetryTemplate();
+        ExponentialBackOffPolicy backOffPolicy = new ExponentialBackOffPolicy();
+        backOffPolicy.setInitialInterval(500);
+        backOffPolicy.setMultiplier(10.0);
+        backOffPolicy.setMaxInterval(10_000);
+        retryTemplate.setBackOffPolicy(backOffPolicy);
+        rabbitTemplate.setRetryTemplate(retryTemplate);
         rabbitTemplate.setMessageConverter(producerJackson2MessageConverter);
         rabbitTemplate.setConfirmCallback(
                 (correlationData, acknowledgement, cause) -> {
                     Assert.notNull(correlationData, () -> "correlationData can't be null");
                     log.info(
-                            "correlation id {} , acknowledgement {}, cause {}",
+                            "correlation id : {} , acknowledgement : {}, cause : {}",
                             correlationData.getId(),
                             acknowledgement,
                             cause);
