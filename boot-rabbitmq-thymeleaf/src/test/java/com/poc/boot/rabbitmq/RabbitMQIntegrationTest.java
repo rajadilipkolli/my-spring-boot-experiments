@@ -2,9 +2,10 @@ package com.poc.boot.rabbitmq;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.poc.boot.rabbitmq.model.Order;
 import org.junit.jupiter.api.Test;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -24,8 +25,6 @@ class RabbitMQIntegrationTest {
 
     @Autowired private RabbitTemplate rabbitTemplate;
 
-    @Autowired private ObjectMapper objectMapper;
-
     @Test
     void contextLoads() {
         assertThat(this.rabbitTemplate).isNotNull();
@@ -39,9 +38,21 @@ class RabbitMQIntegrationTest {
         order.setProductId("P1");
         mockMvc.perform(
                         post("/sendMsg")
-                                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                                .param("order", objectMapper.writeValueAsString(order)))
-                .andExpect(status().is3xxRedirection())
+                                .flashAttr("order", order)
+                                .contentType(MediaType.APPLICATION_FORM_URLENCODED))
+                .andExpect(status().isFound())
+                .andExpect(redirectedUrl("/"))
+                .andExpect(flash().attribute("message", "Order message sent successfully"));
+    }
+
+    @Test
+    void testSendingFailedMessage() throws Exception {
+        Order order = new Order();
+        order.setOrderNumber("2");
+        order.setAmount(-10d);
+        order.setProductId("P2");
+        mockMvc.perform(post("/sendMsg").flashAttr("order", order))
+                .andExpect(status().isFound())
                 .andExpect(redirectedUrl("/"))
                 .andExpect(flash().attribute("message", "Order message sent successfully"));
     }

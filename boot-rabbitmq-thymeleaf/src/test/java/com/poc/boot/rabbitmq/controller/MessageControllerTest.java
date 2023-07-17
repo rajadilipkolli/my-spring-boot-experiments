@@ -1,21 +1,20 @@
 package com.poc.boot.rabbitmq.controller;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.willDoNothing;
 import static org.mockito.BDDMockito.willThrow;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.poc.boot.rabbitmq.model.Order;
 import com.poc.boot.rabbitmq.service.OrderMessageSender;
 import com.poc.boot.rabbitmq.util.MockObjectCreator;
 import java.io.Serial;
-import java.util.Objects;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -30,8 +29,6 @@ class MessageControllerTest {
 
     @Autowired private MockMvc mockMvc;
 
-    @Autowired private ObjectMapper objectMapper;
-
     @MockBean private OrderMessageSender orderMessageSender;
 
     @Test
@@ -42,9 +39,7 @@ class MessageControllerTest {
         this.mockMvc
                 .perform(
                         post("/sendMsg")
-                                .content(
-                                        this.objectMapper.writeValueAsString(
-                                                MockObjectCreator.getOrder()))
+                                .flashAttr("order", MockObjectCreator.getOrder())
                                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isFound())
                 .andExpect(flash().attribute("message", "Order message sent successfully"))
@@ -60,25 +55,20 @@ class MessageControllerTest {
                 .given(this.orderMessageSender)
                 .sendOrder(any(Order.class));
 
-        String exception =
-                Objects.requireNonNull(
-                                this.mockMvc
-                                        .perform(
-                                                post("/sendMsg")
-                                                        .content(
-                                                                this.objectMapper
-                                                                        .writeValueAsString(
-                                                                                MockObjectCreator
-                                                                                        .getOrder()))
-                                                        .contentType(MediaType.APPLICATION_JSON))
-                                        .andExpect(status().isInternalServerError())
-                                        .andReturn()
-                                        .getResolvedException())
-                        .getMessage();
-
-        assertThat(exception)
-                .isEqualTo(
-                        "500 INTERNAL_SERVER_ERROR \"Unable To Parse Order"
-                                + "(orderNumber=null, productId=null, amount=null)\"");
+        this.mockMvc
+                .perform(
+                        post("/sendMsg")
+                                .flashAttr("order", MockObjectCreator.getOrder())
+                                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isInternalServerError())
+                .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON))
+                .andExpect(jsonPath("$.title").value("Internal Server Error"))
+                .andExpect(jsonPath("$.type").value("about:blank"))
+                .andExpect(jsonPath("$.status").value(500))
+                .andExpect(
+                        jsonPath("$.detail")
+                                .value(
+                                        "Unable To Parse Order(orderNumber=1, productId=P1, amount=10.0)"))
+                .andExpect(jsonPath("$.instance").value("/sendMsg"));
     }
 }
