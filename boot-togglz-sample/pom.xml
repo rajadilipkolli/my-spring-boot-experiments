@@ -9,9 +9,9 @@
         <relativePath /> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.example.featuretoggle</groupId>
-    <artifactId>spring-boot-togglz-sample</artifactId>
+    <artifactId>boot-togglz-sample</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>spring-boot-togglz-sample</name>
+    <name>boot-togglz-sample</name>
     <description>spring boot togglz implementation</description>
 
     <properties>

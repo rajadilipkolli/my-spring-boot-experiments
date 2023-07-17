@@ -6,7 +6,7 @@ pipeline {
     }
 
     environment {
-        APPLICATION_NAME = 'spring-boot-togglz-sample'
+        APPLICATION_NAME = 'boot-togglz-sample'
     }
 
     stages {

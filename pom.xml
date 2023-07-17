@@ -14,6 +14,7 @@
         <module>boot-jobrunr-sample</module>
         <module>boot-mongodb-elasticsearch</module>
         <module>boot-rabbitmq-thymeleaf</module>
+        <module>boot-togglz-sample</module>
         <module>boot-ultimate-redis</module>
         <module>graphql/spring-boot-graphql-webmvc</module>
         <module>httpClients/http-proxy</module>
@@ -29,7 +30,6 @@
         <module>jpa/multitenancy/partition</module>
         <module>jpa/multitenancy/schema</module>
         <module>r2dbc/boot-jooq-r2dbc-sample</module>
-        <module>spring-boot-togglz-sample</module>
         <module>open-api-spring-boot</module>
         <module>jmh-benchmark</module>
     </modules>

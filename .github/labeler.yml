@@ -27,7 +27,7 @@
 "component: strategy-plugin":
   - boot-strategy-plugin/**/*
 "component: togglz":
-  - spring-boot-togglz-sample/**/*
+  - boot-togglz-sample/**/*
 "component: ultimate-redis":
   - boot-ultimate-redis/**/*
 "component: rabbitmq-thymeleaf":
@@ -63,7 +63,7 @@
   - graphql/spring-boot-graphql-querydsl/build.gradle.kts
   - graphql/spring-boot-graphql-webmvc/pom.xml
   - boot-strategy-plugin/build.gradle
-  - spring-boot-togglz-sample/pom.xml
+  - boot-togglz-sample/pom.xml
   - boot-ultimate-redis/pom.xml
   - boot-rabbitmq-thymeleaf/pom.xml
   - r2dbc/boot-jooq-r2dbc-sample/pom.xml

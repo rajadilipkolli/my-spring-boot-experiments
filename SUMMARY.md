@@ -29,7 +29,7 @@
 * [Scheduling using JobRunr](boot-jobrunr-sample/README.md)
 * [MongoDb for insertion and search using elastic search](boot-mongodb-elasticsearch/README.md)
 * [boot-strategy-plugin](boot-strategy-plugin/ReadMe.md)
-* [spring-boot-togglz-sample](spring-boot-togglz-sample/README.md)
+* [spring-boot-togglz-sample](boot-togglz-sample/README.md)
 * [spring-boot-ultimate-redis](boot-ultimate-redis/README.md)
 * [spring-boot-rabbitmq-thymeleaf](boot-rabbitmq-thymeleaf/README.md)
 * [Code Of Conduct](Code-of-conduct.md)
