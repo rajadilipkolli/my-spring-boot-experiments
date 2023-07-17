@@ -1,6 +1,7 @@
 package com.poc.boot.rabbitmq;
 
 import org.springframework.boot.SpringApplication;
+import org.springframework.boot.devtools.restart.RestartScope;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.context.annotation.Bean;
@@ -12,9 +13,10 @@ public class TestRabbitMQApplication {
 
     @Bean
     @ServiceConnection
+    @RestartScope
     RabbitMQContainer rabbitMQContainer() {
         return new RabbitMQContainer(
-                DockerImageName.parse("rabbitmq").withTag("3.12.0-management"));
+                DockerImageName.parse("rabbitmq").withTag("3.12.1-management"));
     }
 
     public static void main(String[] args) {

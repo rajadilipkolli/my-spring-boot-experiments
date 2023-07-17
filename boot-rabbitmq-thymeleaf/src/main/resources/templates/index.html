@@ -6,7 +6,7 @@
     <meta charset="utf-8"/>
     <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
-    <title>SivaLabs: SpringBoot RabbitMQ Demo</title>
+    <title>Application: SpringBoot RabbitMQ Demo</title>
 
     <link rel="stylesheet" th:href="@{/webjars/bootstrap/css/bootstrap.min.css}"/>
     <style>
@@ -19,7 +19,7 @@
 <body>
 <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
     <div class="container">
-        <a class="navbar-brand" href="#" th:href="@{/}">SivaLabs</a>
+        <a class="navbar-brand" href="#" th:href="@{/}">RabbitMQ Application</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault"
                 aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
@@ -36,15 +36,15 @@
         <form th:action="@{/sendMsg}" method="post">
             <div class="form-group">
                 <label for="orderNumber">Order Number:</label>
-                <input class="form-control" id="orderNumber" name="orderNumber"/>
+                <input class="form-control" id="orderNumber" name="orderNumber" required/>
             </div>
             <div class="form-group">
                 <label for="productId">ProductId:</label>
-                <input class="form-control" id="productId" name="productId" />
+                <input class="form-control" id="productId" name="productId" required />
             </div>
             <div class="form-group">
                 <label for="amount">Amount:</label>
-                <input class="form-control" id="amount" name="amount" />
+                <input class="form-control" id="amount" name="amount" required />
             </div>
             <button type="submit" class="btn btn-primary">Submit</button>
         </form>

@@ -71,9 +71,11 @@ public class RabbitMQConfig implements RabbitListenerConfigurer {
 
     /* Bean for rabbitTemplate */
     @Bean
-    public RabbitTemplate rabbitTemplate(final ConnectionFactory connectionFactory) {
+    RabbitTemplate rabbitTemplate(
+            final ConnectionFactory connectionFactory,
+            final Jackson2JsonMessageConverter producerJackson2MessageConverter) {
         final RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
-        rabbitTemplate.setMessageConverter(producerJackson2MessageConverter());
+        rabbitTemplate.setMessageConverter(producerJackson2MessageConverter);
         rabbitTemplate.setConfirmCallback(
                 (correlationData, acknowledgement, cause) -> {
                     Assert.notNull(correlationData, () -> "correlationData can't be null");
@@ -87,25 +89,26 @@ public class RabbitMQConfig implements RabbitListenerConfigurer {
     }
 
     @Bean
-    public Jackson2JsonMessageConverter producerJackson2MessageConverter() {
+    Jackson2JsonMessageConverter producerJackson2MessageConverter() {
         return new Jackson2JsonMessageConverter();
     }
 
     @Bean
-    MessageHandlerMethodFactory messageHandlerMethodFactory() {
+    MappingJackson2MessageConverter consumerJackson2MessageConverter() {
+        return new MappingJackson2MessageConverter();
+    }
+
+    @Bean
+    MessageHandlerMethodFactory messageHandlerMethodFactory(
+            final MappingJackson2MessageConverter consumerJackson2MessageConverter) {
         DefaultMessageHandlerMethodFactory messageHandlerMethodFactory =
                 new DefaultMessageHandlerMethodFactory();
-        messageHandlerMethodFactory.setMessageConverter(consumerJackson2MessageConverter());
+        messageHandlerMethodFactory.setMessageConverter(consumerJackson2MessageConverter);
         return messageHandlerMethodFactory;
     }
 
     @Override
     public void configureRabbitListeners(RabbitListenerEndpointRegistrar registrar) {
         registrar.setMessageHandlerMethodFactory(messageHandlerMethodFactory());
-    }
-
-    @Bean
-    public MappingJackson2MessageConverter consumerJackson2MessageConverter() {
-        return new MappingJackson2MessageConverter();
     }
 }

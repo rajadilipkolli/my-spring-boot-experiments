@@ -14,5 +14,6 @@ Windows
 # Important links
 
 Home Page : http://localhost:8080
+RabbitMq  : http://localhost:15672
 
 	
