@@ -4,7 +4,8 @@ import static com.example.jooq.r2dbc.testcontainersflyway.db.Tables.POSTS;
 import static com.example.jooq.r2dbc.testcontainersflyway.db.Tables.POSTS_TAGS;
 import static com.example.jooq.r2dbc.testcontainersflyway.db.Tables.POST_COMMENTS;
 import static com.example.jooq.r2dbc.testcontainersflyway.db.Tables.TAGS;
-import static org.jooq.impl.DSL.*;
+import static org.jooq.impl.DSL.multiset;
+import static org.jooq.impl.DSL.select;
 
 import com.example.jooq.r2dbc.entities.Post;
 import com.example.jooq.r2dbc.model.request.CreatePostCommand;

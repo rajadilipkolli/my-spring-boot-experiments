@@ -27,6 +27,7 @@ The following table list all sample codes related to the spring boot integration
 | [spring-boot-graphql-webmvc](./graphql/spring-boot-graphql-webmvc)                       | The application, demonstrates how to apply graphql concepts to the spring boot project                                                                                         | WIP       |
 | [Choas Engineering Principles](./boot-choas-monkey)                                      | The application, demonstrates how to apply choas engineering concepts to the spring boot project, test using Gatling to demonstrate the difference                             | WIP       |
 | [Feature Toggles](./boot-togglz-sample)                                                  | The application, demonstrates how to apply feature toggles concepts to the spring boot project                                                                                 | WIP       |
+| [Rabbit Mq Implementation](./boot-rabbitmq-thymeleaf)                                    | The application, demonstrates how rabbitmq works with producer side acknowledgement                                                                                            | Completed |
 
 For More info about this repository, Please visit [here](https://rajadilipkolli.github.io/my-spring-boot-experiments/)
 
