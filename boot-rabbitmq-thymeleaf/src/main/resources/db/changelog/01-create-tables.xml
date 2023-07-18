@@ -1,0 +1,41 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+
+    <changeSet id="1689581050846-1" author="rajakolli">
+        <preConditions>
+            <not>
+                <sequenceExists sequenceName="tracking_state_seq"/>
+            </not>
+        </preConditions>
+        <createSequence sequenceName="tracking_state_seq" startValue="1" incrementBy="50"/>
+    </changeSet>
+
+    <changeSet id="1" author="rajakolli">
+        <preConditions>
+            <not>
+                <tableExists tableName="tracking_state"/>
+            </not>
+        </preConditions>
+        <createTable tableName="tracking_state">
+            <column name="id" type="bigint" defaultValueSequenceNext="tracking_state_seq">
+                <constraints primaryKey="true" primaryKeyName="tracking_state_id"/>
+            </column>
+            <column name="correlation_id" type="varchar2(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="varchar2(50)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="1689580674038-1" author="rajakolli">
+        <createIndex tableName="tracking_state" indexName="tracking_state_correlationId_uc">
+            <column name="correlation_id"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>

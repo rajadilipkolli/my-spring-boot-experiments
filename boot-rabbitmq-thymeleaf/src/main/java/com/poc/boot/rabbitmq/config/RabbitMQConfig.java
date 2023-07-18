@@ -21,7 +21,6 @@ import org.springframework.messaging.handler.annotation.support.DefaultMessageHa
 import org.springframework.messaging.handler.annotation.support.MessageHandlerMethodFactory;
 import org.springframework.retry.backoff.ExponentialBackOffPolicy;
 import org.springframework.retry.support.RetryTemplate;
-import org.springframework.util.Assert;
 
 @EnableRabbit
 @Configuration
@@ -37,6 +36,12 @@ public class RabbitMQConfig implements RabbitListenerConfigurer {
     private static final String ORDERS_EXCHANGE = "ORDERS.EXCHANGE";
 
     private static final String ROUTING_KEY_ORDERS_QUEUE = "ROUTING_KEY_ORDERS_QUEUE";
+
+    private final RabbitTemplateConfirmCallback rabbitTemplateConfirmCallback;
+
+    public RabbitMQConfig(RabbitTemplateConfirmCallback rabbitTemplateConfirmCallback) {
+        this.rabbitTemplateConfirmCallback = rabbitTemplateConfirmCallback;
+    }
 
     @Bean
     Queue ordersQueue() {
@@ -96,15 +101,7 @@ public class RabbitMQConfig implements RabbitListenerConfigurer {
         retryTemplate.setBackOffPolicy(backOffPolicy);
         templateWithConfirmsEnabled.setRetryTemplate(retryTemplate);
         templateWithConfirmsEnabled.setMessageConverter(producerJackson2MessageConverter);
-        templateWithConfirmsEnabled.setConfirmCallback(
-                (correlationData, acknowledgement, cause) -> {
-                    Assert.notNull(correlationData, () -> "correlationData can't be null");
-                    log.info(
-                            "correlation id : {} , acknowledgement : {}, cause : {}",
-                            correlationData.getId(),
-                            acknowledgement,
-                            cause);
-                });
+        templateWithConfirmsEnabled.setConfirmCallback(rabbitTemplateConfirmCallback);
         return templateWithConfirmsEnabled;
     }
 

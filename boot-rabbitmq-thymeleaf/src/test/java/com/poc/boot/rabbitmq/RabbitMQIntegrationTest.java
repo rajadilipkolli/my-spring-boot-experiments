@@ -5,8 +5,11 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.testcontainers.shaded.org.awaitility.Awaitility.await;
 
 import com.poc.boot.rabbitmq.model.Order;
+import com.poc.boot.rabbitmq.repository.TrackingStateRepository;
+import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.Test;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,9 +28,13 @@ class RabbitMQIntegrationTest {
 
     @Autowired private RabbitTemplate rabbitTemplate;
 
+    @Autowired private TrackingStateRepository trackingStateRepository;
+
     @Test
     void contextLoads() {
         assertThat(this.rabbitTemplate).isNotNull();
+        assertThat(rabbitTemplate.getExchange()).isEmpty();
+        assertThat(rabbitTemplate.getRoutingKey()).isEmpty();
     }
 
     @Test
@@ -36,6 +43,7 @@ class RabbitMQIntegrationTest {
         order.setOrderNumber("1");
         order.setAmount(10d);
         order.setProductId("P1");
+        long count = trackingStateRepository.countByStatus("processed");
         mockMvc.perform(
                         post("/sendMsg")
                                 .flashAttr("order", order)
@@ -43,10 +51,18 @@ class RabbitMQIntegrationTest {
                 .andExpect(status().isFound())
                 .andExpect(redirectedUrl("/"))
                 .andExpect(flash().attribute("message", "Order message sent successfully"));
+        await().pollDelay(1, TimeUnit.SECONDS)
+                .atMost(3, TimeUnit.SECONDS)
+                .untilAsserted(
+                        () -> {
+                            long afterCount = trackingStateRepository.countByStatus("processed");
+                            assertThat(afterCount).isEqualTo(count + 1);
+                        });
     }
 
     @Test
     void testSendingFailedMessage() throws Exception {
+        long count = trackingStateRepository.countByStatus("processed");
         Order order = new Order();
         order.setOrderNumber("2");
         order.setAmount(-10d);
@@ -55,5 +71,21 @@ class RabbitMQIntegrationTest {
                 .andExpect(status().isFound())
                 .andExpect(redirectedUrl("/"))
                 .andExpect(flash().attribute("message", "Order message sent successfully"));
+        await().pollDelay(1, TimeUnit.SECONDS)
+                .atMost(3, TimeUnit.SECONDS)
+                .untilAsserted(
+                        () -> {
+                            long afterCount = trackingStateRepository.countByStatus("processed");
+                            assertThat(afterCount).isEqualTo(count + 1);
+                        });
+        await().pollDelay(2, TimeUnit.SECONDS)
+                .atMost(10, TimeUnit.SECONDS)
+                .untilAsserted(
+                        () -> {
+                            long afterCount = trackingStateRepository.countByStatus("failed");
+                            assertThat(afterCount).isEqualTo(1);
+                            afterCount = trackingStateRepository.countByStatus("processed");
+                            assertThat(afterCount).isEqualTo(count);
+                        });
     }
 }
