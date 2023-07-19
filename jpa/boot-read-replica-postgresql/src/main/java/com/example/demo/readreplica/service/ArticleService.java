@@ -19,31 +19,22 @@ public class ArticleService {
     private final ArticleRepository articleRepository;
 
     public Optional<ArticleDTO> findArticleById(Integer id) {
-        return this.articleRepository
-                .findByArticleId(id)
-                .map(
-                        article ->
-                                new ArticleDTO(
-                                        article.getTitle(),
-                                        article.getAuthored(),
-                                        article.getPublished(),
-                                        article.getComments().stream()
-                                                .map(
-                                                        comment ->
-                                                                new CommentDTO(
-                                                                        comment.getComment()))
-                                                .toList()));
+        return this.articleRepository.findByArticleId(id).map(this::convertToArticleDTO);
     }
 
     @Transactional
-    public ArticleDTO saveArticle(ArticleDTO articleDTO) {
+    public Integer saveArticle(ArticleDTO articleDTO) {
         Article article = convertToArticle(articleDTO);
         Article savedArticle = this.articleRepository.save(article);
+        return savedArticle.getId();
+    }
+
+    private ArticleDTO convertToArticleDTO(Article articleEntity) {
         return new ArticleDTO(
-                savedArticle.getTitle(),
-                savedArticle.getAuthored(),
-                savedArticle.getPublished(),
-                savedArticle.getComments().stream()
+                articleEntity.getTitle(),
+                articleEntity.getAuthored(),
+                articleEntity.getPublished(),
+                articleEntity.getComments().stream()
                         .map(comment -> new CommentDTO(comment.getComment()))
                         .toList());
     }

@@ -8,6 +8,8 @@ services:
     volumes:
       - 'postgresql_master_data:/bitnami/postgresql'
     environment:
+      - POSTGRESQL_PGAUDIT_LOG=READ,WRITE
+      - POSTGRESQL_LOG_HOSTNAME=TRUE
       - POSTGRESQL_REPLICATION_MODE=master
       - POSTGRESQL_REPLICATION_USER=repl_user
       - POSTGRESQL_REPLICATION_PASSWORD=repl_password
@@ -25,8 +27,11 @@ services:
       - POSTGRESQL_REPLICATION_USER=repl_user
       - POSTGRESQL_REPLICATION_PASSWORD=repl_password
       - POSTGRESQL_MASTER_HOST=postgresql-master
+      - POSTGRESQL_USERNAME=postgres_write
       - POSTGRESQL_PASSWORD=postgres_write
       - POSTGRESQL_MASTER_PORT_NUMBER=5432
+      - POSTGRESQL_PGAUDIT_LOG=READ,WRITE
+      - POSTGRESQL_LOG_HOSTNAME=TRUE
 
   pgadmin4:
     image: dpage/pgadmin4
@@ -40,3 +45,4 @@ services:
 
 volumes:
   postgresql_master_data:
+    driver: local

@@ -68,3 +68,4 @@ insert into comments (id, comment, article_id)  values (3, 'i came here to say t
 --changeset raja:7
 --preconditions onFail:MARK_RAN, onError:MARK_RAN,
 GRANT SELECT ON ALL TABLES IN SCHEMA public TO repl_user;
+ALTER DEFAULT PRIVILEGES IN SCHEMA PUBLIC GRANT SELECT ON TABLES TO repl_user;
