@@ -10,6 +10,6 @@ import org.springframework.transaction.annotation.Transactional;
 public interface ArticleRepository extends JpaRepository<Article, Integer> {
 
     @Transactional(readOnly = true)
-    @Query("select a from Article a join fetch a.comments where a.id = :articleId  ")
+    @Query("select a from Article a left join fetch a.comments where a.id = :articleId  ")
     Optional<Article> findByArticleId(@Param("articleId") Integer articleId);
 }

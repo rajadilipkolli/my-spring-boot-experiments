@@ -1,16 +1,21 @@
 spring:
+  application.name: boot-read-replica-postgresql
   primary:
     datasource:
       password: postgres_write
       username: postgres_write
       driver: org.postgresql.Driver
       url: jdbc:postgresql://localhost:5432/my_database
+      configuration:
+        poolName: primaryHikariPool
   replica:
     datasource:
       password: repl_password
       username: repl_user
       driver: org.postgresql.Driver
       url: jdbc:postgresql://localhost:15432/my_database
+      configuration:
+        poolName: replicaHikariPool
 
   jpa:
     open-in-view: false

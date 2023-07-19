@@ -1,16 +1,15 @@
 package com.example.demo.readreplica.config;
 
 import com.example.demo.readreplica.config.routing.RoutingDataSource;
-import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import java.util.HashMap;
 import java.util.Map;
 import javax.sql.DataSource;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
-import org.springframework.core.env.Environment;
 
 @Configuration(proxyBeanMethods = false)
 public class DatabaseConfig {
@@ -18,17 +17,41 @@ public class DatabaseConfig {
     private static final String PRIMARY_DATABASE_PROPERTY_KEY_PREFIX = "spring.primary.datasource";
     private static final String REPLICA_DATABASE_PROPERTY_KEY_PREFIX = "spring.replica.datasource";
 
-    @Autowired private Environment environment;
+    @Bean
+    @ConfigurationProperties(PRIMARY_DATABASE_PROPERTY_KEY_PREFIX)
+    public DataSourceProperties primaryDataSourceProperties() {
+        return new DataSourceProperties();
+    }
+
+    @Bean
+    @ConfigurationProperties(PRIMARY_DATABASE_PROPERTY_KEY_PREFIX + ".configuration")
+    public DataSource primaryDataSource(final DataSourceProperties primaryDataSourceProperties) {
+        return primaryDataSourceProperties
+                .initializeDataSourceBuilder()
+                .type(HikariDataSource.class)
+                .build();
+    }
+
+    @Bean
+    @ConfigurationProperties(REPLICA_DATABASE_PROPERTY_KEY_PREFIX)
+    public DataSourceProperties replicaDataSourceProperties() {
+        return new DataSourceProperties();
+    }
+
+    @Bean
+    @ConfigurationProperties(REPLICA_DATABASE_PROPERTY_KEY_PREFIX + ".configuration")
+    public DataSource replicaDataSource(final DataSourceProperties replicaDataSourceProperties) {
+        return replicaDataSourceProperties
+                .initializeDataSourceBuilder()
+                .type(HikariDataSource.class)
+                .build();
+    }
 
     @Bean
     @Primary
-    public DataSource dataSource() {
+    public DataSource dataSource(
+            final DataSource primaryDataSource, final DataSource replicaDataSource) {
         final RoutingDataSource routingDataSource = new RoutingDataSource();
-
-        final DataSource primaryDataSource =
-                buildDataSource("PrimaryHikariPool", PRIMARY_DATABASE_PROPERTY_KEY_PREFIX);
-        final DataSource replicaDataSource =
-                buildDataSource("ReplicaHikariPool", REPLICA_DATABASE_PROPERTY_KEY_PREFIX);
 
         final Map<Object, Object> targetDataSources = new HashMap<>();
         targetDataSources.put(RoutingDataSource.Route.PRIMARY, primaryDataSource);
@@ -38,20 +61,5 @@ public class DatabaseConfig {
         routingDataSource.setDefaultTargetDataSource(primaryDataSource);
 
         return routingDataSource;
-    }
-
-    private DataSource buildDataSource(String poolName, String dataSourcePrefix) {
-        final HikariConfig hikariConfig = new HikariConfig();
-
-        hikariConfig.setPoolName(poolName);
-        hikariConfig.setJdbcUrl(environment.getProperty(String.format("%s.url", dataSourcePrefix)));
-        hikariConfig.setUsername(
-                environment.getProperty(String.format("%s.username", dataSourcePrefix)));
-        hikariConfig.setPassword(
-                environment.getProperty(String.format("%s.password", dataSourcePrefix)));
-        hikariConfig.setDriverClassName(
-                environment.getProperty(String.format("%s.driver", dataSourcePrefix)));
-
-        return new HikariDataSource(hikariConfig);
     }
 }
