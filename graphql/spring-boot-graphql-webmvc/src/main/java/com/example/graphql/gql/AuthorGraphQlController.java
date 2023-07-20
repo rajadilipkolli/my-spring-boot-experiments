@@ -41,7 +41,7 @@ public class AuthorGraphQlController {
 
     @BatchMapping(typeName = "Author")
     public Map<AuthorResponse, List<PostInfo>> posts(List<AuthorResponse> authorResponses) {
-        log.info("Fetching PostInformation by AuthodIds");
+        log.info("Fetching PostInformation by AuthorIds");
         List<Long> authorIds = authorResponses.stream().map(AuthorResponse::id).toList();
 
         var authorPostsMap = this.postService.getPostByAuthorIdIn(authorIds);

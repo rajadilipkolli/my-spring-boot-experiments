@@ -53,10 +53,7 @@ public class PostEntity implements Serializable {
     @Builder.Default
     private List<PostCommentEntity> comments = new ArrayList<>();
 
-    @OneToOne(
-            mappedBy = "postEntity",
-            cascade = CascadeType.ALL,
-            optional = false)
+    @OneToOne(mappedBy = "postEntity", cascade = CascadeType.ALL, optional = false)
     private PostDetailsEntity details;
 
     @OneToMany(mappedBy = "postEntity", cascade = CascadeType.ALL, orphanRemoval = true)
