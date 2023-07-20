@@ -2,13 +2,13 @@ package com.example.demo.readreplica;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.awaitility.Awaitility.await;
 
 import com.example.demo.readreplica.config.routing.RoutingDataSource;
 import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import javax.sql.DataSource;
-import org.awaitility.Awaitility;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
@@ -74,8 +74,7 @@ class ReadReplicaApplicationTests {
         assertThat(rowsAffected).isEqualTo(1);
         Integer noOfRows = primaryJdbcTemplate.queryForObject(countSQL, Integer.class);
         assertThat(noOfRows).isEqualTo(4);
-        Awaitility.await()
-                .atMost(3, TimeUnit.SECONDS)
+        await().atMost(3, TimeUnit.SECONDS)
                 .untilAsserted(
                         () -> {
                             Integer totalCount =
@@ -91,8 +90,7 @@ class ReadReplicaApplicationTests {
         Object[] params = {4};
         int rowsAffected = primaryJdbcTemplate.update(deleteSQL, params);
         assertThat(rowsAffected).isEqualTo(1);
-        Awaitility.await()
-                .atMost(3, TimeUnit.SECONDS)
+        await().atMost(3, TimeUnit.SECONDS)
                 .untilAsserted(
                         () -> {
                             Integer noOfRows =
