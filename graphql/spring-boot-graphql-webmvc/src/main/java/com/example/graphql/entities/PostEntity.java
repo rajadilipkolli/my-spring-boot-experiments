@@ -14,6 +14,7 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -43,7 +44,7 @@ public class PostEntity implements Serializable {
 
     private boolean published;
 
-    private LocalDateTime createdAt;
+    private OffsetDateTime createdAt;
 
     private LocalDateTime modifiedAt;
 
@@ -69,7 +70,7 @@ public class PostEntity implements Serializable {
     private AuthorEntity authorEntity;
 
     public PostEntity() {
-        this.createdAt = LocalDateTime.now();
+        this.createdAt = OffsetDateTime.now();
     }
 
     public void addComment(PostCommentEntity comment) {

@@ -1,4 +1,5 @@
 scalar LocalDateTime
+scalar DateTime @specifiedBy(url:"https://tools.ietf.org/html/rfc3339")
 
 type Author{
     id:ID!
@@ -15,7 +16,7 @@ type Post{
     title:String!
     content:String!
     published:Boolean
-    createdAt:LocalDateTime
+    createdAt:DateTime
     modifiedAt:LocalDateTime
     publishedAt:LocalDateTime
     details: PostDetails

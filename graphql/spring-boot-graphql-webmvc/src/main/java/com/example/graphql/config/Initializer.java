@@ -6,6 +6,7 @@ import com.example.graphql.entities.PostDetailsEntity;
 import com.example.graphql.entities.PostEntity;
 import com.example.graphql.repositories.AuthorRepository;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.stream.LongStream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -48,7 +49,7 @@ public class Initializer implements CommandLineRunner {
                                     PostEntity.builder()
                                             .title("Title" + i)
                                             .content("content" + 1)
-                                            .createdAt(localDateTime1)
+                                            .createdAt(OffsetDateTime.now())
                                             .published(true)
                                             .build();
                             postEntity.setDetails(post1Details);
@@ -60,7 +61,7 @@ public class Initializer implements CommandLineRunner {
                                     PostEntity.builder()
                                             .title("Second Title" + i)
                                             .content("Second Content" + 1)
-                                            .createdAt(localDateTime2)
+                                            .createdAt(OffsetDateTime.now())
                                             .published(false)
                                             .build();
                             PostCommentEntity post2Comment =
