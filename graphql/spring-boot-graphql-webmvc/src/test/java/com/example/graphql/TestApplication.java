@@ -1,13 +1,19 @@
 package com.example.graphql;
 
-import com.example.graphql.common.MyContainers;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.testcontainers.context.ImportTestcontainers;
+import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.springframework.context.annotation.Bean;
+import org.testcontainers.containers.PostgreSQLContainer;
 
 @TestConfiguration(proxyBeanMethods = false)
-@ImportTestcontainers(MyContainers.class)
 public class TestApplication {
+
+    @Bean
+    @ServiceConnection
+    PostgreSQLContainer<?> postgreSQLContainer() {
+        return new PostgreSQLContainer<>("postgres:15.3-alpine");
+    }
 
     public static void main(String[] args) {
         SpringApplication.from(Application::main).with(TestApplication.class).run(args);
