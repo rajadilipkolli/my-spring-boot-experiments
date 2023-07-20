@@ -1,3 +1,5 @@
+scalar LocalDateTime
+
 type Author{
     id:ID!
     firstName:String!
@@ -13,9 +15,9 @@ type Post{
     title:String!
     content:String!
     published:Boolean
-    createdAt:String
-    modifiedAt:String
-    publishedAt:String
+    createdAt:LocalDateTime
+    modifiedAt:LocalDateTime
+    publishedAt:LocalDateTime
     details: PostDetails
     comments: [PostComments]
     tags:[Tags]
@@ -31,14 +33,14 @@ type PostComments {
     title:String!
     content:String
     published:Boolean
-    publishedAt:String
-    createdAt:String
+    publishedAt:LocalDateTime
+    createdAt:LocalDateTime
 }
 
 type PostDetails {
     id:ID!
     detailsKey:String
-    createdAt:String!
+    createdAt:LocalDateTime!
 }
 
 type Query {
