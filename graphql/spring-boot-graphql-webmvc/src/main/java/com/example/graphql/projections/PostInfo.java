@@ -18,6 +18,8 @@ public interface PostInfo {
 
     LocalDateTime getModifiedAt();
 
+    LocalDateTime getPublishedAt();
+
     PostDetailsInfo getDetails();
 
     AuthorInfo getAuthorEntity();
