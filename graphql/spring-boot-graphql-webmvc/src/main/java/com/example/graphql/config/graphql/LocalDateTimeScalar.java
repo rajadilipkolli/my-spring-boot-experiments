@@ -30,8 +30,6 @@ public class LocalDateTimeScalar {
 
     private LocalDateTimeScalar() {}
 
-    private static final DateTimeFormatter customOutputFormatter = getCustomDateTimeFormatter();
-
     static {
         Coercing<LocalDateTime, String> coercing =
                 new Coercing<>() {
@@ -136,6 +134,8 @@ public class LocalDateTimeScalar {
                         .coercing(coercing)
                         .build();
     }
+
+    private static final DateTimeFormatter customOutputFormatter = getCustomDateTimeFormatter();
 
     private static DateTimeFormatter getCustomDateTimeFormatter() {
         return new DateTimeFormatterBuilder()
