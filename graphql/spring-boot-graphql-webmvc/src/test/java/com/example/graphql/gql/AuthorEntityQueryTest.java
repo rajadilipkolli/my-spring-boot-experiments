@@ -1,10 +1,12 @@
 package com.example.graphql.gql;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
+import com.example.graphql.config.graphql.GraphQlConfiguration;
 import com.example.graphql.model.response.AuthorResponse;
 import com.example.graphql.services.AuthorService;
 import com.example.graphql.services.PostCommentService;
@@ -12,19 +14,18 @@ import com.example.graphql.services.PostService;
 import com.example.graphql.services.TagService;
 import java.time.LocalDateTime;
 import java.util.List;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.mockito.BDDMockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.graphql.GraphQlTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.graphql.test.tester.GraphQlTester;
 
 @GraphQlTest(AuthorGraphQlController.class)
-@Disabled
+@Import(GraphQlConfiguration.class)
 class AuthorEntityQueryTest {
 
-    @Autowired GraphQlTester graphQlTester;
+    @Autowired private GraphQlTester graphQlTester;
 
     @MockBean AuthorService authorService;
     @MockBean PostService postService;
@@ -32,9 +33,8 @@ class AuthorEntityQueryTest {
     @MockBean TagService tagService;
 
     @Test
-    @Disabled
     void allAuthors() {
-        BDDMockito.given(authorService.findAllAuthors())
+        given(authorService.findAllAuthors())
                 .willReturn(
                         List.of(
                                 new AuthorResponse(
