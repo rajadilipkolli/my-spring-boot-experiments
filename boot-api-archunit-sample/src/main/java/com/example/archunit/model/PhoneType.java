@@ -17,10 +17,12 @@ public class PhoneType extends Base {
     @Column(nullable = false, length = 250)
     private String name;
 
+    @Override
     public Long getId() {
         return id;
     }
 
+    @Override
     public void setId(Long id) {
         this.id = id;
     }
