@@ -1,46 +1,58 @@
 package com.example.rest.webclient.services;
 
-import com.example.rest.webclient.entities.Post;
-import com.example.rest.webclient.model.response.PagedResult;
-import com.example.rest.webclient.repositories.PostRepository;
+import com.example.rest.webclient.model.response.PostDto;
+import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.reactive.function.BodyInserters;
+import org.springframework.web.reactive.function.client.WebClient;
 
 @Service
-@Transactional
 @RequiredArgsConstructor
 public class PostService {
 
-    private final PostRepository postRepository;
+    private final WebClient webClient;
 
-    public PagedResult<Post> findAllPosts(int pageNo, int pageSize, String sortBy, String sortDir) {
-        Sort sort =
-                sortDir.equalsIgnoreCase(Sort.Direction.ASC.name())
-                        ? Sort.by(sortBy).ascending()
-                        : Sort.by(sortBy).descending();
-
-        // create Pageable instance
-        Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
-        Page<Post> postsPage = postRepository.findAll(pageable);
-
-        return new PagedResult<>(postsPage);
+    public List<PostDto> findAllPosts() {
+        return webClient
+                .get()
+                .uri("/posts")
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .bodyToFlux(new ParameterizedTypeReference<List<PostDto>>() {})
+                .blockLast();
     }
 
-    public Optional<Post> findPostById(Long id) {
-        return postRepository.findById(id);
+    public Optional<PostDto> findPostById(Long id) {
+        return Optional.ofNullable(
+                webClient
+                        .get()
+                        .uri(uriBuilder -> uriBuilder.path("/posts/{postId}").build(id))
+                        .retrieve()
+                        .bodyToMono(PostDto.class)
+                        .block());
     }
 
-    public Post savePost(Post post) {
-        return postRepository.save(post);
+    public PostDto savePost(PostDto post) {
+        return webClient
+                .post()
+                .uri("/posts")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(BodyInserters.fromValue(post))
+                .retrieve()
+                .bodyToMono(PostDto.class)
+                .block();
     }
 
-    public void deletePostById(Long id) {
-        postRepository.deleteById(id);
+    public PostDto deletePostById(Long id) {
+        return webClient
+                .delete()
+                .uri(uriBuilder -> uriBuilder.path("/posts/{postId}").build(id))
+                .retrieve()
+                .bodyToMono(PostDto.class)
+                .block();
     }
 }

@@ -3,14 +3,11 @@ package com.example.restclient.bootrestclient.services;
 import com.example.restclient.bootrestclient.exception.MyCustomRuntimeException;
 import com.example.restclient.bootrestclient.model.response.PostDto;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
-import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,10 +18,6 @@ public class PostService {
 
     public PostService(RestClient restClient) {
         this.restClient = restClient;
-    }
-
-    private static void handle(HttpRequest request, ClientHttpResponse response) throws IOException, MyCustomRuntimeException {
-        throw new MyCustomRuntimeException(response.getStatusCode(), response.getHeaders());
     }
 
     public List<PostDto> findAllPosts(int pageNo, int pageSize, String sortBy, String sortDir) {

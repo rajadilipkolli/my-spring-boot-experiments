@@ -3,7 +3,9 @@ package com.example.rest.webclient.service;
 import com.example.rest.webclient.model.PostDto;
 import java.util.Comparator;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -32,7 +34,13 @@ public class PostService {
     }
 
     public Mono<PostDto> savePost(PostDto post) {
-        return webClient.post().uri("/posts").retrieve().bodyToMono(PostDto.class);
+        return webClient
+                .post()
+                .uri("/posts")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(BodyInserters.fromValue(post))
+                .retrieve()
+                .bodyToMono(PostDto.class);
     }
 
     public Mono<PostDto> deletePostById(Long id) {
