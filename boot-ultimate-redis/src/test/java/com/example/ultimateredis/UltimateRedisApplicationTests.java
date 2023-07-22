@@ -1,13 +1,19 @@
 package com.example.ultimateredis;
 
-import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
+import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest
-@Import(TestUltimateRedisApplication.class)
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.redis.core.RedisTemplate;
+
+@SpringBootTest(classes = TestUltimateRedisApplication.class)
 class UltimateRedisApplicationTests {
 
+    @Autowired private RedisTemplate<String, String> redisTemplate;
+
     @Test
-    void contextLoads() {}
+    void contextLoads() {
+        assertThat(redisTemplate).isNotNull();
+    }
 }
