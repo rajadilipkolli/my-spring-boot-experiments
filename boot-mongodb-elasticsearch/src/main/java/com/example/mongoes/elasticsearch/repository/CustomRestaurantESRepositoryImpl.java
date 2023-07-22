@@ -36,6 +36,8 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class CustomRestaurantESRepositoryImpl implements CustomRestaurantESRepository {
 
+    private static final String BOROUGH = "borough";
+    private static final String CUISINE = "cuisine";
     private static final int PAGE_SIZE = 1_000;
     private final ReactiveElasticsearchOperations reactiveElasticsearchOperations;
 
@@ -58,7 +60,7 @@ public class CustomRestaurantESRepositoryImpl implements CustomRestaurantESRepos
     public Mono<SearchPage<Restaurant>> findByBoroughOrCuisineOrName(
             String queryKeyWord, Boolean prefixPhraseEnabled, Pageable pageable) {
         MultiMatchQuery.Builder builder =
-                QueryBuilders.multiMatch().query(queryKeyWord).fields("borough", "cuisine", "name");
+                QueryBuilders.multiMatch().query(queryKeyWord).fields(BOROUGH, CUISINE, "name");
         if (prefixPhraseEnabled) {
             builder.type(TextQueryType.PhrasePrefix);
         }
@@ -74,7 +76,7 @@ public class CustomRestaurantESRepositoryImpl implements CustomRestaurantESRepos
         Query query =
                 new NativeQuery(
                         QueryBuilders.term()
-                                .field("borough")
+                                .field(BOROUGH)
                                 .value(queryTerm)
                                 .caseInsensitive(true)
                                 .build()
@@ -93,7 +95,7 @@ public class CustomRestaurantESRepositoryImpl implements CustomRestaurantESRepos
                 //                 "borough", queries.stream().map(String::toLowerCase).toList()));
                 new NativeQuery(
                         QueryBuilders.multiMatch()
-                                .fields("borough")
+                                .fields(BOROUGH)
                                 .query(queries.get(0))
                                 .build()
                                 ._toQuery());
@@ -107,10 +109,10 @@ public class CustomRestaurantESRepositoryImpl implements CustomRestaurantESRepos
             String borough, String cuisine, String name, Pageable pageable) {
         BoolQuery.Builder boolQueryBuilder = QueryBuilders.bool();
         boolQueryBuilder.should(
-                QueryBuilders.match().field("borough").query(borough).build()._toQuery());
+                QueryBuilders.match().field(BOROUGH).query(borough).build()._toQuery());
         boolQueryBuilder.should(
                 QueryBuilders.wildcard()
-                        .field("cuisine")
+                        .field(CUISINE)
                         .value("*" + cuisine + "*")
                         .build()
                         ._toQuery());
@@ -126,13 +128,13 @@ public class CustomRestaurantESRepositoryImpl implements CustomRestaurantESRepos
         BoolQuery.Builder queryBuilders = QueryBuilders.bool();
         queryBuilders.should(
                 QueryBuilders.wildcard()
-                        .field("borough")
+                        .field(BOROUGH)
                         .value("*" + queryKeyword + "*")
                         .build()
                         ._toQuery());
         queryBuilders.should(
                 QueryBuilders.wildcard()
-                        .field("cuisine")
+                        .field(CUISINE)
                         .value("*" + queryKeyword + "*")
                         .build()
                         ._toQuery());
@@ -153,7 +155,7 @@ public class CustomRestaurantESRepositoryImpl implements CustomRestaurantESRepos
         Query query =
                 new NativeQuery(
                         QueryBuilders.regexp()
-                                .field("borough")
+                                .field(BOROUGH)
                                 .value(reqEx)
                                 .caseInsensitive(true)
                                 .build()
@@ -167,13 +169,13 @@ public class CustomRestaurantESRepositoryImpl implements CustomRestaurantESRepos
     public Mono<SearchPage<Restaurant>> searchSimpleQueryForBoroughAndCuisine(
             String queryKeyword, Pageable pageable) {
         Map<String, Float> map = new HashMap<>();
-        map.put("borough", 1.0F);
-        map.put("cuisine", 2.0F);
+        map.put(BOROUGH, 1.0F);
+        map.put(CUISINE, 2.0F);
         Query query =
                 new NativeQuery(
                         QueryBuilders.simpleQueryString()
                                 .query(queryKeyword)
-                                .fields("borough", "cuisine")
+                                .fields(BOROUGH, CUISINE)
                                 .build()
                                 ._toQuery());
         query.setPageable(pageable);
@@ -222,10 +224,10 @@ public class CustomRestaurantESRepositoryImpl implements CustomRestaurantESRepos
             Integer offset,
             String[] sortFields) {
         TermsAggregation cuisineTermsBuilder =
-                AggregationBuilders.terms().field("cuisine").size(PAGE_SIZE).build();
+                AggregationBuilders.terms().field(CUISINE).size(PAGE_SIZE).build();
         // .order(BucketOrder.count(false));
         TermsAggregation boroughTermsBuilder =
-                AggregationBuilders.terms().field("borough").size(PAGE_SIZE).build();
+                AggregationBuilders.terms().field(BOROUGH).size(PAGE_SIZE).build();
         // .order(BucketOrder.count(false));
         Builder dateRangeBuilder =
                 AggregationBuilders.dateRange().name("MyDateRange").field("grades.date");

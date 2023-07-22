@@ -14,12 +14,12 @@ public class CustomChangeStreamResumeRepositoryImpl implements CustomChangeStrea
 
     private final ReactiveMongoTemplate reactiveMongoTemplate;
 
-    private static final String field = "resumeTimestamp";
+    private static final String FIELD_NAME = "resumeTimestamp";
 
     @Override
     public Mono<UpdateResult> update(BsonTimestamp resumeTimestamp) {
         Query query = new Query();
-        Update update = new Update().set(field, resumeTimestamp);
+        Update update = new Update().set(FIELD_NAME, resumeTimestamp);
         return reactiveMongoTemplate.upsert(query, update, ChangeStreamResume.class);
     }
 }
