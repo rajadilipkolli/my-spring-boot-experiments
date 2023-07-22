@@ -1,6 +1,14 @@
 package com.example.restclient.bootrestclient;
 
-import org.junit.jupiter.api.AfterEach;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.client.ExpectedCount.times;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,15 +19,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.client.RestClient;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.web.client.ExpectedCount.times;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
-import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -35,13 +34,15 @@ class BootRestClientApplicationTests {
 
     @BeforeEach
     public void setUp() {
-        mockServer = MockRestServiceServer.bindTo(builder).ignoreExpectOrder(true).build();
+        mockServer =
+                MockRestServiceServer.bindTo(builder).ignoreExpectOrder(true).build();
     }
 
     @Test
     void findPostById() throws Exception {
         // Mock the external API response
-        String mockApiResponse = """
+        String mockApiResponse =
+                """
                 {
                   "userId": 1,
                   "id": 1,
@@ -49,19 +50,23 @@ class BootRestClientApplicationTests {
                   "body": "quia et suscipit\\nsuscipit recusandae consequuntur expedita et cum\\nreprehenderit molestiae ut ut quas totam\\nnostrum rerum est autem sunt rem eveniet architecto"
                 }
                 """;
-        mockServer.expect(times(1), requestTo("https://jsonplaceholder.typicode.com/posts/1"))
+        mockServer
+                .expect(times(1), requestTo("https://jsonplaceholder.typicode.com/posts/1"))
                 .andExpect(method(HttpMethod.GET))
                 .andRespond(withSuccess(mockApiResponse, MediaType.APPLICATION_JSON));
 
         // Perform the test
-        String result = this.mockMvc.perform(get("/api/posts/{postId}", 1))
+        String result = this.mockMvc
+                .perform(get("/api/posts/{postId}", 1))
                 .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
 
         // Verify the result
         assertThat(result).isEqualToIgnoringWhitespace(mockApiResponse);
 
-		mockServer.reset();
+        mockServer.reset();
         // Verify that the expected API call was made
         mockServer.verify();
     }
@@ -69,7 +74,8 @@ class BootRestClientApplicationTests {
     @Test
     void createPost() throws Exception {
         // Mock the external API response
-        String mockApiResponse = """
+        String mockApiResponse =
+                """
                 {
                   "userId": 1,
                   "id": 101,
@@ -77,7 +83,8 @@ class BootRestClientApplicationTests {
                   "body": "quia et suscipit\\nsuscipit recusandae consequuntur expedita et cum\\nreprehenderit molestiae ut ut quas totam\\nnostrum rerum est autem sunt rem eveniet architecto"
                 }
                 """;
-		String mockApiRequest = """
+        String mockApiRequest =
+                """
                 {
                   "userId": 1,
                   "id": 1,
@@ -85,23 +92,24 @@ class BootRestClientApplicationTests {
                   "body": "quia et suscipit\\nsuscipit recusandae consequuntur expedita et cum\\nreprehenderit molestiae ut ut quas totam\\nnostrum rerum est autem sunt rem eveniet architecto"
                 }
                 """;
-        mockServer.expect(times(1), requestTo("https://jsonplaceholder.typicode.com/posts"))
+        mockServer
+                .expect(times(1), requestTo("https://jsonplaceholder.typicode.com/posts"))
                 .andExpect(method(HttpMethod.POST))
                 .andRespond(withSuccess(mockApiResponse, MediaType.APPLICATION_JSON));
 
         // Perform the test
-        String result = this.mockMvc.perform(post("/api/posts")
-						.content(mockApiRequest).contentType(MediaType.APPLICATION_JSON))
+        String result = this.mockMvc
+                .perform(post("/api/posts").content(mockApiRequest).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated())
-                .andReturn().getResponse().getContentAsString();
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
 
         // Verify the result
         assertThat(result).isEqualToIgnoringWhitespace(mockApiResponse);
 
-		mockServer.reset();
+        mockServer.reset();
         // Verify that the expected API call was made
         mockServer.verify();
-
     }
-
 }
