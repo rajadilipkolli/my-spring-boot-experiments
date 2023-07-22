@@ -4,9 +4,9 @@ public enum TenantName {
     TEST1("test1"),
     TEST2("test2");
 
-    public final String tenantName;
+    public final String tName;
 
-    private TenantName(String tenantName) {
-        this.tenantName = tenantName;
+    private TenantName(String tName) {
+        this.tName = tName;
     }
 }

@@ -35,6 +35,6 @@ public class TenantInterceptor implements HandlerInterceptor {
     }
 
     private List<String> getValidTenants() {
-        return List.of(TenantName.TEST1.name(), TenantName.TEST2.name());
+        return List.of(TenantName.TEST1.tName, TenantName.TEST2.tName);
     }
 }
