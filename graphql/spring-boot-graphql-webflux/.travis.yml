@@ -1,9 +1,0 @@
-language: java
-jdk: openjdk19
-sudo: false
-
-services:
-  - docker
-
-script:
-  - ./gradlew clean build
