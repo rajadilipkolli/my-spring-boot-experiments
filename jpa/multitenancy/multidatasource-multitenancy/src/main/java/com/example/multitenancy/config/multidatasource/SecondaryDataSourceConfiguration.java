@@ -49,7 +49,7 @@ public class SecondaryDataSourceConfiguration {
         hibernateProps.putAll(this.jpaProperties.getProperties());
         // needs to set tenantIdentifier for connecting to secondary datasource and fetching the
         // metadata
-        tenantIdentifierResolver.setCurrentTenant(DatabaseType.secondary.name());
+        tenantIdentifierResolver.setCurrentTenant(DatabaseType.SECONDARY.getSchemaName());
         return builder.dataSource(tenantRoutingDatasource)
                 .properties(hibernateProps)
                 .persistenceUnit("secondary")

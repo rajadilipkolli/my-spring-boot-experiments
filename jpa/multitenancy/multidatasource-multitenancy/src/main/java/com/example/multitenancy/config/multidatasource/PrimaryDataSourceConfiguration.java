@@ -49,7 +49,7 @@ public class PrimaryDataSourceConfiguration {
         hibernateProps.putAll(this.jpaProperties.getProperties());
         // needs to set tenantIdentifier for connecting to primary datasource and fetching the
         // metadata
-        tenantIdentifierResolver.setCurrentTenant(DatabaseType.primary.name());
+        tenantIdentifierResolver.setCurrentTenant(DatabaseType.PRIMARY.getSchemaName());
         return builder.dataSource(tenantRoutingDatasource)
                 .persistenceUnit("primary")
                 .properties(hibernateProps)

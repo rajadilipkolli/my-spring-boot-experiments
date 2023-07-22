@@ -35,8 +35,8 @@ public class MultiTenantConnectionProviderImpl
     @Override
     public Connection getConnection(String tenantIdentifier) throws SQLException {
         var connection = tenantRoutingDatasource.getConnection();
-        if (DatabaseType.schema1.name().equals(tenantIdentifier)
-                || DatabaseType.schema2.name().equals(tenantIdentifier)) {
+        if (DatabaseType.SCHEMA1.getSchemaName().equals(tenantIdentifier)
+                || DatabaseType.SCHEMA2.getSchemaName().equals(tenantIdentifier)) {
             connection.setSchema(tenantIdentifier);
         }
         return connection;
@@ -45,8 +45,8 @@ public class MultiTenantConnectionProviderImpl
     @Override
     public void releaseConnection(String tenantIdentifier, Connection connection)
             throws SQLException {
-        if (DatabaseType.schema1.name().equals(tenantIdentifier)
-                || DatabaseType.schema2.name().equals(tenantIdentifier)) {
+        if (DatabaseType.SCHEMA1.getSchemaName().equals(tenantIdentifier)
+                || DatabaseType.SCHEMA2.getSchemaName().equals(tenantIdentifier)) {
             connection.setSchema("public");
         }
         connection.close();

@@ -1,11 +1,21 @@
 package com.example.multitenancy.utils;
 
 public enum DatabaseType {
-    primary,
-    secondary,
-    schema1,
-    schema2,
-    dbsystc,
-    dbsystp,
-    dbsystv;
+    PRIMARY("primary"),
+    SECONDARY("secondary"),
+    SCHEMA1("schema1"),
+    SCHEMA2("schema2"),
+    DBSYSTC("dbsystc"),
+    DBSYSTP("dbsystp"),
+    DBSYSTV("dbsystv");
+
+    private final String schemaName;
+
+    private DatabaseType(String schemaName) {
+        this.schemaName = schemaName;
+    }
+
+    public String getSchemaName() {
+        return this.schemaName;
+    }
 }

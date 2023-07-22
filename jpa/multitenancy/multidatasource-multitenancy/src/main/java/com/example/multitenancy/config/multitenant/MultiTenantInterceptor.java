@@ -49,7 +49,8 @@ public class MultiTenantInterceptor implements HandlerInterceptor {
 
     private List<String> getValidTenants() {
         if (validTenantsList.isEmpty()) {
-            validTenantsList = Arrays.stream(DatabaseType.values()).map(Enum::name).toList();
+            validTenantsList =
+                    Arrays.stream(DatabaseType.values()).map(DatabaseType::getSchemaName).toList();
         }
         return validTenantsList;
     }
