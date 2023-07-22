@@ -8,6 +8,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MapsId;
 import jakarta.persistence.Table;
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import lombok.Getter;
@@ -17,7 +18,7 @@ import lombok.Setter;
 @Table(name = "post_tag")
 @Setter
 @Getter
-public class PostTagEntity {
+public class PostTagEntity implements Serializable {
 
     @EmbeddedId private PostTagEntityId id;
 
