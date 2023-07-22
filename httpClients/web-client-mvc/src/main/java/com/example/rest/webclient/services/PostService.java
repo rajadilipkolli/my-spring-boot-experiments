@@ -4,7 +4,6 @@ import com.example.rest.webclient.model.response.PostDto;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.BodyInserters;
@@ -22,8 +21,9 @@ public class PostService {
                 .uri("/posts")
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
-                .bodyToFlux(new ParameterizedTypeReference<List<PostDto>>() {})
-                .blockLast();
+                .bodyToFlux(PostDto.class)
+                .collectList()
+                .block();
     }
 
     public Optional<PostDto> findPostById(Long id) {
@@ -66,6 +66,7 @@ public class PostService {
         return webClient
                 .delete()
                 .uri(uriBuilder -> uriBuilder.path("/posts/{postId}").build(id))
+                .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
                 .bodyToMono(PostDto.class)
                 .block();
