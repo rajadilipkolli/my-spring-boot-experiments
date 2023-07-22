@@ -8,7 +8,6 @@ import com.example.custom.sequence.model.response.PagedResult;
 import com.example.custom.sequence.repositories.OrderRepository;
 import java.util.List;
 import java.util.Optional;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -22,7 +21,6 @@ public class OrderService {
 
     private final OrderRepository orderRepository;
 
-    @Autowired
     public OrderService(OrderRepository orderRepository) {
         this.orderRepository = orderRepository;
     }
@@ -65,11 +63,7 @@ public class OrderService {
     }
 
     private Optional<OrderResponse> convertToOrderDTO(Optional<Order> optionalOrder) {
-        if (optionalOrder.isEmpty()) {
-            return Optional.empty();
-        } else {
-            return Optional.of(getOrderDTO(optionalOrder.get()));
-        }
+        return optionalOrder.map(this::getOrderDTO);
     }
 
     private OrderResponse getOrderDTO(Order order) {

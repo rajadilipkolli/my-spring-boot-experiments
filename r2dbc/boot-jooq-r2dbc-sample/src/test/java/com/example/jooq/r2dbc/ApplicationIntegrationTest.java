@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 class ApplicationIntegrationTest extends AbstractIntegrationTest {
 
     @Test
-    public void willLoadPosts() {
+    void willLoadPosts() {
         this.webTestClient
                 .get()
                 .uri("/posts")
