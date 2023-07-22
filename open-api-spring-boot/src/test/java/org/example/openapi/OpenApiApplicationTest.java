@@ -16,19 +16,19 @@ class OpenApiApplicationTest {
     @Autowired protected MockMvc mockMvc;
 
     @Test
-    public void testLoadingSwagger() throws Exception {
+    void testLoadingSwagger() throws Exception {
         this.mockMvc.perform(get("/"))
             .andExpect(status().isFound());
     }
 
     @Test
-    public void whenReadAll_thenStatusIsNotImplemented() throws Exception {
+    void whenReadAll_thenStatusIsNotImplemented() throws Exception {
         this.mockMvc.perform(get("/api/customers"))
             .andExpect(status().isNotImplemented());
     }
 
     @Test
-    public void whenReadCustomerById_thenStatusIsNotImplemented() throws Exception {
+    void whenReadCustomerById_thenStatusIsNotImplemented() throws Exception {
         this.mockMvc.perform(get("/api/customers/1"))
             .andExpect(status().isNotImplemented());
     }
