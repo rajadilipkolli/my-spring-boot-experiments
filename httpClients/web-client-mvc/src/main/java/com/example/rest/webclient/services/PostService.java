@@ -31,6 +31,7 @@ public class PostService {
                 webClient
                         .get()
                         .uri(uriBuilder -> uriBuilder.path("/posts/{postId}").build(id))
+                        .accept(MediaType.APPLICATION_JSON)
                         .retrieve()
                         .bodyToMono(PostDto.class)
                         .block());
@@ -40,11 +41,25 @@ public class PostService {
         return webClient
                 .post()
                 .uri("/posts")
+                .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(BodyInserters.fromValue(post))
                 .retrieve()
                 .bodyToMono(PostDto.class)
                 .block();
+    }
+
+    public Optional<PostDto> updatePostById(Long id, PostDto post) {
+        return Optional.ofNullable(
+                webClient
+                        .put()
+                        .uri(uriBuilder -> uriBuilder.path("/posts/{postId}").build(id))
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body(BodyInserters.fromValue(post))
+                        .retrieve()
+                        .bodyToMono(PostDto.class)
+                        .block());
     }
 
     public PostDto deletePostById(Long id) {

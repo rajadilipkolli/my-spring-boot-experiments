@@ -50,12 +50,8 @@ public class PostController {
     @PutMapping("/{id}")
     public ResponseEntity<PostDto> updatePost(@PathVariable Long id, @RequestBody PostDto post) {
         return postService
-                .findPostById(id)
-                .map(
-                        postObj -> {
-                            PostDto postWithId = post.withId(id);
-                            return ResponseEntity.ok(postService.savePost(postWithId));
-                        })
+                .updatePostById(id, post)
+                .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
