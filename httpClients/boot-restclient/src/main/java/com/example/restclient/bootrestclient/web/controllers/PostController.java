@@ -1,4 +1,4 @@
-package com.example.restclient.bootrestclient.web.controller;
+package com.example.restclient.bootrestclient.web.controllers;
 
 import com.example.restclient.bootrestclient.model.response.PostDto;
 import com.example.restclient.bootrestclient.services.PostService;
@@ -53,9 +53,7 @@ public class PostController {
     public ResponseEntity<PostDto> deletePost(@PathVariable Long id) {
         return postService
                 .findPostById(id)
-                .map(postDto -> {
-                    return ResponseEntity.ok(postService.deletePostById(id));
-                })
+                .map(postDto -> ResponseEntity.ok(postService.deletePostById(id)))
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 }
