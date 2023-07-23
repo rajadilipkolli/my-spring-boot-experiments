@@ -20,13 +20,12 @@ public class PostService {
     }
 
     public List<PostDto> findAllPosts() {
-        List<PostDto> posts = restClient
+        return restClient
                 .get()
                 .uri("/posts")
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
                 .body(new ParameterizedTypeReference<List<PostDto>>() {});
-        return posts;
     }
 
     public Optional<PostDto> findPostById(Long id) {
