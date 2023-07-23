@@ -21,7 +21,7 @@ class PostControllerIT extends AbstractIntegrationTest {
 
     @BeforeEach
     public void setup() {
-        wireMockServer = new WireMockServer(9090);
+        wireMockServer = new WireMockServer(9091);
         wireMockServer.start();
     }
 
