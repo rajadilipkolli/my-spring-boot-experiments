@@ -6,11 +6,9 @@ import com.example.rest.webclient.common.AbstractIntegrationTest;
 import com.example.rest.webclient.model.PostDto;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.github.tomakehurst.wiremock.WireMockServer;
-import java.util.Arrays;
 import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -23,7 +21,7 @@ class PostControllerIT extends AbstractIntegrationTest {
 
     @BeforeEach
     public void setup() {
-        wireMockServer = new WireMockServer(8080);
+        wireMockServer = new WireMockServer(9090);
         wireMockServer.start();
     }
 
@@ -33,11 +31,10 @@ class PostControllerIT extends AbstractIntegrationTest {
     }
 
     @Test
-    @Disabled
     void testFindAllPosts() throws JsonProcessingException {
         // Prepare mock data
         List<PostDto> mockPosts =
-                Arrays.asList(
+                List.of(
                         new PostDto(1L, "Title 1", 1L, "Content 1"),
                         new PostDto(2L, "Title 2", 1L, "Content 2"),
                         new PostDto(3L, "Title 3", 1L, "Content 3"));
@@ -69,6 +66,6 @@ class PostControllerIT extends AbstractIntegrationTest {
                 .expectNextMatches(post -> post.id() == 3)
                 .verifyComplete();
 
-        wireMockServer.verify(getRequestedFor(urlEqualTo("/api/posts")));
+        wireMockServer.verify(getRequestedFor(urlEqualTo("/posts")));
     }
 }

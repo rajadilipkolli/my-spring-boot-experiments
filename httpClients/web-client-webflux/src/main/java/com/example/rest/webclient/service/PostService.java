@@ -17,18 +17,29 @@ public class PostService {
     private final WebClient webClient;
 
     public Flux<PostDto> findAllPosts(String sortBy, String sortDir) {
+
+        // Create the Comparator based on sortDir and sortBy
+        Comparator<PostDto> comparator;
+        if ("desc".equalsIgnoreCase(sortDir)) {
+            comparator = Comparator.comparing((PostDto o) -> sortBy).reversed();
+        } else {
+            comparator = Comparator.comparing((PostDto o) -> sortBy);
+        }
+
         return webClient
                 .get()
                 .uri("/posts")
+                .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
                 .bodyToFlux(PostDto.class)
-                .sort(Comparator.comparing(PostDto::id));
+                .sort(comparator);
     }
 
     public Mono<PostDto> findPostById(Long id) {
         return webClient
                 .get()
                 .uri(uriBuilder -> uriBuilder.path("/posts/{postId}").build(id))
+                .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
                 .bodyToMono(PostDto.class);
     }
@@ -37,6 +48,7 @@ public class PostService {
         return webClient
                 .post()
                 .uri("/posts")
+                .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(BodyInserters.fromValue(post))
                 .retrieve()
@@ -47,6 +59,7 @@ public class PostService {
         return webClient
                 .delete()
                 .uri(uriBuilder -> uriBuilder.path("/posts/{postId}").build(id))
+                .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
                 .bodyToMono(PostDto.class);
     }

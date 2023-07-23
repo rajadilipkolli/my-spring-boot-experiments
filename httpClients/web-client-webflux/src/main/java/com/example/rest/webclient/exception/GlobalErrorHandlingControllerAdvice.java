@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.support.WebExchangeBindException;
 
 @ControllerAdvice
-public class ErrorDetailProblemHandlingControllerAdvice {
+public class GlobalErrorHandlingControllerAdvice {
 
     @ExceptionHandler(WebExchangeBindException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)

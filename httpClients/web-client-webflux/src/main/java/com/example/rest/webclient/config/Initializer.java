@@ -22,8 +22,8 @@ public class Initializer implements CommandLineRunner {
         log.info("Running Initializer.....");
         postService
                 .findAllPosts("id", "asc")
-                .map(postDto -> this.postMapper.toEntity(postDto))
-                .flatMap(post -> this.postRepository.save(post))
+                .map(this.postMapper::toEntity)
+                .flatMap(this.postRepository::save)
                 .subscribe(
                         savedPost -> log.info("Saved Post {}", savedPost),
                         err -> log.error("Error Occurred while saving ", err),

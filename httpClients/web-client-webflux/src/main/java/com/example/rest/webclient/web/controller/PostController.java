@@ -63,10 +63,7 @@ public class PostController {
             @PathVariable Long id, @RequestBody PostDto post) {
         return postService
                 .findPostById(id)
-                .map(
-                        postObj -> {
-                            return ResponseEntity.ok(postService.savePost(post.withId(id)));
-                        })
+                .map(postObj -> ResponseEntity.ok(postService.savePost(post.withId(id))))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
