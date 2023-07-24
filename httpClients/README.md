@@ -13,3 +13,4 @@ The following table list all sample codes related to the spring boot integration
 | [rest template](./rest-template)           | The application, demonstrates the way spring boot application will connect with external system using rest template                                  |
 | [web-client-mvc](./web-client-mvc)         | The application, demonstrates the way spring boot application will connect with external system using spring 5's webclient in a servlet environment  |
 | [web-client-webflux](./web-client-webflux) | The application, demonstrates the way spring boot application will connect with external system using spring 5's webclient in a reactive environment |
+| [http client](./boot-restclient)           | The application, demonstrates the way spring boot application will connect with external system using spring 6's restclient in a reactive environment |
