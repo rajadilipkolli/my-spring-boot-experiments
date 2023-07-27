@@ -1,10 +1,10 @@
 package com.example.envers.web.controllers;
 
 import com.example.envers.entities.Customer;
+import com.example.envers.model.RevisionDTO;
 import com.example.envers.services.CustomerService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.history.Revisions;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -37,7 +37,7 @@ public class CustomerController {
     }
 
     @GetMapping("/revision/{id}")
-    public ResponseEntity<Revisions<Long, Customer>> findCustomerRevisionsById(@PathVariable Long id) {
+    public ResponseEntity<List<RevisionDTO>> findCustomerRevisionsById(@PathVariable Long id) {
         return ResponseEntity.ok(customerService.findCustomerRevisionsById(id));
     }
 

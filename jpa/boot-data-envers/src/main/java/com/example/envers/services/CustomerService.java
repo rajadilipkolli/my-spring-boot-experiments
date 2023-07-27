@@ -1,11 +1,11 @@
 package com.example.envers.services;
 
 import com.example.envers.entities.Customer;
+import com.example.envers.model.RevisionDTO;
 import com.example.envers.repositories.CustomerRepository;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.history.Revisions;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,8 +24,14 @@ public class CustomerService {
         return customerRepository.findById(id);
     }
 
-    public Revisions<Long, Customer> findCustomerRevisionsById(Long id) {
-        return customerRepository.findRevisions(id);
+    public List<RevisionDTO> findCustomerRevisionsById(Long id) {
+        return customerRepository.findRevisions(id).getContent().stream()
+                .map(customerRevision -> new RevisionDTO(
+                        customerRevision.getEntity(),
+                        customerRevision.getMetadata().getRevisionNumber(),
+                        customerRevision.getMetadata().getRevisionType().name(),
+                        customerRevision.getMetadata().getRevisionInstant()))
+                .toList();
     }
 
     @Transactional

@@ -58,6 +58,17 @@ class CustomerControllerIT extends AbstractIntegrationTest {
     }
 
     @Test
+    void shouldFindCustomerRevisionsById() throws Exception {
+        Customer customer = customerList.get(0);
+        Long customerId = customer.getId();
+
+        this.mockMvc
+                .perform(get("/api/customers/revision/{id}", customerId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.size()", is(1)));
+    }
+
+    @Test
     void shouldCreateNewCustomer() throws Exception {
         Customer customer = new Customer(null, "New Customer", 0L);
         this.mockMvc

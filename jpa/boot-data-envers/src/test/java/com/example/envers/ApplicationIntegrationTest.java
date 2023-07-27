@@ -23,7 +23,7 @@ class ApplicationIntegrationTest extends AbstractIntegrationTest {
         cust.setName("junit");
         Customer customer = customerRepository.save(cust);
 
-        Revisions<Long, Customer> revisions = customerRepository.findRevisions(customer.getId());
+        Revisions<Integer, Customer> revisions = customerRepository.findRevisions(customer.getId());
 
         assertThat(revisions).isNotEmpty().allSatisfy(revision -> assertThat(revision.getEntity())
                 .extracting(Customer::getId, Customer::getName, Customer::getVersion)
@@ -40,7 +40,7 @@ class ApplicationIntegrationTest extends AbstractIntegrationTest {
 
         customerRepository.save(customer);
 
-        Optional<Revision<Long, Customer>> revision = customerRepository.findLastChangeRevision(customer.getId());
+        Optional<Revision<Integer, Customer>> revision = customerRepository.findLastChangeRevision(customer.getId());
 
         assertThat(revision)
                 .isPresent()
@@ -60,14 +60,14 @@ class ApplicationIntegrationTest extends AbstractIntegrationTest {
 
         customerRepository.delete(customer);
 
-        Revisions<Long, Customer> revisions = customerRepository.findRevisions(customer.getId());
+        Revisions<Integer, Customer> revisions = customerRepository.findRevisions(customer.getId());
 
         assertThat(revisions).hasSize(2);
 
-        Iterator<Revision<Long, Customer>> iterator = revisions.iterator();
+        Iterator<Revision<Integer, Customer>> iterator = revisions.iterator();
 
-        Revision<Long, Customer> initialRevision = iterator.next();
-        Revision<Long, Customer> finalRevision = iterator.next();
+        Revision<Integer, Customer> initialRevision = iterator.next();
+        Revision<Integer, Customer> finalRevision = iterator.next();
 
         assertThat(initialRevision).satisfies(rev -> assertThat(rev.getEntity())
                 .extracting(Customer::getId, Customer::getName, Customer::getVersion)

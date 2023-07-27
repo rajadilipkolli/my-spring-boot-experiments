@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.10.xsd">
+
+    <property name="stringType" dbms="postgres" value="text"/>
+    <property name="stringType" dbms="!postgres" value="varchar(1024)"/>
+
+    <changeSet author="raja" id="createTable-customers">
+        <createSequence
+                sequenceName="customers_seq"
+                incrementBy="50"
+                startValue="1"
+        />
+        <createTable tableName="customers">
+            <column name="id" type="bigint" defaultValueSequenceNext="customers_seq">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="${stringType}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>
