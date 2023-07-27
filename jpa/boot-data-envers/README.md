@@ -4,7 +4,9 @@ Spring Data Envers is a tool for auditing changes made to persistent entities in
 
 ### Run tests
 
-`./gradlew clean build`
+```shell
+./gradlew clean build
+```
 
 ### Run locally
 

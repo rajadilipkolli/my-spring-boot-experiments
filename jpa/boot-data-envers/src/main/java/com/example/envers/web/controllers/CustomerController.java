@@ -3,7 +3,8 @@ package com.example.envers.web.controllers;
 import com.example.envers.entities.Customer;
 import com.example.envers.services.CustomerService;
 import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.history.Revisions;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -19,14 +20,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/customers")
+@RequiredArgsConstructor
 public class CustomerController {
 
     private final CustomerService customerService;
-
-    @Autowired
-    public CustomerController(CustomerService customerService) {
-        this.customerService = customerService;
-    }
 
     @GetMapping
     public List<Customer> getAllCustomers() {
@@ -37,6 +34,11 @@ public class CustomerController {
     public ResponseEntity<Customer> getCustomerById(@PathVariable Long id) {
         return customerService.findCustomerById(id).map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound()
                 .build());
+    }
+
+    @GetMapping("/revision/{id}")
+    public ResponseEntity<Revisions<Long, Customer>> findCustomerRevisionsById(@PathVariable Long id) {
+        return ResponseEntity.ok(customerService.findCustomerRevisionsById(id));
     }
 
     @PostMapping
