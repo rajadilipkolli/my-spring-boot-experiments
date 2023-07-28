@@ -6,7 +6,7 @@
          http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.10.xsd">
 
     <property name="stringType" dbms="postgres" value="text"/>
-    <property name="stringType" dbms="!postgres" value="varchar(1024)"/>
+    <property name="stringType" dbms="!postgres" value="varchar(256)"/>
 
     <changeSet author="raja" id="createTable-customers-aud">
 
@@ -21,6 +21,7 @@
                 <constraints nullable="false"/>
             </column>
             <column name="name" type="${stringType}"/>
+            <column name="address" type="${stringType}"/>
         </createTable>
         <addPrimaryKey tableName="customers_aud" columnNames="rev,id"/>
     </changeSet>

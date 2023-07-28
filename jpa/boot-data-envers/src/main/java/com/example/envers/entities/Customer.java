@@ -33,6 +33,8 @@ public class Customer {
     @NotEmpty(message = "Name cannot be empty")
     private String name;
 
+    private String address;
+
     @Version
     Long version = 0L;
 
