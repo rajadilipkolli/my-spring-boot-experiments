@@ -62,12 +62,6 @@ dependencies {
     testAnnotationProcessor "org.projectlombok:lombok"
 }
 
-dependencyManagement {
-    imports {
-        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${spring_cloud_version}"
-    }
-}
-
 defaultTasks "bootRun"
 
 springBoot {
