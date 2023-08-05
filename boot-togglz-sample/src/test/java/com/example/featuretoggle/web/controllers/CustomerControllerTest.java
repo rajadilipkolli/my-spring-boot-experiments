@@ -15,6 +15,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.example.featuretoggle.entities.Customer;
+import com.example.featuretoggle.model.response.CustomerDTO;
 import com.example.featuretoggle.services.CustomerService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
@@ -62,7 +63,7 @@ class CustomerControllerTest {
     @Test
     void shouldFindCustomerById() throws Exception {
         Long customerId = 1L;
-        Customer customer = new Customer(customerId, "text 1", "name 1", 1);
+        CustomerDTO customer = new CustomerDTO(customerId, "text 1", "name 1", 1);
         given(customerService.findCustomerById(customerId)).willReturn(Optional.of(customer));
 
         this.mockMvc
@@ -120,7 +121,7 @@ class CustomerControllerTest {
     @Test
     void shouldUpdateCustomer() throws Exception {
         Long customerId = 1L;
-        Customer customer = new Customer(customerId, "Updated text", "name 1", 1);
+        CustomerDTO customer = new CustomerDTO(customerId, "Updated text", "name 1", 1);
         given(customerService.findCustomerById(customerId)).willReturn(Optional.of(customer));
         given(customerService.saveCustomer(any(Customer.class)))
                 .willAnswer((invocation) -> invocation.getArgument(0));
@@ -151,7 +152,7 @@ class CustomerControllerTest {
     @Test
     void shouldDeleteCustomer() throws Exception {
         Long customerId = 1L;
-        Customer customer = new Customer(customerId, "Some text", "name 1", 1);
+        CustomerDTO customer = new CustomerDTO(customerId, "Some text", "name 1", 1);
         given(customerService.findCustomerById(customerId)).willReturn(Optional.of(customer));
         doNothing().when(customerService).deleteCustomerById(customer.getId());
 

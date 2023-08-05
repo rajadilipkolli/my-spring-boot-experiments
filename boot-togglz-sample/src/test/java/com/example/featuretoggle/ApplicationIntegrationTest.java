@@ -12,11 +12,16 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
 
-@TestPropertySource(properties = {"togglz.features.ADD_NEW_FIELDS.enabled=true"})
+@TestPropertySource(
+        properties = {
+            "togglz.features.TEXT.enabled=false",
+            "togglz.features.NAME.enabled=false",
+            "togglz.features.ZIP.enabled=true"
+        })
 class ApplicationIntegrationTest extends AbstractIntegrationTest {
 
     @Test
-    void shouldNotFindCustomerById() throws Exception {
+    void shouldFindCustomerByIdWithEmptyData() throws Exception {
         Customer customer = new Customer(101L, "New Customer", "name 1", 1);
         this.mockMvc
                 .perform(
@@ -24,10 +29,17 @@ class ApplicationIntegrationTest extends AbstractIntegrationTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(customer)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.text", is(customer.getText())));
+                .andExpect(jsonPath("$.text", is(customer.getText())))
+                .andExpect(jsonPath("$.name", is(customer.getName())))
+                .andExpect(jsonPath("$.zipCode").value(customer.getZipCode()))
+                .andExpect(jsonPath("$.id", is(1)));
 
         this.mockMvc
-                .perform(get("/api/customers/{id}", customer.getId()))
-                .andExpect(status().isNotFound());
+                .perform(get("/api/customers/{id}", 1))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.text").doesNotExist())
+                .andExpect(jsonPath("$.name").doesNotExist())
+                .andExpect(jsonPath("$.zipCode").value(customer.getZipCode()))
+                .andExpect(jsonPath("$.id", is(1)));
     }
 }

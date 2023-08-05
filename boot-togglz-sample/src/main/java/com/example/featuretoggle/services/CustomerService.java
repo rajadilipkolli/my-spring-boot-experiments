@@ -1,6 +1,7 @@
 package com.example.featuretoggle.services;
 
 import com.example.featuretoggle.entities.Customer;
+import com.example.featuretoggle.model.response.CustomerDTO;
 import com.example.featuretoggle.repositories.CustomerRepository;
 import java.util.List;
 import java.util.Optional;
@@ -20,17 +21,33 @@ public class CustomerService {
 
     private final FeatureManager featureManager;
 
-    public static final Feature ADD_NEW_FIELDS = new NamedFeature("ADD_NEW_FIELDS");
+    private static final Feature NAME = new NamedFeature("NAME");
+    private static final Feature TEXT = new NamedFeature("TEXT");
+    private static final Feature ZIP = new NamedFeature("ZIP");
 
     public List<Customer> findAllCustomers() {
         return customerRepository.findAll();
     }
 
-    public Optional<Customer> findCustomerById(Long id) {
-        if (featureManager.isActive(ADD_NEW_FIELDS)) {
-            return Optional.empty();
-        }
-        return customerRepository.findById(id);
+    public Optional<CustomerDTO> findCustomerById(Long id) {
+
+        return customerRepository
+                .findById(id)
+                .map(
+                        cust -> {
+                            CustomerDTO customerDTO = new CustomerDTO();
+                            customerDTO.setId(cust.getId());
+                            if (featureManager.isActive(NAME)) {
+                                customerDTO.setName(cust.getName());
+                            }
+                            if (featureManager.isActive(TEXT)) {
+                                customerDTO.setText(cust.getText());
+                            }
+                            if (featureManager.isActive(ZIP)) {
+                                customerDTO.setZipCode(cust.getZipCode());
+                            }
+                            return customerDTO;
+                        });
     }
 
     public Customer saveCustomer(Customer customer) {

@@ -1,10 +1,10 @@
 package com.example.featuretoggle.web.controllers;
 
 import com.example.featuretoggle.entities.Customer;
+import com.example.featuretoggle.model.response.CustomerDTO;
 import com.example.featuretoggle.services.CustomerService;
 import java.util.List;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -20,15 +20,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/customers")
-@Slf4j
+@RequiredArgsConstructor
 public class CustomerController {
 
     private final CustomerService customerService;
-
-    @Autowired
-    public CustomerController(CustomerService customerService) {
-        this.customerService = customerService;
-    }
 
     @GetMapping
     public List<Customer> getAllCustomers() {
@@ -36,7 +31,7 @@ public class CustomerController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Customer> getCustomerById(@PathVariable Long id) {
+    public ResponseEntity<CustomerDTO> getCustomerById(@PathVariable Long id) {
         return customerService
                 .findCustomerById(id)
                 .map(ResponseEntity::ok)
@@ -63,7 +58,7 @@ public class CustomerController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Customer> deleteCustomer(@PathVariable Long id) {
+    public ResponseEntity<CustomerDTO> deleteCustomer(@PathVariable Long id) {
         return customerService
                 .findCustomerById(id)
                 .map(
