@@ -16,7 +16,7 @@ public class DatabaseTogglzConfiguration {
     private final DataSource dataSource;
 
     @Bean
-    StateRepository getStateRepository() {
+    StateRepository jdbcStateRepository() {
         return JDBCStateRepository.newBuilder(dataSource).createTable(false).build();
     }
 

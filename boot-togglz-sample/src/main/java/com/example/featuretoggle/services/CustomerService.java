@@ -1,5 +1,6 @@
 package com.example.featuretoggle.services;
 
+import com.example.featuretoggle.config.logging.Loggable;
 import com.example.featuretoggle.entities.Customer;
 import com.example.featuretoggle.model.response.CustomerDTO;
 import com.example.featuretoggle.repositories.CustomerRepository;
@@ -9,12 +10,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.togglz.core.Feature;
+import org.togglz.core.activation.UsernameActivationStrategy;
 import org.togglz.core.manager.FeatureManager;
 import org.togglz.core.util.NamedFeature;
 
 @Service
 @Transactional
 @RequiredArgsConstructor
+@Loggable
 public class CustomerService {
 
     private final CustomerRepository customerRepository;
@@ -25,10 +28,12 @@ public class CustomerService {
     private static final Feature TEXT = new NamedFeature("TEXT");
     private static final Feature ZIP = new NamedFeature("ZIP");
 
+    @Transactional(readOnly = true)
     public List<Customer> findAllCustomers() {
         return customerRepository.findAll();
     }
 
+    @Transactional(readOnly = true)
     public Optional<CustomerDTO> findCustomerById(Long id) {
 
         return customerRepository
@@ -37,7 +42,12 @@ public class CustomerService {
                         cust -> {
                             CustomerDTO customerDTO = new CustomerDTO();
                             customerDTO.setId(cust.getId());
-                            if (featureManager.isActive(NAME)) {
+                            if (new UsernameActivationStrategy()
+                                    .isActive(
+                                            featureManager
+                                                    .getMetaData(NAME)
+                                                    .getDefaultFeatureState(),
+                                            featureManager.getCurrentFeatureUser())) {
                                 customerDTO.setName(cust.getName());
                             }
                             if (featureManager.isActive(TEXT)) {
