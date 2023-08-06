@@ -45,7 +45,7 @@ dependencies {
     runtimeOnly ("org.postgresql:r2dbc-postgresql")
     runtimeOnly ("org.postgresql:postgresql")
     implementation("org.liquibase:liquibase-core")
-    implementation("org.springdoc:springdoc-openapi-starter-webflux-ui:2.1.0")
+    implementation("org.springdoc:springdoc-openapi-starter-webflux-ui:2.2.0")
     implementation("org.apache.commons:commons-lang3")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
