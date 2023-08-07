@@ -20,7 +20,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
         <java.version>17</java.version>
-        <springdoc-openapi.version>2.1.0</springdoc-openapi.version>
+        <springdoc-openapi.version>2.2.0</springdoc-openapi.version>
         <commons-io.version>2.13.0</commons-io.version>
         <org.mapstruct.extensions.spring.version>1.0.1</org.mapstruct.extensions.spring.version>
         <org.mapstruct.version>1.5.5.Final</org.mapstruct.version>
