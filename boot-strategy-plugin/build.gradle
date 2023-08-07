@@ -18,20 +18,20 @@ repositories {
 
 dependencies {
 	implementation 'org.springframework.plugin:spring-plugin-core:3.0.0'
-    implementation 'org.springframework.plugin:spring-plugin-metadata:3.0.0'
+	implementation 'org.springframework.plugin:spring-plugin-metadata:3.0.0'
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 	implementation 'org.springframework.boot:spring-boot-starter-aop'
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	//Swagger
-    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:${springdoc_openapi_version}'
+	implementation "org.springdoc:springdoc-openapi-starter-webmvc-ui:${springdoc_openapi_version}"
 	// For Tracing
 	// OpenTelemetry version
 	implementation 'io.micrometer:micrometer-tracing-bridge-otel'
 	//For Latency Visualization
-    implementation 'io.opentelemetry:opentelemetry-exporter-zipkin'
+	implementation 'io.opentelemetry:opentelemetry-exporter-zipkin'
 	// For pushing logs out
-    runtimeOnly  'com.github.loki4j:loki-logback-appender:1.4.1'
+	runtimeOnly  'com.github.loki4j:loki-logback-appender:1.4.1'
 	runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }

@@ -10,8 +10,10 @@ vscode:
     - vscjava.vscode-java-pack
     - Pivotal.vscode-boot-dev-pack
     - GabrielBB.vscode-lombok
-    - GraphQL.vscode-graphql
     - richardwillis.vscode-gradle
+    - GraphQL.vscode-graphql
+    - GraphQL.vscode-graphql-syntax
+    - redhat.java
 
 ports:
   - port: 3000
