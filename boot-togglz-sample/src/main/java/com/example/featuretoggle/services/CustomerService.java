@@ -10,7 +10,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.togglz.core.Feature;
-import org.togglz.core.activation.UsernameActivationStrategy;
 import org.togglz.core.manager.FeatureManager;
 import org.togglz.core.util.NamedFeature;
 
@@ -42,12 +41,7 @@ public class CustomerService {
                         cust -> {
                             CustomerDTO customerDTO = new CustomerDTO();
                             customerDTO.setId(cust.getId());
-                            if (new UsernameActivationStrategy()
-                                    .isActive(
-                                            featureManager
-                                                    .getMetaData(NAME)
-                                                    .getDefaultFeatureState(),
-                                            featureManager.getCurrentFeatureUser())) {
+                            if (featureManager.isActive(NAME)) {
                                 customerDTO.setName(cust.getName());
                             }
                             if (featureManager.isActive(TEXT)) {

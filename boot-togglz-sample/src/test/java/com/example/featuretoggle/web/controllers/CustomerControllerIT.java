@@ -55,7 +55,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.text", is(customer.getText())))
                 .andExpect(jsonPath("$.id", is(customerId), Long.class))
-                .andExpect(jsonPath("$.name").doesNotExist())
+                .andExpect(jsonPath("$.name").value(customer.getName()))
                 .andExpect(jsonPath("$.zipCode").doesNotExist());
     }
 
@@ -121,6 +121,6 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.text", is(customer.getText())))
                 .andExpect(jsonPath("$.name", is(customer.getName())))
                 .andExpect(jsonPath("$.id", is(customer.getId()), Long.class))
-                .andExpect(jsonPath("$.zipCode", is(customer.getZipCode())));
+                .andExpect(jsonPath("$.zipCode").doesNotExist());
     }
 }
