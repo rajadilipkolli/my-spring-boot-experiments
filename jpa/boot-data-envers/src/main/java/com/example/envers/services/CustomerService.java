@@ -1,10 +1,12 @@
 package com.example.envers.services;
 
 import com.example.envers.entities.Customer;
+import com.example.envers.mapper.CustomerRevisionToRevisionDTOMapper;
 import com.example.envers.model.RevisionDTO;
 import com.example.envers.repositories.CustomerRepository;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class CustomerService {
 
     private final CustomerRepository customerRepository;
+    private final CustomerRevisionToRevisionDTOMapper customerRevisionToRevisionDTOMapper;
 
     public List<Customer> findAllCustomers() {
         return customerRepository.findAll();
@@ -26,12 +29,7 @@ public class CustomerService {
 
     public List<RevisionDTO> findCustomerRevisionsById(Long id) {
         return customerRepository.findRevisions(id).getContent().stream()
-                .map(customerRevision -> new RevisionDTO(
-                        customerRevision.getEntity(),
-                        customerRevision.getMetadata().getRevisionNumber(),
-                        customerRevision.getMetadata().getRevisionType().name(),
-                        customerRevision.getMetadata().getRevisionInstant()))
-                .toList();
+                .collect(Collectors.mapping(customerRevisionToRevisionDTOMapper::convert, Collectors.toList()));
     }
 
     @Transactional
