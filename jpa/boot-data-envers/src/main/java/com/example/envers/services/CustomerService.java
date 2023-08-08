@@ -6,7 +6,7 @@ import com.example.envers.model.RevisionDTO;
 import com.example.envers.repositories.CustomerRepository;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.concurrent.CompletableFuture;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,8 +28,11 @@ public class CustomerService {
     }
 
     public List<RevisionDTO> findCustomerRevisionsById(Long id) {
-        return customerRepository.findRevisions(id).getContent().stream()
-                .collect(Collectors.mapping(customerRevisionToRevisionDTOMapper::convert, Collectors.toList()));
+        List<CompletableFuture<RevisionDTO>> revisionDtoCF = customerRepository.findRevisions(id).getContent().stream()
+                .map(customerRevision -> CompletableFuture.supplyAsync(
+                        () -> customerRevisionToRevisionDTOMapper.convert(customerRevision)))
+                .toList();
+        return revisionDtoCF.stream().map(CompletableFuture::join).toList();
     }
 
     @Transactional
