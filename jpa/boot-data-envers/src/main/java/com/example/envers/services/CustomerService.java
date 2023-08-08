@@ -28,7 +28,9 @@ public class CustomerService {
     }
 
     public List<RevisionDTO> findCustomerRevisionsById(Long id) {
-        List<CompletableFuture<RevisionDTO>> revisionDtoCF = customerRepository.findRevisions(id).getContent().stream()
+        List<CompletableFuture<RevisionDTO>> revisionDtoCF = customerRepository
+                .findRevisions(id)
+                .get()
                 .map(customerRevision -> CompletableFuture.supplyAsync(
                         () -> customerRevisionToRevisionDTOMapper.convert(customerRevision)))
                 .toList();
