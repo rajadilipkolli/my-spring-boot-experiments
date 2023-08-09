@@ -39,10 +39,7 @@ class RabbitMQIntegrationTest {
 
     @Test
     void testSendingMessage() throws Exception {
-        Order order = new Order();
-        order.setOrderNumber("1");
-        order.setAmount(10d);
-        order.setProductId("P1");
+        Order order = new Order("1", "P1", 10d);
         long count = trackingStateRepository.countByStatus("processed");
         mockMvc.perform(
                         post("/sendMsg")
@@ -63,10 +60,7 @@ class RabbitMQIntegrationTest {
     @Test
     void testSendingFailedMessage() throws Exception {
         long count = trackingStateRepository.countByStatus("processed");
-        Order order = new Order();
-        order.setOrderNumber("2");
-        order.setAmount(-10d);
-        order.setProductId("P2");
+        Order order = new Order("2", "P2", -10d);
         mockMvc.perform(post("/sendMsg").flashAttr("order", order))
                 .andExpect(status().isFound())
                 .andExpect(redirectedUrl("/"))

@@ -24,7 +24,7 @@ public class OrderMessageListener {
     @RabbitListener(queues = ORDERS_QUEUE)
     public void processOrder(Order order) {
         log.debug("Order Received: {}", order);
-        if (order.getAmount() < 0) {
+        if (order.amount() < 0) {
             throw new AmqpRejectAndDontRequeueException("Order Rejected");
         }
     }

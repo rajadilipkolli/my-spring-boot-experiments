@@ -68,7 +68,7 @@ class MessageControllerTest {
                 .andExpect(
                         jsonPath("$.detail")
                                 .value(
-                                        "Unable To Parse Order(orderNumber=1, productId=P1, amount=10.0)"))
+                                        "Unable To Parse Order[orderNumber=1, productId=P1, amount=10.0]"))
                 .andExpect(jsonPath("$.instance").value("/sendMsg"));
     }
 }
