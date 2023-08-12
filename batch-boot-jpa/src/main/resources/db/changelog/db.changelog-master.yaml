@@ -3,3 +3,27 @@ databaseChangeLog:
       path: migration/
       errorIfMissingOrEmpty: true
       relativeToChangelogFile: true
+
+  - changeSet:
+      dbms: postgresql
+      id: create-spring-batch-metadata
+      author: raja
+      changes:
+        - sqlFile:
+            encoding: UTF-8
+            path: classpath:/org/springframework/batch/core/schema-postgresql.sql
+            relativeToChangelogFile: false
+            splitStatements: true
+            stripComments: true
+
+  - changeSet:
+      dbms: h2
+      id: create-spring-batch-metadata
+      author: raja
+      changes:
+        - sqlFile:
+            encoding: UTF-8
+            path: classpath:/org/springframework/batch/core/schema-h2.sql
+            relativeToChangelogFile: false
+            splitStatements: true
+            stripComments: true

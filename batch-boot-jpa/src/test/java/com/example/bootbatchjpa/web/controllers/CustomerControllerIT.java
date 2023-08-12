@@ -3,6 +3,7 @@ package com.example.bootbatchjpa.web.controllers;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.Matchers.hasSize;
+import static org.instancio.Select.field;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -14,8 +15,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.example.bootbatchjpa.common.AbstractIntegrationTest;
 import com.example.bootbatchjpa.entities.Customer;
 import com.example.bootbatchjpa.repositories.CustomerRepository;
-import java.util.ArrayList;
 import java.util.List;
+import org.instancio.Instancio;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,10 +33,11 @@ class CustomerControllerIT extends AbstractIntegrationTest {
     void setUp() {
         customerRepository.deleteAllInBatch();
 
-        customerList = new ArrayList<>();
-        customerList.add(new Customer(null, "First Customer"));
-        customerList.add(new Customer(null, "Second Customer"));
-        customerList.add(new Customer(null, "Third Customer"));
+        customerList = Instancio.ofList(Customer.class)
+                .size(3)
+                .generate(field(Customer.class, "gender"), gen -> gen.oneOf("male", "female"))
+                .create();
+
         customerList = customerRepository.saveAll(customerList);
     }
 
@@ -63,24 +65,24 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                 .perform(get("/api/customers/{id}", customerId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(customer.getId()), Long.class))
-                .andExpect(jsonPath("$.text", is(customer.getText())));
+                .andExpect(jsonPath("$.name", is(customer.getName())));
     }
 
     @Test
     void shouldCreateNewCustomer() throws Exception {
-        Customer customer = new Customer(null, "New Customer");
+        Customer customer = Instancio.create(Customer.class);
         this.mockMvc
                 .perform(post("/api/customers")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(customer)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id", notNullValue()))
-                .andExpect(jsonPath("$.text", is(customer.getText())));
+                .andExpect(jsonPath("$.name", is(customer.getName())));
     }
 
     @Test
     void shouldReturn400WhenCreateNewCustomerWithoutText() throws Exception {
-        Customer customer = new Customer(null, null);
+        Customer customer = new Customer(null, null, null, null);
 
         this.mockMvc
                 .perform(post("/api/customers")
@@ -94,15 +96,15 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.detail", is("Invalid request content.")))
                 .andExpect(jsonPath("$.instance", is("/api/customers")))
                 .andExpect(jsonPath("$.violations", hasSize(1)))
-                .andExpect(jsonPath("$.violations[0].field", is("text")))
-                .andExpect(jsonPath("$.violations[0].message", is("Text cannot be empty")))
+                .andExpect(jsonPath("$.violations[0].field", is("name")))
+                .andExpect(jsonPath("$.violations[0].message", is("Name cannot be empty")))
                 .andReturn();
     }
 
     @Test
     void shouldUpdateCustomer() throws Exception {
         Customer customer = customerList.get(0);
-        customer.setText("Updated Customer");
+        customer.setName("Updated Customer");
 
         this.mockMvc
                 .perform(put("/api/customers/{id}", customer.getId())
@@ -110,7 +112,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                         .content(objectMapper.writeValueAsString(customer)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(customer.getId()), Long.class))
-                .andExpect(jsonPath("$.text", is(customer.getText())));
+                .andExpect(jsonPath("$.name", is("Updated Customer")));
     }
 
     @Test
@@ -121,6 +123,6 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                 .perform(delete("/api/customers/{id}", customer.getId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(customer.getId()), Long.class))
-                .andExpect(jsonPath("$.text", is(customer.getText())));
+                .andExpect(jsonPath("$.name", is(customer.getName())));
     }
 }

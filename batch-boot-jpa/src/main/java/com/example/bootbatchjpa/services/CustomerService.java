@@ -1,5 +1,6 @@
 package com.example.bootbatchjpa.services;
 
+import com.example.bootbatchjpa.config.logging.Loggable;
 import com.example.bootbatchjpa.entities.Customer;
 import com.example.bootbatchjpa.model.response.PagedResult;
 import com.example.bootbatchjpa.repositories.CustomerRepository;
@@ -14,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Transactional
+@Loggable
 public class CustomerService {
 
     private final CustomerRepository customerRepository;
@@ -23,6 +25,7 @@ public class CustomerService {
         this.customerRepository = customerRepository;
     }
 
+    @Transactional(readOnly = true)
     public PagedResult<Customer> findAllCustomers(int pageNo, int pageSize, String sortBy, String sortDir) {
         Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name())
                 ? Sort.by(sortBy).ascending()
@@ -35,6 +38,7 @@ public class CustomerService {
         return new PagedResult<>(customersPage);
     }
 
+    @Transactional(readOnly = true)
     public Optional<Customer> findCustomerById(Long id) {
         return customerRepository.findById(id);
     }

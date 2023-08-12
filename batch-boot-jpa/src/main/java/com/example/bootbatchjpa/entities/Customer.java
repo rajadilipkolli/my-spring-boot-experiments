@@ -27,8 +27,12 @@ public class Customer {
     private Long id;
 
     @Column(nullable = false)
-    @NotEmpty(message = "Text cannot be empty")
-    private String text;
+    @NotEmpty(message = "Name cannot be empty")
+    private String name;
+
+    private String address;
+
+    private String gender;
 
     @Override
     public boolean equals(Object o) {

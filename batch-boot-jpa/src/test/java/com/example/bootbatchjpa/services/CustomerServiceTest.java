@@ -63,7 +63,7 @@ class CustomerServiceTest {
         assertThat(optionalCustomer).isPresent();
         Customer customer = optionalCustomer.get();
         assertThat(customer.getId()).isEqualTo(1L);
-        assertThat(customer.getText()).isEqualTo("junitTest");
+        assertThat(customer.getName()).isEqualTo("junitName");
     }
 
     @Test
@@ -75,7 +75,7 @@ class CustomerServiceTest {
         // then
         assertThat(persistedCustomer).isNotNull();
         assertThat(persistedCustomer.getId()).isEqualTo(1L);
-        assertThat(persistedCustomer.getText()).isEqualTo("junitTest");
+        assertThat(persistedCustomer.getName()).isEqualTo("junitName");
     }
 
     @Test
@@ -91,7 +91,9 @@ class CustomerServiceTest {
     private Customer getCustomer() {
         Customer customer = new Customer();
         customer.setId(1L);
-        customer.setText("junitTest");
+        customer.setName("junitName");
+        customer.setAddress("junitAddress");
+        customer.setGender("male");
         return customer;
     }
 }
