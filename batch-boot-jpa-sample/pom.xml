@@ -11,9 +11,9 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.example.bootbatchjpa</groupId>
-    <artifactId>batch-boot-jpa</artifactId>
+    <artifactId>batch-boot-jpa-sample</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>batch-boot-jpa</name>
+    <name>batch-boot-jpa-sample</name>
     <description>batch-boot-jpa</description>
 
     <properties>

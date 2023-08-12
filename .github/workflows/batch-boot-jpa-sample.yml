@@ -1,4 +1,4 @@
-name: batch-boot-jpa CI Build
+name: batch-boot-jpa-sample CI Build
 
 on:
   push:
@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: batch-boot-jpa
+        working-directory: batch-boot-jpa-sample
     strategy:
       matrix:
         distribution: [ 'temurin' ]

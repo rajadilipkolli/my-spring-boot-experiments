@@ -1,5 +1,7 @@
 "component : archunit":
  - boot-api-archunit-sample/**/*
+"component : spring-batch":
+ - batch-boot-jpa-sample/**/*
 "component : choas-monkey":
  - boot-choas-monkey/**/*
 "component: graphql-webflux":
@@ -46,6 +48,7 @@
   - ./**/*
 "type: documentation": docs/**/*
 "type: dependency-upgrade":
+  - batch-boot-jpa-sample/pom.xml
   - boot-api-archunit-sample/pom.xml
   - boot-choas-monkey/pom.xml
   - jpa/boot-data-envers/build.gradle
