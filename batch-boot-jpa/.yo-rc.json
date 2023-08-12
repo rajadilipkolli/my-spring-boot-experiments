@@ -1,0 +1,13 @@
+{
+  "generator-springboot": {
+    "appName": "batch-boot-jpa",
+    "packageName": "com.example.bootbatchjpa",
+    "databaseType": "postgresql",
+    "dbMigrationTool": "liquibase",
+    "dbMigrationFormat": "xml",
+    "features": [],
+    "buildTool": "maven",
+    "packageFolder": "com/example/bootbatchjpa",
+    "liquibaseMigrationCounter": 2
+  }
+}

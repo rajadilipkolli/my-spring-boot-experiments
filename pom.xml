@@ -9,6 +9,7 @@
     <packaging>pom</packaging>
 
     <modules>
+        <module>batch-boot-jpa</module>
         <module>boot-api-archunit-sample</module>
         <module>boot-choas-monkey</module>
         <module>boot-jobrunr-sample</module>
