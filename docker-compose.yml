@@ -12,7 +12,7 @@ services:
       - SA_PASSWORD=password
 
   mysql:
-    image: mysql:8
+    image: mysql:8.1
     ports:
       - "3306:3306"
     volumes:
@@ -24,7 +24,7 @@ services:
       - MYSQL_DATABASE=mydatabase
 
   postgres:
-    image: postgres:latest
+    image: postgres:15.4-alpine
     ports:
       - "5432:5432"
     volumes:
