@@ -46,10 +46,10 @@
             <version>${springdoc-openapi.version}</version>
         </dependency>
 
-        <!-- <dependency>
+        <dependency>
             <groupId>org.liquibase</groupId>
             <artifactId>liquibase-core</artifactId>
-        </dependency> -->
+        </dependency>
 
         <dependency>
             <groupId>org.postgresql</groupId>
