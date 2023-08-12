@@ -25,7 +25,8 @@ public class Initializer implements CommandLineRunner {
                 .size(1000)
                 .generate(field(Customer.class, "gender"), gen -> gen.oneOf("male", "female"))
                 .create();
-        customerRepository.saveAll(customerList);
-        log.info("Inserted customers.....");
+        log.info("Saving Customers of size :{}", customerList.size());
+        customerList = customerRepository.saveAll(customerList);
+        log.info("Inserted customers of size :{}", customerList.size());
     }
 }

@@ -176,6 +176,16 @@
             "projectName": "boot-read-replica-postgresql",
             "args": "",
             "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-Application<batch-boot-jpa-sample>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.example.bootbatchjpa.Application",
+            "projectName": "batch-boot-jpa-sample",
+            "args": "--spring.profiles.active=local",
+            "envFile": "${workspaceFolder}/.env"
         }
     ]
 }
