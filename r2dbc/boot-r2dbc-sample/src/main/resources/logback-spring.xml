@@ -19,6 +19,7 @@
     </springProfile>
 
     <logger name="com.example.bootr2dbc" level="DEBUG"/>
+    <logger name="org.springframework.security" level="DEBUG"/>
     <logger name="org.springframework" level="INFO"/>
 
 </configuration>
