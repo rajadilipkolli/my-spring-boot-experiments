@@ -8,6 +8,6 @@
     "features": [],
     "buildTool": "maven",
     "packageFolder": "com/example/bootr2dbc",
-    "liquibaseMigrationCounter": 2
+    "liquibaseMigrationCounter": 1
   }
 }

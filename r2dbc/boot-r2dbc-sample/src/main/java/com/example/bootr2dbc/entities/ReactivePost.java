@@ -1,8 +1,7 @@
 package com.example.bootr2dbc.entities;
 
 import java.time.LocalDateTime;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
@@ -11,9 +10,11 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
-@Getter
-@Setter
+@Data
 @Table("reactive_posts")
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class ReactivePost {
 
     @Id
@@ -41,9 +42,4 @@ public class ReactivePost {
     @Column("updated_by")
     @LastModifiedBy
     private String updatedBy;
-
-    public ReactivePost(String title, String content) {
-        this.title = title;
-        this.content = content;
-    }
 }
