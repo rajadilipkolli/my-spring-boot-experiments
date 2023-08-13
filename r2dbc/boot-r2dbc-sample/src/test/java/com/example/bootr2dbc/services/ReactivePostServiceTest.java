@@ -9,6 +9,9 @@ import static org.mockito.BDDMockito.willDoNothing;
 import com.example.bootr2dbc.entities.ReactivePost;
 import com.example.bootr2dbc.model.response.PagedResult;
 import com.example.bootr2dbc.repositories.ReactivePostRepository;
+
+import reactor.core.publisher.Mono;
+
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
@@ -58,7 +61,7 @@ class ReactivePostServiceTest {
         // given
         given(reactivePostRepository.findById(1L)).willReturn(Optional.of(getReactivePost()));
         // when
-        Optional<ReactivePost> optionalReactivePost = reactivePostService.findReactivePostById(1L);
+        Mono<ReactivePost> optionalReactivePost = reactivePostService.findReactivePostById(1L);
         // then
         assertThat(optionalReactivePost).isPresent();
         ReactivePost reactivePost = optionalReactivePost.get();
