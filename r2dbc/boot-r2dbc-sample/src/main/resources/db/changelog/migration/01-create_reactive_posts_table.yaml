@@ -1,5 +1,13 @@
 # https://docs.liquibase.com/concepts/changelogs/yaml-format.html
 databaseChangeLog:
+  - property:
+      name: stringType
+      value: text
+      dbms: postgres
+  - property:
+      name: stringType
+      value: varchar(255)
+      dbms: '!postgres'
   - changeSet:
       author: author
       id: createTable-reactive_posts
@@ -20,12 +28,12 @@ databaseChangeLog:
                     nullable: false
               - column:
                   name: title
-                  type: varchar(1024)
+                  type: ${stringType}
                   constraints:
                     nullable: false
               - column:
                   name: content
-                  type: varchar(255)
+                  type: ${stringType}
                   constraints:
                     nullable: false
               - column:
@@ -33,10 +41,10 @@ databaseChangeLog:
                   type: timestamptz
               - column:
                   name: created_by
-                  type: varchar(255)
+                  type: ${stringType}
               - column:
                   name: updated_at
                   type: timestamptz
               - column:
                   name: updated_by
-                  type: varchar(255)
+                  type: ${stringType}

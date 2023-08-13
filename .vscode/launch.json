@@ -196,6 +196,16 @@
             "projectName": "boot-graphql-webmvc",
             "args": "",
             "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-Application<boot-r2dbc-sample>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.example.bootr2dbc.Application",
+            "projectName": "boot-r2dbc-sample",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
         }
     ]
 }
