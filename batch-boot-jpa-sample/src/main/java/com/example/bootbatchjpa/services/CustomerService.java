@@ -5,7 +5,7 @@ import com.example.bootbatchjpa.entities.Customer;
 import com.example.bootbatchjpa.model.response.PagedResult;
 import com.example.bootbatchjpa.repositories.CustomerRepository;
 import java.util.Optional;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -16,14 +16,10 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional
 @Loggable
+@RequiredArgsConstructor
 public class CustomerService {
 
     private final CustomerRepository customerRepository;
-
-    @Autowired
-    public CustomerService(CustomerRepository customerRepository) {
-        this.customerRepository = customerRepository;
-    }
 
     @Transactional(readOnly = true)
     public PagedResult<Customer> findAllCustomers(int pageNo, int pageSize, String sortBy, String sortDir) {

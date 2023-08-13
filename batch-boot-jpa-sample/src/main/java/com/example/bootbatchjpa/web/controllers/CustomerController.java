@@ -4,8 +4,7 @@ import com.example.bootbatchjpa.entities.Customer;
 import com.example.bootbatchjpa.model.response.PagedResult;
 import com.example.bootbatchjpa.services.CustomerService;
 import com.example.bootbatchjpa.utils.AppConstants;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -22,15 +21,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/customers")
-@Slf4j
+@RequiredArgsConstructor
 public class CustomerController {
 
     private final CustomerService customerService;
-
-    @Autowired
-    public CustomerController(CustomerService customerService) {
-        this.customerService = customerService;
-    }
 
     @GetMapping
     public PagedResult<Customer> getAllCustomers(

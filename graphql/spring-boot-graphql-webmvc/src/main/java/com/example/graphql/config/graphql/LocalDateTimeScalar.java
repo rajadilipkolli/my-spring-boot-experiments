@@ -1,13 +1,9 @@
 package com.example.graphql.config.graphql;
 
 import static graphql.scalars.util.Kit.typeName;
-import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE;
-import static java.time.temporal.ChronoField.HOUR_OF_DAY;
-import static java.time.temporal.ChronoField.MINUTE_OF_HOUR;
-import static java.time.temporal.ChronoField.NANO_OF_SECOND;
-import static java.time.temporal.ChronoField.OFFSET_SECONDS;
-import static java.time.temporal.ChronoField.SECOND_OF_MINUTE;
 
+import graphql.GraphQLContext;
+import graphql.execution.CoercedVariables;
 import graphql.language.StringValue;
 import graphql.language.Value;
 import graphql.schema.Coercing;
@@ -17,11 +13,9 @@ import graphql.schema.CoercingSerializeException;
 import graphql.schema.GraphQLScalarType;
 import java.time.DateTimeException;
 import java.time.LocalDateTime;
-import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeFormatterBuilder;
 import java.time.format.DateTimeParseException;
-import java.util.function.Function;
+import java.util.Locale;
 
 // Copied from DateTimeScalar which supports OffsetDateTime
 public class LocalDateTimeScalar {
@@ -34,53 +28,62 @@ public class LocalDateTimeScalar {
         Coercing<LocalDateTime, String> coercing =
                 new Coercing<>() {
                     @Override
-                    public String serialize(Object input) throws CoercingSerializeException {
-                        LocalDateTime localDateTime;
-                        if (input instanceof LocalDateTime) {
-                            localDateTime = (LocalDateTime) input;
-                        } else if (input instanceof ZonedDateTime) {
-                            localDateTime = ((ZonedDateTime) input).toLocalDateTime();
-                        } else if (input instanceof String) {
-                            localDateTime =
-                                    parseOffsetDateTime(
-                                            input.toString(), CoercingSerializeException::new);
+                    public String serialize(
+                            Object dataFetcherResult, GraphQLContext graphQLContext, Locale locale)
+                            throws CoercingSerializeException {
+                        if (dataFetcherResult instanceof LocalDateTime localDateTime) {
+                            try {
+                                return localDateTime.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+                            } catch (ClassCastException | DateTimeException exception) {
+                                throw new CoercingSerializeException(
+                                        "Unable to turn TemporalAccessor into LocalDateTime because of : '"
+                                                + exception.getMessage()
+                                                + "'.");
+                            }
                         } else {
                             throw new CoercingSerializeException(
-                                    "Expected something we can convert to 'java.time.OffsetDateTime' but was '"
-                                            + typeName(input)
-                                            + "'.");
-                        }
-                        try {
-                            return customOutputFormatter.format(localDateTime);
-                        } catch (DateTimeException e) {
-                            throw new CoercingSerializeException(
-                                    "Unable to turn TemporalAccessor into OffsetDateTime because of : '"
-                                            + e.getMessage()
+                                    "Expected something we can convert to 'java.time.LocalDateTime' but was '"
+                                            + typeName(dataFetcherResult)
                                             + "'.");
                         }
                     }
 
                     @Override
-                    public LocalDateTime parseValue(Object input)
+                    public LocalDateTime parseValue(
+                            Object input, GraphQLContext graphQLContext, Locale locale)
                             throws CoercingParseValueException {
-                        LocalDateTime localDateTime;
-                        if (input instanceof LocalDateTime) {
-                            localDateTime = (LocalDateTime) input;
-                        } else if (input instanceof ZonedDateTime) {
-                            localDateTime = ((ZonedDateTime) input).toLocalDateTime();
-                        } else if (input instanceof String) {
-                            localDateTime =
-                                    parseOffsetDateTime(
-                                            input.toString(), CoercingParseValueException::new);
-                        } else {
+                        // Will be String if the value is specified via external variables object,
+                        // and a StringValue
+                        // if provided direct in the query.
+                        if (input instanceof StringValue stringValue) {
+                            return parseString(stringValue.getValue());
+                        }
+                        if (input instanceof String inputString) {
+                            return parseString(inputString);
+                        }
+                        if (input instanceof LocalDateTime localDateTime) {
+                            return localDateTime;
+                        }
+                        throw new CoercingParseValueException(
+                                "Expected a 'String' but was '" + typeName(input) + "'.");
+                    }
+
+                    private LocalDateTime parseString(String input) {
+                        try {
+                            return LocalDateTime.parse(
+                                    input, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+                        } catch (DateTimeParseException parseException) {
                             throw new CoercingParseValueException(
                                     "Expected a 'String' but was '" + typeName(input) + "'.");
                         }
-                        return localDateTime;
                     }
 
                     @Override
-                    public LocalDateTime parseLiteral(Object input)
+                    public LocalDateTime parseLiteral(
+                            Value<?> input,
+                            CoercedVariables variables,
+                            GraphQLContext graphQLContext,
+                            Locale locale)
                             throws CoercingParseLiteralException {
                         if (!(input instanceof StringValue)) {
                             throw new CoercingParseLiteralException(
@@ -88,37 +91,18 @@ public class LocalDateTimeScalar {
                                             + typeName(input)
                                             + "'.");
                         }
-                        return parseOffsetDateTime(
-                                ((StringValue) input).getValue(),
-                                CoercingParseLiteralException::new);
+                        try {
+                            return parseValue(input, graphQLContext, locale);
+                        } catch (CoercingParseValueException exception) {
+                            throw new CoercingParseLiteralException(exception);
+                        }
                     }
 
                     @Override
-                    public Value<?> valueToLiteral(Object input) {
-                        String s = serialize(input);
+                    public Value<?> valueToLiteral(
+                            Object input, GraphQLContext graphQLContext, Locale locale) {
+                        String s = serialize(input, graphQLContext, locale);
                         return StringValue.newStringValue(s).build();
-                    }
-
-                    private LocalDateTime parseOffsetDateTime(
-                            String s, Function<String, RuntimeException> exceptionMaker) {
-                        try {
-                            LocalDateTime parse =
-                                    LocalDateTime.parse(s, DateTimeFormatter.ISO_OFFSET_DATE_TIME);
-                            if (parse.get(OFFSET_SECONDS) == 0 && s.endsWith("-00:00")) {
-                                throw exceptionMaker.apply(
-                                        "Invalid value : '"
-                                                + s
-                                                + "'. Negative zero offset is not allowed");
-                            }
-                            return parse;
-                        } catch (DateTimeParseException e) {
-                            throw exceptionMaker.apply(
-                                    "Invalid RFC3339 value : '"
-                                            + s
-                                            + "'. because of : '"
-                                            + e.getMessage()
-                                            + "'");
-                        }
                     }
                 };
 
@@ -126,29 +110,10 @@ public class LocalDateTimeScalar {
                 GraphQLScalarType.newScalar()
                         .name("LocalDateTime")
                         .description(
-                                "A slightly refined version of RFC-3339 compliant DateTime Scalar")
-                        .specifiedByUrl(
-                                "https://scalars.graphql.org/andimarek/date-time") // TODO: Change
-                        // to
-                        // .specifiedByURL when builder added to graphql-java
+                                "A date-time without a time-zone in the ISO-8601 calendar system, formatted as '2011-12-03T10:15:30")
+                        .specifiedByUrl("https://scalars.graphql.org/andimarek/date-time.html")
+                        // TODO: Change to .specifiedByURL when builder added to graphql-java
                         .coercing(coercing)
                         .build();
-    }
-
-    private static final DateTimeFormatter customOutputFormatter = getCustomDateTimeFormatter();
-
-    private static DateTimeFormatter getCustomDateTimeFormatter() {
-        return new DateTimeFormatterBuilder()
-                .parseCaseInsensitive()
-                .append(ISO_LOCAL_DATE)
-                .appendLiteral('T')
-                .appendValue(HOUR_OF_DAY, 2)
-                .appendLiteral(':')
-                .appendValue(MINUTE_OF_HOUR, 2)
-                .appendLiteral(':')
-                .appendValue(SECOND_OF_MINUTE, 2)
-                .appendFraction(NANO_OF_SECOND, 3, 3, true)
-                .appendLiteral('Z')
-                .toFormatter();
     }
 }
