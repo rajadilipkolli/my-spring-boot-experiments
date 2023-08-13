@@ -32,11 +32,13 @@ public class Initializer implements CommandLineRunner {
                             PostCommentEntity post1Comment =
                                     PostCommentEntity.builder()
                                             .title("Sample Review" + i)
+                                            .content("Sample Content" + i)
                                             .published(true)
                                             .build();
                             PostCommentEntity post1Comment2 =
                                     PostCommentEntity.builder()
                                             .title("Complicated Review" + i)
+                                            .content("Complicated Content" + i)
                                             .published(false)
                                             .build();
                             PostDetailsEntity post1Details =
@@ -67,6 +69,7 @@ public class Initializer implements CommandLineRunner {
                             PostCommentEntity post2Comment =
                                     PostCommentEntity.builder()
                                             .title("Complicated Title" + i)
+                                            .content("Complicated Content" + i)
                                             .published(true)
                                             .publishedAt(localDateTime2)
                                             .build();

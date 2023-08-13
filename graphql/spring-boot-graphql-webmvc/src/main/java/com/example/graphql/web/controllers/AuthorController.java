@@ -1,5 +1,6 @@
 package com.example.graphql.web.controllers;
 
+import com.example.graphql.config.logging.Loggable;
 import com.example.graphql.model.request.AuthorRequest;
 import com.example.graphql.model.response.AuthorResponse;
 import com.example.graphql.services.AuthorService;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/authors")
 @RequiredArgsConstructor
+@Loggable
 public class AuthorController {
 
     private final AuthorService authorService;

@@ -186,6 +186,16 @@
             "projectName": "batch-boot-jpa-sample",
             "args": "--spring.profiles.active=local",
             "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-TestApplication<boot-graphql-webmvc>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.example.graphql.TestApplication",
+            "projectName": "boot-graphql-webmvc",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
         }
     ]
 }

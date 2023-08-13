@@ -1,5 +1,6 @@
 package com.example.graphql.services;
 
+import com.example.graphql.config.logging.Loggable;
 import com.example.graphql.entities.PostEntity;
 import com.example.graphql.mapper.NewPostRequestToPostEntityMapper;
 import com.example.graphql.model.request.NewPostRequest;
@@ -20,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
+@Loggable
 public class PostService {
 
     private final PostRepository postRepository;

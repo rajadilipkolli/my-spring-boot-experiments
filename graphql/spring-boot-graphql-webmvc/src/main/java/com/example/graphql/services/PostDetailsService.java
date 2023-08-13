@@ -1,5 +1,6 @@
 package com.example.graphql.services;
 
+import com.example.graphql.config.logging.Loggable;
 import com.example.graphql.entities.PostDetailsEntity;
 import com.example.graphql.repositories.PostDetailsRepository;
 import java.util.List;
@@ -11,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional
 @RequiredArgsConstructor
+@Loggable
 public class PostDetailsService {
 
     private final PostDetailsRepository postDetailsRepository;

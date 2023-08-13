@@ -1,5 +1,6 @@
 package com.example.graphql.web.controllers;
 
+import com.example.graphql.config.logging.Loggable;
 import com.example.graphql.entities.TagEntity;
 import com.example.graphql.services.TagService;
 import java.util.List;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/tags")
 @RequiredArgsConstructor
+@Loggable
 public class TagController {
 
     private final TagService tagService;

@@ -1,5 +1,6 @@
 package com.example.graphql.services;
 
+import com.example.graphql.config.logging.Loggable;
 import com.example.graphql.entities.AuthorEntity;
 import com.example.graphql.mapper.AuthorRequestToEntityMapper;
 import com.example.graphql.model.request.AuthorRequest;
@@ -15,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional
 @RequiredArgsConstructor
+@Loggable
 public class AuthorService {
 
     private final AuthorRepository authorRepository;

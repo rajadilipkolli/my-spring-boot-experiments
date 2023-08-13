@@ -1,5 +1,6 @@
 package com.example.graphql.web.controllers;
 
+import com.example.graphql.config.logging.Loggable;
 import com.example.graphql.model.request.NewPostRequest;
 import com.example.graphql.model.response.PostResponse;
 import com.example.graphql.services.PostService;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/posts")
 @RequiredArgsConstructor
+@Loggable
 public class PostController {
 
     private final PostService postService;
