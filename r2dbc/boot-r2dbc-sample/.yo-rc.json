@@ -1,0 +1,13 @@
+{
+  "generator-springboot": {
+    "appName": "boot-r2dbc-sample",
+    "packageName": "com.example.bootr2dbc",
+    "databaseType": "postgresql",
+    "dbMigrationTool": "liquibase",
+    "dbMigrationFormat": "yaml",
+    "features": [],
+    "buildTool": "maven",
+    "packageFolder": "com/example/bootr2dbc",
+    "liquibaseMigrationCounter": 2
+  }
+}
