@@ -4,23 +4,20 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.times;
 import static org.mockito.BDDMockito.verify;
-import static org.mockito.BDDMockito.willDoNothing;
 
 import com.example.bootr2dbc.entities.ReactivePost;
-import com.example.bootr2dbc.model.response.PagedResult;
+import com.example.bootr2dbc.model.ReactivePostRequest;
 import com.example.bootr2dbc.repositories.ReactivePostRepository;
-import java.util.List;
-import java.util.Optional;
+import java.util.Objects;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 @ExtendWith(MockitoExtension.class)
 class ReactivePostServiceTest {
@@ -34,54 +31,57 @@ class ReactivePostServiceTest {
     @Test
     void findAllReactivePosts() {
         // given
-        Pageable pageable = PageRequest.of(0, 10, Sort.by(Sort.Direction.ASC, "id"));
-        Page<ReactivePost> reactivePostPage = new PageImpl<>(List.of(getReactivePost()));
-        given(reactivePostRepository.findAll(pageable)).willReturn(reactivePostPage);
+        Sort sort = Sort.by(Sort.Direction.ASC, "id");
+        given(reactivePostRepository.findAll(sort)).willReturn(Flux.just(getReactivePost()));
 
         // when
-        PagedResult<ReactivePost> pagedResult = reactivePostService.findAllReactivePosts(0, 10, "id", "asc");
+        Flux<ReactivePost> pagedResult = reactivePostService.findAllReactivePosts("id", "asc");
 
         // then
         assertThat(pagedResult).isNotNull();
-        assertThat(pagedResult.data()).isNotEmpty().hasSize(1);
-        assertThat(pagedResult.hasNext()).isFalse();
-        assertThat(pagedResult.pageNumber()).isEqualTo(1);
-        assertThat(pagedResult.totalPages()).isEqualTo(1);
-        assertThat(pagedResult.isFirst()).isTrue();
-        assertThat(pagedResult.isLast()).isTrue();
-        assertThat(pagedResult.hasPrevious()).isFalse();
-        assertThat(pagedResult.totalElements()).isEqualTo(1);
     }
 
     @Test
     void findReactivePostById() {
         // given
-        given(reactivePostRepository.findById(1L)).willReturn(Optional.of(getReactivePost()));
+        given(reactivePostRepository.findById(1L)).willReturn(Mono.just(getReactivePost()));
         // when
-        Optional<ReactivePost> optionalReactivePost = reactivePostService.findReactivePostById(1L);
+        Mono<ReactivePost> reactivePostMono = reactivePostService.findReactivePostById(1L);
         // then
-        assertThat(optionalReactivePost).isPresent();
-        ReactivePost reactivePost = optionalReactivePost.get();
-        assertThat(reactivePost.getId()).isEqualTo(1L);
-        assertThat(reactivePost.getText()).isEqualTo("junitTest");
+        StepVerifier.create(reactivePostMono)
+                .expectNextMatches(reactivePost -> Objects.equals(
+                                reactivePost.getId(), getReactivePost().getId())
+                        && reactivePost.getTitle().equals(getReactivePost().getTitle())
+                        && reactivePost.getContent().equals(getReactivePost().getContent()))
+                .expectComplete()
+                .verify();
     }
 
     @Test
     void saveReactivePost() {
         // given
-        given(reactivePostRepository.save(getReactivePost())).willReturn(getReactivePost());
+        ReactivePostRequest reactivePostRequest = getReactivePostRequest();
+        ReactivePost mappedReactivePost = ReactivePost.builder()
+                .content(reactivePostRequest.content())
+                .title(reactivePostRequest.title())
+                .build();
+        given(reactivePostRepository.save(mappedReactivePost)).willReturn(Mono.just(getReactivePost()));
         // when
-        ReactivePost persistedReactivePost = reactivePostService.saveReactivePost(getReactivePost());
+        Mono<ReactivePost> persistedReactivePost = reactivePostService.saveReactivePost(reactivePostRequest);
         // then
-        assertThat(persistedReactivePost).isNotNull();
-        assertThat(persistedReactivePost.getId()).isEqualTo(1L);
-        assertThat(persistedReactivePost.getText()).isEqualTo("junitTest");
+        StepVerifier.create(persistedReactivePost)
+                .expectNextMatches(reactivePost -> reactivePost
+                                .getTitle()
+                                .equals(getReactivePost().getTitle())
+                        && reactivePost.getContent().equals(getReactivePost().getContent()))
+                .expectComplete()
+                .verify();
     }
 
     @Test
     void deleteReactivePostById() {
         // given
-        willDoNothing().given(reactivePostRepository).deleteById(1L);
+        given(reactivePostRepository.deleteById(1L)).willReturn(Mono.empty());
         // when
         reactivePostService.deleteReactivePostById(1L);
         // then
@@ -91,7 +91,12 @@ class ReactivePostServiceTest {
     private ReactivePost getReactivePost() {
         ReactivePost reactivePost = new ReactivePost();
         reactivePost.setId(1L);
-        reactivePost.setText("junitTest");
+        reactivePost.setTitle("junitTitle");
+        reactivePost.setContent("junitContent");
         return reactivePost;
+    }
+
+    private ReactivePostRequest getReactivePostRequest() {
+        return new ReactivePostRequest("junitTitle", "junitContent");
     }
 }
