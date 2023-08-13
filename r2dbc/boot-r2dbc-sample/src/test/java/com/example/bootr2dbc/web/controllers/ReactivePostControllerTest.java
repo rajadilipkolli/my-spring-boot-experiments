@@ -69,7 +69,7 @@ class ReactivePostControllerTest {
 
         this.webTestClient
                 .get()
-                .uri("/api/posts")
+                .uri("/api/posts/")
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus()
@@ -131,7 +131,7 @@ class ReactivePostControllerTest {
         this.webTestClient
                 .mutateWith(csrf())
                 .post()
-                .uri("/api/posts")
+                .uri("/api/posts/")
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(BodyInserters.fromValue(reactivePost))
                 .exchange()
@@ -155,7 +155,7 @@ class ReactivePostControllerTest {
         this.webTestClient
                 .mutateWith(csrf())
                 .post()
-                .uri("/api/posts")
+                .uri("/api/posts/")
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(BodyInserters.fromValue(reactivePost))
                 .exchange()
@@ -173,7 +173,7 @@ class ReactivePostControllerTest {
                 .jsonPath("$.detail")
                 .isEqualTo("Invalid request content.")
                 .jsonPath("$.instance")
-                .isEqualTo("/api/posts")
+                .isEqualTo("/api/posts/")
                 .jsonPath("$.violations")
                 .isArray()
                 .jsonPath("$.violations")

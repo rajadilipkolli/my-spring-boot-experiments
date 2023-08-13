@@ -6,7 +6,6 @@ import com.example.bootr2dbc.services.ReactivePostService;
 import com.example.bootr2dbc.utils.AppConstants;
 import java.net.URI;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -24,13 +23,12 @@ import reactor.core.publisher.Mono;
 
 @RestController
 @RequestMapping("/api/posts")
-@Slf4j
 @RequiredArgsConstructor
 public class ReactivePostController {
 
     private final ReactivePostService reactivePostService;
 
-    @GetMapping
+    @GetMapping("/")
     public Flux<ReactivePost> getAllReactivePosts(
             @RequestParam(value = "sortBy", defaultValue = AppConstants.DEFAULT_SORT_BY, required = false)
                     String sortBy,
@@ -47,7 +45,7 @@ public class ReactivePostController {
                 .switchIfEmpty(Mono.just(ResponseEntity.notFound().build()));
     }
 
-    @PostMapping
+    @PostMapping("/")
     public Mono<ResponseEntity<ReactivePost>> createReactivePost(
             @RequestBody @Validated ReactivePostRequest reactivePostRequest,
             UriComponentsBuilder uriComponentsBuilder) {
