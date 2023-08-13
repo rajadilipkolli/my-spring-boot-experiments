@@ -3,7 +3,9 @@ package com.example.bootr2dbc.web.controllers;
 import static com.example.bootr2dbc.utils.AppConstants.PROFILE_TEST;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.BDDMockito.given;
+import static org.springframework.security.test.web.reactive.server.SecurityMockServerConfigurers.csrf;
 
+import com.example.bootr2dbc.config.SecurityConfig;
 import com.example.bootr2dbc.entities.ReactivePost;
 import com.example.bootr2dbc.model.ReactivePostRequest;
 import com.example.bootr2dbc.services.ReactivePostService;
@@ -14,7 +16,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.function.BodyInserters;
@@ -23,6 +27,8 @@ import reactor.core.publisher.Mono;
 
 @WebFluxTest(controllers = ReactivePostController.class)
 @ActiveProfiles(PROFILE_TEST)
+@WithMockUser(username = "username")
+@Import(SecurityConfig.class) // Import the security configuration
 class ReactivePostControllerTest {
 
     @Autowired
@@ -123,8 +129,7 @@ class ReactivePostControllerTest {
         given(reactivePostService.saveReactivePost(reactivePost)).willReturn(reactivePostFlux.next());
 
         this.webTestClient
-                .mutate()
-                .build()
+                .mutateWith(csrf())
                 .post()
                 .uri("/api/posts")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -148,11 +153,10 @@ class ReactivePostControllerTest {
         ReactivePostRequest reactivePost = new ReactivePostRequest(null, null);
 
         this.webTestClient
-                .mutate()
-                .defaultHeaders(httpHeaders -> httpHeaders.setContentType(MediaType.APPLICATION_JSON))
-                .build()
+                .mutateWith(csrf())
                 .post()
                 .uri("/api/posts")
+                .contentType(MediaType.APPLICATION_JSON)
                 .body(BodyInserters.fromValue(reactivePost))
                 .exchange()
                 .expectStatus()
@@ -206,11 +210,10 @@ class ReactivePostControllerTest {
                 .willReturn(Mono.just(reactivePost));
 
         this.webTestClient
-                .mutate()
-                .defaultHeaders(httpHeaders -> httpHeaders.setContentType(MediaType.APPLICATION_JSON))
-                .build()
+                .mutateWith(csrf())
                 .put()
                 .uri("/api/posts/{id}", reactivePostId)
+                .contentType(MediaType.APPLICATION_JSON)
                 .body(BodyInserters.fromValue(reactivePostRequest))
                 .exchange()
                 .expectStatus()
@@ -232,11 +235,10 @@ class ReactivePostControllerTest {
         given(reactivePostService.findReactivePostById(reactivePostId)).willReturn(Mono.empty());
 
         this.webTestClient
-                .mutate()
-                .defaultHeaders(httpHeaders -> httpHeaders.setContentType(MediaType.APPLICATION_JSON))
-                .build()
+                .mutateWith(csrf())
                 .put()
                 .uri("/api/posts/{id}", reactivePostId)
+                .contentType(MediaType.APPLICATION_JSON)
                 .body(BodyInserters.fromValue(reactivePostRequest))
                 .exchange()
                 .expectStatus()
@@ -246,6 +248,9 @@ class ReactivePostControllerTest {
     }
 
     @Test
+    @WithMockUser(
+            username = "admin",
+            roles = {"USER", "ADMIN"})
     void shouldDeleteReactivePost() {
         Long reactivePostId = 1L;
         ReactivePost reactivePost = reactivePostFlux.next().block();
@@ -263,6 +268,9 @@ class ReactivePostControllerTest {
     }
 
     @Test
+    @WithMockUser(
+            username = "admin",
+            roles = {"ADMIN"})
     void shouldReturn404WhenDeletingNonExistingReactivePost() {
         Long reactivePostId = 1L;
         ReactivePost reactivePost = reactivePostFlux.next().block();
@@ -274,5 +282,15 @@ class ReactivePostControllerTest {
                 .exchange()
                 .expectStatus()
                 .isNotFound();
+    }
+
+    @Test
+    void shouldReturn404WhenDeletingReactivePost() {
+        this.webTestClient
+                .delete()
+                .uri("/api/posts/{id}", 10_000L)
+                .exchange()
+                .expectStatus()
+                .isForbidden();
     }
 }

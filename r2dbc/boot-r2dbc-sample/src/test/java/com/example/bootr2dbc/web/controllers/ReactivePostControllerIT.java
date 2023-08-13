@@ -45,6 +45,9 @@ class ReactivePostControllerIT extends AbstractIntegrationTest {
         List<ReactivePost> expectedPosts = reactivePostFlux.collectList().block();
 
         this.webTestClient
+                .mutate() // Mutate the client to add basic authentication headers
+                .defaultHeaders(headers -> headers.setBasicAuth("user", "password"))
+                .build()
                 .get()
                 .uri("/api/posts")
                 .accept(MediaType.APPLICATION_JSON)
@@ -64,6 +67,12 @@ class ReactivePostControllerIT extends AbstractIntegrationTest {
         Long reactivePostId = reactivePost.getId();
 
         this.webTestClient
+                .mutate() // Mutate the client to add basic authentication headers
+                .defaultHeaders(headers -> {
+                    headers.setBasicAuth("user", "password");
+                    headers.setContentType(MediaType.APPLICATION_JSON);
+                })
+                .build()
                 .get()
                 .uri("/api/posts/{id}", reactivePostId)
                 .accept(MediaType.APPLICATION_JSON)
@@ -85,7 +94,11 @@ class ReactivePostControllerIT extends AbstractIntegrationTest {
     void shouldCreateNewReactivePost() {
         ReactivePostRequest reactivePost = new ReactivePostRequest("New Title", "New ReactivePost");
         this.webTestClient
-                .mutate()
+                .mutate() // Mutate the client to add basic authentication headers
+                .defaultHeaders(headers -> {
+                    headers.setBasicAuth("user", "password");
+                    headers.setContentType(MediaType.APPLICATION_JSON);
+                })
                 .build()
                 .post()
                 .uri("/api/posts")
@@ -110,8 +123,11 @@ class ReactivePostControllerIT extends AbstractIntegrationTest {
         ReactivePostRequest reactivePost = new ReactivePostRequest(null, null);
 
         this.webTestClient
-                .mutate()
-                .defaultHeaders(httpHeaders -> httpHeaders.setContentType(MediaType.APPLICATION_JSON))
+                .mutate() // Mutate the client to add basic authentication headers
+                .defaultHeaders(headers -> {
+                    headers.setBasicAuth("user", "password");
+                    headers.setContentType(MediaType.APPLICATION_JSON);
+                })
                 .build()
                 .post()
                 .uri("/api/posts")
@@ -162,8 +178,11 @@ class ReactivePostControllerIT extends AbstractIntegrationTest {
                 new ReactivePostRequest("Updated ReactivePost", reactivePost.getContent());
 
         this.webTestClient
-                .mutate()
-                .defaultHeaders(httpHeaders -> httpHeaders.setContentType(MediaType.APPLICATION_JSON))
+                .mutate() // Mutate the client to add basic authentication headers
+                .defaultHeaders(headers -> {
+                    headers.setBasicAuth("user", "password");
+                    headers.setContentType(MediaType.APPLICATION_JSON);
+                })
                 .build()
                 .put()
                 .uri("/api/posts/{id}", reactivePostId)
@@ -185,6 +204,9 @@ class ReactivePostControllerIT extends AbstractIntegrationTest {
         ReactivePost reactivePost = reactivePostFlux.next().block();
 
         this.webTestClient
+                .mutate() // Mutate the client to add basic authentication headers
+                .defaultHeaders(headers -> headers.setBasicAuth("admin", "password"))
+                .build()
                 .delete()
                 .uri("/api/posts/{id}", reactivePost.getId())
                 .exchange()
