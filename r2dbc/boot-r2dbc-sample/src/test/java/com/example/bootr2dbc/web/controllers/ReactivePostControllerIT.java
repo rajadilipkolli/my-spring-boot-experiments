@@ -5,8 +5,8 @@ import static org.hamcrest.Matchers.hasSize;
 import com.example.bootr2dbc.common.AbstractIntegrationTest;
 import com.example.bootr2dbc.entities.ReactivePost;
 import com.example.bootr2dbc.model.ReactivePostRequest;
+import com.example.bootr2dbc.repositories.ReactiveCommentsRepository;
 import com.example.bootr2dbc.repositories.ReactivePostRepository;
-import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,21 +20,29 @@ class ReactivePostControllerIT extends AbstractIntegrationTest {
     @Autowired
     private ReactivePostRepository reactivePostRepository;
 
+    @Autowired
+    private ReactiveCommentsRepository reactiveCommentsRepository;
+
     private Flux<ReactivePost> reactivePostFlux = null;
 
     @BeforeEach
     void setUp() {
-        reactivePostRepository.deleteAll();
-
-        List<ReactivePost> reactivePostList = new ArrayList<>();
-        reactivePostList.add(
-                ReactivePost.builder().title("title 1").content("content 1").build());
-        reactivePostList.add(
-                ReactivePost.builder().title("title 2").content("content 2").build());
-        reactivePostList.add(
-                ReactivePost.builder().title("title 3").content("content 3").build());
-        // Save the reactivePostList and obtain a Flux<ReactivePost>
-        reactivePostFlux = Flux.fromIterable(reactivePostList)
+        reactivePostFlux = reactiveCommentsRepository
+                .deleteAll()
+                .then(reactivePostRepository.deleteAll())
+                .thenMany(Flux.just(
+                        ReactivePost.builder()
+                                .title("title 1")
+                                .content("content 1")
+                                .build(),
+                        ReactivePost.builder()
+                                .title("title 2")
+                                .content("content 2")
+                                .build(),
+                        ReactivePost.builder()
+                                .title("title 3")
+                                .content("content 3")
+                                .build()))
                 .flatMap(reactivePostRepository::save)
                 .thenMany(reactivePostRepository.findAll());
     }

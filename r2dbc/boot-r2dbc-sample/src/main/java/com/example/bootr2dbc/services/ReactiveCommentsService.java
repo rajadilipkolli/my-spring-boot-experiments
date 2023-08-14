@@ -23,12 +23,10 @@ public class ReactiveCommentsService {
                 ? Sort.by(sortBy).ascending()
                 : Sort.by(sortBy).descending();
 
-        Flux<ReactiveComments> reactiveCommentssPage = reactiveCommentsRepository.findAllByPostId(postId, sort);
-
-        return reactiveCommentssPage;
+        return reactiveCommentsRepository.findAllByPostId(postId, sort);
     }
 
-    public Mono<ReactiveComments> findReactiveCommentsById(UUID id) {
+    public Mono<ReactiveComments> findReactiveCommentById(UUID id) {
         return reactiveCommentsRepository.findById(id);
     }
 
@@ -43,13 +41,14 @@ public class ReactiveCommentsService {
         return reactiveCommentsRepository.save(reactiveComments);
     }
 
-    public Mono<Void> deleteReactiveCommentsById(UUID id) {
+    public Mono<Void> deleteReactiveCommentById(UUID id) {
         return reactiveCommentsRepository.deleteById(id);
     }
 
     private ReactiveComments mapToReactiveComments(ReactiveCommentRequest reactiveCommentRequest) {
         ReactiveComments reactiveComments = new ReactiveComments();
         reactiveComments.setContent(reactiveCommentRequest.content());
+        reactiveComments.setTitle(reactiveCommentRequest.title());
         reactiveComments.setPostId(reactiveCommentRequest.postId());
         return reactiveComments;
     }

@@ -3,9 +3,9 @@ package com.example.bootr2dbc.entities;
 import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Builder;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
@@ -15,8 +15,8 @@ import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
 @Table(name = "reactive_post_comments")
-@Getter
-@Setter
+@Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class ReactiveComments {
@@ -33,6 +33,11 @@ public class ReactiveComments {
 
     @Column("post_id")
     private Long postId;
+
+    private boolean published;
+
+    @Column("published_at")
+    private LocalDateTime publishedAt;
 
     @Column("created_at")
     @CreatedDate

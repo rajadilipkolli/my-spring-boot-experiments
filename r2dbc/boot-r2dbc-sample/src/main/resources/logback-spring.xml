@@ -9,6 +9,7 @@
             <appender-ref ref="CONSOLE" />
         </root>
     </springProfile>
+
     <springProfile name="!default">
         <property name="LOG_FILE" value="logs/${appName}.log"/>
         <include resource="org/springframework/boot/logging/logback/file-appender.xml" />
@@ -19,7 +20,9 @@
     </springProfile>
 
     <logger name="com.example.bootr2dbc" level="DEBUG"/>
-    <logger name="org.springframework.security" level="DEBUG"/>
+    <logger name="org.springframework.security" level="INFO"/>
+    <logger name="org.springframework.transaction" level="DEBUG"/>
+    <logger name="org.springframework.data.r2dbc.connectionfactory" level="DEBUG"/>
     <logger name="org.springframework" level="INFO"/>
 
 </configuration>

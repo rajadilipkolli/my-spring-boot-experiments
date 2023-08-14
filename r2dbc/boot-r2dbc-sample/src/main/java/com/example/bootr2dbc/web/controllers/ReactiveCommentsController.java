@@ -23,14 +23,14 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @RestController
-@RequestMapping("/api/post/comments")
+@RequestMapping("/api/posts/comments")
 @RequiredArgsConstructor
 public class ReactiveCommentsController {
 
     private final ReactiveCommentsService reactiveCommentsService;
 
-    @GetMapping
-    public Flux<ReactiveComments> getAllReactiveCommentss(
+    @GetMapping("/")
+    public Flux<ReactiveComments> getAllReactiveComments(
             @RequestParam(value = "postId") Long postId,
             @RequestParam(value = "sortBy", defaultValue = AppConstants.DEFAULT_SORT_BY, required = false)
                     String sortBy,
@@ -42,13 +42,13 @@ public class ReactiveCommentsController {
     @GetMapping("/{id}")
     public Mono<ResponseEntity<ReactiveComments>> getReactiveCommentsById(@PathVariable UUID id) {
         return reactiveCommentsService
-                .findReactiveCommentsById(id)
+                .findReactiveCommentById(id)
                 .map(ResponseEntity::ok)
                 .switchIfEmpty(Mono.just(ResponseEntity.notFound().build()));
     }
 
-    @PostMapping
-    public Mono<ResponseEntity<ReactiveComments>> createReactiveComments(
+    @PostMapping("/")
+    public Mono<ResponseEntity<ReactiveComments>> createReactiveComment(
             @RequestBody @Validated ReactiveCommentRequest reactiveCommentRequest,
             UriComponentsBuilder uriComponentsBuilder) {
         return reactiveCommentsService
@@ -66,10 +66,10 @@ public class ReactiveCommentsController {
     }
 
     @PutMapping("/{id}")
-    public Mono<ResponseEntity<ReactiveComments>> updateReactiveComments(
+    public Mono<ResponseEntity<ReactiveComments>> updateReactiveComment(
             @PathVariable UUID id, @RequestBody ReactiveCommentRequest reactiveCommentRequest) {
         return reactiveCommentsService
-                .findReactiveCommentsById(id)
+                .findReactiveCommentById(id)
                 .flatMap(existingPostComment -> reactiveCommentsService
                         .updateReactivePostComment(reactiveCommentRequest, id)
                         .map(ResponseEntity::ok))
@@ -77,11 +77,11 @@ public class ReactiveCommentsController {
     }
 
     @DeleteMapping("/{id}")
-    public Mono<ResponseEntity<Void>> deleteReactiveComments(@PathVariable UUID id) {
+    public Mono<ResponseEntity<Void>> deleteReactiveComment(@PathVariable UUID id) {
         return reactiveCommentsService
-                .findReactiveCommentsById(id)
+                .findReactiveCommentById(id)
                 .flatMap(reactivePostComment -> reactiveCommentsService
-                        .deleteReactiveCommentsById(id)
+                        .deleteReactiveCommentById(id)
                         .then(Mono.just(ResponseEntity.noContent().<Void>build())))
                 .switchIfEmpty(Mono.just(ResponseEntity.notFound().build()));
     }

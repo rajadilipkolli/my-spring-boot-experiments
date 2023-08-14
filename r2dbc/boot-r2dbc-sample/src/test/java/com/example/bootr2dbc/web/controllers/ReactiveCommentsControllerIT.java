@@ -1,126 +1,272 @@
-// package com.example.bootr2dbc.web.controllers;
+package com.example.bootr2dbc.web.controllers;
 
-// import static org.hamcrest.CoreMatchers.is;
-// import static org.hamcrest.CoreMatchers.notNullValue;
-// import static org.hamcrest.Matchers.hasSize;
-// import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-// import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-// import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-// import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-// import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
-// import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-// import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.hasSize;
 
-// import com.example.bootr2dbc.common.AbstractIntegrationTest;
-// import com.example.bootr2dbc.entities.ReactiveComments;
-// import com.example.bootr2dbc.repositories.ReactiveCommentsRepository;
-// import java.util.ArrayList;
-// import java.util.List;
-// import org.junit.jupiter.api.BeforeEach;
-// import org.junit.jupiter.api.Test;
-// import org.springframework.beans.factory.annotation.Autowired;
-// import org.springframework.http.MediaType;
+import com.example.bootr2dbc.common.AbstractIntegrationTest;
+import com.example.bootr2dbc.entities.ReactiveComments;
+import com.example.bootr2dbc.entities.ReactivePost;
+import com.example.bootr2dbc.model.ReactiveCommentRequest;
+import com.example.bootr2dbc.repositories.ReactiveCommentsRepository;
+import com.example.bootr2dbc.repositories.ReactivePostRepository;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.UUID;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
+import org.springframework.web.reactive.function.BodyInserters;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
-// class ReactiveCommentsControllerIT extends AbstractIntegrationTest {
+class ReactiveCommentsControllerIT extends AbstractIntegrationTest {
 
-//     @Autowired
-//     private ReactiveCommentsRepository reactiveCommentsRepository;
+    @Autowired
+    private ReactiveCommentsRepository reactiveCommentsRepository;
 
-//     private List<ReactiveComments> reactiveCommentsList = null;
+    @Autowired
+    private ReactivePostRepository reactivePostRepository;
 
-//     @BeforeEach
-//     void setUp() {
-//         reactiveCommentsRepository.deleteAllInBatch();
+    private Flux<ReactiveComments> reactiveCommentsFlux;
 
-//         reactiveCommentsList = new ArrayList<>();
-//         reactiveCommentsList.add(new ReactiveComments(null, "First ReactiveComments"));
-//         reactiveCommentsList.add(new ReactiveComments(null, "Second ReactiveComments"));
-//         reactiveCommentsList.add(new ReactiveComments(null, "Third ReactiveComments"));
-//         reactiveCommentsList = reactiveCommentsRepository.saveAll(reactiveCommentsList);
-//     }
+    @BeforeEach
+    void setUp() {
+        reactiveCommentsFlux = reactiveCommentsRepository
+                .deleteAll()
+                .then(reactivePostRepository.deleteAll())
+                .then(reactivePostRepository
+                        .save(ReactivePost.builder()
+                                .title("title 1")
+                                .content("content 1")
+                                .build())
+                        .flatMap(reactivePost -> {
+                            ReactiveComments comment1 = ReactiveComments.builder()
+                                    .title("First Title")
+                                    .content("First Content")
+                                    .postId(reactivePost.getId())
+                                    .build();
+                            ReactiveComments comment2 = ReactiveComments.builder()
+                                    .title("Second Title")
+                                    .content("Second Content")
+                                    .postId(reactivePost.getId())
+                                    .published(true)
+                                    .publishedAt(LocalDateTime.now())
+                                    .build();
+                            ReactiveComments comment3 = ReactiveComments.builder()
+                                    .title("Third Title")
+                                    .content("Third Content")
+                                    .postId(reactivePost.getId())
+                                    .build();
 
-//     @Test
-//     void shouldFetchAllReactiveCommentss() throws Exception {
-//         this.mockMvc
-//                 .perform(get("/api/post/comments"))
-//                 .andExpect(status().isOk())
-//                 .andExpect(jsonPath("$.data.size()", is(reactiveCommentsList.size())))
-//                 .andExpect(jsonPath("$.totalElements", is(3)))
-//                 .andExpect(jsonPath("$.pageNumber", is(1)))
-//                 .andExpect(jsonPath("$.totalPages", is(1)))
-//                 .andExpect(jsonPath("$.isFirst", is(true)))
-//                 .andExpect(jsonPath("$.isLast", is(true)))
-//                 .andExpect(jsonPath("$.hasNext", is(false)))
-//                 .andExpect(jsonPath("$.hasPrevious", is(false)));
-//     }
+                            return reactiveCommentsRepository
+                                    .save(comment1)
+                                    .then(reactiveCommentsRepository.save(comment2))
+                                    .then(reactiveCommentsRepository.save(comment3))
+                                    .then(Mono.just(reactivePost));
+                        }))
+                .flatMapMany(post -> reactiveCommentsRepository.findAllByPostId(post.getId()));
+    }
 
-//     @Test
-//     void shouldFindReactiveCommentsById() throws Exception {
-//         ReactiveComments reactiveComments = reactiveCommentsList.get(0);
-//         Long reactiveCommentsId = reactiveComments.getId();
+    @Test
+    void shouldFetchAllReactiveComments() {
+        // Fetch all posts using WebClient
+        List<ReactiveComments> expectedPostComments =
+                reactiveCommentsFlux.collectList().block();
 
-//         this.mockMvc
-//                 .perform(get("/api/post/comments/{id}", reactiveCommentsId))
-//                 .andExpect(status().isOk())
-//                 .andExpect(jsonPath("$.id", is(reactiveComments.getId()), Long.class))
-//                 .andExpect(jsonPath("$.text", is(reactiveComments.getText())));
-//     }
+        this.webTestClient
+                .mutate() // Mutate the client to add basic authentication headers
+                .defaultHeaders(headers -> headers.setBasicAuth("user", "password"))
+                .build()
+                .get()
+                .uri(uriBuilder -> {
+                    uriBuilder.queryParam("postId", expectedPostComments.get(0).getPostId());
+                    uriBuilder.queryParam("sortBy", "title");
+                    uriBuilder.path("/api/posts/comments/");
+                    return uriBuilder.build();
+                })
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectHeader()
+                .contentType(MediaType.APPLICATION_JSON)
+                .expectBodyList(ReactiveComments.class)
+                .hasSize(expectedPostComments.size())
+                .isEqualTo(expectedPostComments); // Ensure fetched comments match the expected comments
+    }
 
-//     @Test
-//     void shouldCreateNewReactiveComments() throws Exception {
-//         ReactiveComments reactiveComments = new ReactiveComments(null, "New ReactiveComments");
-//         this.mockMvc
-//                 .perform(post("/api/post/comments")
-//                         .contentType(MediaType.APPLICATION_JSON)
-//                         .content(objectMapper.writeValueAsString(reactiveComments)))
-//                 .andExpect(status().isCreated())
-//                 .andExpect(jsonPath("$.id", notNullValue()))
-//                 .andExpect(jsonPath("$.text", is(reactiveComments.getText())));
-//     }
+    @Test
+    void shouldFindReactiveCommentsById() {
+        ReactiveComments reactiveComments = reactiveCommentsFlux.next().block();
+        UUID reactiveCommentsId = reactiveComments.getId();
 
-//     @Test
-//     void shouldReturn400WhenCreateNewReactiveCommentsWithoutText() throws Exception {
-//         ReactiveComments reactiveComments = new ReactiveComments(null, null);
+        this.webTestClient
+                .mutate() // Mutate the client to add basic authentication headers
+                .defaultHeaders(headers -> {
+                    headers.setBasicAuth("user", "password");
+                    headers.setContentType(MediaType.APPLICATION_JSON);
+                })
+                .build()
+                .get()
+                .uri("/api/posts/comments/{id}", reactiveCommentsId)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectHeader()
+                .contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.id")
+                .isEqualTo(reactiveCommentsId.toString())
+                .jsonPath("$.title")
+                .isEqualTo(reactiveComments.getTitle())
+                .jsonPath("$.content")
+                .isEqualTo(reactiveComments.getContent());
+    }
 
-//         this.mockMvc
-//                 .perform(post("/api/post/comments")
-//                         .contentType(MediaType.APPLICATION_JSON)
-//                         .content(objectMapper.writeValueAsString(reactiveComments)))
-//                 .andExpect(status().isBadRequest())
-//                 .andExpect(header().string("Content-Type", is("application/problem+json")))
-//                 .andExpect(jsonPath("$.type", is("about:blank")))
-//                 .andExpect(jsonPath("$.title", is("Constraint Violation")))
-//                 .andExpect(jsonPath("$.status", is(400)))
-//                 .andExpect(jsonPath("$.detail", is("Invalid request content.")))
-//                 .andExpect(jsonPath("$.instance", is("/api/post/comments")))
-//                 .andExpect(jsonPath("$.violations", hasSize(1)))
-//                 .andExpect(jsonPath("$.violations[0].field", is("text")))
-//                 .andExpect(jsonPath("$.violations[0].message", is("Text cannot be empty")))
-//                 .andReturn();
-//     }
+    @Test
+    void shouldCreateNewReactiveComments() {
+        ReactiveComments reactiveComments = reactiveCommentsFlux.next().block();
+        Long reactivePostId = reactiveComments.getPostId();
+        ReactiveCommentRequest reactiveCommentRequest =
+                new ReactiveCommentRequest("New Title", "New ReactiveComments", reactivePostId);
+        this.webTestClient
+                .mutate() // Mutate the client to add basic authentication headers
+                .defaultHeaders(headers -> {
+                    headers.setBasicAuth("user", "password");
+                    headers.setContentType(MediaType.APPLICATION_JSON);
+                })
+                .build()
+                .post()
+                .uri("/api/posts/comments/")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(BodyInserters.fromValue(reactiveCommentRequest))
+                .exchange()
+                .expectStatus()
+                .isCreated()
+                .expectHeader()
+                .contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.id")
+                .value(returningId -> {
+                    // Attempt to parse the value as a UUID
+                    UUID uuid = UUID.fromString((String) returningId);
+                    assertThat(uuid).isNotNull();
+                })
+                .jsonPath("$.title")
+                .isEqualTo(reactiveCommentRequest.title())
+                .jsonPath("$.content")
+                .isEqualTo(reactiveCommentRequest.content())
+                .jsonPath("$.postId")
+                .isEqualTo(reactivePostId)
+                .jsonPath("$.published")
+                .isEqualTo(false);
+    }
 
-//     @Test
-//     void shouldUpdateReactiveComments() throws Exception {
-//         ReactiveComments reactiveComments = reactiveCommentsList.get(0);
-//         reactiveComments.setText("Updated ReactiveComments");
+    @Test
+    void shouldReturn400WhenCreateNewReactiveCommentsWithoutTitleAndContent() {
+        ReactiveCommentRequest reactiveCommentRequest = new ReactiveCommentRequest(null, null, -90L);
 
-//         this.mockMvc
-//                 .perform(put("/api/post/comments/{id}", reactiveComments.getId())
-//                         .contentType(MediaType.APPLICATION_JSON)
-//                         .content(objectMapper.writeValueAsString(reactiveComments)))
-//                 .andExpect(status().isOk())
-//                 .andExpect(jsonPath("$.id", is(reactiveComments.getId()), Long.class))
-//                 .andExpect(jsonPath("$.text", is(reactiveComments.getText())));
-//     }
+        this.webTestClient
+                .mutate() // Mutate the client to add basic authentication headers
+                .defaultHeaders(headers -> {
+                    headers.setBasicAuth("user", "password");
+                    headers.setContentType(MediaType.APPLICATION_JSON);
+                })
+                .build()
+                .post()
+                .uri("/api/posts/comments/")
+                .body(BodyInserters.fromValue(reactiveCommentRequest))
+                .exchange()
+                .expectStatus()
+                .isBadRequest()
+                .expectHeader()
+                .contentType(MediaType.APPLICATION_PROBLEM_JSON)
+                .expectBody()
+                .jsonPath("$.type")
+                .isEqualTo("about:blank")
+                .jsonPath("$.title")
+                .isEqualTo("Constraint Violation")
+                .jsonPath("$.status")
+                .isEqualTo(400)
+                .jsonPath("$.detail")
+                .isEqualTo("Invalid request content.")
+                .jsonPath("$.instance")
+                .isEqualTo("/api/posts/comments/")
+                .jsonPath("$.violations")
+                .isArray()
+                .jsonPath("$.violations")
+                .value(hasSize(3)) // Use .value() with hasSize()
+                .jsonPath("$.violations[0].object")
+                .isEqualTo("reactiveCommentRequest")
+                .jsonPath("$.violations[0].field")
+                .isEqualTo("content")
+                .jsonPath("$.violations[0].rejectedValue")
+                .isEmpty()
+                .jsonPath("$.violations[0].message")
+                .isEqualTo("Content must not be blank")
+                .jsonPath("$.violations[1].object")
+                .isEqualTo("reactiveCommentRequest")
+                .jsonPath("$.violations[1].field")
+                .isEqualTo("postId")
+                .jsonPath("$.violations[1].rejectedValue")
+                .isEqualTo(-90)
+                .jsonPath("$.violations[1].message")
+                .isEqualTo("PostId must be greater than 0")
+                .jsonPath("$.violations[2].object")
+                .isEqualTo("reactiveCommentRequest")
+                .jsonPath("$.violations[2].field")
+                .isEqualTo("title")
+                .jsonPath("$.violations[2].rejectedValue")
+                .isEmpty()
+                .jsonPath("$.violations[2].message")
+                .isEqualTo("Title must not be blank");
+    }
 
-//     @Test
-//     void shouldDeleteReactiveComments() throws Exception {
-//         ReactiveComments reactiveComments = reactiveCommentsList.get(0);
+    @Test
+    void shouldUpdateReactiveComments() {
+        ReactiveComments reactiveComments = reactiveCommentsFlux.next().block();
+        UUID reactivePostId = reactiveComments.getId();
+        ReactiveCommentRequest reactivePostRequest = new ReactiveCommentRequest(
+                "Updated ReactivePost", reactiveComments.getContent(), reactiveComments.getPostId());
 
-//         this.mockMvc
-//                 .perform(delete("/api/post/comments/{id}", reactiveComments.getId()))
-//                 .andExpect(status().isOk())
-//                 .andExpect(jsonPath("$.id", is(reactiveComments.getId()), Long.class))
-//                 .andExpect(jsonPath("$.text", is(reactiveComments.getText())));
-//     }
-// }
+        this.webTestClient
+                .mutate() // Mutate the client to add basic authentication headers
+                .defaultHeaders(headers -> {
+                    headers.setBasicAuth("user", "password");
+                    headers.setContentType(MediaType.APPLICATION_JSON);
+                })
+                .build()
+                .put()
+                .uri("/api/posts/comments/{id}", reactivePostId)
+                .body(BodyInserters.fromValue(reactivePostRequest))
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectHeader()
+                .contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.id")
+                .isEqualTo(reactivePostId.toString())
+                .jsonPath("$.title")
+                .isEqualTo("Updated ReactivePost");
+    }
+
+    @Test
+    void shouldDeleteReactiveComments() {
+        ReactiveComments reactiveComments = reactiveCommentsFlux.next().block();
+
+        this.webTestClient
+                .mutate() // Mutate the client to add basic authentication headers
+                .defaultHeaders(headers -> headers.setBasicAuth("admin", "password"))
+                .build()
+                .delete()
+                .uri("/api/posts/comments/{id}", reactiveComments.getId())
+                .exchange()
+                .expectStatus()
+                .isNoContent()
+                .expectBody()
+                .isEmpty();
+    }
+}

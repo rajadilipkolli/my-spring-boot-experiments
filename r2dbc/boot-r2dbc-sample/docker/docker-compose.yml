@@ -12,7 +12,7 @@ services:
     ports:
       - "5432:5432"
     networks:
-      - demo-network
+      - boot-r2dbc-network
 
   pgadmin:
     image: dpage/pgadmin4
@@ -35,9 +35,9 @@ services:
       - "/bin/echo 'postgresqldb:5432:*:appuser:secret' > /tmp/pgpassfile && chmod 600 /tmp/pgpassfile && /entrypoint.sh"
     restart: unless-stopped
     networks:
-      - demo-network
+      - boot-r2dbc-network
 
 
 networks:
-  demo-network:
+  boot-r2dbc-network:
     driver: bridge

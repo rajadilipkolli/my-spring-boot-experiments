@@ -2,8 +2,11 @@ package com.example.bootr2dbc.services;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.times;
+import static org.mockito.BDDMockito.verify;
 
 import com.example.bootr2dbc.entities.ReactiveComments;
+import com.example.bootr2dbc.model.ReactiveCommentRequest;
 import com.example.bootr2dbc.repositories.ReactiveCommentsRepository;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
@@ -26,7 +29,7 @@ class ReactiveCommentsServiceTest {
     private ReactiveCommentsService reactiveCommentsService;
 
     @Test
-    void findAllReactiveCommentss() {
+    void findAllReactiveComments() {
         // given
         Sort sort = Sort.by(Sort.Direction.ASC, "id");
         given(reactiveCommentsRepository.findAllByPostId(1L, sort)).willReturn(Flux.just(getReactiveComments()));
@@ -53,7 +56,7 @@ class ReactiveCommentsServiceTest {
         UUID postCommentId = UUID.randomUUID();
         given(reactiveCommentsRepository.findById(postCommentId)).willReturn(Mono.just(getReactiveComments()));
         // when
-        Mono<ReactiveComments> reactiveCommentsMono = reactiveCommentsService.findReactiveCommentsById(postCommentId);
+        Mono<ReactiveComments> reactiveCommentsMono = reactiveCommentsService.findReactiveCommentById(postCommentId);
         // then
         StepVerifier.create(reactiveCommentsMono)
                 .expectNextMatches(reactivePostComment -> reactivePostComment
@@ -66,28 +69,41 @@ class ReactiveCommentsServiceTest {
                 .verify();
     }
 
-    // @Test
-    // void saveReactiveComments() {
-    //     // given
-    //     given(reactiveCommentsRepository.save(getReactiveComments())).willReturn(getReactiveComments());
-    //     // when
-    //     ReactiveComments persistedReactiveComments =
-    //             reactiveCommentsService.saveReactiveComments(getReactiveComments());
-    //     // then
-    //     assertThat(persistedReactiveComments).isNotNull();
-    //     assertThat(persistedReactiveComments.getId()).isEqualTo(1L);
-    //     assertThat(persistedReactiveComments.getText()).isEqualTo("junitTest");
-    // }
+    @Test
+    void saveReactiveComments() {
+        // given
 
-    // @Test
-    // void deleteReactiveCommentsById() {
-    //     // given
-    //     willDoNothing().given(reactiveCommentsRepository).deleteById(1L);
-    //     // when
-    //     reactiveCommentsService.deleteReactiveCommentsById(1L);
-    //     // then
-    //     verify(reactiveCommentsRepository, times(1)).deleteById(1L);
-    // }
+        given(reactiveCommentsRepository.save(ReactiveComments.builder()
+                        .postId(1L)
+                        .title("junitTitle")
+                        .content("junitContent")
+                        .build()))
+                .willReturn(Mono.just(getReactiveComments()));
+        // when
+        Mono<ReactiveComments> persistedReactiveComments =
+                reactiveCommentsService.saveReactiveCommentByPostId(getReactiveCommentRequest());
+        // then
+        StepVerifier.create(persistedReactiveComments)
+                .expectNextMatches(reactivePostComment -> reactivePostComment
+                                .getPostId()
+                                .equals(getReactiveComments().getPostId())
+                        && reactivePostComment
+                                .getContent()
+                                .equals(getReactiveComments().getContent()))
+                .expectComplete()
+                .verify();
+    }
+
+    @Test
+    void deleteReactiveCommentsById() {
+        // given
+        UUID postCommentId = UUID.randomUUID();
+        given(reactiveCommentsRepository.deleteById(postCommentId)).willReturn(Mono.empty());
+        // when
+        reactiveCommentsService.deleteReactiveCommentById(postCommentId);
+        // then
+        verify(reactiveCommentsRepository, times(1)).deleteById(postCommentId);
+    }
 
     private ReactiveComments getReactiveComments() {
         ReactiveComments reactiveComments = new ReactiveComments();
@@ -95,5 +111,9 @@ class ReactiveCommentsServiceTest {
         reactiveComments.setContent("junitContent");
         reactiveComments.setPostId(1L);
         return reactiveComments;
+    }
+
+    private ReactiveCommentRequest getReactiveCommentRequest() {
+        return new ReactiveCommentRequest("junitTitle", "junitContent", 1L);
     }
 }

@@ -9,7 +9,7 @@ databaseChangeLog:
       value: varchar(255)
       dbms: '!postgres'
   - changeSet:
-      author: author
+      author: appUser
       id: createTable-reactive_posts
       changes:
         - createSequence:

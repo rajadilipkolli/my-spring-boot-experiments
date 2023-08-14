@@ -1,6 +1,7 @@
 package com.example.bootr2dbc.web.controllers;
 
 import static com.example.bootr2dbc.utils.AppConstants.PROFILE_TEST;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.security.test.web.reactive.server.SecurityMockServerConfigurers.csrf;
@@ -18,6 +19,7 @@ import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.WebTestClient;
@@ -64,6 +66,7 @@ class ReactivePostControllerTest {
     void shouldFetchAllReactivePosts() {
         // Fetch all posts using WebClient
         List<ReactivePost> expectedPosts = reactivePostFlux.collectList().block();
+        assertThat(expectedPosts).isNotEmpty().hasSize(3);
 
         given(reactivePostService.findAllReactivePosts("id", "asc")).willReturn(reactivePostFlux);
 
@@ -79,6 +82,19 @@ class ReactivePostControllerTest {
                 .expectBodyList(ReactivePost.class)
                 .hasSize(expectedPosts.size())
                 .isEqualTo(expectedPosts); // Ensure fetched posts match the expected posts
+    }
+
+    @Test
+    void shouldReturn404FetchAllReactivePosts() {
+        given(reactivePostService.findAllReactivePosts("id", "asc")).willReturn(Flux.empty());
+
+        this.webTestClient
+                .get()
+                .uri("/api/posts/")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isNoContent();
     }
 
     @Test
@@ -254,8 +270,8 @@ class ReactivePostControllerTest {
     void shouldDeleteReactivePost() {
         Long reactivePostId = 1L;
         ReactivePost reactivePost = reactivePostFlux.next().block();
-        given(reactivePostService.findReactivePostById(reactivePostId)).willReturn(Mono.just(reactivePost));
-        given(reactivePostService.deleteReactivePostById(reactivePost.getId())).willReturn(Mono.empty());
+        given(reactivePostService.deleteReactivePostAndCommentsById(reactivePostId))
+                .willReturn(Mono.just(ResponseEntity.noContent().build()));
 
         this.webTestClient
                 .delete()
@@ -268,13 +284,12 @@ class ReactivePostControllerTest {
     }
 
     @Test
-    @WithMockUser(
-            username = "admin",
-            roles = {"ADMIN"})
+    @WithMockUser(roles = "ADMIN")
     void shouldReturn404WhenDeletingNonExistingReactivePost() {
         Long reactivePostId = 1L;
         ReactivePost reactivePost = reactivePostFlux.next().block();
-        given(reactivePostService.findReactivePostById(reactivePostId)).willReturn(Mono.empty());
+        given(reactivePostService.deleteReactivePostAndCommentsById(reactivePostId))
+                .willReturn(Mono.just(ResponseEntity.notFound().build()));
 
         this.webTestClient
                 .delete()

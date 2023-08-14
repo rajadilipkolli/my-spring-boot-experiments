@@ -1,10 +1,12 @@
 package com.example.bootr2dbc.web.controllers;
 
+import com.example.bootr2dbc.entities.ReactiveComments;
 import com.example.bootr2dbc.entities.ReactivePost;
 import com.example.bootr2dbc.model.ReactivePostRequest;
 import com.example.bootr2dbc.services.ReactivePostService;
 import com.example.bootr2dbc.utils.AppConstants;
 import java.net.URI;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -18,7 +20,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @RestController
@@ -29,12 +30,21 @@ public class ReactivePostController {
     private final ReactivePostService reactivePostService;
 
     @GetMapping("/")
-    public Flux<ReactivePost> getAllReactivePosts(
+    public Mono<ResponseEntity<List<ReactivePost>>> getAllReactivePosts(
             @RequestParam(value = "sortBy", defaultValue = AppConstants.DEFAULT_SORT_BY, required = false)
                     String sortBy,
             @RequestParam(value = "sortDir", defaultValue = AppConstants.DEFAULT_SORT_DIRECTION, required = false)
                     String sortDir) {
-        return reactivePostService.findAllReactivePosts(sortBy, sortDir);
+        return reactivePostService
+                .findAllReactivePosts(sortBy, sortDir)
+                .collectList()
+                .flatMap(posts -> {
+                    if (posts.isEmpty()) {
+                        return Mono.just(ResponseEntity.noContent().build());
+                    } else {
+                        return Mono.just(ResponseEntity.ok(posts));
+                    }
+                });
     }
 
     @GetMapping("/{id}")
@@ -43,6 +53,20 @@ public class ReactivePostController {
                 .findReactivePostById(id)
                 .map(ResponseEntity::ok)
                 .switchIfEmpty(Mono.just(ResponseEntity.notFound().build()));
+    }
+
+    @GetMapping("/{postId}/comments")
+    public Mono<ResponseEntity<List<ReactiveComments>>> getCommentsForReactivePost(@PathVariable Long postId) {
+        return reactivePostService
+                .findCommentsForReactivePost(postId)
+                .collectList()
+                .flatMap(comments -> {
+                    if (comments.isEmpty()) {
+                        return Mono.just(ResponseEntity.noContent().build());
+                    } else {
+                        return Mono.just(ResponseEntity.ok(comments));
+                    }
+                });
     }
 
     @PostMapping("/")
@@ -73,12 +97,7 @@ public class ReactivePostController {
     }
 
     @DeleteMapping("/{id}")
-    public Mono<ResponseEntity<Void>> deleteReactivePost(@PathVariable Long id) {
-        return reactivePostService
-                .findReactivePostById(id)
-                .flatMap(reactivePost -> reactivePostService
-                        .deleteReactivePostById(id)
-                        .then(Mono.just(ResponseEntity.noContent().<Void>build())))
-                .switchIfEmpty(Mono.just(ResponseEntity.notFound().build()));
+    public Mono<ResponseEntity<Object>> deleteReactivePost(@PathVariable Long id) {
+        return reactivePostService.deleteReactivePostAndCommentsById(id);
     }
 }

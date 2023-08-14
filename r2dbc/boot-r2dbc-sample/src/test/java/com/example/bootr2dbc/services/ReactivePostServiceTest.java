@@ -1,6 +1,5 @@
 package com.example.bootr2dbc.services;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.times;
 import static org.mockito.BDDMockito.verify;
@@ -38,7 +37,13 @@ class ReactivePostServiceTest {
         Flux<ReactivePost> pagedResult = reactivePostService.findAllReactivePosts("id", "asc");
 
         // then
-        assertThat(pagedResult).isNotNull();
+        StepVerifier.create(pagedResult)
+                .expectNextMatches(reactivePost -> Objects.equals(
+                                reactivePost.getId(), getReactivePost().getId())
+                        && reactivePost.getTitle().equals(getReactivePost().getTitle())
+                        && reactivePost.getContent().equals(getReactivePost().getContent()))
+                .expectComplete()
+                .verify();
     }
 
     @Test
