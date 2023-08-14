@@ -6,6 +6,7 @@ import static org.mockito.BDDMockito.times;
 import static org.mockito.BDDMockito.verify;
 
 import com.example.bootr2dbc.entities.ReactiveComments;
+import com.example.bootr2dbc.mapper.ReactivePostCommentMapper;
 import com.example.bootr2dbc.model.ReactiveCommentRequest;
 import com.example.bootr2dbc.repositories.ReactiveCommentsRepository;
 import java.util.UUID;
@@ -24,6 +25,9 @@ class ReactiveCommentsServiceTest {
 
     @Mock
     private ReactiveCommentsRepository reactiveCommentsRepository;
+
+    @Mock
+    private ReactivePostCommentMapper reactivePostCommentMapper;
 
     @InjectMocks
     private ReactiveCommentsService reactiveCommentsService;
@@ -72,16 +76,18 @@ class ReactiveCommentsServiceTest {
     @Test
     void saveReactiveComments() {
         // given
-
-        given(reactiveCommentsRepository.save(ReactiveComments.builder()
-                        .postId(1L)
-                        .title("junitTitle")
-                        .content("junitContent")
-                        .build()))
-                .willReturn(Mono.just(getReactiveComments()));
+        ReactiveCommentRequest reactivePostCommentsRequest = getReactiveCommentRequest();
+        ReactiveComments mappedReactivePostComments = ReactiveComments.builder()
+                .content(reactivePostCommentsRequest.content())
+                .title(reactivePostCommentsRequest.title())
+                .postId(reactivePostCommentsRequest.postId())
+                .build();
+        given(reactivePostCommentMapper.mapToReactivePostComments(reactivePostCommentsRequest))
+                .willReturn(mappedReactivePostComments);
+        given(reactiveCommentsRepository.save(mappedReactivePostComments)).willReturn(Mono.just(getReactiveComments()));
         // when
         Mono<ReactiveComments> persistedReactiveComments =
-                reactiveCommentsService.saveReactiveCommentByPostId(getReactiveCommentRequest());
+                reactiveCommentsService.saveReactiveCommentByPostId(reactivePostCommentsRequest);
         // then
         StepVerifier.create(persistedReactiveComments)
                 .expectNextMatches(reactivePostComment -> reactivePostComment

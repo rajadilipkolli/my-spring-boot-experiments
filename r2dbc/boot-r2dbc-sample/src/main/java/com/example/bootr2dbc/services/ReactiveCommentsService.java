@@ -1,6 +1,7 @@
 package com.example.bootr2dbc.services;
 
 import com.example.bootr2dbc.entities.ReactiveComments;
+import com.example.bootr2dbc.mapper.ReactivePostCommentMapper;
 import com.example.bootr2dbc.model.ReactiveCommentRequest;
 import com.example.bootr2dbc.repositories.ReactiveCommentsRepository;
 import java.util.UUID;
@@ -17,6 +18,7 @@ import reactor.core.publisher.Mono;
 public class ReactiveCommentsService {
 
     private final ReactiveCommentsRepository reactiveCommentsRepository;
+    private final ReactivePostCommentMapper reactivePostCommentMapper;
 
     public Flux<ReactiveComments> findAllReactiveCommentsByPostId(Long postId, String sortBy, String sortDir) {
         Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name())
@@ -31,25 +33,17 @@ public class ReactiveCommentsService {
     }
 
     public Mono<ReactiveComments> saveReactiveCommentByPostId(ReactiveCommentRequest reactiveCommentRequest) {
-        ReactiveComments reactiveComments = mapToReactiveComments(reactiveCommentRequest);
+        ReactiveComments reactiveComments = reactivePostCommentMapper.mapToReactivePostComments(reactiveCommentRequest);
         return reactiveCommentsRepository.save(reactiveComments);
     }
 
     public Mono<ReactiveComments> updateReactivePostComment(ReactiveCommentRequest reactiveCommentRequest, UUID id) {
-        ReactiveComments reactiveComments = mapToReactiveComments(reactiveCommentRequest);
+        ReactiveComments reactiveComments = reactivePostCommentMapper.mapToReactivePostComments(reactiveCommentRequest);
         reactiveComments.setId(id);
         return reactiveCommentsRepository.save(reactiveComments);
     }
 
     public Mono<Void> deleteReactiveCommentById(UUID id) {
         return reactiveCommentsRepository.deleteById(id);
-    }
-
-    private ReactiveComments mapToReactiveComments(ReactiveCommentRequest reactiveCommentRequest) {
-        ReactiveComments reactiveComments = new ReactiveComments();
-        reactiveComments.setContent(reactiveCommentRequest.content());
-        reactiveComments.setTitle(reactiveCommentRequest.title());
-        reactiveComments.setPostId(reactiveCommentRequest.postId());
-        return reactiveComments;
     }
 }
