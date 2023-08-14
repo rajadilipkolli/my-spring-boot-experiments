@@ -4,6 +4,7 @@ import com.example.bootr2dbc.entities.ReactivePost;
 import com.example.bootr2dbc.model.ReactivePostRequest;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 
 @Mapper(componentModel = "spring")
 public interface ReactivePostMapper {
@@ -14,4 +15,7 @@ public interface ReactivePostMapper {
     @Mapping(target = "createdBy", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     ReactivePost mapToReactivePost(ReactivePostRequest reactivePostRequest);
+
+    void updateReactivePostFromReactivePostRequest(
+            ReactivePostRequest reactivePostRequest, @MappingTarget ReactivePost reactivePost);
 }

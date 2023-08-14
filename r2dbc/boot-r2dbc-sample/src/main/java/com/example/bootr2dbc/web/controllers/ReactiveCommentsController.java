@@ -71,7 +71,7 @@ public class ReactiveCommentsController {
         return reactiveCommentsService
                 .findReactiveCommentById(id)
                 .flatMap(existingPostComment -> reactiveCommentsService
-                        .updateReactivePostComment(reactiveCommentRequest, id)
+                        .updateReactivePostComment(reactiveCommentRequest, existingPostComment)
                         .map(ResponseEntity::ok))
                 .switchIfEmpty(Mono.just(ResponseEntity.notFound().build()));
     }

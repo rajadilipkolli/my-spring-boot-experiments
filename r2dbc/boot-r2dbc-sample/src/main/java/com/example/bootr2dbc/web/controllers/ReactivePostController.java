@@ -91,7 +91,7 @@ public class ReactivePostController {
         return reactivePostService
                 .findReactivePostById(id)
                 .flatMap(existingPost -> reactivePostService
-                        .updateReactivePost(reactivePostRequest, id)
+                        .updateReactivePost(reactivePostRequest, existingPost)
                         .map(ResponseEntity::ok))
                 .switchIfEmpty(Mono.just(ResponseEntity.notFound().build()));
     }

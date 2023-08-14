@@ -222,7 +222,7 @@ class ReactivePostControllerTest {
         reactivePost.setTitle("Updated ReactivePost");
 
         given(reactivePostService.findReactivePostById(reactivePostId)).willReturn(Mono.just(reactivePost));
-        given(reactivePostService.updateReactivePost(reactivePostRequest, reactivePostId))
+        given(reactivePostService.updateReactivePost(reactivePostRequest, reactivePost))
                 .willReturn(Mono.just(reactivePost));
 
         this.webTestClient

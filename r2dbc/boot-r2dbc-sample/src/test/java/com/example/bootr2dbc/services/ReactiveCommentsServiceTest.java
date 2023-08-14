@@ -120,6 +120,6 @@ class ReactiveCommentsServiceTest {
     }
 
     private ReactiveCommentRequest getReactiveCommentRequest() {
-        return new ReactiveCommentRequest("junitTitle", "junitContent", 1L);
+        return new ReactiveCommentRequest("junitTitle", "junitContent", 1L, true);
     }
 }

@@ -130,7 +130,7 @@ class ReactiveCommentsControllerIT extends AbstractIntegrationTest {
         ReactiveComments reactiveComments = reactiveCommentsFlux.next().block();
         Long reactivePostId = reactiveComments.getPostId();
         ReactiveCommentRequest reactiveCommentRequest =
-                new ReactiveCommentRequest("New Title", "New ReactiveComments", reactivePostId);
+                new ReactiveCommentRequest("New Title", "New ReactiveComments", reactivePostId, false);
         this.webTestClient
                 .mutate() // Mutate the client to add basic authentication headers
                 .defaultHeaders(headers -> {
@@ -166,7 +166,7 @@ class ReactiveCommentsControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldReturn400WhenCreateNewReactiveCommentsWithoutTitleAndContent() {
-        ReactiveCommentRequest reactiveCommentRequest = new ReactiveCommentRequest(null, null, -90L);
+        ReactiveCommentRequest reactiveCommentRequest = new ReactiveCommentRequest(null, null, -90L, false);
 
         this.webTestClient
                 .mutate() // Mutate the client to add basic authentication headers
@@ -229,7 +229,7 @@ class ReactiveCommentsControllerIT extends AbstractIntegrationTest {
         ReactiveComments reactiveComments = reactiveCommentsFlux.next().block();
         UUID reactivePostId = reactiveComments.getId();
         ReactiveCommentRequest reactivePostRequest = new ReactiveCommentRequest(
-                "Updated ReactivePost", reactiveComments.getContent(), reactiveComments.getPostId());
+                "Updated ReactivePost", reactiveComments.getContent(), reactiveComments.getPostId(), true);
 
         this.webTestClient
                 .mutate() // Mutate the client to add basic authentication headers

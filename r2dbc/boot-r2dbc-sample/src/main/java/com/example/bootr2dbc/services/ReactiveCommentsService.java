@@ -37,9 +37,10 @@ public class ReactiveCommentsService {
         return reactiveCommentsRepository.save(reactiveComments);
     }
 
-    public Mono<ReactiveComments> updateReactivePostComment(ReactiveCommentRequest reactiveCommentRequest, UUID id) {
-        ReactiveComments reactiveComments = reactivePostCommentMapper.mapToReactivePostComments(reactiveCommentRequest);
-        reactiveComments.setId(id);
+    public Mono<ReactiveComments> updateReactivePostComment(
+            ReactiveCommentRequest reactiveCommentRequest, ReactiveComments reactiveComments) {
+        reactivePostCommentMapper.updateReactiveCommentRequestFromReactiveComments(
+                reactiveCommentRequest, reactiveComments);
         return reactiveCommentsRepository.save(reactiveComments);
     }
 

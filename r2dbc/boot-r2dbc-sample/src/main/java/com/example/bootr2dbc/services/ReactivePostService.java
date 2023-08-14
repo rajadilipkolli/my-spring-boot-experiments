@@ -47,9 +47,8 @@ public class ReactivePostService {
         return reactivePostRepository.save(reactivePost);
     }
 
-    public Mono<ReactivePost> updateReactivePost(ReactivePostRequest reactivePostRequest, Long id) {
-        ReactivePost reactivePost = reactivePostMapper.mapToReactivePost(reactivePostRequest);
-        reactivePost.setId(id);
+    public Mono<ReactivePost> updateReactivePost(ReactivePostRequest reactivePostRequest, ReactivePost reactivePost) {
+        this.reactivePostMapper.updateReactivePostFromReactivePostRequest(reactivePostRequest, reactivePost);
         return reactivePostRepository.save(reactivePost);
     }
 

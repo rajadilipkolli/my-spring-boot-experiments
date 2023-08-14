@@ -143,7 +143,7 @@ class ReactiveCommentsControllerTest {
         ReactiveComments reactiveComments = reactiveCommentsFlux.next().block();
         Long reactivePostId = reactiveComments.getPostId();
         ReactiveCommentRequest reactiveCommentRequest =
-                new ReactiveCommentRequest("First Title", "First Content", reactivePostId);
+                new ReactiveCommentRequest("First Title", "First Content", reactivePostId, false);
 
         given(reactiveCommentsService.saveReactiveCommentByPostId(reactiveCommentRequest))
                 .willReturn(Mono.just(reactiveComments));
@@ -177,7 +177,7 @@ class ReactiveCommentsControllerTest {
 
     @Test
     void shouldReturn400WhenCreateNewReactiveCommentsWithoutTitleAndContent() {
-        ReactiveCommentRequest reactiveCommentRequest = new ReactiveCommentRequest(null, null, -90L);
+        ReactiveCommentRequest reactiveCommentRequest = new ReactiveCommentRequest(null, null, -90L, false);
 
         this.webTestClient
                 .post()
@@ -235,10 +235,10 @@ class ReactiveCommentsControllerTest {
         reactiveComments.setTitle("Updated ReactivePost");
         UUID reactivePostId = reactiveComments.getId();
         ReactiveCommentRequest reactivePostRequest = new ReactiveCommentRequest(
-                "Updated ReactivePost", reactiveComments.getContent(), reactiveComments.getPostId());
+                "Updated ReactivePost", reactiveComments.getContent(), reactiveComments.getPostId(), true);
 
         given(reactiveCommentsService.findReactiveCommentById(reactivePostId)).willReturn(Mono.just(reactiveComments));
-        given(reactiveCommentsService.updateReactivePostComment(reactivePostRequest, reactivePostId))
+        given(reactiveCommentsService.updateReactivePostComment(reactivePostRequest, reactiveComments))
                 .willReturn(Mono.just(reactiveComments));
 
         this.webTestClient
@@ -262,7 +262,7 @@ class ReactiveCommentsControllerTest {
         ReactiveComments reactiveComments = reactiveCommentsFlux.next().block();
         UUID reactivePostId = reactiveComments.getId();
         ReactiveCommentRequest reactivePostRequest = new ReactiveCommentRequest(
-                "Updated ReactivePost", reactiveComments.getContent(), reactiveComments.getPostId());
+                "Updated ReactivePost", reactiveComments.getContent(), reactiveComments.getPostId(), false);
 
         given(reactiveCommentsService.findReactiveCommentById(reactivePostId)).willReturn(Mono.empty());
 
