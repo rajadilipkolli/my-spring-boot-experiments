@@ -1,10 +1,11 @@
 package com.example.bootr2dbc.entities;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
@@ -13,22 +14,25 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
-@Data
-@Table("reactive_posts")
-@Builder
-@AllArgsConstructor
+@Table(name = "reactive_post_comments")
+@Getter
+@Setter
 @NoArgsConstructor
-public class ReactivePost {
+@AllArgsConstructor
+public class ReactiveComments {
 
     @Id
     @Column("id")
-    private Long id;
+    private UUID id;
 
     @Column("title")
     private String title;
 
     @Column("content")
     private String content;
+
+    @Column("post_id")
+    private Long postId;
 
     @Column("created_at")
     @CreatedDate

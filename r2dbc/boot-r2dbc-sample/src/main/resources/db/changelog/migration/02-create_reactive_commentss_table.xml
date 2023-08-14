@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <property name="string.type" dbms="postgresql" value="text"/>
+    <property name="string.type" dbms="!postgresql" value="varchar2(255)"/>
+
+    <changeSet author="appUser" id="createTable-reactive_post_comments">
+        <createSequence
+            sequenceName="reactive_post_comments_seq"
+            incrementBy="50"
+            startValue="1"
+        />
+        <createTable tableName="reactive_post_comments">
+            <column name="id" type="bigint" defaultValueSequenceNext="reactive_post_comments_seq">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="title" type="${string.type}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="content" type="${string.type}"/>
+            <column name="post_id" type="BIGINT"/>
+            <column name="published" type="boolean"/>
+            <column name="published_at" type="timestamptz"/>
+            <column name="created_at" type="timestamptz"/>
+        </createTable>
+        <addForeignKeyConstraint baseColumnNames="post_id" baseTableName="reactive_post_comments"
+                                 constraintName="FK_POST_COMMENT_ON_POST" referencedColumnNames="id"
+                                 referencedTableName="reactive_posts"/>
+    </changeSet>
+</databaseChangeLog>
