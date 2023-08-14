@@ -206,6 +206,16 @@
             "projectName": "boot-r2dbc-sample",
             "args": "",
             "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-TestApplication<boot-r2dbc-sample>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.example.bootr2dbc.TestApplication",
+            "projectName": "boot-r2dbc-sample",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
         }
     ]
 }

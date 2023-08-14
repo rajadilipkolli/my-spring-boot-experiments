@@ -5,7 +5,9 @@ import static org.mockito.BDDMockito.times;
 import static org.mockito.BDDMockito.verify;
 
 import com.example.bootr2dbc.entities.ReactivePost;
+import com.example.bootr2dbc.mapper.ReactivePostMapper;
 import com.example.bootr2dbc.model.ReactivePostRequest;
+import com.example.bootr2dbc.repositories.ReactiveCommentsRepository;
 import com.example.bootr2dbc.repositories.ReactivePostRepository;
 import java.util.Objects;
 import org.junit.jupiter.api.Test;
@@ -23,6 +25,12 @@ class ReactivePostServiceTest {
 
     @Mock
     private ReactivePostRepository reactivePostRepository;
+
+    @Mock
+    private ReactiveCommentsRepository reactiveCommentsRepository;
+
+    @Mock
+    private ReactivePostMapper reactivePostMapper;
 
     @InjectMocks
     private ReactivePostService reactivePostService;
@@ -70,6 +78,7 @@ class ReactivePostServiceTest {
                 .content(reactivePostRequest.content())
                 .title(reactivePostRequest.title())
                 .build();
+        given(reactivePostMapper.mapToReactivePost(reactivePostRequest)).willReturn(mappedReactivePost);
         given(reactivePostRepository.save(mappedReactivePost)).willReturn(Mono.just(getReactivePost()));
         // when
         Mono<ReactivePost> persistedReactivePost = reactivePostService.saveReactivePost(reactivePostRequest);

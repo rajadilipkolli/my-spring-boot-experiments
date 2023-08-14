@@ -2,6 +2,7 @@ package com.example.bootr2dbc.services;
 
 import com.example.bootr2dbc.entities.ReactiveComments;
 import com.example.bootr2dbc.entities.ReactivePost;
+import com.example.bootr2dbc.mapper.ReactivePostMapper;
 import com.example.bootr2dbc.model.ReactivePostRequest;
 import com.example.bootr2dbc.repositories.ReactiveCommentsRepository;
 import com.example.bootr2dbc.repositories.ReactivePostRepository;
@@ -20,7 +21,9 @@ public class ReactivePostService {
 
     private final ReactivePostRepository reactivePostRepository;
     private final ReactiveCommentsRepository reactiveCommentsRepository;
+    private final ReactivePostMapper reactivePostMapper;
 
+    @Transactional(readOnly = true)
     public Flux<ReactivePost> findAllReactivePosts(String sortBy, String sortDir) {
         Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name())
                 ? Sort.by(sortBy).ascending()
@@ -29,21 +32,23 @@ public class ReactivePostService {
         return reactivePostRepository.findAll(sort);
     }
 
+    @Transactional(readOnly = true)
     public Mono<ReactivePost> findReactivePostById(Long id) {
         return reactivePostRepository.findById(id);
     }
 
+    @Transactional(readOnly = true)
     public Flux<ReactiveComments> findCommentsForReactivePost(Long id) {
         return reactiveCommentsRepository.findAllByPostId(id);
     }
 
     public Mono<ReactivePost> saveReactivePost(ReactivePostRequest reactivePostRequest) {
-        ReactivePost reactivePost = mapToReactivePost(reactivePostRequest);
+        ReactivePost reactivePost = reactivePostMapper.mapToReactivePost(reactivePostRequest);
         return reactivePostRepository.save(reactivePost);
     }
 
     public Mono<ReactivePost> updateReactivePost(ReactivePostRequest reactivePostRequest, Long id) {
-        ReactivePost reactivePost = mapToReactivePost(reactivePostRequest);
+        ReactivePost reactivePost = reactivePostMapper.mapToReactivePost(reactivePostRequest);
         reactivePost.setId(id);
         return reactivePostRepository.save(reactivePost);
     }
@@ -59,12 +64,5 @@ public class ReactivePostService {
                         .then(deleteReactivePostById(reactivePost.getId()))
                         .then(Mono.just(ResponseEntity.noContent().build())))
                 .switchIfEmpty(Mono.just(ResponseEntity.notFound().build()));
-    }
-
-    private ReactivePost mapToReactivePost(ReactivePostRequest reactivePostRequest) {
-        return ReactivePost.builder()
-                .content(reactivePostRequest.content())
-                .title(reactivePostRequest.title())
-                .build();
     }
 }

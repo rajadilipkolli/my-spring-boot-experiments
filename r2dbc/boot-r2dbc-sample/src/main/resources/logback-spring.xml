@@ -22,7 +22,8 @@
     <logger name="com.example.bootr2dbc" level="DEBUG"/>
     <logger name="org.springframework.security" level="INFO"/>
     <logger name="org.springframework.transaction" level="DEBUG"/>
-    <logger name="org.springframework.data.r2dbc.connectionfactory" level="DEBUG"/>
+    <logger name="io.r2dbc.postgresql.QUERY" level="DEBUG"/>
+    <logger name="io.r2dbc.postgresql.PARAM" level="DEBUG"/>
     <logger name="org.springframework" level="INFO"/>
 
 </configuration>
