@@ -1,13 +1,13 @@
-name: spring-boot-graphql-webmvc
+name: boot-graphql-webmvc
 
 on:
   push:
     paths:
-      - "graphql/spring-boot-graphql-webmvc/**"
+      - "graphql/boot-graphql-webmvc/**"
     branches: [main]
   pull_request:
     paths:
-      - "graphql/spring-boot-graphql-webmvc/**"
+      - "graphql/boot-graphql-webmvc/**"
     types:
       - opened
       - synchronize
@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: "graphql/spring-boot-graphql-webmvc"
+        working-directory: "graphql/boot-graphql-webmvc"
     steps:
       - uses: actions/checkout@v3
         with:

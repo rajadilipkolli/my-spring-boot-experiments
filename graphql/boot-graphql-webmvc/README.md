@@ -1,4 +1,4 @@
-# spring-boot-graphql-webmvc
+# boot-graphql-webmvc
 
 ### Run tests
 ```shell

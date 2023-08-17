@@ -34,3 +34,5 @@ scrape_configs:
   scrape_interval: 5s
   static_configs:
   - targets: ['host.docker.internal:8080', 'localhost:8080']
+    labels:
+      application: boot-graphql-webmvc

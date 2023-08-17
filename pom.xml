@@ -17,7 +17,7 @@
         <module>boot-rabbitmq-thymeleaf</module>
         <module>boot-togglz-sample</module>
         <module>boot-ultimate-redis</module>
-        <module>graphql/spring-boot-graphql-webmvc</module>
+        <module>graphql/boot-graphql-webmvc</module>
         <module>httpClients/boot-restclient</module>
         <module>httpClients/http-proxy</module>
         <module>httpClients/rest-template</module>
