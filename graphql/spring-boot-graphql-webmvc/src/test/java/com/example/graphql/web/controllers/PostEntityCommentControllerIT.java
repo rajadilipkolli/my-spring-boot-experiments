@@ -1,6 +1,7 @@
 package com.example.graphql.web.controllers;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -10,7 +11,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.example.graphql.common.AbstractIntegrationTest;
 import com.example.graphql.entities.PostCommentEntity;
-import com.example.graphql.repositories.PostCommentRepository;
+import com.example.graphql.entities.PostDetailsEntity;
+import com.example.graphql.entities.PostEntity;
+import com.example.graphql.model.request.PostCommentRequest;
+import com.example.graphql.repositories.PostRepository;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,19 +25,26 @@ import org.springframework.http.MediaType;
 
 class PostEntityCommentControllerIT extends AbstractIntegrationTest {
 
-    @Autowired private PostCommentRepository postCommentRepository;
+    @Autowired private PostRepository postRepository;
 
-    private List<PostCommentEntity> postCommentEntityList = null;
+    private PostEntity postEntity;
 
     @BeforeEach
     void setUp() {
-        postCommentRepository.deleteAll();
+        postRepository.deleteAll();
 
-        postCommentEntityList = new ArrayList<>();
+        postEntity = PostEntity.builder().content("First Post").content("First Content").build();
+        PostDetailsEntity postDetailsEntity =
+                PostDetailsEntity.builder().detailsKey("First Details").build();
+        postEntity.setDetails(postDetailsEntity);
+
+        List<PostCommentEntity> postCommentEntityList = new ArrayList<>();
         postCommentEntityList.add(PostCommentEntity.builder().title("First PostComment").build());
         postCommentEntityList.add(PostCommentEntity.builder().title("Second PostComment").build());
         postCommentEntityList.add(PostCommentEntity.builder().title("Third PostComment").build());
-        postCommentEntityList = postCommentRepository.saveAll(postCommentEntityList);
+        postCommentEntityList.forEach(
+                postCommentEntity -> postEntity.addComment(postCommentEntity));
+        postRepository.save(postEntity);
     }
 
     @Test
@@ -40,12 +52,12 @@ class PostEntityCommentControllerIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(get("/api/postcomments"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.size()", is(postCommentEntityList.size())));
+                .andExpect(jsonPath("$.size()", is(postEntity.getComments().size())));
     }
 
     @Test
     void shouldFindPostCommentById() throws Exception {
-        PostCommentEntity postCommentEntity = postCommentEntityList.get(0);
+        PostCommentEntity postCommentEntity = postEntity.getComments().get(0);
         Long postCommentId = postCommentEntity.getId();
 
         this.mockMvc
@@ -56,34 +68,46 @@ class PostEntityCommentControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldCreateNewPostComment() throws Exception {
-        PostCommentEntity postCommentEntity =
-                PostCommentEntity.builder().title("New PostComment").build();
+        PostCommentRequest postCommentRequest =
+                new PostCommentRequest(
+                        "First PostComment", "First Content", postEntity.getId(), true);
+
         this.mockMvc
                 .perform(
                         post("/api/postcomments")
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(postCommentEntity)))
+                                .content(objectMapper.writeValueAsString(postCommentRequest)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.title", is(postCommentEntity.getTitle())));
+                .andExpect(jsonPath("$.postId", is(postEntity.getId()), Long.class))
+                .andExpect(jsonPath("$.commentId", notNullValue(Long.class)))
+                .andExpect(jsonPath("$.title", is(postCommentRequest.title())))
+                .andExpect(jsonPath("$.content", is(postCommentRequest.content())))
+                .andExpect(jsonPath("$.published", is(postCommentRequest.published())))
+                .andExpect(jsonPath("$.publishedAt", notNullValue(LocalDateTime.class)));
     }
 
     @Test
     void shouldUpdatePostComment() throws Exception {
-        PostCommentEntity postCommentEntity = postCommentEntityList.get(0);
-        postCommentEntity.setTitle("Updated PostComment");
+        PostCommentEntity postCommentEntity = postEntity.getComments().get(0);
 
+        PostCommentRequest postCommentRequest =
+                new PostCommentRequest(
+                        "Updated PostComment",
+                        postCommentEntity.getContent(),
+                        postEntity.getId(),
+                        postCommentEntity.isPublished());
         this.mockMvc
                 .perform(
                         put("/api/postcomments/{id}", postCommentEntity.getId())
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(postCommentEntity)))
+                                .content(objectMapper.writeValueAsString(postCommentRequest)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.title", is(postCommentEntity.getTitle())));
+                .andExpect(jsonPath("$.title", is("Updated PostComment")));
     }
 
     @Test
     void shouldDeletePostComment() throws Exception {
-        PostCommentEntity postCommentEntity = postCommentEntityList.get(0);
+        PostCommentEntity postCommentEntity = postEntity.getComments().get(0);
 
         this.mockMvc
                 .perform(delete("/api/postcomments/{id}", postCommentEntity.getId()))

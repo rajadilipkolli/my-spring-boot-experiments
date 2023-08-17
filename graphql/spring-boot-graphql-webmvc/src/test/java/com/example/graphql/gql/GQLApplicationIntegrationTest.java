@@ -3,6 +3,7 @@ package com.example.graphql.gql;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.example.graphql.common.AbstractIntegrationTest;
+import com.example.graphql.model.request.PostCommentRequest;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
@@ -134,17 +135,14 @@ class GQLApplicationIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     void testAddCommentToPost() {
-        Map<String, Object> addCommentToPost = new HashMap<>();
-        addCommentToPost.put("title", "JunitTitle");
-        addCommentToPost.put("content", "JunitContent");
-        addCommentToPost.put("postId", "1");
-        addCommentToPost.put("published", true);
+        PostCommentRequest postCommentRequest =
+                new PostCommentRequest("JunitTitle", "JunitContent", 1L, true);
 
         graphQlTester
                 .documentName("addCommentToPost")
-                .variable("addCommentToPostRequest", addCommentToPost)
+                .variable("addCommentToPostRequest", postCommentRequest)
                 .execute()
-                .path("addCommentToPost.id")
+                .path("addCommentToPost.commentId")
                 .entity(Long.class)
                 .satisfies(id -> assertThat(id).isGreaterThan(0))
                 .path("addCommentToPost.published")

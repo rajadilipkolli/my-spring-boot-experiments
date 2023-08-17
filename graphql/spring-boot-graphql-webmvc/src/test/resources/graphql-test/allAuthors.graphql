@@ -5,17 +5,27 @@ query authorEntities {
         lastName
         email
         posts {
-        title
-        content
-        comments {
+            id
             title
             content
-        }
-        details {
+            published
             createdAt
-            id
-        }
-        createdAt
+            publishedAt
+            modifiedAt
+            comments {
+                title
+                content
+                published
+                publishedAt
+            }
+            details {
+                createdAt
+                detailsKey
+                id
+            }
+            tags {
+                tagName
+            }
         }
     }
 }

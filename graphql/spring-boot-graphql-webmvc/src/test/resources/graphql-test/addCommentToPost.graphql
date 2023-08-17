@@ -1,6 +1,6 @@
 mutation addCommentToPost($addCommentToPostRequest: AddCommentToPostRequest!) {
     addCommentToPost(addCommentToPostRequest: $addCommentToPostRequest) {
-        id
+        commentId
         title
         content
         published

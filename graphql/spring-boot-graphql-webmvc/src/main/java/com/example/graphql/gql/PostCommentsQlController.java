@@ -1,7 +1,7 @@
 package com.example.graphql.gql;
 
-import com.example.graphql.entities.PostCommentEntity;
-import com.example.graphql.model.request.AddCommentToPostRequest;
+import com.example.graphql.model.request.PostCommentRequest;
+import com.example.graphql.model.response.PostCommentResponse;
 import com.example.graphql.services.PostCommentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -18,9 +18,8 @@ public class PostCommentsQlController {
     private final PostCommentService postCommentService;
 
     @MutationMapping
-    public PostCommentEntity addCommentToPost(
-            @Valid @Argument("addCommentToPostRequest")
-                    AddCommentToPostRequest addCommentToPostRequest) {
-        return this.postCommentService.addCommentToPost(addCommentToPostRequest);
+    public PostCommentResponse addCommentToPost(
+            @Valid @Argument("addCommentToPostRequest") PostCommentRequest postCommentRequest) {
+        return this.postCommentService.addCommentToPost(postCommentRequest);
     }
 }

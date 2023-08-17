@@ -1,7 +1,8 @@
 package com.example.graphql.web.controllers;
 
 import com.example.graphql.config.logging.Loggable;
-import com.example.graphql.entities.PostCommentEntity;
+import com.example.graphql.model.request.PostCommentRequest;
+import com.example.graphql.model.response.PostCommentResponse;
 import com.example.graphql.services.PostCommentService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -27,12 +28,12 @@ public class PostCommentController {
     private final PostCommentService postCommentService;
 
     @GetMapping
-    public List<PostCommentEntity> getAllPostComments() {
+    public List<PostCommentResponse> getAllPostComments() {
         return postCommentService.findAllPostComments();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<PostCommentEntity> getPostCommentById(@PathVariable Long id) {
+    public ResponseEntity<PostCommentResponse> getPostCommentById(@PathVariable Long id) {
         return postCommentService
                 .findPostCommentById(id)
                 .map(ResponseEntity::ok)
@@ -41,27 +42,26 @@ public class PostCommentController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public PostCommentEntity createPostComment(
-            @RequestBody @Validated PostCommentEntity postCommentEntity) {
-        return postCommentService.savePostComment(postCommentEntity);
+    public PostCommentResponse createPostComment(
+            @RequestBody @Validated PostCommentRequest postCommentRequest) {
+        return postCommentService.addCommentToPost(postCommentRequest);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<PostCommentEntity> updatePostComment(
-            @PathVariable Long id, @RequestBody PostCommentEntity postCommentEntity) {
+    public ResponseEntity<PostCommentResponse> updatePostComment(
+            @PathVariable Long id, @RequestBody PostCommentRequest postCommentRequest) {
         return postCommentService
-                .findPostCommentById(id)
+                .findCommentById(id)
                 .map(
-                        postCommentObj -> {
-                            postCommentEntity.setId(id);
-                            return ResponseEntity.ok(
-                                    postCommentService.savePostComment(postCommentEntity));
-                        })
+                        postCommentObj ->
+                                ResponseEntity.ok(
+                                        postCommentService.updatePostComment(
+                                                postCommentObj, postCommentRequest)))
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<PostCommentEntity> deletePostComment(@PathVariable Long id) {
+    public ResponseEntity<PostCommentResponse> deletePostComment(@PathVariable Long id) {
         return postCommentService
                 .findPostCommentById(id)
                 .map(
