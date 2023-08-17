@@ -1,0 +1,148 @@
+package com.example.graphql.web.controllers;
+
+import static com.example.graphql.utils.AppConstants.PROFILE_TEST;
+import static org.hamcrest.CoreMatchers.is;
+import static org.mockito.BDDMockito.given;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import com.example.graphql.entities.PostDetailsEntity;
+import com.example.graphql.model.request.PostDetailsRequest;
+import com.example.graphql.projections.PostDetailsInfo;
+import com.example.graphql.services.PostDetailsService;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.web.servlet.MockMvc;
+
+@WebMvcTest(controllers = PostDetailsController.class)
+@ActiveProfiles(PROFILE_TEST)
+class PostDetailsControllerTest {
+
+    @Autowired private MockMvc mockMvc;
+
+    @MockBean private PostDetailsService postDetailsService;
+
+    @Autowired private ObjectMapper objectMapper;
+
+    private List<PostDetailsEntity> postDetailsList;
+
+    @BeforeEach
+    void setUp() {
+        this.postDetailsList = new ArrayList<>();
+        this.postDetailsList.add(PostDetailsEntity.builder().id(1L).createdBy("Junit1").build());
+    }
+
+    @Test
+    void shouldFetchAllPostDetails() throws Exception {
+        given(postDetailsService.findAllPostDetails()).willReturn(List.of(getPostDetails()));
+
+        this.mockMvc
+                .perform(get("/api/postdetails"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.size()", is(postDetailsList.size())));
+    }
+
+    @Test
+    void shouldFindPostDetailsById() throws Exception {
+        Long postDetailsId = 10L;
+
+        given(postDetailsService.findPostDetailsById(postDetailsId))
+                .willReturn(Optional.of(getPostDetails()));
+
+        this.mockMvc
+                .perform(get("/api/postdetails/{id}", postDetailsId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.createdBy", is("junit")));
+    }
+
+    @Test
+    void shouldReturn404WhenFetchingNonExistingPostDetails() throws Exception {
+        Long postDetailsId = 1L;
+        given(postDetailsService.findPostDetailsById(postDetailsId)).willReturn(Optional.empty());
+
+        this.mockMvc
+                .perform(get("/api/postdetails/{id}", postDetailsId))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void shouldUpdatePostDetails() throws Exception {
+        Long postDetailsId = 1L;
+        PostDetailsEntity postDetails =
+                PostDetailsEntity.builder().id(postDetailsId).createdBy("updated").build();
+        PostDetailsRequest postDetailsRequest = new PostDetailsRequest("junitDetailsKey");
+        given(postDetailsService.findDetailsById(postDetailsId))
+                .willReturn(Optional.of(postDetails));
+        given(postDetailsService.updatePostDetails(postDetails, postDetailsRequest))
+                .willReturn(getPostDetails());
+
+        this.mockMvc
+                .perform(
+                        put("/api/postdetails/{id}", postDetails.getId())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(postDetailsRequest)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.detailsKey", is("junitDetailsKey")));
+    }
+
+    @Test
+    void shouldReturn404WhenUpdatingNonExistingPostDetails() throws Exception {
+        Long postDetailsId = 1L;
+        given(postDetailsService.findPostDetailsById(postDetailsId)).willReturn(Optional.empty());
+        PostDetailsEntity postDetails =
+                PostDetailsEntity.builder().id(postDetailsId).createdBy("Junit1").build();
+
+        this.mockMvc
+                .perform(
+                        put("/api/postdetails/{id}", postDetailsId)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(postDetails)))
+                .andExpect(status().isNotFound());
+    }
+
+    private PostDetailsInfo getPostDetails() {
+        return new PostDetailsInfo() {
+            @Override
+            public Long getId() {
+                return 10L;
+            }
+
+            @Override
+            public String getDetailsKey() {
+                return "junitDetailsKey";
+            }
+
+            @Override
+            public String getCreatedBy() {
+                return "junit";
+            }
+
+            @Override
+            public LocalDateTime getCreatedAt() {
+                return LocalDateTime.now();
+            }
+
+            @Override
+            public LocalDateTime getModifiedAt() {
+                return LocalDateTime.now();
+            }
+
+            @Override
+            public Long postId() {
+                return 1L;
+            }
+        };
+    }
+}

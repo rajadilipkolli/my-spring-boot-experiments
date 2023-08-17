@@ -1,13 +1,13 @@
 package com.example.graphql.web.controllers;
 
 import com.example.graphql.config.logging.Loggable;
-import com.example.graphql.entities.PostDetailsEntity;
+import com.example.graphql.model.request.PostDetailsRequest;
+import com.example.graphql.projections.PostDetailsInfo;
 import com.example.graphql.services.PostDetailsService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/postdetails")
@@ -18,7 +18,28 @@ public class PostDetailsController {
     private final PostDetailsService postDetailsService;
 
     @GetMapping
-    public List<PostDetailsEntity> getAllPostDetails() {
+    public List<PostDetailsInfo> getAllPostDetails() {
         return postDetailsService.findAllPostDetails();
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<PostDetailsInfo> getPostDetailsById(@PathVariable Long id) {
+        return postDetailsService
+                .findPostDetailsById(id)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<PostDetailsInfo> updatePostDetails(
+            @PathVariable Long id, @RequestBody PostDetailsRequest postDetailsEntity) {
+        return postDetailsService
+                .findDetailsById(id)
+                .map(
+                        postDetailsObj ->
+                                ResponseEntity.ok(
+                                        postDetailsService.updatePostDetails(
+                                                postDetailsObj, postDetailsEntity)))
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 }

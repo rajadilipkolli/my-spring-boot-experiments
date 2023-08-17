@@ -9,5 +9,11 @@ public interface PostDetailsInfo {
 
     String getDetailsKey();
 
+    String getCreatedBy();
+
     LocalDateTime getCreatedAt();
+
+    LocalDateTime getModifiedAt();
+
+    Long postId();
 }
