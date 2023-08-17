@@ -1,9 +1,9 @@
 package com.example.graphql.gql;
 
-import com.example.graphql.entities.PostCommentEntity;
 import com.example.graphql.entities.TagEntity;
 import com.example.graphql.model.request.AuthorRequest;
 import com.example.graphql.model.response.AuthorResponse;
+import com.example.graphql.model.response.PostCommentResponse;
 import com.example.graphql.projections.PostInfo;
 import com.example.graphql.services.AuthorService;
 import com.example.graphql.services.PostCommentService;
@@ -56,7 +56,7 @@ public class AuthorGraphQlController {
     }
 
     @BatchMapping(typeName = "Post")
-    public Map<PostInfo, List<PostCommentEntity>> comments(List<PostInfo> posts) {
+    public Map<PostInfo, List<PostCommentResponse>> comments(List<PostInfo> posts) {
         log.info("Fetching PostComments by PostIds");
         List<Long> postIds = posts.stream().map(PostInfo::getId).toList();
 

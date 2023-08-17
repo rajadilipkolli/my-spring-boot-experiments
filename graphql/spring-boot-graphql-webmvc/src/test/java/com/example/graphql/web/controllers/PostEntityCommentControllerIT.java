@@ -6,6 +6,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -39,8 +40,10 @@ class PostEntityCommentControllerIT extends AbstractIntegrationTest {
         postEntity.setDetails(postDetailsEntity);
 
         List<PostCommentEntity> postCommentEntityList = new ArrayList<>();
-        postCommentEntityList.add(PostCommentEntity.builder().title("First PostComment").build());
-        postCommentEntityList.add(PostCommentEntity.builder().title("Second PostComment").build());
+        postCommentEntityList.add(
+                PostCommentEntity.builder().title("First PostComment").published(true).build());
+        postCommentEntityList.add(
+                PostCommentEntity.builder().title("Second PostComment").published(false).build());
         postCommentEntityList.add(PostCommentEntity.builder().title("Third PostComment").build());
         postCommentEntityList.forEach(
                 postCommentEntity -> postEntity.addComment(postCommentEntity));
@@ -52,6 +55,7 @@ class PostEntityCommentControllerIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(get("/api/postcomments"))
                 .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.size()", is(postEntity.getComments().size())));
     }
 
@@ -63,6 +67,7 @@ class PostEntityCommentControllerIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(get("/api/postcomments/{id}", postCommentId))
                 .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.title", is(postCommentEntity.getTitle())));
     }
 
@@ -78,6 +83,7 @@ class PostEntityCommentControllerIT extends AbstractIntegrationTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(postCommentRequest)))
                 .andExpect(status().isCreated())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.postId", is(postEntity.getId()), Long.class))
                 .andExpect(jsonPath("$.commentId", notNullValue(Long.class)))
                 .andExpect(jsonPath("$.title", is(postCommentRequest.title())))
@@ -102,6 +108,7 @@ class PostEntityCommentControllerIT extends AbstractIntegrationTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(postCommentRequest)))
                 .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.title", is("Updated PostComment")));
     }
 
@@ -111,7 +118,6 @@ class PostEntityCommentControllerIT extends AbstractIntegrationTest {
 
         this.mockMvc
                 .perform(delete("/api/postcomments/{id}", postCommentEntity.getId()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.title", is(postCommentEntity.getTitle())));
+                .andExpect(status().isAccepted());
     }
 }

@@ -18,7 +18,7 @@ public class PostDetailsController {
     private final PostDetailsService postDetailsService;
 
     @GetMapping
-    public List<PostDetailsEntity> getAllPostDetailss() {
-        return postDetailsService.findAllPostDetailss();
+    public List<PostDetailsEntity> getAllPostDetails() {
+        return postDetailsService.findAllPostDetails();
     }
 }

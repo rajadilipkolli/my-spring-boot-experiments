@@ -3,6 +3,8 @@ package com.example.graphql.mapper;
 import com.example.graphql.entities.PostCommentEntity;
 import com.example.graphql.model.request.PostCommentRequest;
 import com.example.graphql.model.response.PostCommentResponse;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
@@ -18,4 +20,12 @@ public interface PostCommentEntityToResponseMapper
 
     void updatePostCommentEntity(
             PostCommentRequest authorRequest, @MappingTarget PostCommentEntity postCommentEntity);
+
+    default LocalDateTime mapToLocalDateTime(OffsetDateTime offsetDateTime) {
+        if (offsetDateTime != null) {
+            return offsetDateTime.toLocalDateTime();
+        } else {
+            return null;
+        }
+    }
 }

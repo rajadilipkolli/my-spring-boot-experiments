@@ -17,7 +17,7 @@ public class PostDetailsService {
 
     private final PostDetailsRepository postDetailsRepository;
 
-    public List<PostDetailsEntity> findAllPostDetailss() {
+    public List<PostDetailsEntity> findAllPostDetails() {
         return postDetailsRepository.findAll();
     }
 

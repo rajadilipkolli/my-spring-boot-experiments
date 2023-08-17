@@ -5,7 +5,6 @@ import com.example.graphql.entities.PostCommentEntity;
 import com.example.graphql.entities.PostDetailsEntity;
 import com.example.graphql.entities.PostEntity;
 import com.example.graphql.repositories.AuthorRepository;
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.stream.LongStream;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +27,6 @@ public class Initializer implements CommandLineRunner {
         LongStream.range(1, 5)
                 .forEach(
                         i -> {
-                            LocalDateTime localDateTime1 = LocalDateTime.now();
                             PostCommentEntity post1Comment =
                                     PostCommentEntity.builder()
                                             .title("Sample Review" + i)
@@ -44,26 +42,22 @@ public class Initializer implements CommandLineRunner {
                             PostDetailsEntity post1Details =
                                     PostDetailsEntity.builder()
                                             .createdBy("user" + i)
-                                            .createdAt(localDateTime1)
                                             .detailsKey("key" + i)
                                             .build();
                             PostEntity postEntity =
                                     PostEntity.builder()
                                             .title("Title" + i)
                                             .content("content" + 1)
-                                            .createdAt(OffsetDateTime.now())
                                             .published(true)
                                             .build();
                             postEntity.setDetails(post1Details);
                             postEntity.addComment(post1Comment);
                             postEntity.addComment(post1Comment2);
 
-                            LocalDateTime localDateTime2 = LocalDateTime.now();
                             PostEntity postEntity1 =
                                     PostEntity.builder()
                                             .title("Second Title" + i)
                                             .content("Second Content" + 1)
-                                            .createdAt(OffsetDateTime.now())
                                             .published(false)
                                             .build();
                             PostCommentEntity post2Comment =
@@ -71,12 +65,11 @@ public class Initializer implements CommandLineRunner {
                                             .title("Complicated Title" + i)
                                             .content("Complicated Content" + i)
                                             .published(true)
-                                            .publishedAt(localDateTime2)
+                                            .publishedAt(OffsetDateTime.now())
                                             .build();
                             PostDetailsEntity post2Details =
                                     PostDetailsEntity.builder()
                                             .createdBy("user" + i)
-                                            .createdAt(localDateTime2)
                                             .detailsKey("keys" + i)
                                             .build();
                             postEntity1.setDetails(post2Details);

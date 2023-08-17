@@ -8,6 +8,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -17,6 +18,7 @@ import com.example.graphql.model.response.PostCommentResponse;
 import com.example.graphql.services.PostCommentService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -63,6 +65,7 @@ class PostEntityCommentControllerTest {
         this.mockMvc
                 .perform(get("/api/postcomments"))
                 .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.size()", is(postCommentResponseList.size())));
     }
 
@@ -76,6 +79,7 @@ class PostEntityCommentControllerTest {
         this.mockMvc
                 .perform(get("/api/postcomments/{id}", postCommentId))
                 .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.title", is(postCommentResponse.title())));
     }
 
@@ -98,7 +102,7 @@ class PostEntityCommentControllerTest {
                         "First PostComment",
                         "First Content",
                         true,
-                        LocalDateTime.now(),
+                        OffsetDateTime.now(),
                         LocalDateTime.now());
 
         PostCommentRequest postCommentRequest =
@@ -113,6 +117,7 @@ class PostEntityCommentControllerTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(postCommentRequest)))
                 .andExpect(status().isCreated())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.postId", is(1)))
                 .andExpect(jsonPath("$.commentId", is(100)))
                 .andExpect(jsonPath("$.title", is(postCommentResponse.title())))
@@ -138,6 +143,7 @@ class PostEntityCommentControllerTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(postCommentRequest)))
                 .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.title", is(postCommentResponse.title())));
     }
 
@@ -166,8 +172,8 @@ class PostEntityCommentControllerTest {
 
         this.mockMvc
                 .perform(delete("/api/postcomments/{id}", postCommentId))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.title", is(postCommentResponse.title())));
+                .andExpect(status().isAccepted())
+                .andExpect(content().string(""));
     }
 
     @Test

@@ -3,13 +3,15 @@ package com.example.graphql.services;
 import com.example.graphql.config.logging.Loggable;
 import com.example.graphql.entities.PostCommentEntity;
 import com.example.graphql.mapper.PostCommentEntityToResponseMapper;
+import com.example.graphql.mapper.PostCommentRequestToEntityMapper;
 import com.example.graphql.model.request.PostCommentRequest;
 import com.example.graphql.model.response.PostCommentResponse;
 import com.example.graphql.repositories.PostCommentRepository;
 import com.example.graphql.repositories.PostRepository;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
@@ -26,6 +28,7 @@ public class PostCommentService {
     private final PostCommentRepository postCommentRepository;
     private final PostRepository postRepository;
     private final PostCommentEntityToResponseMapper postCommentEntityToResponseMapper;
+    private final PostCommentRequestToEntityMapper postCommentRequestToEntityMapper;
 
     @Transactional(readOnly = true)
     public List<PostCommentResponse> findAllPostComments() {
@@ -43,7 +46,7 @@ public class PostCommentService {
 
     @Transactional(readOnly = true)
     public Optional<PostCommentResponse> findPostCommentById(Long id) {
-        return postCommentRepository.findById(id).map(postCommentEntityToResponseMapper::convert);
+        return findCommentById(id).map(postCommentEntityToResponseMapper::convert);
     }
 
     @Transactional(readOnly = true)
@@ -53,15 +56,7 @@ public class PostCommentService {
 
     public PostCommentResponse addCommentToPost(PostCommentRequest postCommentRequest) {
         PostCommentEntity postCommentEntity =
-                PostCommentEntity.builder()
-                        .postEntity(postRepository.getReferenceById(postCommentRequest.postId()))
-                        .title(postCommentRequest.title())
-                        .content(postCommentRequest.content())
-                        .published(postCommentRequest.published())
-                        .build();
-        if (postCommentEntity.isPublished()) {
-            postCommentEntity.setPublishedAt(LocalDateTime.now());
-        }
+                postCommentRequestToEntityMapper.covert(postCommentRequest, postRepository);
         return saveAndConvert(postCommentEntity);
     }
 
@@ -70,9 +65,11 @@ public class PostCommentService {
     }
 
     @Transactional(readOnly = true)
-    public Map<Long, List<PostCommentEntity>> getCommentsByPostIdIn(List<Long> postIds) {
+    public Map<Long, List<PostCommentResponse>> getCommentsByPostIdIn(List<Long> postIds) {
         return this.postCommentRepository.findByPostEntity_IdIn(postIds).stream()
-                .collect(Collectors.groupingBy(postComment -> postComment.getPostEntity().getId()));
+                .map(postCommentEntityToResponseMapper::convert)
+                .filter(Objects::nonNull)
+                .collect(Collectors.groupingBy(PostCommentResponse::postId));
     }
 
     public PostCommentResponse updatePostComment(
@@ -81,7 +78,7 @@ public class PostCommentService {
                 postCommentRequest, postCommentEntity);
         // if published is changed to true then publishedAt should be set
         if (postCommentEntity.isPublished() && postCommentEntity.getPublishedAt() == null) {
-            postCommentEntity.setPublishedAt(LocalDateTime.now());
+            postCommentEntity.setPublishedAt(OffsetDateTime.now());
         }
         return saveAndConvert(postCommentEntity);
     }

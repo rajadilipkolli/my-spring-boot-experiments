@@ -3,7 +3,7 @@
     xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
-         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.2.xsd">
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
 
     <property name="string.type" dbms="postgresql" value="text"/>
     <property name="string.type" dbms="!postgresql" value="varchar2(255)"/>
@@ -26,6 +26,7 @@
             <column name="published_at" type="timestamptz"/>
             <column name="post_id" type="BIGINT"/>
             <column name="created_at" type="timestamptz"/>
+            <column name="modified_at" type="timestamptz"/>
         </createTable>
         <addForeignKeyConstraint baseColumnNames="post_id" baseTableName="post_comments"
                                  constraintName="FK_POST_COMMENT_ON_POST" referencedColumnNames="id"

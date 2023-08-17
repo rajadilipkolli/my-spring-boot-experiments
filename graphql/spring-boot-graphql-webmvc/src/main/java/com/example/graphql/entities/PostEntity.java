@@ -13,7 +13,6 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -21,6 +20,7 @@ import java.util.Objects;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.Hibernate;
 
@@ -30,7 +30,8 @@ import org.hibernate.Hibernate;
 @Setter
 @AllArgsConstructor
 @Builder
-public class PostEntity implements Serializable {
+@NoArgsConstructor
+public class PostEntity extends Auditable implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
@@ -42,10 +43,6 @@ public class PostEntity implements Serializable {
     private String content;
 
     private boolean published;
-
-    private OffsetDateTime createdAt;
-
-    private LocalDateTime modifiedAt;
 
     private LocalDateTime publishedAt;
 
@@ -63,10 +60,6 @@ public class PostEntity implements Serializable {
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "author_id")
     private AuthorEntity authorEntity;
-
-    public PostEntity() {
-        this.createdAt = OffsetDateTime.now();
-    }
 
     public void addComment(PostCommentEntity comment) {
         this.comments.add(comment);

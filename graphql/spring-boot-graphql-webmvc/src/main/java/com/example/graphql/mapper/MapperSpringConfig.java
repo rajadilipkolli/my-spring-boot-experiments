@@ -4,5 +4,5 @@ import org.mapstruct.MapperConfig;
 import org.mapstruct.extensions.spring.SpringMapperConfig;
 
 @MapperConfig(uses = ConversionServiceAdapter.class)
-@SpringMapperConfig(conversionServiceBeanName = "myConversionService")
+@SpringMapperConfig(conversionServiceBeanName = "appConversionService")
 public class MapperSpringConfig {}

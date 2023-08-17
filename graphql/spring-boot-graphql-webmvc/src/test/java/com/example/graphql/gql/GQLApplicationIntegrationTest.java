@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.example.graphql.common.AbstractIntegrationTest;
 import com.example.graphql.model.request.PostCommentRequest;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
@@ -149,7 +150,7 @@ class GQLApplicationIntegrationTest extends AbstractIntegrationTest {
                 .entity(Boolean.class)
                 .satisfies(published -> assertThat(published).isTrue())
                 .path("addCommentToPost.publishedAt")
-                .entity(LocalDateTime.class)
+                .entity(OffsetDateTime.class)
                 .satisfies(localDateTime -> assertThat(localDateTime).isNotNull())
                 .path("addCommentToPost.title")
                 .entity(String.class)

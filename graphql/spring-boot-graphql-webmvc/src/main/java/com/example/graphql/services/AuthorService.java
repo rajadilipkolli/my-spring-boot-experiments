@@ -20,7 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class AuthorService {
 
     private final AuthorRepository authorRepository;
-    private final ConversionService myConversionService;
+    private final ConversionService appConversionService;
     private final AuthorRequestToEntityMapper authorRequestToEntityMapper;
 
     @Transactional(readOnly = true)
@@ -28,7 +28,7 @@ public class AuthorService {
         return authorRepository.findAll().stream()
                 .map(
                         authorEntity ->
-                                myConversionService.convert(authorEntity, AuthorResponse.class))
+                                appConversionService.convert(authorEntity, AuthorResponse.class))
                 .toList();
     }
 
@@ -38,13 +38,13 @@ public class AuthorService {
                 .findById(id)
                 .map(
                         authorEntity ->
-                                myConversionService.convert(authorEntity, AuthorResponse.class));
+                                appConversionService.convert(authorEntity, AuthorResponse.class));
     }
 
     public AuthorResponse saveAuthor(AuthorRequest authorRequest) {
         AuthorEntity authorEntity =
-                this.myConversionService.convert(authorRequest, AuthorEntity.class);
-        return this.myConversionService.convert(
+                this.appConversionService.convert(authorRequest, AuthorEntity.class);
+        return this.appConversionService.convert(
                 authorRepository.save(authorEntity), AuthorResponse.class);
     }
 
@@ -56,7 +56,7 @@ public class AuthorService {
                         authorEntity -> {
                             authorRequestToEntityMapper.upDateAuthorEntity(
                                     authorRequest, authorEntity);
-                            return myConversionService.convert(
+                            return appConversionService.convert(
                                     authorRepository.save(authorEntity), AuthorResponse.class);
                         });
     }
@@ -71,6 +71,6 @@ public class AuthorService {
                 .findByEmailAllIgnoreCase(email)
                 .map(
                         authorEntity ->
-                                myConversionService.convert(authorEntity, AuthorResponse.class));
+                                appConversionService.convert(authorEntity, AuthorResponse.class));
     }
 }

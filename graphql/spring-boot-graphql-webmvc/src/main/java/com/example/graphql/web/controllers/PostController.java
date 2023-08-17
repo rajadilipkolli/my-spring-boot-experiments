@@ -51,7 +51,7 @@ public class PostController {
             @PathVariable Long id, @RequestBody NewPostRequest newPostRequest) {
         return postService
                 .updatePost(id, newPostRequest)
-                .map(body -> ResponseEntity.ok(body))
+                .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 

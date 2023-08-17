@@ -61,13 +61,13 @@ public class PostCommentController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<PostCommentResponse> deletePostComment(@PathVariable Long id) {
+    public ResponseEntity<Object> deletePostComment(@PathVariable Long id) {
         return postCommentService
                 .findPostCommentById(id)
                 .map(
                         postComment -> {
                             postCommentService.deletePostCommentById(id);
-                            return ResponseEntity.ok(postComment);
+                            return ResponseEntity.accepted().build();
                         })
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }

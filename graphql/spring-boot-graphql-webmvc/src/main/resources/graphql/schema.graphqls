@@ -16,7 +16,7 @@ type Post{
     title:String!
     content:String!
     published:Boolean
-    createdAt:DateTime
+    createdAt:LocalDateTime
     modifiedAt:LocalDateTime
     publishedAt:LocalDateTime
     details: PostDetails
@@ -34,7 +34,7 @@ type PostComments {
     title:String!
     content:String
     published:Boolean
-    publishedAt:LocalDateTime
+    publishedAt:DateTime
     createdAt:LocalDateTime
 }
 

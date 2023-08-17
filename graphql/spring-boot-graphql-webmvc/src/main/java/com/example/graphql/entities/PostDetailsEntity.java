@@ -9,11 +9,11 @@ import jakarta.persistence.MapsId;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.io.Serializable;
-import java.time.LocalDateTime;
 import java.util.Objects;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
@@ -22,13 +22,12 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @Builder
-public class PostDetailsEntity implements Serializable {
+@NoArgsConstructor
+public class PostDetailsEntity extends Auditable implements Serializable {
 
     @Id private Long id;
 
     private String detailsKey;
-
-    private LocalDateTime createdAt;
 
     @Column(name = "created_by")
     private String createdBy;
@@ -38,12 +37,7 @@ public class PostDetailsEntity implements Serializable {
     @JoinColumn(name = "id")
     private PostEntity postEntity;
 
-    public PostDetailsEntity() {
-        this.createdAt = LocalDateTime.now();
-    }
-
     public PostDetailsEntity(String createdBy) {
-        this.createdAt = LocalDateTime.now();
         this.createdBy = createdBy;
     }
 

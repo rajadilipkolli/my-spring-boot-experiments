@@ -1,6 +1,7 @@
 package com.example.graphql.model.response;
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import lombok.Builder;
 
 @Builder
@@ -10,5 +11,5 @@ public record PostCommentResponse(
         String title,
         String content,
         boolean published,
-        LocalDateTime publishedAt,
+        OffsetDateTime publishedAt,
         LocalDateTime createdAt) {}

@@ -3,7 +3,7 @@
     xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
-         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.2.xsd">
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
 
     <property name="now" value="now()" dbms="mysql,h2"/>
     <property name="now" value="current_timestamp" dbms="postgresql"/>
@@ -21,6 +21,7 @@
             <column name="details_key" type="${string.type}"/>
             <column name="created_at" type="timestamptz" defaultValueDate="${now}"/>
             <column name="created_by" type="${string.type}"/>
+            <column name="modified_at" type="timestamptz"/>
         </createTable>
         <addForeignKeyConstraint baseColumnNames="id" baseTableName="post_details"
                                  constraintName="FK_POST_DETAILS_ON_POST" referencedColumnNames="id"

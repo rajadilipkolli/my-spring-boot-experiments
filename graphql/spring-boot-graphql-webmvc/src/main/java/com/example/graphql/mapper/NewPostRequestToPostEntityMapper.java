@@ -12,6 +12,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
+// After Mapping will not be set if we use builder pattern, hence disabled it
 @Mapper(
         builder = @Builder(disableBuilder = true),
         uses = {TagRepository.class})
