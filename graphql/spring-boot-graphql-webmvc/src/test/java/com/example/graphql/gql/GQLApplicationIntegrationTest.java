@@ -160,6 +160,7 @@ class GQLApplicationIntegrationTest extends AbstractIntegrationTest {
                 .entity(String.class)
                 .isEqualTo("JunitContent")
                 .path("addCommentToPost.createdAt")
-                .entity(LocalDateTime.class);
+                .entity(LocalDateTime.class)
+                .satisfies(localDateTime -> assertThat(localDateTime).isNotNull());
     }
 }
