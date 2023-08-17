@@ -33,7 +33,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(controllers = PostCommentController.class)
 @ActiveProfiles(PROFILE_TEST)
-class PostEntityCommentControllerTest {
+class PostCommentEntityControllerTest {
 
     @Autowired private MockMvc mockMvc;
 

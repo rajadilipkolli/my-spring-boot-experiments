@@ -24,7 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 
-class PostEntityCommentControllerIT extends AbstractIntegrationTest {
+class PostCommentEntityControllerIT extends AbstractIntegrationTest {
 
     @Autowired private PostRepository postRepository;
 

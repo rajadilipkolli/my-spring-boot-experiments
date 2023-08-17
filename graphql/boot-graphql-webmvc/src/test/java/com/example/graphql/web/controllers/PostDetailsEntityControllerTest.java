@@ -28,7 +28,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(controllers = PostDetailsController.class)
 @ActiveProfiles(PROFILE_TEST)
-class PostDetailsControllerTest {
+class PostDetailsEntityControllerTest {
 
     @Autowired private MockMvc mockMvc;
 
