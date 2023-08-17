@@ -11,14 +11,8 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.graphql.tester.AutoConfigureHttpGraphQlTester;
-import org.springframework.graphql.test.tester.HttpGraphQlTester;
 
-@AutoConfigureHttpGraphQlTester
 class GQLApplicationIntegrationTest extends AbstractIntegrationTest {
-
-    @Autowired private HttpGraphQlTester graphQlTester;
 
     @Test
     void allAuthors() {
