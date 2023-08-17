@@ -13,7 +13,7 @@ class TestUltimateRedisApplication {
     @Bean
     @ServiceConnection(name = "redis")
     GenericContainer<?> redisContainer() {
-        return new GenericContainer<>(DockerImageName.parse("redis").withTag("7.0.12"))
+        return new GenericContainer<>(DockerImageName.parse("redis").withTag("7.2.0-alpine"))
                 .withExposedPorts(6379);
     }
 
