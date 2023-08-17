@@ -57,10 +57,18 @@ type Mutation {
     createTag(tagName: String!, tagDescription: String) : Tags
     updateTagDescription(tagName: String!, tagDescription: String!) : Tags
     deleteTag(tagName: String!) : Boolean
-    createPost(newPostRequest: newPostRequest!): Post
+    createPost(newPostRequest: NewPostRequest!): Post
+    addCommentToPost(addCommentToPostRequest: AddCommentToPostRequest!): PostComments
 }
 
-input newPostRequest {
+input AddCommentToPostRequest {
+    title:String!
+    content:String!
+    postId:String!
+    published:Boolean
+}
+
+input NewPostRequest {
     title:String!
     content:String!
     email:String!

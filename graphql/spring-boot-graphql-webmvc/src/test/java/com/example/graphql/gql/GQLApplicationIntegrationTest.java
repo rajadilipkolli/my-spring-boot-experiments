@@ -131,4 +131,35 @@ class GQLApplicationIntegrationTest extends AbstractIntegrationTest {
                 .entity(String.class)
                 .isEqualTo("newPost");
     }
+
+    @Test
+    void testAddCommentToPost() {
+        Map<String, Object> addCommentToPost = new HashMap<>();
+        addCommentToPost.put("title", "JunitTitle");
+        addCommentToPost.put("content", "JunitContent");
+        addCommentToPost.put("postId", "1");
+        addCommentToPost.put("published", true);
+
+        graphQlTester
+                .documentName("addCommentToPost")
+                .variable("addCommentToPostRequest", addCommentToPost)
+                .execute()
+                .path("addCommentToPost.id")
+                .entity(Long.class)
+                .satisfies(id -> assertThat(id).isGreaterThan(0))
+                .path("addCommentToPost.published")
+                .entity(Boolean.class)
+                .satisfies(published -> assertThat(published).isTrue())
+                .path("addCommentToPost.publishedAt")
+                .entity(LocalDateTime.class)
+                .satisfies(localDateTime -> assertThat(localDateTime).isNotNull())
+                .path("addCommentToPost.title")
+                .entity(String.class)
+                .isEqualTo("JunitTitle")
+                .path("addCommentToPost.content")
+                .entity(String.class)
+                .isEqualTo("JunitContent")
+                .path("addCommentToPost.createdAt")
+                .entity(LocalDateTime.class);
+    }
 }

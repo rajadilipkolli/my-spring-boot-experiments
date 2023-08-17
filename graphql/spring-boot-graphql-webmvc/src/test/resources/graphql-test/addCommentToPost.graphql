@@ -1,0 +1,10 @@
+mutation addCommentToPost($addCommentToPostRequest: AddCommentToPostRequest!) {
+    addCommentToPost(addCommentToPostRequest: $addCommentToPostRequest) {
+        id
+        title
+        content
+        published
+        publishedAt
+        createdAt
+    }
+}

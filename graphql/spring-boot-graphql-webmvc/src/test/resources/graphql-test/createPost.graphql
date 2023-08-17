@@ -1,4 +1,4 @@
-mutation createPost($newPostRequest: newPostRequest!) {
+mutation createPost($newPostRequest: NewPostRequest!) {
     createPost(newPostRequest: $newPostRequest) {
         id
         title
