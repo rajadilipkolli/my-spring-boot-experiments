@@ -31,8 +31,7 @@ jobs:
           java-version: 17
           distribution: "zulu"
           cache: "maven"
-      
-      
+          
       - name: Grant execute permission for mvnw
         run: chmod +x mvnw
 

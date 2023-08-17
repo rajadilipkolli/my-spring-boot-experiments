@@ -28,7 +28,7 @@ scrape_configs:
   static_configs:
   - targets: ['prometheus:9090', 'host.docker.internal:9090', 'localhost:9090']
 
-- job_name: 'spring-graph-ql'
+- job_name: 'boot-graphql-webmvc'
 
   metrics_path: '/actuator/prometheus'
   scrape_interval: 5s
