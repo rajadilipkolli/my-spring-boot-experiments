@@ -71,7 +71,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "10.0.1",
+      "pluginVersion": "10.0.3",
       "targets": [
         {
           "datasource": {
@@ -133,7 +133,7 @@
         },
         "textMode": "value_and_name"
       },
-      "pluginVersion": "10.0.1",
+      "pluginVersion": "10.0.3",
       "targets": [
         {
           "datasource": {
@@ -203,7 +203,7 @@
         "showUnfilled": true,
         "valueMode": "color"
       },
-      "pluginVersion": "10.0.1",
+      "pluginVersion": "10.0.3",
       "targets": [
         {
           "datasource": {
@@ -270,7 +270,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "10.0.1",
+      "pluginVersion": "10.0.3",
       "targets": [
         {
           "datasource": {
@@ -936,7 +936,7 @@
             "uid": "loki"
           },
           "editorMode": "code",
-          "expr": "{compose_service=~\"app-.*\"} | pattern `<date> <time> <_>=<trace_id> <_>=<span_id> <_>=<trace_flags> <type> <_> --- <msg>` | line_format \"{{.compose_service}}\\t{{.type}}\\ttrace_id={{.trace_id}}\\t{{.msg}}\" |= \"$log_keyword\"",
+          "expr": "{compose_service=~\"strategy.*\"} | pattern `<date> <time> <_>=<trace_id> <_>=<span_id> <_>=<trace_flags> <type> <_> --- <msg>` | line_format \"{{.compose_service}}\\t{{.type}}\\ttrace_id={{.trace_id}}\\t{{.msg}}\" |= \"$log_keyword\"",
           "hide": false,
           "queryType": "range",
           "refId": "A"
