@@ -1,4 +1,3 @@
-# my global config
 global:
   scrape_interval:     2s # Set the scrape interval to every 15 seconds. Default is every 1 minute.
   evaluation_interval: 2s # Evaluate rules every 15 seconds. The default is every 1 minute.
@@ -19,20 +18,18 @@ rule_files:
 # A scrape configuration containing exactly one endpoint to scrape:
 # Here it's Prometheus itself.
 scrape_configs:
-# The job name is added as a label `job=<job_name>` to any timeseries scraped from this config.
-- job_name: 'prometheus'
-
+  - job_name: 'prometheus'
+  
   # metrics_path defaults to '/metrics'
   # scheme defaults to 'http'.
-
-  static_configs:
-  - targets: ['prometheus:9090', 'host.docker.internal:9090', 'localhost:9090']
-
-- job_name: 'boot-graphql-webmvc'
-
-  metrics_path: '/actuator/prometheus'
-  scrape_interval: 5s
-  static_configs:
-  - targets: ['host.docker.internal:8080', 'localhost:8080']
-    labels:
-      application: boot-graphql-webmvc
+    static_configs:
+      - targets: ['host.docker.internal:9090', 'prometheus:9090']
+        labels:
+          application: 'prometheus'
+  - job_name: 'boot-graphql-webmvc-sample'
+    scrape_interval: 2s
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['host.docker.internal:8080', 'localhost:8080' ]
+        labels:
+          application: 'boot-graphql-webmvc'
