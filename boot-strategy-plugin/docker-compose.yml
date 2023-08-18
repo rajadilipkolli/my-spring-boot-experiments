@@ -5,6 +5,8 @@ services:
         extra_hosts: ['host.docker.internal:host-gateway']
         container_name: tempo
         command: [ "-config.file=/etc/tempo.yaml" ]
+        depends_on:
+            - loki
         volumes:
             - ./platform/tempo/tempo-local.yaml:/etc/tempo.yaml:ro
             - ./platform/tempo/tempo-data:/tmp/tempo
@@ -29,6 +31,8 @@ services:
         image: prom/prometheus:v2.46.0
         extra_hosts: ['host.docker.internal:host-gateway']
         container_name: prometheus
+        depends_on:
+            - loki
         command:
             - --enable-feature=exemplar-storage
             - --config.file=/etc/prometheus/prometheus.yml

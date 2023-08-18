@@ -11,7 +11,8 @@ datasources:
       uid: prometheus
       access: proxy
       url: http://host.docker.internal:9090
-      editable: false
+      editable: true
+      readOnly: false
       jsonData:
         httpMethod: POST
         exemplarTraceIdDestinations:
@@ -25,13 +26,19 @@ datasources:
       basicAuth: false
       isDefault: true
       version: 1
-      editable: false
+      editable: true
+      readOnly: false
       apiVersion: 1
       uid: tempo
       jsonData:
           httpMethod: GET
           tracesToLogs:
               datasourceUid: 'loki'
+              filterBySpanID: false
+              filterByTraceID: true
+              mapTagNamesEnabled: false
+              tags:
+                - compose_service
     - name: Loki
       type: loki
       uid: loki
@@ -41,7 +48,8 @@ datasources:
       basicAuth: false
       isDefault: false
       version: 1
-      editable: false
+      readOnly: false
+      editable: true
       apiVersion: 1
       jsonData:
           derivedFields:
