@@ -22,7 +22,7 @@ import org.springframework.context.annotation.Configuration;
                 @ExternalDocumentation(
                         description = "SpringGraphQL Wiki Documentation",
                         url =
-                                "https://rajadilipkolli.gitbook.io/my-spring-boot-experiments/graphql/spring-boot-graphql-webflux"))
+                                "https://rajadilipkolli.gitbook.io/my-spring-boot-experiments/graphql/boot-graphql-webflux"))
 public class SwaggerConfig {
 
     @Bean

@@ -32,7 +32,7 @@ It contains 3 concepts
    
 Sample data 
 
- ```json
+```
  {
     customers {
     id
@@ -46,7 +46,7 @@ Sample data
    
 or 
 
-```json
+```
 {
     customers {
      id
@@ -56,7 +56,7 @@ or
 
 Fetching data based on name
 
-```json
+```
 {
     customersByName(name: "kolli") {
         id
