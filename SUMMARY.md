@@ -3,7 +3,7 @@
 * [README](README.md)
 * [GraphQL](graphql/README.md)
   * [spring-boot-graphql-querydsl](graphql/spring-boot-graphql-querydsl/README.md)
-  * [spring-boot-graphql-webflux](graphql/spring-boot-graphql-webflux/README.md)
+  * [boot-graphql-webflux](graphql/boot-graphql-webflux/README.md)
   * [boot-graphql-webmvc](graphql/boot-graphql-webmvc/README.md)
 * [httpClients](httpClients/README.md)
   * [http-proxy](httpClients/http-proxy/README.md)

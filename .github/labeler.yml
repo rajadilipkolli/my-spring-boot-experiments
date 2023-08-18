@@ -5,7 +5,7 @@
 "component : choas-monkey":
  - boot-choas-monkey/**/*
 "component: graphql-webflux":
-  - graphql/spring-boot-graphql-webflux/**/*
+  - graphql/boot-graphql-webflux/**/*
 "component: graphql-webmvc":
   - graphql/boot-graphql-webmvc/**/*
 "component: graphql-querydsl":
@@ -62,7 +62,7 @@
   - jpa/boot-data-customsequence/pom.xml
   - boot-jobrunr-sample/pom.xml
   - boot-mongodb-elasticsearch/pom.xml
-  - graphql/spring-boot-graphql-webflux/build.gradle.kts
+  - graphql/boot-graphql-webflux/build.gradle.kts
   - graphql/spring-boot-graphql-querydsl/build.gradle.kts
   - graphql/boot-graphql-webmvc/pom.xml
   - boot-strategy-plugin/build.gradle

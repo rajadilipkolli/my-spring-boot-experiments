@@ -1,13 +1,13 @@
-name: spring-boot-graphql-webflux
+name: boot-graphql-webflux
 
 on:
   push:
     paths:
-      - "graphql/spring-boot-graphql-webflux/**"
+      - "graphql/boot-graphql-webflux/**"
     branches: [main]
   pull_request:
     paths:
-      - "graphql/spring-boot-graphql-webflux/**"
+      - "graphql/boot-graphql-webflux/**"
     types:
       - opened
       - synchronize
@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: "graphql/spring-boot-graphql-webflux"
+        working-directory: "graphql/boot-graphql-webflux"
     steps:
       - uses: actions/checkout@v3
         with:
