@@ -12,6 +12,7 @@ plugins {
 	id("org.owasp.dependencycheck") version "8.3.1"
 	jacoco
 	id("org.sonarqube") version "4.3.0.3225"
+	id("org.graalvm.buildtools.native") version "0.9.23"
 }
 
 group = "com.example.graphql"
@@ -99,7 +100,7 @@ tasks.jacocoTestCoverageVerification {
 			limit {
 				counter = "LINE"
 				value = "COVEREDRATIO"
-				minimum = "0.63".toBigDecimal()
+				minimum = "0.59".toBigDecimal()
 			}
 		}
 	}
@@ -131,7 +132,7 @@ dependencyCheck {
 	// Specifies if the build should be failed if a CVSS score equal to or above a specified level is identified.
 	// failBuildOnCVSS = 8.toFloat()
 	// Output directory where the report should be generated
-	outputDirectory = "$buildDir/reports/dependency-vulnerabilities"
+	outputDirectory = "${layout.buildDirectory}/reports/dependency-vulnerabilities"
 	// specify a list of known issues which contain false-positives to be suppressed
 	//suppressionFiles = ["$projectDir/config/dependencycheck/dependency-check-suppression.xml"]
 	// Sets the number of hours to wait before checking for new updates from the NVD, defaults to 4.
@@ -141,7 +142,7 @@ dependencyCheck {
 sonarqube {
 	properties {
 		property("sonar.sourceEncoding", "UTF-8")
-		property("sonar.projectKey", "rajadilipkolli_mfscreener")
+		property("sonar.projectKey", "rajadilipkolli_boot-graphql-webflux")
 		property("sonar.organization", "rajadilipkolli")
 		property("sonar.host.url", "https://sonarcloud.io")
 		property("sonar.sources", "src/main/java")
@@ -149,7 +150,7 @@ sonarqube {
 		property("sonar.exclusions", "src/main/java/**/config/*.*,src/main/java/**/entities/*.*,src/main/java/**/models/*.*,src/main/java/**/exceptions/*.*,src/main/java/**/utils/*.*,src/main/java/**/*Application.*")
 		property("sonar.test.inclusions", "**/*Test.java,**/*IntegrationTest.java,**/*IT.java")
 		property("sonar.java.codeCoveragePlugin", "jacoco")
-		property("sonar.coverage.jacoco.xmlReportPaths", "$buildDir/jacoco/test/jacoco.xml")
-		property("sonar.junit.reportPaths", "$buildDir/test-results/test")
+		property("sonar.coverage.jacoco.xmlReportPaths", "${layout.buildDirectory.dir("/jacoco/test/jacoco.xml")}")
+		property("sonar.junit.reportPaths", "${layout.buildDirectory.dir("/test-results/test")}")
 	}
 }

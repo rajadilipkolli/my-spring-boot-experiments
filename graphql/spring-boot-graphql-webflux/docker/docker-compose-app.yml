@@ -1,7 +1,7 @@
 version: '3.8'
 services:
 
-  spring-graph-ql:
+  boot-graphql-webflux:
     build: ..
     ports:
       - "18080:8080"

@@ -5,4 +5,4 @@ pluginManagement {
 	}
 }
 
-rootProject.name = "spring-boot-graphql-webflux"
+rootProject.name = "boot-graphql-webflux"

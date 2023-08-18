@@ -43,7 +43,8 @@
             "mainClass": "com.example.rest.webclient.Application",
             "projectName": "web-client-webflux",
             "args": "--spring.profiles.active=local",
-            "envFile": "${workspaceFolder}/.env"
+            "envFile": "${workspaceFolder}/.env",
+            "vmArgs": " -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=42815 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dspring.jmx.enabled=true -Djava.rmi.server.hostname=localhost -Dspring.application.admin.enabled=true -Dspring.boot.project.name=web-client-webflux"
         },
         {
             "type": "java",
@@ -215,6 +216,16 @@
             "mainClass": "com.example.bootr2dbc.TestApplication",
             "projectName": "boot-r2dbc-sample",
             "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-Application<spring-boot-graphql-webflux>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.example.graphql.Application",
+            "projectName": "spring-boot-graphql-webflux",
+            "args": "--spring.profiles.active=local",
             "envFile": "${workspaceFolder}/.env"
         }
     ]
