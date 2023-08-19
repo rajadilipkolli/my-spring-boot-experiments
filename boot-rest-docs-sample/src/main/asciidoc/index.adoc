@@ -1,5 +1,7 @@
-= User Application Guide
-Raja Kolli;
+= User Application API Guide
+
+Author Raja Kolli
+
 :doctype: book
 :icons: font
 :source-highlighter: highlightjs
@@ -7,11 +9,26 @@ Raja Kolli;
 :toclevels: 4
 :sectlinks:
 
-== Users API
+== Getting Started
+
+=== Prerequisites
+
+To use this API, you need the following:
+
+- A client that can make HTTP requests.
+- Authentication credentials (if required).
+
+=== Base URL
+
+The base URL for all API endpoints is: http://localhost:8080/api
+
+=== Users API
 
 Users API documentation generated from unit tests with Spring REST Docs.
 
 === GET /api/users/
+
+Fetch all users from database
 
 .curl sample request
 include::{snippets}/find-all/curl-request.adoc[]
@@ -23,6 +40,10 @@ include::{snippets}/find-all/http-response.adoc[]
 include::{snippets}/find-all/response-fields.adoc[]
 
 === GET /api/users/{id}
+
+==== Description
+
+Retrieve information about a user by id and if it doesn't exists then throws 404
 
 .curl sample request
 include::{snippets}/find-by-id/curl-request.adoc[]
