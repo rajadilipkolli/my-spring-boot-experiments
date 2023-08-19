@@ -6,6 +6,7 @@ import static org.mockito.BDDMockito.times;
 import static org.mockito.BDDMockito.verify;
 import static org.mockito.BDDMockito.willDoNothing;
 
+import com.example.restdocs.entities.Gender;
 import com.example.restdocs.entities.User;
 import com.example.restdocs.model.response.PagedResult;
 import com.example.restdocs.repositories.UserRepository;
@@ -63,7 +64,7 @@ class UserServiceTest {
         assertThat(optionalUser).isPresent();
         User user = optionalUser.get();
         assertThat(user.getId()).isEqualTo(1L);
-        assertThat(user.getText()).isEqualTo("junitTest");
+        assertThat(user.getFirstName()).isEqualTo("junitTest");
     }
 
     @Test
@@ -75,7 +76,7 @@ class UserServiceTest {
         // then
         assertThat(persistedUser).isNotNull();
         assertThat(persistedUser.getId()).isEqualTo(1L);
-        assertThat(persistedUser.getText()).isEqualTo("junitTest");
+        assertThat(persistedUser.getFirstName()).isEqualTo("junitTest");
     }
 
     @Test
@@ -91,7 +92,11 @@ class UserServiceTest {
     private User getUser() {
         User user = new User();
         user.setId(1L);
-        user.setText("junitTest");
+        user.setFirstName("junitTest");
+        user.setLastName("junitLastName");
+        user.setAge(60);
+        user.setGender(Gender.MALE);
+        user.setPhoneNumber("9876543210");
         return user;
     }
 }

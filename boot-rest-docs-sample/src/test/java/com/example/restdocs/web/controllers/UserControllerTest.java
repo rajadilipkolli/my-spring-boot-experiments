@@ -2,7 +2,6 @@ package com.example.restdocs.web.controllers;
 
 import static com.example.restdocs.utils.AppConstants.PROFILE_TEST;
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
@@ -15,6 +14,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.example.restdocs.entities.Gender;
 import com.example.restdocs.entities.User;
 import com.example.restdocs.model.response.PagedResult;
 import com.example.restdocs.services.UserService;
@@ -51,9 +51,9 @@ class UserControllerTest {
     @BeforeEach
     void setUp() {
         this.userList = new ArrayList<>();
-        this.userList.add(new User(1L, "text 1"));
-        this.userList.add(new User(2L, "text 2"));
-        this.userList.add(new User(3L, "text 3"));
+        userList.add(new User(1L, "First User", "Last Name", 30, Gender.MALE, "9848022334"));
+        userList.add(new User(2L, "Second User", "Last Name", 20, Gender.FEMALE, "9848022334"));
+        userList.add(new User(3L, "Third User", "Last Name", 30, Gender.MALE, "9848022334"));
     }
 
     @Test
@@ -78,13 +78,17 @@ class UserControllerTest {
     @Test
     void shouldFindUserById() throws Exception {
         Long userId = 1L;
-        User user = new User(userId, "text 1");
+        User user = new User(userId, "text 1", "Last Name", 30, Gender.MALE, "9848022334");
         given(userService.findUserById(userId)).willReturn(Optional.of(user));
 
         this.mockMvc
                 .perform(get("/api/users/{id}", userId))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.text", is(user.getText())));
+                .andExpect(jsonPath("$.firstName", is(user.getFirstName())))
+                .andExpect(jsonPath("$.lastName", is(user.getLastName())))
+                .andExpect(jsonPath("$.age", is(user.getAge())))
+                .andExpect(jsonPath("$.gender", is(user.getGender().name())))
+                .andExpect(jsonPath("$.phoneNumber", is(user.getPhoneNumber())));
     }
 
     @Test
@@ -97,21 +101,32 @@ class UserControllerTest {
 
     @Test
     void shouldCreateNewUser() throws Exception {
-        given(userService.saveUser(any(User.class))).willAnswer((invocation) -> invocation.getArgument(0));
+        given(userService.saveUser(any(User.class))).willAnswer((invocationOnMock) -> {
+            if (invocationOnMock.getArguments().length > 0
+                    && invocationOnMock.getArguments()[0] instanceof User mockUser) {
+                mockUser.setId(34L);
+                return mockUser;
+            }
+            return null;
+        });
 
-        User user = new User(1L, "some text");
+        User user = new User(null, "some text", "Last Name", 30, Gender.MALE, "9848022334");
         this.mockMvc
                 .perform(post("/api/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(user)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id", notNullValue()))
-                .andExpect(jsonPath("$.text", is(user.getText())));
+                .andExpect(jsonPath("$.id", is(34)))
+                .andExpect(jsonPath("$.firstName", is(user.getFirstName())))
+                .andExpect(jsonPath("$.lastName", is(user.getLastName())))
+                .andExpect(jsonPath("$.age", is(user.getAge())))
+                .andExpect(jsonPath("$.gender", is(user.getGender().name())))
+                .andExpect(jsonPath("$.phoneNumber", is(user.getPhoneNumber())));
     }
 
     @Test
-    void shouldReturn400WhenCreateNewUserWithoutText() throws Exception {
-        User user = new User(null, null);
+    void shouldReturn400WhenCreateNewUserWithoutFirstNameAndAge() throws Exception {
+        User user = new User(null, null, "Last Name", 90, Gender.MALE, "9848022334");
 
         this.mockMvc
                 .perform(post("/api/users")
@@ -125,31 +140,42 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.detail", is("Invalid request content.")))
                 .andExpect(jsonPath("$.instance", is("/api/users")))
                 .andExpect(jsonPath("$.violations", hasSize(1)))
-                .andExpect(jsonPath("$.violations[0].field", is("text")))
-                .andExpect(jsonPath("$.violations[0].message", is("Text cannot be empty")))
+                .andExpect(jsonPath("$.violations[0].field", is("firstName")))
+                .andExpect(jsonPath("$.violations[0].message", is("FirstName can't be empty")))
                 .andReturn();
     }
 
     @Test
     void shouldUpdateUser() throws Exception {
         Long userId = 1L;
-        User user = new User(userId, "Updated text");
+        User user = new User(userId, "Updated text", "Last Name", 30, Gender.MALE, "9848022334");
         given(userService.findUserById(userId)).willReturn(Optional.of(user));
-        given(userService.saveUser(any(User.class))).willAnswer((invocation) -> invocation.getArgument(0));
+        given(userService.saveUser(any(User.class))).willAnswer((invocationOnMock) -> {
+            if (invocationOnMock.getArguments().length > 0
+                    && invocationOnMock.getArguments()[0] instanceof User mockUser) {
+                mockUser.setId(1L);
+                return mockUser;
+            }
+            return null;
+        });
 
         this.mockMvc
                 .perform(put("/api/users/{id}", user.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(user)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.text", is(user.getText())));
+                .andExpect(jsonPath("$.firstName", is(user.getFirstName())))
+                .andExpect(jsonPath("$.lastName", is(user.getLastName())))
+                .andExpect(jsonPath("$.age", is(user.getAge())))
+                .andExpect(jsonPath("$.gender", is(user.getGender().name())))
+                .andExpect(jsonPath("$.phoneNumber", is(user.getPhoneNumber())));
     }
 
     @Test
     void shouldReturn404WhenUpdatingNonExistingUser() throws Exception {
         Long userId = 1L;
         given(userService.findUserById(userId)).willReturn(Optional.empty());
-        User user = new User(userId, "Updated text");
+        User user = new User(userId, "Updated text", "Last Name", 30, Gender.MALE, "9848022334");
 
         this.mockMvc
                 .perform(put("/api/users/{id}", userId)
@@ -161,14 +187,18 @@ class UserControllerTest {
     @Test
     void shouldDeleteUser() throws Exception {
         Long userId = 1L;
-        User user = new User(userId, "Some text");
+        User user = new User(userId, "Some text", "Last Name", 30, Gender.MALE, "9848022334");
         given(userService.findUserById(userId)).willReturn(Optional.of(user));
         doNothing().when(userService).deleteUserById(user.getId());
 
         this.mockMvc
                 .perform(delete("/api/users/{id}", user.getId()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.text", is(user.getText())));
+                .andExpect(jsonPath("$.firstName", is(user.getFirstName())))
+                .andExpect(jsonPath("$.lastName", is(user.getLastName())))
+                .andExpect(jsonPath("$.age", is(user.getAge())))
+                .andExpect(jsonPath("$.gender", is(user.getGender().name())))
+                .andExpect(jsonPath("$.phoneNumber", is(user.getPhoneNumber())));
     }
 
     @Test
