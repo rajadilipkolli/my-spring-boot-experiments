@@ -8,8 +8,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.Positive;
 import java.util.Objects;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -30,26 +28,16 @@ public class User {
     private Long id;
 
     @Column(nullable = false)
-    @NotEmpty(message = "FirstName can't be empty")
     private String firstName;
 
     private String lastName;
 
-    /**
-     * Age in years of the customer
-     */
-    @Positive(message = "Age must be greater than 0") @Column(nullable = false)
+    @Column(nullable = false)
     private Integer age;
 
-    /**
-     * Gender of the customer
-     */
     @Enumerated(EnumType.STRING)
     private Gender gender;
 
-    /**
-     * Phone number of the customer
-     */
     private String phoneNumber;
 
     @Override

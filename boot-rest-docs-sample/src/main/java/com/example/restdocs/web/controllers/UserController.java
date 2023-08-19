@@ -1,11 +1,11 @@
 package com.example.restdocs.web.controllers;
 
 import com.example.restdocs.entities.User;
+import com.example.restdocs.model.request.UserRequest;
 import com.example.restdocs.model.response.PagedResult;
 import com.example.restdocs.services.UserService;
 import com.example.restdocs.utils.AppConstants;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -22,15 +22,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/users")
-@Slf4j
+@RequiredArgsConstructor
 public class UserController {
 
     private final UserService userService;
-
-    @Autowired
-    public UserController(UserService userService) {
-        this.userService = userService;
-    }
 
     @GetMapping
     public PagedResult<User> getAllUsers(
@@ -53,18 +48,15 @@ public class UserController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public User createUser(@RequestBody @Validated User user) {
-        return userService.saveUser(user);
+    public User createUser(@RequestBody @Validated UserRequest userRequest) {
+        return userService.saveUser(userRequest);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody User user) {
+    public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody UserRequest userRequest) {
         return userService
                 .findUserById(id)
-                .map(userObj -> {
-                    user.setId(id);
-                    return ResponseEntity.ok(userService.saveUser(user));
-                })
+                .map(userObj -> ResponseEntity.ok(userService.updateUser(userObj, userRequest)))
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 

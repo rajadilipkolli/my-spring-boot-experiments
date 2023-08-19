@@ -1,6 +1,7 @@
 package com.example.restdocs.services;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.times;
 import static org.mockito.BDDMockito.verify;
@@ -8,6 +9,7 @@ import static org.mockito.BDDMockito.willDoNothing;
 
 import com.example.restdocs.entities.Gender;
 import com.example.restdocs.entities.User;
+import com.example.restdocs.model.request.UserRequest;
 import com.example.restdocs.model.response.PagedResult;
 import com.example.restdocs.repositories.UserRepository;
 import java.util.List;
@@ -70,12 +72,19 @@ class UserServiceTest {
     @Test
     void saveUser() {
         // given
-        given(userRepository.save(getUser())).willReturn(getUser());
+        given(userRepository.save(any(User.class))).willAnswer((invocationOnMock) -> {
+            if (invocationOnMock.getArguments().length > 0
+                    && invocationOnMock.getArguments()[0] instanceof User mockUser) {
+                mockUser.setId(34L);
+                return mockUser;
+            }
+            return null;
+        });
         // when
-        User persistedUser = userService.saveUser(getUser());
+        User persistedUser = userService.saveUser(getUserRequest());
         // then
         assertThat(persistedUser).isNotNull();
-        assertThat(persistedUser.getId()).isEqualTo(1L);
+        assertThat(persistedUser.getId()).isEqualTo(34L);
         assertThat(persistedUser.getFirstName()).isEqualTo("junitTest");
     }
 
@@ -98,5 +107,9 @@ class UserServiceTest {
         user.setGender(Gender.MALE);
         user.setPhoneNumber("9876543210");
         return user;
+    }
+
+    private UserRequest getUserRequest() {
+        return new UserRequest("junitTest", "junitLastName", 60, Gender.MALE, "9876543210");
     }
 }

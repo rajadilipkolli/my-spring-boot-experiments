@@ -1,0 +1,70 @@
+= User Application Guide
+Raja Kolli;
+:doctype: book
+:icons: font
+:source-highlighter: highlightjs
+:toc: left
+:toclevels: 4
+:sectlinks:
+
+== Users API
+
+Users API documentation generated from unit tests with Spring REST Docs.
+
+=== GET /api/users/
+
+.curl sample request
+include::{snippets}/find-all/curl-request.adoc[]
+.Request parameters
+include::{snippets}/find-all/query-parameters.adoc[]
+.HTTP Response
+include::{snippets}/find-all/http-response.adoc[]
+.Output
+include::{snippets}/find-all/response-fields.adoc[]
+
+=== GET /api/users/{id}
+
+.curl sample request
+include::{snippets}/find-by-id/curl-request.adoc[]
+.HTTP Response
+include::{snippets}/find-by-id/http-response.adoc[]
+.Request parameters
+include::{snippets}/find-by-id/path-parameters.adoc[]
+.Output
+include::{snippets}/find-by-id/response-fields.adoc[]
+
+=== POST /api/users
+
+.curl sample request
+include::{snippets}/create-user/curl-request.adoc[]
+.HTTP Response
+include::{snippets}/create-user/http-response.adoc[]
+.Request fields
+include::{snippets}/create-user/request-fields.adoc[]
+.Response fields
+include::{snippets}/create-user/response-fields.adoc[]
+
+=== PUT /api/users/+{id}+
+
+.curl sample request
+include::{snippets}/update-user/curl-request.adoc[]
+.HTTP Response
+include::{snippets}/update-user/http-response.adoc[]
+.Request parameters
+include::{snippets}/update-user/path-parameters.adoc[]
+.Output
+.Request fields
+include::{snippets}/update-user/request-fields.adoc[]
+.Response fields
+include::{snippets}/update-user/response-fields.adoc[]
+
+=== DELETE /api/users/{id}
+
+.curl sample request
+include::{snippets}/delete-user/curl-request.adoc[]
+.HTTP Response
+include::{snippets}/delete-user/http-response.adoc[]
+.Request parameters
+include::{snippets}/delete-user/path-parameters.adoc[]
+.Output
+include::{snippets}/delete-user/response-fields.adoc[]
