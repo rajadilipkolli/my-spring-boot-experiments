@@ -1,0 +1,12 @@
+{
+  "generator-springboot": {
+    "appName": "boot-rest-docs-sample",
+    "packageName": "com.example.restdocs",
+    "databaseType": "postgresql",
+    "dbMigrationTool": "flywaydb",
+    "features": [],
+    "buildTool": "maven",
+    "packageFolder": "com/example/restdocs",
+    "flywayMigrationCounter": 2
+  }
+}

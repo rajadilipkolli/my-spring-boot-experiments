@@ -34,5 +34,6 @@
 * [spring-boot-togglz-sample](boot-togglz-sample/README.md)
 * [spring-boot-ultimate-redis](boot-ultimate-redis/README.md)
 * [spring-boot-rabbitmq-thymeleaf](boot-rabbitmq-thymeleaf/README.md)
+* [boot-rest-docs-sample](boot-rest-docs-sample/README.md)
 * [batch-boot-jpa-sample](batch-boot-jpa-sample/README.md)
 * [Code Of Conduct](Code-of-conduct.md)

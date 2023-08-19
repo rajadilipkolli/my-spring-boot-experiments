@@ -1,0 +1,39 @@
+name: boot-rest-docs-sample CI Build
+
+on:
+  push:
+    paths:
+      - "boot-rest-docs-sample/**"
+    branches: [main]
+  pull_request:
+    paths:
+      - "boot-rest-docs-sample/**"
+    types:
+      - opened
+      - synchronize
+      - reopened
+
+jobs:
+  build:
+    name: Run Unit & Integration Tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: boot-rest-docs-sample
+    strategy:
+      matrix:
+        distribution: [ 'microsoft' ]
+        java: [ '17' ]
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3.12.0
+        with:
+          java-version: ${{ matrix.java }}
+          distribution: ${{ matrix.distribution }}
+          cache: 'maven'
+      - name: Build and analyze
+        run: ./mvnw clean verify

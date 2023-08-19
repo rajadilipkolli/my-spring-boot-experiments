@@ -38,6 +38,8 @@
   - r2dbc/boot-jooq-r2dbc-sample/**/*
 "component: openapi":
   - open-api-spring-boot/**/*
+"component: rest-docs":
+  - boot-rest-docs-sample/**/*
 "component: httpclients":
   - httpClients/web-client-webflux/**/*
   - httpClients/http-proxy/**/*
@@ -69,6 +71,7 @@
   - boot-togglz-sample/pom.xml
   - boot-ultimate-redis/pom.xml
   - boot-rabbitmq-thymeleaf/pom.xml
+  - boot-rest-docs-sample/pom.xml
   - r2dbc/boot-jooq-r2dbc-sample/pom.xml
   - httpClients/http-proxy/pom.xml
   - httpClients/rest-template/pom.xml
