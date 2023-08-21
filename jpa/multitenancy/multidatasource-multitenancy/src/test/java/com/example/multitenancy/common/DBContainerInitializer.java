@@ -12,7 +12,7 @@ public class DBContainerInitializer {
 
     @Container
     private static final PostgreSQLContainer<?> POSTGRE_SQL_CONTAINER =
-            new PostgreSQLContainer<>("postgres:15.3-alpine");
+            new PostgreSQLContainer<>("postgres:15.4-alpine");
 
     @Container
     private static final OracleContainer ORACLE_CONTAINER =
