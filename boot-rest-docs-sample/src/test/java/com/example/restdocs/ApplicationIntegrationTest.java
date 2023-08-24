@@ -1,6 +1,6 @@
 package com.example.restdocs;
 
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import com.example.restdocs.common.AbstractIntegrationTest;
 import com.zaxxer.hikari.HikariDataSource;
