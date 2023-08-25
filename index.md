@@ -25,6 +25,8 @@ The following table list all sample codes related to the spring boot integration
 | [my-spring-graphql-webmvc](../main/my-spring-graphql-webmvc)                           | The application, demonstrates how to apply graphql concepts to the spring boot project                                                                                        | WIP       |
 | [my-spring-choas-moneky](../main/spring-boot-choas-monkey)                               | The application, demonstrates how to apply choas engineering concepts to the spring boot project                                                                              | Completed       |
 | [Feature Toggles](../main/spring-boot-togglz-sample)                                          | The application, demonstrates how to apply feature toggles concepts to the spring boot project                                                                                | Completed       |
+| [Spring Batch Implementation](../main/batch-boot-jpa-sample)                                  | The application, demonstrates implementing Spring Batch 5 using simple config and creating batch tables using liquibase                                                        | Completed |
+| [Rest API Documentation with examples](../main/boot-rest-docs-sample)                         | This application, demonstrates ability to generate pdf API documentation using spring rest docs                                                                                | Completed |
 
 
 ### Build Tools Used
