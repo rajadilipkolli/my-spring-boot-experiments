@@ -21,9 +21,15 @@ docker-compose -f docker/docker-compose.yml up -d
 * Actuator Endpoint: http://localhost:8080/actuator
 * Grafana : http://localhost:3000 (admin/admin)
 * Prometheus : http://localhost:9090/graph
+* Alerts: http://localhost:9090/alerts
+* Alerts Stats: http://localhost:9093/
 
 ### Update to Spring Boot 3
 
 * Removed problem-spring-web-starter and replaced with Spring OOTB `spring.mvc.problemdetails.enabled=true`
 * Migrated from javax namespace to jakarta namespace
 * By Default `hibernate_sequence` is not used instead `tablename_seq` is used while mapping sequence name and `pooled-lo` generation strategy is used OOTB
+
+### Reference:
+ 
+ * Alerts - https://github.com/emredmrcan/tutorials/tree/main/monitoring

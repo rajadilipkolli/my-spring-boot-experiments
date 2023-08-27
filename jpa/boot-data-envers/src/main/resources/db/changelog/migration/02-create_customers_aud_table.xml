@@ -7,6 +7,8 @@
 
     <property name="stringType" dbms="postgres" value="text"/>
     <property name="stringType" dbms="!postgres" value="varchar(256)"/>
+    <property name="intType" dbms="postgres" value="smallint"/>
+    <property name="intType" dbms="!postgres" value="tinyint"/>
 
     <changeSet author="raja" id="createTable-customers-aud">
 
@@ -17,7 +19,7 @@
             <column name="rev" type="integer">
                 <constraints nullable="false"/>
             </column>
-            <column name="revtype" type="smallint">
+            <column name="revtype" type="${intType}">
                 <constraints nullable="false"/>
             </column>
             <column name="name" type="${stringType}"/>

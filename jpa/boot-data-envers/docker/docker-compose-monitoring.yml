@@ -10,6 +10,7 @@ services:
     volumes:
       - grafana_data:/var/lib/grafana
       - ../config/grafana/provisioning/:/etc/grafana/provisioning/
+      - ../config/grafana/grafana.ini:/etc/grafana/grafana.ini
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=admin
       - GF_SECURITY_ADMIN_USER=admin
@@ -24,14 +25,19 @@ services:
     ports:
       - "9090:9090"
     volumes:
-      - ../config/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ../config/prometheus/config:/etc/prometheus
       - prometheus_data:/prometheus
-    command:
-      - --config.file=/etc/prometheus/prometheus.yml
+    command: --config.file=/etc/prometheus/prometheus.yml --log.level=debug
+
+  alertmanager:
+    image: prom/alertmanager:v0.25.0
+    ports:
+      - "9093:9093"
+    volumes:
+      - ../config/alert-manager/tmp:/data
+      - ../config/alert-manager/config:/config
+    command: --config.file=/config/alertmanager.yml --log.level=debug
 
 volumes:
   prometheus_data: {}
   grafana_data: {}
-  esdata1:
-    driver: local
-

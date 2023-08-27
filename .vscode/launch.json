@@ -23,6 +23,16 @@
             "projectName": "boot-strategy-plugin",
             "args": "",
             "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-Application<boot-data-envers>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.example.envers.Application",
+            "projectName": "boot-data-envers",
+            "args": "--spring.profiles.active=local",
+            "envFile": "${workspaceFolder}/.env"
         }
     ]
 }
