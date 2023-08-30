@@ -12,7 +12,7 @@ public class TestApplication {
     @Bean
     @ServiceConnection
     MariaDBContainer<?> mariaDbContainer() {
-        return new MariaDBContainer<>("mariadb:11.0");
+        return new MariaDBContainer<>("mariadb:11.1");
     }
 
     public static void main(String[] args) {
