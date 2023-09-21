@@ -9,6 +9,7 @@ import co.elastic.clients.elasticsearch._types.query_dsl.QueryBuilders;
 import co.elastic.clients.elasticsearch._types.query_dsl.TextQueryType;
 import co.elastic.clients.json.JsonData;
 import com.example.mongoes.document.Restaurant;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -259,6 +260,93 @@ public class CustomRestaurantESRepositoryImpl implements CustomRestaurantESRepos
         return reactiveElasticsearchOperations.searchForPage(query, Restaurant.class);
     }
 
+    
+    /**
+     *
+     * below is the console query {@snippet :
+
+            """     POST /restaurant/_search?size=15&pretty
+            {
+                "query": {
+                    "multi_match": {
+                        "query": "Pizza",
+                        "fields": [
+                                "restautant_name",
+                                "borough",
+                                "cuisine"
+                        ],
+                        "operator": "or"
+                    }
+                },
+                "aggs": {
+                    "MyCuisine": {
+                        "terms": {
+                            "field": "cuisine", "size": 1000, "order": {
+                            "_count": "desc"
+                        }
+                        }
+                    },
+                    "MyBorough": {
+                        "terms": {
+                                "field": "borough" , "size": 1000
+                        }
+                    },
+                    "MyDateRange": {
+                        "date_range": {
+                        "field": "grades.date",
+                        "format": "dd-MM-yyy'T'hh:mm:ss",
+                        "ranges": [
+                            {
+                                "key": "Older",
+                                "to": "now-12y-1d/y"
+                            },
+                            {
+                                "from": "now-12y/y",
+                                "to": "now-11y/y"
+                            },
+                            {
+                                "from": "now-11y/y",
+                                "to": "now-10y/y"
+                            },
+                            {
+                                "from": "now-10y/y",
+                                "to": "now-9y/y"
+                            },
+                            {
+                                "from": "now-9y/y",
+                                "to": "now-8y/y"
+                            },
+                            {
+                                "from": "now-8y/y",
+                                "to": "now-7y/y"
+                            },
+                            {
+                                "from": "now-7y/y",
+                                "to": "now-6y/y"
+                            },
+                            {
+                                "from": "now-6y/y",
+                                "to": "now-5y/y"
+                            },
+                            {
+                                "from": "now-5y/y",
+                                "to": "now-4y/y"
+                            },
+                            {
+                                "key": "Newer",
+                                "from": "now-0y/y",
+                                "to": "now/d"
+                            }
+                        ]
+                        }
+                    }
+                }
+            }
+            """;
+            }
+     *
+     *
+     */
     @Override
     public Mono<SearchPage<Restaurant>> aggregateSearch(
             String searchKeyword,
@@ -277,31 +365,9 @@ public class CustomRestaurantESRepositoryImpl implements CustomRestaurantESRepos
                 AggregationBuilders.dateRange(
                         builder ->
                                 builder.field("grades.date")
-                                        .format("MM-yyyy")
-                                        .ranges(
-                                                DateRangeExpression.of(
-                                                        dateRanageExpressionBuilder ->
-                                                                dateRanageExpressionBuilder
-                                                                        .key("Older")
-                                                                        .to(
-                                                                                builder1 ->
-                                                                                        builder1
-                                                                                                .expr(
-                                                                                                        "now-120M/M"))),
-                                                DateRangeExpression.of(
-                                                        dateRanageExpressionBuilder ->
-                                                                dateRanageExpressionBuilder
-                                                                        .from(
-                                                                                builder1 ->
-                                                                                        builder1
-                                                                                                .expr(
-                                                                                                        "now-120M/M"))
-                                                                        .to(
-                                                                                builder1 ->
-                                                                                        builder1
-                                                                                                .expr(
-                                                                                                        "now/M")))));
-        //        addDateRange(dateRangeBuilder);
+                                        .format("dd-MM-yyy")
+                                        .timeZone("UTC")
+                                        .ranges(getDateRanges()));
 
         Query query =
                 NativeQuery.builder()
@@ -319,6 +385,38 @@ public class CustomRestaurantESRepositoryImpl implements CustomRestaurantESRepos
         query.setPageable(PageRequest.of(offset, limit));
 
         return this.reactiveElasticsearchOperations.searchForPage(query, Restaurant.class);
+    }
+
+    private List<DateRangeExpression> getDateRanges() {
+        List<DateRangeExpression> dateList = new ArrayList<>();
+
+        // Create the "Older" DateRangeExpression
+        dateList.add(
+                DateRangeExpression.of(
+                        builder ->
+                                builder.key("Older").to(toBuilder -> toBuilder.expr("now-12y/y"))));
+
+        // Create DateRangeExpressions for the middle years
+        for (int i = 12; i > 0; i--) {
+            dateList.add(createDateRangeExpression(i));
+        }
+
+        // Create the "Newer" DateRangeExpression
+        dateList.add(
+                DateRangeExpression.of(
+                        builder ->
+                                builder.key("Newer")
+                                        .from(fromBuilder -> fromBuilder.expr("now-0y/y"))
+                                        .to(toBuilder -> toBuilder.expr("now/d"))));
+
+        return dateList;
+    }
+
+    private DateRangeExpression createDateRangeExpression(int yearsAgo) {
+        return new DateRangeExpression.Builder()
+                .from(fromBuilder -> fromBuilder.expr("now-%dy/y".formatted(yearsAgo)))
+                .to(toBuilder -> toBuilder.expr("now-%dy/y".formatted(yearsAgo - 1)))
+                .build();
     }
 
     @Override
