@@ -60,7 +60,7 @@ public class RestaurantController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Restaurant> getRestaurantById(@PathVariable Long id) {
+    public ResponseEntity<Restaurant> getRestaurantById(@PathVariable String id) {
         return restaurantService
                 .findRestaurantById(id)
                 .map(ResponseEntity::ok)
@@ -75,7 +75,7 @@ public class RestaurantController {
 
     @PutMapping("/{id}")
     public ResponseEntity<Restaurant> updateRestaurant(
-            @PathVariable Long id, @RequestBody Restaurant restaurant) {
+            @PathVariable String id, @RequestBody Restaurant restaurant) {
         return restaurantService
                 .findRestaurantById(id)
                 .map(
@@ -87,7 +87,7 @@ public class RestaurantController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Restaurant> deleteRestaurant(@PathVariable Long id) {
+    public ResponseEntity<Restaurant> deleteRestaurant(@PathVariable String id) {
         return restaurantService
                 .findRestaurantById(id)
                 .map(

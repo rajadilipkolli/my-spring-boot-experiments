@@ -48,9 +48,9 @@ class RestaurantControllerTest {
     @BeforeEach
     void setUp() {
         this.restaurantList = new ArrayList<>();
-        this.restaurantList.add(new Restaurant(1L, "text 1"));
-        this.restaurantList.add(new Restaurant(2L, "text 2"));
-        this.restaurantList.add(new Restaurant(3L, "text 3"));
+        this.restaurantList.add(new Restaurant("1", "text 1"));
+        this.restaurantList.add(new Restaurant("2", "text 2"));
+        this.restaurantList.add(new Restaurant("3", "text 3"));
     }
 
     @Test
@@ -75,7 +75,7 @@ class RestaurantControllerTest {
 
     @Test
     void shouldFindRestaurantById() throws Exception {
-        Long restaurantId = 1L;
+        String restaurantId = "1";
         Restaurant restaurant = new Restaurant(restaurantId, "text 1");
         given(restaurantService.findRestaurantById(restaurantId))
                 .willReturn(Optional.of(restaurant));
@@ -88,7 +88,7 @@ class RestaurantControllerTest {
 
     @Test
     void shouldReturn404WhenFetchingNonExistingRestaurant() throws Exception {
-        Long restaurantId = 1L;
+        String restaurantId = "1";
         given(restaurantService.findRestaurantById(restaurantId)).willReturn(Optional.empty());
 
         this.mockMvc
@@ -101,7 +101,7 @@ class RestaurantControllerTest {
         given(restaurantService.saveRestaurant(any(Restaurant.class)))
                 .willAnswer((invocation) -> invocation.getArgument(0));
 
-        Restaurant restaurant = new Restaurant(1L, "some text");
+        Restaurant restaurant = new Restaurant("1", "some text");
         this.mockMvc
                 .perform(
                         post("/api/restaurants")
@@ -136,7 +136,7 @@ class RestaurantControllerTest {
 
     @Test
     void shouldUpdateRestaurant() throws Exception {
-        Long restaurantId = 1L;
+        String restaurantId = "1";
         Restaurant restaurant = new Restaurant(restaurantId, "Updated text");
         given(restaurantService.findRestaurantById(restaurantId))
                 .willReturn(Optional.of(restaurant));
@@ -154,7 +154,7 @@ class RestaurantControllerTest {
 
     @Test
     void shouldReturn404WhenUpdatingNonExistingRestaurant() throws Exception {
-        Long restaurantId = 1L;
+        String restaurantId = "1";
         given(restaurantService.findRestaurantById(restaurantId)).willReturn(Optional.empty());
         Restaurant restaurant = new Restaurant(restaurantId, "Updated text");
 
@@ -168,7 +168,7 @@ class RestaurantControllerTest {
 
     @Test
     void shouldDeleteRestaurant() throws Exception {
-        Long restaurantId = 1L;
+        String restaurantId = "1";
         Restaurant restaurant = new Restaurant(restaurantId, "Some text");
         given(restaurantService.findRestaurantById(restaurantId))
                 .willReturn(Optional.of(restaurant));
@@ -182,7 +182,7 @@ class RestaurantControllerTest {
 
     @Test
     void shouldReturn404WhenDeletingNonExistingRestaurant() throws Exception {
-        Long restaurantId = 1L;
+        String restaurantId = "1";
         given(restaurantService.findRestaurantById(restaurantId)).willReturn(Optional.empty());
 
         this.mockMvc

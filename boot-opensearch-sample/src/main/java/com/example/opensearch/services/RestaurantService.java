@@ -37,7 +37,7 @@ public class RestaurantService {
         return new PagedResult<>(restaurantsPage);
     }
 
-    public Optional<Restaurant> findRestaurantById(Long id) {
+    public Optional<Restaurant> findRestaurantById(String id) {
         return restaurantRepository.findById(id);
     }
 
@@ -45,7 +45,7 @@ public class RestaurantService {
         return restaurantRepository.save(restaurant);
     }
 
-    public void deleteRestaurantById(Long id) {
+    public void deleteRestaurantById(String id) {
         restaurantRepository.deleteById(id);
     }
 }

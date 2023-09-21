@@ -55,13 +55,13 @@ class RestaurantServiceTest {
     @Test
     void findRestaurantById() {
         // given
-        given(restaurantRepository.findById(1L)).willReturn(Optional.of(getRestaurant()));
+        given(restaurantRepository.findById("1")).willReturn(Optional.of(getRestaurant()));
         // when
-        Optional<Restaurant> optionalRestaurant = restaurantService.findRestaurantById(1L);
+        Optional<Restaurant> optionalRestaurant = restaurantService.findRestaurantById("1");
         // then
         assertThat(optionalRestaurant).isPresent();
         Restaurant restaurant = optionalRestaurant.get();
-        assertThat(restaurant.getId()).isEqualTo(1L);
+        assertThat(restaurant.getId()).isEqualTo("1");
         assertThat(restaurant.getName()).isEqualTo("junitTest");
     }
 
@@ -73,23 +73,23 @@ class RestaurantServiceTest {
         Restaurant persistedRestaurant = restaurantService.saveRestaurant(getRestaurant());
         // then
         assertThat(persistedRestaurant).isNotNull();
-        assertThat(persistedRestaurant.getId()).isEqualTo(1L);
+        assertThat(persistedRestaurant.getId()).isEqualTo("1");
         assertThat(persistedRestaurant.getName()).isEqualTo("junitTest");
     }
 
     @Test
     void deleteRestaurantById() {
         // given
-        willDoNothing().given(restaurantRepository).deleteById(1L);
+        willDoNothing().given(restaurantRepository).deleteById("1");
         // when
-        restaurantService.deleteRestaurantById(1L);
+        restaurantService.deleteRestaurantById("1");
         // then
-        verify(restaurantRepository, times(1)).deleteById(1L);
+        verify(restaurantRepository, times(1)).deleteById("1");
     }
 
     private Restaurant getRestaurant() {
         Restaurant restaurant = new Restaurant();
-        restaurant.setId(1L);
+        restaurant.setId("1");
         restaurant.setName("junitTest");
         return restaurant;
     }

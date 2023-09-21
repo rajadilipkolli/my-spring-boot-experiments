@@ -1,12 +1,23 @@
 version: '3.8'
 services:
 
-  postgresqldb:
-    image: postgres:15.4-alpine
-    environment:
-      - POSTGRES_USER=appuser
-      - POSTGRES_PASSWORD=secret
-      - POSTGRES_DB=appdb
+  opensearch:
+    image: opensearchproject/opensearch:1.1.0
+    container_name: opensearch
+    hostname: opensearch
     ports:
-      - "5432:5432"
+      - "9200:9200"
+      - "9600:9600"
+    environment:
+      - discovery.type=single-node
+      - "DISABLE_SECURITY_PLUGIN=true"
+      - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m"
 
+  opensearch-dashboards:
+    image: opensearchproject/opensearch-dashboards:1.1.0
+    container_name: opensearch_dashboards
+    ports:
+      - "5601:5601"
+    environment:
+      OPENSEARCH_HOSTS: '["http://opensearch:9200"]'
+      DISABLE_SECURITY_DASHBOARDS_PLUGIN: "true"

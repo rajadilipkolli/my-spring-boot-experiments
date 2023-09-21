@@ -8,23 +8,23 @@ import org.springframework.data.elasticsearch.annotations.Document;
 @Document(indexName = "restaurants")
 public class Restaurant {
 
-    @Id private Long id;
+    @Id private String id;
 
     @NotEmpty(message = "Name cannot be empty")
     private String name;
 
     public Restaurant() {}
 
-    public Restaurant(Long id, String name) {
+    public Restaurant(String id, String name) {
         this.id = id;
         this.name = name;
     }
 
-    public Long getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(String id) {
         this.id = id;
     }
 

@@ -56,12 +56,12 @@ class RestaurantControllerIT extends AbstractIntegrationTest {
     @Test
     void shouldFindRestaurantById() throws Exception {
         Restaurant restaurant = restaurantList.get(0);
-        Long restaurantId = restaurant.getId();
+        String restaurantId = restaurant.getId();
 
         this.mockMvc
                 .perform(get("/api/restaurants/{id}", restaurantId))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(restaurant.getId()), Long.class))
+                .andExpect(jsonPath("$.id", is(restaurant.getId()), String.class))
                 .andExpect(jsonPath("$.name", is(restaurant.getName())));
     }
 
@@ -111,7 +111,7 @@ class RestaurantControllerIT extends AbstractIntegrationTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(restaurant)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(restaurant.getId()), Long.class))
+                .andExpect(jsonPath("$.id", is(restaurant.getId()), String.class))
                 .andExpect(jsonPath("$.name", is(restaurant.getName())));
     }
 
@@ -122,7 +122,7 @@ class RestaurantControllerIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(delete("/api/restaurants/{id}", restaurant.getId()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(restaurant.getId()), Long.class))
+                .andExpect(jsonPath("$.id", is(restaurant.getId()), String.class))
                 .andExpect(jsonPath("$.name", is(restaurant.getName())));
     }
 }

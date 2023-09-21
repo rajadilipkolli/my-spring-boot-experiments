@@ -7,4 +7,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface RestaurantRepository
-        extends ElasticsearchRepository<Restaurant, Long>, ListCrudRepository<Restaurant, Long> {}
+        extends ElasticsearchRepository<Restaurant, String>,
+                ListCrudRepository<Restaurant, String> {}
