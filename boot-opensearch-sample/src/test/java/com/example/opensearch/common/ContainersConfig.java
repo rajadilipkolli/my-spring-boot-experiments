@@ -1,12 +1,9 @@
 package com.example.opensearch.common;
 
-import java.util.concurrent.TimeUnit;
-import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.GenericContainer;
 
-@TestConfiguration(proxyBeanMethods = false)
 public class ContainersConfig {
 
     static final GenericContainer<?> openSearchContainer =
@@ -18,12 +15,6 @@ public class ContainersConfig {
 
     static {
         openSearchContainer.start();
-        try {
-            // waiting for container to start
-            TimeUnit.SECONDS.sleep(30);
-        } catch (Exception e) {
-            // TODO: handle exception
-        }
     }
 
     @DynamicPropertySource
