@@ -33,6 +33,16 @@
             "projectName": "boot-data-envers",
             "args": "--spring.profiles.active=local",
             "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-Application<boot-mongodb-elasticsearch>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.example.mongoes.Application",
+            "projectName": "boot-mongodb-elasticsearch",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
         }
     ]
 }
