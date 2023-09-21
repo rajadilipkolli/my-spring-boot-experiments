@@ -479,8 +479,9 @@ class RestaurantESRepositoryIntegrationTest extends AbstractIntegrationTest {
                             assertThat(elasticsearchAggregations.aggregations()).isNotNull();
                             Map<String, ElasticsearchAggregation> aggregationMap =
                                     elasticsearchAggregations.aggregationsAsMap();
-                            assertThat(aggregationMap).isNotEmpty().hasSize(2);
-                            assertThat(aggregationMap).containsOnlyKeys("MyCuisine", "MyBorough");
+                            assertThat(aggregationMap).isNotEmpty().hasSize(3);
+                            assertThat(aggregationMap)
+                                    .containsOnlyKeys("MyCuisine", "MyBorough", "MyDateRange");
                         })
                 .verifyComplete();
     }
