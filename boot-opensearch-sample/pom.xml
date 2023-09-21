@@ -20,7 +20,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-        <java.version>17</java.version>
+        <java.version>21</java.version>
         <spring-cloud.version>2022.0.4</spring-cloud.version>
         <springdoc-openapi.version>2.2.0</springdoc-openapi.version>
 
@@ -207,9 +207,10 @@
                 <version>${spotless.version}</version>
                 <configuration>
                     <java>
-                        <palantirJavaFormat>
-                            <version>2.30.0</version>
-                        </palantirJavaFormat>
+                        <googleJavaFormat>
+                            <version>1.17.0</version>
+                            <style>AOSP</style>
+                        </googleJavaFormat>
                         <importOrder />
                         <removeUnusedImports />
                         <formatAnnotations />

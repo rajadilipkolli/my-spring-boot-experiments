@@ -31,7 +31,8 @@ public class GlobalExceptionHandler {
                                             fieldError.getObjectName(),
                                             fieldError.getField(),
                                             fieldError.getRejectedValue(),
-                                            Objects.requireNonNull(fieldError.getDefaultMessage(), ""));
+                                            Objects.requireNonNull(
+                                                    fieldError.getDefaultMessage(), ""));
                                 })
                         .sorted(Comparator.comparing(ApiValidationError::field))
                         .toList();
@@ -40,5 +41,4 @@ public class GlobalExceptionHandler {
     }
 
     record ApiValidationError(String object, String field, Object rejectedValue, String message) {}
-
 }
