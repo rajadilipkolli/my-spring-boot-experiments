@@ -24,18 +24,15 @@ import org.springframework.web.client.RestClient;
 @AutoConfigureMockMvc
 class BootRestClientApplicationTests {
 
-    @Autowired
-    private MockMvc mockMvc;
+    @Autowired private MockMvc mockMvc;
 
-    @Autowired
-    RestClient.Builder builder;
+    @Autowired RestClient.Builder builder;
 
     private MockRestServiceServer mockServer;
 
     @BeforeEach
     public void setUp() {
-        mockServer =
-                MockRestServiceServer.bindTo(builder).ignoreExpectOrder(true).build();
+        mockServer = MockRestServiceServer.bindTo(builder).ignoreExpectOrder(true).build();
     }
 
     @Test
@@ -56,12 +53,13 @@ class BootRestClientApplicationTests {
                 .andRespond(withSuccess(mockApiResponse, MediaType.APPLICATION_JSON));
 
         // Perform the test
-        String result = this.mockMvc
-                .perform(get("/api/posts/{postId}", 1))
-                .andExpect(status().isOk())
-                .andReturn()
-                .getResponse()
-                .getContentAsString();
+        String result =
+                this.mockMvc
+                        .perform(get("/api/posts/{postId}", 1))
+                        .andExpect(status().isOk())
+                        .andReturn()
+                        .getResponse()
+                        .getContentAsString();
 
         // Verify the result
         assertThat(result).isEqualToIgnoringWhitespace(mockApiResponse);
@@ -98,12 +96,16 @@ class BootRestClientApplicationTests {
                 .andRespond(withSuccess(mockApiResponse, MediaType.APPLICATION_JSON));
 
         // Perform the test
-        String result = this.mockMvc
-                .perform(post("/api/posts").content(mockApiRequest).contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isCreated())
-                .andReturn()
-                .getResponse()
-                .getContentAsString();
+        String result =
+                this.mockMvc
+                        .perform(
+                                post("/api/posts")
+                                        .content(mockApiRequest)
+                                        .contentType(MediaType.APPLICATION_JSON))
+                        .andExpect(status().isCreated())
+                        .andReturn()
+                        .getResponse()
+                        .getContentAsString();
 
         // Verify the result
         assertThat(result).isEqualToIgnoringWhitespace(mockApiResponse);

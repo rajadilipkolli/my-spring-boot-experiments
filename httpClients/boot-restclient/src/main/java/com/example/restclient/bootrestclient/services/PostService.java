@@ -29,15 +29,19 @@ public class PostService {
     }
 
     public Optional<PostDto> findPostById(Long id) {
-        return Optional.ofNullable(restClient
-                .get()
-                .uri(uriBuilder -> uriBuilder.path("/posts/{postId}").build(id))
-                .accept(MediaType.APPLICATION_JSON)
-                .retrieve()
-                .onStatus(HttpStatusCode::is4xxClientError, (request, response) -> {
-                    throw new MyCustomRuntimeException(response.getStatusCode(), response.getHeaders());
-                })
-                .body(PostDto.class));
+        return Optional.ofNullable(
+                restClient
+                        .get()
+                        .uri(uriBuilder -> uriBuilder.path("/posts/{postId}").build(id))
+                        .accept(MediaType.APPLICATION_JSON)
+                        .retrieve()
+                        .onStatus(
+                                HttpStatusCode::is4xxClientError,
+                                (request, response) -> {
+                                    throw new MyCustomRuntimeException(
+                                            response.getStatusCode(), response.getHeaders());
+                                })
+                        .body(PostDto.class));
     }
 
     public PostDto savePost(PostDto post) {
@@ -51,16 +55,20 @@ public class PostService {
     }
 
     public Optional<PostDto> updatePostById(Long id, PostDto postDto) {
-        return Optional.ofNullable(restClient
-                .put()
-                .uri(uriBuilder -> uriBuilder.path("/posts/{postId}").build(id))
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(postDto)
-                .retrieve()
-                .onStatus(HttpStatusCode::is4xxClientError, (request, response) -> {
-                    throw new MyCustomRuntimeException(response.getStatusCode(), response.getHeaders());
-                })
-                .body(PostDto.class));
+        return Optional.ofNullable(
+                restClient
+                        .put()
+                        .uri(uriBuilder -> uriBuilder.path("/posts/{postId}").build(id))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body(postDto)
+                        .retrieve()
+                        .onStatus(
+                                HttpStatusCode::is4xxClientError,
+                                (request, response) -> {
+                                    throw new MyCustomRuntimeException(
+                                            response.getStatusCode(), response.getHeaders());
+                                })
+                        .body(PostDto.class));
     }
 
     public PostDto deletePostById(Long id) {

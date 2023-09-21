@@ -33,14 +33,11 @@ import org.springframework.test.web.servlet.MockMvc;
 @ActiveProfiles(PROFILE_TEST)
 class PostControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
+    @Autowired private MockMvc mockMvc;
 
-    @MockBean
-    private PostService postService;
+    @MockBean private PostService postService;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+    @Autowired private ObjectMapper objectMapper;
 
     private List<PostDto> postList;
 
@@ -84,13 +81,15 @@ class PostControllerTest {
 
     @Test
     void shouldCreateNewPost() throws Exception {
-        given(postService.savePost(any(PostDto.class))).willAnswer((invocation) -> invocation.getArgument(0));
+        given(postService.savePost(any(PostDto.class)))
+                .willAnswer((invocation) -> invocation.getArgument(0));
 
         PostDto post = new PostDto(1L, 1L, "text 1", "First Body");
         this.mockMvc
-                .perform(post("/api/posts")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(post)))
+                .perform(
+                        post("/api/posts")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(post)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id", notNullValue()))
                 .andExpect(jsonPath("$.title", is(post.title())));
@@ -101,9 +100,10 @@ class PostControllerTest {
         PostDto post = new PostDto(null, null, null, null);
 
         this.mockMvc
-                .perform(post("/api/posts")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(post)))
+                .perform(
+                        post("/api/posts")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(post)))
                 .andExpect(status().isBadRequest())
                 .andExpect(header().string("Content-Type", is("application/problem+json")))
                 .andExpect(jsonPath("$.type", is("about:blank")))
@@ -124,9 +124,10 @@ class PostControllerTest {
         given(postService.updatePostById(postId, post)).willReturn(Optional.of(post));
 
         this.mockMvc
-                .perform(put("/api/posts/{id}", post.id())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(post)))
+                .perform(
+                        put("/api/posts/{id}", post.id())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(post)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.title", is(post.title())));
     }
@@ -138,9 +139,10 @@ class PostControllerTest {
         PostDto post = new PostDto(1L, postId, "Updated text", "First Body");
 
         this.mockMvc
-                .perform(put("/api/posts/{id}", postId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(post)))
+                .perform(
+                        put("/api/posts/{id}", postId)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(post)))
                 .andExpect(status().isNotFound());
     }
 
