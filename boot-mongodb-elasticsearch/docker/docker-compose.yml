@@ -25,7 +25,7 @@ services:
     restart: unless-stopped
 
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.10.1
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.10.2
     container_name: elasticsearch
     environment:
       - discovery.type=single-node
@@ -38,7 +38,7 @@ services:
       - esdata1:/usr/share/elasticsearch/data
 
   kibana:
-    image: docker.elastic.co/kibana/kibana:8.10.1
+    image: docker.elastic.co/kibana/kibana:8.10.2
     restart: always
     ports:
       - "5601:5601"
