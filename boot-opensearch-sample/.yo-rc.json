@@ -1,0 +1,11 @@
+{
+  "generator-springboot": {
+    "appName": "boot-opensearch-sample",
+    "packageName": "com.example.opensearch",
+    "databaseType": "postgresql",
+    "dbMigrationTool": "none",
+    "features": [],
+    "buildTool": "maven",
+    "packageFolder": "com/example/opensearch"
+  }
+}

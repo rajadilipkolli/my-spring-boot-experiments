@@ -1,0 +1,40 @@
+name: boot-opensearch-sample CI
+on:
+  push:
+    paths:
+      - "boot-opensearch-sample/**"
+    branches:
+      - main
+  pull_request:
+    paths:
+      - "boot-opensearch-sample/**"
+    types:
+      - opened
+      - synchronize
+      - reopened
+
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        java: [ '21' ]
+    defaults:
+      run:
+        working-directory: "boot-opensearch-sample"
+    name: Build on Java ${{ matrix.Java }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Set up JDK ${{ matrix.java }}
+        uses: actions/setup-java@v3.13.0
+        with:
+          java-version: ${{ matrix.java }}
+          distribution: 'zulu'
+          cache: 'maven'
+      - name: Build with Maven and analyze
+        run: ./mvnw -B clean verify package --file pom.xml 
+
+

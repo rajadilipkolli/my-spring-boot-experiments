@@ -40,6 +40,8 @@
   - open-api-spring-boot/**/*
 "component: rest-docs":
   - boot-rest-docs-sample/**/*
+"component: opensearch":
+  - boot-opensearch-sample/**/*
 "component: httpclients":
   - httpClients/web-client-webflux/**/*
   - httpClients/http-proxy/**/*
@@ -64,6 +66,7 @@
   - jpa/boot-data-customsequence/pom.xml
   - boot-jobrunr-sample/pom.xml
   - boot-mongodb-elasticsearch/pom.xml
+  - boot-opensearch-sample/pom.xml
   - graphql/boot-graphql-webflux/build.gradle.kts
   - graphql/spring-boot-graphql-querydsl/build.gradle.kts
   - graphql/boot-graphql-webmvc/pom.xml
