@@ -14,7 +14,7 @@ services:
       - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m"
 
   opensearch-dashboards:
-    image: opensearchproject/opensearch-dashboards:1.3.13
+    image: opensearchproject/opensearch-dashboards:2.9.0
     container_name: opensearch_dashboards
     ports:
       - "5601:5601"
