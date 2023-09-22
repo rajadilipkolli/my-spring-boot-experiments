@@ -17,7 +17,6 @@ import com.example.opensearch.repositories.RestaurantRepository;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -40,7 +39,6 @@ class RestaurantControllerIT extends AbstractIntegrationTest {
     }
 
     @Test
-    @Disabled("should fix mapping for id column")
     void shouldFetchAllRestaurants() throws Exception {
         this.mockMvc
                 .perform(get("/api/restaurants"))

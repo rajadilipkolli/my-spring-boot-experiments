@@ -4,11 +4,15 @@ import jakarta.validation.constraints.NotEmpty;
 import java.util.Objects;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
+import org.springframework.data.elasticsearch.annotations.Field;
+import org.springframework.data.elasticsearch.annotations.FieldType;
 
 @Document(indexName = "restaurants")
 public class Restaurant {
 
-    @Id private String id;
+    @Id
+    @Field(fielddata = true, type = FieldType.Text)
+    private String id;
 
     @NotEmpty(message = "Name cannot be empty")
     private String name;
