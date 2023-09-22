@@ -7,7 +7,7 @@ import org.testcontainers.containers.GenericContainer;
 public class ContainersConfig {
 
     static final GenericContainer<?> openSearchContainer =
-            new GenericContainer<>("opensearchproject/opensearch:1.3.12")
+            new GenericContainer<>("opensearchproject/opensearch:2.9.0")
                     .withEnv("discovery.type", "single-node")
                     .withEnv("DISABLE_SECURITY_PLUGIN", "true")
                     .withEnv("OPENSEARCH_JAVA_OPTS", "-Xms512m -Xmx512m")
