@@ -2,11 +2,11 @@ name: boot-httpClients-http-proxy
 on:
   push:
     paths:
-      - "httpClients/http-proxy/**"
+      - "httpClients/boot-http-proxy/**"
     branches: [main]
   pull_request:
     paths:
-      - "httpClients/http-proxy/**"
+      - "httpClients/boot-http-proxy/**"
     types:
       - opened
       - synchronize
@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: "httpClients/http-proxy"
+        working-directory: "httpClients/boot-http-proxy"
     steps:
       - uses: actions/checkout@v4
         with:

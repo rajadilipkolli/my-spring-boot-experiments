@@ -20,8 +20,8 @@
         <module>boot-togglz-sample</module>
         <module>boot-ultimate-redis</module>
         <module>graphql/boot-graphql-webmvc</module>
+        <module>httpClients/boot-http-proxy</module>
         <module>httpClients/boot-restclient</module>
-        <module>httpClients/http-proxy</module>
         <module>httpClients/rest-template</module>
         <module>httpClients/web-client-mvc</module>
         <module>httpClients/web-client-webflux</module>

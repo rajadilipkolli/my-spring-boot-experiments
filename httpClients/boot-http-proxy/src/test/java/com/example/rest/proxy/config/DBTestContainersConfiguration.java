@@ -13,6 +13,6 @@ public class DBTestContainersConfiguration {
     @ServiceConnection
     @RestartScope
     PostgreSQLContainer<?> postgresContainer() {
-        return new PostgreSQLContainer<>("postgres:15.3-alpine");
+        return new PostgreSQLContainer<>("postgres:16.0-alpine");
     }
 }
