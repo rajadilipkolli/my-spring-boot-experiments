@@ -10,16 +10,16 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.example.rest.proxy</groupId>
-    <artifactId>http-proxy</artifactId>
+    <artifactId>boot-http-proxy</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>http-proxy</name>
-    <description>http-proxy</description>
+    <name>boot-http-proxy</name>
+    <description>boot-http-proxy</description>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-        <java.version>17</java.version>
+        <java.version>21</java.version>
         <springdoc-openapi.version>2.2.0</springdoc-openapi.version>
         
         <project.testresult.directory>${project.build.directory}/test-results</project.testresult.directory>
