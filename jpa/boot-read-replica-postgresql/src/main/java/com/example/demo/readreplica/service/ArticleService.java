@@ -7,7 +7,6 @@ import com.example.demo.readreplica.entities.Comment;
 import com.example.demo.readreplica.repository.ArticleRepository;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -56,6 +55,6 @@ public class ArticleService {
                             comment.setComment(commentDTO.comment());
                             return comment;
                         })
-                .collect(Collectors.toList());
+                .toList();
     }
 }

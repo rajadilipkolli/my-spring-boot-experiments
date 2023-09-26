@@ -278,8 +278,8 @@ class RestaurantESRepositoryIntegrationTest extends AbstractIntegrationTest {
         StepVerifier.create(wildcardSearchMono)
                 .consumeNextWith(
                         searchPage -> {
-                            assertThat(searchPage.getNumberOfElements()).isEqualTo(0);
-                            assertThat(searchPage.getTotalPages()).isEqualTo(0);
+                            assertThat(searchPage.getNumberOfElements()).isZero();
+                            assertThat(searchPage.getTotalPages()).isZero();
                             assertThat(searchPage.isFirst()).isTrue();
                             assertThat(searchPage.isLast()).isTrue();
                             assertThat(searchPage.isEmpty()).isTrue();
