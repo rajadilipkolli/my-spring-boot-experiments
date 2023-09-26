@@ -8,8 +8,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.plugin.core.PluginRegistry;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
-
 @Service
 public class StrategyService {
 
