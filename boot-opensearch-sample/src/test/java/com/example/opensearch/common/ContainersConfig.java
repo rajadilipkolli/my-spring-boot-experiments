@@ -1,17 +1,16 @@
 package com.example.opensearch.common;
 
+import org.opensearch.testcontainers.OpensearchContainer;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.utility.DockerImageName;
 
 public class ContainersConfig {
 
-    static final GenericContainer<?> openSearchContainer =
-            new GenericContainer<>("opensearchproject/opensearch:2.10.0")
-                    .withEnv("discovery.type", "single-node")
-                    .withEnv("DISABLE_SECURITY_PLUGIN", "true")
-                    .withEnv("OPENSEARCH_JAVA_OPTS", "-Xms512m -Xmx512m")
-                    .withExposedPorts(9200, 9600);
+    @Container
+    public static OpensearchContainer openSearchContainer =
+            new OpensearchContainer(DockerImageName.parse("opensearchproject/opensearch:2.10.0"));
 
     static {
         openSearchContainer.start();
@@ -20,11 +19,6 @@ public class ContainersConfig {
     @DynamicPropertySource
     static void setApplicationProperties(DynamicPropertyRegistry dynamicPropertyRegistry) {
         dynamicPropertyRegistry.add(
-                "opensearch.uris",
-                () ->
-                        "http://%s:%d"
-                                .formatted(
-                                        openSearchContainer.getHost(),
-                                        openSearchContainer.getMappedPort(9200)));
+                "opensearch.uris", () -> openSearchContainer.getHttpHostAddress());
     }
 }
