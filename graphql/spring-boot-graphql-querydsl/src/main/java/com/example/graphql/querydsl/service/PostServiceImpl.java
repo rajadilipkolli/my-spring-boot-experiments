@@ -1,6 +1,11 @@
 package com.example.graphql.querydsl.service;
 
-import com.example.graphql.querydsl.entities.*;
+import com.example.graphql.querydsl.entities.Post;
+import com.example.graphql.querydsl.entities.PostComment;
+import com.example.graphql.querydsl.entities.PostDetails;
+import com.example.graphql.querydsl.entities.PostTag;
+import com.example.graphql.querydsl.entities.QTag;
+import com.example.graphql.querydsl.entities.Tag;
 import com.example.graphql.querydsl.exception.PostNotFoundException;
 import com.example.graphql.querydsl.model.PostCommentsDTO;
 import com.example.graphql.querydsl.model.TagDTO;
@@ -12,7 +17,6 @@ import com.example.graphql.querydsl.repository.TagRepository;
 import com.querydsl.core.types.Predicate;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -71,13 +75,13 @@ public class PostServiceImpl implements PostService {
     private List<TagDTO> getTagsList(List<PostTag> tags) {
         return tags.stream()
                 .map(postTag -> new TagDTO(postTag.getTag().getName()))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     private List<PostCommentsDTO> getCommentsList(List<PostComment> comments) {
         return comments.stream()
                 .map(postComment -> new PostCommentsDTO(postComment.getReview()))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     private void addPostTagsToPost(List<TagDTO> tags, Post post) {
