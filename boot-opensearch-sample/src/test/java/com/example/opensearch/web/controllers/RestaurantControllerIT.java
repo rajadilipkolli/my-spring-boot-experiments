@@ -12,13 +12,17 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.example.opensearch.common.AbstractIntegrationTest;
+import com.example.opensearch.entities.Address;
+import com.example.opensearch.entities.Grades;
 import com.example.opensearch.entities.Restaurant;
 import com.example.opensearch.repositories.RestaurantRepository;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.geo.Point;
 import org.springframework.http.MediaType;
 
 class RestaurantControllerIT extends AbstractIntegrationTest {
@@ -32,9 +36,19 @@ class RestaurantControllerIT extends AbstractIntegrationTest {
         restaurantRepository.deleteAll();
 
         restaurantList = new ArrayList<>();
-        restaurantList.add(new Restaurant(null, "First Restaurant"));
-        restaurantList.add(new Restaurant(null, "Second Restaurant"));
-        restaurantList.add(new Restaurant(null, "Third Restaurant"));
+        Address address = new Address();
+        address.setLocation(new Point(-73.9, 40.8));
+        Grades grade = new Grades("A", LocalDateTime.of(2022, 1, 1, 1, 1, 1), 15);
+        Grades grade1 = new Grades("B", LocalDateTime.of(2022, 3, 31, 23, 59, 59), 15);
+        this.restaurantList.add(
+                new Restaurant(
+                        "1", "text 1", "borough1", "cuisine1", address, List.of(grade, grade1)));
+        this.restaurantList.add(
+                new Restaurant(
+                        "2", "text 2", "borough2", "cuisine2", address, List.of(grade, grade1)));
+        this.restaurantList.add(
+                new Restaurant(
+                        "3", "text 3", "borough3", "cuisine3", address, List.of(grade, grade1)));
         restaurantList = restaurantRepository.saveAll(restaurantList);
     }
 
@@ -67,7 +81,15 @@ class RestaurantControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldCreateNewRestaurant() throws Exception {
-        Restaurant restaurant = new Restaurant(null, "New Restaurant");
+        Address address = new Address();
+        address.setBuilding("building1");
+        address.setZipcode(500049);
+        address.setLocation(new Point(-73.8, 40.8));
+        address.setStreet("street1");
+        Grades grade = new Grades("1", LocalDateTime.now(), 5);
+        Restaurant restaurant =
+                new Restaurant(
+                        null, "New Restaurant", "borough1", "cuisine1", address, List.of(grade));
         this.mockMvc
                 .perform(
                         post("/api/restaurants")
@@ -80,7 +102,7 @@ class RestaurantControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldReturn400WhenCreateNewRestaurantWithoutText() throws Exception {
-        Restaurant restaurant = new Restaurant(null, null);
+        Restaurant restaurant = new Restaurant(null, null, null, null, null, null);
 
         this.mockMvc
                 .perform(
@@ -94,9 +116,13 @@ class RestaurantControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.status", is(400)))
                 .andExpect(jsonPath("$.detail", is("Invalid request content.")))
                 .andExpect(jsonPath("$.instance", is("/api/restaurants")))
-                .andExpect(jsonPath("$.violations", hasSize(1)))
-                .andExpect(jsonPath("$.violations[0].field", is("name")))
-                .andExpect(jsonPath("$.violations[0].message", is("Name cannot be empty")))
+                .andExpect(jsonPath("$.violations", hasSize(3)))
+                .andExpect(jsonPath("$.violations[0].field", is("borough")))
+                .andExpect(jsonPath("$.violations[0].message", is("Borough Can't be Blank")))
+                .andExpect(jsonPath("$.violations[1].field", is("cuisine")))
+                .andExpect(jsonPath("$.violations[1].message", is("Cuisine Can't be Blank")))
+                .andExpect(jsonPath("$.violations[2].field", is("name")))
+                .andExpect(jsonPath("$.violations[2].message", is("Name cannot be empty")))
                 .andReturn();
     }
 

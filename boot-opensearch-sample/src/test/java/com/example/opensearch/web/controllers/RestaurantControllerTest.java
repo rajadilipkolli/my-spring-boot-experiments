@@ -15,10 +15,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.example.opensearch.entities.Address;
+import com.example.opensearch.entities.Grades;
 import com.example.opensearch.entities.Restaurant;
 import com.example.opensearch.model.response.PagedResult;
 import com.example.opensearch.services.RestaurantService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -29,6 +32,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.geo.Point;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -48,9 +52,19 @@ class RestaurantControllerTest {
     @BeforeEach
     void setUp() {
         this.restaurantList = new ArrayList<>();
-        this.restaurantList.add(new Restaurant("1", "text 1"));
-        this.restaurantList.add(new Restaurant("2", "text 2"));
-        this.restaurantList.add(new Restaurant("3", "text 3"));
+        Address address = new Address();
+        address.setLocation(new Point(-73.9, 40.8));
+        Grades grade = new Grades("A", LocalDateTime.of(2022, 1, 1, 1, 1, 1), 15);
+        Grades grade1 = new Grades("B", LocalDateTime.of(2022, 3, 31, 23, 59, 59), 15);
+        this.restaurantList.add(
+                new Restaurant(
+                        "1", "text 1", "borough1", "cuisine1", address, List.of(grade, grade1)));
+        this.restaurantList.add(
+                new Restaurant(
+                        "2", "text 2", "borough2", "cuisine2", address, List.of(grade, grade1)));
+        this.restaurantList.add(
+                new Restaurant(
+                        "3", "text 3", "borough3", "cuisine3", address, List.of(grade, grade1)));
     }
 
     @Test
@@ -76,7 +90,14 @@ class RestaurantControllerTest {
     @Test
     void shouldFindRestaurantById() throws Exception {
         String restaurantId = "1";
-        Restaurant restaurant = new Restaurant(restaurantId, "text 1");
+        Restaurant restaurant =
+                new Restaurant(
+                        restaurantId,
+                        "text 1",
+                        "borough1",
+                        "cuisine1",
+                        new Address(),
+                        new ArrayList<>());
         given(restaurantService.findRestaurantById(restaurantId))
                 .willReturn(Optional.of(restaurant));
 
@@ -101,7 +122,9 @@ class RestaurantControllerTest {
         given(restaurantService.saveRestaurant(any(Restaurant.class)))
                 .willAnswer((invocation) -> invocation.getArgument(0));
 
-        Restaurant restaurant = new Restaurant("1", "some text");
+        Restaurant restaurant =
+                new Restaurant(
+                        "1", "some text", "borough1", "cuisine1", new Address(), new ArrayList<>());
         this.mockMvc
                 .perform(
                         post("/api/restaurants")
@@ -114,7 +137,7 @@ class RestaurantControllerTest {
 
     @Test
     void shouldReturn400WhenCreateNewRestaurantWithoutText() throws Exception {
-        Restaurant restaurant = new Restaurant(null, null);
+        Restaurant restaurant = new Restaurant(null, null, null, null, null, null);
 
         this.mockMvc
                 .perform(
@@ -128,16 +151,27 @@ class RestaurantControllerTest {
                 .andExpect(jsonPath("$.status", is(400)))
                 .andExpect(jsonPath("$.detail", is("Invalid request content.")))
                 .andExpect(jsonPath("$.instance", is("/api/restaurants")))
-                .andExpect(jsonPath("$.violations", hasSize(1)))
-                .andExpect(jsonPath("$.violations[0].field", is("name")))
-                .andExpect(jsonPath("$.violations[0].message", is("Name cannot be empty")))
+                .andExpect(jsonPath("$.violations", hasSize(3)))
+                .andExpect(jsonPath("$.violations[0].field", is("borough")))
+                .andExpect(jsonPath("$.violations[0].message", is("Borough Can't be Blank")))
+                .andExpect(jsonPath("$.violations[1].field", is("cuisine")))
+                .andExpect(jsonPath("$.violations[1].message", is("Cuisine Can't be Blank")))
+                .andExpect(jsonPath("$.violations[2].field", is("name")))
+                .andExpect(jsonPath("$.violations[2].message", is("Name cannot be empty")))
                 .andReturn();
     }
 
     @Test
     void shouldUpdateRestaurant() throws Exception {
         String restaurantId = "1";
-        Restaurant restaurant = new Restaurant(restaurantId, "Updated text");
+        Restaurant restaurant =
+                new Restaurant(
+                        restaurantId,
+                        "Updated text",
+                        "borough1",
+                        "cuisine1",
+                        new Address(),
+                        new ArrayList<>());
         given(restaurantService.findRestaurantById(restaurantId))
                 .willReturn(Optional.of(restaurant));
         given(restaurantService.saveRestaurant(any(Restaurant.class)))
@@ -156,7 +190,14 @@ class RestaurantControllerTest {
     void shouldReturn404WhenUpdatingNonExistingRestaurant() throws Exception {
         String restaurantId = "1";
         given(restaurantService.findRestaurantById(restaurantId)).willReturn(Optional.empty());
-        Restaurant restaurant = new Restaurant(restaurantId, "Updated text");
+        Restaurant restaurant =
+                new Restaurant(
+                        restaurantId,
+                        "Updated text",
+                        "borough1",
+                        "cuisine1",
+                        new Address(),
+                        new ArrayList<>());
 
         this.mockMvc
                 .perform(
@@ -169,7 +210,14 @@ class RestaurantControllerTest {
     @Test
     void shouldDeleteRestaurant() throws Exception {
         String restaurantId = "1";
-        Restaurant restaurant = new Restaurant(restaurantId, "Some text");
+        Restaurant restaurant =
+                new Restaurant(
+                        restaurantId,
+                        "Some text",
+                        "borough1",
+                        "cuisine1",
+                        new Address(),
+                        new ArrayList<>());
         given(restaurantService.findRestaurantById(restaurantId))
                 .willReturn(Optional.of(restaurant));
         doNothing().when(restaurantService).deleteRestaurantById(restaurant.getId());

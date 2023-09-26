@@ -1,6 +1,9 @@
 package com.example.opensearch.entities;
 
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
@@ -17,11 +20,34 @@ public class Restaurant {
     @NotEmpty(message = "Name cannot be empty")
     private String name;
 
+    @NotBlank(message = "Borough Can't be Blank")
+    @Field(fielddata = true, type = FieldType.Text)
+    private String borough;
+
+    @NotBlank(message = "Cuisine Can't be Blank")
+    @Field(fielddata = true, type = FieldType.Text)
+    private String cuisine;
+
+    @Field(type = FieldType.Nested, includeInParent = true)
+    private Address address;
+
+    private List<Grades> grades = new ArrayList<>();
+
     public Restaurant() {}
 
-    public Restaurant(String id, String name) {
+    public Restaurant(
+            String id,
+            String name,
+            String borough,
+            String cuisine,
+            Address address,
+            List<Grades> grades) {
         this.id = id;
         this.name = name;
+        this.borough = borough;
+        this.cuisine = cuisine;
+        this.address = address;
+        this.grades = grades;
     }
 
     public String getId() {
@@ -38,6 +64,38 @@ public class Restaurant {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getBorough() {
+        return borough;
+    }
+
+    public void setBorough(String borough) {
+        this.borough = borough;
+    }
+
+    public String getCuisine() {
+        return cuisine;
+    }
+
+    public void setCuisine(String cuisine) {
+        this.cuisine = cuisine;
+    }
+
+    public Address getAddress() {
+        return address;
+    }
+
+    public void setAddress(Address address) {
+        this.address = address;
+    }
+
+    public List<Grades> getGrades() {
+        return grades;
+    }
+
+    public void setGrades(List<Grades> grades) {
+        this.grades = grades;
     }
 
     @Override
