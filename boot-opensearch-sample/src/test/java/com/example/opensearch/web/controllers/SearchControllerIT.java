@@ -1,0 +1,351 @@
+package com.example.opensearch.web.controllers;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import com.example.opensearch.common.AbstractIntegrationTest;
+import com.example.opensearch.entities.Address;
+import com.example.opensearch.entities.Grades;
+import com.example.opensearch.entities.Restaurant;
+import com.example.opensearch.repositories.RestaurantRepository;
+import java.time.LocalDateTime;
+import java.util.List;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.geo.Point;
+
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+class SearchControllerIT extends AbstractIntegrationTest {
+
+    @Autowired private RestaurantRepository restaurantRepository;
+
+    private static final String RESTAURANT_NAME = "Lb Spumoni Gardens";
+    private static final String BOROUGH_NAME = "Brooklyn";
+    private static final String CUISINE_NAME = "Pizza/Italian";
+
+    @BeforeAll
+    void setUp() {
+        this.restaurantRepository.deleteAll();
+        Restaurant restaurant = new Restaurant();
+        restaurant.setId("2");
+        restaurant.setName(RESTAURANT_NAME);
+        restaurant.setBorough(BOROUGH_NAME);
+        restaurant.setCuisine(CUISINE_NAME);
+        Address address = new Address();
+        address.setLocation(new Point(-73.9, 40.8));
+        address.setZipcode(80986);
+        restaurant.setAddress(address);
+        Grades grade = new Grades("A", LocalDateTime.of(2022, 1, 1, 1, 1, 1), 15);
+        Grades grade1 = new Grades("B", LocalDateTime.of(2022, 3, 31, 23, 59, 59), 15);
+        restaurant.setGrades(List.of(grade, grade1));
+        Restaurant restaurant1 = new Restaurant();
+        restaurant1.setId("40363920");
+        restaurant1.setBorough("Brooklyn");
+        restaurant1.setCuisine("Chinese");
+        restaurant1.setName("Yono gardens");
+        restaurant1.setGrades(List.of(grade, grade1));
+        this.restaurantRepository.saveAll(List.of(restaurant, restaurant1));
+    }
+
+    @Test
+    void searchPhrase() throws Exception {
+        this.mockMvc
+                .perform(get("/search/borough").param("query", BOROUGH_NAME))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.size()", is(2)))
+                .andExpect(jsonPath("$.totalElements", is(2)))
+                .andExpect(jsonPath("$.pageNumber", is(1)))
+                .andExpect(jsonPath("$.totalPages", is(1)))
+                .andExpect(jsonPath("$.isFirst", is(true)))
+                .andExpect(jsonPath("$.isLast", is(true)))
+                .andExpect(jsonPath("$.hasNext", is(false)))
+                .andExpect(jsonPath("$.hasPrevious", is(false)))
+                .andExpect(jsonPath("$.data[0].id", is("2"))) // Check the first item's "id"
+                .andExpect(
+                        jsonPath("$.data[1].id", is("40363920"))); // Check the second item's "id"
+    }
+
+    @Test
+    void searchMulti() throws Exception {
+        this.mockMvc
+                .perform(get("/search/multi").param("query", BOROUGH_NAME))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.size()", is(2)))
+                .andExpect(jsonPath("$.totalElements", is(2)))
+                .andExpect(jsonPath("$.pageNumber", is(1)))
+                .andExpect(jsonPath("$.totalPages", is(1)))
+                .andExpect(jsonPath("$.isFirst", is(true)))
+                .andExpect(jsonPath("$.isLast", is(true)))
+                .andExpect(jsonPath("$.hasNext", is(false)))
+                .andExpect(jsonPath("$.hasPrevious", is(false)))
+                .andExpect(jsonPath("$.data[0].content.id", is("2"))) // Check the first item's "id"
+                .andExpect(
+                        jsonPath(
+                                "$.data[1].content.id",
+                                is("40363920"))); // Check the second item's "id"
+    }
+
+    @Test
+    void searchTermForBorough() throws Exception {
+        this.mockMvc
+                .perform(get("/search/term/borough").param("query", BOROUGH_NAME))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.size()", is(2)))
+                .andExpect(jsonPath("$.totalElements", is(2)))
+                .andExpect(jsonPath("$.pageNumber", is(1)))
+                .andExpect(jsonPath("$.totalPages", is(1)))
+                .andExpect(jsonPath("$.isFirst", is(true)))
+                .andExpect(jsonPath("$.isLast", is(true)))
+                .andExpect(jsonPath("$.hasNext", is(false)))
+                .andExpect(jsonPath("$.hasPrevious", is(false)))
+                .andExpect(jsonPath("$.data[0].content.id", is("2"))) // Check the first item's "id"
+                .andExpect(
+                        jsonPath(
+                                "$.data[1].content.id",
+                                is("40363920"))); // Check the second item's "id"
+    }
+
+    @Test
+    void searchTerms() throws Exception {
+        this.mockMvc
+                .perform(get("/search/terms").param("query", BOROUGH_NAME))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.size()", is(2)))
+                .andExpect(jsonPath("$.totalElements", is(2)))
+                .andExpect(jsonPath("$.pageNumber", is(1)))
+                .andExpect(jsonPath("$.totalPages", is(1)))
+                .andExpect(jsonPath("$.isFirst", is(true)))
+                .andExpect(jsonPath("$.isLast", is(true)))
+                .andExpect(jsonPath("$.hasNext", is(false)))
+                .andExpect(jsonPath("$.hasPrevious", is(false)))
+                .andExpect(jsonPath("$.data[0].content.id", is("2"))) // Check the first item's "id"
+                .andExpect(
+                        jsonPath(
+                                "$.data[1].content.id",
+                                is("40363920"))); // Check the second item's "id"
+    }
+
+    @Test
+    void testQueryBoolWithMust() throws Exception {
+        this.mockMvc
+                .perform(
+                        get("/search/must/bool")
+                                .param("borough", BOROUGH_NAME)
+                                .param("cuisine", CUISINE_NAME)
+                                .param("name", RESTAURANT_NAME))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.size()", is(1)))
+                .andExpect(jsonPath("$.totalElements", is(1)))
+                .andExpect(jsonPath("$.pageNumber", is(1)))
+                .andExpect(jsonPath("$.totalPages", is(1)))
+                .andExpect(jsonPath("$.isFirst", is(true)))
+                .andExpect(jsonPath("$.isLast", is(true)))
+                .andExpect(jsonPath("$.hasNext", is(false)))
+                .andExpect(jsonPath("$.hasPrevious", is(false)))
+                .andExpect(jsonPath("$.data[0].id", is("2"))); // Check the first item's "id"
+    }
+
+    @Test
+    void searchBoolShould() throws Exception {
+        this.mockMvc
+                .perform(
+                        get("/search/should/bool")
+                                .param("borough", BOROUGH_NAME)
+                                .param("cuisine", CUISINE_NAME)
+                                .param("name", RESTAURANT_NAME))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.size()", is(2)))
+                .andExpect(jsonPath("$.totalElements", is(2)))
+                .andExpect(jsonPath("$.pageNumber", is(1)))
+                .andExpect(jsonPath("$.totalPages", is(1)))
+                .andExpect(jsonPath("$.isFirst", is(true)))
+                .andExpect(jsonPath("$.isLast", is(true)))
+                .andExpect(jsonPath("$.hasNext", is(false)))
+                .andExpect(jsonPath("$.hasPrevious", is(false)))
+                .andExpect(jsonPath("$.data[0].content.id", is("2"))) // Check the first item's "id"
+                .andExpect(
+                        jsonPath(
+                                "$.data[1].content.id",
+                                is("40363920"))); // Check the second item's "id"
+    }
+
+    @Test
+    void testSearchWildCardBoroughFail() throws Exception {
+        this.mockMvc
+                .perform(get("/search/wildcard/borough").param("query", "Spumoni"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.size()", is(0)))
+                .andExpect(jsonPath("$.totalElements", is(0)))
+                .andExpect(jsonPath("$.pageNumber", is(1)))
+                .andExpect(jsonPath("$.totalPages", is(0)))
+                .andExpect(jsonPath("$.isFirst", is(true)))
+                .andExpect(jsonPath("$.isLast", is(true)))
+                .andExpect(jsonPath("$.hasNext", is(false)))
+                .andExpect(jsonPath("$.hasPrevious", is(false)));
+    }
+
+    @Test
+    @Disabled
+    void testSearchWildCardBorough() throws Exception {
+        this.mockMvc
+                .perform(get("/search/wildcard/borough").param("query", "ines"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.size()", is(2)))
+                .andExpect(jsonPath("$.totalElements", is(2)))
+                .andExpect(jsonPath("$.pageNumber", is(1)))
+                .andExpect(jsonPath("$.totalPages", is(1)))
+                .andExpect(jsonPath("$.isFirst", is(true)))
+                .andExpect(jsonPath("$.isLast", is(true)))
+                .andExpect(jsonPath("$.hasNext", is(false)))
+                .andExpect(jsonPath("$.hasPrevious", is(false)))
+                .andExpect(jsonPath("$.data[0].content.id", is("2"))) // Check the first item's "id"
+                .andExpect(
+                        jsonPath(
+                                "$.data[1].content.id",
+                                is("40363920"))); // Check the second item's "id"
+    }
+
+    @Test
+    void searchRegularExpression() throws Exception {
+        this.mockMvc
+                .perform(get("/search/regexp/borough").param("query", "B.[a-z]*"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.size()", is(2)))
+                .andExpect(jsonPath("$.totalElements", is(2)))
+                .andExpect(jsonPath("$.pageNumber", is(1)))
+                .andExpect(jsonPath("$.totalPages", is(1)))
+                .andExpect(jsonPath("$.isFirst", is(true)))
+                .andExpect(jsonPath("$.isLast", is(true)))
+                .andExpect(jsonPath("$.hasNext", is(false)))
+                .andExpect(jsonPath("$.hasPrevious", is(false)))
+                .andExpect(jsonPath("$.data[0].content.id", is("2"))) // Check the first item's "id"
+                .andExpect(
+                        jsonPath(
+                                "$.data[1].content.id",
+                                is("40363920"))); // Check the second item's "id"
+    }
+
+    @Test
+    void searchSimpleQueryForBoroughAndCuisine() throws Exception {
+        this.mockMvc
+                .perform(get("/search/simple").param("query", BOROUGH_NAME))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.size()", is(2)))
+                .andExpect(jsonPath("$.totalElements", is(2)))
+                .andExpect(jsonPath("$.pageNumber", is(1)))
+                .andExpect(jsonPath("$.totalPages", is(1)))
+                .andExpect(jsonPath("$.isFirst", is(true)))
+                .andExpect(jsonPath("$.isLast", is(true)))
+                .andExpect(jsonPath("$.hasNext", is(false)))
+                .andExpect(jsonPath("$.hasPrevious", is(false)))
+                .andExpect(jsonPath("$.data[0].content.id", is("2"))) // Check the first item's "id"
+                .andExpect(
+                        jsonPath(
+                                "$.data[1].content.id",
+                                is("40363920"))); // Check the second item's "id"
+    }
+
+    @Test
+    @Disabled
+    void searchRestaurantIdRange() throws Exception {
+        this.mockMvc
+                .perform(
+                        get("/search/restaurant/range")
+                                .param("lowerLimit", "1")
+                                .param("upperLimit", "10"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.size()", is(1)))
+                .andExpect(jsonPath("$.totalElements", is(1)))
+                .andExpect(jsonPath("$.pageNumber", is(1)))
+                .andExpect(jsonPath("$.totalPages", is(1)))
+                .andExpect(jsonPath("$.isFirst", is(true)))
+                .andExpect(jsonPath("$.isLast", is(true)))
+                .andExpect(jsonPath("$.hasNext", is(false)))
+                .andExpect(jsonPath("$.hasPrevious", is(false)))
+                .andExpect(
+                        jsonPath("$.data[0].content.id", is("2"))); // Check the first item's "id"
+    }
+
+    @Test
+    void searchDateRange() throws Exception {
+        this.mockMvc
+                .perform(
+                        get("/search/date/range")
+                                .param(
+                                        "fromDate",
+                                        LocalDateTime.of(2021, 12, 31, 23, 59, 59).toString())
+                                .param("toDate", LocalDateTime.of(2022, 4, 11, 0, 0, 0).toString()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.size()", is(2)))
+                .andExpect(jsonPath("$.totalElements", is(2)))
+                .andExpect(jsonPath("$.pageNumber", is(1)))
+                .andExpect(jsonPath("$.totalPages", is(1)))
+                .andExpect(jsonPath("$.isFirst", is(true)))
+                .andExpect(jsonPath("$.isLast", is(true)))
+                .andExpect(jsonPath("$.hasNext", is(false)))
+                .andExpect(jsonPath("$.hasPrevious", is(false)))
+                .andExpect(jsonPath("$.data[0].content.id", is("2"))) // Check the first item's "id"
+                .andExpect(
+                        jsonPath(
+                                "$.data[1].content.id",
+                                is("40363920"))); // Check the second item's "id"
+    }
+
+    @Test
+    void aggregateSearch() throws Exception {
+        this.mockMvc
+                .perform(
+                        get("/search/aggregate")
+                                .param("searchKeyword", "Pizza")
+                                .param("fieldNames", "name", "borough", "cuisine"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.aggregationMap.length()").value(3))
+                .andExpect(jsonPath("$.aggregationMap.MyBorough.brooklyn").value(1))
+                .andExpect(jsonPath("$.aggregationMap.MyCuisine.italian").value(1))
+                .andExpect(jsonPath("$.aggregationMap.MyCuisine.pizza").value(1))
+                .andExpect(jsonPath("$.aggregationMap.MyDateRange.length()").value(1))
+                .andExpect(
+                        jsonPath(
+                                "$.data.length()", is(1))) // Check the number of items in "content"
+                .andExpect(jsonPath("$.totalElements", is(1))) // Check the total number of elements
+                .andExpect(jsonPath("$.totalPages", is(1))) // Check the total number of pages
+                .andExpect(jsonPath("$.pageNumber", is(1))) // Check the current page number
+                .andExpect(jsonPath("$.isFirst", is(true))) // Check if it's the first page
+                .andExpect(jsonPath("$.isLast", is(true))) // Check if it's the last page
+                .andExpect(jsonPath("$.hasNext", is(false))) // Check if there is a next page
+                .andExpect(
+                        jsonPath("$.hasPrevious", is(false))) // Check if there is a previous page
+                .andExpect(
+                        jsonPath("$.data[0].content.id", is("2"))); // Check the first item's "id"
+    }
+
+    @Test
+    @Disabled
+    void searchRestaurantsWithInRange() throws Exception {
+        this.mockMvc
+                .perform(
+                        get("/search/restaurant/withInRange")
+                                .param("lat", "40.8")
+                                .param("lon", "-73.9")
+                                .param("distance", "50"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.size()", is(2)))
+                .andExpect(jsonPath("$.totalElements", is(2)))
+                .andExpect(jsonPath("$.pageNumber", is(1)))
+                .andExpect(jsonPath("$.totalPages", is(1)))
+                .andExpect(jsonPath("$.isFirst", is(true)))
+                .andExpect(jsonPath("$.isLast", is(true)))
+                .andExpect(jsonPath("$.hasNext", is(false)))
+                .andExpect(jsonPath("$.hasPrevious", is(false)))
+                .andExpect(jsonPath("$.data[0].content.id", is("2"))) // Check the first item's "id"
+                .andExpect(
+                        jsonPath(
+                                "$.data[1].content.id",
+                                is("40363920"))); // Check the second item's "id"
+    }
+}
