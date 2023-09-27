@@ -11,7 +11,7 @@ plugins {
 	id("com.gorylenko.gradle-git-properties") version "2.4.1"
 	id("org.owasp.dependencycheck") version "8.4.0"
 	jacoco
-	id("org.sonarqube") version "4.3.1.3277"
+	id("org.sonarqube") version "4.4.0.3356"
 }
 
 group = "com.example.graphql"
