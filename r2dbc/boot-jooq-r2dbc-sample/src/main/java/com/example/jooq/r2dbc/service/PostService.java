@@ -39,34 +39,25 @@ public class PostService {
     private final PostRepository postRepository;
 
     public Flux<PostSummary> findAll() {
-        var post = POSTS;
-        var postsTags = POSTS_TAGS;
-        var tags = TAGS;
-        var postComment = POST_COMMENTS;
         var sql =
                 dslContext
                         .select(
-                                post.ID,
-                                post.TITLE,
+                                POSTS.ID,
+                                POSTS.TITLE,
                                 DSL.field("count(post_comments.id)", SQLDataType.BIGINT),
                                 multiset(
-                                                select(tags.NAME)
-                                                        .from(tags)
-                                                        .join(postsTags)
-                                                        .on(tags.ID.eq(postsTags.TAG_ID))
-                                                        .where(postsTags.POST_ID.eq(post.ID)))
-                                        .as("tags"))
-                        .from(post.leftJoin(postComment).on(postComment.POST_ID.eq(post.ID)))
-                        .groupBy(post.ID)
-                        .orderBy(post.CREATED_AT);
+                                                select(TAGS.NAME)
+                                                        .from(TAGS)
+                                                        .join(POSTS_TAGS)
+                                                        .on(TAGS.ID.eq(POSTS_TAGS.TAG_ID))
+                                                        .where(POSTS_TAGS.POST_ID.eq(POSTS.ID)))
+                                        .as("tags")
+                                        .convertFrom(record -> record.map(Record1::value1)))
+                        .from(POSTS.leftJoin(POST_COMMENTS).on(POST_COMMENTS.POST_ID.eq(POSTS.ID)))
+                        .groupBy(POSTS.ID)
+                        .orderBy(POSTS.CREATED_AT);
         return Flux.from(sql)
-                .map(
-                        r ->
-                                new PostSummary(
-                                        r.value1(),
-                                        r.value2(),
-                                        r.value3(),
-                                        r.value4().map(Record1::value1)));
+                .map(r -> new PostSummary(r.value1(), r.value2(), r.value3(), r.value4()));
     }
 
     public Mono<UUID> create(CreatePostCommand createPostCommand) {
@@ -112,38 +103,35 @@ public class PostService {
                 keyword,
                 offset,
                 limit);
-        var posts = POSTS;
-        var postsTags = POSTS_TAGS;
-        var tags = TAGS;
-        var postComments = POST_COMMENTS;
 
         Condition where = DSL.trueCondition();
         if (StringUtils.hasText(keyword)) {
-            where = where.and(posts.TITLE.likeIgnoreCase("%" + keyword + "%"));
+            where = where.and(POSTS.TITLE.likeIgnoreCase("%" + keyword + "%"));
         }
         var dataSql =
                 dslContext
                         .select(
-                                posts.ID,
-                                posts.TITLE,
+                                POSTS.ID,
+                                POSTS.TITLE,
                                 DSL.field("count(post_comments.id)", SQLDataType.BIGINT),
                                 multiset(
-                                                select(tags.NAME)
-                                                        .from(tags)
-                                                        .join(postsTags)
-                                                        .on(tags.ID.eq(postsTags.TAG_ID))
-                                                        .where(postsTags.POST_ID.eq(posts.ID)))
-                                        .as("tags"))
-                        .from(posts.leftJoin(postComments).on(postComments.POST_ID.eq(posts.ID)))
+                                                select(TAGS.NAME)
+                                                        .from(TAGS)
+                                                        .join(POSTS_TAGS)
+                                                        .on(TAGS.ID.eq(POSTS_TAGS.TAG_ID))
+                                                        .where(POSTS_TAGS.POST_ID.eq(POSTS.ID)))
+                                        .as("tags")
+                                        .convertFrom(record -> record.map(Record1::value1)))
+                        .from(POSTS.leftJoin(POST_COMMENTS).on(POST_COMMENTS.POST_ID.eq(POSTS.ID)))
                         .where(where)
-                        .groupBy(posts.ID)
-                        .orderBy(posts.CREATED_AT)
+                        .groupBy(POSTS.ID)
+                        .orderBy(POSTS.CREATED_AT)
                         .limit(offset, limit);
 
         val countSql =
                 dslContext
                         .select(DSL.field("count(1)", SQLDataType.BIGINT))
-                        .from(posts)
+                        .from(POSTS)
                         .where(where);
 
         return Mono.zip(
@@ -154,7 +142,7 @@ public class PostService {
                                                         r.value1(),
                                                         r.value2(),
                                                         r.value3(),
-                                                        r.value4().map(Record1::value1)))
+                                                        r.value4()))
                                 .collectList(),
                         Mono.from(countSql).map(Record1::value1))
                 .map(it -> new PaginatedResult(it.getT1(), it.getT2()));
