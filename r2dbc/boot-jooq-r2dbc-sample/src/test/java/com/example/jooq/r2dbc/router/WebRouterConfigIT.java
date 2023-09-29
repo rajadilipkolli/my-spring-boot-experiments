@@ -1,11 +1,12 @@
-package com.example.jooq.r2dbc;
+package com.example.jooq.r2dbc.router;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 import com.example.jooq.r2dbc.common.AbstractIntegrationTest;
 import java.util.List;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-class ApplicationIntegrationTest extends AbstractIntegrationTest {
+class WebRouterConfigIT extends AbstractIntegrationTest {
 
     @Test
     void willLoadPosts() {
@@ -17,8 +18,6 @@ class ApplicationIntegrationTest extends AbstractIntegrationTest {
                 .is2xxSuccessful()
                 .expectBody()
                 .jsonPath("$[*].title")
-                .value(
-                        (List<String> titles) ->
-                                Assertions.assertThat(titles).containsAnyOf("jooq test"));
+                .value((List<String> titles) -> assertThat(titles).containsAnyOf("jooq test"));
     }
 }
