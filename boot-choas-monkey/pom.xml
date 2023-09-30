@@ -20,7 +20,6 @@
 
         <java.version>17</java.version>
         <springdoc-openapi.version>2.2.0</springdoc-openapi.version>
-        <commons-io.version>2.13.0</commons-io.version>
 
         <gatling.version>3.9.5</gatling.version>
         <gatling-maven-plugin.version>4.5.0</gatling-maven-plugin.version>
@@ -95,15 +94,6 @@
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
             <version>${springdoc-openapi.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>commons-io</groupId>
-            <artifactId>commons-io</artifactId>
-            <version>${commons-io.version}</version>
         </dependency>
 
         <dependency>
@@ -244,7 +234,7 @@
                 <configuration>
                     <java>
                         <googleJavaFormat>
-                            <version>1.15.0</version>
+                            <version>1.17.0</version>
                             <style>AOSP</style>
                         </googleJavaFormat>
                     </java>
