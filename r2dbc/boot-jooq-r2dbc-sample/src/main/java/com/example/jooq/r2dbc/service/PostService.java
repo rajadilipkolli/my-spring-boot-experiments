@@ -15,16 +15,24 @@ import com.example.jooq.r2dbc.model.response.PostSummary;
 import com.example.jooq.r2dbc.repository.PostRepository;
 import com.example.jooq.r2dbc.testcontainersflyway.db.tables.records.PostCommentsRecord;
 import com.example.jooq.r2dbc.testcontainersflyway.db.tables.records.PostsTagsRecord;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import lombok.val;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Record1;
+import org.jooq.SortField;
+import org.jooq.TableField;
 import org.jooq.impl.DSL;
 import org.jooq.impl.SQLDataType;
+import org.springframework.dao.InvalidDataAccessApiUsageException;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
@@ -106,7 +114,7 @@ public class PostService {
                         });
     }
 
-    public Mono<UUID> fetchOrInsertTag(String tagName) {
+    private Mono<UUID> fetchOrInsertTag(String tagName) {
 
         // Check if the tag with the given Name exists
         return Mono.from(dslContext.select(TAGS.ID).from(TAGS).where(TAGS.NAME.eq(tagName)))
@@ -120,12 +128,12 @@ public class PostService {
                 .map(Record1::value1);
     }
 
-    public Mono<PaginatedResult> findByKeyword(String keyword, int offset, int limit) {
+    public Mono<PaginatedResult<PostSummary>> findByKeyword(String keyword, Pageable pageable) {
         log.debug(
                 "findByKeyword with keyword :{} with offset :{} and limit :{}",
                 keyword,
-                offset,
-                limit);
+                pageable.getOffset(),
+                pageable.getPageSize());
 
         Condition where = DSL.trueCondition();
         if (StringUtils.hasText(keyword)) {
@@ -148,10 +156,11 @@ public class PostService {
                         .from(POSTS.leftJoin(POST_COMMENTS).on(POST_COMMENTS.POST_ID.eq(POSTS.ID)))
                         .where(where)
                         .groupBy(POSTS.ID)
-                        .orderBy(POSTS.CREATED_AT)
-                        .limit(offset, limit);
+                        .orderBy(getSortFields(pageable.getSort()))
+                        .limit(pageable.getPageSize())
+                        .offset(pageable.getOffset());
 
-        val countSql =
+        var countSql =
                 dslContext
                         .select(DSL.field("count(1)", SQLDataType.BIGINT))
                         .from(POSTS)
@@ -168,7 +177,48 @@ public class PostService {
                                                         r.value4()))
                                 .collectList(),
                         Mono.from(countSql).map(Record1::value1))
-                .map(it -> new PaginatedResult(it.getT1(), it.getT2()));
+                .map(it -> new PageImpl<>(it.getT1(), pageable, it.getT2()))
+                .map(PaginatedResult::new);
+    }
+
+    private List<SortField<?>> getSortFields(Sort sortSpecification) {
+        List<SortField<?>> querySortFields = new ArrayList<>();
+
+        if (sortSpecification == null) {
+            return querySortFields;
+        }
+
+        for (Sort.Order specifiedField : sortSpecification) {
+            String sortFieldName = specifiedField.getProperty();
+            Sort.Direction sortDirection = specifiedField.getDirection();
+
+            TableField tableField = getTableField(sortFieldName);
+            SortField<?> querySortField = convertTableFieldToSortField(tableField, sortDirection);
+            querySortFields.add(querySortField);
+        }
+
+        return querySortFields;
+    }
+
+    private TableField getTableField(String sortFieldName) {
+        TableField sortField;
+        try {
+            Field tableField = POSTS.getClass().getField(sortFieldName.toUpperCase(Locale.ROOT));
+            sortField = (TableField) tableField.get(POSTS);
+        } catch (NoSuchFieldException | IllegalAccessException ex) {
+            String errorMessage = String.format("Could not find table field: %s", sortFieldName);
+            throw new InvalidDataAccessApiUsageException(errorMessage, ex);
+        }
+        return sortField;
+    }
+
+    private SortField<?> convertTableFieldToSortField(
+            TableField tableField, Sort.Direction sortDirection) {
+        if (sortDirection == Sort.Direction.ASC) {
+            return tableField.asc();
+        } else {
+            return tableField.desc();
+        }
     }
 
     public Mono<Post> findById(String id) {

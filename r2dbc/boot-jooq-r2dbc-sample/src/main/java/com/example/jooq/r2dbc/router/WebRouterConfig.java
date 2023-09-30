@@ -61,6 +61,7 @@ public class WebRouterConfig {
                 operation =
                         @Operation(
                                 operationId = "search",
+                                description = "search based on title",
                                 parameters = {
                                     @Parameter(
                                             name = "keyword",
@@ -68,15 +69,25 @@ public class WebRouterConfig {
                                             in = ParameterIn.QUERY,
                                             required = true),
                                     @Parameter(
-                                            name = "offset",
-                                            description = "offset value of page",
+                                            name = "pageNo",
+                                            description = "page Number of page",
                                             in = ParameterIn.QUERY,
                                             example = "0"),
                                     @Parameter(
-                                            name = "limit",
+                                            name = "pageSize",
                                             description = "max Number of records per page",
                                             in = ParameterIn.QUERY,
-                                            example = "10")
+                                            example = "10"),
+                                    @Parameter(
+                                            name = "sortBy",
+                                            description = "sort By Fields",
+                                            in = ParameterIn.QUERY,
+                                            example = "id"),
+                                    @Parameter(
+                                            name = "sortDir",
+                                            description = "sortBy Direction asc/desc",
+                                            in = ParameterIn.QUERY,
+                                            example = "asc")
                                 },
                                 responses =
                                         @ApiResponse(

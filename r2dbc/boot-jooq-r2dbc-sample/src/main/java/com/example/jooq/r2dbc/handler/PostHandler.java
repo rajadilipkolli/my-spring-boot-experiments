@@ -12,6 +12,9 @@ import com.example.jooq.r2dbc.model.response.PostSummary;
 import com.example.jooq.r2dbc.service.PostService;
 import java.net.URI;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
@@ -62,11 +65,19 @@ public class PostHandler {
 
     @Loggable
     public Mono<ServerResponse> search(ServerRequest req) {
+        String sortDir = req.queryParam("sortDir").orElse("asc");
+        String sortBy = req.queryParam("sortBy").orElse("id");
+        Sort sort =
+                sortDir.equalsIgnoreCase(Sort.Direction.ASC.name())
+                        ? Sort.by(sortBy).ascending()
+                        : Sort.by(sortBy).descending();
+
+        // create Pageable instance
+        int pageNo = req.queryParam("pageNo").map(Integer::parseInt).orElse(0);
+        int pageSize = req.queryParam("pageSize").map(Integer::parseInt).orElse(10);
+        Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
         return postService
-                .findByKeyword(
-                        req.queryParam("keyword").orElse(""),
-                        req.queryParam("offset").map(Integer::parseInt).orElse(0),
-                        req.queryParam("limit").map(Integer::parseInt).orElse(10))
+                .findByKeyword(req.queryParam("keyword").orElse(""), pageable)
                 .flatMap(
                         paginatedResult ->
                                 ServerResponse.ok()
