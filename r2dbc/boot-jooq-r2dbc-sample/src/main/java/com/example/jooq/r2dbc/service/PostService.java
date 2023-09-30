@@ -11,8 +11,12 @@ import com.example.jooq.r2dbc.entities.Post;
 import com.example.jooq.r2dbc.model.request.CreatePostCommand;
 import com.example.jooq.r2dbc.model.request.CreatePostComment;
 import com.example.jooq.r2dbc.model.response.PaginatedResult;
+import com.example.jooq.r2dbc.model.response.PostCommentResponse;
+import com.example.jooq.r2dbc.model.response.PostResponse;
 import com.example.jooq.r2dbc.model.response.PostSummary;
 import com.example.jooq.r2dbc.repository.PostRepository;
+import com.example.jooq.r2dbc.testcontainersflyway.db.tables.PostComments;
+import com.example.jooq.r2dbc.testcontainersflyway.db.tables.Posts;
 import com.example.jooq.r2dbc.testcontainersflyway.db.tables.records.PostCommentsRecord;
 import com.example.jooq.r2dbc.testcontainersflyway.db.tables.records.PostsTagsRecord;
 import java.lang.reflect.Field;
@@ -128,7 +132,7 @@ public class PostService {
                 .map(Record1::value1);
     }
 
-    public Mono<PaginatedResult<PostSummary>> findByKeyword(String keyword, Pageable pageable) {
+    public Mono<PaginatedResult<PostResponse>> findByKeyword(String keyword, Pageable pageable) {
         log.debug(
                 "findByKeyword with keyword :{} with offset :{} and limit :{}",
                 keyword,
@@ -144,7 +148,21 @@ public class PostService {
                         .select(
                                 POSTS.ID,
                                 POSTS.TITLE,
-                                DSL.field("count(post_comments.id)", SQLDataType.BIGINT),
+                                POSTS.CONTENT,
+                                multiset(
+                                                select(
+                                                                PostComments.POST_COMMENTS.ID,
+                                                                PostComments.POST_COMMENTS.CONTENT,
+                                                                PostComments.POST_COMMENTS
+                                                                        .CREATED_AT)
+                                                        .from(PostComments.POST_COMMENTS)
+                                                        .where(
+                                                                PostComments.POST_COMMENTS.POST_ID
+                                                                        .eq(Posts.POSTS.ID)))
+                                        .as("comments")
+                                        .convertFrom(
+                                                record3s ->
+                                                        record3s.into(PostCommentResponse.class)),
                                 multiset(
                                                 select(TAGS.NAME)
                                                         .from(TAGS)
@@ -160,21 +178,18 @@ public class PostService {
                         .limit(pageable.getPageSize())
                         .offset(pageable.getOffset());
 
-        var countSql =
-                dslContext
-                        .select(DSL.field("count(1)", SQLDataType.BIGINT))
-                        .from(POSTS)
-                        .where(where);
+        var countSql = dslContext.selectCount().from(POSTS).where(where);
 
         return Mono.zip(
                         Flux.from(dataSql)
                                 .map(
                                         r ->
-                                                new PostSummary(
+                                                new PostResponse(
                                                         r.value1(),
                                                         r.value2(),
                                                         r.value3(),
-                                                        r.value4()))
+                                                        r.value4(),
+                                                        r.value5()))
                                 .collectList(),
                         Mono.from(countSql).map(Record1::value1))
                 .map(it -> new PageImpl<>(it.getT1(), pageable, it.getT2()))

@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.example.jooq.r2dbc.common.AbstractIntegrationTest;
 import com.example.jooq.r2dbc.model.request.CreatePostCommand;
+import com.example.jooq.r2dbc.model.response.PaginatedResult;
 import com.example.jooq.r2dbc.repository.TagRepository;
 import java.util.List;
 import java.util.UUID;
@@ -28,6 +29,33 @@ class WebRouterConfigIT extends AbstractIntegrationTest {
                 .expectBody()
                 .jsonPath("$[*].title")
                 .value((List<String> titles) -> assertThat(titles).containsAnyOf("jooq test"));
+    }
+
+    @Test
+    void searchPosts() {
+        this.webTestClient
+                .get()
+                .uri(
+                        uriBuilder -> {
+                            uriBuilder.path("/posts/search");
+                            uriBuilder.queryParam("keyword", "Jooq");
+                            return uriBuilder.build();
+                        })
+                .exchange()
+                .expectStatus()
+                .is2xxSuccessful()
+                .expectBody(PaginatedResult.class)
+                .value(
+                        paginatedResult -> {
+                            assertThat(paginatedResult.data()).isNotEmpty().hasSize(1);
+                            assertThat(paginatedResult.totalElements()).isEqualTo(1);
+                            assertThat(paginatedResult.pageNumber()).isEqualTo(1);
+                            assertThat(paginatedResult.totalPages()).isEqualTo(1);
+                            assertThat(paginatedResult.isFirst()).isTrue();
+                            assertThat(paginatedResult.isLast()).isTrue();
+                            assertThat(paginatedResult.hasNext()).isFalse();
+                            assertThat(paginatedResult.hasPrevious()).isFalse();
+                        });
     }
 
     @Test
@@ -60,9 +88,8 @@ class WebRouterConfigIT extends AbstractIntegrationTest {
                 .exists("Location")
                 .expectBody(UUID.class);
 
-        Mono<Long> newCount = tagRepository.count();
-
-        Mono<Long> resultMono = newCount.zipWith(newCount, (value1, value2) -> value2 - value1);
+        Mono<Long> resultMono =
+                tagRepository.count().zipWith(count, (value1, value2) -> value2 - value1);
 
         // Use StepVerifier to assert the behavior
         StepVerifier.create(resultMono)
