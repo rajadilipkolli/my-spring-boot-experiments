@@ -26,7 +26,7 @@ create table post_comments
 create table tags
 (
     id uuid not null DEFAULT uuid_generate_v4 (),
-    name text,
+    name text unique,
     created_at timestamptz DEFAULT NOW(),
     primary key (id)
 );

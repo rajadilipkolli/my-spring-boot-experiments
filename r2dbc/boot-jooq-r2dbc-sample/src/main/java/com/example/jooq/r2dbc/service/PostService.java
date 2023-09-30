@@ -61,39 +61,62 @@ public class PostService {
     }
 
     public Mono<UUID> create(CreatePostCommand createPostCommand) {
-        var post = POSTS;
-        var postsTags = POSTS_TAGS;
-        var sqlInsertPost =
+
+        var createPostSQL =
                 dslContext
-                        .insertInto(post)
-                        .columns(post.TITLE, post.CONTENT)
+                        .insertInto(POSTS)
+                        .columns(POSTS.TITLE, POSTS.CONTENT)
                         .values(createPostCommand.title(), createPostCommand.content())
-                        .returningResult(post.ID);
-        return Mono.from(sqlInsertPost)
+                        .returningResult(POSTS.ID);
+
+        return Flux.fromIterable(createPostCommand.tagName())
+                .flatMap(this::fetchOrInsertTag)
+                .collectList()
                 .flatMap(
-                        id -> {
-                            List<PostsTagsRecord> tags =
-                                    createPostCommand.tagId().stream()
-                                            .map(
-                                                    tag -> {
-                                                        PostsTagsRecord r = postsTags.newRecord();
-                                                        r.setPostId(id.component1());
-                                                        r.setTagId(tag);
-                                                        return r;
-                                                    })
-                                            .toList();
-                            return Mono.from(
-                                            dslContext
-                                                    .insertInto(postsTags)
-                                                    .columns(postsTags.POST_ID, postsTags.TAG_ID)
-                                                    .valuesOfRecords(tags)
-                                                    .returning())
-                                    .map(
-                                            r -> {
-                                                log.debug("inserted tags:: {}", r);
-                                                return id;
-                                            });
-                        })
+                        tagIdList ->
+                                Mono.from(createPostSQL)
+                                        .flatMap(
+                                                postIdRecord ->
+                                                        insertIntoPostTags(
+                                                                tagIdList,
+                                                                postIdRecord.component1())));
+    }
+
+    private Mono<UUID> insertIntoPostTags(List<UUID> tagIdList, UUID postId) {
+        List<PostsTagsRecord> tags =
+                tagIdList.stream()
+                        .map(
+                                tagId -> {
+                                    PostsTagsRecord r = POSTS_TAGS.newRecord();
+                                    r.setPostId(postId);
+                                    r.setTagId(tagId);
+                                    return r;
+                                })
+                        .toList();
+        return Mono.from(
+                        dslContext
+                                .insertInto(POSTS_TAGS)
+                                .columns(POSTS_TAGS.POST_ID, POSTS_TAGS.TAG_ID)
+                                .valuesOfRecords(tags)
+                                .returning())
+                .map(
+                        r -> {
+                            log.debug("inserted tags:: {}", r);
+                            return r.component1();
+                        });
+    }
+
+    public Mono<UUID> fetchOrInsertTag(String tagName) {
+
+        // Check if the tag with the given Name exists
+        return Mono.from(dslContext.select(TAGS.ID).from(TAGS).where(TAGS.NAME.eq(tagName)))
+                .switchIfEmpty(
+                        Mono.from(
+                                dslContext
+                                        .insertInto(TAGS)
+                                        .columns(TAGS.NAME)
+                                        .values(tagName)
+                                        .returningResult(TAGS.ID)))
                 .map(Record1::value1);
     }
 
