@@ -11,8 +11,6 @@ import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import reactor.core.publisher.Mono;
-import reactor.test.StepVerifier;
 
 class WebRouterConfigIT extends AbstractIntegrationTest {
 
@@ -62,7 +60,11 @@ class WebRouterConfigIT extends AbstractIntegrationTest {
     void willCreatePosts() {
         CreatePostCommand createPost =
                 new CreatePostCommand("junitTitle", "junitContent", List.of("junitTag"));
-        Mono<Long> count = tagRepository.count();
+
+        // Save the initial count of tags
+        Long initialCount = tagRepository.count().block();
+
+        // Create the first post
         this.webTestClient
                 .post()
                 .uri("/posts")
@@ -75,6 +77,13 @@ class WebRouterConfigIT extends AbstractIntegrationTest {
                 .exists("Location")
                 .expectBody(UUID.class);
 
+        // Calculate the difference in tag count after creating posts
+        Long afterCount = tagRepository.count().block();
+
+        // Use Assertions to verify the result
+        assertThat(afterCount - initialCount).isEqualTo(1);
+
+        // Create the second post
         createPost = new CreatePostCommand("junitTitle1", "junitContent1", List.of("junitTag"));
         this.webTestClient
                 .post()
@@ -88,13 +97,10 @@ class WebRouterConfigIT extends AbstractIntegrationTest {
                 .exists("Location")
                 .expectBody(UUID.class);
 
-        Mono<Long> resultMono =
-                tagRepository.count().zipWith(count, (value1, value2) -> value2 - value1);
+        // Calculate the difference in tag count after creating posts
+        afterCount = tagRepository.count().block();
 
-        // Use StepVerifier to assert the behavior
-        StepVerifier.create(resultMono)
-                .expectNext(0L) // Expected result after subtraction
-                .expectComplete()
-                .verify();
+        // Use Assertions to verify the result that no newer one is created
+        assertThat(afterCount - initialCount).isEqualTo(1);
     }
 }
