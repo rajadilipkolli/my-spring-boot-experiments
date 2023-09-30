@@ -43,6 +43,16 @@
             "projectName": "boot-mongodb-elasticsearch",
             "args": "",
             "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-Application<boot-jooq-r2dbc-sample>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.example.jooq.r2dbc.Application",
+            "projectName": "boot-jooq-r2dbc-sample",
+            "args": "--spring.profiles.active=local",
+            "envFile": "${workspaceFolder}/.env"
         }
     ]
 }
