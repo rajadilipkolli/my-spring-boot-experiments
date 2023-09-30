@@ -73,50 +73,38 @@ public class Initializer implements CommandLineRunner {
                                                                 .returningResult(POST_COMMENTS.ID))
                                         .collectList() // Collect all comment IDs into a list
                         )
-                .flatMapMany(
-                        it ->
-                                dslContext
-                                        .select(
-                                                POSTS.ID,
-                                                POSTS.TITLE,
-                                                POSTS.CONTENT,
-                                                multiset(
-                                                                select(
-                                                                                POST_COMMENTS.ID,
-                                                                                POST_COMMENTS
-                                                                                        .CONTENT,
-                                                                                POST_COMMENTS
-                                                                                        .CREATED_AT)
-                                                                        .from(POST_COMMENTS)
-                                                                        .where(
-                                                                                POST_COMMENTS
-                                                                                        .POST_ID.eq(
-                                                                                        POSTS.ID)))
-                                                        .as("comments")
-                                                        .convertFrom(
-                                                                record3s ->
-                                                                        record3s.into(
-                                                                                PostCommentResponse
-                                                                                        .class)),
-                                                multiset(
-                                                                select(TAGS.NAME)
-                                                                        .from(TAGS)
-                                                                        .join(POSTS_TAGS)
-                                                                        .on(
-                                                                                TAGS.ID.eq(
-                                                                                        POSTS_TAGS
-                                                                                                .TAG_ID))
-                                                                        .where(
-                                                                                POSTS_TAGS.POST_ID
-                                                                                        .eq(
-                                                                                                POSTS.ID)))
-                                                        .as("tags")
-                                                        .convertFrom(
-                                                                record ->
-                                                                        record.map(
-                                                                                Record1::value1)))
-                                        .from(POSTS)
-                                        .orderBy(POSTS.CREATED_AT))
+                .thenMany(
+                        dslContext
+                                .select(
+                                        POSTS.ID,
+                                        POSTS.TITLE,
+                                        POSTS.CONTENT,
+                                        multiset(
+                                                        select(
+                                                                        POST_COMMENTS.ID,
+                                                                        POST_COMMENTS.CONTENT,
+                                                                        POST_COMMENTS.CREATED_AT)
+                                                                .from(POST_COMMENTS)
+                                                                .where(
+                                                                        POST_COMMENTS.POST_ID.eq(
+                                                                                POSTS.ID)))
+                                                .as("comments")
+                                                .convertFrom(
+                                                        record3s ->
+                                                                record3s.into(
+                                                                        PostCommentResponse.class)),
+                                        multiset(
+                                                        select(TAGS.NAME)
+                                                                .from(TAGS)
+                                                                .join(POSTS_TAGS)
+                                                                .on(TAGS.ID.eq(POSTS_TAGS.TAG_ID))
+                                                                .where(
+                                                                        POSTS_TAGS.POST_ID.eq(
+                                                                                POSTS.ID)))
+                                                .as("tags")
+                                                .convertFrom(record -> record.map(Record1::value1)))
+                                .from(POSTS)
+                                .orderBy(POSTS.CREATED_AT))
                 .subscribe(
                         data -> log.debug("Retrieved data: {}", data.into(PostResponse.class)),
                         error -> log.debug("error: " + error),
