@@ -6,9 +6,14 @@ import static org.springframework.web.reactive.function.server.ServerResponse.ok
 import com.example.jooq.r2dbc.config.logging.Loggable;
 import com.example.jooq.r2dbc.entities.Tags;
 import com.example.jooq.r2dbc.model.request.TagDto;
+import com.example.jooq.r2dbc.model.response.PaginatedResult;
 import com.example.jooq.r2dbc.service.TagService;
+import com.example.jooq.r2dbc.utils.AppConstants;
 import java.net.URI;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
@@ -16,16 +21,38 @@ import reactor.core.publisher.Mono;
 
 @Component
 @RequiredArgsConstructor
+@Loggable
 public class TagHandler {
 
+    // Service responsible for handling Tag-related business logic
     private final TagService tagService;
 
-    @Loggable
+    // Retrieve all tags based on query parameters for sorting and pagination
     public Mono<ServerResponse> getAll(ServerRequest req) {
-        return ok().body(this.tagService.findAll(), Tags.class);
+        // Extracting and setting sort direction and field from query parameters
+        String sortDir = req.queryParam("sortDir").orElse(AppConstants.DEFAULT_SORT_DIRECTION);
+        String sortBy = req.queryParam("sortBy").orElse(AppConstants.DEFAULT_SORT_BY);
+        Sort sort =
+                sortDir.equalsIgnoreCase(Sort.Direction.ASC.name())
+                        ? Sort.by(sortBy).ascending()
+                        : Sort.by(sortBy).descending();
+
+        // Creating Pageable instance for pagination
+        int pageNo =
+                req.queryParam("pageNo")
+                        .map(Integer::parseInt)
+                        .orElse(AppConstants.DEFAULT_PAGE_NUMBER);
+        int pageSize =
+                req.queryParam("pageSize")
+                        .map(Integer::parseInt)
+                        .orElse(AppConstants.DEFAULT_PAGE_SIZE);
+        Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
+
+        // Returning paginated result of tags
+        return ok().body(this.tagService.findAll(pageable), PaginatedResult.class);
     }
 
-    @Loggable
+    // Retrieve a specific tag by its ID
     public Mono<ServerResponse> get(ServerRequest req) {
         return this.tagService
                 .findById(req.pathVariable("id"))
@@ -33,7 +60,7 @@ public class TagHandler {
                 .switchIfEmpty(ServerResponse.notFound().build());
     }
 
-    @Loggable
+    // Create a new tag based on the request body
     public Mono<ServerResponse> create(ServerRequest req) {
         return req.bodyToMono(TagDto.class)
                 .flatMap(this.tagService::create)

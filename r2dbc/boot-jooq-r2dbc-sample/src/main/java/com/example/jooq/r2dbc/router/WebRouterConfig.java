@@ -12,6 +12,7 @@ import com.example.jooq.r2dbc.model.request.CreatePostComment;
 import com.example.jooq.r2dbc.model.request.TagDto;
 import com.example.jooq.r2dbc.model.response.PaginatedResult;
 import com.example.jooq.r2dbc.model.response.PostSummary;
+import com.example.jooq.r2dbc.utils.AppConstants;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
@@ -61,7 +62,9 @@ public class WebRouterConfig {
                 operation =
                         @Operation(
                                 operationId = "search",
-                                description = "search based on title",
+                                description = "search posts based on title",
+                                summary =
+                                        "searches based on title and fetches associated comments and tags using pagination",
                                 parameters = {
                                     @Parameter(
                                             name = "keyword",
@@ -82,12 +85,12 @@ public class WebRouterConfig {
                                             name = "sortBy",
                                             description = "sort By Fields",
                                             in = ParameterIn.QUERY,
-                                            example = "id"),
+                                            example = AppConstants.DEFAULT_SORT_BY),
                                     @Parameter(
                                             name = "sortDir",
                                             description = "sortBy Direction asc/desc",
                                             in = ParameterIn.QUERY,
-                                            example = "asc")
+                                            example = AppConstants.DEFAULT_SORT_DIRECTION)
                                 },
                                 responses =
                                         @ApiResponse(
@@ -184,18 +187,39 @@ public class WebRouterConfig {
                 operation =
                         @Operation(
                                 operationId = "all",
+                                summary = "fetches all tags from database using pagination",
+                                parameters = {
+                                    @Parameter(
+                                            name = "pageNo",
+                                            description = "page Number of page",
+                                            in = ParameterIn.QUERY,
+                                            example = "0"),
+                                    @Parameter(
+                                            name = "pageSize",
+                                            description = "max Number of records per page",
+                                            in = ParameterIn.QUERY,
+                                            example = "10"),
+                                    @Parameter(
+                                            name = "sortBy",
+                                            description = "sort By Fields",
+                                            in = ParameterIn.QUERY,
+                                            example = AppConstants.DEFAULT_SORT_BY),
+                                    @Parameter(
+                                            name = "sortDir",
+                                            description = "sortBy Direction asc/desc",
+                                            in = ParameterIn.QUERY,
+                                            example = AppConstants.DEFAULT_SORT_DIRECTION)
+                                },
                                 responses =
                                         @ApiResponse(
                                                 responseCode = "200",
                                                 content =
                                                         @Content(
-                                                                array =
-                                                                        @ArraySchema(
-                                                                                schema =
-                                                                                        @Schema(
-                                                                                                implementation =
-                                                                                                        Tags
-                                                                                                                .class)))))),
+                                                                schema =
+                                                                        @Schema(
+                                                                                implementation =
+                                                                                        PaginatedResult
+                                                                                                .class))))),
         @RouterOperation(
                 path = "/tags",
                 method = RequestMethod.POST,

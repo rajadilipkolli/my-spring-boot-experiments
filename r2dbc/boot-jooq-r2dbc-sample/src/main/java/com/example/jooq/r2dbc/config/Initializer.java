@@ -10,9 +10,14 @@ import static org.jooq.impl.DSL.select;
 import com.example.jooq.r2dbc.config.logging.Loggable;
 import com.example.jooq.r2dbc.model.response.PostCommentResponse;
 import com.example.jooq.r2dbc.model.response.PostResponse;
+import com.example.jooq.r2dbc.testcontainersflyway.db.tables.records.PostCommentsRecord;
+import com.example.jooq.r2dbc.testcontainersflyway.db.tables.records.PostsRecord;
+import com.example.jooq.r2dbc.testcontainersflyway.db.tables.records.PostsTagsRecord;
+import com.example.jooq.r2dbc.testcontainersflyway.db.tables.records.TagsRecord;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jooq.DSLContext;
+import org.jooq.DeleteUsingStep;
 import org.jooq.Record1;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
@@ -29,12 +34,24 @@ public class Initializer implements CommandLineRunner {
     @Loggable
     public void run(String... args) {
         log.info("Running Initializer.....");
-        Mono.from(
-                        dslContext
-                                .insertInto(POSTS)
-                                .columns(POSTS.TITLE, POSTS.CONTENT)
-                                .values("jooq test", "content of Jooq test")
-                                .returningResult(POSTS.ID))
+        DeleteUsingStep<PostsTagsRecord> postsTagsRecordDeleteUsingStep =
+                dslContext.deleteFrom(POSTS_TAGS);
+        DeleteUsingStep<TagsRecord> tagsRecordDeleteUsingStep = dslContext.deleteFrom(TAGS);
+        DeleteUsingStep<PostCommentsRecord> postCommentsRecordDeleteUsingStep =
+                dslContext.deleteFrom(POST_COMMENTS);
+        DeleteUsingStep<PostsRecord> postsRecordDeleteUsingStep = dslContext.deleteFrom(POSTS);
+
+        Mono.from(postsTagsRecordDeleteUsingStep)
+                .then(Mono.from(tagsRecordDeleteUsingStep))
+                .then(Mono.from(postCommentsRecordDeleteUsingStep))
+                .then(Mono.from(postsRecordDeleteUsingStep))
+                .then(
+                        Mono.from(
+                                dslContext
+                                        .insertInto(POSTS)
+                                        .columns(POSTS.TITLE, POSTS.CONTENT)
+                                        .values("jooq test", "content of Jooq test")
+                                        .returningResult(POSTS.ID)))
                 .flatMap(
                         postId ->
                                 Mono.from(
@@ -71,8 +88,7 @@ public class Initializer implements CommandLineRunner {
                                                                         pid.component1(),
                                                                         "test comments 2")
                                                                 .returningResult(POST_COMMENTS.ID))
-                                        .collectList() // Collect all comment IDs into a list
-                        )
+                                        .collectList())
                 .thenMany(
                         dslContext
                                 .select(

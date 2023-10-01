@@ -10,6 +10,7 @@ import com.example.jooq.r2dbc.model.request.CreatePostComment;
 import com.example.jooq.r2dbc.model.response.PaginatedResult;
 import com.example.jooq.r2dbc.model.response.PostSummary;
 import com.example.jooq.r2dbc.service.PostService;
+import com.example.jooq.r2dbc.utils.AppConstants;
 import java.net.URI;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -65,16 +66,22 @@ public class PostHandler {
 
     @Loggable
     public Mono<ServerResponse> search(ServerRequest req) {
-        String sortDir = req.queryParam("sortDir").orElse("asc");
-        String sortBy = req.queryParam("sortBy").orElse("id");
+        String sortDir = req.queryParam("sortDir").orElse(AppConstants.DEFAULT_SORT_DIRECTION);
+        String sortBy = req.queryParam("sortBy").orElse(AppConstants.DEFAULT_SORT_BY);
         Sort sort =
                 sortDir.equalsIgnoreCase(Sort.Direction.ASC.name())
                         ? Sort.by(sortBy).ascending()
                         : Sort.by(sortBy).descending();
 
         // create Pageable instance
-        int pageNo = req.queryParam("pageNo").map(Integer::parseInt).orElse(0);
-        int pageSize = req.queryParam("pageSize").map(Integer::parseInt).orElse(10);
+        int pageNo =
+                req.queryParam("pageNo")
+                        .map(Integer::parseInt)
+                        .orElse(AppConstants.DEFAULT_PAGE_NUMBER);
+        int pageSize =
+                req.queryParam("pageSize")
+                        .map(Integer::parseInt)
+                        .orElse(AppConstants.DEFAULT_PAGE_SIZE);
         Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
         return postService
                 .findByKeyword(req.queryParam("keyword").orElse(""), pageable)

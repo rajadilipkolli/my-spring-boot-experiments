@@ -2,11 +2,12 @@ package com.example.jooq.r2dbc.service;
 
 import com.example.jooq.r2dbc.entities.Tags;
 import com.example.jooq.r2dbc.model.request.TagDto;
+import com.example.jooq.r2dbc.model.response.PaginatedResult;
 import com.example.jooq.r2dbc.repository.TagRepository;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Service
@@ -15,8 +16,8 @@ public class TagService {
 
     private final TagRepository tagRepository;
 
-    public Flux<Tags> findAll() {
-        return this.tagRepository.findAll();
+    public Mono<PaginatedResult<Tags>> findAll(Pageable pageable) {
+        return this.tagRepository.findAll(pageable).map(PaginatedResult::new);
     }
 
     public Mono<Tags> findById(String id) {

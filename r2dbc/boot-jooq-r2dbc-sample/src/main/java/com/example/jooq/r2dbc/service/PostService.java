@@ -11,34 +11,21 @@ import com.example.jooq.r2dbc.entities.Post;
 import com.example.jooq.r2dbc.model.request.CreatePostCommand;
 import com.example.jooq.r2dbc.model.request.CreatePostComment;
 import com.example.jooq.r2dbc.model.response.PaginatedResult;
-import com.example.jooq.r2dbc.model.response.PostCommentResponse;
 import com.example.jooq.r2dbc.model.response.PostResponse;
 import com.example.jooq.r2dbc.model.response.PostSummary;
 import com.example.jooq.r2dbc.repository.PostRepository;
-import com.example.jooq.r2dbc.testcontainersflyway.db.tables.PostComments;
-import com.example.jooq.r2dbc.testcontainersflyway.db.tables.Posts;
 import com.example.jooq.r2dbc.testcontainersflyway.db.tables.records.PostCommentsRecord;
 import com.example.jooq.r2dbc.testcontainersflyway.db.tables.records.PostsTagsRecord;
-import java.lang.reflect.Field;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Record1;
-import org.jooq.SortField;
-import org.jooq.TableField;
 import org.jooq.impl.DSL;
 import org.jooq.impl.SQLDataType;
-import org.springframework.dao.InvalidDataAccessApiUsageException;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -139,101 +126,7 @@ public class PostService {
                 pageable.getOffset(),
                 pageable.getPageSize());
 
-        Condition where = DSL.trueCondition();
-        if (StringUtils.hasText(keyword)) {
-            where = where.and(POSTS.TITLE.likeIgnoreCase("%" + keyword + "%"));
-        }
-        var dataSql =
-                dslContext
-                        .select(
-                                POSTS.ID,
-                                POSTS.TITLE,
-                                POSTS.CONTENT,
-                                multiset(
-                                                select(
-                                                                PostComments.POST_COMMENTS.ID,
-                                                                PostComments.POST_COMMENTS.CONTENT,
-                                                                PostComments.POST_COMMENTS
-                                                                        .CREATED_AT)
-                                                        .from(PostComments.POST_COMMENTS)
-                                                        .where(
-                                                                PostComments.POST_COMMENTS.POST_ID
-                                                                        .eq(Posts.POSTS.ID)))
-                                        .as("comments")
-                                        .convertFrom(
-                                                record3s ->
-                                                        record3s.into(PostCommentResponse.class)),
-                                multiset(
-                                                select(TAGS.NAME)
-                                                        .from(TAGS)
-                                                        .join(POSTS_TAGS)
-                                                        .on(TAGS.ID.eq(POSTS_TAGS.TAG_ID))
-                                                        .where(POSTS_TAGS.POST_ID.eq(POSTS.ID)))
-                                        .as("tags")
-                                        .convertFrom(record -> record.map(Record1::value1)))
-                        .from(POSTS.leftJoin(POST_COMMENTS).on(POST_COMMENTS.POST_ID.eq(POSTS.ID)))
-                        .where(where)
-                        .groupBy(POSTS.ID)
-                        .orderBy(getSortFields(pageable.getSort()))
-                        .limit(pageable.getPageSize())
-                        .offset(pageable.getOffset());
-
-        var countSql = dslContext.selectCount().from(POSTS).where(where);
-
-        return Mono.zip(
-                        Flux.from(dataSql)
-                                .map(
-                                        r ->
-                                                new PostResponse(
-                                                        r.value1(),
-                                                        r.value2(),
-                                                        r.value3(),
-                                                        r.value4(),
-                                                        r.value5()))
-                                .collectList(),
-                        Mono.from(countSql).map(Record1::value1))
-                .map(it -> new PageImpl<>(it.getT1(), pageable, it.getT2()))
-                .map(PaginatedResult::new);
-    }
-
-    private List<SortField<?>> getSortFields(Sort sortSpecification) {
-        List<SortField<?>> querySortFields = new ArrayList<>();
-
-        if (sortSpecification == null) {
-            return querySortFields;
-        }
-
-        for (Sort.Order specifiedField : sortSpecification) {
-            String sortFieldName = specifiedField.getProperty();
-            Sort.Direction sortDirection = specifiedField.getDirection();
-
-            TableField tableField = getTableField(sortFieldName);
-            SortField<?> querySortField = convertTableFieldToSortField(tableField, sortDirection);
-            querySortFields.add(querySortField);
-        }
-
-        return querySortFields;
-    }
-
-    private TableField getTableField(String sortFieldName) {
-        TableField sortField;
-        try {
-            Field tableField = POSTS.getClass().getField(sortFieldName.toUpperCase(Locale.ROOT));
-            sortField = (TableField) tableField.get(POSTS);
-        } catch (NoSuchFieldException | IllegalAccessException ex) {
-            String errorMessage = String.format("Could not find table field: %s", sortFieldName);
-            throw new InvalidDataAccessApiUsageException(errorMessage, ex);
-        }
-        return sortField;
-    }
-
-    private SortField<?> convertTableFieldToSortField(
-            TableField tableField, Sort.Direction sortDirection) {
-        if (sortDirection == Sort.Direction.ASC) {
-            return tableField.asc();
-        } else {
-            return tableField.desc();
-        }
+        return this.postRepository.findByKeyword(keyword, pageable).map(PaginatedResult::new);
     }
 
     public Mono<Post> findById(String id) {

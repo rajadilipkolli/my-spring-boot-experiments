@@ -31,8 +31,12 @@ create table tags
     primary key (id)
 );
 
-create table posts_tags
+CREATE TABLE posts_tags
 (
-    post_id uuid not null,
-    tag_id uuid not null
+    post_id UUID NOT NULL,
+    tag_id UUID NOT NULL,
+    CONSTRAINT FK_POST_TAGS_PID FOREIGN KEY (post_id) REFERENCES posts(id),
+    CONSTRAINT FK_POST_TAGS_TID FOREIGN KEY (tag_id) REFERENCES tags(id),
+    CONSTRAINT UK_POST_TAGS UNIQUE (post_id, tag_id)
 );
+
