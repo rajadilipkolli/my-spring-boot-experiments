@@ -11,6 +11,6 @@
     ],
     "buildTool": "maven",
     "packageFolder": "com/example/hibernatecache",
-    "liquibaseMigrationCounter": 4
+    "liquibaseMigrationCounter": 3
   }
 }

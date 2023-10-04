@@ -1,7 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+<!-- https://docs.liquibase.com/concepts/changelogs/xml-format.html -->
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <property  name="string.type"  value="varchar(255)"  dbms="!postgresql"/>
+    <property  name="string.type"  value="text"  dbms="postgresql"/>
 
     <changeSet author="appuser" id="createTable-customers">
         <preConditions>
@@ -15,12 +21,12 @@
             <column name="id" type="bigint" defaultValueSequenceNext="customers_seq">
                 <constraints primaryKey="true" nullable="false" />
             </column>
-            <column name="first_name" type="varchar(1024)">
+            <column name="first_name" type="${string.type}">
                 <constraints nullable="false" />
             </column>
-            <column name="last_name" type="varchar(255)" />
-            <column name="email" type="varchar(255)" />
-            <column name="phone" type="varchar(255)" />
+            <column name="last_name" type="${string.type}" />
+            <column name="email" type="${string.type}" />
+            <column name="phone" type="${string.type}" />
         </createTable>
     </changeSet>
 </databaseChangeLog>
