@@ -27,3 +27,15 @@ docker-compose -f docker/docker-compose.yml up -d
 
 * We need to explicitly set the querycacheHint to customerqueries for enabling 2nd level cache
 * This is enabled only for SessionFactory(i.e as soon as application is closed it will be deleted)
+
+### **Caching Collections (One-Many & Many-Many Relations)**
+
+
+Collection caching allows you to cache entire collections of associated entities. These collections can be part of your domain model, such as one-to-many or many-to-many relationships between entities.
+
+Collection caching is valuable when dealing with associations between entities that are frequently loaded and where caching can lead to significant performance gains. When you enable collection caching, Hibernate caches entire collections, such as lists or sets, associated with an entity.
+
+When Hibernate caches a collection, it doesn’t cache the entire collection of entities but rather caches the IDs of the entities contained in the collection.
+
+* Caching only the IDs reduces memory usage compared to caching the entire collection of entities.
+* When a collection is updated, only the relevant IDs need to be invalidated in the cache, rather than the entire collection. This minimizes cache invalidation overhead.
