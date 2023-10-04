@@ -19,21 +19,22 @@ class ApplicationIntegrationTest extends AbstractIntegrationTest {
     @Test
     void contextLoads() throws Exception {
 
-        Customer request =
+        Customer customer =
                 new Customer(
                         null,
                         "firstNameTest",
                         "lastName test",
                         "emailtest@junit.com",
-                        "9876543211");
+                        "9876543211",
+                        null);
         SQLStatementCountValidator.reset();
         this.mockMvc
                 .perform(
                         post("/api/customers")
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(request)))
+                                .content(objectMapper.writeValueAsString(customer)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.firstName", is(request.getFirstName())));
+                .andExpect(jsonPath("$.firstName", is(customer.getFirstName())));
         assertInsertCount(1);
         // For selecting next sequence value
         assertSelectCount(1);
@@ -43,7 +44,11 @@ class ApplicationIntegrationTest extends AbstractIntegrationTest {
                     .perform(
                             get("/api/customers/search?firstName=firstNameTest")
                                     .contentType(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isOk());
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.firstName", is(customer.getFirstName())))
+                    .andExpect(jsonPath("$.lastName", is(customer.getLastName())))
+                    .andExpect(jsonPath("$.email", is(customer.getEmail())))
+                    .andExpect(jsonPath("$.phone", is(customer.getPhone())));
         }
         assertSelectCount(1);
     }

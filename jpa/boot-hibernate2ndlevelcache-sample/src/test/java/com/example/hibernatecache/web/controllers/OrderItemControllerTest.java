@@ -15,7 +15,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.example.hibernatecache.entities.Customer;
+import com.example.hibernatecache.entities.Order;
 import com.example.hibernatecache.entities.OrderItem;
+import com.example.hibernatecache.model.response.OrderItemResponse;
 import com.example.hibernatecache.model.response.PagedResult;
 import com.example.hibernatecache.services.OrderItemService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -44,19 +47,29 @@ class OrderItemControllerTest {
     @Autowired private ObjectMapper objectMapper;
 
     private List<OrderItem> orderItemList;
+    private Order savedOrder;
 
     @BeforeEach
     void setUp() {
+        Customer savedCustomer =
+                new Customer(
+                        null, "firstName 1", "lastName 1", "email1@junit.com", "9876543211", null);
+        savedOrder = new Order(null, "First Order", savedCustomer, null);
         this.orderItemList = new ArrayList<>();
-        this.orderItemList.add(new OrderItem(1L, "text 1"));
-        this.orderItemList.add(new OrderItem(2L, "text 2"));
-        this.orderItemList.add(new OrderItem(3L, "text 3"));
+        this.orderItemList.add(new OrderItem(1L, "text 1", savedOrder));
+        this.orderItemList.add(new OrderItem(2L, "text 2", savedOrder));
+        this.orderItemList.add(new OrderItem(3L, "text 3", savedOrder));
     }
 
     @Test
     void shouldFetchAllOrderItems() throws Exception {
-        Page<OrderItem> page = new PageImpl<>(orderItemList);
-        PagedResult<OrderItem> orderItemPagedResult = new PagedResult<>(page);
+        List<OrderItemResponse> orderItemResponseList =
+                List.of(
+                        new OrderItemResponse(1L, "text 1"),
+                        new OrderItemResponse(2L, "text 2"),
+                        new OrderItemResponse(3L, "text 3"));
+        Page<OrderItemResponse> page = new PageImpl<>(orderItemResponseList);
+        PagedResult<OrderItemResponse> orderItemPagedResult = new PagedResult<>(page);
         given(orderItemService.findAllOrderItems(0, 10, "id", "asc"))
                 .willReturn(orderItemPagedResult);
 
@@ -76,13 +89,13 @@ class OrderItemControllerTest {
     @Test
     void shouldFindOrderItemById() throws Exception {
         Long orderItemId = 1L;
-        OrderItem orderItem = new OrderItem(orderItemId, "text 1");
+        OrderItemResponse orderItem = new OrderItemResponse(orderItemId, "text 1");
         given(orderItemService.findOrderItemById(orderItemId)).willReturn(Optional.of(orderItem));
 
         this.mockMvc
                 .perform(get("/api/order/items/{id}", orderItemId))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.text", is(orderItem.getText())));
+                .andExpect(jsonPath("$.text", is(orderItem.text())));
     }
 
     @Test
@@ -98,22 +111,22 @@ class OrderItemControllerTest {
     @Test
     void shouldCreateNewOrderItem() throws Exception {
         given(orderItemService.saveOrderItem(any(OrderItem.class)))
-                .willAnswer((invocation) -> invocation.getArgument(0));
+                .willReturn(new OrderItemResponse(1L, "some text"));
 
-        OrderItem orderItem = new OrderItem(1L, "some text");
+        OrderItem orderItem = new OrderItem(1L, "some text", savedOrder);
         this.mockMvc
                 .perform(
                         post("/api/order/items")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(orderItem)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id", notNullValue()))
+                .andExpect(jsonPath("$.orderItemId", notNullValue()))
                 .andExpect(jsonPath("$.text", is(orderItem.getText())));
     }
 
     @Test
     void shouldReturn400WhenCreateNewOrderItemWithoutText() throws Exception {
-        OrderItem orderItem = new OrderItem(null, null);
+        OrderItem orderItem = new OrderItem(null, null, savedOrder);
 
         this.mockMvc
                 .perform(
@@ -136,10 +149,10 @@ class OrderItemControllerTest {
     @Test
     void shouldUpdateOrderItem() throws Exception {
         Long orderItemId = 1L;
-        OrderItem orderItem = new OrderItem(orderItemId, "Updated text");
-        given(orderItemService.findOrderItemById(orderItemId)).willReturn(Optional.of(orderItem));
+        OrderItem orderItem = new OrderItem(orderItemId, "Updated text", savedOrder);
+        given(orderItemService.findById(orderItemId)).willReturn(Optional.of(orderItem));
         given(orderItemService.saveOrderItem(any(OrderItem.class)))
-                .willAnswer((invocation) -> invocation.getArgument(0));
+                .willReturn(new OrderItemResponse(orderItemId, "Updated text"));
 
         this.mockMvc
                 .perform(
@@ -154,7 +167,7 @@ class OrderItemControllerTest {
     void shouldReturn404WhenUpdatingNonExistingOrderItem() throws Exception {
         Long orderItemId = 1L;
         given(orderItemService.findOrderItemById(orderItemId)).willReturn(Optional.empty());
-        OrderItem orderItem = new OrderItem(orderItemId, "Updated text");
+        OrderItem orderItem = new OrderItem(orderItemId, "Updated text", savedOrder);
 
         this.mockMvc
                 .perform(
@@ -167,14 +180,14 @@ class OrderItemControllerTest {
     @Test
     void shouldDeleteOrderItem() throws Exception {
         Long orderItemId = 1L;
-        OrderItem orderItem = new OrderItem(orderItemId, "Some text");
+        OrderItemResponse orderItem = new OrderItemResponse(orderItemId, "Some text");
         given(orderItemService.findOrderItemById(orderItemId)).willReturn(Optional.of(orderItem));
-        doNothing().when(orderItemService).deleteOrderItemById(orderItem.getId());
+        doNothing().when(orderItemService).deleteOrderItemById(orderItemId);
 
         this.mockMvc
-                .perform(delete("/api/order/items/{id}", orderItem.getId()))
+                .perform(delete("/api/order/items/{id}", orderItemId))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.text", is(orderItem.getText())));
+                .andExpect(jsonPath("$.text", is(orderItem.text())));
     }
 
     @Test

@@ -1,6 +1,7 @@
 package com.example.hibernatecache.web.controllers;
 
 import com.example.hibernatecache.entities.OrderItem;
+import com.example.hibernatecache.model.response.OrderItemResponse;
 import com.example.hibernatecache.model.response.PagedResult;
 import com.example.hibernatecache.services.OrderItemService;
 import com.example.hibernatecache.utils.AppConstants;
@@ -33,7 +34,7 @@ public class OrderItemController {
     }
 
     @GetMapping
-    public PagedResult<OrderItem> getAllOrderItems(
+    public PagedResult<OrderItemResponse> getAllOrderItems(
             @RequestParam(
                             value = "pageNo",
                             defaultValue = AppConstants.DEFAULT_PAGE_NUMBER,
@@ -58,7 +59,7 @@ public class OrderItemController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<OrderItem> getOrderItemById(@PathVariable Long id) {
+    public ResponseEntity<OrderItemResponse> getOrderItemById(@PathVariable Long id) {
         return orderItemService
                 .findOrderItemById(id)
                 .map(ResponseEntity::ok)
@@ -67,15 +68,15 @@ public class OrderItemController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public OrderItem createOrderItem(@RequestBody @Validated OrderItem orderItem) {
+    public OrderItemResponse createOrderItem(@RequestBody @Validated OrderItem orderItem) {
         return orderItemService.saveOrderItem(orderItem);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<OrderItem> updateOrderItem(
+    public ResponseEntity<OrderItemResponse> updateOrderItem(
             @PathVariable Long id, @RequestBody OrderItem orderItem) {
         return orderItemService
-                .findOrderItemById(id)
+                .findById(id)
                 .map(
                         orderItemObj -> {
                             orderItem.setId(id);
@@ -85,7 +86,7 @@ public class OrderItemController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<OrderItem> deleteOrderItem(@PathVariable Long id) {
+    public ResponseEntity<OrderItemResponse> deleteOrderItem(@PathVariable Long id) {
         return orderItemService
                 .findOrderItemById(id)
                 .map(

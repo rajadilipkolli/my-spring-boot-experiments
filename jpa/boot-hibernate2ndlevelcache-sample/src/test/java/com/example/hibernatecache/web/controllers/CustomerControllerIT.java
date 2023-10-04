@@ -1,6 +1,7 @@
 package com.example.hibernatecache.web.controllers;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -13,6 +14,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.example.hibernatecache.common.AbstractIntegrationTest;
 import com.example.hibernatecache.entities.Customer;
 import com.example.hibernatecache.repositories.CustomerRepository;
+import com.example.hibernatecache.repositories.OrderRepository;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,20 +25,25 @@ import org.springframework.http.MediaType;
 class CustomerControllerIT extends AbstractIntegrationTest {
 
     @Autowired private CustomerRepository customerRepository;
+    @Autowired private OrderRepository orderRepository;
 
     private List<Customer> customerList = null;
 
     @BeforeEach
     void setUp() {
+        orderRepository.deleteAll();
         customerRepository.deleteAll();
 
         customerList = new ArrayList<>();
         customerList.add(
-                new Customer(null, "firstName 1", "lastName 1", "email1@junit.com", "9876543211"));
+                new Customer(
+                        null, "firstName 1", "lastName 1", "email1@junit.com", "9876543211", null));
         customerList.add(
-                new Customer(null, "firstName 2", "lastName 2", "email2@junit.com", "9876543212"));
+                new Customer(
+                        null, "firstName 2", "lastName 2", "email2@junit.com", "9876543212", null));
         customerList.add(
-                new Customer(null, "firstName 3", "lastName 3", "email3@junit.com", "9876543213"));
+                new Customer(
+                        null, "firstName 3", "lastName 3", "email3@junit.com", "9876543213", null));
         customerList = customerRepository.saveAll(customerList);
     }
 
@@ -45,7 +52,14 @@ class CustomerControllerIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(get("/api/customers"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.size()", is(customerList.size())));
+                .andExpect(jsonPath("$.data.size()", is(customerList.size())))
+                .andExpect(jsonPath("$.totalElements", is(3)))
+                .andExpect(jsonPath("$.pageNumber", is(1)))
+                .andExpect(jsonPath("$.totalPages", is(1)))
+                .andExpect(jsonPath("$.isFirst", is(true)))
+                .andExpect(jsonPath("$.isLast", is(true)))
+                .andExpect(jsonPath("$.hasNext", is(false)))
+                .andExpect(jsonPath("$.hasPrevious", is(false)));
     }
 
     @Test
@@ -65,13 +79,15 @@ class CustomerControllerIT extends AbstractIntegrationTest {
     @Test
     void shouldCreateNewCustomer() throws Exception {
         Customer customer =
-                new Customer(null, "firstName 4", "lastName 4", "email4@junit.com", "9876543213");
+                new Customer(
+                        null, "firstName 4", "lastName 4", "email4@junit.com", "9876543213", null);
         this.mockMvc
                 .perform(
                         post("/api/customers")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(customer)))
                 .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.customerId", notNullValue()))
                 .andExpect(jsonPath("$.firstName", is(customer.getFirstName())))
                 .andExpect(jsonPath("$.lastName", is(customer.getLastName())))
                 .andExpect(jsonPath("$.email", is(customer.getEmail())))
@@ -80,7 +96,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldReturn400WhenCreateNewCustomerWithoutText() throws Exception {
-        Customer customer = new Customer(null, null, null, null, null);
+        Customer customer = new Customer(null, null, null, null, null, null);
 
         this.mockMvc
                 .perform(

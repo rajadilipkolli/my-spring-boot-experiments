@@ -7,6 +7,8 @@ import static org.mockito.BDDMockito.verify;
 import static org.mockito.BDDMockito.willDoNothing;
 
 import com.example.hibernatecache.entities.OrderItem;
+import com.example.hibernatecache.mapper.Mapper;
+import com.example.hibernatecache.model.response.OrderItemResponse;
 import com.example.hibernatecache.model.response.PagedResult;
 import com.example.hibernatecache.repositories.OrderItemRepository;
 import java.util.List;
@@ -26,6 +28,7 @@ import org.springframework.data.domain.Sort;
 class OrderItemServiceTest {
 
     @Mock private OrderItemRepository orderItemRepository;
+    @Mock private Mapper mapper;
 
     @InjectMocks private OrderItemService orderItemService;
 
@@ -35,9 +38,12 @@ class OrderItemServiceTest {
         Pageable pageable = PageRequest.of(0, 10, Sort.by(Sort.Direction.ASC, "id"));
         Page<OrderItem> orderItemPage = new PageImpl<>(List.of(getOrderItem()));
         given(orderItemRepository.findAll(pageable)).willReturn(orderItemPage);
+        given(mapper.orderItemListToOrderItemResponseList(List.of(getOrderItem())))
+                .willReturn(List.of(getOrderItemResponse()));
 
         // when
-        PagedResult<OrderItem> pagedResult = orderItemService.findAllOrderItems(0, 10, "id", "asc");
+        PagedResult<OrderItemResponse> pagedResult =
+                orderItemService.findAllOrderItems(0, 10, "id", "asc");
 
         // then
         assertThat(pagedResult).isNotNull();
@@ -55,25 +61,29 @@ class OrderItemServiceTest {
     void findOrderItemById() {
         // given
         given(orderItemRepository.findById(1L)).willReturn(Optional.of(getOrderItem()));
+        given(mapper.orderItemToOrderItemResponse(getOrderItem()))
+                .willReturn(getOrderItemResponse());
         // when
-        Optional<OrderItem> optionalOrderItem = orderItemService.findOrderItemById(1L);
+        Optional<OrderItemResponse> optionalOrderItem = orderItemService.findOrderItemById(1L);
         // then
         assertThat(optionalOrderItem).isPresent();
-        OrderItem orderItem = optionalOrderItem.get();
-        assertThat(orderItem.getId()).isEqualTo(1L);
-        assertThat(orderItem.getText()).isEqualTo("junitTest");
+        OrderItemResponse orderItem = optionalOrderItem.get();
+        assertThat(orderItem.orderItemId()).isEqualTo(1L);
+        assertThat(orderItem.text()).isEqualTo("junitTest");
     }
 
     @Test
     void saveOrderItem() {
         // given
         given(orderItemRepository.save(getOrderItem())).willReturn(getOrderItem());
+        given(mapper.orderItemToOrderItemResponse(getOrderItem()))
+                .willReturn(getOrderItemResponse());
         // when
-        OrderItem persistedOrderItem = orderItemService.saveOrderItem(getOrderItem());
+        OrderItemResponse persistedOrderItem = orderItemService.saveOrderItem(getOrderItem());
         // then
         assertThat(persistedOrderItem).isNotNull();
-        assertThat(persistedOrderItem.getId()).isEqualTo(1L);
-        assertThat(persistedOrderItem.getText()).isEqualTo("junitTest");
+        assertThat(persistedOrderItem.orderItemId()).isEqualTo(1L);
+        assertThat(persistedOrderItem.text()).isEqualTo("junitTest");
     }
 
     @Test
@@ -91,5 +101,9 @@ class OrderItemServiceTest {
         orderItem.setId(1L);
         orderItem.setText("junitTest");
         return orderItem;
+    }
+
+    private OrderItemResponse getOrderItemResponse() {
+        return new OrderItemResponse(1L, "junitTest");
     }
 }

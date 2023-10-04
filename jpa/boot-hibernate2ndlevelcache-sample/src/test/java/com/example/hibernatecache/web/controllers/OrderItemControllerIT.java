@@ -12,8 +12,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.example.hibernatecache.common.AbstractIntegrationTest;
+import com.example.hibernatecache.entities.Customer;
+import com.example.hibernatecache.entities.Order;
 import com.example.hibernatecache.entities.OrderItem;
+import com.example.hibernatecache.repositories.CustomerRepository;
 import com.example.hibernatecache.repositories.OrderItemRepository;
+import com.example.hibernatecache.repositories.OrderRepository;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,17 +28,33 @@ import org.springframework.http.MediaType;
 class OrderItemControllerIT extends AbstractIntegrationTest {
 
     @Autowired private OrderItemRepository orderItemRepository;
+    @Autowired private OrderRepository orderRepository;
+    @Autowired private CustomerRepository customerRepository;
 
     private List<OrderItem> orderItemList = null;
+    Order savedOrder;
 
     @BeforeEach
     void setUp() {
         orderItemRepository.deleteAllInBatch();
+        orderRepository.deleteAllInBatch();
+        customerRepository.deleteAllInBatch();
+
+        Customer savedCustomer =
+                customerRepository.save(
+                        new Customer(
+                                null,
+                                "firstName 1",
+                                "lastName 1",
+                                "email1@junit.com",
+                                "9876543211",
+                                null));
+        savedOrder = orderRepository.save(new Order(null, "First Order", savedCustomer, null));
 
         orderItemList = new ArrayList<>();
-        orderItemList.add(new OrderItem(null, "First OrderItem"));
-        orderItemList.add(new OrderItem(null, "Second OrderItem"));
-        orderItemList.add(new OrderItem(null, "Third OrderItem"));
+        orderItemList.add(new OrderItem(null, "First OrderItem", savedOrder));
+        orderItemList.add(new OrderItem(null, "Second OrderItem", savedOrder));
+        orderItemList.add(new OrderItem(null, "Third OrderItem", savedOrder));
         orderItemList = orderItemRepository.saveAll(orderItemList);
     }
 
@@ -61,26 +81,26 @@ class OrderItemControllerIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(get("/api/order/items/{id}", orderItemId))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(orderItem.getId()), Long.class))
+                .andExpect(jsonPath("$.orderItemId", is(orderItem.getId()), Long.class))
                 .andExpect(jsonPath("$.text", is(orderItem.getText())));
     }
 
     @Test
     void shouldCreateNewOrderItem() throws Exception {
-        OrderItem orderItem = new OrderItem(null, "New OrderItem");
+        OrderItem orderItem = new OrderItem(null, "New OrderItem", savedOrder);
         this.mockMvc
                 .perform(
                         post("/api/order/items")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(orderItem)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id", notNullValue()))
+                .andExpect(jsonPath("$.orderItemId", notNullValue()))
                 .andExpect(jsonPath("$.text", is(orderItem.getText())));
     }
 
     @Test
     void shouldReturn400WhenCreateNewOrderItemWithoutText() throws Exception {
-        OrderItem orderItem = new OrderItem(null, null);
+        OrderItem orderItem = new OrderItem(null, null, savedOrder);
 
         this.mockMvc
                 .perform(
@@ -111,7 +131,7 @@ class OrderItemControllerIT extends AbstractIntegrationTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(orderItem)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(orderItem.getId()), Long.class))
+                .andExpect(jsonPath("$.orderItemId", is(orderItem.getId()), Long.class))
                 .andExpect(jsonPath("$.text", is(orderItem.getText())));
     }
 
@@ -122,7 +142,7 @@ class OrderItemControllerIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(delete("/api/order/items/{id}", orderItem.getId()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(orderItem.getId()), Long.class))
+                .andExpect(jsonPath("$.orderItemId", is(orderItem.getId()), Long.class))
                 .andExpect(jsonPath("$.text", is(orderItem.getText())));
     }
 }

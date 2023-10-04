@@ -12,7 +12,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.example.hibernatecache.common.AbstractIntegrationTest;
+import com.example.hibernatecache.entities.Customer;
 import com.example.hibernatecache.entities.Order;
+import com.example.hibernatecache.model.request.OrderRequest;
+import com.example.hibernatecache.repositories.CustomerRepository;
 import com.example.hibernatecache.repositories.OrderRepository;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,17 +27,30 @@ import org.springframework.http.MediaType;
 class OrderControllerIT extends AbstractIntegrationTest {
 
     @Autowired private OrderRepository orderRepository;
+    @Autowired private CustomerRepository customerRepository;
 
     private List<Order> orderList = null;
+
+    private Customer savedCustomer;
 
     @BeforeEach
     void setUp() {
         orderRepository.deleteAllInBatch();
+        customerRepository.deleteAll();
 
+        savedCustomer =
+                customerRepository.save(
+                        new Customer(
+                                null,
+                                "firstName 1",
+                                "lastName 1",
+                                "email1@junit.com",
+                                "9876543211",
+                                null));
         orderList = new ArrayList<>();
-        orderList.add(new Order(null, "First Order"));
-        orderList.add(new Order(null, "Second Order"));
-        orderList.add(new Order(null, "Third Order"));
+        orderList.add(new Order(null, "First Order", savedCustomer, null));
+        orderList.add(new Order(null, "Second Order", savedCustomer, null));
+        orderList.add(new Order(null, "Third Order", savedCustomer, null));
         orderList = orderRepository.saveAll(orderList);
     }
 
@@ -61,26 +77,26 @@ class OrderControllerIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(get("/api/orders/{id}", orderId))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(order.getId()), Long.class))
+                .andExpect(jsonPath("$.orderId", is(order.getId()), Long.class))
                 .andExpect(jsonPath("$.text", is(order.getText())));
     }
 
     @Test
     void shouldCreateNewOrder() throws Exception {
-        Order order = new Order(null, "New Order");
+        OrderRequest order = new OrderRequest(savedCustomer.getId(), "New Order");
         this.mockMvc
                 .perform(
                         post("/api/orders")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(order)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id", notNullValue()))
-                .andExpect(jsonPath("$.text", is(order.getText())));
+                .andExpect(jsonPath("$.orderId", notNullValue()))
+                .andExpect(jsonPath("$.text", is(order.text())));
     }
 
     @Test
     void shouldReturn400WhenCreateNewOrderWithoutText() throws Exception {
-        Order order = new Order(null, null);
+        Order order = new Order(null, null, null, null);
 
         this.mockMvc
                 .perform(
@@ -111,7 +127,7 @@ class OrderControllerIT extends AbstractIntegrationTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(order)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(order.getId()), Long.class))
+                .andExpect(jsonPath("$.orderId", is(order.getId()), Long.class))
                 .andExpect(jsonPath("$.text", is(order.getText())));
     }
 
@@ -122,7 +138,7 @@ class OrderControllerIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(delete("/api/orders/{id}", order.getId()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(order.getId()), Long.class))
+                .andExpect(jsonPath("$.orderId", is(order.getId()), Long.class))
                 .andExpect(jsonPath("$.text", is(order.getText())));
     }
 }

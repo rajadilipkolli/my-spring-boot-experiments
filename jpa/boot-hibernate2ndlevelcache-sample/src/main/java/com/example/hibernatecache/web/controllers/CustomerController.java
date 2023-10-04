@@ -1,8 +1,10 @@
 package com.example.hibernatecache.web.controllers;
 
 import com.example.hibernatecache.entities.Customer;
+import com.example.hibernatecache.model.response.CustomerResponse;
+import com.example.hibernatecache.model.response.PagedResult;
 import com.example.hibernatecache.services.CustomerService;
-import java.util.List;
+import com.example.hibernatecache.utils.AppConstants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -32,12 +34,32 @@ public class CustomerController {
     }
 
     @GetMapping
-    public List<Customer> getAllCustomers() {
-        return customerService.findAllCustomers();
+    public PagedResult<CustomerResponse> getAllCustomers(
+            @RequestParam(
+                            value = "pageNo",
+                            defaultValue = AppConstants.DEFAULT_PAGE_NUMBER,
+                            required = false)
+                    int pageNo,
+            @RequestParam(
+                            value = "pageSize",
+                            defaultValue = AppConstants.DEFAULT_PAGE_SIZE,
+                            required = false)
+                    int pageSize,
+            @RequestParam(
+                            value = "sortBy",
+                            defaultValue = AppConstants.DEFAULT_SORT_BY,
+                            required = false)
+                    String sortBy,
+            @RequestParam(
+                            value = "sortDir",
+                            defaultValue = AppConstants.DEFAULT_SORT_DIRECTION,
+                            required = false)
+                    String sortDir) {
+        return customerService.findAllCustomers(pageNo, pageSize, sortBy, sortDir);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Customer> getCustomerById(@PathVariable Long id) {
+    public ResponseEntity<CustomerResponse> getCustomerById(@PathVariable Long id) {
         return customerService
                 .findCustomerById(id)
                 .map(ResponseEntity::ok)
@@ -45,7 +67,8 @@ public class CustomerController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<Customer> searchCustomer(@RequestParam("firstName") String firstName) {
+    public ResponseEntity<CustomerResponse> searchCustomer(
+            @RequestParam("firstName") String firstName) {
         return customerService
                 .findCustomerByFirstName(firstName)
                 .map(ResponseEntity::ok)
@@ -54,25 +77,25 @@ public class CustomerController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Customer createCustomer(@RequestBody @Validated Customer customer) {
+    public CustomerResponse createCustomer(@RequestBody @Validated Customer customer) {
         return customerService.saveCustomer(customer);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Customer> updateCustomer(
-            @PathVariable Long id, @RequestBody Customer customer) {
+    public ResponseEntity<CustomerResponse> updateCustomer(
+            @PathVariable Long id, @RequestBody Customer customerRequest) {
         return customerService
-                .findCustomerById(id)
+                .findById(id)
                 .map(
-                        customerObj -> {
-                            customer.setId(id);
-                            return ResponseEntity.ok(customerService.saveCustomer(customer));
-                        })
+                        customerObj ->
+                                ResponseEntity.ok(
+                                        customerService.updateCustomer(
+                                                customerRequest, customerObj)))
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Customer> deleteCustomer(@PathVariable Long id) {
+    public ResponseEntity<CustomerResponse> deleteCustomer(@PathVariable Long id) {
         return customerService
                 .findCustomerById(id)
                 .map(

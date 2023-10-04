@@ -7,8 +7,12 @@ import static org.mockito.BDDMockito.verify;
 import static org.mockito.BDDMockito.willDoNothing;
 
 import com.example.hibernatecache.entities.Order;
+import com.example.hibernatecache.mapper.Mapper;
+import com.example.hibernatecache.model.request.OrderRequest;
+import com.example.hibernatecache.model.response.OrderResponse;
 import com.example.hibernatecache.model.response.PagedResult;
 import com.example.hibernatecache.repositories.OrderRepository;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
@@ -26,6 +30,7 @@ import org.springframework.data.domain.Sort;
 class OrderServiceTest {
 
     @Mock private OrderRepository orderRepository;
+    @Mock private Mapper mapper;
 
     @InjectMocks private OrderService orderService;
 
@@ -35,9 +40,11 @@ class OrderServiceTest {
         Pageable pageable = PageRequest.of(0, 10, Sort.by(Sort.Direction.ASC, "id"));
         Page<Order> orderPage = new PageImpl<>(List.of(getOrder()));
         given(orderRepository.findAll(pageable)).willReturn(orderPage);
+        given(mapper.mapToOrderResponseList(List.of(getOrder())))
+                .willReturn(List.of(getOrderResponse()));
 
         // when
-        PagedResult<Order> pagedResult = orderService.findAllOrders(0, 10, "id", "asc");
+        PagedResult<OrderResponse> pagedResult = orderService.findAllOrders(0, 10, "id", "asc");
 
         // then
         assertThat(pagedResult).isNotNull();
@@ -55,25 +62,34 @@ class OrderServiceTest {
     void findOrderById() {
         // given
         given(orderRepository.findById(1L)).willReturn(Optional.of(getOrder()));
+        given(mapper.orderToOrderResponse(getOrder())).willReturn(getOrderResponse());
         // when
-        Optional<Order> optionalOrder = orderService.findOrderById(1L);
+        Optional<OrderResponse> optionalOrder = orderService.findOrderById(1L);
         // then
         assertThat(optionalOrder).isPresent();
-        Order order = optionalOrder.get();
-        assertThat(order.getId()).isEqualTo(1L);
-        assertThat(order.getText()).isEqualTo("junitTest");
+        OrderResponse order = optionalOrder.get();
+        assertThat(order.orderId()).isEqualTo(1L);
+        assertThat(order.text()).isEqualTo("junitTest");
     }
 
     @Test
     void saveOrder() {
         // given
+        given(mapper.mapToOrder(getOrderRequest())).willReturn(getOrder());
         given(orderRepository.save(getOrder())).willReturn(getOrder());
+        given(mapper.orderToOrderResponse(getOrder())).willReturn(getOrderResponse());
+
         // when
-        Order persistedOrder = orderService.saveOrder(getOrder());
+        OrderResponse persistedOrder = orderService.saveOrderRequest(getOrderRequest());
         // then
         assertThat(persistedOrder).isNotNull();
-        assertThat(persistedOrder.getId()).isEqualTo(1L);
-        assertThat(persistedOrder.getText()).isEqualTo("junitTest");
+        assertThat(persistedOrder.customerId()).isEqualTo(1L);
+        assertThat(persistedOrder.orderId()).isEqualTo(1L);
+        assertThat(persistedOrder.text()).isEqualTo("junitTest");
+    }
+
+    private OrderRequest getOrderRequest() {
+        return new OrderRequest(1L, "junitTest");
     }
 
     @Test
@@ -91,5 +107,9 @@ class OrderServiceTest {
         order.setId(1L);
         order.setText("junitTest");
         return order;
+    }
+
+    private OrderResponse getOrderResponse() {
+        return new OrderResponse(1L, 1L, "junitTest", new ArrayList<>());
     }
 }

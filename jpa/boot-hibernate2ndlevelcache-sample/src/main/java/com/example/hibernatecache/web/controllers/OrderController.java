@@ -1,6 +1,7 @@
 package com.example.hibernatecache.web.controllers;
 
-import com.example.hibernatecache.entities.Order;
+import com.example.hibernatecache.model.request.OrderRequest;
+import com.example.hibernatecache.model.response.OrderResponse;
 import com.example.hibernatecache.model.response.PagedResult;
 import com.example.hibernatecache.services.OrderService;
 import com.example.hibernatecache.utils.AppConstants;
@@ -33,7 +34,7 @@ public class OrderController {
     }
 
     @GetMapping
-    public PagedResult<Order> getAllOrders(
+    public PagedResult<OrderResponse> getAllOrders(
             @RequestParam(
                             value = "pageNo",
                             defaultValue = AppConstants.DEFAULT_PAGE_NUMBER,
@@ -58,7 +59,7 @@ public class OrderController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Order> getOrderById(@PathVariable Long id) {
+    public ResponseEntity<OrderResponse> getOrderById(@PathVariable Long id) {
         return orderService
                 .findOrderById(id)
                 .map(ResponseEntity::ok)
@@ -67,24 +68,23 @@ public class OrderController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Order createOrder(@RequestBody @Validated Order order) {
-        return orderService.saveOrder(order);
+    public OrderResponse createOrder(@RequestBody @Validated OrderRequest orderRequest) {
+        return orderService.saveOrderRequest(orderRequest);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Order> updateOrder(@PathVariable Long id, @RequestBody Order order) {
+    public ResponseEntity<OrderResponse> updateOrder(
+            @PathVariable Long id, @RequestBody OrderRequest orderRequest) {
         return orderService
-                .findOrderById(id)
+                .findById(id)
                 .map(
-                        orderObj -> {
-                            order.setId(id);
-                            return ResponseEntity.ok(orderService.saveOrder(order));
-                        })
+                        orderObj ->
+                                ResponseEntity.ok(orderService.updateOrder(orderObj, orderRequest)))
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Order> deleteOrder(@PathVariable Long id) {
+    public ResponseEntity<OrderResponse> deleteOrder(@PathVariable Long id) {
         return orderService
                 .findOrderById(id)
                 .map(
