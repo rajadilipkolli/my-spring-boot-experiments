@@ -31,10 +31,10 @@ jobs:
           java-version: 21
           distribution: "zulu"
           cache: "maven"
-      - name: Start up redis & postgres via Docker Compose
+      - name: Start up redis via Docker Compose
         run: |
           cd docker
-          docker compose up -d postgresqldb redis
+          docker compose up -d redis
           sleep 5
           docker ps -a
       - name: Build and analyze

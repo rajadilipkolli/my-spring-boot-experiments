@@ -7,7 +7,7 @@ import org.springframework.boot.testcontainers.context.ImportTestcontainers;
 
 @TestConfiguration(proxyBeanMethods = false)
 @ImportTestcontainers(TestContainersConfig.class)
-class TestApplication {
+public class TestApplication {
 
     public static void main(String[] args) {
         SpringApplication.from(Application::main).with(TestApplication.class).run(args);
