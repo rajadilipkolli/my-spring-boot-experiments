@@ -35,17 +35,29 @@ public class BatchConfig implements JobExecutionListener {
             JpaPagingItemReader<Customer> jpaPagingItemReader,
             JobRepository jobRepository,
             PlatformTransactionManager transactionManager) {
-        Step step = new StepBuilder("all-customers-step", jobRepository)
-                .allowStartIfComplete(true)
-                .<Customer, CustomerDTO>chunk(10, transactionManager)
-                .reader(jpaPagingItemReader)
-                .processor(customer -> new CustomerDTO(customer.getName(), customer.getAddress(), customer.getGender()))
-                .writer(items -> {
-                    log.info("Writing chunk of size {} at :{}", items.size(), LocalDateTime.now());
-                    items.forEach(customerDTO -> log.info("Read customer: {}", customerDTO));
-                })
-                .faultTolerant()
-                .build();
+        Step step =
+                new StepBuilder("all-customers-step", jobRepository)
+                        .allowStartIfComplete(true)
+                        .<Customer, CustomerDTO>chunk(10, transactionManager)
+                        .reader(jpaPagingItemReader)
+                        .processor(
+                                customer ->
+                                        new CustomerDTO(
+                                                customer.getName(),
+                                                customer.getAddress(),
+                                                customer.getGender()))
+                        .writer(
+                                items -> {
+                                    log.info(
+                                            "Writing chunk of size {} at :{}",
+                                            items.size(),
+                                            LocalDateTime.now());
+                                    items.forEach(
+                                            customerDTO ->
+                                                    log.info("Read customer: {}", customerDTO));
+                                })
+                        .faultTolerant()
+                        .build();
 
         return new JobBuilder("all-customers-job", jobRepository)
                 .start(step)
@@ -66,7 +78,8 @@ public class BatchConfig implements JobExecutionListener {
         return new JpaPagingItemReaderBuilder<Customer>()
                 .name("jpaPagingItemReader")
                 .entityManagerFactory(entityManagerFactory)
-                .queryString("SELECT c FROM Customer c WHERE c.id BETWEEN :minId AND :maxId ORDER BY c.id")
+                .queryString(
+                        "SELECT c FROM Customer c WHERE c.id BETWEEN :minId AND :maxId ORDER BY c.id")
                 .parameterValues(parameterValuesMap)
                 .pageSize(10)
                 .build();

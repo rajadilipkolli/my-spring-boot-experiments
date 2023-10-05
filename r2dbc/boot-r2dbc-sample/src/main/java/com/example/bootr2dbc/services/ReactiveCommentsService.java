@@ -20,10 +20,12 @@ public class ReactiveCommentsService {
     private final ReactiveCommentsRepository reactiveCommentsRepository;
     private final ReactivePostCommentMapper reactivePostCommentMapper;
 
-    public Flux<ReactiveComments> findAllReactiveCommentsByPostId(Long postId, String sortBy, String sortDir) {
-        Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name())
-                ? Sort.by(sortBy).ascending()
-                : Sort.by(sortBy).descending();
+    public Flux<ReactiveComments> findAllReactiveCommentsByPostId(
+            Long postId, String sortBy, String sortDir) {
+        Sort sort =
+                sortDir.equalsIgnoreCase(Sort.Direction.ASC.name())
+                        ? Sort.by(sortBy).ascending()
+                        : Sort.by(sortBy).descending();
 
         return reactiveCommentsRepository.findAllByPostId(postId, sort);
     }
@@ -32,8 +34,10 @@ public class ReactiveCommentsService {
         return reactiveCommentsRepository.findById(id);
     }
 
-    public Mono<ReactiveComments> saveReactiveCommentByPostId(ReactiveCommentRequest reactiveCommentRequest) {
-        ReactiveComments reactiveComments = reactivePostCommentMapper.mapToReactivePostComments(reactiveCommentRequest);
+    public Mono<ReactiveComments> saveReactiveCommentByPostId(
+            ReactiveCommentRequest reactiveCommentRequest) {
+        ReactiveComments reactiveComments =
+                reactivePostCommentMapper.mapToReactivePostComments(reactiveCommentRequest);
         return reactiveCommentsRepository.save(reactiveComments);
     }
 

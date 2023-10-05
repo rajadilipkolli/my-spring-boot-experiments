@@ -23,17 +23,13 @@ import reactor.test.StepVerifier;
 @ExtendWith(MockitoExtension.class)
 class ReactivePostServiceTest {
 
-    @Mock
-    private ReactivePostRepository reactivePostRepository;
+    @Mock private ReactivePostRepository reactivePostRepository;
 
-    @Mock
-    private ReactiveCommentsRepository reactiveCommentsRepository;
+    @Mock private ReactiveCommentsRepository reactiveCommentsRepository;
 
-    @Mock
-    private ReactivePostMapper reactivePostMapper;
+    @Mock private ReactivePostMapper reactivePostMapper;
 
-    @InjectMocks
-    private ReactivePostService reactivePostService;
+    @InjectMocks private ReactivePostService reactivePostService;
 
     @Test
     void findAllReactivePosts() {
@@ -46,10 +42,15 @@ class ReactivePostServiceTest {
 
         // then
         StepVerifier.create(pagedResult)
-                .expectNextMatches(reactivePost -> Objects.equals(
-                                reactivePost.getId(), getReactivePost().getId())
-                        && reactivePost.getTitle().equals(getReactivePost().getTitle())
-                        && reactivePost.getContent().equals(getReactivePost().getContent()))
+                .expectNextMatches(
+                        reactivePost ->
+                                Objects.equals(reactivePost.getId(), getReactivePost().getId())
+                                        && reactivePost
+                                                .getTitle()
+                                                .equals(getReactivePost().getTitle())
+                                        && reactivePost
+                                                .getContent()
+                                                .equals(getReactivePost().getContent()))
                 .expectComplete()
                 .verify();
     }
@@ -62,10 +63,15 @@ class ReactivePostServiceTest {
         Mono<ReactivePost> reactivePostMono = reactivePostService.findReactivePostById(1L);
         // then
         StepVerifier.create(reactivePostMono)
-                .expectNextMatches(reactivePost -> Objects.equals(
-                                reactivePost.getId(), getReactivePost().getId())
-                        && reactivePost.getTitle().equals(getReactivePost().getTitle())
-                        && reactivePost.getContent().equals(getReactivePost().getContent()))
+                .expectNextMatches(
+                        reactivePost ->
+                                Objects.equals(reactivePost.getId(), getReactivePost().getId())
+                                        && reactivePost
+                                                .getTitle()
+                                                .equals(getReactivePost().getTitle())
+                                        && reactivePost
+                                                .getContent()
+                                                .equals(getReactivePost().getContent()))
                 .expectComplete()
                 .verify();
     }
@@ -74,20 +80,26 @@ class ReactivePostServiceTest {
     void saveReactivePost() {
         // given
         ReactivePostRequest reactivePostRequest = getReactivePostRequest();
-        ReactivePost mappedReactivePost = ReactivePost.builder()
-                .content(reactivePostRequest.content())
-                .title(reactivePostRequest.title())
-                .build();
-        given(reactivePostMapper.mapToReactivePost(reactivePostRequest)).willReturn(mappedReactivePost);
-        given(reactivePostRepository.save(mappedReactivePost)).willReturn(Mono.just(getReactivePost()));
+        ReactivePost mappedReactivePost =
+                ReactivePost.builder()
+                        .content(reactivePostRequest.content())
+                        .title(reactivePostRequest.title())
+                        .build();
+        given(reactivePostMapper.mapToReactivePost(reactivePostRequest))
+                .willReturn(mappedReactivePost);
+        given(reactivePostRepository.save(mappedReactivePost))
+                .willReturn(Mono.just(getReactivePost()));
         // when
-        Mono<ReactivePost> persistedReactivePost = reactivePostService.saveReactivePost(reactivePostRequest);
+        Mono<ReactivePost> persistedReactivePost =
+                reactivePostService.saveReactivePost(reactivePostRequest);
         // then
         StepVerifier.create(persistedReactivePost)
-                .expectNextMatches(reactivePost -> reactivePost
-                                .getTitle()
-                                .equals(getReactivePost().getTitle())
-                        && reactivePost.getContent().equals(getReactivePost().getContent()))
+                .expectNextMatches(
+                        reactivePost ->
+                                reactivePost.getTitle().equals(getReactivePost().getTitle())
+                                        && reactivePost
+                                                .getContent()
+                                                .equals(getReactivePost().getContent()))
                 .expectComplete()
                 .verify();
     }

@@ -16,8 +16,7 @@ import org.springframework.boot.testcontainers.context.ImportTestcontainers;
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 class SchemaValidationTest {
 
-    @Autowired
-    private DataSource dataSource;
+    @Autowired private DataSource dataSource;
 
     @Test
     void contextLoads() {

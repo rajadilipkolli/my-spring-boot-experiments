@@ -37,14 +37,11 @@ import org.springframework.test.web.servlet.MockMvc;
 @ActiveProfiles(PROFILE_TEST)
 class CustomerControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
+    @Autowired private MockMvc mockMvc;
 
-    @MockBean
-    private CustomerService customerService;
+    @MockBean private CustomerService customerService;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+    @Autowired private ObjectMapper objectMapper;
 
     private List<Customer> customerList;
 
@@ -90,18 +87,22 @@ class CustomerControllerTest {
         Long customerId = 1L;
         given(customerService.findCustomerById(customerId)).willReturn(Optional.empty());
 
-        this.mockMvc.perform(get("/api/customers/{id}", customerId)).andExpect(status().isNotFound());
+        this.mockMvc
+                .perform(get("/api/customers/{id}", customerId))
+                .andExpect(status().isNotFound());
     }
 
     @Test
     void shouldCreateNewCustomer() throws Exception {
-        given(customerService.saveCustomer(any(Customer.class))).willAnswer((invocation) -> invocation.getArgument(0));
+        given(customerService.saveCustomer(any(Customer.class)))
+                .willAnswer((invocation) -> invocation.getArgument(0));
 
         Customer customer = Instancio.create(Customer.class);
         this.mockMvc
-                .perform(post("/api/customers")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(customer)))
+                .perform(
+                        post("/api/customers")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(customer)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id", notNullValue()))
                 .andExpect(jsonPath("$.name", is(customer.getName())));
@@ -112,9 +113,10 @@ class CustomerControllerTest {
         Customer customer = new Customer(null, null, null, null);
 
         this.mockMvc
-                .perform(post("/api/customers")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(customer)))
+                .perform(
+                        post("/api/customers")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(customer)))
                 .andExpect(status().isBadRequest())
                 .andExpect(header().string("Content-Type", is("application/problem+json")))
                 .andExpect(jsonPath("$.type", is("about:blank")))
@@ -135,12 +137,14 @@ class CustomerControllerTest {
         customer.setId(customerId);
         customer.setName("Updated Name");
         given(customerService.findCustomerById(customerId)).willReturn(Optional.of(customer));
-        given(customerService.saveCustomer(any(Customer.class))).willAnswer((invocation) -> invocation.getArgument(0));
+        given(customerService.saveCustomer(any(Customer.class)))
+                .willAnswer((invocation) -> invocation.getArgument(0));
 
         this.mockMvc
-                .perform(put("/api/customers/{id}", customer.getId())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(customer)))
+                .perform(
+                        put("/api/customers/{id}", customer.getId())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(customer)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name", is("Updated Name")));
     }
@@ -152,9 +156,10 @@ class CustomerControllerTest {
         Customer customer = Instancio.create(Customer.class);
 
         this.mockMvc
-                .perform(put("/api/customers/{id}", customerId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(customer)))
+                .perform(
+                        put("/api/customers/{id}", customerId)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(customer)))
                 .andExpect(status().isNotFound());
     }
 
@@ -177,6 +182,8 @@ class CustomerControllerTest {
         Long customerId = 1L;
         given(customerService.findCustomerById(customerId)).willReturn(Optional.empty());
 
-        this.mockMvc.perform(delete("/api/customers/{id}", customerId)).andExpect(status().isNotFound());
+        this.mockMvc
+                .perform(delete("/api/customers/{id}", customerId))
+                .andExpect(status().isNotFound());
     }
 }

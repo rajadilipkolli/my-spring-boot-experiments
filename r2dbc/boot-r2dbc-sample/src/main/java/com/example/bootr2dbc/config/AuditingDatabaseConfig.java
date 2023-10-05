@@ -15,11 +15,12 @@ public class AuditingDatabaseConfig {
 
     @Bean
     ReactiveAuditorAware<String> auditorAware() {
-        return () -> ReactiveSecurityContextHolder.getContext()
-                .map(SecurityContext::getAuthentication)
-                .filter(Authentication::isAuthenticated)
-                .map(Authentication::getPrincipal)
-                .map(User.class::cast)
-                .map(User::getUsername);
+        return () ->
+                ReactiveSecurityContextHolder.getContext()
+                        .map(SecurityContext::getAuthentication)
+                        .filter(Authentication::isAuthenticated)
+                        .map(Authentication::getPrincipal)
+                        .map(User.class::cast)
+                        .map(User::getUsername);
     }
 }

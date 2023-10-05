@@ -12,8 +12,7 @@ import org.springframework.test.context.TestPropertySource;
 @TestPropertySource(properties = {"spring.jpa.hibernate.ddl-auto=validate"})
 class ApplicationIntegrationTest extends AbstractIntegrationTest {
 
-    @Autowired
-    private DataSource dataSource;
+    @Autowired private DataSource dataSource;
 
     @Test
     void contextLoads() {

@@ -17,34 +17,34 @@ import reactor.core.publisher.Flux;
 
 class ReactivePostControllerIT extends AbstractIntegrationTest {
 
-    @Autowired
-    private ReactivePostRepository reactivePostRepository;
+    @Autowired private ReactivePostRepository reactivePostRepository;
 
-    @Autowired
-    private ReactiveCommentsRepository reactiveCommentsRepository;
+    @Autowired private ReactiveCommentsRepository reactiveCommentsRepository;
 
     private Flux<ReactivePost> reactivePostFlux = null;
 
     @BeforeEach
     void setUp() {
-        reactivePostFlux = reactiveCommentsRepository
-                .deleteAll()
-                .then(reactivePostRepository.deleteAll())
-                .thenMany(Flux.just(
-                        ReactivePost.builder()
-                                .title("title 1")
-                                .content("content 1")
-                                .build(),
-                        ReactivePost.builder()
-                                .title("title 2")
-                                .content("content 2")
-                                .build(),
-                        ReactivePost.builder()
-                                .title("title 3")
-                                .content("content 3")
-                                .build()))
-                .flatMap(reactivePostRepository::save)
-                .thenMany(reactivePostRepository.findAll());
+        reactivePostFlux =
+                reactiveCommentsRepository
+                        .deleteAll()
+                        .then(reactivePostRepository.deleteAll())
+                        .thenMany(
+                                Flux.just(
+                                        ReactivePost.builder()
+                                                .title("title 1")
+                                                .content("content 1")
+                                                .build(),
+                                        ReactivePost.builder()
+                                                .title("title 2")
+                                                .content("content 2")
+                                                .build(),
+                                        ReactivePost.builder()
+                                                .title("title 3")
+                                                .content("content 3")
+                                                .build()))
+                        .flatMap(reactivePostRepository::save)
+                        .thenMany(reactivePostRepository.findAll());
     }
 
     @Test
@@ -76,10 +76,11 @@ class ReactivePostControllerIT extends AbstractIntegrationTest {
 
         this.webTestClient
                 .mutate() // Mutate the client to add basic authentication headers
-                .defaultHeaders(headers -> {
-                    headers.setBasicAuth("user", "password");
-                    headers.setContentType(MediaType.APPLICATION_JSON);
-                })
+                .defaultHeaders(
+                        headers -> {
+                            headers.setBasicAuth("user", "password");
+                            headers.setContentType(MediaType.APPLICATION_JSON);
+                        })
                 .build()
                 .get()
                 .uri("/api/posts/{id}", reactivePostId)
@@ -103,10 +104,11 @@ class ReactivePostControllerIT extends AbstractIntegrationTest {
         ReactivePostRequest reactivePost = new ReactivePostRequest("New Title", "New ReactivePost");
         this.webTestClient
                 .mutate() // Mutate the client to add basic authentication headers
-                .defaultHeaders(headers -> {
-                    headers.setBasicAuth("user", "password");
-                    headers.setContentType(MediaType.APPLICATION_JSON);
-                })
+                .defaultHeaders(
+                        headers -> {
+                            headers.setBasicAuth("user", "password");
+                            headers.setContentType(MediaType.APPLICATION_JSON);
+                        })
                 .build()
                 .post()
                 .uri("/api/posts/")
@@ -132,10 +134,11 @@ class ReactivePostControllerIT extends AbstractIntegrationTest {
 
         this.webTestClient
                 .mutate() // Mutate the client to add basic authentication headers
-                .defaultHeaders(headers -> {
-                    headers.setBasicAuth("user", "password");
-                    headers.setContentType(MediaType.APPLICATION_JSON);
-                })
+                .defaultHeaders(
+                        headers -> {
+                            headers.setBasicAuth("user", "password");
+                            headers.setContentType(MediaType.APPLICATION_JSON);
+                        })
                 .build()
                 .post()
                 .uri("/api/posts/")
@@ -187,10 +190,11 @@ class ReactivePostControllerIT extends AbstractIntegrationTest {
 
         this.webTestClient
                 .mutate() // Mutate the client to add basic authentication headers
-                .defaultHeaders(headers -> {
-                    headers.setBasicAuth("user", "password");
-                    headers.setContentType(MediaType.APPLICATION_JSON);
-                })
+                .defaultHeaders(
+                        headers -> {
+                            headers.setBasicAuth("user", "password");
+                            headers.setContentType(MediaType.APPLICATION_JSON);
+                        })
                 .build()
                 .put()
                 .uri("/api/posts/{id}", reactivePostId)

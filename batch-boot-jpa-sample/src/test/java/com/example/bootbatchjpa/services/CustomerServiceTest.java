@@ -25,11 +25,9 @@ import org.springframework.data.domain.Sort;
 @ExtendWith(MockitoExtension.class)
 class CustomerServiceTest {
 
-    @Mock
-    private CustomerRepository customerRepository;
+    @Mock private CustomerRepository customerRepository;
 
-    @InjectMocks
-    private CustomerService customerService;
+    @InjectMocks private CustomerService customerService;
 
     @Test
     void findAllCustomers() {

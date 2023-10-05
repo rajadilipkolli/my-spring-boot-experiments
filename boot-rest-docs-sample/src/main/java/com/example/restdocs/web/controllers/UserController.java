@@ -29,21 +29,35 @@ public class UserController {
 
     @GetMapping
     public PagedResult<User> getAllUsers(
-            @RequestParam(value = "pageNo", defaultValue = AppConstants.DEFAULT_PAGE_NUMBER, required = false)
+            @RequestParam(
+                            value = "pageNo",
+                            defaultValue = AppConstants.DEFAULT_PAGE_NUMBER,
+                            required = false)
                     int pageNo,
-            @RequestParam(value = "pageSize", defaultValue = AppConstants.DEFAULT_PAGE_SIZE, required = false)
+            @RequestParam(
+                            value = "pageSize",
+                            defaultValue = AppConstants.DEFAULT_PAGE_SIZE,
+                            required = false)
                     int pageSize,
-            @RequestParam(value = "sortBy", defaultValue = AppConstants.DEFAULT_SORT_BY, required = false)
+            @RequestParam(
+                            value = "sortBy",
+                            defaultValue = AppConstants.DEFAULT_SORT_BY,
+                            required = false)
                     String sortBy,
-            @RequestParam(value = "sortDir", defaultValue = AppConstants.DEFAULT_SORT_DIRECTION, required = false)
+            @RequestParam(
+                            value = "sortDir",
+                            defaultValue = AppConstants.DEFAULT_SORT_DIRECTION,
+                            required = false)
                     String sortDir) {
         return userService.findAllUsers(pageNo, pageSize, sortBy, sortDir);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<User> getUserById(@PathVariable Long id) {
-        return userService.findUserById(id).map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound()
-                .build());
+        return userService
+                .findUserById(id)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PostMapping
@@ -53,7 +67,8 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody UserRequest userRequest) {
+    public ResponseEntity<User> updateUser(
+            @PathVariable Long id, @RequestBody UserRequest userRequest) {
         return userService
                 .findUserById(id)
                 .map(userObj -> ResponseEntity.ok(userService.updateUser(userObj, userRequest)))
@@ -64,10 +79,11 @@ public class UserController {
     public ResponseEntity<User> deleteUser(@PathVariable Long id) {
         return userService
                 .findUserById(id)
-                .map(user -> {
-                    userService.deleteUserById(id);
-                    return ResponseEntity.ok(user);
-                })
+                .map(
+                        user -> {
+                            userService.deleteUserById(id);
+                            return ResponseEntity.ok(user);
+                        })
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 }

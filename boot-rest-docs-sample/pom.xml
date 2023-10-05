@@ -268,9 +268,10 @@
                 <version>${spotless.version}</version>
                 <configuration>
                     <java>
-                        <palantirJavaFormat>
-                            <version>2.30.0</version>
-                        </palantirJavaFormat>
+                        <googleJavaFormat>
+                            <version>1.17.0</version>
+                            <style>AOSP</style>
+                        </googleJavaFormat>
                         <importOrder />
                         <removeUnusedImports />
                         <formatAnnotations />

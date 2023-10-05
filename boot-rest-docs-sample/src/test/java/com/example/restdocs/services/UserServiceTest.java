@@ -28,11 +28,9 @@ import org.springframework.data.domain.Sort;
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
 
-    @Mock
-    private UserRepository userRepository;
+    @Mock private UserRepository userRepository;
 
-    @InjectMocks
-    private UserService userService;
+    @InjectMocks private UserService userService;
 
     @Test
     void findAllUsers() {
@@ -72,14 +70,17 @@ class UserServiceTest {
     @Test
     void saveUser() {
         // given
-        given(userRepository.save(any(User.class))).willAnswer((invocationOnMock) -> {
-            if (invocationOnMock.getArguments().length > 0
-                    && invocationOnMock.getArguments()[0] instanceof User mockUser) {
-                mockUser.setId(34L);
-                return mockUser;
-            }
-            return null;
-        });
+        given(userRepository.save(any(User.class)))
+                .willAnswer(
+                        (invocationOnMock) -> {
+                            if (invocationOnMock.getArguments().length > 0
+                                    && invocationOnMock.getArguments()[0]
+                                            instanceof User mockUser) {
+                                mockUser.setId(34L);
+                                return mockUser;
+                            }
+                            return null;
+                        });
         // when
         User persistedUser = userService.saveUser(getUserRequest());
         // then

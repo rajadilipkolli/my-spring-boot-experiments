@@ -23,33 +23,34 @@ import reactor.test.StepVerifier;
 @ExtendWith(MockitoExtension.class)
 class ReactiveCommentsServiceTest {
 
-    @Mock
-    private ReactiveCommentsRepository reactiveCommentsRepository;
+    @Mock private ReactiveCommentsRepository reactiveCommentsRepository;
 
-    @Mock
-    private ReactivePostCommentMapper reactivePostCommentMapper;
+    @Mock private ReactivePostCommentMapper reactivePostCommentMapper;
 
-    @InjectMocks
-    private ReactiveCommentsService reactiveCommentsService;
+    @InjectMocks private ReactiveCommentsService reactiveCommentsService;
 
     @Test
     void findAllReactiveComments() {
         // given
         Sort sort = Sort.by(Sort.Direction.ASC, "id");
-        given(reactiveCommentsRepository.findAllByPostId(1L, sort)).willReturn(Flux.just(getReactiveComments()));
+        given(reactiveCommentsRepository.findAllByPostId(1L, sort))
+                .willReturn(Flux.just(getReactiveComments()));
 
         // when
-        Flux<ReactiveComments> pagedResult = reactiveCommentsService.findAllReactiveCommentsByPostId(1L, "id", "asc");
+        Flux<ReactiveComments> pagedResult =
+                reactiveCommentsService.findAllReactiveCommentsByPostId(1L, "id", "asc");
 
         // then
         assertThat(pagedResult).isNotNull();
         StepVerifier.create(pagedResult)
-                .expectNextMatches(reactivePostComment -> reactivePostComment
-                                .getPostId()
-                                .equals(getReactiveComments().getPostId())
-                        && reactivePostComment
-                                .getContent()
-                                .equals(getReactiveComments().getContent()))
+                .expectNextMatches(
+                        reactivePostComment ->
+                                reactivePostComment
+                                                .getPostId()
+                                                .equals(getReactiveComments().getPostId())
+                                        && reactivePostComment
+                                                .getContent()
+                                                .equals(getReactiveComments().getContent()))
                 .expectComplete()
                 .verify();
     }
@@ -58,17 +59,21 @@ class ReactiveCommentsServiceTest {
     void findReactiveCommentsById() {
         // given
         UUID postCommentId = UUID.randomUUID();
-        given(reactiveCommentsRepository.findById(postCommentId)).willReturn(Mono.just(getReactiveComments()));
+        given(reactiveCommentsRepository.findById(postCommentId))
+                .willReturn(Mono.just(getReactiveComments()));
         // when
-        Mono<ReactiveComments> reactiveCommentsMono = reactiveCommentsService.findReactiveCommentById(postCommentId);
+        Mono<ReactiveComments> reactiveCommentsMono =
+                reactiveCommentsService.findReactiveCommentById(postCommentId);
         // then
         StepVerifier.create(reactiveCommentsMono)
-                .expectNextMatches(reactivePostComment -> reactivePostComment
-                                .getPostId()
-                                .equals(getReactiveComments().getPostId())
-                        && reactivePostComment
-                                .getContent()
-                                .equals(getReactiveComments().getContent()))
+                .expectNextMatches(
+                        reactivePostComment ->
+                                reactivePostComment
+                                                .getPostId()
+                                                .equals(getReactiveComments().getPostId())
+                                        && reactivePostComment
+                                                .getContent()
+                                                .equals(getReactiveComments().getContent()))
                 .expectComplete()
                 .verify();
     }
@@ -77,25 +82,29 @@ class ReactiveCommentsServiceTest {
     void saveReactiveComments() {
         // given
         ReactiveCommentRequest reactivePostCommentsRequest = getReactiveCommentRequest();
-        ReactiveComments mappedReactivePostComments = ReactiveComments.builder()
-                .content(reactivePostCommentsRequest.content())
-                .title(reactivePostCommentsRequest.title())
-                .postId(reactivePostCommentsRequest.postId())
-                .build();
+        ReactiveComments mappedReactivePostComments =
+                ReactiveComments.builder()
+                        .content(reactivePostCommentsRequest.content())
+                        .title(reactivePostCommentsRequest.title())
+                        .postId(reactivePostCommentsRequest.postId())
+                        .build();
         given(reactivePostCommentMapper.mapToReactivePostComments(reactivePostCommentsRequest))
                 .willReturn(mappedReactivePostComments);
-        given(reactiveCommentsRepository.save(mappedReactivePostComments)).willReturn(Mono.just(getReactiveComments()));
+        given(reactiveCommentsRepository.save(mappedReactivePostComments))
+                .willReturn(Mono.just(getReactiveComments()));
         // when
         Mono<ReactiveComments> persistedReactiveComments =
                 reactiveCommentsService.saveReactiveCommentByPostId(reactivePostCommentsRequest);
         // then
         StepVerifier.create(persistedReactiveComments)
-                .expectNextMatches(reactivePostComment -> reactivePostComment
-                                .getPostId()
-                                .equals(getReactiveComments().getPostId())
-                        && reactivePostComment
-                                .getContent()
-                                .equals(getReactiveComments().getContent()))
+                .expectNextMatches(
+                        reactivePostComment ->
+                                reactivePostComment
+                                                .getPostId()
+                                                .equals(getReactiveComments().getPostId())
+                                        && reactivePostComment
+                                                .getContent()
+                                                .equals(getReactiveComments().getContent()))
                 .expectComplete()
                 .verify();
     }

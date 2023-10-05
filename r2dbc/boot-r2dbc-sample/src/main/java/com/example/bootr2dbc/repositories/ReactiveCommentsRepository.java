@@ -9,7 +9,8 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 public interface ReactiveCommentsRepository
-        extends ReactiveCrudRepository<ReactiveComments, UUID>, ReactiveSortingRepository<ReactiveComments, UUID> {
+        extends ReactiveCrudRepository<ReactiveComments, UUID>,
+                ReactiveSortingRepository<ReactiveComments, UUID> {
 
     Flux<ReactiveComments> findAllByPostId(Long postId, Sort sort);
 

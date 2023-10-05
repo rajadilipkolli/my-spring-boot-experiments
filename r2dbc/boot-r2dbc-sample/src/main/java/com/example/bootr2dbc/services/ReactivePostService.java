@@ -25,9 +25,10 @@ public class ReactivePostService {
 
     @Transactional(readOnly = true)
     public Flux<ReactivePost> findAllReactivePosts(String sortBy, String sortDir) {
-        Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name())
-                ? Sort.by(sortBy).ascending()
-                : Sort.by(sortBy).descending();
+        Sort sort =
+                sortDir.equalsIgnoreCase(Sort.Direction.ASC.name())
+                        ? Sort.by(sortBy).ascending()
+                        : Sort.by(sortBy).descending();
 
         return reactivePostRepository.findAll(sort);
     }
@@ -47,8 +48,10 @@ public class ReactivePostService {
         return reactivePostRepository.save(reactivePost);
     }
 
-    public Mono<ReactivePost> updateReactivePost(ReactivePostRequest reactivePostRequest, ReactivePost reactivePost) {
-        this.reactivePostMapper.updateReactivePostFromReactivePostRequest(reactivePostRequest, reactivePost);
+    public Mono<ReactivePost> updateReactivePost(
+            ReactivePostRequest reactivePostRequest, ReactivePost reactivePost) {
+        this.reactivePostMapper.updateReactivePostFromReactivePostRequest(
+                reactivePostRequest, reactivePost);
         return reactivePostRepository.save(reactivePost);
     }
 
@@ -58,10 +61,12 @@ public class ReactivePostService {
 
     public Mono<ResponseEntity<Object>> deleteReactivePostAndCommentsById(Long id) {
         return findReactivePostById(id)
-                .flatMap(reactivePost -> reactiveCommentsRepository
-                        .deleteAllByPostId(reactivePost.getId())
-                        .then(deleteReactivePostById(reactivePost.getId()))
-                        .then(Mono.just(ResponseEntity.noContent().build())))
+                .flatMap(
+                        reactivePost ->
+                                reactiveCommentsRepository
+                                        .deleteAllByPostId(reactivePost.getId())
+                                        .then(deleteReactivePostById(reactivePost.getId()))
+                                        .then(Mono.just(ResponseEntity.noContent().build())))
                 .switchIfEmpty(Mono.just(ResponseEntity.notFound().build()));
     }
 }

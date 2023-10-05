@@ -32,56 +32,58 @@ import reactor.core.publisher.Mono;
 @Import(SecurityConfig.class) // Import the security configuration
 class ReactiveCommentsControllerTest {
 
-    @Autowired
-    private WebTestClient webTestClient;
+    @Autowired private WebTestClient webTestClient;
 
-    @MockBean
-    private ReactiveCommentsService reactiveCommentsService;
+    @MockBean private ReactiveCommentsService reactiveCommentsService;
 
     private Flux<ReactiveComments> reactiveCommentsFlux;
 
     @BeforeEach
     void setUp() {
-        ReactiveComments comment1 = ReactiveComments.builder()
-                .id(UUID.randomUUID())
-                .title("First Title")
-                .content("First Content")
-                .postId(1L)
-                .build();
-        ReactiveComments comment2 = ReactiveComments.builder()
-                .id(UUID.randomUUID())
-                .title("Second Title")
-                .content("Second Content")
-                .postId(1L)
-                .published(true)
-                .publishedAt(LocalDateTime.now())
-                .build();
-        ReactiveComments comment3 = ReactiveComments.builder()
-                .id(UUID.randomUUID())
-                .title("Third Title")
-                .content("Third Content")
-                .postId(1L)
-                .build();
+        ReactiveComments comment1 =
+                ReactiveComments.builder()
+                        .id(UUID.randomUUID())
+                        .title("First Title")
+                        .content("First Content")
+                        .postId(1L)
+                        .build();
+        ReactiveComments comment2 =
+                ReactiveComments.builder()
+                        .id(UUID.randomUUID())
+                        .title("Second Title")
+                        .content("Second Content")
+                        .postId(1L)
+                        .published(true)
+                        .publishedAt(LocalDateTime.now())
+                        .build();
+        ReactiveComments comment3 =
+                ReactiveComments.builder()
+                        .id(UUID.randomUUID())
+                        .title("Third Title")
+                        .content("Third Content")
+                        .postId(1L)
+                        .build();
         reactiveCommentsFlux = Flux.fromIterable(List.of(comment1, comment2, comment3));
     }
 
     @Test
     void shouldFetchAllReactiveComments() {
         // Fetch all posts using WebClient
-        List<ReactiveComments> expectedCommentsList =
-                reactiveCommentsFlux.collectList().block();
+        List<ReactiveComments> expectedCommentsList = reactiveCommentsFlux.collectList().block();
 
         given(reactiveCommentsService.findAllReactiveCommentsByPostId(1L, "title", "asc"))
                 .willReturn(reactiveCommentsFlux);
 
         this.webTestClient
                 .get()
-                .uri(uriBuilder -> {
-                    uriBuilder.queryParam("postId", expectedCommentsList.get(0).getPostId());
-                    uriBuilder.queryParam("sortBy", "title");
-                    uriBuilder.path("/api/posts/comments/");
-                    return uriBuilder.build();
-                })
+                .uri(
+                        uriBuilder -> {
+                            uriBuilder.queryParam(
+                                    "postId", expectedCommentsList.get(0).getPostId());
+                            uriBuilder.queryParam("sortBy", "title");
+                            uriBuilder.path("/api/posts/comments/");
+                            return uriBuilder.build();
+                        })
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus()
@@ -160,11 +162,12 @@ class ReactiveCommentsControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
                 .jsonPath("$.id")
-                .value(returningId -> {
-                    // Attempt to parse the value as a UUID
-                    UUID uuid = UUID.fromString((String) returningId);
-                    assertThat(uuid).isNotNull();
-                })
+                .value(
+                        returningId -> {
+                            // Attempt to parse the value as a UUID
+                            UUID uuid = UUID.fromString((String) returningId);
+                            assertThat(uuid).isNotNull();
+                        })
                 .jsonPath("$.title")
                 .isEqualTo(reactiveCommentRequest.title())
                 .jsonPath("$.content")
@@ -177,7 +180,8 @@ class ReactiveCommentsControllerTest {
 
     @Test
     void shouldReturn400WhenCreateNewReactiveCommentsWithoutTitleAndContent() {
-        ReactiveCommentRequest reactiveCommentRequest = new ReactiveCommentRequest(null, null, -90L, false);
+        ReactiveCommentRequest reactiveCommentRequest =
+                new ReactiveCommentRequest(null, null, -90L, false);
 
         this.webTestClient
                 .post()
@@ -234,11 +238,18 @@ class ReactiveCommentsControllerTest {
         ReactiveComments reactiveComments = reactiveCommentsFlux.next().block();
         reactiveComments.setTitle("Updated ReactivePost");
         UUID reactivePostId = reactiveComments.getId();
-        ReactiveCommentRequest reactivePostRequest = new ReactiveCommentRequest(
-                "Updated ReactivePost", reactiveComments.getContent(), reactiveComments.getPostId(), true);
+        ReactiveCommentRequest reactivePostRequest =
+                new ReactiveCommentRequest(
+                        "Updated ReactivePost",
+                        reactiveComments.getContent(),
+                        reactiveComments.getPostId(),
+                        true);
 
-        given(reactiveCommentsService.findReactiveCommentById(reactivePostId)).willReturn(Mono.just(reactiveComments));
-        given(reactiveCommentsService.updateReactivePostComment(reactivePostRequest, reactiveComments))
+        given(reactiveCommentsService.findReactiveCommentById(reactivePostId))
+                .willReturn(Mono.just(reactiveComments));
+        given(
+                        reactiveCommentsService.updateReactivePostComment(
+                                reactivePostRequest, reactiveComments))
                 .willReturn(Mono.just(reactiveComments));
 
         this.webTestClient
@@ -261,10 +272,15 @@ class ReactiveCommentsControllerTest {
     void shouldReturn404WhenUpdatingNonExistingReactiveComments() {
         ReactiveComments reactiveComments = reactiveCommentsFlux.next().block();
         UUID reactivePostId = reactiveComments.getId();
-        ReactiveCommentRequest reactivePostRequest = new ReactiveCommentRequest(
-                "Updated ReactivePost", reactiveComments.getContent(), reactiveComments.getPostId(), false);
+        ReactiveCommentRequest reactivePostRequest =
+                new ReactiveCommentRequest(
+                        "Updated ReactivePost",
+                        reactiveComments.getContent(),
+                        reactiveComments.getPostId(),
+                        false);
 
-        given(reactiveCommentsService.findReactiveCommentById(reactivePostId)).willReturn(Mono.empty());
+        given(reactiveCommentsService.findReactiveCommentById(reactivePostId))
+                .willReturn(Mono.empty());
 
         this.webTestClient
                 .put()

@@ -22,12 +22,14 @@ public class JobInvokerController {
     private final Job allCustomersJob;
 
     @GetMapping("/run-allCustomers-job")
-    public String allCustomersJobHandle(@RequestParam Long minId, @RequestParam Long maxId) throws Exception {
+    public String allCustomersJobHandle(@RequestParam Long minId, @RequestParam Long maxId)
+            throws Exception {
 
-        JobParameters jobParameters = new JobParametersBuilder()
-                .addLong("minId", minId)
-                .addLong("maxId", maxId)
-                .toJobParameters();
+        JobParameters jobParameters =
+                new JobParametersBuilder()
+                        .addLong("minId", minId)
+                        .addLong("maxId", maxId)
+                        .toJobParameters();
         JobExecution jobExecution = this.jobLauncher.run(this.allCustomersJob, jobParameters);
 
         return "Batch job has been invoked as " + jobExecution.getJobId();

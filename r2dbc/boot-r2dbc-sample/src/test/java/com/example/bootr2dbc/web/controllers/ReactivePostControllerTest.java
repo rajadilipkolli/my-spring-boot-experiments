@@ -33,32 +33,21 @@ import reactor.core.publisher.Mono;
 @Import(SecurityConfig.class) // Import the security configuration
 class ReactivePostControllerTest {
 
-    @Autowired
-    private WebTestClient webTestClient;
+    @Autowired private WebTestClient webTestClient;
 
-    @MockBean
-    private ReactivePostService reactivePostService;
+    @MockBean private ReactivePostService reactivePostService;
 
     private Flux<ReactivePost> reactivePostFlux;
 
     @BeforeEach
     void setUp() {
         List<ReactivePost> reactivePostList = new ArrayList<>();
-        reactivePostList.add(ReactivePost.builder()
-                .id(1L)
-                .title("title 1")
-                .content("content 1")
-                .build());
-        reactivePostList.add(ReactivePost.builder()
-                .id(2L)
-                .title("title 2")
-                .content("content 2")
-                .build());
-        reactivePostList.add(ReactivePost.builder()
-                .id(3L)
-                .title("title 3")
-                .content("content 3")
-                .build());
+        reactivePostList.add(
+                ReactivePost.builder().id(1L).title("title 1").content("content 1").build());
+        reactivePostList.add(
+                ReactivePost.builder().id(2L).title("title 2").content("content 2").build());
+        reactivePostList.add(
+                ReactivePost.builder().id(3L).title("title 3").content("content 3").build());
         reactivePostFlux = Flux.fromIterable(reactivePostList);
     }
 
@@ -102,7 +91,8 @@ class ReactivePostControllerTest {
 
         ReactivePost reactivePost = reactivePostFlux.next().block();
         Long reactivePostId = reactivePost.getId();
-        given(reactivePostService.findReactivePostById(reactivePostId)).willReturn(Mono.just(reactivePost));
+        given(reactivePostService.findReactivePostById(reactivePostId))
+                .willReturn(Mono.just(reactivePost));
 
         this.webTestClient
                 .get()
@@ -142,7 +132,8 @@ class ReactivePostControllerTest {
     void shouldCreateNewReactivePost() {
 
         ReactivePostRequest reactivePost = new ReactivePostRequest("title 1", "content 1");
-        given(reactivePostService.saveReactivePost(reactivePost)).willReturn(reactivePostFlux.next());
+        given(reactivePostService.saveReactivePost(reactivePost))
+                .willReturn(reactivePostFlux.next());
 
         this.webTestClient
                 .mutateWith(csrf())
@@ -221,7 +212,8 @@ class ReactivePostControllerTest {
                 new ReactivePostRequest("Updated ReactivePost", reactivePost.getContent());
         reactivePost.setTitle("Updated ReactivePost");
 
-        given(reactivePostService.findReactivePostById(reactivePostId)).willReturn(Mono.just(reactivePost));
+        given(reactivePostService.findReactivePostById(reactivePostId))
+                .willReturn(Mono.just(reactivePost));
         given(reactivePostService.updateReactivePost(reactivePostRequest, reactivePost))
                 .willReturn(Mono.just(reactivePost));
 
@@ -246,7 +238,8 @@ class ReactivePostControllerTest {
     @Test
     void shouldReturn404WhenUpdatingNonExistingReactivePost() {
 
-        ReactivePostRequest reactivePostRequest = new ReactivePostRequest("Updated ReactivePost", "Updated Content");
+        ReactivePostRequest reactivePostRequest =
+                new ReactivePostRequest("Updated ReactivePost", "Updated Content");
         Long reactivePostId = 1000L;
         given(reactivePostService.findReactivePostById(reactivePostId)).willReturn(Mono.empty());
 

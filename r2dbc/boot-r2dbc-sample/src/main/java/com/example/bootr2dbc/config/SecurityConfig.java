@@ -27,16 +27,21 @@ public class SecurityConfig {
         return http.csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .httpBasic(Customizer.withDefaults())
                 .authorizeExchange(
-                        it -> it.pathMatchers("/webjars/**", "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**")
-                                .permitAll() // Allow Springdoc OpenAPI resources
-                                .pathMatchers(HttpMethod.DELETE, postPath)
-                                .hasRole("ADMIN")
-                                .pathMatchers(postPath)
-                                .hasRole("USER")
-                                .pathMatchers("/users/{user}/**")
-                                .access(this::currentUserMatchesPath)
-                                .anyExchange()
-                                .authenticated())
+                        it ->
+                                it.pathMatchers(
+                                                "/webjars/**",
+                                                "/swagger-ui.html",
+                                                "/swagger-ui/**",
+                                                "/v3/api-docs/**")
+                                        .permitAll() // Allow Springdoc OpenAPI resources
+                                        .pathMatchers(HttpMethod.DELETE, postPath)
+                                        .hasRole("ADMIN")
+                                        .pathMatchers(postPath)
+                                        .hasRole("USER")
+                                        .pathMatchers("/users/{user}/**")
+                                        .access(this::currentUserMatchesPath)
+                                        .anyExchange()
+                                        .authenticated())
                 .build();
     }
 
@@ -53,17 +58,20 @@ public class SecurityConfig {
     }
 
     @Bean(name = "userDetailsService")
-    public MapReactiveUserDetailsService userDetailsServiceWithPasswordEncoder(PasswordEncoder passwordEncoder) {
-        UserDetails user = User.withUsername("user")
-                .passwordEncoder(passwordEncoder::encode)
-                .password("password")
-                .roles("USER")
-                .build();
-        UserDetails admin = User.withUsername("admin")
-                .passwordEncoder(passwordEncoder::encode)
-                .password("password")
-                .roles("USER", "ADMIN")
-                .build();
+    public MapReactiveUserDetailsService userDetailsServiceWithPasswordEncoder(
+            PasswordEncoder passwordEncoder) {
+        UserDetails user =
+                User.withUsername("user")
+                        .passwordEncoder(passwordEncoder::encode)
+                        .password("password")
+                        .roles("USER")
+                        .build();
+        UserDetails admin =
+                User.withUsername("admin")
+                        .passwordEncoder(passwordEncoder::encode)
+                        .password("password")
+                        .roles("USER", "ADMIN")
+                        .build();
         return new MapReactiveUserDetailsService(user, admin);
     }
 }

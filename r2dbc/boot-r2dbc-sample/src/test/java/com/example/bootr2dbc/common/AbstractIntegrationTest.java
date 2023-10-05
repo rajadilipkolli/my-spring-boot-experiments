@@ -17,6 +17,5 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 @AutoConfigureWebTestClient
 public abstract class AbstractIntegrationTest {
 
-    @Autowired
-    protected WebTestClient webTestClient;
+    @Autowired protected WebTestClient webTestClient;
 }

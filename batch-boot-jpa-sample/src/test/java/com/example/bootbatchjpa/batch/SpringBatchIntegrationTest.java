@@ -16,14 +16,11 @@ import org.springframework.test.annotation.DirtiesContext;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 class SpringBatchIntegrationTest extends AbstractIntegrationTest {
 
-    @Autowired
-    private JobLauncherTestUtils jobLauncherTestUtils;
+    @Autowired private JobLauncherTestUtils jobLauncherTestUtils;
 
-    @Autowired
-    private JobRepositoryTestUtils jobRepositoryTestUtils;
+    @Autowired private JobRepositoryTestUtils jobRepositoryTestUtils;
 
-    @Autowired
-    private Job jobUnderTest;
+    @Autowired private Job jobUnderTest;
 
     @BeforeEach
     void setup() {

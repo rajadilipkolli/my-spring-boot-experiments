@@ -17,5 +17,6 @@ public interface ReactivePostCommentMapper {
     ReactiveComments mapToReactivePostComments(ReactiveCommentRequest reactiveCommentRequest);
 
     void updateReactiveCommentRequestFromReactiveComments(
-            ReactiveCommentRequest reactiveCommentRequest, @MappingTarget ReactiveComments reactiveComments);
+            ReactiveCommentRequest reactiveCommentRequest,
+            @MappingTarget ReactiveComments reactiveComments);
 }

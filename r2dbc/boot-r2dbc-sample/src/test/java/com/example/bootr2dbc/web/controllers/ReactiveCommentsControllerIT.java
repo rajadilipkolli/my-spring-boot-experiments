@@ -22,69 +22,81 @@ import reactor.core.publisher.Mono;
 
 class ReactiveCommentsControllerIT extends AbstractIntegrationTest {
 
-    @Autowired
-    private ReactiveCommentsRepository reactiveCommentsRepository;
+    @Autowired private ReactiveCommentsRepository reactiveCommentsRepository;
 
-    @Autowired
-    private ReactivePostRepository reactivePostRepository;
+    @Autowired private ReactivePostRepository reactivePostRepository;
 
     private Flux<ReactiveComments> reactiveCommentsFlux;
 
     @BeforeEach
     void setUp() {
-        reactiveCommentsFlux = reactiveCommentsRepository
-                .deleteAll()
-                .then(reactivePostRepository.deleteAll())
-                .then(reactivePostRepository
-                        .save(ReactivePost.builder()
-                                .title("title 1")
-                                .content("content 1")
-                                .build())
-                        .flatMap(reactivePost -> {
-                            ReactiveComments comment1 = ReactiveComments.builder()
-                                    .title("First Title")
-                                    .content("First Content")
-                                    .postId(reactivePost.getId())
-                                    .build();
-                            ReactiveComments comment2 = ReactiveComments.builder()
-                                    .title("Second Title")
-                                    .content("Second Content")
-                                    .postId(reactivePost.getId())
-                                    .published(true)
-                                    .publishedAt(LocalDateTime.now())
-                                    .build();
-                            ReactiveComments comment3 = ReactiveComments.builder()
-                                    .title("Third Title")
-                                    .content("Third Content")
-                                    .postId(reactivePost.getId())
-                                    .build();
+        reactiveCommentsFlux =
+                reactiveCommentsRepository
+                        .deleteAll()
+                        .then(reactivePostRepository.deleteAll())
+                        .then(
+                                reactivePostRepository
+                                        .save(
+                                                ReactivePost.builder()
+                                                        .title("title 1")
+                                                        .content("content 1")
+                                                        .build())
+                                        .flatMap(
+                                                reactivePost -> {
+                                                    ReactiveComments comment1 =
+                                                            ReactiveComments.builder()
+                                                                    .title("First Title")
+                                                                    .content("First Content")
+                                                                    .postId(reactivePost.getId())
+                                                                    .build();
+                                                    ReactiveComments comment2 =
+                                                            ReactiveComments.builder()
+                                                                    .title("Second Title")
+                                                                    .content("Second Content")
+                                                                    .postId(reactivePost.getId())
+                                                                    .published(true)
+                                                                    .publishedAt(
+                                                                            LocalDateTime.now())
+                                                                    .build();
+                                                    ReactiveComments comment3 =
+                                                            ReactiveComments.builder()
+                                                                    .title("Third Title")
+                                                                    .content("Third Content")
+                                                                    .postId(reactivePost.getId())
+                                                                    .build();
 
-                            return reactiveCommentsRepository
-                                    .save(comment1)
-                                    .then(reactiveCommentsRepository.save(comment2))
-                                    .then(reactiveCommentsRepository.save(comment3))
-                                    .then(Mono.just(reactivePost));
-                        }))
-                .flatMapMany(post -> reactiveCommentsRepository.findAllByPostId(post.getId()));
+                                                    return reactiveCommentsRepository
+                                                            .save(comment1)
+                                                            .then(
+                                                                    reactiveCommentsRepository.save(
+                                                                            comment2))
+                                                            .then(
+                                                                    reactiveCommentsRepository.save(
+                                                                            comment3))
+                                                            .then(Mono.just(reactivePost));
+                                                }))
+                        .flatMapMany(
+                                post -> reactiveCommentsRepository.findAllByPostId(post.getId()));
     }
 
     @Test
     void shouldFetchAllReactiveComments() {
         // Fetch all posts using WebClient
-        List<ReactiveComments> expectedPostComments =
-                reactiveCommentsFlux.collectList().block();
+        List<ReactiveComments> expectedPostComments = reactiveCommentsFlux.collectList().block();
 
         this.webTestClient
                 .mutate() // Mutate the client to add basic authentication headers
                 .defaultHeaders(headers -> headers.setBasicAuth("user", "password"))
                 .build()
                 .get()
-                .uri(uriBuilder -> {
-                    uriBuilder.queryParam("postId", expectedPostComments.get(0).getPostId());
-                    uriBuilder.queryParam("sortBy", "title");
-                    uriBuilder.path("/api/posts/comments/");
-                    return uriBuilder.build();
-                })
+                .uri(
+                        uriBuilder -> {
+                            uriBuilder.queryParam(
+                                    "postId", expectedPostComments.get(0).getPostId());
+                            uriBuilder.queryParam("sortBy", "title");
+                            uriBuilder.path("/api/posts/comments/");
+                            return uriBuilder.build();
+                        })
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus()
@@ -93,7 +105,8 @@ class ReactiveCommentsControllerIT extends AbstractIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .expectBodyList(ReactiveComments.class)
                 .hasSize(expectedPostComments.size())
-                .isEqualTo(expectedPostComments); // Ensure fetched comments match the expected comments
+                .isEqualTo(expectedPostComments); // Ensure fetched comments match the expected
+        // comments
     }
 
     @Test
@@ -103,10 +116,11 @@ class ReactiveCommentsControllerIT extends AbstractIntegrationTest {
 
         this.webTestClient
                 .mutate() // Mutate the client to add basic authentication headers
-                .defaultHeaders(headers -> {
-                    headers.setBasicAuth("user", "password");
-                    headers.setContentType(MediaType.APPLICATION_JSON);
-                })
+                .defaultHeaders(
+                        headers -> {
+                            headers.setBasicAuth("user", "password");
+                            headers.setContentType(MediaType.APPLICATION_JSON);
+                        })
                 .build()
                 .get()
                 .uri("/api/posts/comments/{id}", reactiveCommentsId)
@@ -130,13 +144,15 @@ class ReactiveCommentsControllerIT extends AbstractIntegrationTest {
         ReactiveComments reactiveComments = reactiveCommentsFlux.next().block();
         Long reactivePostId = reactiveComments.getPostId();
         ReactiveCommentRequest reactiveCommentRequest =
-                new ReactiveCommentRequest("New Title", "New ReactiveComments", reactivePostId, false);
+                new ReactiveCommentRequest(
+                        "New Title", "New ReactiveComments", reactivePostId, false);
         this.webTestClient
                 .mutate() // Mutate the client to add basic authentication headers
-                .defaultHeaders(headers -> {
-                    headers.setBasicAuth("user", "password");
-                    headers.setContentType(MediaType.APPLICATION_JSON);
-                })
+                .defaultHeaders(
+                        headers -> {
+                            headers.setBasicAuth("user", "password");
+                            headers.setContentType(MediaType.APPLICATION_JSON);
+                        })
                 .build()
                 .post()
                 .uri("/api/posts/comments/")
@@ -149,11 +165,12 @@ class ReactiveCommentsControllerIT extends AbstractIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
                 .jsonPath("$.id")
-                .value(returningId -> {
-                    // Attempt to parse the value as a UUID
-                    UUID uuid = UUID.fromString((String) returningId);
-                    assertThat(uuid).isNotNull();
-                })
+                .value(
+                        returningId -> {
+                            // Attempt to parse the value as a UUID
+                            UUID uuid = UUID.fromString((String) returningId);
+                            assertThat(uuid).isNotNull();
+                        })
                 .jsonPath("$.title")
                 .isEqualTo(reactiveCommentRequest.title())
                 .jsonPath("$.content")
@@ -166,14 +183,16 @@ class ReactiveCommentsControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldReturn400WhenCreateNewReactiveCommentsWithoutTitleAndContent() {
-        ReactiveCommentRequest reactiveCommentRequest = new ReactiveCommentRequest(null, null, -90L, false);
+        ReactiveCommentRequest reactiveCommentRequest =
+                new ReactiveCommentRequest(null, null, -90L, false);
 
         this.webTestClient
                 .mutate() // Mutate the client to add basic authentication headers
-                .defaultHeaders(headers -> {
-                    headers.setBasicAuth("user", "password");
-                    headers.setContentType(MediaType.APPLICATION_JSON);
-                })
+                .defaultHeaders(
+                        headers -> {
+                            headers.setBasicAuth("user", "password");
+                            headers.setContentType(MediaType.APPLICATION_JSON);
+                        })
                 .build()
                 .post()
                 .uri("/api/posts/comments/")
@@ -228,15 +247,20 @@ class ReactiveCommentsControllerIT extends AbstractIntegrationTest {
     void shouldUpdateReactiveComments() {
         ReactiveComments reactiveComments = reactiveCommentsFlux.next().block();
         UUID reactivePostId = reactiveComments.getId();
-        ReactiveCommentRequest reactivePostRequest = new ReactiveCommentRequest(
-                "Updated ReactivePost", reactiveComments.getContent(), reactiveComments.getPostId(), true);
+        ReactiveCommentRequest reactivePostRequest =
+                new ReactiveCommentRequest(
+                        "Updated ReactivePost",
+                        reactiveComments.getContent(),
+                        reactiveComments.getPostId(),
+                        true);
 
         this.webTestClient
                 .mutate() // Mutate the client to add basic authentication headers
-                .defaultHeaders(headers -> {
-                    headers.setBasicAuth("user", "password");
-                    headers.setContentType(MediaType.APPLICATION_JSON);
-                })
+                .defaultHeaders(
+                        headers -> {
+                            headers.setBasicAuth("user", "password");
+                            headers.setContentType(MediaType.APPLICATION_JSON);
+                        })
                 .build()
                 .put()
                 .uri("/api/posts/comments/{id}", reactivePostId)
