@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-mvn liquibase:diff \
+./mvnw liquibase:diff \
  -Dliquibase.diffChangeLogFile=diff.sql \
 
 

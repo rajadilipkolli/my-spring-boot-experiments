@@ -29,7 +29,7 @@ public class ArticleController {
 
     @PostMapping("/")
     public ResponseEntity<Object> saveArticle(@RequestBody ArticleDTO articleDTO) {
-        Integer articleId = this.articleService.saveArticle(articleDTO);
+        Long articleId = this.articleService.saveArticle(articleDTO);
         return ResponseEntity.created(URI.create("/articles/" + articleId)).build();
     }
 }

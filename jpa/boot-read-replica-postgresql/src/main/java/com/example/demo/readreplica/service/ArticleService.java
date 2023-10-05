@@ -22,7 +22,7 @@ public class ArticleService {
     }
 
     @Transactional
-    public Integer saveArticle(ArticleDTO articleDTO) {
+    public Long saveArticle(ArticleDTO articleDTO) {
         Article article = convertToArticle(articleDTO);
         Article savedArticle = this.articleRepository.save(article);
         return savedArticle.getId();

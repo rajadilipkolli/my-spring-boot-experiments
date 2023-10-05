@@ -22,7 +22,7 @@ public class Article {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     @Column(name = "id", nullable = false)
-    private Integer id;
+    private Long id;
 
     @Column(nullable = false)
     private String title;
