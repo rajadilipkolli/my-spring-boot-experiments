@@ -122,7 +122,10 @@ class OrderControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.violations[0].field", is("name")))
                 .andExpect(jsonPath("$.violations[0].message", is("Name cannot be blank")))
                 .andExpect(jsonPath("$.violations[1].field", is("price")))
-                .andExpect(jsonPath("$.violations[1].message", is("Value must be greater than or equal to 0.01")))
+                .andExpect(
+                        jsonPath(
+                                "$.violations[1].message",
+                                is("Value must be greater than or equal to 0.01")))
                 .andReturn();
     }
 
