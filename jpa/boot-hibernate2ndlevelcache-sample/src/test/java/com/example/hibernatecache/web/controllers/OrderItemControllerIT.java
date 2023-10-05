@@ -18,6 +18,7 @@ import com.example.hibernatecache.entities.OrderItem;
 import com.example.hibernatecache.repositories.CustomerRepository;
 import com.example.hibernatecache.repositories.OrderItemRepository;
 import com.example.hibernatecache.repositories.OrderRepository;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -49,7 +50,9 @@ class OrderItemControllerIT extends AbstractIntegrationTest {
                                 "email1@junit.com",
                                 "9876543211",
                                 null));
-        savedOrder = orderRepository.save(new Order(null, "First Order", savedCustomer, null));
+        savedOrder =
+                orderRepository.save(
+                        new Order(null, "First Order", BigDecimal.TEN, savedCustomer, null));
 
         orderItemList = new ArrayList<>();
         orderItemList.add(new OrderItem(null, "First OrderItem", savedOrder));

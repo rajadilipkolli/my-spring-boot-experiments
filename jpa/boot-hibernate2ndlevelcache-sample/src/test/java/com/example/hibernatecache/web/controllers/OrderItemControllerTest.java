@@ -22,6 +22,7 @@ import com.example.hibernatecache.model.response.OrderItemResponse;
 import com.example.hibernatecache.model.response.PagedResult;
 import com.example.hibernatecache.services.OrderItemService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -54,7 +55,7 @@ class OrderItemControllerTest {
         Customer savedCustomer =
                 new Customer(
                         null, "firstName 1", "lastName 1", "email1@junit.com", "9876543211", null);
-        savedOrder = new Order(null, "First Order", savedCustomer, null);
+        savedOrder = new Order(null, "First Order", BigDecimal.TEN, savedCustomer, null);
         this.orderItemList = new ArrayList<>();
         this.orderItemList.add(new OrderItem(1L, "text 1", savedOrder));
         this.orderItemList.add(new OrderItem(2L, "text 2", savedOrder));

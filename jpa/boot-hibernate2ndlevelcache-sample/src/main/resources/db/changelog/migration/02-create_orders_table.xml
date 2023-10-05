@@ -19,7 +19,10 @@
             <column name="id" type="bigint" defaultValueSequenceNext="orders_seq">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
-            <column name="text" type="${string.type}">
+            <column name="name" type="${string.type}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="price" type="java.math.BigDecimal">
                 <constraints nullable="false"/>
             </column>
             <column name="customer_id" type="bigint">

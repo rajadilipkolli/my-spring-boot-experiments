@@ -12,6 +12,7 @@ import com.example.hibernatecache.model.request.OrderRequest;
 import com.example.hibernatecache.model.response.OrderResponse;
 import com.example.hibernatecache.model.response.PagedResult;
 import com.example.hibernatecache.repositories.OrderRepository;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -69,7 +70,7 @@ class OrderServiceTest {
         assertThat(optionalOrder).isPresent();
         OrderResponse order = optionalOrder.get();
         assertThat(order.orderId()).isEqualTo(1L);
-        assertThat(order.text()).isEqualTo("junitTest");
+        assertThat(order.name()).isEqualTo("junitTest");
     }
 
     @Test
@@ -85,11 +86,11 @@ class OrderServiceTest {
         assertThat(persistedOrder).isNotNull();
         assertThat(persistedOrder.customerId()).isEqualTo(1L);
         assertThat(persistedOrder.orderId()).isEqualTo(1L);
-        assertThat(persistedOrder.text()).isEqualTo("junitTest");
+        assertThat(persistedOrder.name()).isEqualTo("junitTest");
     }
 
     private OrderRequest getOrderRequest() {
-        return new OrderRequest(1L, "junitTest");
+        return new OrderRequest(1L, "junitTest", BigDecimal.TEN);
     }
 
     @Test
@@ -105,11 +106,11 @@ class OrderServiceTest {
     private Order getOrder() {
         Order order = new Order();
         order.setId(1L);
-        order.setText("junitTest");
+        order.setName("junitTest");
         return order;
     }
 
     private OrderResponse getOrderResponse() {
-        return new OrderResponse(1L, 1L, "junitTest", new ArrayList<>());
+        return new OrderResponse(1L, 1L, "junitTest", BigDecimal.TEN, new ArrayList<>());
     }
 }
