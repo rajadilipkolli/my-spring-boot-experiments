@@ -1,7 +1,5 @@
 package com.example.mongoes;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 import java.util.Map;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.devtools.restart.RestartScope;
