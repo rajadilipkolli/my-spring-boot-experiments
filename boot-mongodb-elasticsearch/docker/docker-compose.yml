@@ -38,7 +38,7 @@ services:
       - esdata1:/usr/share/elasticsearch/data
 
   kibana:
-    image: docker.elastic.co/kibana/kibana:8.10.3
+    image: docker.elastic.co/kibana/kibana:8.10.4
     restart: always
     ports:
       - "5601:5601"
