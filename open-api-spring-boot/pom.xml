@@ -128,7 +128,7 @@
                             <apiPackage>org.example.openapi.api</apiPackage>
                             <modelPackage>org.example.openapi.model</modelPackage>
                             <supportingFilesToGenerate>
-                               ApiUtil.java,RFC3339DateFormat.java
+                                HomeController.java,SpringDocConfiguration.java,OpenApiGeneratorApplication.java,ApiUtil.java,RFC3339DateFormat.java
                                 <!-- ClientConfiguration.java,ApiKeyRequestInterceptor.java -->
                             </supportingFilesToGenerate>
                             <configOptions>
