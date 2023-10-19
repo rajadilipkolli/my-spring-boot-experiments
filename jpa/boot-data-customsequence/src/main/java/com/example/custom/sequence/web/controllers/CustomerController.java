@@ -1,9 +1,11 @@
 package com.example.custom.sequence.web.controllers;
 
 import com.example.custom.sequence.entities.Customer;
+import com.example.custom.sequence.model.response.CustomerResponse;
 import com.example.custom.sequence.model.response.PagedResult;
 import com.example.custom.sequence.services.CustomerService;
 import com.example.custom.sequence.utils.AppConstants;
+import com.example.custom.sequence.web.api.CustomerAPI;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -23,7 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/customers")
 @Slf4j
-public class CustomerController {
+public class CustomerController implements CustomerAPI {
 
     private final CustomerService customerService;
 
@@ -67,12 +69,13 @@ public class CustomerController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Customer createCustomer(@RequestBody @Validated Customer customer) {
+    @Override
+    public CustomerResponse createCustomer(@RequestBody @Validated Customer customer) {
         return customerService.saveCustomer(customer);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Customer> updateCustomer(
+    public ResponseEntity<CustomerResponse> updateCustomer(
             @PathVariable String id, @RequestBody Customer customer) {
         return customerService
                 .findCustomerById(id)

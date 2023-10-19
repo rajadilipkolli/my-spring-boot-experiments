@@ -16,6 +16,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.example.custom.sequence.entities.Customer;
+import com.example.custom.sequence.model.response.CustomerResponse;
 import com.example.custom.sequence.model.response.PagedResult;
 import com.example.custom.sequence.services.CustomerService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -97,7 +98,7 @@ class CustomerControllerTest {
     @Test
     void shouldCreateNewCustomer() throws Exception {
         given(customerService.saveCustomer(any(Customer.class)))
-                .willAnswer((invocation) -> invocation.getArgument(0));
+                .willReturn(new CustomerResponse("CUS_1", "some text"));
 
         Customer customer = new Customer("CUS_1", "some text", new ArrayList<>());
         this.mockMvc
@@ -138,7 +139,7 @@ class CustomerControllerTest {
         Customer customer = new Customer(customerId, "Updated text", new ArrayList<>());
         given(customerService.findCustomerById(customerId)).willReturn(Optional.of(customer));
         given(customerService.saveCustomer(any(Customer.class)))
-                .willAnswer((invocation) -> invocation.getArgument(0));
+                .willReturn(new CustomerResponse("CUS_1", "Updated text"));
 
         this.mockMvc
                 .perform(

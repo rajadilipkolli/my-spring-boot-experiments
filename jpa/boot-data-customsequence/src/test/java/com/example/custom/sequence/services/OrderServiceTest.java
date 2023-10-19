@@ -8,6 +8,8 @@ import static org.mockito.BDDMockito.willDoNothing;
 
 import com.example.custom.sequence.entities.Customer;
 import com.example.custom.sequence.entities.Order;
+import com.example.custom.sequence.mapper.OrderMapper;
+import com.example.custom.sequence.model.response.CustomerResponse;
 import com.example.custom.sequence.model.response.OrderResponse;
 import com.example.custom.sequence.model.response.PagedResult;
 import com.example.custom.sequence.repositories.OrderRepository;
@@ -28,6 +30,7 @@ import org.springframework.data.domain.Sort;
 class OrderServiceTest {
 
     @Mock private OrderRepository orderRepository;
+    @Mock private OrderMapper orderMapper;
 
     @InjectMocks private OrderService orderService;
 
@@ -57,6 +60,7 @@ class OrderServiceTest {
     void findOrderById() {
         // given
         given(orderRepository.findById("1")).willReturn(Optional.of(getOrder()));
+        given(orderMapper.getOrderResponse(getOrder())).willReturn(getOrderResponse());
         // when
         Optional<OrderResponse> optionalOrder = orderService.findOrderById("1");
         // then
@@ -70,6 +74,7 @@ class OrderServiceTest {
     void saveOrder() {
         // given
         given(orderRepository.save(getOrder())).willReturn(getOrder());
+        given(orderMapper.getOrderResponse(getOrder())).willReturn(getOrderResponse());
         // when
         OrderResponse persistedOrder = orderService.saveOrder(getOrder());
         // then
@@ -97,5 +102,9 @@ class OrderServiceTest {
         customer.setText("custText");
         order.setCustomer(customer);
         return order;
+    }
+
+    private OrderResponse getOrderResponse() {
+        return new OrderResponse("1", "junitText", new CustomerResponse("1", "custText"));
     }
 }

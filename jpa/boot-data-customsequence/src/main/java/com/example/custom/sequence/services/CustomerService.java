@@ -1,6 +1,8 @@
 package com.example.custom.sequence.services;
 
 import com.example.custom.sequence.entities.Customer;
+import com.example.custom.sequence.mapper.CustomerMapper;
+import com.example.custom.sequence.model.response.CustomerResponse;
 import com.example.custom.sequence.model.response.PagedResult;
 import com.example.custom.sequence.repositories.CustomerRepository;
 import java.util.List;
@@ -19,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class CustomerService {
 
     private final CustomerRepository customerRepository;
+    private final CustomerMapper customerMapper;
 
     @Transactional(readOnly = true)
     public PagedResult<Customer> findAllCustomers(
@@ -49,8 +52,9 @@ public class CustomerService {
         return customerRepository.findById(id);
     }
 
-    public Customer saveCustomer(Customer customer) {
-        return customerRepository.save(customer);
+    public CustomerResponse saveCustomer(Customer customer) {
+        Customer saved = customerRepository.save(customer);
+        return customerMapper.mapToResponse(saved);
     }
 
     public void deleteCustomerById(String id) {

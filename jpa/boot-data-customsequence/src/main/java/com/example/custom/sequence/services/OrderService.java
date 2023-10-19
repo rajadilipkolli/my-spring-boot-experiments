@@ -1,13 +1,13 @@
 package com.example.custom.sequence.services;
 
-import com.example.custom.sequence.entities.Customer;
 import com.example.custom.sequence.entities.Order;
-import com.example.custom.sequence.model.response.CustomerDTO;
+import com.example.custom.sequence.mapper.OrderMapper;
 import com.example.custom.sequence.model.response.OrderResponse;
 import com.example.custom.sequence.model.response.PagedResult;
 import com.example.custom.sequence.repositories.OrderRepository;
 import java.util.List;
 import java.util.Optional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -17,13 +17,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class OrderService {
 
     private final OrderRepository orderRepository;
-
-    public OrderService(OrderRepository orderRepository) {
-        this.orderRepository = orderRepository;
-    }
+    private final OrderMapper orderMapper;
 
     public PagedResult<OrderResponse> findAllOrders(
             int pageNo, int pageSize, String sortBy, String sortDir) {
@@ -37,7 +35,7 @@ public class OrderService {
         Page<Order> ordersPage = orderRepository.findAll(pageable);
 
         List<OrderResponse> orderResponseList =
-                ordersPage.getContent().stream().map(this::getOrderDTO).toList();
+                ordersPage.getContent().stream().map(orderMapper::getOrderResponse).toList();
 
         return new PagedResult<>(
                 orderResponseList,
@@ -51,26 +49,14 @@ public class OrderService {
     }
 
     public Optional<OrderResponse> findOrderById(String id) {
-        return convertToOrderDTO(orderRepository.findById(id));
+        return orderRepository.findById(id).map(orderMapper::getOrderResponse);
     }
 
     public OrderResponse saveOrder(Order order) {
-        return getOrderDTO(orderRepository.save(order));
+        return orderMapper.getOrderResponse(orderRepository.save(order));
     }
 
     public void deleteOrderById(String id) {
         orderRepository.deleteById(id);
-    }
-
-    private Optional<OrderResponse> convertToOrderDTO(Optional<Order> optionalOrder) {
-        return optionalOrder.map(this::getOrderDTO);
-    }
-
-    private OrderResponse getOrderDTO(Order order) {
-        Customer customer = order.getCustomer();
-        return new OrderResponse(
-                order.getId(),
-                order.getText(),
-                new CustomerDTO(customer.getId(), customer.getText()));
     }
 }

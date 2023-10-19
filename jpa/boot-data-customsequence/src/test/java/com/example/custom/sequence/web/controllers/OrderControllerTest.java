@@ -17,7 +17,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.example.custom.sequence.entities.Customer;
 import com.example.custom.sequence.entities.Order;
-import com.example.custom.sequence.model.response.CustomerDTO;
+import com.example.custom.sequence.model.response.CustomerResponse;
 import com.example.custom.sequence.model.response.OrderResponse;
 import com.example.custom.sequence.model.response.PagedResult;
 import com.example.custom.sequence.services.OrderService;
@@ -61,9 +61,12 @@ class OrderControllerTest {
     @Test
     void shouldFetchAllOrders() throws Exception {
         List<OrderResponse> orderResponseList = new ArrayList<>();
-        orderResponseList.add(new OrderResponse("1", "text 1", new CustomerDTO("1", "customer1")));
-        orderResponseList.add(new OrderResponse("2", "text 2", new CustomerDTO("1", "customer1")));
-        orderResponseList.add(new OrderResponse("3", "text 3", new CustomerDTO("1", "customer1")));
+        orderResponseList.add(
+                new OrderResponse("1", "text 1", new CustomerResponse("1", "customer1")));
+        orderResponseList.add(
+                new OrderResponse("2", "text 2", new CustomerResponse("1", "customer1")));
+        orderResponseList.add(
+                new OrderResponse("3", "text 3", new CustomerResponse("1", "customer1")));
         Page<OrderResponse> page = new PageImpl<>(orderResponseList);
         PagedResult<OrderResponse> orderPagedResult = new PagedResult<>(page);
         given(orderService.findAllOrders(0, 10, "id", "asc")).willReturn(orderPagedResult);
@@ -86,7 +89,9 @@ class OrderControllerTest {
         String orderId = "1";
         OrderResponse order =
                 new OrderResponse(
-                        orderId, "text 1", new CustomerDTO(customer.getId(), customer.getText()));
+                        orderId,
+                        "text 1",
+                        new CustomerResponse(customer.getId(), customer.getText()));
         given(orderService.findOrderById(orderId)).willReturn(Optional.of(order));
 
         this.mockMvc
@@ -148,7 +153,7 @@ class OrderControllerTest {
                 new OrderResponse(
                         orderId,
                         "Updated text",
-                        new CustomerDTO(customer.getId(), customer.getText()));
+                        new CustomerResponse(customer.getId(), customer.getText()));
         given(orderService.findOrderById(orderId)).willReturn(Optional.of(orderResponse));
         given(orderService.saveOrder(any(Order.class)))
                 .willReturn(new OrderResponse("1", "Updated text", null));
@@ -183,7 +188,7 @@ class OrderControllerTest {
                 new OrderResponse(
                         orderId,
                         "Some text",
-                        new CustomerDTO(customer.getId(), customer.getText()));
+                        new CustomerResponse(customer.getId(), customer.getText()));
         given(orderService.findOrderById(orderId)).willReturn(Optional.of(order));
         doNothing().when(orderService).deleteOrderById(order.id());
 

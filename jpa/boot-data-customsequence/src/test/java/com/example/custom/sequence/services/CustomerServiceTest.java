@@ -7,6 +7,8 @@ import static org.mockito.BDDMockito.verify;
 import static org.mockito.BDDMockito.willDoNothing;
 
 import com.example.custom.sequence.entities.Customer;
+import com.example.custom.sequence.mapper.CustomerMapper;
+import com.example.custom.sequence.model.response.CustomerResponse;
 import com.example.custom.sequence.model.response.PagedResult;
 import com.example.custom.sequence.repositories.CustomerRepository;
 import java.util.List;
@@ -25,6 +27,7 @@ import org.springframework.data.domain.Sort;
 class CustomerServiceTest {
 
     @Mock private CustomerRepository customerRepository;
+    @Mock private CustomerMapper customerMapper;
 
     @InjectMocks private CustomerService customerService;
 
@@ -69,12 +72,13 @@ class CustomerServiceTest {
     void saveCustomer() {
         // given
         given(customerRepository.save(getCustomer())).willReturn(getCustomer());
+        given(customerMapper.mapToResponse(getCustomer())).willReturn(getCustomerResponse());
         // when
-        Customer persistedCustomer = customerService.saveCustomer(getCustomer());
+        CustomerResponse persistedCustomer = customerService.saveCustomer(getCustomer());
         // then
         assertThat(persistedCustomer).isNotNull();
-        assertThat(persistedCustomer.getId()).isEqualTo("CUS_1");
-        assertThat(persistedCustomer.getText()).isEqualTo("junitTest");
+        assertThat(persistedCustomer.id()).isEqualTo("CUS_1");
+        assertThat(persistedCustomer.text()).isEqualTo("junitTest");
     }
 
     @Test
@@ -92,5 +96,9 @@ class CustomerServiceTest {
         customer.setId("CUS_1");
         customer.setText("junitTest");
         return customer;
+    }
+
+    private CustomerResponse getCustomerResponse() {
+        return new CustomerResponse("CUS_1", "junitTest");
     }
 }
