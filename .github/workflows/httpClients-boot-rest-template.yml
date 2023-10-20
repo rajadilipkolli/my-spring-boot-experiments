@@ -1,12 +1,12 @@
-name: spring-boot-httpClients-boot-restclient
+name: httpClients-boot-rest-template
 on:
   push:
     paths:
-      - "httpClients/boot-restclient/**"
+      - "httpClients/boot-rest-template/**"
     branches: [main]
   pull_request:
     paths:
-      - "httpClients/boot-restclient/**"
+      - "httpClients/boot-rest-template/**"
     types:
       - opened
       - synchronize
@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: "httpClients/boot-restclient"
+        working-directory: "httpClients/boot-rest-template"
     steps:
       - uses: actions/checkout@v4
         with:
@@ -30,9 +30,5 @@ jobs:
           java-version: 21
           distribution: "zulu"
           cache: "maven"
-
-      - name: Grant execute permission for mvnw
-        run: chmod +x mvnw
-
       - name: Build and analyze
         run: ./mvnw clean verify

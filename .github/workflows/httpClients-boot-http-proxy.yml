@@ -1,12 +1,12 @@
-name: boot-httpClients-rest-template
+name: httpClients-boot-http-proxy
 on:
   push:
     paths:
-      - "httpClients/boot-rest-template/**"
+      - "httpClients/boot-http-proxy/**"
     branches: [main]
   pull_request:
     paths:
-      - "httpClients/boot-rest-template/**"
+      - "httpClients/boot-http-proxy/**"
     types:
       - opened
       - synchronize
@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: "httpClients/boot-rest-template"
+        working-directory: "httpClients/boot-http-proxy"
     steps:
       - uses: actions/checkout@v4
         with:
