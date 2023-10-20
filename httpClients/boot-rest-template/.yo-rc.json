@@ -1,6 +1,6 @@
 {
   "generator-springboot": {
-    "appName": "rest-template",
+    "appName": "boot-rest-template",
     "packageName": "com.example.rest.template",
     "databaseType": "postgresql",
     "dbMigrationTool": "liquibase",

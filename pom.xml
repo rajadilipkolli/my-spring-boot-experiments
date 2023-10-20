@@ -27,7 +27,7 @@
         <module>graphql/boot-graphql-webmvc</module>
         <module>httpClients/boot-http-proxy</module>
         <module>httpClients/boot-restclient</module>
-        <module>httpClients/rest-template</module>
+        <module>httpClients/boot-rest-template</module>
         <module>httpClients/web-client-mvc</module>
         <module>httpClients/web-client-webflux</module>
         <module>jpa/boot-data-customsequence</module>

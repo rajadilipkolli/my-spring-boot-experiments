@@ -1,4 +1,4 @@
-# rest-template
+# boot-rest-template
 
 
 ## Spring RestTemplate Overview
