@@ -48,8 +48,8 @@ public class CustomerService {
                 customerPage.hasPrevious());
     }
 
-    public Optional<Customer> findCustomerById(String id) {
-        return customerRepository.findById(id);
+    public Optional<CustomerResponse> findCustomerById(String id) {
+        return customerRepository.findById(id).map(customerMapper::mapToResponse);
     }
 
     public CustomerResponse saveCustomer(Customer customer) {

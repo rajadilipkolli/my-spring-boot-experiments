@@ -59,13 +59,14 @@ class CustomerServiceTest {
     void findCustomerById() {
         // given
         given(customerRepository.findById("CUS_1")).willReturn(Optional.of(getCustomer()));
+        given(customerMapper.mapToResponse(getCustomer())).willReturn(getCustomerResponse());
         // when
-        Optional<Customer> optionalCustomer = customerService.findCustomerById("CUS_1");
+        Optional<CustomerResponse> optionalCustomer = customerService.findCustomerById("CUS_1");
         // then
         assertThat(optionalCustomer).isPresent();
-        Customer customer = optionalCustomer.get();
-        assertThat(customer.getId()).isEqualTo("CUS_1");
-        assertThat(customer.getText()).isEqualTo("junitTest");
+        CustomerResponse customer = optionalCustomer.get();
+        assertThat(customer.id()).isEqualTo("CUS_1");
+        assertThat(customer.text()).isEqualTo("junitTest");
     }
 
     @Test

@@ -76,13 +76,13 @@ class CustomerControllerTest {
     @Test
     void shouldFindCustomerById() throws Exception {
         String customerId = "CUS_1";
-        Customer customer = new Customer(customerId, "text 1", new ArrayList<>());
+        CustomerResponse customer = new CustomerResponse(customerId, "text 1");
         given(customerService.findCustomerById(customerId)).willReturn(Optional.of(customer));
 
         this.mockMvc
                 .perform(get("/api/customers/{id}", customerId))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.text", is(customer.getText())));
+                .andExpect(jsonPath("$.text", is(customer.text())));
     }
 
     @Test
@@ -136,18 +136,18 @@ class CustomerControllerTest {
     @Test
     void shouldUpdateCustomer() throws Exception {
         String customerId = "CUS_1";
-        Customer customer = new Customer(customerId, "Updated text", new ArrayList<>());
+        CustomerResponse customer = new CustomerResponse(customerId, "Updated text");
         given(customerService.findCustomerById(customerId)).willReturn(Optional.of(customer));
         given(customerService.saveCustomer(any(Customer.class)))
                 .willReturn(new CustomerResponse("CUS_1", "Updated text"));
 
         this.mockMvc
                 .perform(
-                        put("/api/customers/{id}", customer.getId())
+                        put("/api/customers/{id}", customerId)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(customer)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.text", is(customer.getText())));
+                .andExpect(jsonPath("$.text", is(customer.text())));
     }
 
     @Test
@@ -167,14 +167,14 @@ class CustomerControllerTest {
     @Test
     void shouldDeleteCustomer() throws Exception {
         String customerId = "CUS_1";
-        Customer customer = new Customer(customerId, "Some text", new ArrayList<>());
+        CustomerResponse customer = new CustomerResponse(customerId, "Some text");
         given(customerService.findCustomerById(customerId)).willReturn(Optional.of(customer));
-        doNothing().when(customerService).deleteCustomerById(customer.getId());
+        doNothing().when(customerService).deleteCustomerById(customerId);
 
         this.mockMvc
-                .perform(delete("/api/customers/{id}", customer.getId()))
+                .perform(delete("/api/customers/{id}", customerId))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.text", is(customer.getText())));
+                .andExpect(jsonPath("$.text", is(customer.text())));
     }
 
     @Test

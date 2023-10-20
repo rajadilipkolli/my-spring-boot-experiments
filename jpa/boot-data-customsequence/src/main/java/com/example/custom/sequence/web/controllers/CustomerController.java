@@ -35,6 +35,7 @@ public class CustomerController implements CustomerAPI {
     }
 
     @GetMapping
+    @Override
     public PagedResult<Customer> getAllCustomers(
             @RequestParam(
                             value = "pageNo",
@@ -60,7 +61,8 @@ public class CustomerController implements CustomerAPI {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Customer> getCustomerById(@PathVariable String id) {
+    @Override
+    public ResponseEntity<CustomerResponse> getCustomerById(@PathVariable String id) {
         return customerService
                 .findCustomerById(id)
                 .map(ResponseEntity::ok)
@@ -88,7 +90,7 @@ public class CustomerController implements CustomerAPI {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Customer> deleteCustomer(@PathVariable String id) {
+    public ResponseEntity<CustomerResponse> deleteCustomer(@PathVariable String id) {
         return customerService
                 .findCustomerById(id)
                 .map(

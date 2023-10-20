@@ -9,7 +9,7 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.example.rest.template</groupId>
-    <artifactId>noot-rest-template</artifactId>
+    <artifactId>boot-rest-template</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>boot-rest-template</name>
     <description>boot-rest-template</description>
