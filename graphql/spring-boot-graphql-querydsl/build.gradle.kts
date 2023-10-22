@@ -9,7 +9,7 @@ plugins {
 	id("io.spring.dependency-management") version "1.1.3"
 	id("com.diffplug.spotless") version "6.22.0"
 	id("com.gorylenko.gradle-git-properties") version "2.4.1"
-	id("org.owasp.dependencycheck") version "8.4.0"
+	id("org.owasp.dependencycheck") version "8.4.1"
 	jacoco
 	id("org.sonarqube") version "4.4.1.3373"
 }
