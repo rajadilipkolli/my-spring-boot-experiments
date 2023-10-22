@@ -8,7 +8,7 @@
 * [httpClients](httpClients/README.md)
   * [http-proxy](httpClients/boot-http-proxy/README.md)
   * [rest-client](httpClients/boot-restclient/README.md)
-  * [rest-template](httpClients/rest-template/README.md)
+  * [rest-template](httpClients/boot-rest-template/README.md)
   * [web-client-mvc](httpClients/web-client-mvc/README.md)
   * [web-client-webflux](httpClients/web-client-webflux/README.md)
 * [jmh-benchmark](jmh-benchmark/README.md)
