@@ -5,8 +5,7 @@ import com.example.hibernatecache.model.response.CustomerResponse;
 import com.example.hibernatecache.model.response.PagedResult;
 import com.example.hibernatecache.services.CustomerService;
 import com.example.hibernatecache.utils.AppConstants;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -23,15 +22,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/customers")
-@Slf4j
+@RequiredArgsConstructor
 public class CustomerController {
 
     private final CustomerService customerService;
-
-    @Autowired
-    public CustomerController(CustomerService customerService) {
-        this.customerService = customerService;
-    }
 
     @GetMapping
     public PagedResult<CustomerResponse> getAllCustomers(

@@ -5,8 +5,7 @@ import com.example.hibernatecache.model.response.OrderItemResponse;
 import com.example.hibernatecache.model.response.PagedResult;
 import com.example.hibernatecache.services.OrderItemService;
 import com.example.hibernatecache.utils.AppConstants;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -23,15 +22,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/order/items")
-@Slf4j
+@RequiredArgsConstructor
 public class OrderItemController {
 
     private final OrderItemService orderItemService;
-
-    @Autowired
-    public OrderItemController(OrderItemService orderItemService) {
-        this.orderItemService = orderItemService;
-    }
 
     @GetMapping
     public PagedResult<OrderItemResponse> getAllOrderItems(
@@ -80,7 +74,7 @@ public class OrderItemController {
                 .map(
                         orderItemObj -> {
                             orderItem.setId(id);
-                            return ResponseEntity.ok(orderItemService.saveOrderItem(orderItem));
+                            return ResponseEntity.ok(orderItemService.updateOrder(orderItem));
                         })
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }

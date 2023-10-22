@@ -75,7 +75,7 @@ class OrderItemServiceTest {
     @Test
     void saveOrderItem() {
         // given
-        given(orderItemRepository.save(getOrderItem())).willReturn(getOrderItem());
+        given(orderItemRepository.persist(getOrderItem())).willReturn(getOrderItem());
         given(mapper.orderItemToOrderItemResponse(getOrderItem()))
                 .willReturn(getOrderItemResponse());
         // when

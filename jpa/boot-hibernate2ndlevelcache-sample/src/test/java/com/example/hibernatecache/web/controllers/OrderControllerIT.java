@@ -37,11 +37,11 @@ class OrderControllerIT extends AbstractIntegrationTest {
 
     @BeforeEach
     void setUp() {
-        orderRepository.deleteAllInBatch();
+        orderRepository.deleteAll();
         customerRepository.deleteAll();
 
         savedCustomer =
-                customerRepository.save(
+                customerRepository.persist(
                         new Customer(
                                 null,
                                 "firstName 1",
@@ -53,7 +53,7 @@ class OrderControllerIT extends AbstractIntegrationTest {
         orderList.add(new Order(null, "First Order", BigDecimal.TEN, savedCustomer, null));
         orderList.add(new Order(null, "Second Order", BigDecimal.TEN, savedCustomer, null));
         orderList.add(new Order(null, "Third Order", BigDecimal.TEN, savedCustomer, null));
-        orderList = orderRepository.saveAll(orderList);
+        orderList = orderRepository.persistAll(orderList);
     }
 
     @Test

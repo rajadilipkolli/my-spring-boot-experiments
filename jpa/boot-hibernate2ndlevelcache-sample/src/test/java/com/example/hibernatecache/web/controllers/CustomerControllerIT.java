@@ -44,7 +44,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
         customerList.add(
                 new Customer(
                         null, "firstName 3", "lastName 3", "email3@junit.com", "9876543213", null));
-        customerList = customerRepository.saveAll(customerList);
+        customerList = customerRepository.persistAll(customerList);
     }
 
     @Test

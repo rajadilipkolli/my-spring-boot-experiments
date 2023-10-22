@@ -8,12 +8,16 @@ import com.example.hibernatecache.repositories.CustomerRepository;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@Transactional
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class CustomerService {
 
@@ -32,7 +36,7 @@ public class CustomerService {
         Page<Customer> customersPage = customerRepository.findAll(pageable);
         List<CustomerResponse> customerResponses =
                 mapper.mapToCustomerResponseList(customersPage.getContent());
-        PageImpl<CustomerResponse> customerResponsePage =
+        Page<CustomerResponse> customerResponsePage =
                 new PageImpl<>(customerResponses, pageable, customersPage.getTotalElements());
         return new PagedResult<>(customerResponsePage);
     }
@@ -41,11 +45,13 @@ public class CustomerService {
         return findById(id).map(mapper::mapToCustomerResponse);
     }
 
+    @Transactional
     public CustomerResponse saveCustomer(Customer customer) {
-        Customer saved = customerRepository.save(customer);
+        Customer saved = customerRepository.persist(customer);
         return mapper.mapToCustomerResponse(saved);
     }
 
+    @Transactional
     public void deleteCustomerById(Long id) {
         customerRepository.deleteById(id);
     }
@@ -58,8 +64,10 @@ public class CustomerService {
         return customerRepository.findById(id);
     }
 
+    @Transactional
     public CustomerResponse updateCustomer(Customer customerRequest, Customer savedCustomer) {
         mapper.updateCustomerWithRequest(customerRequest, savedCustomer);
-        return saveCustomer(savedCustomer);
+        Customer updated = customerRepository.update(savedCustomer);
+        return mapper.mapToCustomerResponse(updated);
     }
 }

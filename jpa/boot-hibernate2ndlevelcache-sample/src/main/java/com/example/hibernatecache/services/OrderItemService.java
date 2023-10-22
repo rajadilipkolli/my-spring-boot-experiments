@@ -7,23 +7,22 @@ import com.example.hibernatecache.model.response.PagedResult;
 import com.example.hibernatecache.repositories.OrderItemRepository;
 import java.util.List;
 import java.util.Optional;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.*;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@Transactional
+@Transactional(readOnly = true)
+@RequiredArgsConstructor
 public class OrderItemService {
 
     private final OrderItemRepository orderItemRepository;
     private final Mapper mapper;
-
-    @Autowired
-    public OrderItemService(OrderItemRepository orderItemRepository, Mapper mapper) {
-        this.orderItemRepository = orderItemRepository;
-        this.mapper = mapper;
-    }
 
     public PagedResult<OrderItemResponse> findAllOrderItems(
             int pageNo, int pageSize, String sortBy, String sortDir) {
@@ -46,16 +45,24 @@ public class OrderItemService {
         return findById(id).map(mapper::orderItemToOrderItemResponse);
     }
 
+    @Transactional
     public OrderItemResponse saveOrderItem(OrderItem orderItem) {
-        OrderItem saved = orderItemRepository.save(orderItem);
+        OrderItem saved = orderItemRepository.persist(orderItem);
         return mapper.orderItemToOrderItemResponse(saved);
     }
 
+    @Transactional
     public void deleteOrderItemById(Long id) {
         orderItemRepository.deleteById(id);
     }
 
     public Optional<OrderItem> findById(Long id) {
         return orderItemRepository.findById(id);
+    }
+
+    @Transactional
+    public OrderItemResponse updateOrder(OrderItem orderObj) {
+        OrderItem updated = orderItemRepository.update(orderObj);
+        return mapper.orderItemToOrderItemResponse(updated);
     }
 }

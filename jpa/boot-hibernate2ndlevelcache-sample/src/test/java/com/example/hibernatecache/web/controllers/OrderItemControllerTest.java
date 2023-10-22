@@ -152,7 +152,7 @@ class OrderItemControllerTest {
         Long orderItemId = 1L;
         OrderItem orderItem = new OrderItem(orderItemId, "Updated text", savedOrder);
         given(orderItemService.findById(orderItemId)).willReturn(Optional.of(orderItem));
-        given(orderItemService.saveOrderItem(any(OrderItem.class)))
+        given(orderItemService.updateOrder(any(OrderItem.class)))
                 .willReturn(new OrderItemResponse(orderItemId, "Updated text"));
 
         this.mockMvc

@@ -8,23 +8,22 @@ import com.example.hibernatecache.model.response.PagedResult;
 import com.example.hibernatecache.repositories.OrderRepository;
 import java.util.List;
 import java.util.Optional;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.*;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@Transactional
+@Transactional(readOnly = true)
+@RequiredArgsConstructor
 public class OrderService {
 
     private final OrderRepository orderRepository;
     private final Mapper mapper;
-
-    @Autowired
-    public OrderService(OrderRepository orderRepository, Mapper mapper) {
-        this.orderRepository = orderRepository;
-        this.mapper = mapper;
-    }
 
     public PagedResult<OrderResponse> findAllOrders(
             int pageNo, int pageSize, String sortBy, String sortDir) {
@@ -47,17 +46,14 @@ public class OrderService {
         return findById(id).map(mapper::orderToOrderResponse);
     }
 
+    @Transactional
     public OrderResponse saveOrderRequest(OrderRequest orderRequest) {
-
         Order order = mapper.mapToOrder(orderRequest);
-        return saveOrder(order);
-    }
-
-    private OrderResponse saveOrder(Order order) {
-        Order saved = orderRepository.save(order);
+        Order saved = orderRepository.persist(order);
         return mapper.orderToOrderResponse(saved);
     }
 
+    @Transactional
     public void deleteOrderById(Long id) {
         orderRepository.deleteById(id);
     }
@@ -66,8 +62,10 @@ public class OrderService {
         return orderRepository.findById(id);
     }
 
+    @Transactional
     public OrderResponse updateOrder(Order orderObj, OrderRequest orderRequest) {
         mapper.updateOrderWithRequest(orderRequest, orderObj);
-        return saveOrder(orderObj);
+        Order updated = orderRepository.update(orderObj);
+        return mapper.orderToOrderResponse(updated);
     }
 }

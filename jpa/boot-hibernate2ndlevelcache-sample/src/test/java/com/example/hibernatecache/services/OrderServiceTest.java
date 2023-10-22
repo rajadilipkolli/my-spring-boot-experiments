@@ -77,7 +77,7 @@ class OrderServiceTest {
     void saveOrder() {
         // given
         given(mapper.mapToOrder(getOrderRequest())).willReturn(getOrder());
-        given(orderRepository.save(getOrder())).willReturn(getOrder());
+        given(orderRepository.persist(getOrder())).willReturn(getOrder());
         given(mapper.orderToOrderResponse(getOrder())).willReturn(getOrderResponse());
 
         // when
