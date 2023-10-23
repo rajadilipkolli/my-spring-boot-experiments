@@ -83,6 +83,16 @@
             "projectName": "boot-ultimate-redis",
             "args": "",
             "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-TestApplication<boot-http-proxy>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.example.rest.proxy.TestApplication",
+            "projectName": "boot-http-proxy",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
         }
     ]
 }
