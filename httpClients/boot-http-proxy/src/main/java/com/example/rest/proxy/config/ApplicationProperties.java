@@ -6,6 +6,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @Data
 @ConfigurationProperties("application")
 public class ApplicationProperties {
+
+    private String postServiceUrl;
     private Cors cors = new Cors();
 
     @Data
