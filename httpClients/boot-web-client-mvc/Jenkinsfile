@@ -6,7 +6,7 @@ pipeline {
     }
 
     environment {
-        APPLICATION_NAME = 'web-client-mvc'
+        APPLICATION_NAME = 'boot-web-client-mvc'
     }
 
     stages {

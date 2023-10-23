@@ -28,7 +28,7 @@
         <module>httpClients/boot-http-proxy</module>
         <module>httpClients/boot-restclient</module>
         <module>httpClients/boot-rest-template</module>
-        <module>httpClients/web-client-mvc</module>
+        <module>httpClients/boot-web-client-mvc</module>
         <module>httpClients/web-client-webflux</module>
         <module>jpa/boot-data-customsequence</module>
         <module>jpa/boot-data-multipledatasources</module>

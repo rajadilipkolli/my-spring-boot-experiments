@@ -1,6 +1,6 @@
 {
   "generator-springboot": {
-    "appName": "web-client-mvc",
+    "appName": "boot-web-client-mvc",
     "packageName": "com.example.rest.webclient",
     "databaseType": "postgresql",
     "dbMigrationTool": "flywaydb",
