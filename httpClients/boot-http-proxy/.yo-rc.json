@@ -1,6 +1,6 @@
 {
   "generator-springboot": {
-    "appName": "http-proxy",
+    "appName": "boot-http-proxy",
     "packageName": "com.example.rest.proxy",
     "databaseType": "postgresql",
     "dbMigrationTool": "liquibase",

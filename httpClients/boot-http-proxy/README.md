@@ -1,4 +1,4 @@
-# http-proxy
+# boot-http-proxy
 
 ### Run tests
 `$ ./mvnw clean verify`
