@@ -3,6 +3,7 @@ package com.example.graphql.web.controllers;
 import static com.example.graphql.utils.AppConstants.PROFILE_TEST;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
@@ -10,10 +11,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import com.example.graphql.entities.TagEntity;
+import com.example.graphql.model.request.TagsRequest;
 import com.example.graphql.services.TagService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
@@ -80,18 +81,39 @@ class TagEntityControllerTest {
 
     @Test
     void shouldCreateNewTag() throws Exception {
-        given(tagService.saveTag(any(TagEntity.class)))
-                .willAnswer((invocation) -> invocation.getArgument(0));
 
         TagEntity tagEntity = new TagEntity(1L, "some text", null);
+        TagsRequest tagsRequest = new TagsRequest("some text", null);
+        given(tagService.saveTag("some text", null)).willReturn(tagEntity);
+
         this.mockMvc
                 .perform(
                         post("/api/tags")
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(tagEntity)))
+                                .content(objectMapper.writeValueAsString(tagsRequest)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id", notNullValue()))
                 .andExpect(jsonPath("$.tagName", is(tagEntity.getTagName())));
+    }
+
+    @Test
+    void shouldReturn400WhenCreateNewTagWithoutValidData() throws Exception {
+        TagsRequest tag = new TagsRequest(null, null);
+
+        this.mockMvc
+                .perform(
+                        post("/api/tags")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(tag)))
+                .andExpect(status().isBadRequest())
+                .andExpect(header().string("Content-Type", is("application/problem+json")))
+                .andExpect(jsonPath("$.type", is("about:blank")))
+                .andExpect(jsonPath("$.title", is("Constraint Violation")))
+                .andExpect(jsonPath("$.status", is(400)))
+                .andExpect(jsonPath("$.violations", hasSize(1)))
+                .andExpect(jsonPath("$.violations[0].field", is("tagName")))
+                .andExpect(jsonPath("$.violations[0].message", is("TagName must not be blank")))
+                .andReturn();
     }
 
     @Test

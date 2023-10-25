@@ -1,6 +1,7 @@
 package com.example.graphql.web.controllers;
 
 import com.example.graphql.config.logging.Loggable;
+import com.example.graphql.exception.PostRestControllerException;
 import com.example.graphql.model.request.NewPostRequest;
 import com.example.graphql.model.response.PostResponse;
 import com.example.graphql.services.PostService;
@@ -37,7 +38,7 @@ public class PostController {
         return postService
                 .findPostById(id)
                 .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+                .orElseThrow(() -> new PostRestControllerException(id));
     }
 
     @PostMapping
@@ -52,7 +53,7 @@ public class PostController {
         return postService
                 .updatePost(id, newPostRequest)
                 .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+                .orElseThrow(() -> new PostRestControllerException(id));
     }
 
     @DeleteMapping("/{id}")
@@ -64,6 +65,6 @@ public class PostController {
                             postService.deletePostById(id);
                             return ResponseEntity.accepted().build();
                         })
-                .orElseGet(() -> ResponseEntity.notFound().build());
+                .orElseThrow(() -> new PostRestControllerException(id));
     }
 }

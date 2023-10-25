@@ -2,15 +2,14 @@ package com.example.graphql.web.controllers;
 
 import static com.example.graphql.utils.AppConstants.PROFILE_TEST;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import com.example.graphql.entities.PostCommentEntity;
 import com.example.graphql.model.request.PostCommentRequest;
@@ -122,6 +121,32 @@ class PostCommentEntityControllerTest {
                 .andExpect(jsonPath("$.commentId", is(100)))
                 .andExpect(jsonPath("$.title", is(postCommentResponse.title())))
                 .andExpect(jsonPath("$.content", is(postCommentResponse.content())));
+    }
+
+    @Test
+    void shouldReturn400WhenCreateNewPostCommentWithoutText() throws Exception {
+        PostCommentRequest postComment = new PostCommentRequest(null, null, -100L, null);
+
+        this.mockMvc
+                .perform(
+                        post("/api/postcomments")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(postComment)))
+                .andExpect(status().isBadRequest())
+                .andExpect(header().string("Content-Type", is("application/problem+json")))
+                .andExpect(jsonPath("$.type", is("about:blank")))
+                .andExpect(jsonPath("$.title", is("Constraint Violation")))
+                .andExpect(jsonPath("$.status", is(400)))
+                .andExpect(jsonPath("$.violations", hasSize(3)))
+                .andExpect(jsonPath("$.violations[0].field", is("content")))
+                .andExpect(
+                        jsonPath("$.violations[0].message", is("CommentContent must not be blank")))
+                .andExpect(jsonPath("$.violations[1].field", is("postId")))
+                .andExpect(jsonPath("$.violations[1].message", is("PostId must be greater than 0")))
+                .andExpect(jsonPath("$.violations[2].field", is("title")))
+                .andExpect(
+                        jsonPath("$.violations[2].message", is("CommentTitle must not be blank")))
+                .andReturn();
     }
 
     @Test

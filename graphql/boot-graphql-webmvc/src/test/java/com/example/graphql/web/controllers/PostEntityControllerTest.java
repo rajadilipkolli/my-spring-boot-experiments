@@ -2,6 +2,7 @@ package com.example.graphql.web.controllers;
 
 import static com.example.graphql.utils.AppConstants.PROFILE_TEST;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
@@ -9,8 +10,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import com.example.graphql.entities.PostEntity;
 import com.example.graphql.model.request.NewPostRequest;
@@ -26,6 +26,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -82,7 +83,18 @@ class PostEntityControllerTest {
         Long postId = 1L;
         given(postService.findPostById(postId)).willReturn(Optional.empty());
 
-        this.mockMvc.perform(get("/api/posts/{id}", postId)).andExpect(status().isNotFound());
+        this.mockMvc
+                .perform(get("/api/posts/{id}", postId))
+                .andExpect(status().isNotFound())
+                .andExpect(
+                        header().string(
+                                        HttpHeaders.CONTENT_TYPE,
+                                        is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
+                .andExpect(jsonPath("$.type", is("about:blank")))
+                .andExpect(jsonPath("$.title", is("Not Found")))
+                .andExpect(jsonPath("$.status", is(404)))
+                .andExpect(jsonPath("$.detail", is("Post: 1 was not found.")))
+                .andExpect(jsonPath("$.instance", is("/api/posts/1")));
     }
 
     @Test
@@ -104,6 +116,30 @@ class PostEntityControllerTest {
                                 .content(objectMapper.writeValueAsString(postEntity)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.content", is(postEntity.content())));
+    }
+
+    @Test
+    void shouldReturn400WhenCreateNewPostWithoutValidData() throws Exception {
+        NewPostRequest post = new NewPostRequest(null, null, null, false, null, null);
+
+        this.mockMvc
+                .perform(
+                        post("/api/posts")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(post)))
+                .andExpect(status().isBadRequest())
+                .andExpect(header().string("Content-Type", is("application/problem+json")))
+                .andExpect(jsonPath("$.type", is("about:blank")))
+                .andExpect(jsonPath("$.title", is("Constraint Violation")))
+                .andExpect(jsonPath("$.status", is(400)))
+                .andExpect(jsonPath("$.violations", hasSize(3)))
+                .andExpect(jsonPath("$.violations[0].field", is("content")))
+                .andExpect(jsonPath("$.violations[0].message", is("PostContent must not be blank")))
+                .andExpect(jsonPath("$.violations[1].field", is("email")))
+                .andExpect(jsonPath("$.violations[1].message", is("Email must not be blank")))
+                .andExpect(jsonPath("$.violations[2].field", is("title")))
+                .andExpect(jsonPath("$.violations[2].message", is("PostTitle must not be blank")))
+                .andReturn();
     }
 
     @Test
@@ -141,7 +177,16 @@ class PostEntityControllerTest {
                         put("/api/posts/{id}", postId)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(postEntity)))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound())
+                .andExpect(
+                        header().string(
+                                        HttpHeaders.CONTENT_TYPE,
+                                        is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
+                .andExpect(jsonPath("$.type", is("about:blank")))
+                .andExpect(jsonPath("$.title", is("Not Found")))
+                .andExpect(jsonPath("$.status", is(404)))
+                .andExpect(jsonPath("$.detail", is("Post: 1 was not found.")))
+                .andExpect(jsonPath("$.instance", is("/api/posts/1")));
     }
 
     @Test
@@ -161,6 +206,17 @@ class PostEntityControllerTest {
         Long postId = 1L;
         given(postService.findPostById(postId)).willReturn(Optional.empty());
 
-        this.mockMvc.perform(delete("/api/posts/{id}", postId)).andExpect(status().isNotFound());
+        this.mockMvc
+                .perform(delete("/api/posts/{id}", postId))
+                .andExpect(status().isNotFound())
+                .andExpect(
+                        header().string(
+                                        HttpHeaders.CONTENT_TYPE,
+                                        is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
+                .andExpect(jsonPath("$.type", is("about:blank")))
+                .andExpect(jsonPath("$.title", is("Not Found")))
+                .andExpect(jsonPath("$.status", is(404)))
+                .andExpect(jsonPath("$.detail", is("Post: 1 was not found.")))
+                .andExpect(jsonPath("$.instance", is("/api/posts/1")));
     }
 }

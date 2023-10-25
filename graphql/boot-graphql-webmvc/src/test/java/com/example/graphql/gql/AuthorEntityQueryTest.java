@@ -5,6 +5,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.springframework.graphql.execution.ErrorType.NOT_FOUND;
 
 import com.example.graphql.config.graphql.GraphQlConfiguration;
 import com.example.graphql.model.response.AuthorResponse;
@@ -14,6 +15,7 @@ import com.example.graphql.services.PostService;
 import com.example.graphql.services.TagService;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.graphql.GraphQlTest;
@@ -77,6 +79,28 @@ class AuthorEntityQueryTest {
                         names -> assertThat(names).containsAll(List.of("firstName", "secondName")));
 
         verify(authorService, times(1)).findAllAuthors();
+        verifyNoMoreInteractions(authorService);
+    }
+
+    @Test
+    void testFindAuthorByEmailId() {
+        given(authorService.findAuthorByEmailId("junit@email.com")).willReturn(Optional.empty());
+        graphQlTester
+                .documentName("findAuthorByEmail")
+                .variable("emailId", "junit@email.com")
+                .execute()
+                .errors()
+                .satisfy(
+                        responseErrors -> {
+                            assertThat(responseErrors.size()).isEqualTo(1);
+                            assertThat(responseErrors.get(0).getPath())
+                                    .isEqualTo("findAuthorByEmailId");
+                            assertThat(responseErrors.get(0).getErrorType()).isEqualTo(NOT_FOUND);
+                            assertThat(responseErrors.get(0).getMessage())
+                                    .isEqualTo("Author: junit@email.com was not found.");
+                        });
+
+        verify(authorService, times(1)).findAuthorByEmailId("junit@email.com");
         verifyNoMoreInteractions(authorService);
     }
 }

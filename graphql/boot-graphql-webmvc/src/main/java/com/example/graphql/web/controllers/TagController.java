@@ -2,6 +2,7 @@ package com.example.graphql.web.controllers;
 
 import com.example.graphql.config.logging.Loggable;
 import com.example.graphql.entities.TagEntity;
+import com.example.graphql.model.request.TagsRequest;
 import com.example.graphql.services.TagService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -41,8 +42,8 @@ public class TagController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public TagEntity createTag(@RequestBody @Validated TagEntity tagEntity) {
-        return tagService.saveTag(tagEntity);
+    public TagEntity createTag(@RequestBody @Validated TagsRequest tagsRequest) {
+        return tagService.saveTag(tagsRequest.tagName(), tagsRequest.tagDescription());
     }
 
     @PutMapping("/{id}")

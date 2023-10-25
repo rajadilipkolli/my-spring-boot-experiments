@@ -1,6 +1,7 @@
 package com.example.graphql.gql;
 
 import com.example.graphql.entities.TagEntity;
+import com.example.graphql.exception.AuthorRestControllerException;
 import com.example.graphql.model.request.AuthorRequest;
 import com.example.graphql.model.response.AuthorResponse;
 import com.example.graphql.model.response.PostCommentResponse;
@@ -13,7 +14,6 @@ import jakarta.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -93,8 +93,10 @@ public class AuthorGraphQlController {
     }
 
     @QueryMapping
-    public Optional<AuthorResponse> findAuthorByEmailId(@Argument("email") String email) {
-        return this.authorService.findAuthorByEmailId(email);
+    public AuthorResponse findAuthorByEmailId(@Argument("email") String email) {
+        return this.authorService
+                .findAuthorByEmailId(email)
+                .orElseThrow(() -> new AuthorRestControllerException(email));
     }
 
     @MutationMapping

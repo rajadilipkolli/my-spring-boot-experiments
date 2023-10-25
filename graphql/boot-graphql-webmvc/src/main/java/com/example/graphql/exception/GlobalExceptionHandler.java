@@ -1,4 +1,4 @@
-package com.example.restclient.bootrestclient.config;
+package com.example.graphql.exception;
 
 import java.util.Comparator;
 import java.util.List;
@@ -34,12 +34,24 @@ public class GlobalExceptionHandler {
                                             fieldError.getObjectName(),
                                             fieldError.getField(),
                                             fieldError.getRejectedValue(),
-                                            Objects.requireNonNull(fieldError.getDefaultMessage()));
+                                            Objects.requireNonNull(
+                                                    fieldError.getDefaultMessage(), ""));
                                 })
                         .sorted(Comparator.comparing(ApiValidationError::field))
                         .toList();
         problemDetail.setProperty("violations", validationErrorsList);
         return problemDetail;
+    }
+
+    @ExceptionHandler(Exception.class)
+    ProblemDetail onException(Exception exception) {
+        if (exception instanceof RestControllerException restControllerException) {
+            return ProblemDetail.forStatusAndDetail(
+                    restControllerException.getHttpStatus(), restControllerException.getMessage());
+        } else {
+            return ProblemDetail.forStatusAndDetail(
+                    HttpStatusCode.valueOf(500), exception.getMessage());
+        }
     }
 
     record ApiValidationError(String object, String field, Object rejectedValue, String message) {}

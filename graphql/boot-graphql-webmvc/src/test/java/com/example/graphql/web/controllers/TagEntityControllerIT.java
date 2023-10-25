@@ -10,6 +10,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.example.graphql.common.AbstractIntegrationTest;
 import com.example.graphql.entities.TagEntity;
+import com.example.graphql.model.request.TagsRequest;
 import com.example.graphql.repositories.TagRepository;
 import java.util.ArrayList;
 import java.util.List;
@@ -56,14 +57,15 @@ class TagEntityControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldCreateNewTag() throws Exception {
-        TagEntity tagEntity = new TagEntity(null, "New Tag", null);
+        TagsRequest tagEntity = new TagsRequest("New Tag", null);
         this.mockMvc
                 .perform(
                         post("/api/tags")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(tagEntity)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.tagName", is(tagEntity.getTagName())));
+                .andExpect(jsonPath("$.tagName", is(tagEntity.tagName())))
+                .andExpect(jsonPath("$.tagDescription", is(tagEntity.tagDescription())));
     }
 
     @Test

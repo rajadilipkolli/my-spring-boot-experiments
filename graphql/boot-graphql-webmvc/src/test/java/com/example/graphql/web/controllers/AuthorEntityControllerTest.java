@@ -3,14 +3,14 @@ package com.example.graphql.web.controllers;
 import static com.example.graphql.utils.AppConstants.PROFILE_TEST;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import com.example.graphql.entities.AuthorEntity;
 import com.example.graphql.model.request.AuthorRequest;
@@ -26,6 +26,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -117,7 +118,18 @@ class AuthorEntityControllerTest {
         Long authorId = 1L;
         given(authorService.findAuthorById(authorId)).willReturn(Optional.empty());
 
-        this.mockMvc.perform(get("/api/authors/{id}", authorId)).andExpect(status().isNotFound());
+        this.mockMvc
+                .perform(get("/api/authors/{id}", authorId))
+                .andExpect(status().isNotFound())
+                .andExpect(
+                        header().string(
+                                        HttpHeaders.CONTENT_TYPE,
+                                        is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
+                .andExpect(jsonPath("$.type", is("about:blank")))
+                .andExpect(jsonPath("$.title", is("Not Found")))
+                .andExpect(jsonPath("$.status", is(404)))
+                .andExpect(jsonPath("$.detail", is("Author: 1 was not found.")))
+                .andExpect(jsonPath("$.instance", is("/api/authors/1")));
     }
 
     @Test
@@ -147,6 +159,32 @@ class AuthorEntityControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.registeredAt", notNullValue()))
                 .andExpect(jsonPath("$.firstName", is(authorRequest.firstName())));
+    }
+
+    @Test
+    void shouldReturn400WhenCreateNewAuthorWithoutValidData() throws Exception {
+        AuthorRequest authorRequest = new AuthorRequest(null, null, null, null, null);
+
+        this.mockMvc
+                .perform(
+                        post("/api/authors")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(authorRequest)))
+                .andExpect(status().isBadRequest())
+                .andExpect(header().string("Content-Type", is("application/problem+json")))
+                .andExpect(jsonPath("$.type", is("about:blank")))
+                .andExpect(jsonPath("$.title", is("Constraint Violation")))
+                .andExpect(jsonPath("$.status", is(400)))
+                .andExpect(jsonPath("$.detail", is("Invalid request content.")))
+                .andExpect(jsonPath("$.instance", is("/api/authors")))
+                .andExpect(jsonPath("$.violations", hasSize(3)))
+                .andExpect(jsonPath("$.violations[0].field", is("email")))
+                .andExpect(jsonPath("$.violations[0].message", is("Email Cant be Blank")))
+                .andExpect(jsonPath("$.violations[1].field", is("firstName")))
+                .andExpect(jsonPath("$.violations[1].message", is("FirstName Cant be Blank")))
+                .andExpect(jsonPath("$.violations[2].field", is("lastName")))
+                .andExpect(jsonPath("$.violations[2].message", is("LastName Cant be Blank")))
+                .andReturn();
     }
 
     @Test
@@ -202,7 +240,16 @@ class AuthorEntityControllerTest {
                         put("/api/authors/{id}", authorId)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(authorRequest)))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound())
+                .andExpect(
+                        header().string(
+                                        HttpHeaders.CONTENT_TYPE,
+                                        is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
+                .andExpect(jsonPath("$.type", is("about:blank")))
+                .andExpect(jsonPath("$.title", is("Not Found")))
+                .andExpect(jsonPath("$.status", is(404)))
+                .andExpect(jsonPath("$.detail", is("Author: 100 was not found.")))
+                .andExpect(jsonPath("$.instance", is("/api/authors/100")));
     }
 
     @Test
@@ -233,6 +280,15 @@ class AuthorEntityControllerTest {
 
         this.mockMvc
                 .perform(delete("/api/authors/{id}", authorId))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound())
+                .andExpect(
+                        header().string(
+                                        HttpHeaders.CONTENT_TYPE,
+                                        is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
+                .andExpect(jsonPath("$.type", is("about:blank")))
+                .andExpect(jsonPath("$.title", is("Not Found")))
+                .andExpect(jsonPath("$.status", is(404)))
+                .andExpect(jsonPath("$.detail", is("Author: 1 was not found.")))
+                .andExpect(jsonPath("$.instance", is("/api/authors/1")));
     }
 }

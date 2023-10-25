@@ -1,3 +1,5 @@
 package com.example.graphql.model.request;
 
-public record PostDetailsRequest(String detailsKey) {}
+import jakarta.validation.constraints.NotBlank;
+
+public record PostDetailsRequest(@NotBlank(message = "Key must not be blank") String detailsKey) {}
