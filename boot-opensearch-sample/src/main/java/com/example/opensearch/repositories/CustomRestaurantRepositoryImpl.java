@@ -207,10 +207,11 @@ public class CustomRestaurantRepositoryImpl implements CustomRestaurantRepositor
     private void addDateRange(DateRangeAggregationBuilder dateRangeBuilder) {
         ZonedDateTime zonedDateTime =
                 ZonedDateTime.now().withDayOfMonth(1).toLocalDate().atStartOfDay(ZoneId.of("UTC"));
-        dateRangeBuilder.addUnboundedTo(zonedDateTime.minusMonths(12));
-        for (int i = 12; i > 0; i--) {
+        dateRangeBuilder.addUnboundedTo(zonedDateTime.minusMonths(12L));
+        for (long i = 12; i > 0; i--) {
             dateRangeBuilder.addRange(
-                    zonedDateTime.minusMonths(i), zonedDateTime.minusMonths(i - 1).minusSeconds(1));
+                    zonedDateTime.minusMonths(i),
+                    zonedDateTime.minusMonths(i - 1L).minusSeconds(1L));
         }
         dateRangeBuilder.addUnboundedFrom(zonedDateTime);
     }
