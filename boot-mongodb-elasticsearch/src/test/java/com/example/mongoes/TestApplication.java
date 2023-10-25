@@ -17,7 +17,7 @@ public class TestApplication {
     @Bean
     @RestartScope
     ElasticsearchContainer elasticsearchContainer() {
-        return new ElasticsearchContainer("docker.elastic.co/elasticsearch/elasticsearch:8.10.3")
+        return new ElasticsearchContainer("docker.elastic.co/elasticsearch/elasticsearch:8.10.4")
                 .withEnv(Map.of("xpack.security.enabled", "false"));
     }
 

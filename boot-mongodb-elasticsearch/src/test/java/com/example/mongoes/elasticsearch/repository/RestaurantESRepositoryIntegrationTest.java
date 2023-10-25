@@ -1,15 +1,16 @@
 package com.example.mongoes.elasticsearch.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 
 import com.example.mongoes.common.AbstractIntegrationTest;
 import com.example.mongoes.document.Address;
 import com.example.mongoes.document.Grades;
 import com.example.mongoes.document.Restaurant;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -36,7 +37,7 @@ class RestaurantESRepositoryIntegrationTest extends AbstractIntegrationTest {
     @Autowired private RestaurantESRepository restaurantESRepository;
 
     @BeforeAll
-    void setUpData() throws InterruptedException {
+    void setUpData() {
         Restaurant restaurant = new Restaurant();
         restaurant.setRestaurantId(2L);
         restaurant.setName(RESTAURANT_NAME);
@@ -61,7 +62,10 @@ class RestaurantESRepositoryIntegrationTest extends AbstractIntegrationTest {
                 .log("saving restaurant")
                 .subscribe();
 
-        TimeUnit.SECONDS.sleep(5);
+        await().atMost(Duration.ofSeconds(10))
+                .pollInterval(Duration.ofSeconds(1))
+                .untilAsserted(
+                        () -> assertThat(this.restaurantESRepository.count().block()).isEqualTo(2));
     }
 
     @Test
