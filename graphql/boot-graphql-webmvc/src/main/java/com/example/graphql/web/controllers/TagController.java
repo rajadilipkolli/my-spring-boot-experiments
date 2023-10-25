@@ -2,6 +2,7 @@ package com.example.graphql.web.controllers;
 
 import com.example.graphql.config.logging.Loggable;
 import com.example.graphql.entities.TagEntity;
+import com.example.graphql.exception.TagNotFoundException;
 import com.example.graphql.model.request.TagsRequest;
 import com.example.graphql.services.TagService;
 import java.util.List;
@@ -37,7 +38,7 @@ public class TagController {
         return tagService
                 .findTagById(id)
                 .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+                .orElseThrow(() -> new TagNotFoundException(id));
     }
 
     @PostMapping
@@ -56,7 +57,7 @@ public class TagController {
                             tagEntity.setId(id);
                             return ResponseEntity.ok(tagService.saveTag(tagEntity));
                         })
-                .orElseGet(() -> ResponseEntity.notFound().build());
+                .orElseThrow(() -> new TagNotFoundException(id));
     }
 
     @DeleteMapping("/{id}")
@@ -68,6 +69,6 @@ public class TagController {
                             tagService.deleteTagById(id);
                             return ResponseEntity.ok(tag);
                         })
-                .orElseGet(() -> ResponseEntity.notFound().build());
+                .orElseThrow(() -> new TagNotFoundException(id));
     }
 }

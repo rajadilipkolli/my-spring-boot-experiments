@@ -1,6 +1,7 @@
 package com.example.graphql.gql;
 
 import com.example.graphql.entities.TagEntity;
+import com.example.graphql.exception.TagNotFoundException;
 import com.example.graphql.services.TagService;
 import jakarta.validation.constraints.NotBlank;
 import java.util.List;
@@ -27,8 +28,10 @@ public class TagGraphQLController {
     }
 
     @QueryMapping
-    public Optional<TagEntity> findTagByName(@Argument("tagName") String tagName) {
-        return this.tagService.findTagByName(tagName);
+    public TagEntity findTagByName(@Argument("tagName") String tagName) {
+        return this.tagService
+                .findTagByName(tagName)
+                .orElseThrow(() -> new TagNotFoundException(tagName));
     }
 
     @MutationMapping

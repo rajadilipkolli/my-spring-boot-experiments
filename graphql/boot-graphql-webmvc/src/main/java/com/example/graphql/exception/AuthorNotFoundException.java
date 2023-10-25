@@ -2,13 +2,13 @@ package com.example.graphql.exception;
 
 import org.springframework.http.HttpStatus;
 
-public class AuthorRestControllerException extends RestControllerException {
+public class AuthorNotFoundException extends RestControllerException {
 
-    public AuthorRestControllerException(Long id) {
+    public AuthorNotFoundException(Long id) {
         super("Author: " + id + " was not found.", HttpStatus.NOT_FOUND);
     }
 
-    public AuthorRestControllerException(String email) {
+    public AuthorNotFoundException(String email) {
         super("Author: " + email + " was not found.", HttpStatus.NOT_FOUND);
     }
 }

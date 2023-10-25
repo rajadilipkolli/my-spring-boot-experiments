@@ -1,7 +1,7 @@
 package com.example.graphql.web.controllers;
 
 import com.example.graphql.config.logging.Loggable;
-import com.example.graphql.exception.AuthorRestControllerException;
+import com.example.graphql.exception.AuthorNotFoundException;
 import com.example.graphql.model.request.AuthorRequest;
 import com.example.graphql.model.response.AuthorResponse;
 import com.example.graphql.services.AuthorService;
@@ -38,7 +38,7 @@ public class AuthorController {
         return authorService
                 .findAuthorById(id)
                 .map(ResponseEntity::ok)
-                .orElseThrow(() -> new AuthorRestControllerException(id));
+                .orElseThrow(() -> new AuthorNotFoundException(id));
     }
 
     @PostMapping
@@ -53,7 +53,7 @@ public class AuthorController {
         return authorService
                 .updateAuthor(authorRequest, id)
                 .map(ResponseEntity::ok)
-                .orElseThrow(() -> new AuthorRestControllerException(id));
+                .orElseThrow(() -> new AuthorNotFoundException(id));
     }
 
     @DeleteMapping("/{id}")
@@ -65,6 +65,6 @@ public class AuthorController {
                             authorService.deleteAuthorById(id);
                             return ResponseEntity.ok(author);
                         })
-                .orElseThrow(() -> new AuthorRestControllerException(id));
+                .orElseThrow(() -> new AuthorNotFoundException(id));
     }
 }

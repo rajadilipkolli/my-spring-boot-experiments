@@ -1,7 +1,7 @@
 package com.example.graphql.gql;
 
 import com.example.graphql.entities.TagEntity;
-import com.example.graphql.exception.AuthorRestControllerException;
+import com.example.graphql.exception.AuthorNotFoundException;
 import com.example.graphql.model.request.AuthorRequest;
 import com.example.graphql.model.response.AuthorResponse;
 import com.example.graphql.model.response.PostCommentResponse;
@@ -96,7 +96,7 @@ public class AuthorGraphQlController {
     public AuthorResponse findAuthorByEmailId(@Argument("email") String email) {
         return this.authorService
                 .findAuthorByEmailId(email)
-                .orElseThrow(() -> new AuthorRestControllerException(email));
+                .orElseThrow(() -> new AuthorNotFoundException(email));
     }
 
     @MutationMapping

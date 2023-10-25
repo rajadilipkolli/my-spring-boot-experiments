@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -76,7 +77,18 @@ class TagEntityControllerTest {
         Long tagId = 1L;
         given(tagService.findTagById(tagId)).willReturn(Optional.empty());
 
-        this.mockMvc.perform(get("/api/tags/{id}", tagId)).andExpect(status().isNotFound());
+        this.mockMvc
+                .perform(get("/api/tags/{id}", tagId))
+                .andExpect(status().isNotFound())
+                .andExpect(
+                        header().string(
+                                        HttpHeaders.CONTENT_TYPE,
+                                        is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
+                .andExpect(jsonPath("$.type", is("about:blank")))
+                .andExpect(jsonPath("$.title", is("Not Found")))
+                .andExpect(jsonPath("$.status", is(404)))
+                .andExpect(jsonPath("$.detail", is("Tag: 1 was not found.")))
+                .andExpect(jsonPath("$.instance", is("/api/tags/1")));
     }
 
     @Test
@@ -144,7 +156,16 @@ class TagEntityControllerTest {
                         put("/api/tags/{id}", tagId)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(tagEntity)))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound())
+                .andExpect(
+                        header().string(
+                                        HttpHeaders.CONTENT_TYPE,
+                                        is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
+                .andExpect(jsonPath("$.type", is("about:blank")))
+                .andExpect(jsonPath("$.title", is("Not Found")))
+                .andExpect(jsonPath("$.status", is(404)))
+                .andExpect(jsonPath("$.detail", is("Tag: 1 was not found.")))
+                .andExpect(jsonPath("$.instance", is("/api/tags/1")));
     }
 
     @Test
@@ -165,6 +186,17 @@ class TagEntityControllerTest {
         Long tagId = 1L;
         given(tagService.findTagById(tagId)).willReturn(Optional.empty());
 
-        this.mockMvc.perform(delete("/api/tags/{id}", tagId)).andExpect(status().isNotFound());
+        this.mockMvc
+                .perform(delete("/api/tags/{id}", tagId))
+                .andExpect(status().isNotFound())
+                .andExpect(
+                        header().string(
+                                        HttpHeaders.CONTENT_TYPE,
+                                        is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
+                .andExpect(jsonPath("$.type", is("about:blank")))
+                .andExpect(jsonPath("$.title", is("Not Found")))
+                .andExpect(jsonPath("$.status", is(404)))
+                .andExpect(jsonPath("$.detail", is("Tag: 1 was not found.")))
+                .andExpect(jsonPath("$.instance", is("/api/tags/1")));
     }
 }
