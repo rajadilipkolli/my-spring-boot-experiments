@@ -1,0 +1,13 @@
+{
+  "generator-springboot": {
+    "appName": "boot-data-keyset-pagination",
+    "packageName": "com.example.keysetpagination",
+    "databaseType": "postgresql",
+    "dbMigrationTool": "liquibase",
+    "dbMigrationFormat": "xml",
+    "features": [],
+    "buildTool": "maven",
+    "packageFolder": "com/example/keysetpagination",
+    "liquibaseMigrationCounter": 2
+  }
+}

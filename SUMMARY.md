@@ -18,6 +18,7 @@
   * [r2dbc-boot](r2dbc/boot-r2dbc-sample/README.md)
 * [jpa](jpa/README.md)
   * [Custom Sequence](jpa/boot-data-customsequence/README.md)
+  * [KeySet Pagination](jpa/boot-data-keyset-pagination/README.md)
   * [spring-boot-multipledatasources](jpa/boot-data-multipledatasources/README.md)
   * [spring-boot-data-envers-sample](jpa/boot-data-envers/README.md)
   * [MultiTenancy using Hibernate in Spring Data JPA](jpa/multitenancy/README.md)

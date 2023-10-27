@@ -31,6 +31,7 @@
         <module>httpClients/boot-web-client-mvc</module>
         <module>httpClients/web-client-webflux</module>
         <module>jpa/boot-data-customsequence</module>
+        <module>jpa/boot-data-keyset-pagination</module>
         <module>jpa/boot-data-multipledatasources</module>
         <module>jpa/boot-hibernate2ndlevelcache-sample</module>
         <module>jpa/boot-read-replica-postgresql</module>
