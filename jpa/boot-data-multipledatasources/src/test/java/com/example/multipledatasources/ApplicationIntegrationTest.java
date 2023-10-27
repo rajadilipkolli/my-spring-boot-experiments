@@ -24,11 +24,11 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 class ApplicationIntegrationTest {
 
     @Container
-    private static final MySQLContainer<?> MY_SQL_CONTAINER = new MySQLContainer<>("mysql:8.0");
+    private static final MySQLContainer<?> MY_SQL_CONTAINER = new MySQLContainer<>("mysql:8.2");
 
     @Container
     private static final PostgreSQLContainer<?> POSTGRE_SQL_CONTAINER =
-            new PostgreSQLContainer<>("postgres:15.3-alpine");
+            new PostgreSQLContainer<>("postgres:16.0-alpine");
 
     @DynamicPropertySource
     static void registerDynamicProperties(DynamicPropertyRegistry registry) {
