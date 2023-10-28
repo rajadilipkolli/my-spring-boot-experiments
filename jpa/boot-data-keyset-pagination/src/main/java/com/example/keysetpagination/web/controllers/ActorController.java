@@ -53,17 +53,51 @@ public class ActorController {
                             defaultValue = AppConstants.DEFAULT_SORT_DIRECTION,
                             required = false)
                     String sortDir,
-            @RequestParam(value = "prevPage", required = false) Integer prevPage,
             @RequestParam(value = "maxResults", required = false) Integer maxResults,
             @RequestParam(value = "lowest", required = false) Long lowest,
-            @RequestParam(value = "highest", required = false) Long highest,
-            @RequestParam(name = "filter", required = false) final ActorsFilter[] actorsFilter) {
+            @RequestParam(value = "highest", required = false) Long highest) {
 
         FindActorsQuery findActorsQuery =
-                new FindActorsQuery(
-                        pageNo, pageSize, prevPage, maxResults, lowest, highest, sortBy, sortDir);
+                new FindActorsQuery(pageNo, pageSize, maxResults, lowest, highest, sortBy, sortDir);
 
-        return actorService.findAll(actorsFilter, findActorsQuery);
+        return actorService.findAll(findActorsQuery);
+    }
+
+    @PostMapping("/search")
+    public PagedResult<ActorResponse> searchActors(
+            @RequestParam(
+                            value = "pageNo",
+                            defaultValue = AppConstants.DEFAULT_PAGE_NUMBER,
+                            required = false)
+                    int pageNo,
+            @RequestParam(
+                            value = "pageSize",
+                            defaultValue = AppConstants.DEFAULT_PAGE_SIZE,
+                            required = false)
+                    int pageSize,
+            @RequestParam(
+                            value = "sortBy",
+                            defaultValue = AppConstants.DEFAULT_SORT_BY,
+                            required = false)
+                    String sortBy,
+            @RequestParam(
+                            value = "sortDir",
+                            defaultValue = AppConstants.DEFAULT_SORT_DIRECTION,
+                            required = false)
+                    String sortDir,
+            @RequestParam(
+                            value = "maxResults",
+                            defaultValue = AppConstants.DEFAULT_PAGE_SIZE,
+                            required = false)
+                    Integer maxResults,
+            @RequestParam(value = "lowest", required = false) Long lowest,
+            @RequestParam(value = "highest", required = false) Long highest,
+            @RequestBody ActorsFilter[] actorsFilters) {
+
+        FindActorsQuery findActorsQuery =
+                new FindActorsQuery(pageNo, pageSize, maxResults, lowest, highest, sortBy, sortDir);
+
+        return actorService.findAll(actorsFilters, findActorsQuery);
     }
 
     @GetMapping("/{id}")

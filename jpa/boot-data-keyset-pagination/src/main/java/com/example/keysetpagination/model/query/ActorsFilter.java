@@ -4,8 +4,10 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.Getter;
+import lombok.Setter;
 
 @Getter
+@Setter
 public class ActorsFilter {
 
     private Kind kind;
@@ -13,14 +15,6 @@ public class ActorsFilter {
     private List<String> values;
 
     public ActorsFilter() {}
-
-    public void setKind(Kind kind) {
-        this.kind = kind;
-    }
-
-    public void setField(String field) {
-        this.field = field;
-    }
 
     @JsonIgnore
     public String getValue() {
@@ -70,11 +64,7 @@ public class ActorsFilter {
         values.set(1, high);
     }
 
-    public void setValues(List<String> values) {
-        this.values = values;
-    }
-
-    public static enum Kind {
+    public enum Kind {
         EQ,
         LT,
         GT,

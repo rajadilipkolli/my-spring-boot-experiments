@@ -34,7 +34,7 @@ class ActorControllerIT extends AbstractIntegrationTest {
 
     @BeforeEach
     void setUp() {
-        actorRepository.deleteAllInBatch();
+        actorRepository.deleteAll();
 
         actorList = new ArrayList<>();
         actorList.add(new Actor(null, "First Actor", LocalDate.now()));
@@ -72,7 +72,6 @@ class ActorControllerIT extends AbstractIntegrationTest {
                                 .param("pageNo", "2")
                                 .param("pageSize", "2")
                                 .param("sortDir", "desc")
-                                .param("prevPage", String.valueOf(pagedResult.pageNumber()))
                                 .param("maxResults", "2")
                                 .param(
                                         "lowest",

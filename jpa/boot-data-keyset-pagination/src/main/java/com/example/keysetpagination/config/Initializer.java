@@ -21,7 +21,7 @@ public class Initializer implements CommandLineRunner {
     public void run(String... args) {
         log.info("Running Initializer.....");
         List<Actor> actorList =
-                LongStream.rangeClosed(1, 30)
+                LongStream.rangeClosed(1, 50)
                         .mapToObj(
                                 actorId -> {
                                     Actor actor = new Actor();
