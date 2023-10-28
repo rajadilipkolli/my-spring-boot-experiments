@@ -7,25 +7,8 @@ import java.util.Objects;
 @Table(name = "phoneType")
 public class PhoneType extends Base {
 
-    private static final long serialVersionUID = 1697687804373017457L;
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "id", nullable = false)
-    private Long id;
-
     @Column(nullable = false, length = 250)
     private String name;
-
-    @Override
-    public Long getId() {
-        return id;
-    }
-
-    @Override
-    public void setId(Long id) {
-        this.id = id;
-    }
 
     public String getName() {
         return name;

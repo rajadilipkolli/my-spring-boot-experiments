@@ -13,8 +13,6 @@ import java.util.Objects;
 @Table(name = "client")
 public class Client extends Base {
 
-    private static final long serialVersionUID = -2974615880078954663L;
-
     @Column(nullable = false, length = 100)
     private String firstname;
 

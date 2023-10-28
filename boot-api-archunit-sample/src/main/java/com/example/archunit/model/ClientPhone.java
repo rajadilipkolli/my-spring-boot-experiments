@@ -11,8 +11,6 @@ import java.util.Objects;
 @Table(name = "clientPhone")
 public class ClientPhone extends Base {
 
-    private static final long serialVersionUID = 1396542167093193958L;
-
     @Column(nullable = false, length = 80)
     private String number;
 

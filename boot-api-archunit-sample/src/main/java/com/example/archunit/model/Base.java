@@ -6,17 +6,18 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.Version;
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Objects;
 
 @MappedSuperclass
 public abstract class Base implements Serializable {
 
-    private static final long serialVersionUID = -2053886894431223968L;
+    @Serial protected static final long serialVersionUID = -2053886894431223968L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    protected Long id;
 
     @Version
     @Column(nullable = false)

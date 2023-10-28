@@ -9,8 +9,6 @@ import java.util.Objects;
 @Table(name = "emailType")
 public class EmailType extends Base {
 
-    private static final long serialVersionUID = 1697687804373017457L;
-
     @Column(nullable = false, length = 250)
     private String name;
 

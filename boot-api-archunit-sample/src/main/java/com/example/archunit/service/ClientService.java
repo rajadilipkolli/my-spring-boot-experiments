@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class ClientService {
 
-    ClientRepository clientRepository;
+    private final ClientRepository clientRepository;
 
     @Autowired
     public ClientService(ClientRepository clientRepository) {
