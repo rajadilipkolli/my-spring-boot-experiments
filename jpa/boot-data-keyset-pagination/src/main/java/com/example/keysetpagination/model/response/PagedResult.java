@@ -1,35 +1,33 @@
 package com.example.keysetpagination.model.response;
 
-import com.blazebit.persistence.PagedList;
-import java.util.Arrays;
+import com.blazebit.persistence.spring.data.repository.KeysetAwarePage;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 
 public record PagedResult<T>(
-        List<T> content,
+        List<T> data,
+        long totalElements,
+        int pageNumber,
         int totalPages,
-        int firstResult,
-        int pageNo,
-        int pageSize,
-        long totalSize,
-        int maxResults,
+        @JsonProperty("isFirst") boolean isFirst,
+        @JsonProperty("isLast") boolean isLast,
+        @JsonProperty("hasNext") boolean hasNext,
+        @JsonProperty("hasPrevious") boolean hasPrevious,
         KeySetPageResponse keySetPageResponse) {
-    public PagedResult(PagedList<T> page) {
+    public PagedResult(KeysetAwarePage<T> page) {
         this(
-                page,
+                page.getContent(),
+                page.getTotalElements(),
+                page.getNumber() + 1,
                 page.getTotalPages(),
-                page.getFirstResult(),
-                page.getPage(),
-                page.getSize(),
-                page.getTotalSize(),
-                page.getMaxResults(),
+                page.isFirst(),
+                page.isLast(),
+                page.hasNext(),
+                page.hasPrevious(),
                 new KeySetPageResponse(
                         page.getKeysetPage().getMaxResults(),
                         page.getKeysetPage().getFirstResult(),
-                        Arrays.stream(page.getKeysetPage().getLowest().getTuple())
-                                .map(String::valueOf)
-                                .toList(),
-                        Arrays.stream(page.getKeysetPage().getHighest().getTuple())
-                                .map(String::valueOf)
-                                .toList()));
+                        (Long) page.getKeysetPage().getLowest().getTuple()[0],
+                        (Long) page.getKeysetPage().getHighest().getTuple()[0]));
     }
 }

@@ -47,15 +47,18 @@ class ActorControllerIT extends AbstractIntegrationTest {
     void shouldFetchAllActors() throws Exception {
         String contentAsString =
                 this.mockMvc
-                        .perform(get("/api/actors?pageSize=2"))
+                        .perform(get("/api/actors?pageNo=0&pageSize=2&sortDir=desc"))
                         .andExpect(status().isOk())
-                        .andExpect(jsonPath("$.content.size()", is(2)))
+                        .andExpect(jsonPath("$.data.size()", is(2)))
+                        .andExpect(jsonPath("$.totalElements", is(3)))
+                        .andExpect(jsonPath("$.pageNumber", is(1)))
                         .andExpect(jsonPath("$.totalPages", is(2)))
-                        .andExpect(jsonPath("$.firstResult", is(0)))
-                        .andExpect(jsonPath("$.pageNo", is(1)))
-                        .andExpect(jsonPath("$.pageSize", is(2)))
-                        .andExpect(jsonPath("$.totalSize", is(3)))
+                        .andExpect(jsonPath("$.isFirst", is(true)))
+                        .andExpect(jsonPath("$.isLast", is(false)))
+                        .andExpect(jsonPath("$.hasNext", is(true)))
+                        .andExpect(jsonPath("$.hasPrevious", is(false)))
                         .andExpect(jsonPath("$.keySetPageResponse.maxResults", is(2)))
+                        .andExpect(jsonPath("$.keySetPageResponse.firstResult", is(0)))
                         .andReturn()
                         .getResponse()
                         .getContentAsString();
@@ -65,34 +68,29 @@ class ActorControllerIT extends AbstractIntegrationTest {
 
         this.mockMvc
                 .perform(
-                        get("/api/actors/next")
+                        get("/api/actors")
+                                .param("pageNo", "1")
                                 .param("pageSize", "2")
-                                .param("pageNo", String.valueOf(pagedResult.pageNo()))
-                                .param("firstResult", String.valueOf(pagedResult.firstResult()))
-                                .param(
-                                        "maxResults",
-                                        String.valueOf(
-                                                pagedResult.keySetPageResponse().maxResults()))
+                                .param("sortDir", "desc")
+                                .param("prevPage", String.valueOf(pagedResult.pageNumber()))
+                                .param("maxResults", "2")
                                 .param(
                                         "lowest",
-                                        pagedResult
-                                                .keySetPageResponse()
-                                                .lowest()
-                                                .toArray(String[]::new))
+                                        String.valueOf(pagedResult.keySetPageResponse().lowest()))
                                 .param(
                                         "highest",
-                                        pagedResult
-                                                .keySetPageResponse()
-                                                .highest()
-                                                .toArray(String[]::new)))
+                                        String.valueOf(pagedResult.keySetPageResponse().highest())))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content.size()", is(2)))
+                .andExpect(jsonPath("$.data.size()", is(1)))
+                .andExpect(jsonPath("$.totalElements", is(3)))
+                .andExpect(jsonPath("$.pageNumber", is(2)))
                 .andExpect(jsonPath("$.totalPages", is(2)))
-                .andExpect(jsonPath("$.firstResult", is(2)))
-                .andExpect(jsonPath("$.pageNo", is(2)))
-                .andExpect(jsonPath("$.pageSize", is(2)))
-                .andExpect(jsonPath("$.totalSize", is(4)))
-                .andExpect(jsonPath("$.keySetPageResponse.maxResults", is(2)));
+                .andExpect(jsonPath("$.isFirst", is(false)))
+                .andExpect(jsonPath("$.isLast", is(true)))
+                .andExpect(jsonPath("$.hasNext", is(false)))
+                .andExpect(jsonPath("$.hasPrevious", is(true)))
+                .andExpect(jsonPath("$.keySetPageResponse.maxResults", is(2)))
+                .andExpect(jsonPath("$.keySetPageResponse.firstResult", is(2)));
     }
 
     @Test

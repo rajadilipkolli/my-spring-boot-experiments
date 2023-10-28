@@ -1,6 +1,7 @@
 package com.example.keysetpagination.web.controllers;
 
 import com.example.keysetpagination.exception.ActorNotFoundException;
+import com.example.keysetpagination.model.query.ActorsFilter;
 import com.example.keysetpagination.model.query.FindActorsQuery;
 import com.example.keysetpagination.model.request.ActorRequest;
 import com.example.keysetpagination.model.response.ActorResponse;
@@ -10,7 +11,6 @@ import com.example.keysetpagination.utils.AppConstants;
 import jakarta.validation.Valid;
 import java.net.URI;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -26,36 +26,18 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @RestController
 @RequestMapping("/api/actors")
-@Slf4j
 @RequiredArgsConstructor
 public class ActorController {
 
     private final ActorService actorService;
 
     @GetMapping
-    public PagedResult<ActorResponse> getLatestPosts(
+    public PagedResult<ActorResponse> findAllActors(
             @RequestParam(
-                            value = "pageSize",
-                            defaultValue = AppConstants.DEFAULT_PAGE_SIZE,
+                            value = "pageNo",
+                            defaultValue = AppConstants.DEFAULT_PAGE_NUMBER,
                             required = false)
-                    int pageSize,
-            @RequestParam(
-                            value = "sortBy",
-                            defaultValue = AppConstants.DEFAULT_SORT_BY,
-                            required = false)
-                    String sortBy,
-            @RequestParam(
-                            value = "sortDir",
-                            defaultValue = AppConstants.DEFAULT_SORT_DIRECTION,
-                            required = false)
-                    String sortDir) {
-        FindActorsQuery findActorsQuery = new FindActorsQuery(pageSize, sortBy, sortDir);
-        return actorService.firstLatestPosts(findActorsQuery);
-    }
-
-    @GetMapping("/next")
-    public PagedResult<ActorResponse> getNextLatestPosts(
-            @RequestParam int pageNo,
+                    int pageNo,
             @RequestParam(
                             value = "pageSize",
                             defaultValue = AppConstants.DEFAULT_PAGE_SIZE,
@@ -71,21 +53,17 @@ public class ActorController {
                             defaultValue = AppConstants.DEFAULT_SORT_DIRECTION,
                             required = false)
                     String sortDir,
-            @RequestParam int firstResult,
-            @RequestParam int maxResults,
-            @RequestParam Long lowest,
-            @RequestParam Long highest) {
+            @RequestParam(value = "prevPage", required = false) Integer prevPage,
+            @RequestParam(value = "maxResults", required = false) Integer maxResults,
+            @RequestParam(value = "lowest", required = false) Long lowest,
+            @RequestParam(value = "highest", required = false) Long highest,
+            @RequestParam(name = "filter", required = false) final ActorsFilter[] actorsFilter) {
+
         FindActorsQuery findActorsQuery =
                 new FindActorsQuery(
-                        pageNo,
-                        pageSize,
-                        firstResult,
-                        maxResults,
-                        lowest,
-                        highest,
-                        sortBy,
-                        sortDir);
-        return actorService.findNextLatestPosts(findActorsQuery);
+                        pageNo, pageSize, prevPage, maxResults, lowest, highest, sortBy, sortDir);
+
+        return actorService.findAll(actorsFilter, findActorsQuery);
     }
 
     @GetMapping("/{id}")

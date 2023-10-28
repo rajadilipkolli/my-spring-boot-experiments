@@ -27,7 +27,11 @@ public class Initializer implements CommandLineRunner {
                                     Actor actor = new Actor();
                                     actor.setId(actorId);
                                     actor.setText(String.format("Actor - %d", actorId));
-                                    actor.setCreatedOn(LocalDate.now().minusDays(actorId));
+                                    if (actorId % 2 == 0) {
+                                        actor.setCreatedOn(LocalDate.now().minusDays(actorId));
+                                    } else {
+                                        actor.setCreatedOn(LocalDate.now());
+                                    }
                                     return actor;
                                 })
                         .toList();
