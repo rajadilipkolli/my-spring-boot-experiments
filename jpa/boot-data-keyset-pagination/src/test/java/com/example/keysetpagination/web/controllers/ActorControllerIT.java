@@ -69,7 +69,7 @@ class ActorControllerIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(
                         get("/api/actors")
-                                .param("pageNo", "1")
+                                .param("pageNo", "2")
                                 .param("pageSize", "2")
                                 .param("sortDir", "desc")
                                 .param("prevPage", String.valueOf(pagedResult.pageNumber()))
