@@ -18,12 +18,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.example.keysetpagination.entities.Actor;
 import com.example.keysetpagination.exception.ActorNotFoundException;
-import com.example.keysetpagination.model.query.FindActorsQuery;
 import com.example.keysetpagination.model.request.ActorRequest;
 import com.example.keysetpagination.model.response.ActorResponse;
-import com.example.keysetpagination.model.response.PagedResult;
 import com.example.keysetpagination.services.ActorService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -32,8 +31,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
@@ -54,36 +51,15 @@ class ActorControllerTest {
     @BeforeEach
     void setUp() {
         this.actorList = new ArrayList<>();
-        this.actorList.add(new Actor(1L, "text 1"));
-        this.actorList.add(new Actor(2L, "text 2"));
-        this.actorList.add(new Actor(3L, "text 3"));
-    }
-
-    @Test
-    void shouldFetchAllActors() throws Exception {
-
-        Page<ActorResponse> page = new PageImpl<>(getActorResponseList());
-        PagedResult<ActorResponse> actorPagedResult = new PagedResult<>(page);
-        FindActorsQuery findActorsQuery = new FindActorsQuery(0, 10, "id", "asc");
-        given(actorService.findAllActors(findActorsQuery)).willReturn(actorPagedResult);
-
-        this.mockMvc
-                .perform(get("/api/actors"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.size()", is(actorList.size())))
-                .andExpect(jsonPath("$.totalElements", is(3)))
-                .andExpect(jsonPath("$.pageNumber", is(1)))
-                .andExpect(jsonPath("$.totalPages", is(1)))
-                .andExpect(jsonPath("$.isFirst", is(true)))
-                .andExpect(jsonPath("$.isLast", is(true)))
-                .andExpect(jsonPath("$.hasNext", is(false)))
-                .andExpect(jsonPath("$.hasPrevious", is(false)));
+        this.actorList.add(new Actor(1L, "text 1", LocalDate.now()));
+        this.actorList.add(new Actor(2L, "text 2", LocalDate.now()));
+        this.actorList.add(new Actor(3L, "text 3", LocalDate.now()));
     }
 
     @Test
     void shouldFindActorById() throws Exception {
         Long actorId = 1L;
-        ActorResponse actor = new ActorResponse(actorId, "text 1");
+        ActorResponse actor = new ActorResponse(actorId, "text 1", LocalDate.now());
         given(actorService.findActorById(actorId)).willReturn(Optional.of(actor));
 
         this.mockMvc
@@ -118,7 +94,7 @@ class ActorControllerTest {
     @Test
     void shouldCreateNewActor() throws Exception {
 
-        ActorResponse actor = new ActorResponse(1L, "some text");
+        ActorResponse actor = new ActorResponse(1L, "some text", LocalDate.now());
         ActorRequest actorRequest = new ActorRequest("some text");
         given(actorService.saveActor(any(ActorRequest.class))).willReturn(actor);
 
@@ -158,7 +134,7 @@ class ActorControllerTest {
     @Test
     void shouldUpdateActor() throws Exception {
         Long actorId = 1L;
-        ActorResponse actor = new ActorResponse(actorId, "Updated text");
+        ActorResponse actor = new ActorResponse(actorId, "Updated text", LocalDate.now());
         ActorRequest actorRequest = new ActorRequest("Updated text");
         given(actorService.updateActor(eq(actorId), any(ActorRequest.class))).willReturn(actor);
 
@@ -203,7 +179,7 @@ class ActorControllerTest {
     @Test
     void shouldDeleteActor() throws Exception {
         Long actorId = 1L;
-        ActorResponse actor = new ActorResponse(actorId, "Some text");
+        ActorResponse actor = new ActorResponse(actorId, "Some text", LocalDate.now());
         given(actorService.findActorById(actorId)).willReturn(Optional.of(actor));
         doNothing().when(actorService).deleteActorById(actorId);
 
@@ -237,7 +213,10 @@ class ActorControllerTest {
 
     List<ActorResponse> getActorResponseList() {
         return actorList.stream()
-                .map(actor -> new ActorResponse(actor.getId(), actor.getText()))
+                .map(
+                        actor ->
+                                new ActorResponse(
+                                        actor.getId(), actor.getText(), actor.getCreatedOn()))
                 .toList();
     }
 }

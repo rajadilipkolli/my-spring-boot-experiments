@@ -1,3 +1,5 @@
 package com.example.keysetpagination.model.response;
 
-public record ActorResponse(Long id, String text) {}
+import java.time.LocalDate;
+
+public record ActorResponse(Long id, String text, LocalDate createdOn) {}

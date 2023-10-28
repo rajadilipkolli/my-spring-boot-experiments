@@ -20,6 +20,9 @@
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="text" type="${string.type}">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="created_on" type="date">
                 <constraints nullable="false"/>
             </column>
         </createTable>

@@ -11,6 +11,7 @@ import com.example.keysetpagination.entities.Actor;
 import com.example.keysetpagination.mapper.ActorMapper;
 import com.example.keysetpagination.model.response.ActorResponse;
 import com.example.keysetpagination.repositories.ActorRepository;
+import java.time.LocalDate;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -54,10 +55,11 @@ class ActorServiceTest {
         Actor actor = new Actor();
         actor.setId(1L);
         actor.setText("junitTest");
+        actor.setCreatedOn(LocalDate.now());
         return actor;
     }
 
     private ActorResponse getActorResponse() {
-        return new ActorResponse(1L, "junitTest");
+        return new ActorResponse(1L, "junitTest", LocalDate.now());
     }
 }

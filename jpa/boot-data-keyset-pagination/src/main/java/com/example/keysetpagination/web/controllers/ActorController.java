@@ -33,12 +33,7 @@ public class ActorController {
     private final ActorService actorService;
 
     @GetMapping
-    public PagedResult<ActorResponse> getAllActors(
-            @RequestParam(
-                            value = "pageNo",
-                            defaultValue = AppConstants.DEFAULT_PAGE_NUMBER,
-                            required = false)
-                    int pageNo,
+    public PagedResult<ActorResponse> getLatestPosts(
             @RequestParam(
                             value = "pageSize",
                             defaultValue = AppConstants.DEFAULT_PAGE_SIZE,
@@ -54,8 +49,43 @@ public class ActorController {
                             defaultValue = AppConstants.DEFAULT_SORT_DIRECTION,
                             required = false)
                     String sortDir) {
-        FindActorsQuery findActorsQuery = new FindActorsQuery(pageNo, pageSize, sortBy, sortDir);
-        return actorService.findAllActors(findActorsQuery);
+        FindActorsQuery findActorsQuery = new FindActorsQuery(pageSize, sortBy, sortDir);
+        return actorService.firstLatestPosts(findActorsQuery);
+    }
+
+    @GetMapping("/next")
+    public PagedResult<ActorResponse> getNextLatestPosts(
+            @RequestParam int pageNo,
+            @RequestParam(
+                            value = "pageSize",
+                            defaultValue = AppConstants.DEFAULT_PAGE_SIZE,
+                            required = false)
+                    int pageSize,
+            @RequestParam(
+                            value = "sortBy",
+                            defaultValue = AppConstants.DEFAULT_SORT_BY,
+                            required = false)
+                    String sortBy,
+            @RequestParam(
+                            value = "sortDir",
+                            defaultValue = AppConstants.DEFAULT_SORT_DIRECTION,
+                            required = false)
+                    String sortDir,
+            @RequestParam int firstResult,
+            @RequestParam int maxResults,
+            @RequestParam Long lowest,
+            @RequestParam Long highest) {
+        FindActorsQuery findActorsQuery =
+                new FindActorsQuery(
+                        pageNo,
+                        pageSize,
+                        firstResult,
+                        maxResults,
+                        lowest,
+                        highest,
+                        sortBy,
+                        sortDir);
+        return actorService.findNextLatestPosts(findActorsQuery);
     }
 
     @GetMapping("/{id}")

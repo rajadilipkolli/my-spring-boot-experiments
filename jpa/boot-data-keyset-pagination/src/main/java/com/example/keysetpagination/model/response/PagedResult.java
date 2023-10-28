@@ -1,27 +1,35 @@
 package com.example.keysetpagination.model.response;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.blazebit.persistence.PagedList;
+import java.util.Arrays;
 import java.util.List;
-import org.springframework.data.domain.Page;
 
 public record PagedResult<T>(
-        List<T> data,
-        long totalElements,
-        int pageNumber,
+        List<T> content,
         int totalPages,
-        @JsonProperty("isFirst") boolean isFirst,
-        @JsonProperty("isLast") boolean isLast,
-        @JsonProperty("hasNext") boolean hasNext,
-        @JsonProperty("hasPrevious") boolean hasPrevious) {
-    public PagedResult(Page<T> page) {
+        int firstResult,
+        int pageNo,
+        int pageSize,
+        long totalSize,
+        int maxResults,
+        KeySetPageResponse keySetPageResponse) {
+    public PagedResult(PagedList<T> page) {
         this(
-                page.getContent(),
-                page.getTotalElements(),
-                page.getNumber() + 1,
+                page,
                 page.getTotalPages(),
-                page.isFirst(),
-                page.isLast(),
-                page.hasNext(),
-                page.hasPrevious());
+                page.getFirstResult(),
+                page.getPage(),
+                page.getSize(),
+                page.getTotalSize(),
+                page.getMaxResults(),
+                new KeySetPageResponse(
+                        page.getKeysetPage().getMaxResults(),
+                        page.getKeysetPage().getFirstResult(),
+                        Arrays.stream(page.getKeysetPage().getLowest().getTuple())
+                                .map(String::valueOf)
+                                .toList(),
+                        Arrays.stream(page.getKeysetPage().getHighest().getTuple())
+                                .map(String::valueOf)
+                                .toList()));
     }
 }
