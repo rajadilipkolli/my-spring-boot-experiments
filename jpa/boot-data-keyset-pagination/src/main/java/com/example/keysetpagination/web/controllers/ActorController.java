@@ -53,12 +53,11 @@ public class ActorController {
                             defaultValue = AppConstants.DEFAULT_SORT_DIRECTION,
                             required = false)
                     String sortDir,
-            @RequestParam(value = "maxResults", required = false) Integer maxResults,
             @RequestParam(value = "lowest", required = false) Long lowest,
             @RequestParam(value = "highest", required = false) Long highest) {
 
         FindActorsQuery findActorsQuery =
-                new FindActorsQuery(pageNo, pageSize, maxResults, lowest, highest, sortBy, sortDir);
+                new FindActorsQuery(pageNo, pageSize, lowest, highest, sortBy, sortDir);
 
         return actorService.findAll(findActorsQuery);
     }
@@ -85,17 +84,12 @@ public class ActorController {
                             defaultValue = AppConstants.DEFAULT_SORT_DIRECTION,
                             required = false)
                     String sortDir,
-            @RequestParam(
-                            value = "maxResults",
-                            defaultValue = AppConstants.DEFAULT_PAGE_SIZE,
-                            required = false)
-                    Integer maxResults,
             @RequestParam(value = "lowest", required = false) Long lowest,
             @RequestParam(value = "highest", required = false) Long highest,
             @RequestBody ActorsFilter[] actorsFilters) {
 
         FindActorsQuery findActorsQuery =
-                new FindActorsQuery(pageNo, pageSize, maxResults, lowest, highest, sortBy, sortDir);
+                new FindActorsQuery(pageNo, pageSize, lowest, highest, sortBy, sortDir);
 
         return actorService.findAll(actorsFilters, findActorsQuery);
     }

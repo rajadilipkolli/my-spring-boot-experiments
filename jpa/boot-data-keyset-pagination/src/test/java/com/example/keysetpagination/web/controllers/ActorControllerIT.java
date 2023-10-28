@@ -72,7 +72,6 @@ class ActorControllerIT extends AbstractIntegrationTest {
                                 .param("pageNo", "2")
                                 .param("pageSize", "2")
                                 .param("sortDir", "desc")
-                                .param("maxResults", "2")
                                 .param(
                                         "lowest",
                                         String.valueOf(pagedResult.keySetPageResponse().lowest()))

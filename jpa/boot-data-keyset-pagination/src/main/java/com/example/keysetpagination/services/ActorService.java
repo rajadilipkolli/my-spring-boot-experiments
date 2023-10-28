@@ -110,9 +110,7 @@ public class ActorService {
         KeysetPage keysetPage =
                 new DefaultKeysetPage(
                         findActorsQuery.pageNo() - 1,
-                        findActorsQuery.maxResults() == null
-                                ? findActorsQuery.pageSize()
-                                : findActorsQuery.maxResults(),
+                        findActorsQuery.pageSize(),
                         () -> new Serializable[] {findActorsQuery.lowest()},
                         () -> new Serializable[] {findActorsQuery.highest()});
         return new KeysetPageRequest(
