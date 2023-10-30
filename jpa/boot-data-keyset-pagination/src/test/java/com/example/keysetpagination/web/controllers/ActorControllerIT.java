@@ -14,7 +14,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.example.keysetpagination.common.AbstractIntegrationTest;
 import com.example.keysetpagination.entities.Actor;
 import com.example.keysetpagination.model.request.ActorRequest;
-import com.example.keysetpagination.model.response.ActorResponse;
 import com.example.keysetpagination.model.response.PagedResult;
 import com.example.keysetpagination.repositories.ActorRepository;
 import java.time.LocalDate;
@@ -63,8 +62,7 @@ class ActorControllerIT extends AbstractIntegrationTest {
                         .getResponse()
                         .getContentAsString();
 
-        PagedResult<ActorResponse> pagedResult =
-                objectMapper.readValue(contentAsString, PagedResult.class);
+        PagedResult pagedResult = objectMapper.readValue(contentAsString, PagedResult.class);
 
         this.mockMvc
                 .perform(
@@ -89,6 +87,45 @@ class ActorControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.hasPrevious", is(true)))
                 .andExpect(jsonPath("$.keySetPageResponse.maxResults", is(2)))
                 .andExpect(jsonPath("$.keySetPageResponse.firstResult", is(2)));
+    }
+
+    @Test
+    void shouldSearchAllActors() throws Exception {
+        this.mockMvc
+                .perform(
+                        post("/api/actors/search?pageNo=0&pageSize=2&sortDir=desc")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(
+                                        """
+                                [
+                                  {
+                                    "kind": "EQ",
+                                    "field": "createdOn",
+                                    "values": [
+                                      "%s"
+                                    ]
+                                  },
+                                  {
+                                    "kind": "ENDS_WITH",
+                                    "field": "title",
+                                    "values": [
+                                      "Actor"
+                                    ]
+                                  }
+                                ]
+                                """
+                                                .formatted(LocalDate.now())))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.size()", is(2)))
+                .andExpect(jsonPath("$.totalElements", is(3)))
+                .andExpect(jsonPath("$.pageNumber", is(1)))
+                .andExpect(jsonPath("$.totalPages", is(2)))
+                .andExpect(jsonPath("$.isFirst", is(true)))
+                .andExpect(jsonPath("$.isLast", is(false)))
+                .andExpect(jsonPath("$.hasNext", is(true)))
+                .andExpect(jsonPath("$.hasPrevious", is(false)))
+                .andExpect(jsonPath("$.keySetPageResponse.maxResults", is(2)))
+                .andExpect(jsonPath("$.keySetPageResponse.firstResult", is(0)));
     }
 
     @Test

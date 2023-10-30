@@ -30,4 +30,17 @@ public record PagedResult<T>(
                         (Long) page.getKeysetPage().getLowest().getTuple()[0],
                         (Long) page.getKeysetPage().getHighest().getTuple()[0]));
     }
+
+    public <R> PagedResult<R> toResponseRecord(List<R> data) {
+        return new PagedResult<>(
+                data,
+                totalElements,
+                pageNumber,
+                totalPages,
+                isFirst,
+                isLast,
+                hasNext,
+                hasPrevious,
+                keySetPageResponse);
+    }
 }

@@ -15,7 +15,6 @@ import com.example.keysetpagination.model.query.ActorsFilter;
 import com.example.keysetpagination.model.query.FindActorsQuery;
 import com.example.keysetpagination.model.request.ActorRequest;
 import com.example.keysetpagination.model.response.ActorResponse;
-import com.example.keysetpagination.model.response.KeySetPageResponse;
 import com.example.keysetpagination.model.response.PagedResult;
 import com.example.keysetpagination.repositories.ActorRepository;
 import jakarta.persistence.criteria.*;
@@ -84,20 +83,9 @@ public class ActorService {
             KeysetAwarePage<Actor> keysetAwarePage) {
         List<ActorResponse> actorResponseList =
                 actorMapper.toResponseList(keysetAwarePage.getContent());
-        return new PagedResult<>(
-                actorResponseList,
-                keysetAwarePage.getTotalElements(),
-                keysetAwarePage.getNumber() + 1,
-                keysetAwarePage.getTotalPages(),
-                keysetAwarePage.isFirst(),
-                keysetAwarePage.isLast(),
-                keysetAwarePage.hasNext(),
-                keysetAwarePage.hasPrevious(),
-                new KeySetPageResponse(
-                        keysetAwarePage.getKeysetPage().getMaxResults(),
-                        keysetAwarePage.getKeysetPage().getFirstResult(),
-                        (Long) keysetAwarePage.getKeysetPage().getLowest().getTuple()[0],
-                        (Long) keysetAwarePage.getKeysetPage().getHighest().getTuple()[0]));
+        PagedResult<Actor> actorPagedResult = new PagedResult<>(keysetAwarePage);
+
+        return actorPagedResult.toResponseRecord(actorResponseList);
     }
 
     private KeysetPageable createPageable(FindActorsQuery findActorsQuery) {
@@ -125,50 +113,55 @@ public class ActorService {
             List<Predicate> predicates = new ArrayList<>();
             ParserContext parserContext = new ParserContextImpl();
             try {
-                for (ActorsFilter f : actorsFilter) {
-                    SerializableFormat<?> format = FILTER_ATTRIBUTES.get(f.getField());
+                for (ActorsFilter filter : actorsFilter) {
+                    SerializableFormat<?> format = FILTER_ATTRIBUTES.get(filter.getField());
                     if (format != null) {
-                        String[] fieldParts = f.getField().split("\\.");
+                        String[] fieldParts = filter.getField().split("\\.");
                         Path<?> path = root.get(fieldParts[0]);
                         for (int i = 1; i < fieldParts.length; i++) {
                             path = path.get(fieldParts[i]);
                         }
-                        switch (f.getKind()) {
+                        switch (filter.getKind()) {
                             case EQ:
                                 predicates.add(
                                         criteriaBuilder.equal(
-                                                path, format.parse(f.getValue(), parserContext)));
+                                                path,
+                                                format.parse(filter.getValue(), parserContext)));
                                 break;
                             case GT:
                                 predicates.add(
                                         criteriaBuilder.greaterThan(
                                                 (Expression<Comparable>) path,
                                                 (Comparable)
-                                                        format.parse(f.getValue(), parserContext)));
+                                                        format.parse(
+                                                                filter.getValue(), parserContext)));
                                 break;
                             case LT:
                                 predicates.add(
                                         criteriaBuilder.lessThan(
                                                 (Expression<Comparable>) path,
                                                 (Comparable)
-                                                        format.parse(f.getValue(), parserContext)));
+                                                        format.parse(
+                                                                filter.getValue(), parserContext)));
                                 break;
                             case GTE:
                                 predicates.add(
                                         criteriaBuilder.greaterThanOrEqualTo(
                                                 (Expression<Comparable>) path,
                                                 (Comparable)
-                                                        format.parse(f.getValue(), parserContext)));
+                                                        format.parse(
+                                                                filter.getValue(), parserContext)));
                                 break;
                             case LTE:
                                 predicates.add(
                                         criteriaBuilder.lessThanOrEqualTo(
                                                 (Expression<Comparable>) path,
                                                 (Comparable)
-                                                        format.parse(f.getValue(), parserContext)));
+                                                        format.parse(
+                                                                filter.getValue(), parserContext)));
                                 break;
                             case IN:
-                                List<String> values = f.getValues();
+                                List<String> values = filter.getValues();
                                 List<Object> filterValues = new ArrayList<>(values.size());
                                 for (String value : values) {
                                     filterValues.add(format.parse(value, parserContext));
@@ -180,33 +173,39 @@ public class ActorService {
                                         criteriaBuilder.between(
                                                 (Expression<Comparable>) path,
                                                 (Comparable)
-                                                        format.parse(f.getLow(), parserContext),
+                                                        format.parse(
+                                                                filter.getLow(), parserContext),
                                                 (Comparable)
-                                                        format.parse(f.getHigh(), parserContext)));
+                                                        format.parse(
+                                                                filter.getHigh(), parserContext)));
                                 break;
                             case STARTS_WITH:
                                 predicates.add(
                                         criteriaBuilder.like(
                                                 (Expression<String>) path,
-                                                format.parse(f.getValue(), parserContext) + "%"));
+                                                format.parse(filter.getValue(), parserContext)
+                                                        + "%"));
                                 break;
                             case ENDS_WITH:
                                 predicates.add(
                                         criteriaBuilder.like(
                                                 (Expression<String>) path,
-                                                "%" + format.parse(f.getValue(), parserContext)));
+                                                "%"
+                                                        + format.parse(
+                                                                filter.getValue(), parserContext)));
                                 break;
                             case CONTAINS:
                                 predicates.add(
                                         criteriaBuilder.like(
                                                 (Expression<String>) path,
                                                 "%"
-                                                        + format.parse(f.getValue(), parserContext)
+                                                        + format.parse(
+                                                                filter.getValue(), parserContext)
                                                         + "%"));
                                 break;
                             default:
                                 throw new UnsupportedOperationException(
-                                        "Unsupported kind: " + f.getKind());
+                                        "Unsupported kind: " + filter.getKind());
                         }
                     }
                 }
