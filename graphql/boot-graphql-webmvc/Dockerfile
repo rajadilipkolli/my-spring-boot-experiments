@@ -1,4 +1,4 @@
-FROM eclipse-temurin:17.0.8_7-jre-focal as builder
+FROM eclipse-temurin:17.0.9_9-jre-focal as builder
 WORKDIR application
 ARG JAR_FILE=target/boot-graphql-webmvc-0.0.1-SNAPSHOT.jar
 COPY ${JAR_FILE} application.jar
