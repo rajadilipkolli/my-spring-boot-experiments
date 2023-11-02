@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.data.geo.Point;
 import org.springframework.http.MediaType;
 
-public class RestaurantControllerTest extends AbstractIntegrationTest {
+public class RestaurantControllerIntTest extends AbstractIntegrationTest {
 
     @Test
     void testCreateRestaurant() {
