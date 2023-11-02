@@ -25,7 +25,7 @@ import reactor.core.publisher.Mono;
 @RestController
 @RequiredArgsConstructor
 @Timed
-@RequestMapping("/restaurant")
+@RequestMapping("/api/restaurant")
 public class RestaurantController {
 
     private final RestaurantService restaurantService;
@@ -76,7 +76,7 @@ public class RestaurantController {
         return restaurantService.addGrade(grades, restaurantId).map(ResponseEntity::ok);
     }
 
-    @PostMapping("/restaurant")
+    @PostMapping
     public ResponseEntity<GenericMessage> createRestaurant(
             @RequestBody RestaurantRequest restaurantRequest) {
         return ResponseEntity.created(
