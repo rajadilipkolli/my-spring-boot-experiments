@@ -9,6 +9,7 @@ import com.example.mongoes.mongodb.repository.ChangeStreamResumeRepository;
 import com.example.mongoes.mongodb.repository.RestaurantRepository;
 import com.example.mongoes.utils.AppConstants;
 import com.example.mongoes.utils.DateUtility;
+import com.example.mongoes.web.model.RestaurantRequest;
 import com.mongodb.client.model.changestream.ChangeStreamDocument;
 import com.mongodb.client.model.changestream.OperationType;
 import java.io.IOException;
@@ -208,8 +209,9 @@ public class RestaurantService {
         return this.restaurantESRepository.findAll(pageable);
     }
 
-    public Mono<Restaurant> createRestaurant(Restaurant restaurant) {
-        return save(restaurant);
+    public Mono<Restaurant> createRestaurant(RestaurantRequest restaurantRequest) {
+
+        return save(restaurantRequest.toRestaurant());
     }
 
     public Mono<Void> deleteAll() {
