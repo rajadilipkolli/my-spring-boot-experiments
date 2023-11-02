@@ -3,6 +3,7 @@ package com.example.mongoes.web.controller;
 import com.example.mongoes.document.Grades;
 import com.example.mongoes.document.Restaurant;
 import com.example.mongoes.response.GenericMessage;
+import com.example.mongoes.web.model.RestaurantRequest;
 import com.example.mongoes.web.service.RestaurantService;
 import io.micrometer.core.annotation.Timed;
 import jakarta.validation.Valid;
@@ -76,17 +77,19 @@ public class RestaurantController {
     }
 
     @PostMapping("/restaurant")
-    public ResponseEntity<Object> createRestaurant(@RequestBody Restaurant restaurant) {
+    public ResponseEntity<GenericMessage> createRestaurant(
+            @RequestBody RestaurantRequest restaurantRequest) {
         return ResponseEntity.created(
                         URI.create(
                                 String.format(
                                         "/restaurant/%s",
                                         this.restaurantService
-                                                .createRestaurant(restaurant)
+                                                .createRestaurant(restaurantRequest)
                                                 .map(Restaurant::getName))))
                 .body(
                         new GenericMessage(
                                 String.format(
-                                        "restaurant with name %s created", restaurant.getName())));
+                                        "restaurant with name %s created",
+                                        restaurantRequest.name())));
     }
 }
