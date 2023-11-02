@@ -1,7 +1,5 @@
 package com.example.opensearch.entities;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -17,14 +15,11 @@ public class Restaurant {
     @Field(fielddata = true, type = FieldType.Text)
     private String id;
 
-    @NotEmpty(message = "Name cannot be empty")
     private String name;
 
-    @NotBlank(message = "Borough Can't be Blank")
     @Field(fielddata = true, type = FieldType.Text)
     private String borough;
 
-    @NotBlank(message = "Cuisine Can't be Blank")
     @Field(fielddata = true, type = FieldType.Text)
     private String cuisine;
 

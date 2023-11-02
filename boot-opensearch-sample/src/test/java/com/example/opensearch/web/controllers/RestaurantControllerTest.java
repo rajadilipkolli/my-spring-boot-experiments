@@ -2,7 +2,6 @@ package com.example.opensearch.web.controllers;
 
 import static com.example.opensearch.utils.AppConstants.PROFILE_TEST;
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
@@ -18,6 +17,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.example.opensearch.entities.Address;
 import com.example.opensearch.entities.Grades;
 import com.example.opensearch.entities.Restaurant;
+import com.example.opensearch.model.request.RestaurantRequest;
 import com.example.opensearch.model.response.PagedResult;
 import com.example.opensearch.services.RestaurantService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -131,13 +131,13 @@ class RestaurantControllerTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(restaurant)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id", notNullValue()))
                 .andExpect(jsonPath("$.name", is(restaurant.getName())));
     }
 
     @Test
-    void shouldReturn400WhenCreateNewRestaurantWithoutText() throws Exception {
-        Restaurant restaurant = new Restaurant(null, null, null, null, null, null);
+    void shouldReturn400WhenCreateNewRestaurantWithoutRequiredFields() throws Exception {
+        RestaurantRequest restaurant =
+                new RestaurantRequest(null, null, null, null, new ArrayList<>());
 
         this.mockMvc
                 .perform(

@@ -1,11 +1,10 @@
 package com.example.opensearch.web.controllers;
 
 import com.example.opensearch.entities.Restaurant;
+import com.example.opensearch.model.request.RestaurantRequest;
 import com.example.opensearch.model.response.PagedResult;
 import com.example.opensearch.services.RestaurantService;
 import com.example.opensearch.utils.AppConstants;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,8 +23,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/restaurants")
 public class RestaurantController {
-
-    private final Logger log = LoggerFactory.getLogger(this.getClass());
 
     private final RestaurantService restaurantService;
 
@@ -69,17 +66,19 @@ public class RestaurantController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Restaurant createRestaurant(@RequestBody @Validated Restaurant restaurant) {
-        return restaurantService.saveRestaurant(restaurant);
+    public Restaurant createRestaurant(
+            @RequestBody @Validated RestaurantRequest restaurantRequest) {
+        return restaurantService.saveRestaurant(restaurantRequest.toRestaurant());
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<Restaurant> updateRestaurant(
-            @PathVariable String id, @RequestBody Restaurant restaurant) {
+            @PathVariable String id, @RequestBody RestaurantRequest restaurantRequest) {
         return restaurantService
                 .findRestaurantById(id)
                 .map(
                         restaurantObj -> {
+                            Restaurant restaurant = restaurantRequest.toRestaurant();
                             restaurant.setId(id);
                             return ResponseEntity.ok(restaurantService.saveRestaurant(restaurant));
                         })

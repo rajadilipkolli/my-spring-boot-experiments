@@ -15,6 +15,7 @@ import com.example.opensearch.common.AbstractIntegrationTest;
 import com.example.opensearch.entities.Address;
 import com.example.opensearch.entities.Grades;
 import com.example.opensearch.entities.Restaurant;
+import com.example.opensearch.model.request.RestaurantRequest;
 import com.example.opensearch.repositories.RestaurantRepository;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -87,22 +88,22 @@ class RestaurantControllerIT extends AbstractIntegrationTest {
         address.setLocation(new Point(-73.8, 40.8));
         address.setStreet("street1");
         Grades grade = new Grades("1", LocalDateTime.now(), 5);
-        Restaurant restaurant =
-                new Restaurant(
-                        null, "New Restaurant", "borough1", "cuisine1", address, List.of(grade));
+        RestaurantRequest restaurantRequest =
+                new RestaurantRequest(
+                        "New Restaurant", "borough1", "cuisine1", address, List.of(grade));
         this.mockMvc
                 .perform(
                         post("/api/restaurants")
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(restaurant)))
+                                .content(objectMapper.writeValueAsString(restaurantRequest)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id", notNullValue()))
-                .andExpect(jsonPath("$.name", is(restaurant.getName())));
+                .andExpect(jsonPath("$.name", is(restaurantRequest.name())));
     }
 
     @Test
     void shouldReturn400WhenCreateNewRestaurantWithoutText() throws Exception {
-        Restaurant restaurant = new Restaurant(null, null, null, null, null, null);
+        RestaurantRequest restaurant = new RestaurantRequest(null, null, null, null, null);
 
         this.mockMvc
                 .perform(
