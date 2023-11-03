@@ -1,8 +1,7 @@
 package com.example.envers.entities;
 
-import java.util.Objects;
-
 import jakarta.persistence.*;
+import java.util.Objects;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

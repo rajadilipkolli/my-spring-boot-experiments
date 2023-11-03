@@ -11,7 +11,6 @@ import com.example.envers.entities.Customer;
 import com.example.envers.mapper.CustomerMapper;
 import com.example.envers.model.response.CustomerResponse;
 import com.example.envers.repositories.CustomerRepository;
-
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,10 +21,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class CustomerServiceTest {
 
-    @Mock private CustomerRepository customerRepository;
-    @Mock private CustomerMapper customerMapper;
+    @Mock
+    private CustomerRepository customerRepository;
 
-    @InjectMocks private CustomerService customerService;
+    @Mock
+    private CustomerMapper customerMapper;
+
+    @InjectMocks
+    private CustomerService customerService;
 
     @Test
     void findCustomerById() {
@@ -38,7 +41,8 @@ class CustomerServiceTest {
         assertThat(optionalCustomer).isPresent();
         CustomerResponse customer = optionalCustomer.get();
         assertThat(customer.id()).isEqualTo(1L);
-        assertThat(customer.text()).isEqualTo("junitTest");
+        assertThat(customer.name()).isEqualTo("junitTest");
+        assertThat(customer.address()).isEqualTo("junitAddress");
     }
 
     @Test

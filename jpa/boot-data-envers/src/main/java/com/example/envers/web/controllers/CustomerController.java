@@ -1,19 +1,17 @@
 package com.example.envers.web.controllers;
 
 import com.example.envers.exception.CustomerNotFoundException;
-import com.example.envers.model.RevisionDTO;
 import com.example.envers.model.query.FindCustomersQuery;
 import com.example.envers.model.request.CustomerRequest;
 import com.example.envers.model.response.CustomerResponse;
 import com.example.envers.model.response.PagedResult;
+import com.example.envers.model.response.RevisionDTO;
 import com.example.envers.services.CustomerService;
 import com.example.envers.utils.AppConstants;
-import java.util.List;
-import java.net.URI;
 import jakarta.validation.Valid;
-import lombok.extern.slf4j.Slf4j;
+import java.net.URI;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -29,7 +27,6 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @RestController
 @RequestMapping("/api/customers")
-@Slf4j
 @RequiredArgsConstructor
 public class CustomerController {
 
@@ -37,29 +34,15 @@ public class CustomerController {
 
     @GetMapping
     public PagedResult<CustomerResponse> getAllCustomers(
-            @RequestParam(
-                value = "pageNo",
-                defaultValue = AppConstants.DEFAULT_PAGE_NUMBER,
-                required = false)
-            int pageNo,
-            @RequestParam(
-                        value = "pageSize",
-                        defaultValue = AppConstants.DEFAULT_PAGE_SIZE,
-                        required = false)
-                int pageSize,
-            @RequestParam(
-                        value = "sortBy",
-                        defaultValue = AppConstants.DEFAULT_SORT_BY,
-                        required = false)
-                String sortBy,
-            @RequestParam(
-                        value = "sortDir",
-                        defaultValue = AppConstants.DEFAULT_SORT_DIRECTION,
-                        required = false)
-                String sortDir
-                ) {
-        FindCustomersQuery findCustomersQuery =
-                new FindCustomersQuery(pageNo, pageSize, sortBy, sortDir);
+            @RequestParam(value = "pageNo", defaultValue = AppConstants.DEFAULT_PAGE_NUMBER, required = false)
+                    int pageNo,
+            @RequestParam(value = "pageSize", defaultValue = AppConstants.DEFAULT_PAGE_SIZE, required = false)
+                    int pageSize,
+            @RequestParam(value = "sortBy", defaultValue = AppConstants.DEFAULT_SORT_BY, required = false)
+                    String sortBy,
+            @RequestParam(value = "sortDir", defaultValue = AppConstants.DEFAULT_SORT_DIRECTION, required = false)
+                    String sortDir) {
+        FindCustomersQuery findCustomersQuery = new FindCustomersQuery(pageNo, pageSize, sortBy, sortDir);
         return customerService.findAllCustomers(findCustomersQuery);
     }
 
@@ -71,7 +54,7 @@ public class CustomerController {
                 .orElseThrow(() -> new CustomerNotFoundException(id));
     }
 
-    @GetMapping("/{id}/revision")
+    @GetMapping("/{id}/revisions")
     public ResponseEntity<List<RevisionDTO>> findCustomerRevisionsById(@PathVariable Long id) {
         return ResponseEntity.ok(customerService.findCustomerRevisionsById(id));
     }
@@ -79,11 +62,10 @@ public class CustomerController {
     @PostMapping
     public ResponseEntity<CustomerResponse> createCustomer(@RequestBody @Validated CustomerRequest customerRequest) {
         CustomerResponse response = customerService.saveCustomer(customerRequest);
-        URI location =
-                ServletUriComponentsBuilder.fromCurrentRequest()
-                        .path("/api/customers/{id}")
-                        .buildAndExpand(response.id())
-                        .toUri();
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
+                .path("/api/customers/{id}")
+                .buildAndExpand(response.id())
+                .toUri();
         return ResponseEntity.created(location).body(response);
     }
 
@@ -97,11 +79,10 @@ public class CustomerController {
     public ResponseEntity<CustomerResponse> deleteCustomer(@PathVariable Long id) {
         return customerService
                 .findCustomerById(id)
-                .map(
-                        customer -> {
-                            customerService.deleteCustomerById(id);
-                            return ResponseEntity.ok(customer);
-                        })
+                .map(customer -> {
+                    customerService.deleteCustomerById(id);
+                    return ResponseEntity.ok(customer);
+                })
                 .orElseThrow(() -> new CustomerNotFoundException(id));
     }
 }

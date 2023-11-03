@@ -1,4 +1,5 @@
 package com.example.envers.exception;
+
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
 

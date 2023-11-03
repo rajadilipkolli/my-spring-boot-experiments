@@ -25,7 +25,8 @@ import org.springframework.http.MediaType;
 
 class CustomerControllerIT extends AbstractIntegrationTest {
 
-    @Autowired private CustomerRepository customerRepository;
+    @Autowired
+    private CustomerRepository customerRepository;
 
     private List<Customer> customerList = null;
 
@@ -35,7 +36,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
 
         customerList = new ArrayList<>();
         customerList.add(new Customer(null, "First Customer", "Junit Address", 0L));
-        customerList.add(new Customer(null, "Second Customer","Junit Address", 0L));
+        customerList.add(new Customer(null, "Second Customer", "Junit Address", 0L));
         customerList.add(new Customer(null, "Third Customer", "Junit Address", 0L));
         customerList = customerRepository.saveAll(customerList);
     }
@@ -69,13 +70,28 @@ class CustomerControllerIT extends AbstractIntegrationTest {
     }
 
     @Test
+    void shouldFindCustomerRevisionsById() throws Exception {
+        Customer customer = customerList.get(0);
+        Long customerId = customer.getId();
+
+        this.mockMvc
+                .perform(get("/api/customers/{id}/revisions", customerId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.size()", is(1)))
+                .andExpect(jsonPath("$[0].entity.id", is(customer.getId()), Long.class))
+                .andExpect(jsonPath("$[0].entity.name", is(customer.getName())))
+                .andExpect(jsonPath("$[0].entity.address", is(customer.getAddress())))
+                .andExpect(jsonPath("$[0].revisionNumber", notNullValue()))
+                .andExpect(jsonPath("$[0].revisionType", is("INSERT")));
+    }
+
+    @Test
     void shouldCreateNewCustomer() throws Exception {
         CustomerRequest customerRequest = new CustomerRequest("New Customer", "Junit Address");
         this.mockMvc
-                .perform(
-                        post("/api/customers")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(customerRequest)))
+                .perform(post("/api/customers")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(customerRequest)))
                 .andExpect(status().isCreated())
                 .andExpect(header().exists(HttpHeaders.LOCATION))
                 .andExpect(jsonPath("$.id", notNullValue()))
@@ -88,10 +104,9 @@ class CustomerControllerIT extends AbstractIntegrationTest {
         CustomerRequest customerRequest = new CustomerRequest(null, null);
 
         this.mockMvc
-                .perform(
-                        post("/api/customers")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(customerRequest)))
+                .perform(post("/api/customers")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(customerRequest)))
                 .andExpect(status().isBadRequest())
                 .andExpect(header().string("Content-Type", is("application/problem+json")))
                 .andExpect(jsonPath("$.type", is("about:blank")))
@@ -108,13 +123,12 @@ class CustomerControllerIT extends AbstractIntegrationTest {
     @Test
     void shouldUpdateCustomer() throws Exception {
         Long customerId = customerList.get(0).getId();
-        CustomerRequest customerRequest = new CustomerRequest("Updated Customer","Junit Address");
+        CustomerRequest customerRequest = new CustomerRequest("Updated Customer", "Junit Address");
 
         this.mockMvc
-                .perform(
-                        put("/api/customers/{id}", customerId)
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(customerRequest)))
+                .perform(put("/api/customers/{id}", customerId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(customerRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(customerId), Long.class))
                 .andExpect(jsonPath("$.name", is(customerRequest.name())))

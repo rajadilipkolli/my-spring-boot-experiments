@@ -1,7 +1,7 @@
 package com.example.envers.mapper;
 
 import com.example.envers.entities.Customer;
-import com.example.envers.model.RevisionDTO;
+import com.example.envers.model.response.RevisionDTO;
 import org.springframework.data.history.Revision;
 import org.springframework.stereotype.Component;
 

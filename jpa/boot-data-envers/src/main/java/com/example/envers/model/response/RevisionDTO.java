@@ -1,4 +1,4 @@
-package com.example.envers.model;
+package com.example.envers.model.response;
 
 import com.example.envers.entities.Customer;
 import java.time.Instant;
