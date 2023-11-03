@@ -18,6 +18,8 @@ import com.example.envers.repositories.CustomerRepository;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -56,33 +58,36 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.hasPrevious", is(false)));
     }
 
-    @Test
-    void shouldFindCustomerById() throws Exception {
-        Customer customer = customerList.get(0);
-        Long customerId = customer.getId();
+    @Nested
+    @DisplayName("find methods")
+    class Find {
 
-        this.mockMvc
-                .perform(get("/api/customers/{id}", customerId))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(customer.getId()), Long.class))
-                .andExpect(jsonPath("$.name", is(customer.getName())))
-                .andExpect(jsonPath("$.address", is(customer.getAddress())));
-    }
+        @Test
+        void shouldFindCustomerById() throws Exception {
+            Customer customer = customerList.get(0);
+            Long customerId = customer.getId();
 
-    @Test
-    void shouldFindCustomerRevisionsById() throws Exception {
-        Customer customer = customerList.get(0);
-        Long customerId = customer.getId();
+            mockMvc.perform(get("/api/customers/{id}", customerId))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.id", is(customer.getId()), Long.class))
+                    .andExpect(jsonPath("$.name", is(customer.getName())))
+                    .andExpect(jsonPath("$.address", is(customer.getAddress())));
+        }
 
-        this.mockMvc
-                .perform(get("/api/customers/{id}/revisions", customerId))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.size()", is(1)))
-                .andExpect(jsonPath("$[0].entity.id", is(customer.getId()), Long.class))
-                .andExpect(jsonPath("$[0].entity.name", is(customer.getName())))
-                .andExpect(jsonPath("$[0].entity.address", is(customer.getAddress())))
-                .andExpect(jsonPath("$[0].revisionNumber", notNullValue()))
-                .andExpect(jsonPath("$[0].revisionType", is("INSERT")));
+        @Test
+        void shouldFindCustomerRevisionsById() throws Exception {
+            Customer customer = customerList.get(0);
+            Long customerId = customer.getId();
+
+            mockMvc.perform(get("/api/customers/{id}/revisions", customerId))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.size()", is(1)))
+                    .andExpect(jsonPath("$[0].entity.id", is(customer.getId()), Long.class))
+                    .andExpect(jsonPath("$[0].entity.name", is(customer.getName())))
+                    .andExpect(jsonPath("$[0].entity.address", is(customer.getAddress())))
+                    .andExpect(jsonPath("$[0].revisionNumber", notNullValue()))
+                    .andExpect(jsonPath("$[0].revisionType", is("INSERT")));
+        }
     }
 
     @Test
