@@ -20,7 +20,7 @@ if (project.hasProperty("ci")) {
     apply from: "gradle/owasp.gradle"
 }
 
-group = "com.mycompany.myservice"
+group = "com.example.envers"
 version = "0.0.1-SNAPSHOT"
 sourceCompatibility = 17
 targetCompatibility = 17
@@ -39,12 +39,12 @@ dependencies {
     implementation "org.springframework.boot:spring-boot-starter-actuator"
     implementation "org.springframework.boot:spring-boot-starter-validation"
     implementation "org.springframework.boot:spring-boot-starter-web"
-    implementation "org.springframework.boot:spring-boot-starter-data-jpa"
-    implementation "org.springframework.data:spring-data-envers"
     developmentOnly "org.springframework.boot:spring-boot-devtools"
     annotationProcessor "org.springframework.boot:spring-boot-configuration-processor"
     compileOnly "org.projectlombok:lombok"
     annotationProcessor "org.projectlombok:lombok"
+    implementation "org.springframework.boot:spring-boot-starter-data-jpa"
+    implementation "org.springframework.data:spring-data-envers"
     runtimeOnly "com.h2database:h2"
     runtimeOnly "org.postgresql:postgresql"
     implementation "org.liquibase:liquibase-core"
@@ -73,7 +73,7 @@ bootJar {
 }
 
 bootBuildImage {
-    imageName = "dockertmt/spring-boot-data-envers-sample"
+    imageName = "dockertmt/boot-data-envers"
 }
 
 compileJava.dependsOn processResources
@@ -116,7 +116,7 @@ test {
     }
 }
 
-tasks.register('integrationTest', Test) {
+task integrationTest(type: Test) {
     useJUnitPlatform()
 
     include "**/*IT*", "**/*IntegrationTest*", "**/*IntTest*"
@@ -130,6 +130,7 @@ tasks.register('integrationTest', Test) {
 }
 
 check.dependsOn integrationTest
+check.dependsOn jacocoTestReport
 
 tasks.register('testReport', TestReport) {
     destinationDirectory = file("$buildDir/reports/tests")

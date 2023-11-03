@@ -1,7 +1,7 @@
 version: '3.8'
 services:
 
-  my-spring-envers:
+  boot-data-envers:
     build: ..
     ports:
       - "18080:8080"

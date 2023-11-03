@@ -5,6 +5,8 @@ import io.swagger.v3.oas.annotations.info.Info;
 import io.swagger.v3.oas.annotations.servers.Server;
 import org.springframework.context.annotation.Configuration;
 
-@Configuration
-@OpenAPIDefinition(info = @Info(title = "spring-boot-data-envers", version = "v1"), servers = @Server(url = "/"))
+@Configuration(proxyBeanMethods = false)
+@OpenAPIDefinition(
+        info = @Info(title = "boot-data-envers", version = "v1"),
+        servers = @Server(url = "/"))
 public class SwaggerConfig {}

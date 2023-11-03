@@ -1,11 +1,19 @@
 package com.example.envers.web.controllers;
 
-import com.example.envers.entities.Customer;
+import com.example.envers.exception.CustomerNotFoundException;
 import com.example.envers.model.RevisionDTO;
+import com.example.envers.model.query.FindCustomersQuery;
+import com.example.envers.model.request.CustomerRequest;
+import com.example.envers.model.response.CustomerResponse;
+import com.example.envers.model.response.PagedResult;
 import com.example.envers.services.CustomerService;
+import com.example.envers.utils.AppConstants;
 import java.util.List;
+import java.net.URI;
+import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -15,57 +23,85 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @RestController
 @RequestMapping("/api/customers")
+@Slf4j
 @RequiredArgsConstructor
 public class CustomerController {
 
     private final CustomerService customerService;
 
     @GetMapping
-    public List<Customer> getAllCustomers() {
-        return customerService.findAllCustomers();
+    public PagedResult<CustomerResponse> getAllCustomers(
+            @RequestParam(
+                value = "pageNo",
+                defaultValue = AppConstants.DEFAULT_PAGE_NUMBER,
+                required = false)
+            int pageNo,
+            @RequestParam(
+                        value = "pageSize",
+                        defaultValue = AppConstants.DEFAULT_PAGE_SIZE,
+                        required = false)
+                int pageSize,
+            @RequestParam(
+                        value = "sortBy",
+                        defaultValue = AppConstants.DEFAULT_SORT_BY,
+                        required = false)
+                String sortBy,
+            @RequestParam(
+                        value = "sortDir",
+                        defaultValue = AppConstants.DEFAULT_SORT_DIRECTION,
+                        required = false)
+                String sortDir
+                ) {
+        FindCustomersQuery findCustomersQuery =
+                new FindCustomersQuery(pageNo, pageSize, sortBy, sortDir);
+        return customerService.findAllCustomers(findCustomersQuery);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Customer> getCustomerById(@PathVariable Long id) {
-        return customerService.findCustomerById(id).map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound()
-                .build());
+    public ResponseEntity<CustomerResponse> getCustomerById(@PathVariable Long id) {
+        return customerService
+                .findCustomerById(id)
+                .map(ResponseEntity::ok)
+                .orElseThrow(() -> new CustomerNotFoundException(id));
     }
 
-    @GetMapping("/revision/{id}")
+    @GetMapping("/{id}/revision")
     public ResponseEntity<List<RevisionDTO>> findCustomerRevisionsById(@PathVariable Long id) {
         return ResponseEntity.ok(customerService.findCustomerRevisionsById(id));
     }
 
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public Customer createCustomer(@RequestBody @Validated Customer customer) {
-        return customerService.saveCustomer(customer);
+    public ResponseEntity<CustomerResponse> createCustomer(@RequestBody @Validated CustomerRequest customerRequest) {
+        CustomerResponse response = customerService.saveCustomer(customerRequest);
+        URI location =
+                ServletUriComponentsBuilder.fromCurrentRequest()
+                        .path("/api/customers/{id}")
+                        .buildAndExpand(response.id())
+                        .toUri();
+        return ResponseEntity.created(location).body(response);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Customer> updateCustomer(@PathVariable Long id, @RequestBody Customer customer) {
-        return customerService
-                .findCustomerById(id)
-                .map(customerObj -> {
-                    customer.setId(id);
-                    return ResponseEntity.ok(customerService.saveCustomer(customer));
-                })
-                .orElseGet(() -> ResponseEntity.notFound().build());
+    public ResponseEntity<CustomerResponse> updateCustomer(
+            @PathVariable Long id, @RequestBody @Valid CustomerRequest customerRequest) {
+        return ResponseEntity.ok(customerService.updateCustomer(id, customerRequest));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Customer> deleteCustomer(@PathVariable Long id) {
+    public ResponseEntity<CustomerResponse> deleteCustomer(@PathVariable Long id) {
         return customerService
                 .findCustomerById(id)
-                .map(customer -> {
-                    customerService.deleteCustomerById(id);
-                    return ResponseEntity.ok(customer);
-                })
-                .orElseGet(() -> ResponseEntity.notFound().build());
+                .map(
+                        customer -> {
+                            customerService.deleteCustomerById(id);
+                            return ResponseEntity.ok(customer);
+                        })
+                .orElseThrow(() -> new CustomerNotFoundException(id));
     }
 }

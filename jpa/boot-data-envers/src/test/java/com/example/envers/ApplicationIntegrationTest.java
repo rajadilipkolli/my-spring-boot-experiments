@@ -19,8 +19,9 @@ class ApplicationIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     void initialRevision() {
-        var cust = new Customer();
+        Customer cust = new Customer();
         cust.setName("junit");
+        cust.setAddress("address");
         Customer customer = customerRepository.save(cust);
 
         Revisions<Integer, Customer> revisions = customerRepository.findRevisions(customer.getId());

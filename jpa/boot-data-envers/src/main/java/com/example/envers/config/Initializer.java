@@ -19,7 +19,9 @@ public class Initializer implements CommandLineRunner {
     @Override
     public void run(String... args) {
         log.info("Running Initializer.....");
-        Customer customerObj = new Customer("customerName");
+        Customer customerObj = new Customer();
+        customerObj.setName("customerName");
+        customerObj.setAddress("customerAddress");
         Customer persistedCustomer = this.customerRepository.save(customerObj);
         persistedCustomer.setName("updatedCustomer");
         this.customerRepository.save(persistedCustomer);

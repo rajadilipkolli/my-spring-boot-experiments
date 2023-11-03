@@ -118,6 +118,8 @@
                 <version>${openapi-generator.version}</version>
                 <executions>
                     <execution>
+                        <id>openapi-generator</id>
+                        <phase>generate-sources</phase>
                         <goals>
                             <goal>generate</goal>
                         </goals>
@@ -126,17 +128,17 @@
                             <generatorName>spring</generatorName>
                             <!-- <library>spring-cloud</library> -->
                             <apiPackage>org.example.openapi.api</apiPackage>
+                            <modelNameSuffix>DTO</modelNameSuffix>
                             <modelPackage>org.example.openapi.model</modelPackage>
-                            <supportingFilesToGenerate>
-                                HomeController.java,SpringDocConfiguration.java,OpenApiGeneratorApplication.java,ApiUtil.java,RFC3339DateFormat.java
-                                <!-- ClientConfiguration.java,ApiKeyRequestInterceptor.java -->
-                            </supportingFilesToGenerate>
                             <configOptions>
-                                <delegatePattern>true</delegatePattern>
+<!--                                <delegatePattern>true</delegatePattern>-->
                                 <performBeanValidation>true</performBeanValidation>
                                 <useSpringBoot3>true</useSpringBoot3>
+                                <useSpringController>true</useSpringController>
                                 <!-- <async>true</async> -->
                                 <serializableModel>true</serializableModel>
+                                <licenseName>MIT</licenseName>
+                                <licenseUrl>https://www.opensource.org/licenses/mit-license.php</licenseUrl>
                             </configOptions>
                         </configuration>
                     </execution>

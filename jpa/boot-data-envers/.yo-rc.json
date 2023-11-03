@@ -4,11 +4,12 @@
     "packageName": "com.example.envers",
     "databaseType": "postgresql",
     "dbMigrationTool": "liquibase",
+    "dbMigrationFormat": "xml",
     "features": [
       "monitoring"
     ],
     "buildTool": "gradle",
     "packageFolder": "com/example/envers",
-    "liquibaseMigrationCounter": 4
+    "liquibaseMigrationCounter": 3
   }
 }
