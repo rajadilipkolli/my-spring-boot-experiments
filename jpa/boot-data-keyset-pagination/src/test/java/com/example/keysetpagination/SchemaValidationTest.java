@@ -2,6 +2,7 @@ package com.example.keysetpagination;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.example.keysetpagination.common.ContainersConfig;
 import com.example.keysetpagination.config.SpringBlazePersistenceConfiguration;
 import com.zaxxer.hikari.HikariDataSource;
 import javax.sql.DataSource;
@@ -13,10 +14,9 @@ import org.springframework.context.annotation.Import;
 @DataJpaTest(
         properties = {
             "spring.jpa.hibernate.ddl-auto=validate",
-            "spring.test.database.replace=none",
-            "spring.datasource.url=jdbc:tc:postgresql:16.0-alpine:///db"
+            "spring.test.database.replace=none"
         })
-@Import(SpringBlazePersistenceConfiguration.class)
+@Import({SpringBlazePersistenceConfiguration.class, ContainersConfig.class})
 class SchemaValidationTest {
 
     @Autowired private DataSource dataSource;
