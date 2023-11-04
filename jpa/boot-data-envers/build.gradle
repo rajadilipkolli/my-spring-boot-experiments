@@ -99,7 +99,7 @@ spotless {
     java {
         importOrder()
         removeUnusedImports()
-        palantirJavaFormat("2.30.0")
+        palantirJavaFormat("2.38.0")
         formatAnnotations()
     }
 }
