@@ -3,3 +3,15 @@ databaseChangeLog:
       path: migration/
       errorIfMissingOrEmpty: true
       relativeToChangelogFile: true
+
+  - changeSet:
+      dbms: postgresql
+      id: create-spring-quartz-metadata
+      author: raja
+      changes:
+        - sqlFile:
+            encoding: UTF-8
+            path: classpath:/org/quartz/impl/jdbcjobstore/tables_postgres.sql
+            relativeToChangelogFile: false
+            splitStatements: true
+            stripComments: true
