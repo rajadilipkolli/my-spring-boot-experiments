@@ -6,7 +6,7 @@ import org.springframework.data.history.Revision;
 import org.springframework.stereotype.Component;
 
 @Component
-public class CustomerRevisionToRevisionDTOMapper {
+public class CustomerRevisionToRevisionResultMapper {
 
     public RevisionResult convert(Revision<Integer, Customer> customerRevision) {
         return new RevisionResult(

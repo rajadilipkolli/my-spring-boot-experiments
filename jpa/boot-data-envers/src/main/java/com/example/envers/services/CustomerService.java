@@ -3,7 +3,7 @@ package com.example.envers.services;
 import com.example.envers.entities.Customer;
 import com.example.envers.exception.CustomerNotFoundException;
 import com.example.envers.mapper.CustomerMapper;
-import com.example.envers.mapper.CustomerRevisionToRevisionDTOMapper;
+import com.example.envers.mapper.CustomerRevisionToRevisionResultMapper;
 import com.example.envers.model.query.FindCustomersQuery;
 import com.example.envers.model.request.CustomerRequest;
 import com.example.envers.model.response.CustomerResponse;
@@ -27,7 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class CustomerService {
 
     private final CustomerRepository customerRepository;
-    private final CustomerRevisionToRevisionDTOMapper customerRevisionToRevisionDTOMapper;
+    private final CustomerRevisionToRevisionResultMapper customerRevisionToRevisionDTOMapper;
     private final CustomerMapper customerMapper;
 
     public PagedResult<CustomerResponse> findAllCustomers(FindCustomersQuery findCustomersQuery) {
