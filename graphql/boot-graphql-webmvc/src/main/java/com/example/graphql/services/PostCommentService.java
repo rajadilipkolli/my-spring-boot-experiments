@@ -20,7 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@Transactional
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 @Loggable
 public class PostCommentService {
@@ -30,7 +30,6 @@ public class PostCommentService {
     private final PostCommentEntityToResponseMapper postCommentEntityToResponseMapper;
     private final PostCommentRequestToEntityMapper postCommentRequestToEntityMapper;
 
-    @Transactional(readOnly = true)
     public List<PostCommentResponse> findAllPostComments() {
         List<CompletableFuture<PostCommentResponse>> completableFutureList =
                 postCommentRepository.findAll().stream()
@@ -44,27 +43,28 @@ public class PostCommentService {
         return completableFutureList.stream().map(CompletableFuture::join).toList();
     }
 
-    @Transactional(readOnly = true)
     public Optional<PostCommentResponse> findPostCommentById(Long id) {
-        return findCommentById(id).map(postCommentEntityToResponseMapper::convert);
+        return this.postCommentRepository
+                .findById(id)
+                .map(postCommentEntityToResponseMapper::convert);
     }
 
-    @Transactional(readOnly = true)
     public Optional<PostCommentEntity> findCommentById(Long commentId) {
         return this.postCommentRepository.findById(commentId);
     }
 
+    @Transactional
     public PostCommentResponse addCommentToPost(PostCommentRequest postCommentRequest) {
         PostCommentEntity postCommentEntity =
                 postCommentRequestToEntityMapper.covert(postCommentRequest, postRepository);
         return saveAndConvert(postCommentEntity);
     }
 
+    @Transactional
     public void deletePostCommentById(Long id) {
         postCommentRepository.deleteById(id);
     }
 
-    @Transactional(readOnly = true)
     public Map<Long, List<PostCommentResponse>> getCommentsByPostIdIn(List<Long> postIds) {
         return this.postCommentRepository.findByPostEntity_IdIn(postIds).stream()
                 .map(postCommentEntityToResponseMapper::convert)
@@ -72,6 +72,7 @@ public class PostCommentService {
                 .collect(Collectors.groupingBy(PostCommentResponse::postId));
     }
 
+    @Transactional
     public PostCommentResponse updatePostComment(
             PostCommentEntity postCommentEntity, PostCommentRequest postCommentRequest) {
         postCommentEntityToResponseMapper.updatePostCommentEntity(
