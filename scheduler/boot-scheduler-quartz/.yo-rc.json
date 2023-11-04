@@ -1,0 +1,13 @@
+{
+  "generator-springboot": {
+    "appName": "boot-scheduler-quartz",
+    "packageName": "com.scheduler.quartz",
+    "databaseType": "postgresql",
+    "dbMigrationTool": "liquibase",
+    "dbMigrationFormat": "xml",
+    "features": [],
+    "buildTool": "maven",
+    "packageFolder": "com/scheduler/quartz",
+    "liquibaseMigrationCounter": 1
+  }
+}
