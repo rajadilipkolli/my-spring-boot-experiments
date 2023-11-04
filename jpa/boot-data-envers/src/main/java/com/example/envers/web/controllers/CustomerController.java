@@ -5,7 +5,7 @@ import com.example.envers.model.query.FindCustomersQuery;
 import com.example.envers.model.request.CustomerRequest;
 import com.example.envers.model.response.CustomerResponse;
 import com.example.envers.model.response.PagedResult;
-import com.example.envers.model.response.RevisionDTO;
+import com.example.envers.model.response.RevisionResult;
 import com.example.envers.services.CustomerService;
 import com.example.envers.utils.AppConstants;
 import jakarta.validation.Valid;
@@ -55,7 +55,7 @@ public class CustomerController {
     }
 
     @GetMapping("/{id}/revisions")
-    public ResponseEntity<List<RevisionDTO>> findCustomerRevisionsById(@PathVariable Long id) {
+    public ResponseEntity<List<RevisionResult>> findCustomerRevisionsById(@PathVariable Long id) {
         return ResponseEntity.ok(customerService.findCustomerRevisionsById(id));
     }
 

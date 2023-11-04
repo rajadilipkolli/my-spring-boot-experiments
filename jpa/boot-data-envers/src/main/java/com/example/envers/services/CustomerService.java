@@ -8,7 +8,7 @@ import com.example.envers.model.query.FindCustomersQuery;
 import com.example.envers.model.request.CustomerRequest;
 import com.example.envers.model.response.CustomerResponse;
 import com.example.envers.model.response.PagedResult;
-import com.example.envers.model.response.RevisionDTO;
+import com.example.envers.model.response.RevisionResult;
 import com.example.envers.repositories.CustomerRepository;
 import java.util.List;
 import java.util.Optional;
@@ -55,8 +55,8 @@ public class CustomerService {
         return customerRepository.findById(id).map(customerMapper::toResponse);
     }
 
-    public List<RevisionDTO> findCustomerRevisionsById(Long id) {
-        List<CompletableFuture<RevisionDTO>> revisionDtoCF = customerRepository
+    public List<RevisionResult> findCustomerRevisionsById(Long id) {
+        List<CompletableFuture<RevisionResult>> revisionDtoCF = customerRepository
                 .findRevisions(id)
                 .get()
                 .map(customerRevision -> CompletableFuture.supplyAsync(
