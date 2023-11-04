@@ -11,11 +11,15 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 @ActiveProfiles({PROFILE_TEST})
-@SpringBootTest(webEnvironment = RANDOM_PORT, classes = {ContainersConfig.class})
+@SpringBootTest(
+        webEnvironment = RANDOM_PORT,
+        classes = {ContainersConfig.class})
 @AutoConfigureMockMvc
 public abstract class AbstractIntegrationTest {
 
-    @Autowired protected MockMvc mockMvc;
+    @Autowired
+    protected MockMvc mockMvc;
 
-    @Autowired protected ObjectMapper objectMapper;
+    @Autowired
+    protected ObjectMapper objectMapper;
 }
