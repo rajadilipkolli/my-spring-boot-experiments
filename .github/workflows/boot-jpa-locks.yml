@@ -1,0 +1,35 @@
+name: boot-jpa-locks
+
+on:
+  push:
+    paths:
+      - "jpa/boot-jpa-locks/**"
+    branches: [main]
+  pull_request:
+    paths:
+      - "jpa/boot-jpa-locks/**"
+    types:
+      - opened
+      - synchronize
+      - reopened
+
+jobs:
+  build:
+    name: Run Unit & Integration Tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: "jpa/boot-jpa-locks"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
+
+      - name: Set up JDK
+        uses: actions/setup-java@v3.13.0
+        with:
+          java-version: 21
+          distribution: "microsoft"
+          cache: "maven"
+      - name: Build and analyze
+        run: ./mvnw clean verify

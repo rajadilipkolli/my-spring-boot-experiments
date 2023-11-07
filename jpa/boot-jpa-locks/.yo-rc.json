@@ -1,0 +1,13 @@
+{
+  "generator-springboot": {
+    "appName": "boot-jpa-locks",
+    "packageName": "com.example.locks",
+    "databaseType": "postgresql",
+    "dbMigrationTool": "liquibase",
+    "dbMigrationFormat": "xml",
+    "features": [],
+    "buildTool": "maven",
+    "packageFolder": "com/example/locks",
+    "liquibaseMigrationCounter": 3
+  }
+}
