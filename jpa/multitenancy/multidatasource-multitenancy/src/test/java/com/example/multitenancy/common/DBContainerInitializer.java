@@ -12,11 +12,11 @@ public class DBContainerInitializer {
 
     @Container
     private static final PostgreSQLContainer<?> POSTGRE_SQL_CONTAINER =
-            new PostgreSQLContainer<>("postgres:15.4-alpine");
+            new PostgreSQLContainer<>("postgres:16.0-alpine");
 
     @Container
     private static final OracleContainer ORACLE_CONTAINER =
-            new OracleContainer("gvenzl/oracle-xe:21.3.0-slim");
+            new OracleContainer("gvenzl/oracle-xe:slim-faststart");
 
     @DynamicPropertySource
     static void addsDynamicProperties(DynamicPropertyRegistry propertyRegistry) {
