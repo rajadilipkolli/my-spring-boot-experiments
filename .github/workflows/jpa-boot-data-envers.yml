@@ -27,19 +27,15 @@ jobs:
 
       - uses: graalvm/setup-graalvm@v1
         with:
-          version: 'latest'
-          java-version: '17'
-          components: 'native-image'
-          cache: 'gradle'
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          native-image-job-reports: 'true'
-      
+          distribution: 'graalvm'
+          java-version: 21
+          cache: "maven"
+
       - name: Printing versions
         run: |
           echo "GRAALVM_HOME: $GRAALVM_HOME"
           echo "JAVA_HOME: $JAVA_HOME"
           java --version
-          gu --version
           native-image --version
 
       - name: Build and analyze
