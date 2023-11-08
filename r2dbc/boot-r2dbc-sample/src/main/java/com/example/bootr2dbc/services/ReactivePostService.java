@@ -15,7 +15,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Service
-@Transactional
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class ReactivePostService {
 
@@ -23,7 +23,6 @@ public class ReactivePostService {
     private final ReactiveCommentsRepository reactiveCommentsRepository;
     private final ReactivePostMapper reactivePostMapper;
 
-    @Transactional(readOnly = true)
     public Flux<ReactivePost> findAllReactivePosts(String sortBy, String sortDir) {
         Sort sort =
                 sortDir.equalsIgnoreCase(Sort.Direction.ASC.name())
@@ -33,21 +32,21 @@ public class ReactivePostService {
         return reactivePostRepository.findAll(sort);
     }
 
-    @Transactional(readOnly = true)
     public Mono<ReactivePost> findReactivePostById(Long id) {
         return reactivePostRepository.findById(id);
     }
 
-    @Transactional(readOnly = true)
     public Flux<ReactiveComments> findCommentsForReactivePost(Long id) {
         return reactiveCommentsRepository.findAllByPostId(id);
     }
 
+    @Transactional
     public Mono<ReactivePost> saveReactivePost(ReactivePostRequest reactivePostRequest) {
         ReactivePost reactivePost = reactivePostMapper.mapToReactivePost(reactivePostRequest);
         return reactivePostRepository.save(reactivePost);
     }
 
+    @Transactional
     public Mono<ReactivePost> updateReactivePost(
             ReactivePostRequest reactivePostRequest, ReactivePost reactivePost) {
         this.reactivePostMapper.updateReactivePostFromReactivePostRequest(
@@ -55,10 +54,12 @@ public class ReactivePostService {
         return reactivePostRepository.save(reactivePost);
     }
 
+    @Transactional
     public Mono<Void> deleteReactivePostById(Long id) {
         return reactivePostRepository.deleteById(id);
     }
 
+    @Transactional
     public Mono<ResponseEntity<Object>> deleteReactivePostAndCommentsById(Long id) {
         return findReactivePostById(id)
                 .flatMap(
