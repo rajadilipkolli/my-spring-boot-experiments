@@ -66,7 +66,9 @@ public class ReactivePostService {
                         reactivePost ->
                                 reactiveCommentsRepository
                                         .deleteAllByPostId(reactivePost.getId())
-                                        .then(deleteReactivePostById(reactivePost.getId()))
+                                        .then(
+                                                reactivePostRepository.deleteById(
+                                                        reactivePost.getId()))
                                         .then(Mono.just(ResponseEntity.noContent().build())))
                 .switchIfEmpty(Mono.just(ResponseEntity.notFound().build()));
     }
