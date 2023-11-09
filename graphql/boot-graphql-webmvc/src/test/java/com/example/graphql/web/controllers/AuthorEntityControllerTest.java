@@ -92,12 +92,11 @@ class AuthorEntityControllerTest {
     void shouldFindAuthorById() throws Exception {
         Long authorId = 1L;
         AuthorEntity authorEntity =
-                AuthorEntity.builder()
-                        .id(authorId)
-                        .firstName("First Author")
-                        .lastName("lastName")
-                        .email("junit1@email.com")
-                        .build();
+                new AuthorEntity()
+                        .setId(authorId)
+                        .setFirstName("First Author")
+                        .setLastName("lastName")
+                        .setEmail("junit1@email.com");
         AuthorResponse authorResponse =
                 new AuthorResponse(
                         1L,
@@ -193,12 +192,11 @@ class AuthorEntityControllerTest {
     void shouldUpdateAuthor() throws Exception {
         Long authorId = 1L;
         AuthorEntity authorEntity =
-                AuthorEntity.builder()
-                        .id(authorId)
-                        .firstName("First Author")
-                        .lastName("lastName")
-                        .email("junit1@email.com")
-                        .build();
+                new AuthorEntity()
+                        .setId(authorId)
+                        .setFirstName("First Author")
+                        .setLastName("lastName")
+                        .setEmail("junit1@email.com");
 
         AuthorRequest authorRequest =
                 new AuthorRequest(

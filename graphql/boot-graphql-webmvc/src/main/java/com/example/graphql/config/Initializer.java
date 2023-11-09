@@ -28,59 +28,51 @@ public class Initializer implements CommandLineRunner {
                 .forEach(
                         i -> {
                             PostCommentEntity post1Comment =
-                                    PostCommentEntity.builder()
-                                            .title("Sample Review" + i)
-                                            .content("Sample Content" + i)
-                                            .published(true)
-                                            .build();
+                                    new PostCommentEntity()
+                                            .setTitle("Sample Review" + i)
+                                            .setContent("Sample Content" + i)
+                                            .setPublished(true);
                             PostCommentEntity post1Comment2 =
-                                    PostCommentEntity.builder()
-                                            .title("Complicated Review" + i)
-                                            .content("Complicated Content" + i)
-                                            .published(false)
-                                            .build();
+                                    new PostCommentEntity()
+                                            .setTitle("Complicated Review" + i)
+                                            .setContent("Complicated Content" + i)
+                                            .setPublished(false);
                             PostDetailsEntity post1Details =
-                                    PostDetailsEntity.builder()
-                                            .createdBy("user" + i)
-                                            .detailsKey("key" + i)
-                                            .build();
+                                    new PostDetailsEntity()
+                                            .setCreatedBy("user" + i)
+                                            .setDetailsKey("key" + i);
                             PostEntity postEntity =
-                                    PostEntity.builder()
-                                            .title("Title" + i)
-                                            .content("content" + 1)
-                                            .published(true)
-                                            .build();
+                                    new PostEntity()
+                                            .setTitle("Title" + i)
+                                            .setContent("content" + 1)
+                                            .setPublished(true);
                             postEntity.setDetails(post1Details);
                             postEntity.addComment(post1Comment);
                             postEntity.addComment(post1Comment2);
 
                             PostEntity postEntity1 =
-                                    PostEntity.builder()
-                                            .title("Second Title" + i)
-                                            .content("Second Content" + 1)
-                                            .published(false)
-                                            .build();
+                                    new PostEntity()
+                                            .setTitle("Second Title" + i)
+                                            .setContent("Second Content" + 1)
+                                            .setPublished(false);
                             PostCommentEntity post2Comment =
-                                    PostCommentEntity.builder()
-                                            .title("Complicated Title" + i)
-                                            .content("Complicated Content" + i)
-                                            .published(true)
-                                            .publishedAt(OffsetDateTime.now())
-                                            .build();
+                                    new PostCommentEntity()
+                                            .setTitle("Complicated Title" + i)
+                                            .setContent("Complicated Content" + i)
+                                            .setPublished(true)
+                                            .setPublishedAt(OffsetDateTime.now());
                             PostDetailsEntity post2Details =
-                                    PostDetailsEntity.builder()
-                                            .createdBy("user" + i)
-                                            .detailsKey("keys" + i)
-                                            .build();
+                                    new PostDetailsEntity()
+                                            .setCreatedBy("user" + i)
+                                            .setDetailsKey("keys" + i);
                             postEntity1.setDetails(post2Details);
                             postEntity1.addComment(post2Comment);
                             AuthorEntity authorEntity =
-                                    AuthorEntity.builder()
-                                            .email("user" + i + "@example.com")
-                                            .firstName("first name" + i)
-                                            .lastName("last name" + i)
-                                            .mobile(9848922338L)
-                                            .build();
+                                    new AuthorEntity()
+                                            .setEmail("user" + i + "@example.com")
+                                            .setFirstName("first name" + i)
+                                            .setLastName("last name" + i)
+                                            .setMobile(9848922338L);
                             authorEntity.addPost(postEntity);
                             authorEntity.addPost(postEntity1);
                             this.authorRepository.save(authorEntity);

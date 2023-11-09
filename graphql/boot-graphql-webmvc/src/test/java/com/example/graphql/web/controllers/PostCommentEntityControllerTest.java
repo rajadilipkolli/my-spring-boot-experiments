@@ -180,7 +180,7 @@ class PostCommentEntityControllerTest {
         Long postCommentId = 1L;
         given(postCommentService.findPostCommentById(postCommentId)).willReturn(Optional.empty());
         PostCommentEntity postCommentEntity =
-                PostCommentEntity.builder().id(postCommentId).title("Updated PostComment").build();
+                new PostCommentEntity().setId(postCommentId).setTitle("Updated PostComment");
 
         this.mockMvc
                 .perform(

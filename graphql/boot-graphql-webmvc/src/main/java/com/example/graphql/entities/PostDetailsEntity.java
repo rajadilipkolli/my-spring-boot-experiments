@@ -11,17 +11,13 @@ import jakarta.persistence.Table;
 import java.io.Serializable;
 import java.util.Objects;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Entity
 @Table(name = "post_details")
 @Getter
-@Setter
 @AllArgsConstructor
-@Builder
 @NoArgsConstructor
 public class PostDetailsEntity extends Auditable implements Serializable {
 
@@ -37,8 +33,24 @@ public class PostDetailsEntity extends Auditable implements Serializable {
     @JoinColumn(name = "id")
     private PostEntity postEntity;
 
-    public PostDetailsEntity(String createdBy) {
+    public PostDetailsEntity setId(Long id) {
+        this.id = id;
+        return this;
+    }
+
+    public PostDetailsEntity setDetailsKey(String detailsKey) {
+        this.detailsKey = detailsKey;
+        return this;
+    }
+
+    public PostDetailsEntity setCreatedBy(String createdBy) {
         this.createdBy = createdBy;
+        return this;
+    }
+
+    public PostDetailsEntity setPostEntity(PostEntity postEntity) {
+        this.postEntity = postEntity;
+        return this;
     }
 
     @Override

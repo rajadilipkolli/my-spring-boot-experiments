@@ -33,14 +33,14 @@ class PostEntityControllerIT extends AbstractIntegrationTest {
         postRepository.deleteAll();
 
         postEntityList = new ArrayList<>();
-        PostEntity firstPost = PostEntity.builder().content("First Post").build();
-        firstPost.setDetails(PostDetailsEntity.builder().detailsKey("Junit1").build());
+        PostEntity firstPost = new PostEntity().setContent("First Post");
+        firstPost.setDetails(new PostDetailsEntity().setDetailsKey("Junit1"));
         postEntityList.add(firstPost);
-        PostEntity secondPost = PostEntity.builder().content("Second Post").build();
-        secondPost.setDetails(PostDetailsEntity.builder().detailsKey("Junit2").build());
+        PostEntity secondPost = new PostEntity().setContent("Second Post");
+        secondPost.setDetails(new PostDetailsEntity().setDetailsKey("Junit2"));
         postEntityList.add(secondPost);
-        PostEntity thirdPost = PostEntity.builder().content("Third Post").build();
-        thirdPost.setDetails(PostDetailsEntity.builder().detailsKey("Junit3").build());
+        PostEntity thirdPost = new PostEntity().setContent("Third Post");
+        thirdPost.setDetails(new PostDetailsEntity().setDetailsKey("Junit3"));
         postEntityList.add(thirdPost);
         postEntityList = postRepository.saveAll(postEntityList);
     }

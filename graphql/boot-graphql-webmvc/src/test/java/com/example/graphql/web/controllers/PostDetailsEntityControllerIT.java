@@ -26,10 +26,9 @@ class PostDetailsEntityControllerIT extends AbstractIntegrationTest {
     void setUp() {
         postRepository.deleteAll();
 
-        post = PostEntity.builder().content("First Post").title("First Title").build();
+        post = new PostEntity().setContent("First Post").setTitle("First Title");
 
-        PostDetailsEntity postDetailsEntity =
-                PostDetailsEntity.builder().detailsKey("Junit1").build();
+        PostDetailsEntity postDetailsEntity = new PostDetailsEntity().setDetailsKey("Junit1");
         post.setDetails(postDetailsEntity);
 
         post = postRepository.save(post);

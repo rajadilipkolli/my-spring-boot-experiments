@@ -54,9 +54,10 @@ class PostEntityControllerTest {
     @BeforeEach
     void setUp() {
         this.postEntityList = new ArrayList<>();
-        this.postEntityList.add(PostEntity.builder().id(1L).content("First Post").build());
-        this.postEntityList.add(PostEntity.builder().id(2L).content("Second Post").build());
-        this.postEntityList.add(PostEntity.builder().id(3L).content("Third Post").build());
+
+        this.postEntityList.add(new PostEntity().setId(1L).setContent("First Post"));
+        this.postEntityList.add(new PostEntity().setId(2L).setContent("Second Post"));
+        this.postEntityList.add(new PostEntity().setId(3L).setContent("Third Post"));
     }
 
     @Test
@@ -172,7 +173,7 @@ class PostEntityControllerTest {
     void shouldReturn404WhenUpdatingNonExistingPost() throws Exception {
         Long postId = 1L;
         given(postService.findPostById(postId)).willReturn(Optional.empty());
-        PostEntity postEntity = PostEntity.builder().id(postId).content("Updated Post").build();
+        PostEntity postEntity = new PostEntity().setId(postId).setContent("Updated Post");
 
         this.mockMvc
                 .perform(
@@ -194,7 +195,7 @@ class PostEntityControllerTest {
     @Test
     void shouldDeletePost() throws Exception {
         Long postId = 1L;
-        PostEntity postEntity = PostEntity.builder().id(postId).content("First Post").build();
+        PostEntity postEntity = new PostEntity().setId(postId).setContent("First Post");
         given(postService.findPostById(postId)).willReturn(Optional.of(postResponseList.get(0)));
         doNothing().when(postService).deletePostById(postEntity.getId());
 

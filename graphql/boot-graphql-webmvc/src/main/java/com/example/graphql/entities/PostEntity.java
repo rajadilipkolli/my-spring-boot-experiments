@@ -18,18 +18,14 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import org.hibernate.Hibernate;
 
 @Entity
 @Table(name = "posts")
 @Getter
-@Setter
 @AllArgsConstructor
-@Builder
 @NoArgsConstructor
 public class PostEntity extends Auditable implements Serializable {
 
@@ -47,19 +43,63 @@ public class PostEntity extends Auditable implements Serializable {
     private LocalDateTime publishedAt;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "postEntity", orphanRemoval = true)
-    @Builder.Default
     private List<PostCommentEntity> comments = new ArrayList<>();
 
     @OneToOne(mappedBy = "postEntity", cascade = CascadeType.ALL, optional = false)
     private PostDetailsEntity details;
 
     @OneToMany(mappedBy = "postEntity", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Builder.Default
     private List<PostTagEntity> tags = new ArrayList<>();
 
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "author_id")
     private AuthorEntity authorEntity;
+
+    public PostEntity setId(Long id) {
+        this.id = id;
+        return this;
+    }
+
+    public PostEntity setTitle(String title) {
+        this.title = title;
+        return this;
+    }
+
+    public PostEntity setContent(String content) {
+        this.content = content;
+        return this;
+    }
+
+    public PostEntity setPublished(boolean published) {
+        this.published = published;
+        return this;
+    }
+
+    public PostEntity setPublishedAt(LocalDateTime publishedAt) {
+        this.publishedAt = publishedAt;
+        return this;
+    }
+
+    public PostEntity setComments(List<PostCommentEntity> comments) {
+        if (comments == null) {
+            comments = new ArrayList<>();
+        }
+        this.comments = comments;
+        return this;
+    }
+
+    public PostEntity setTags(List<PostTagEntity> tags) {
+        if (tags == null) {
+            tags = new ArrayList<>();
+        }
+        this.tags = tags;
+        return this;
+    }
+
+    public PostEntity setAuthorEntity(AuthorEntity authorEntity) {
+        this.authorEntity = authorEntity;
+        return this;
+    }
 
     public void addComment(PostCommentEntity comment) {
         this.comments.add(comment);

@@ -34,26 +34,23 @@ class AuthorEntityControllerIT extends AbstractIntegrationTest {
 
         authorEntityList = new ArrayList<>();
         authorEntityList.add(
-                AuthorEntity.builder()
-                        .firstName("First Author")
-                        .lastName("lastName")
-                        .email("junit1@email.com")
-                        .mobile(9848022338L)
-                        .build());
+                new AuthorEntity()
+                        .setFirstName("First Author")
+                        .setLastName("lastName")
+                        .setEmail("junit1@email.com")
+                        .setMobile(9848022338L));
         authorEntityList.add(
-                AuthorEntity.builder()
-                        .firstName("Second Author")
-                        .lastName("lastName")
-                        .email("junit2@email.com")
-                        .mobile(9848022339L)
-                        .build());
+                new AuthorEntity()
+                        .setFirstName("Second Author")
+                        .setLastName("lastName")
+                        .setEmail("junit2@email.com")
+                        .setMobile(9848022339L));
         authorEntityList.add(
-                AuthorEntity.builder()
-                        .firstName("Third Author")
-                        .lastName("lastName")
-                        .email("junit3@email.com")
-                        .mobile(9848022340L)
-                        .build());
+                new AuthorEntity()
+                        .setFirstName("Third Author")
+                        .setLastName("lastName")
+                        .setEmail("junit3@email.com")
+                        .setMobile(9848022340L));
         authorEntityList = authorRepository.saveAll(authorEntityList);
     }
 

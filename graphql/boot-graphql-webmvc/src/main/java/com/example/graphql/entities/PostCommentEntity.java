@@ -13,17 +13,13 @@ import java.io.Serializable;
 import java.time.OffsetDateTime;
 import java.util.Objects;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import org.hibernate.Hibernate;
 
 @Entity
 @Table(name = "post_comments")
 @Getter
-@Setter
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class PostCommentEntity extends Auditable implements Serializable {
@@ -44,6 +40,36 @@ public class PostCommentEntity extends Auditable implements Serializable {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id")
     private PostEntity postEntity;
+
+    public PostCommentEntity setId(Long id) {
+        this.id = id;
+        return this;
+    }
+
+    public PostCommentEntity setTitle(String title) {
+        this.title = title;
+        return this;
+    }
+
+    public PostCommentEntity setContent(String content) {
+        this.content = content;
+        return this;
+    }
+
+    public PostCommentEntity setPublished(boolean published) {
+        this.published = published;
+        return this;
+    }
+
+    public PostCommentEntity setPublishedAt(OffsetDateTime publishedAt) {
+        this.publishedAt = publishedAt;
+        return this;
+    }
+
+    public PostCommentEntity setPostEntity(PostEntity postEntity) {
+        this.postEntity = postEntity;
+        return this;
+    }
 
     @Override
     public boolean equals(Object o) {

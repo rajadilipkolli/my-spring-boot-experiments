@@ -46,8 +46,8 @@ public interface NewPostRequestToPostEntityMapper {
                 .orElseGet(
                         () ->
                                 tagRepository.save(
-                                        new TagEntity(
-                                                tagsRequest.tagName(),
-                                                tagsRequest.tagDescription())));
+                                        new TagEntity()
+                                                .setTagName(tagsRequest.tagName())
+                                                .setTagDescription(tagsRequest.tagDescription())));
     }
 }

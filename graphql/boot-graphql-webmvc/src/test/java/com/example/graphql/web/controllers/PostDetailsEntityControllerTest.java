@@ -41,7 +41,7 @@ class PostDetailsEntityControllerTest {
     @BeforeEach
     void setUp() {
         this.postDetailsList = new ArrayList<>();
-        this.postDetailsList.add(PostDetailsEntity.builder().id(1L).createdBy("Junit1").build());
+        this.postDetailsList.add(new PostDetailsEntity().setId(1L).setCreatedBy("Junit1"));
     }
 
     @Test
@@ -81,7 +81,7 @@ class PostDetailsEntityControllerTest {
     void shouldUpdatePostDetails() throws Exception {
         Long postDetailsId = 1L;
         PostDetailsEntity postDetails =
-                PostDetailsEntity.builder().id(postDetailsId).createdBy("updated").build();
+                new PostDetailsEntity().setId(postDetailsId).setCreatedBy("updated");
         PostDetailsRequest postDetailsRequest = new PostDetailsRequest("junitDetailsKey");
         given(postDetailsService.findDetailsById(postDetailsId))
                 .willReturn(Optional.of(postDetails));
@@ -102,7 +102,7 @@ class PostDetailsEntityControllerTest {
         Long postDetailsId = 1L;
         given(postDetailsService.findPostDetailsById(postDetailsId)).willReturn(Optional.empty());
         PostDetailsEntity postDetails =
-                PostDetailsEntity.builder().id(postDetailsId).createdBy("Junit1").build();
+                new PostDetailsEntity().setId(postDetailsId).setCreatedBy("Junit1");
 
         this.mockMvc
                 .perform(
