@@ -2,7 +2,7 @@ $(function() {
 
 	//run job once
     $(".btnRun").click(function() {
-    	var jobId = $(this).parent().data("id");
+    	const jobId = $(this).parent().data("id");
         $.ajax({
             url: "/api/runJob?t=" + new Date().getTime(),
             type: "POST",
@@ -67,7 +67,7 @@ $(function() {
     	var jobId = $(this).parent().data("id");
         $.ajax({
             url: "/api/deleteJob?t=" + new Date().getTime(),
-            type: "POST",
+            type: "DELETE",
             data: {
                 "jobName": $("#name_"+jobId).text(),
                 "jobGroup": $("#group_"+jobId).text()

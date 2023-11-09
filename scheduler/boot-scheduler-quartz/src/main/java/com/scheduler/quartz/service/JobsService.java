@@ -5,9 +5,22 @@ import static org.quartz.impl.matchers.GroupMatcher.jobGroupEquals;
 import com.scheduler.quartz.job.SampleJob;
 import com.scheduler.quartz.model.response.JobStatus;
 import com.scheduler.quartz.model.response.ScheduleJob;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
-import org.quartz.*;
+import org.quartz.CronScheduleBuilder;
+import org.quartz.CronTrigger;
+import org.quartz.JobBuilder;
+import org.quartz.JobDetail;
+import org.quartz.JobKey;
+import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
+import org.quartz.Trigger;
+import org.quartz.TriggerBuilder;
+import org.quartz.TriggerKey;
 import org.quartz.impl.matchers.GroupMatcher;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -17,7 +30,7 @@ import org.springframework.util.StringUtils;
 public class JobsService {
 
     private final Scheduler scheduler;
-    public static final String groupName = "sample-group";
+    public static final String GROUP_NAME = "sample-group";
 
     public JobsService(Scheduler scheduler) {
         this.scheduler = scheduler;
@@ -56,7 +69,7 @@ public class JobsService {
 
     public List<JobStatus> getJobsStatuses() throws SchedulerException {
         LinkedList<JobStatus> list = new LinkedList<>();
-        for (JobKey jobKey : scheduler.getJobKeys(jobGroupEquals(groupName))) {
+        for (JobKey jobKey : scheduler.getJobKeys(jobGroupEquals(GROUP_NAME))) {
             JobDetail jobDetail = scheduler.getJobDetail(jobKey);
             List<? extends Trigger> triggers = scheduler.getTriggersOfJob(jobDetail.getKey());
             for (Trigger trigger : triggers) {
@@ -81,7 +94,7 @@ public class JobsService {
     }
 
     private void updateJobCronExpression(ScheduleJob scheduleJob) throws SchedulerException {
-        TriggerKey triggerKey = TriggerKey.triggerKey(scheduleJob.jobName(), groupName);
+        TriggerKey triggerKey = TriggerKey.triggerKey(scheduleJob.jobName(), GROUP_NAME);
         CronTrigger cronTrigger = (CronTrigger) scheduler.getTrigger(triggerKey);
         CronScheduleBuilder cronScheduleBuilder = CronScheduleBuilder.cronSchedule(scheduleJob.cronExpression());
         if (cronTrigger == null) {
@@ -100,18 +113,18 @@ public class JobsService {
     }
 
     private void addJob(ScheduleJob scheduleJob) throws SchedulerException {
-        TriggerKey triggerKey = TriggerKey.triggerKey(scheduleJob.jobName(), groupName);
+        TriggerKey triggerKey = TriggerKey.triggerKey(scheduleJob.jobName(), GROUP_NAME);
         CronTrigger trigger = (CronTrigger) scheduler.getTrigger(triggerKey);
         if (trigger != null) {
             throw new SchedulerException("job already exists!");
         }
 
         // simulate job info db persist operation
-        ScheduleJob withJobId = scheduleJob.withJobId(String.valueOf(SampleJob.jobList.size() + 1));
-        SampleJob.jobList.add(withJobId);
+        ScheduleJob withJobId = scheduleJob.withJobId(String.valueOf(SampleJob.JOB_LIST.size() + 1));
+        SampleJob.JOB_LIST.add(withJobId);
 
         JobDetail jobDetail = JobBuilder.newJob(SampleJob.class)
-                .withIdentity(withJobId.jobName(), groupName)
+                .withIdentity(withJobId.jobName(), GROUP_NAME)
                 .storeDurably()
                 .requestRecovery()
                 .build();
@@ -119,7 +132,7 @@ public class JobsService {
 
         CronScheduleBuilder cronScheduleBuilder = CronScheduleBuilder.cronSchedule(withJobId.cronExpression());
         trigger = TriggerBuilder.newTrigger()
-                .withIdentity(withJobId.jobName() + "-trigger", groupName)
+                .withIdentity(withJobId.jobName() + "-trigger", GROUP_NAME)
                 .withSchedule(cronScheduleBuilder)
                 .build();
 

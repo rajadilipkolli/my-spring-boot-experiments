@@ -33,9 +33,10 @@
         <module>jpa/boot-data-keyset-pagination</module>
         <module>jpa/boot-data-multipledatasources</module>
         <module>jpa/boot-hibernate2ndlevelcache-sample</module>
+        <module>jpa/boot-jpa-locks</module>
         <module>jpa/boot-read-replica-postgresql</module>
-        <module>jpa/multitenancy/multitenancy-db</module>
         <module>jpa/multitenancy/multidatasource-multitenancy</module>
+        <module>jpa/multitenancy/multitenancy-db</module>
         <module>jpa/multitenancy/partition</module>
         <module>jpa/multitenancy/schema</module>
         <module>r2dbc/boot-jooq-r2dbc-sample</module>

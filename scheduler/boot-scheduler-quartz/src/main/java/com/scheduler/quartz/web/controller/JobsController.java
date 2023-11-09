@@ -30,9 +30,7 @@ public class JobsController {
         return jobsService.getJobsStatuses();
     }
 
-    @RequestMapping(
-            value = "/saveOrUpdate",
-            method = {RequestMethod.GET, RequestMethod.POST})
+    @PostMapping(value = "/saveOrUpdate")
     public Message saveOrUpdate(ScheduleJob job) {
         log.info("params, job = {}", job);
         Message message = Message.failure();
@@ -46,9 +44,7 @@ public class JobsController {
         return message;
     }
 
-    @RequestMapping(
-            value = "/pauseJob",
-            method = {RequestMethod.GET, RequestMethod.POST})
+    @PostMapping(value = "/pauseJob")
     public Message pauseJob(ScheduleJob job) {
         log.info("params, job = {}", job);
         Message message = Message.failure();
@@ -62,9 +58,7 @@ public class JobsController {
         return message;
     }
 
-    @RequestMapping(
-            value = "/deleteJob",
-            method = {RequestMethod.GET, RequestMethod.POST})
+    @DeleteMapping(value = "/deleteJob")
     public Message deleteJob(ScheduleJob job) {
         log.info("params, job = {}", job);
         Message message = Message.failure();

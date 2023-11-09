@@ -15,7 +15,7 @@ public class SampleJob implements Job {
 
     private final OddEvenService oddEvenService;
 
-    public static List<ScheduleJob> jobList = new ArrayList<>();
+    public static final List<ScheduleJob> JOB_LIST = new ArrayList<>();
 
     public SampleJob(OddEvenService oddEvenService) {
         this.oddEvenService = oddEvenService;
