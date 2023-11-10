@@ -76,4 +76,8 @@ public class PostService {
     public void deletePostById(Long id) {
         postRepository.deleteById(id);
     }
+
+    public Long totalPosts() {
+        return postRepository.count();
+    }
 }
