@@ -19,9 +19,14 @@
             <column name="id" type="bigint" defaultValueSequenceNext="posts_seq">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
-            <column name="text" type="${string.type}">
+            <column name="title" type="${string.type}">
                 <constraints nullable="false"/>
             </column>
+            <column name="content" type="${string.type}">
+                <constraints nullable="false" />
+            </column>
+            <column name="created_on" type="DATETIME"/>
+            <column name="details_id" type="BIGINT"/>
         </createTable>
     </changeSet>
 </databaseChangeLog>

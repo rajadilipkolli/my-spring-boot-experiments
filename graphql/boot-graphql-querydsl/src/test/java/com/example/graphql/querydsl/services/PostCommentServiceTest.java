@@ -11,6 +11,7 @@ import com.example.graphql.querydsl.entities.PostComment;
 import com.example.graphql.querydsl.mapper.PostCommentMapper;
 import com.example.graphql.querydsl.model.response.PostCommentResponse;
 import com.example.graphql.querydsl.repositories.PostCommentRepository;
+import java.time.LocalDateTime;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -41,7 +42,7 @@ class PostCommentServiceTest {
         assertThat(optionalPostComment).isPresent();
         PostCommentResponse postComment = optionalPostComment.get();
         assertThat(postComment.id()).isEqualTo(1L);
-        assertThat(postComment.text()).isEqualTo("junitTest");
+        assertThat(postComment.review()).isEqualTo("junitTest");
     }
 
     @Test
@@ -57,11 +58,11 @@ class PostCommentServiceTest {
     private PostComment getPostComment() {
         PostComment postComment = new PostComment();
         postComment.setId(1L);
-        postComment.setText("junitTest");
+        postComment.setReview("junitTest");
         return postComment;
     }
 
     private PostCommentResponse getPostCommentResponse() {
-        return new PostCommentResponse(1L, "junitTest");
+        return new PostCommentResponse(1L, "junitTest", LocalDateTime.now());
     }
 }

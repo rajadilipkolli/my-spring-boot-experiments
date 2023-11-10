@@ -41,7 +41,7 @@ class TagServiceTest {
         assertThat(optionalTag).isPresent();
         TagResponse tag = optionalTag.get();
         assertThat(tag.id()).isEqualTo(1L);
-        assertThat(tag.text()).isEqualTo("junitTest");
+        assertThat(tag.name()).isEqualTo("junitTest");
     }
 
     @Test
@@ -57,7 +57,7 @@ class TagServiceTest {
     private Tag getTag() {
         Tag tag = new Tag();
         tag.setId(1L);
-        tag.setText("junitTest");
+        tag.setName("junitTest");
         return tag;
     }
 

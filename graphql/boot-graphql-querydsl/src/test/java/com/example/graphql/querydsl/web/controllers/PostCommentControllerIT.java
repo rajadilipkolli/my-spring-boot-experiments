@@ -35,9 +35,9 @@ class PostCommentControllerIT extends AbstractIntegrationTest {
         postCommentRepository.deleteAllInBatch();
 
         postCommentList = new ArrayList<>();
-        postCommentList.add(new PostComment(null, "First PostComment"));
-        postCommentList.add(new PostComment(null, "Second PostComment"));
-        postCommentList.add(new PostComment(null, "Third PostComment"));
+        postCommentList.add(new PostComment().setReview("First PostComment"));
+        postCommentList.add(new PostComment().setReview("Second PostComment"));
+        postCommentList.add(new PostComment().setReview("Third PostComment"));
         postCommentList = postCommentRepository.saveAll(postCommentList);
     }
 
@@ -65,7 +65,7 @@ class PostCommentControllerIT extends AbstractIntegrationTest {
                 .perform(get("/api/posts/comments/{id}", postCommentId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(postComment.getId()), Long.class))
-                .andExpect(jsonPath("$.text", is(postComment.getText())));
+                .andExpect(jsonPath("$.review", is(postComment.getReview())));
     }
 
     @Test
@@ -78,11 +78,11 @@ class PostCommentControllerIT extends AbstractIntegrationTest {
                 .andExpect(status().isCreated())
                 .andExpect(header().exists(HttpHeaders.LOCATION))
                 .andExpect(jsonPath("$.id", notNullValue()))
-                .andExpect(jsonPath("$.text", is(postCommentRequest.text())));
+                .andExpect(jsonPath("$.review", is(postCommentRequest.review())));
     }
 
     @Test
-    void shouldReturn400WhenCreateNewPostCommentWithoutText() throws Exception {
+    void shouldReturn400WhenCreateNewPostCommentWithoutReview() throws Exception {
         PostCommentRequest postCommentRequest = new PostCommentRequest(null);
 
         this.mockMvc
@@ -97,8 +97,8 @@ class PostCommentControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.detail", is("Invalid request content.")))
                 .andExpect(jsonPath("$.instance", is("/api/posts/comments")))
                 .andExpect(jsonPath("$.violations", hasSize(1)))
-                .andExpect(jsonPath("$.violations[0].field", is("text")))
-                .andExpect(jsonPath("$.violations[0].message", is("Text cannot be empty")))
+                .andExpect(jsonPath("$.violations[0].field", is("review")))
+                .andExpect(jsonPath("$.violations[0].message", is("Review cannot be empty")))
                 .andReturn();
     }
 
@@ -113,7 +113,7 @@ class PostCommentControllerIT extends AbstractIntegrationTest {
                         .content(objectMapper.writeValueAsString(postCommentRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(postCommentId), Long.class))
-                .andExpect(jsonPath("$.text", is(postCommentRequest.text())));
+                .andExpect(jsonPath("$.review", is(postCommentRequest.review())));
     }
 
     @Test
@@ -124,6 +124,6 @@ class PostCommentControllerIT extends AbstractIntegrationTest {
                 .perform(delete("/api/posts/comments/{id}", postComment.getId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(postComment.getId()), Long.class))
-                .andExpect(jsonPath("$.text", is(postComment.getText())));
+                .andExpect(jsonPath("$.review", is(postComment.getReview())));
     }
 }

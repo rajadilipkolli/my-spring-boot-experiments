@@ -65,7 +65,7 @@ class TagControllerIT extends AbstractIntegrationTest {
                 .perform(get("/api/tags/{id}", tagId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(tag.getId()), Long.class))
-                .andExpect(jsonPath("$.text", is(tag.getText())));
+                .andExpect(jsonPath("$.name", is(tag.getName())));
     }
 
     @Test
@@ -78,11 +78,11 @@ class TagControllerIT extends AbstractIntegrationTest {
                 .andExpect(status().isCreated())
                 .andExpect(header().exists(HttpHeaders.LOCATION))
                 .andExpect(jsonPath("$.id", notNullValue()))
-                .andExpect(jsonPath("$.text", is(tagRequest.text())));
+                .andExpect(jsonPath("$.name", is(tagRequest.name())));
     }
 
     @Test
-    void shouldReturn400WhenCreateNewTagWithoutText() throws Exception {
+    void shouldReturn400WhenCreateNewTagWithoutName() throws Exception {
         TagRequest tagRequest = new TagRequest(null);
 
         this.mockMvc
@@ -97,8 +97,8 @@ class TagControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.detail", is("Invalid request content.")))
                 .andExpect(jsonPath("$.instance", is("/api/tags")))
                 .andExpect(jsonPath("$.violations", hasSize(1)))
-                .andExpect(jsonPath("$.violations[0].field", is("text")))
-                .andExpect(jsonPath("$.violations[0].message", is("Text cannot be empty")))
+                .andExpect(jsonPath("$.violations[0].field", is("name")))
+                .andExpect(jsonPath("$.violations[0].message", is("TagName cannot be empty")))
                 .andReturn();
     }
 
@@ -113,7 +113,7 @@ class TagControllerIT extends AbstractIntegrationTest {
                         .content(objectMapper.writeValueAsString(tagRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(tagId), Long.class))
-                .andExpect(jsonPath("$.text", is(tagRequest.text())));
+                .andExpect(jsonPath("$.name", is(tagRequest.name())));
     }
 
     @Test
@@ -124,6 +124,6 @@ class TagControllerIT extends AbstractIntegrationTest {
                 .perform(delete("/api/tags/{id}", tag.getId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(tag.getId()), Long.class))
-                .andExpect(jsonPath("$.text", is(tag.getText())));
+                .andExpect(jsonPath("$.name", is(tag.getName())));
     }
 }

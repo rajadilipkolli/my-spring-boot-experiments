@@ -1,22 +1,16 @@
 package com.example.graphql.querydsl.entities;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+import java.time.LocalDateTime;
 import java.util.Objects;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import org.hibernate.Hibernate;
 
 @Entity
 @Table(name = "post_comments")
 @Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class PostComment {
@@ -26,7 +20,32 @@ public class PostComment {
     private Long id;
 
     @Column(nullable = false)
-    private String text;
+    private String review;
+
+    private LocalDateTime createdOn;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Post post;
+
+    public PostComment setId(Long id) {
+        this.id = id;
+        return this;
+    }
+
+    public PostComment setReview(String review) {
+        this.review = review;
+        return this;
+    }
+
+    public PostComment setCreatedOn(LocalDateTime createdOn) {
+        this.createdOn = createdOn;
+        return this;
+    }
+
+    public PostComment setPost(Post post) {
+        this.post = post;
+        return this;
+    }
 
     @Override
     public boolean equals(Object o) {

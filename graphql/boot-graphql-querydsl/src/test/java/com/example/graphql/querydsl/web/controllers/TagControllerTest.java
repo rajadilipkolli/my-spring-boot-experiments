@@ -92,7 +92,7 @@ class TagControllerTest {
         this.mockMvc
                 .perform(get("/api/tags/{id}", tagId))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.text", is(tag.text())));
+                .andExpect(jsonPath("$.name", is(tag.name())));
     }
 
     @Test
@@ -124,11 +124,11 @@ class TagControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(header().exists(HttpHeaders.LOCATION))
                 .andExpect(jsonPath("$.id", notNullValue()))
-                .andExpect(jsonPath("$.text", is(tag.text())));
+                .andExpect(jsonPath("$.name", is(tag.name())));
     }
 
     @Test
-    void shouldReturn400WhenCreateNewTagWithoutText() throws Exception {
+    void shouldReturn400WhenCreateNewTagWithoutName() throws Exception {
         TagRequest tagRequest = new TagRequest(null);
 
         this.mockMvc
@@ -143,8 +143,8 @@ class TagControllerTest {
                 .andExpect(jsonPath("$.detail", is("Invalid request content.")))
                 .andExpect(jsonPath("$.instance", is("/api/tags")))
                 .andExpect(jsonPath("$.violations", hasSize(1)))
-                .andExpect(jsonPath("$.violations[0].field", is("text")))
-                .andExpect(jsonPath("$.violations[0].message", is("Text cannot be empty")))
+                .andExpect(jsonPath("$.violations[0].field", is("name")))
+                .andExpect(jsonPath("$.violations[0].message", is("TagName cannot be empty")))
                 .andReturn();
     }
 
@@ -161,7 +161,7 @@ class TagControllerTest {
                         .content(objectMapper.writeValueAsString(tagRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(tagId), Long.class))
-                .andExpect(jsonPath("$.text", is(tag.text())));
+                .andExpect(jsonPath("$.name", is(tag.name())));
     }
 
     @Test
@@ -192,7 +192,7 @@ class TagControllerTest {
         this.mockMvc
                 .perform(delete("/api/tags/{id}", tagId))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.text", is(tag.text())));
+                .andExpect(jsonPath("$.name", is(tag.name())));
     }
 
     @Test
@@ -211,7 +211,7 @@ class TagControllerTest {
 
     List<TagResponse> getTagResponseList() {
         return tagList.stream()
-                .map(tag -> new TagResponse(tag.getId(), tag.getText()))
+                .map(tag -> new TagResponse(tag.getId(), tag.getName()))
                 .toList();
     }
 }

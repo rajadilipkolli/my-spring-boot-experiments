@@ -1,3 +1,5 @@
 package com.example.graphql.querydsl.model.response;
 
-public record PostCommentResponse(Long id, String text) {}
+import java.time.LocalDateTime;
+
+public record PostCommentResponse(Long id, String review, LocalDateTime createdOn) {}

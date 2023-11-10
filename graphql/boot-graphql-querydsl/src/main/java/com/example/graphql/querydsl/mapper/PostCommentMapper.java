@@ -4,26 +4,22 @@ import com.example.graphql.querydsl.entities.PostComment;
 import com.example.graphql.querydsl.model.request.PostCommentRequest;
 import com.example.graphql.querydsl.model.response.PostCommentResponse;
 import java.util.List;
-import org.springframework.stereotype.Service;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 
-@Service
-public class PostCommentMapper {
+@Mapper
+public interface PostCommentMapper {
 
-    public PostComment toEntity(PostCommentRequest postCommentRequest) {
-        PostComment postComment = new PostComment();
-        postComment.setText(postCommentRequest.text());
-        return postComment;
-    }
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "createdOn", expression = "java(java.time.LocalDateTime.now())")
+    PostComment toEntity(PostCommentRequest postCommentRequest);
 
-    public void mapPostCommentWithRequest(PostComment postComment, PostCommentRequest postCommentRequest) {
-        postComment.setText(postCommentRequest.text());
-    }
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "createdOn", ignore = true)
+    void mapPostCommentWithRequest(@MappingTarget PostComment postComment, PostCommentRequest postCommentRequest);
 
-    public PostCommentResponse toResponse(PostComment postComment) {
-        return new PostCommentResponse(postComment.getId(), postComment.getText());
-    }
+    PostCommentResponse toResponse(PostComment postComment);
 
-    public List<PostCommentResponse> toResponseList(List<PostComment> postCommentList) {
-        return postCommentList.stream().map(this::toResponse).toList();
-    }
+    List<PostCommentResponse> toResponseList(List<PostComment> postCommentList);
 }

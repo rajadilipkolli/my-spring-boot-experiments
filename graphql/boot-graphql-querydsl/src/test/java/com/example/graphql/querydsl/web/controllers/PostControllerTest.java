@@ -24,6 +24,8 @@ import com.example.graphql.querydsl.model.response.PagedResult;
 import com.example.graphql.querydsl.model.response.PostResponse;
 import com.example.graphql.querydsl.services.PostService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -54,12 +56,14 @@ class PostControllerTest {
 
     private List<Post> postList;
 
+    DateTimeFormatter formatterWithMillis = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSS");
+
     @BeforeEach
     void setUp() {
         this.postList = new ArrayList<>();
-        this.postList.add(new Post(1L, "text 1"));
-        this.postList.add(new Post(2L, "text 2"));
-        this.postList.add(new Post(3L, "text 3"));
+        this.postList.add(new Post().setId(1L).setTitle("title 1").setContent("content 1"));
+        this.postList.add(new Post().setId(2L).setTitle("title 2").setContent("content 2"));
+        this.postList.add(new Post().setId(3L).setTitle("title 3").setContent("content 3"));
     }
 
     @Test
@@ -86,13 +90,16 @@ class PostControllerTest {
     @Test
     void shouldFindPostById() throws Exception {
         Long postId = 1L;
-        PostResponse post = new PostResponse(postId, "text 1");
+        PostResponse post = new PostResponse(postId, "text 1", "content 1", LocalDateTime.now());
         given(postService.findPostById(postId)).willReturn(Optional.of(post));
 
         this.mockMvc
                 .perform(get("/api/posts/{id}", postId))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.text", is(post.text())));
+                .andExpect(jsonPath("$.title", is(post.title())))
+                .andExpect(jsonPath("$.content", is(post.content())))
+                .andExpect(
+                        jsonPath("$.createdOn", is(post.createdOn().format(formatterWithMillis)), LocalDateTime.class));
     }
 
     @Test
@@ -113,8 +120,8 @@ class PostControllerTest {
     @Test
     void shouldCreateNewPost() throws Exception {
 
-        PostResponse post = new PostResponse(1L, "some text");
-        PostRequest postRequest = new PostRequest("some text");
+        PostResponse post = new PostResponse(1L, "some text", "some content", LocalDateTime.now());
+        PostRequest postRequest = new PostRequest("some title", "some content");
         given(postService.savePost(any(PostRequest.class))).willReturn(post);
 
         this.mockMvc
@@ -124,12 +131,15 @@ class PostControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(header().exists(HttpHeaders.LOCATION))
                 .andExpect(jsonPath("$.id", notNullValue()))
-                .andExpect(jsonPath("$.text", is(post.text())));
+                .andExpect(jsonPath("$.title", is(post.title())))
+                .andExpect(jsonPath("$.content", is(post.content())))
+                .andExpect(
+                        jsonPath("$.createdOn", is(post.createdOn().format(formatterWithMillis)), LocalDateTime.class));
     }
 
     @Test
-    void shouldReturn400WhenCreateNewPostWithoutText() throws Exception {
-        PostRequest postRequest = new PostRequest(null);
+    void shouldReturn400WhenCreateNewPostWithoutTitleAndContent() throws Exception {
+        PostRequest postRequest = new PostRequest(null, null);
 
         this.mockMvc
                 .perform(post("/api/posts")
@@ -142,17 +152,19 @@ class PostControllerTest {
                 .andExpect(jsonPath("$.status", is(400)))
                 .andExpect(jsonPath("$.detail", is("Invalid request content.")))
                 .andExpect(jsonPath("$.instance", is("/api/posts")))
-                .andExpect(jsonPath("$.violations", hasSize(1)))
-                .andExpect(jsonPath("$.violations[0].field", is("text")))
-                .andExpect(jsonPath("$.violations[0].message", is("Text cannot be empty")))
+                .andExpect(jsonPath("$.violations", hasSize(2)))
+                .andExpect(jsonPath("$.violations[0].field", is("content")))
+                .andExpect(jsonPath("$.violations[0].message", is("Content cannot be blank")))
+                .andExpect(jsonPath("$.violations[1].field", is("title")))
+                .andExpect(jsonPath("$.violations[1].message", is("Title cannot be empty")))
                 .andReturn();
     }
 
     @Test
     void shouldUpdatePost() throws Exception {
         Long postId = 1L;
-        PostResponse post = new PostResponse(postId, "Updated text");
-        PostRequest postRequest = new PostRequest("Updated text");
+        PostResponse post = new PostResponse(postId, "Updated text", "some content", LocalDateTime.now());
+        PostRequest postRequest = new PostRequest("Updated text", "some content");
         given(postService.updatePost(eq(postId), any(PostRequest.class))).willReturn(post);
 
         this.mockMvc
@@ -161,13 +173,16 @@ class PostControllerTest {
                         .content(objectMapper.writeValueAsString(postRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(postId), Long.class))
-                .andExpect(jsonPath("$.text", is(post.text())));
+                .andExpect(jsonPath("$.title", is(post.title())))
+                .andExpect(jsonPath("$.content", is(post.content())))
+                .andExpect(
+                        jsonPath("$.createdOn", is(post.createdOn().format(formatterWithMillis)), LocalDateTime.class));
     }
 
     @Test
     void shouldReturn404WhenUpdatingNonExistingPost() throws Exception {
         Long postId = 1L;
-        PostRequest postRequest = new PostRequest("Updated text");
+        PostRequest postRequest = new PostRequest("Updated text", "some content");
         given(postService.updatePost(eq(postId), any(PostRequest.class))).willThrow(new PostNotFoundException(postId));
 
         this.mockMvc
@@ -185,14 +200,17 @@ class PostControllerTest {
     @Test
     void shouldDeletePost() throws Exception {
         Long postId = 1L;
-        PostResponse post = new PostResponse(postId, "Some text");
+        PostResponse post = new PostResponse(postId, "Some text", "some content", LocalDateTime.now());
         given(postService.findPostById(postId)).willReturn(Optional.of(post));
         doNothing().when(postService).deletePostById(postId);
 
         this.mockMvc
                 .perform(delete("/api/posts/{id}", postId))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.text", is(post.text())));
+                .andExpect(jsonPath("$.title", is(post.title())))
+                .andExpect(jsonPath("$.content", is(post.content())))
+                .andExpect(
+                        jsonPath("$.createdOn", is(post.createdOn().format(formatterWithMillis)), LocalDateTime.class));
     }
 
     @Test
@@ -211,7 +229,7 @@ class PostControllerTest {
 
     List<PostResponse> getPostResponseList() {
         return postList.stream()
-                .map(post -> new PostResponse(post.getId(), post.getText()))
+                .map(post -> new PostResponse(post.getId(), post.getTitle(), post.getContent(), post.getCreatedOn()))
                 .toList();
     }
 }

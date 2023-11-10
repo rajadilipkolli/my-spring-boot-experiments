@@ -63,7 +63,7 @@ public class PostService {
         Post post = postRepository.findById(id).orElseThrow(() -> new PostNotFoundException(id));
 
         // Update the post object with data from postRequest
-        postMapper.mapPostWithRequest(post, postRequest);
+        postMapper.mapPostWithRequest(postRequest, post);
 
         // Save the updated post object
         Post updatedPost = postRepository.save(post);

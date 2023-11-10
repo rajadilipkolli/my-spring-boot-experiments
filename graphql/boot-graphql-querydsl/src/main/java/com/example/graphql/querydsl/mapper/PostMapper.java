@@ -4,26 +4,20 @@ import com.example.graphql.querydsl.entities.Post;
 import com.example.graphql.querydsl.model.request.PostRequest;
 import com.example.graphql.querydsl.model.response.PostResponse;
 import java.util.List;
-import org.springframework.stereotype.Service;
+import org.mapstruct.*;
 
-@Service
-public class PostMapper {
+@Mapper
+public interface PostMapper {
 
-    public Post toEntity(PostRequest postRequest) {
-        Post post = new Post();
-        post.setText(postRequest.text());
-        return post;
-    }
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "createdOn", expression = "java(java.time.LocalDateTime.now())")
+    Post toEntity(PostRequest postRequest);
 
-    public void mapPostWithRequest(Post post, PostRequest postRequest) {
-        post.setText(postRequest.text());
-    }
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "createdOn", ignore = true)
+    void mapPostWithRequest(PostRequest postRequest, @MappingTarget Post post);
 
-    public PostResponse toResponse(Post post) {
-        return new PostResponse(post.getId(), post.getText());
-    }
+    PostResponse toResponse(Post post);
 
-    public List<PostResponse> toResponseList(List<Post> postList) {
-        return postList.stream().map(this::toResponse).toList();
-    }
+    List<PostResponse> toResponseList(List<Post> postList);
 }

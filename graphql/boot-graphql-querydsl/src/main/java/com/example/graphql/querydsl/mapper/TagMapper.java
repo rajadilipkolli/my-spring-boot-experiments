@@ -4,26 +4,20 @@ import com.example.graphql.querydsl.entities.Tag;
 import com.example.graphql.querydsl.model.request.TagRequest;
 import com.example.graphql.querydsl.model.response.TagResponse;
 import java.util.List;
-import org.springframework.stereotype.Service;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 
-@Service
-public class TagMapper {
+@Mapper
+public interface TagMapper {
 
-    public Tag toEntity(TagRequest tagRequest) {
-        Tag tag = new Tag();
-        tag.setText(tagRequest.text());
-        return tag;
-    }
+    @Mapping(target = "id", ignore = true)
+    Tag toEntity(TagRequest tagRequest);
 
-    public void mapTagWithRequest(Tag tag, TagRequest tagRequest) {
-        tag.setText(tagRequest.text());
-    }
+    @Mapping(target = "id", ignore = true)
+    void mapTagWithRequest(@MappingTarget Tag tag, TagRequest tagRequest);
 
-    public TagResponse toResponse(Tag tag) {
-        return new TagResponse(tag.getId(), tag.getText());
-    }
+    TagResponse toResponse(Tag tag);
 
-    public List<TagResponse> toResponseList(List<Tag> tagList) {
-        return tagList.stream().map(this::toResponse).toList();
-    }
+    List<TagResponse> toResponseList(List<Tag> tagList);
 }

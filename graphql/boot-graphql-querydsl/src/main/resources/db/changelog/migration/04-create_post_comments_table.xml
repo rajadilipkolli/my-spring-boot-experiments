@@ -19,9 +19,17 @@
             <column name="id" type="bigint" defaultValueSequenceNext="post_comments_seq">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
-            <column name="text" type="${string.type}">
+            <column name="review" type="${string.type}">
                 <constraints nullable="false"/>
             </column>
+            <column name="created_on" type="DATETIME"/>
+            <column name="post_id" type="BIGINT"/>
         </createTable>
+    </changeSet>
+
+    <changeSet id="add_foreign_key_post_comment" author="app">
+        <addForeignKeyConstraint baseColumnNames="post_id" baseTableName="post_comments"
+                                 constraintName="FK_POST_COMMENT_ON_POSTS" referencedColumnNames="id"
+                                 referencedTableName="posts"/>
     </changeSet>
 </databaseChangeLog>

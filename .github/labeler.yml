@@ -9,7 +9,7 @@
 "component: graphql-webmvc":
   - graphql/boot-graphql-webmvc/**/*
 "component: graphql-querydsl":
-  - graphql/spring-boot-graphql-querydsl/**/*
+  - graphql/boot-graphql-querydsl/**/*
 "component: hibernate2ndlevelcache-sample":
   - jpa/boot-hibernate2ndlevelcache-sample/**/*
 "component: jobrunr":
@@ -69,7 +69,7 @@
   - boot-mongodb-elasticsearch/pom.xml
   - boot-opensearch-sample/pom.xml
   - graphql/boot-graphql-webflux/build.gradle.kts
-  - graphql/spring-boot-graphql-querydsl/build.gradle.kts
+  - graphql/boot-graphql-querydsl/pom.xml
   - graphql/boot-graphql-webmvc/pom.xml
   - boot-strategy-plugin/build.gradle
   - boot-togglz-sample/pom.xml

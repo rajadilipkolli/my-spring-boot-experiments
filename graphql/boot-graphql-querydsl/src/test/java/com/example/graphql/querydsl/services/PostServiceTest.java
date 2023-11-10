@@ -11,6 +11,7 @@ import com.example.graphql.querydsl.entities.Post;
 import com.example.graphql.querydsl.mapper.PostMapper;
 import com.example.graphql.querydsl.model.response.PostResponse;
 import com.example.graphql.querydsl.repositories.PostRepository;
+import java.time.LocalDateTime;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -41,7 +42,7 @@ class PostServiceTest {
         assertThat(optionalPost).isPresent();
         PostResponse post = optionalPost.get();
         assertThat(post.id()).isEqualTo(1L);
-        assertThat(post.text()).isEqualTo("junitTest");
+        assertThat(post.title()).isEqualTo("junitTest");
     }
 
     @Test
@@ -57,11 +58,11 @@ class PostServiceTest {
     private Post getPost() {
         Post post = new Post();
         post.setId(1L);
-        post.setText("junitTest");
+        post.setTitle("junitTest");
         return post;
     }
 
     private PostResponse getPostResponse() {
-        return new PostResponse(1L, "junitTest");
+        return new PostResponse(1L, "junitTest", "junitContent", LocalDateTime.now());
     }
 }

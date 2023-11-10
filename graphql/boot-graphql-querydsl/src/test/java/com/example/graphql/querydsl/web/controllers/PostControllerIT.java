@@ -15,6 +15,7 @@ import com.example.graphql.querydsl.common.AbstractIntegrationTest;
 import com.example.graphql.querydsl.entities.Post;
 import com.example.graphql.querydsl.model.request.PostRequest;
 import com.example.graphql.querydsl.repositories.PostRepository;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,9 +36,9 @@ class PostControllerIT extends AbstractIntegrationTest {
         postRepository.deleteAllInBatch();
 
         postList = new ArrayList<>();
-        postList.add(new Post(null, "First Post"));
-        postList.add(new Post(null, "Second Post"));
-        postList.add(new Post(null, "Third Post"));
+        postList.add(new Post().setTitle("First Post").setContent("First Content"));
+        postList.add(new Post().setTitle("Second Post").setContent("Second Content"));
+        postList.add(new Post().setTitle("Third Post").setContent("Third Content"));
         postList = postRepository.saveAll(postList);
     }
 
@@ -65,12 +66,14 @@ class PostControllerIT extends AbstractIntegrationTest {
                 .perform(get("/api/posts/{id}", postId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(post.getId()), Long.class))
-                .andExpect(jsonPath("$.text", is(post.getText())));
+                .andExpect(jsonPath("$.title", is(post.getTitle())))
+                .andExpect(jsonPath("$.content", is(post.getContent())))
+                .andExpect(jsonPath("$.createdOn", is(post.getCreatedOn()), LocalDateTime.class));
     }
 
     @Test
     void shouldCreateNewPost() throws Exception {
-        PostRequest postRequest = new PostRequest("New Post");
+        PostRequest postRequest = new PostRequest("New Post", "New Content");
         this.mockMvc
                 .perform(post("/api/posts")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -78,12 +81,13 @@ class PostControllerIT extends AbstractIntegrationTest {
                 .andExpect(status().isCreated())
                 .andExpect(header().exists(HttpHeaders.LOCATION))
                 .andExpect(jsonPath("$.id", notNullValue()))
-                .andExpect(jsonPath("$.text", is(postRequest.text())));
+                .andExpect(jsonPath("$.title", is(postRequest.title())))
+                .andExpect(jsonPath("$.content", is(postRequest.content())));
     }
 
     @Test
-    void shouldReturn400WhenCreateNewPostWithoutText() throws Exception {
-        PostRequest postRequest = new PostRequest(null);
+    void shouldReturn400WhenCreateNewPostWithoutTitleAndContent() throws Exception {
+        PostRequest postRequest = new PostRequest(null, null);
 
         this.mockMvc
                 .perform(post("/api/posts")
@@ -96,16 +100,18 @@ class PostControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.status", is(400)))
                 .andExpect(jsonPath("$.detail", is("Invalid request content.")))
                 .andExpect(jsonPath("$.instance", is("/api/posts")))
-                .andExpect(jsonPath("$.violations", hasSize(1)))
-                .andExpect(jsonPath("$.violations[0].field", is("text")))
-                .andExpect(jsonPath("$.violations[0].message", is("Text cannot be empty")))
+                .andExpect(jsonPath("$.violations", hasSize(2)))
+                .andExpect(jsonPath("$.violations[0].field", is("content")))
+                .andExpect(jsonPath("$.violations[0].message", is("Content cannot be blank")))
+                .andExpect(jsonPath("$.violations[1].field", is("title")))
+                .andExpect(jsonPath("$.violations[1].message", is("Title cannot be empty")))
                 .andReturn();
     }
 
     @Test
     void shouldUpdatePost() throws Exception {
         Long postId = postList.get(0).getId();
-        PostRequest postRequest = new PostRequest("Updated Post");
+        PostRequest postRequest = new PostRequest("Updated Post", "New Content");
 
         this.mockMvc
                 .perform(put("/api/posts/{id}", postId)
@@ -113,7 +119,8 @@ class PostControllerIT extends AbstractIntegrationTest {
                         .content(objectMapper.writeValueAsString(postRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(postId), Long.class))
-                .andExpect(jsonPath("$.text", is(postRequest.text())));
+                .andExpect(jsonPath("$.title", is(postRequest.title())))
+                .andExpect(jsonPath("$.content", is(postRequest.content())));
     }
 
     @Test
@@ -124,6 +131,8 @@ class PostControllerIT extends AbstractIntegrationTest {
                 .perform(delete("/api/posts/{id}", post.getId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(post.getId()), Long.class))
-                .andExpect(jsonPath("$.text", is(post.getText())));
+                .andExpect(jsonPath("$.title", is(post.getTitle())))
+                .andExpect(jsonPath("$.content", is(post.getContent())))
+                .andExpect(jsonPath("$.createdOn", is(post.getCreatedOn()), LocalDateTime.class));
     }
 }

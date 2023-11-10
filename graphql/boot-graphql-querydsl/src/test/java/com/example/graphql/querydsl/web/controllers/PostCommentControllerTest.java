@@ -24,6 +24,7 @@ import com.example.graphql.querydsl.model.response.PagedResult;
 import com.example.graphql.querydsl.model.response.PostCommentResponse;
 import com.example.graphql.querydsl.services.PostCommentService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -57,9 +58,9 @@ class PostCommentControllerTest {
     @BeforeEach
     void setUp() {
         this.postCommentList = new ArrayList<>();
-        this.postCommentList.add(new PostComment(1L, "text 1"));
-        this.postCommentList.add(new PostComment(2L, "text 2"));
-        this.postCommentList.add(new PostComment(3L, "text 3"));
+        this.postCommentList.add(new PostComment().setId(1L).setReview("text 1"));
+        this.postCommentList.add(new PostComment().setId(2L).setReview("text 2"));
+        this.postCommentList.add(new PostComment().setId(3L).setReview("text 3"));
     }
 
     @Test
@@ -86,13 +87,13 @@ class PostCommentControllerTest {
     @Test
     void shouldFindPostCommentById() throws Exception {
         Long postCommentId = 1L;
-        PostCommentResponse postComment = new PostCommentResponse(postCommentId, "text 1");
+        PostCommentResponse postComment = new PostCommentResponse(postCommentId, "text 1", LocalDateTime.now());
         given(postCommentService.findPostCommentById(postCommentId)).willReturn(Optional.of(postComment));
 
         this.mockMvc
                 .perform(get("/api/posts/comments/{id}", postCommentId))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.text", is(postComment.text())));
+                .andExpect(jsonPath("$.review", is(postComment.review())));
     }
 
     @Test
@@ -113,7 +114,7 @@ class PostCommentControllerTest {
     @Test
     void shouldCreateNewPostComment() throws Exception {
 
-        PostCommentResponse postComment = new PostCommentResponse(1L, "some text");
+        PostCommentResponse postComment = new PostCommentResponse(1L, "some text", LocalDateTime.now());
         PostCommentRequest postCommentRequest = new PostCommentRequest("some text");
         given(postCommentService.savePostComment(any(PostCommentRequest.class))).willReturn(postComment);
 
@@ -124,11 +125,11 @@ class PostCommentControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(header().exists(HttpHeaders.LOCATION))
                 .andExpect(jsonPath("$.id", notNullValue()))
-                .andExpect(jsonPath("$.text", is(postComment.text())));
+                .andExpect(jsonPath("$.review", is(postComment.review())));
     }
 
     @Test
-    void shouldReturn400WhenCreateNewPostCommentWithoutText() throws Exception {
+    void shouldReturn400WhenCreateNewPostCommentWithoutReview() throws Exception {
         PostCommentRequest postCommentRequest = new PostCommentRequest(null);
 
         this.mockMvc
@@ -143,15 +144,15 @@ class PostCommentControllerTest {
                 .andExpect(jsonPath("$.detail", is("Invalid request content.")))
                 .andExpect(jsonPath("$.instance", is("/api/posts/comments")))
                 .andExpect(jsonPath("$.violations", hasSize(1)))
-                .andExpect(jsonPath("$.violations[0].field", is("text")))
-                .andExpect(jsonPath("$.violations[0].message", is("Text cannot be empty")))
+                .andExpect(jsonPath("$.violations[0].field", is("review")))
+                .andExpect(jsonPath("$.violations[0].message", is("Review cannot be empty")))
                 .andReturn();
     }
 
     @Test
     void shouldUpdatePostComment() throws Exception {
         Long postCommentId = 1L;
-        PostCommentResponse postComment = new PostCommentResponse(postCommentId, "Updated text");
+        PostCommentResponse postComment = new PostCommentResponse(postCommentId, "Updated text", LocalDateTime.now());
         PostCommentRequest postCommentRequest = new PostCommentRequest("Updated text");
         given(postCommentService.updatePostComment(eq(postCommentId), any(PostCommentRequest.class)))
                 .willReturn(postComment);
@@ -162,7 +163,7 @@ class PostCommentControllerTest {
                         .content(objectMapper.writeValueAsString(postCommentRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(postCommentId), Long.class))
-                .andExpect(jsonPath("$.text", is(postComment.text())));
+                .andExpect(jsonPath("$.review", is(postComment.review())));
     }
 
     @Test
@@ -187,14 +188,14 @@ class PostCommentControllerTest {
     @Test
     void shouldDeletePostComment() throws Exception {
         Long postCommentId = 1L;
-        PostCommentResponse postComment = new PostCommentResponse(postCommentId, "Some text");
+        PostCommentResponse postComment = new PostCommentResponse(postCommentId, "Some text", LocalDateTime.now());
         given(postCommentService.findPostCommentById(postCommentId)).willReturn(Optional.of(postComment));
         doNothing().when(postCommentService).deletePostCommentById(postCommentId);
 
         this.mockMvc
                 .perform(delete("/api/posts/comments/{id}", postCommentId))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.text", is(postComment.text())));
+                .andExpect(jsonPath("$.review", is(postComment.review())));
     }
 
     @Test
@@ -213,7 +214,8 @@ class PostCommentControllerTest {
 
     List<PostCommentResponse> getPostCommentResponseList() {
         return postCommentList.stream()
-                .map(postComment -> new PostCommentResponse(postComment.getId(), postComment.getText()))
+                .map(postComment -> new PostCommentResponse(
+                        postComment.getId(), postComment.getReview(), postComment.getCreatedOn()))
                 .toList();
     }
 }
