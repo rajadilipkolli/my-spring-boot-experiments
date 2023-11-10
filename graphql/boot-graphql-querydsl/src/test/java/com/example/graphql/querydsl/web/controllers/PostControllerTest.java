@@ -22,7 +22,7 @@ import com.example.graphql.querydsl.entities.PostDetails;
 import com.example.graphql.querydsl.exception.PostNotFoundException;
 import com.example.graphql.querydsl.model.query.FindPostsQuery;
 import com.example.graphql.querydsl.model.request.CreatePostRequest;
-import com.example.graphql.querydsl.model.request.PostRequest;
+import com.example.graphql.querydsl.model.request.UpdatePostRequest;
 import com.example.graphql.querydsl.model.response.PagedResult;
 import com.example.graphql.querydsl.model.response.PostResponse;
 import com.example.graphql.querydsl.services.PostService;
@@ -104,7 +104,7 @@ class PostControllerTest {
     @Test
     void shouldFindPostById() throws Exception {
         Long postId = 1L;
-        PostResponse post = new PostResponse(postId, "text 1", "content 1", getCreatedOn());
+        PostResponse post = new PostResponse(postId, "text 1", "content 1", getCreatedOn(), new ArrayList<>());
         given(postService.findPostById(postId)).willReturn(Optional.of(post));
 
         this.mockMvc
@@ -134,8 +134,9 @@ class PostControllerTest {
     @Test
     void shouldCreateNewPost() throws Exception {
 
-        PostResponse post = new PostResponse(1L, "some text", "some content", getCreatedOn());
-        CreatePostRequest postRequest = new CreatePostRequest("some title", "some content", "appUser");
+        PostResponse post = new PostResponse(1L, "some text", "some content", getCreatedOn(), new ArrayList<>());
+        CreatePostRequest postRequest =
+                new CreatePostRequest("some title", "some content", "appUser", new ArrayList<>());
         given(postService.savePost(any(CreatePostRequest.class))).willReturn(post);
 
         this.mockMvc
@@ -153,7 +154,7 @@ class PostControllerTest {
 
     @Test
     void shouldReturn400WhenCreateNewPostWithoutTitleAndContent() throws Exception {
-        CreatePostRequest createPostRequest = new CreatePostRequest(null, null, null);
+        CreatePostRequest createPostRequest = new CreatePostRequest(null, null, null, null);
 
         this.mockMvc
                 .perform(post("/api/posts")
@@ -182,13 +183,15 @@ class PostControllerTest {
         @Test
         void shouldUpdatePost() throws Exception {
             Long postId = 1L;
-            PostResponse post = new PostResponse(postId, "Updated text", "some content", getCreatedOn());
-            PostRequest postRequest = new PostRequest("Updated text", "some content");
-            given(postService.updatePost(eq(postId), any(PostRequest.class))).willReturn(post);
+            PostResponse post =
+                    new PostResponse(postId, "Updated text", "some content", getCreatedOn(), new ArrayList<>());
+            UpdatePostRequest updatePostRequest = new UpdatePostRequest("Updated text", "some content");
+            given(postService.updatePost(eq(postId), any(UpdatePostRequest.class)))
+                    .willReturn(post);
 
             mockMvc.perform(put("/api/posts/{id}", postId)
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(postRequest)))
+                            .content(objectMapper.writeValueAsString(updatePostRequest)))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.id", is(postId), Long.class))
                     .andExpect(jsonPath("$.title", is(post.title())))
@@ -200,13 +203,13 @@ class PostControllerTest {
         @Test
         void shouldReturn404WhenUpdatingNonExistingPost() throws Exception {
             Long postId = 1L;
-            PostRequest postRequest = new PostRequest("Updated text", "some content");
-            given(postService.updatePost(eq(postId), any(PostRequest.class)))
+            UpdatePostRequest updatePostRequest = new UpdatePostRequest("Updated text", "some content");
+            given(postService.updatePost(eq(postId), any(UpdatePostRequest.class)))
                     .willThrow(new PostNotFoundException(postId));
 
             mockMvc.perform(put("/api/posts/{id}", postId)
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(postRequest)))
+                            .content(objectMapper.writeValueAsString(updatePostRequest)))
                     .andExpect(status().isNotFound())
                     .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                     .andExpect(jsonPath("$.type", is("http://api.boot-graphql-querydsl.com/errors/not-found")))
@@ -219,7 +222,7 @@ class PostControllerTest {
     @Test
     void shouldDeletePost() throws Exception {
         Long postId = 1L;
-        PostResponse post = new PostResponse(postId, "Some text", "some content", getCreatedOn());
+        PostResponse post = new PostResponse(postId, "Some text", "some content", getCreatedOn(), new ArrayList<>());
         given(postService.findPostById(postId)).willReturn(Optional.of(post));
         doNothing().when(postService).deletePostById(postId);
 
@@ -252,7 +255,8 @@ class PostControllerTest {
                         post.getId(),
                         post.getTitle(),
                         post.getContent(),
-                        post.getDetails().getCreatedOn()))
+                        post.getDetails().getCreatedOn(),
+                        new ArrayList<>()))
                 .toList();
     }
 

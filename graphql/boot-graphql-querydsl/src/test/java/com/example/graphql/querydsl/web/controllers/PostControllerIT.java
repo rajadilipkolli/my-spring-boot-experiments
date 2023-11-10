@@ -15,7 +15,8 @@ import com.example.graphql.querydsl.common.AbstractIntegrationTest;
 import com.example.graphql.querydsl.entities.Post;
 import com.example.graphql.querydsl.entities.PostDetails;
 import com.example.graphql.querydsl.model.request.CreatePostRequest;
-import com.example.graphql.querydsl.model.request.PostRequest;
+import com.example.graphql.querydsl.model.request.PostCommentRequest;
+import com.example.graphql.querydsl.model.request.UpdatePostRequest;
 import com.example.graphql.querydsl.repositories.PostRepository;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -75,7 +76,11 @@ class PostControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldCreateNewPost() throws Exception {
-        CreatePostRequest postRequest = new CreatePostRequest("New Post", "New Content", "Junit");
+        CreatePostRequest postRequest = new CreatePostRequest(
+                "New Post",
+                "New Content",
+                "Junit",
+                List.of(new PostCommentRequest("New Review"), new PostCommentRequest("Second Review")));
         this.mockMvc
                 .perform(post("/api/posts")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -89,7 +94,7 @@ class PostControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldReturn400WhenCreateNewPostWithoutTitleAndContent() throws Exception {
-        CreatePostRequest createPostRequest = new CreatePostRequest(null, null, null);
+        CreatePostRequest createPostRequest = new CreatePostRequest(null, null, null, new ArrayList<>());
 
         this.mockMvc
                 .perform(post("/api/posts")
@@ -115,16 +120,16 @@ class PostControllerIT extends AbstractIntegrationTest {
     @Test
     void shouldUpdatePost() throws Exception {
         Long postId = postList.get(0).getId();
-        PostRequest postRequest = new PostRequest("Updated Post", "New Content");
+        UpdatePostRequest updatePostRequest = new UpdatePostRequest("Updated Post", "New Content");
 
         this.mockMvc
                 .perform(put("/api/posts/{id}", postId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(postRequest)))
+                        .content(objectMapper.writeValueAsString(updatePostRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(postId), Long.class))
-                .andExpect(jsonPath("$.title", is(postRequest.title())))
-                .andExpect(jsonPath("$.content", is(postRequest.content())));
+                .andExpect(jsonPath("$.title", is(updatePostRequest.title())))
+                .andExpect(jsonPath("$.content", is(updatePostRequest.content())));
     }
 
     @Test

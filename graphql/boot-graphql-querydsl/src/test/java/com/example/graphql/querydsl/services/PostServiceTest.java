@@ -12,6 +12,7 @@ import com.example.graphql.querydsl.mapper.PostMapper;
 import com.example.graphql.querydsl.model.response.PostResponse;
 import com.example.graphql.querydsl.repositories.PostRepository;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -63,6 +64,6 @@ class PostServiceTest {
     }
 
     private PostResponse getPostResponse() {
-        return new PostResponse(1L, "junitTest", "junitContent", LocalDateTime.now());
+        return new PostResponse(1L, "junitTest", "junitContent", LocalDateTime.now(), new ArrayList<>());
     }
 }

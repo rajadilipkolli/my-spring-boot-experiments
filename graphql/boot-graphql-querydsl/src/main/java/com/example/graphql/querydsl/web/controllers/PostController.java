@@ -3,7 +3,7 @@ package com.example.graphql.querydsl.web.controllers;
 import com.example.graphql.querydsl.exception.PostNotFoundException;
 import com.example.graphql.querydsl.model.query.FindPostsQuery;
 import com.example.graphql.querydsl.model.request.CreatePostRequest;
-import com.example.graphql.querydsl.model.request.PostRequest;
+import com.example.graphql.querydsl.model.request.UpdatePostRequest;
 import com.example.graphql.querydsl.model.response.PagedResult;
 import com.example.graphql.querydsl.model.response.PostResponse;
 import com.example.graphql.querydsl.services.PostService;
@@ -63,7 +63,8 @@ public class PostController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<PostResponse> updatePost(@PathVariable Long id, @RequestBody @Valid PostRequest postRequest) {
+    public ResponseEntity<PostResponse> updatePost(
+            @PathVariable Long id, @RequestBody @Valid UpdatePostRequest postRequest) {
         return ResponseEntity.ok(postService.updatePost(id, postRequest));
     }
 

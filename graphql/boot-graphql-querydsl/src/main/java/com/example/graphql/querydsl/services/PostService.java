@@ -5,7 +5,7 @@ import com.example.graphql.querydsl.exception.PostNotFoundException;
 import com.example.graphql.querydsl.mapper.PostMapper;
 import com.example.graphql.querydsl.model.query.FindPostsQuery;
 import com.example.graphql.querydsl.model.request.CreatePostRequest;
-import com.example.graphql.querydsl.model.request.PostRequest;
+import com.example.graphql.querydsl.model.request.UpdatePostRequest;
 import com.example.graphql.querydsl.model.response.PagedResult;
 import com.example.graphql.querydsl.model.response.PostResponse;
 import com.example.graphql.querydsl.repositories.PostRepository;
@@ -60,11 +60,11 @@ public class PostService {
     }
 
     @Transactional
-    public PostResponse updatePost(Long id, PostRequest postRequest) {
+    public PostResponse updatePost(Long id, UpdatePostRequest updatePostRequest) {
         Post post = postRepository.findById(id).orElseThrow(() -> new PostNotFoundException(id));
 
         // Update the post object with data from postRequest
-        postMapper.mapPostWithRequest(postRequest, post);
+        postMapper.mapPostWithRequest(updatePostRequest, post);
 
         // Save the updated post object
         Post updatedPost = postRepository.save(post);
