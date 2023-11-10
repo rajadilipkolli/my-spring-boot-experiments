@@ -24,8 +24,7 @@ class GeneralCodingRulesTest {
 
     @ArchTest
     static final ArchRule noGenericExceptions =
-            NO_CLASSES_SHOULD_THROW_GENERIC_EXCEPTIONS.because(
-                    "Throw AlmundoException or any child of this instead");
+            NO_CLASSES_SHOULD_THROW_GENERIC_EXCEPTIONS.because("Throw AlmundoException or any child of this instead");
 
     @ArchTest
     static final ArchRule noJavaUtilLogging =

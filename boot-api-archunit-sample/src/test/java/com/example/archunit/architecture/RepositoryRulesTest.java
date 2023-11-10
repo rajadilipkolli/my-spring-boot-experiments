@@ -18,16 +18,13 @@ class RepositoryRulesTest {
 
     // Classes
     @ArchTest
-    static final ArchRule classes_should_be_annotated =
-            classes()
-                    .that()
-                    .resideInAPackage(REPOSITORY_PACKAGE)
-                    .should()
-                    .beAnnotatedWith(Repository.class)
-                    .because(
-                            String.format(ANNOTATED_EXPLANATION, REPOSITORY_SUFFIX, "@Repository"));
+    static final ArchRule classes_should_be_annotated = classes()
+            .that()
+            .resideInAPackage(REPOSITORY_PACKAGE)
+            .should()
+            .beAnnotatedWith(Repository.class)
+            .because(String.format(ANNOTATED_EXPLANATION, REPOSITORY_SUFFIX, "@Repository"));
 
     @ArchTest
-    static final ArchRule classesShouldBeInterfaces =
-            interfacesAreOnlyAllowedRule(REPOSITORY_PACKAGE);
+    static final ArchRule classesShouldBeInterfaces = interfacesAreOnlyAllowedRule(REPOSITORY_PACKAGE);
 }

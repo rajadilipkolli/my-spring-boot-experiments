@@ -23,17 +23,15 @@ class ServiceRulesTest {
 
     // Classes
     @ArchTest
-    static final ArchRule component_annotation_is_not_allowed =
-            componentAnnotationIsNotAllowedRule(SERVICE_PACKAGE);
+    static final ArchRule component_annotation_is_not_allowed = componentAnnotationIsNotAllowedRule(SERVICE_PACKAGE);
 
     @ArchTest
-    static final ArchRule classes_should_be_annotated =
-            classes()
-                    .that()
-                    .resideInAPackage(SERVICE_PACKAGE)
-                    .should()
-                    .beAnnotatedWith(Service.class)
-                    .because(String.format(ANNOTATED_EXPLANATION, SERVICE_SUFFIX, "@Service"));
+    static final ArchRule classes_should_be_annotated = classes()
+            .that()
+            .resideInAPackage(SERVICE_PACKAGE)
+            .should()
+            .beAnnotatedWith(Service.class)
+            .because(String.format(ANNOTATED_EXPLANATION, SERVICE_SUFFIX, "@Service"));
 
     // Fields
     @ArchTest
@@ -41,19 +39,15 @@ class ServiceRulesTest {
 
     // Constructors
     @ArchTest
-    static final ArchRule constructors_should_not_be_private =
-            publicConstructorsRule(SERVICE_PACKAGE);
+    static final ArchRule constructors_should_not_be_private = publicConstructorsRule(SERVICE_PACKAGE);
 
     // Methods
     @ArchTest
-    static final ArchRule bean_methods_are_not_allowed =
-            beanMethodsAreNotAllowedRule(SERVICE_PACKAGE);
+    static final ArchRule bean_methods_are_not_allowed = beanMethodsAreNotAllowedRule(SERVICE_PACKAGE);
 
     @ArchTest
-    static final ArchRule private_methods_are_not_allowed =
-            privateMethodsAreNotAllowedRule(SERVICE_PACKAGE);
+    static final ArchRule private_methods_are_not_allowed = privateMethodsAreNotAllowedRule(SERVICE_PACKAGE);
 
     @ArchTest
-    static final ArchRule static_methods_are_not_allowed =
-            staticMethodsAreNotAllowedRule(SERVICE_PACKAGE);
+    static final ArchRule static_methods_are_not_allowed = staticMethodsAreNotAllowedRule(SERVICE_PACKAGE);
 }

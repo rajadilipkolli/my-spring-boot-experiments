@@ -60,15 +60,13 @@ public class CommonRules {
                 .notBeAnnotatedWith(Controller.class)
                 .andShould()
                 .notBeAnnotatedWith(RestController.class)
-                .because(
-                        String.format(
-                                "Classes in %s should not be annotated with Spring annotations",
-                                Arrays.toString(packageNames)));
+                .because(String.format(
+                        "Classes in %s should not be annotated with Spring annotations",
+                        Arrays.toString(packageNames)));
     }
 
     // Fields
-    static ArchRule fieldsShouldHaveGetterRule(
-            Map<String, String> exclusions, String... packageNames) {
+    static ArchRule fieldsShouldHaveGetterRule(Map<String, String> exclusions, String... packageNames) {
         return fields().that()
                 .areDeclaredInClassesThat()
                 .resideInAnyPackage(packageNames)
@@ -82,8 +80,7 @@ public class CommonRules {
                 .and()
                 .areNotStatic()
                 .should(haveGetter(exclusions))
-                .because(
-                        "Private fields should have getters in %s" + Arrays.toString(packageNames));
+                .because("Private fields should have getters in %s" + Arrays.toString(packageNames));
     }
 
     static ArchRule fieldsShouldNotBePublic(String packageName) {
@@ -105,10 +102,8 @@ public class CommonRules {
                 .notBeFinal()
                 .andShould()
                 .notBePublic()
-                .because(
-                        String.format(
-                                "Fields with public and final modifiers are not allowed in %s",
-                                Arrays.toString(packageNames)));
+                .because(String.format(
+                        "Fields with public and final modifiers are not allowed in %s", Arrays.toString(packageNames)));
     }
 
     static ArchRule fieldsShouldHaveGetterRule(String... packageNames) {
@@ -128,10 +123,9 @@ public class CommonRules {
                 .doNotHaveModifier(JavaModifier.SYNTHETIC)
                 .should()
                 .beFinal()
-                .because(
-                        String.format(
-                                "Private attributes should be instanced by constructor classes, or it should be static in %s",
-                                packageName));
+                .because(String.format(
+                        "Private attributes should be instanced by constructor classes, or it should be static in %s",
+                        packageName));
     }
 
     // Constructors

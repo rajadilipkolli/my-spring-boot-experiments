@@ -18,23 +18,22 @@ class LayeredArchitectureTest {
     private static final String SERVICE = "Service";
 
     @ArchTest
-    static final ArchRule layeredArchitectureRule =
-            layeredArchitecture()
-                    .consideringOnlyDependenciesInLayers()
-                    .layer(CONTROLLER)
-                    .definedBy(CONTROLLER_PACKAGE)
-                    .layer(MODEL)
-                    .definedBy(MODEL_PACKAGE)
-                    .layer(REPOSITORY)
-                    .definedBy(REPOSITORY_PACKAGE)
-                    .layer(SERVICE)
-                    .definedBy(SERVICE_PACKAGE)
-                    .whereLayer(CONTROLLER)
-                    .mayNotBeAccessedByAnyLayer()
-                    .whereLayer(MODEL)
-                    .mayOnlyBeAccessedByLayers(REPOSITORY, SERVICE)
-                    .whereLayer(REPOSITORY)
-                    .mayOnlyBeAccessedByLayers(SERVICE)
-                    .whereLayer(SERVICE)
-                    .mayOnlyBeAccessedByLayers(CONTROLLER, SERVICE);
+    static final ArchRule layeredArchitectureRule = layeredArchitecture()
+            .consideringOnlyDependenciesInLayers()
+            .layer(CONTROLLER)
+            .definedBy(CONTROLLER_PACKAGE)
+            .layer(MODEL)
+            .definedBy(MODEL_PACKAGE)
+            .layer(REPOSITORY)
+            .definedBy(REPOSITORY_PACKAGE)
+            .layer(SERVICE)
+            .definedBy(SERVICE_PACKAGE)
+            .whereLayer(CONTROLLER)
+            .mayNotBeAccessedByAnyLayer()
+            .whereLayer(MODEL)
+            .mayOnlyBeAccessedByLayers(REPOSITORY, SERVICE)
+            .whereLayer(REPOSITORY)
+            .mayOnlyBeAccessedByLayers(SERVICE)
+            .whereLayer(SERVICE)
+            .mayOnlyBeAccessedByLayers(CONTROLLER, SERVICE);
 }

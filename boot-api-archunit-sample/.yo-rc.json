@@ -1,0 +1,12 @@
+{
+  "generator-springboot": {
+    "appName": "boot-api-archunit-sample",
+    "packageName": "com.example.archunit",
+    "databaseType": "postgresql",
+    "dbMigrationTool": "flywaydb",
+    "features": [],
+    "buildTool": "maven",
+    "packageFolder": "com/example/archunit",
+    "flywayMigrationCounter": 2
+  }
+}

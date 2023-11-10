@@ -1,22 +1,33 @@
-# API Example for Archunit
+# boot-api-archunit-sample
 
- ![](../images/ArchUnit-Logo.png) 
- [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+### Format code
 
-ArchUnit is a Java-based library that allows developers to create unit tests for the architecture of their code. It provides a set of rules and assertions that can be used to validate the architecture of the code, ensuring that it follows best practices and meets certain architectural requirements. This allows developers to catch potential issues early on in the development process and improve the overall quality and maintainability of the code.
+```shell
+$ ./mvnw spotless:apply
+```
 
-ArchUnit Implementation in a Spring Boot Project, read [more](https://www.archunit.org/motivation) for understanding concept.
+### Run tests
 
-## Credits
+```shell
+$ ./mvnw clean verify
+```
 
-Shamelessly copied from [api-example-archunit](https://github.com/andres-sacco/api-example-archunit)
+### Run locally
 
-The idea behind this API is to show some of all possibles rules that you can validate in one particular project. For more information about this library and how you can use it check his [page](https://sacco-andres.medium.com/)
+```shell
+$ docker-compose -f docker/docker-compose.yml up -d
+$ ./mvnw spring-boot:run -Dspring-boot.run.profiles=local
+```
 
-## Technologies
+### Using Testcontainers at Development Time
+You can run `TestApplication.java` from your IDE directly.
+You can also run the application using Maven as follows:
 
-Here are some of technologies that I used to develop this example:
+```shell
+./mvnw spring-boot:test-run
+```
 
-* Spring Boot - 3.0.0
-* Archunit - 1.0.0
-* Junit5
+
+### Useful Links
+* Swagger UI: http://localhost:8080/swagger-ui.html
+* Actuator Endpoint: http://localhost:8080/actuator

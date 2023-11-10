@@ -21,33 +21,28 @@ class ModelRulesTest {
 
     // Classes
     @ArchTest
-    static final ArchRule classesShouldOverrideEqualsAndHashCode =
-            classes()
-                    .that()
-                    .resideInAnyPackage(MODEL_PACKAGE)
-                    .and()
-                    .areNotMemberClasses()
-                    .should(HAVE_EQUALS_AND_HASH_CODE)
-                    .because("Model classes should override equals and hashCode methods");
+    static final ArchRule classesShouldOverrideEqualsAndHashCode = classes()
+            .that()
+            .resideInAnyPackage(MODEL_PACKAGE)
+            .and()
+            .areNotMemberClasses()
+            .should(HAVE_EQUALS_AND_HASH_CODE)
+            .because("Model classes should override equals and hashCode methods");
 
     @ArchTest
-    static final ArchRule springAnnotationsAreNotAllowed =
-            springAnnotationsClassesAreNotAllowedRule(MODEL_PACKAGE);
+    static final ArchRule springAnnotationsAreNotAllowed = springAnnotationsClassesAreNotAllowedRule(MODEL_PACKAGE);
 
     // Fields
     @ArchTest
-    static final ArchRule fieldsShouldHaveGetter =
-            fieldsShouldHaveGetterRule(Maps.newHashMap(), MODEL_PACKAGE);
+    static final ArchRule fieldsShouldHaveGetter = fieldsShouldHaveGetterRule(Maps.newHashMap(), MODEL_PACKAGE);
 
     @ArchTest
-    static final ArchRule publicAndFinalFieldsAreNotAllowed =
-            publicAndFinalFieldsAreNotAllowedRule(MODEL_PACKAGE);
+    static final ArchRule publicAndFinalFieldsAreNotAllowed = publicAndFinalFieldsAreNotAllowedRule(MODEL_PACKAGE);
 
     // Methods
     @ArchTest
     static final ArchRule methodsShouldBePublic = methodsShouldBePublicRule(MODEL_PACKAGE);
 
     @ArchTest
-    static final ArchRule staticMethodsAreNotAllowed =
-            staticMethodsAreNotAllowedRule(MODEL_PACKAGE);
+    static final ArchRule staticMethodsAreNotAllowed = staticMethodsAreNotAllowedRule(MODEL_PACKAGE);
 }
