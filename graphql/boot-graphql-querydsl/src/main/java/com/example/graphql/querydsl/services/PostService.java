@@ -4,6 +4,7 @@ import com.example.graphql.querydsl.entities.Post;
 import com.example.graphql.querydsl.exception.PostNotFoundException;
 import com.example.graphql.querydsl.mapper.PostMapper;
 import com.example.graphql.querydsl.model.query.FindPostsQuery;
+import com.example.graphql.querydsl.model.request.CreatePostRequest;
 import com.example.graphql.querydsl.model.request.PostRequest;
 import com.example.graphql.querydsl.model.response.PagedResult;
 import com.example.graphql.querydsl.model.response.PostResponse;
@@ -52,8 +53,8 @@ public class PostService {
     }
 
     @Transactional
-    public PostResponse savePost(PostRequest postRequest) {
-        Post post = postMapper.toEntity(postRequest);
+    public PostResponse savePost(CreatePostRequest createPostRequest) {
+        Post post = postMapper.toEntity(createPostRequest);
         Post savedPost = postRepository.save(post);
         return postMapper.toResponse(savedPost);
     }

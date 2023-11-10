@@ -1,7 +1,6 @@
 package com.example.graphql.querydsl.entities;
 
 import jakarta.persistence.*;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -27,10 +26,12 @@ public class Post {
     @Column(nullable = false)
     private String content;
 
-    private LocalDateTime createdOn;
-
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "post", orphanRemoval = true)
     private List<PostComment> comments = new ArrayList<>();
+
+    @JoinColumn(name = "details_Id")
+    @OneToOne(cascade = CascadeType.ALL, mappedBy = "post", orphanRemoval = true, fetch = FetchType.LAZY)
+    private PostDetails details;
 
     public Post setId(Long id) {
         this.id = id;
@@ -47,16 +48,16 @@ public class Post {
         return this;
     }
 
-    public Post setCreatedOn(LocalDateTime createdOn) {
-        this.createdOn = createdOn;
-        return this;
-    }
-
     public Post setComments(List<PostComment> comments) {
         if (comments == null) {
             comments = new ArrayList<>();
         }
         this.comments = comments;
+        return this;
+    }
+
+    public Post setDetails(PostDetails details) {
+        this.details = details;
         return this;
     }
 
@@ -68,6 +69,16 @@ public class Post {
     public void removeComment(PostComment comment) {
         this.comments.remove(comment);
         comment.setPost(null);
+    }
+
+    public void addDetails(PostDetails details) {
+        this.details = details;
+        details.setPost(this);
+    }
+
+    public void removeDetails() {
+        this.details.setPost(null);
+        this.details = null;
     }
 
     @Override

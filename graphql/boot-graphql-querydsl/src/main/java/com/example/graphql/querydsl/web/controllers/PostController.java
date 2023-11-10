@@ -2,6 +2,7 @@ package com.example.graphql.querydsl.web.controllers;
 
 import com.example.graphql.querydsl.exception.PostNotFoundException;
 import com.example.graphql.querydsl.model.query.FindPostsQuery;
+import com.example.graphql.querydsl.model.request.CreatePostRequest;
 import com.example.graphql.querydsl.model.request.PostRequest;
 import com.example.graphql.querydsl.model.response.PagedResult;
 import com.example.graphql.querydsl.model.response.PostResponse;
@@ -52,8 +53,8 @@ public class PostController {
     }
 
     @PostMapping
-    public ResponseEntity<PostResponse> createPost(@RequestBody @Validated PostRequest postRequest) {
-        PostResponse response = postService.savePost(postRequest);
+    public ResponseEntity<PostResponse> createPost(@RequestBody @Validated CreatePostRequest createPostRequest) {
+        PostResponse response = postService.savePost(createPostRequest);
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/api/posts/{id}")
                 .buildAndExpand(response.id())
