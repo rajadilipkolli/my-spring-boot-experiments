@@ -1,0 +1,13 @@
+{
+  "generator-springboot": {
+    "appName": "boot-graphql-querydsl",
+    "packageName": "com.example.graphql.querydsl",
+    "databaseType": "postgresql",
+    "dbMigrationTool": "liquibase",
+    "dbMigrationFormat": "xml",
+    "features": [],
+    "buildTool": "maven",
+    "packageFolder": "com/example/graphql/querydsl",
+    "liquibaseMigrationCounter": 4
+  }
+}

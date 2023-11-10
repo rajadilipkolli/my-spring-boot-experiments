@@ -1,0 +1,39 @@
+name: boot-graphql-querydsl
+
+on:
+  push:
+    paths:
+      - "graphql/boot-graphql-querydsl/**"
+    branches: [main]
+  pull_request:
+    paths:
+      - "graphql/boot-graphql-querydsl/**"
+    types:
+      - opened
+      - synchronize
+      - reopened
+
+jobs:
+  build:
+    name: Run Unit & Integration Tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: "graphql/boot-graphql-querydsl"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v3.13.0
+        with:
+          java-version: 21
+          distribution: "microsoft"
+          cache: "maven"
+          
+      - name: Grant execute permission for mvnw
+        run: chmod +x mvnw
+
+      - name: Build and analyze
+        run: ./mvnw clean verify

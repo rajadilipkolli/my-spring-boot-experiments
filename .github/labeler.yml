@@ -44,8 +44,9 @@
   - boot-opensearch-sample/**/*
 "component: httpclients":
   - httpClients/web-client-webflux/**/*
-  - httpClients/http-proxy/**/*
-  - httpClients/rest-template/**/*
+  - httpClients/boot-http-proxy/**/*
+  - httpClients/boot-restclient/**/*
+  - httpClients/boot-rest-template/**/*
   - httpClients/web-client-mvc/**/*
 "status: waiting-for-triage":
   - ./*
@@ -76,8 +77,9 @@
   - boot-rabbitmq-thymeleaf/pom.xml
   - boot-rest-docs-sample/pom.xml
   - r2dbc/boot-jooq-r2dbc-sample/pom.xml
-  - httpClients/http-proxy/pom.xml
-  - httpClients/rest-template/pom.xml
+  - httpClients/boot-http-proxy/pom.xml
+  - httpClients/boot-restclient/pom.xml
+  - httpClients/boot-rest-template/pom.xml
   - httpClients/web-client-webmvc/pom.xml
   - httpClients/web-client-webflux/pom.xml
   - open-api-spring-boot/pom.xml
