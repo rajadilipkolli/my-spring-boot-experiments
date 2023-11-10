@@ -104,7 +104,8 @@ class PostControllerTest {
     @Test
     void shouldFindPostById() throws Exception {
         Long postId = 1L;
-        PostResponse post = new PostResponse(postId, "text 1", "content 1", getCreatedOn(), new ArrayList<>());
+        PostResponse post =
+                new PostResponse(postId, "text 1", "content 1", getCreatedOn(), new ArrayList<>(), new ArrayList<>());
         given(postService.findPostById(postId)).willReturn(Optional.of(post));
 
         this.mockMvc
@@ -134,9 +135,10 @@ class PostControllerTest {
     @Test
     void shouldCreateNewPost() throws Exception {
 
-        PostResponse post = new PostResponse(1L, "some text", "some content", getCreatedOn(), new ArrayList<>());
+        PostResponse post =
+                new PostResponse(1L, "some text", "some content", getCreatedOn(), new ArrayList<>(), new ArrayList<>());
         CreatePostRequest postRequest =
-                new CreatePostRequest("some title", "some content", "appUser", new ArrayList<>());
+                new CreatePostRequest("some title", "some content", "appUser", new ArrayList<>(), new ArrayList<>());
         given(postService.savePost(any(CreatePostRequest.class))).willReturn(post);
 
         this.mockMvc
@@ -154,7 +156,7 @@ class PostControllerTest {
 
     @Test
     void shouldReturn400WhenCreateNewPostWithoutTitleAndContent() throws Exception {
-        CreatePostRequest createPostRequest = new CreatePostRequest(null, null, null, null);
+        CreatePostRequest createPostRequest = new CreatePostRequest(null, null, null, null, null);
 
         this.mockMvc
                 .perform(post("/api/posts")
@@ -183,8 +185,8 @@ class PostControllerTest {
         @Test
         void shouldUpdatePost() throws Exception {
             Long postId = 1L;
-            PostResponse post =
-                    new PostResponse(postId, "Updated text", "some content", getCreatedOn(), new ArrayList<>());
+            PostResponse post = new PostResponse(
+                    postId, "Updated text", "some content", getCreatedOn(), new ArrayList<>(), new ArrayList<>());
             UpdatePostRequest updatePostRequest = new UpdatePostRequest("Updated text", "some content");
             given(postService.updatePost(eq(postId), any(UpdatePostRequest.class)))
                     .willReturn(post);
@@ -222,7 +224,8 @@ class PostControllerTest {
     @Test
     void shouldDeletePost() throws Exception {
         Long postId = 1L;
-        PostResponse post = new PostResponse(postId, "Some text", "some content", getCreatedOn(), new ArrayList<>());
+        PostResponse post = new PostResponse(
+                postId, "Some text", "some content", getCreatedOn(), new ArrayList<>(), new ArrayList<>());
         given(postService.findPostById(postId)).willReturn(Optional.of(post));
         doNothing().when(postService).deletePostById(postId);
 
@@ -256,6 +259,7 @@ class PostControllerTest {
                         post.getTitle(),
                         post.getContent(),
                         post.getDetails().getCreatedOn(),
+                        new ArrayList<>(),
                         new ArrayList<>()))
                 .toList();
     }

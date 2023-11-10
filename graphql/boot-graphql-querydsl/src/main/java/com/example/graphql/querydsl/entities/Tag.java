@@ -10,13 +10,11 @@ import java.util.Objects;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import org.hibernate.Hibernate;
 
 @Entity
 @Table(name = "tags")
 @Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class Tag {
@@ -27,6 +25,16 @@ public class Tag {
 
     @Column(nullable = false)
     private String name;
+
+    public Tag setId(Long id) {
+        this.id = id;
+        return this;
+    }
+
+    public Tag setName(String name) {
+        this.name = name;
+        return this;
+    }
 
     @Override
     public boolean equals(Object o) {

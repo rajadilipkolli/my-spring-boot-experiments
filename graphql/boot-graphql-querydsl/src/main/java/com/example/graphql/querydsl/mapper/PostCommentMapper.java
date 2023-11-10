@@ -11,10 +11,12 @@ import org.mapstruct.MappingTarget;
 @Mapper
 public interface PostCommentMapper {
 
+    @Mapping(target = "post", ignore = true)
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdOn", expression = "java(java.time.LocalDateTime.now())")
     PostComment toEntity(PostCommentRequest postCommentRequest);
 
+    @Mapping(target = "post", ignore = true)
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdOn", ignore = true)
     void mapPostCommentWithRequest(@MappingTarget PostComment postComment, PostCommentRequest postCommentRequest);

@@ -64,6 +64,7 @@ class PostServiceTest {
     }
 
     private PostResponse getPostResponse() {
-        return new PostResponse(1L, "junitTest", "junitContent", LocalDateTime.now(), new ArrayList<>());
+        return new PostResponse(
+                1L, "junitTest", "junitContent", LocalDateTime.now(), new ArrayList<>(), new ArrayList<>());
     }
 }

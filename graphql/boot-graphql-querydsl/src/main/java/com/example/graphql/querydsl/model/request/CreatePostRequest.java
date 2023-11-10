@@ -8,4 +8,5 @@ public record CreatePostRequest(
         @NotEmpty(message = "Title cannot be empty") String title,
         @NotBlank(message = "Content cannot be blank") String content,
         @NotBlank(message = "CreatedBy cannot be blank") String createdBy,
-        List<PostCommentRequest> postCommentRequests) {}
+        List<PostCommentRequest> postCommentRequests,
+        List<TagRequest> tagRequests) {}

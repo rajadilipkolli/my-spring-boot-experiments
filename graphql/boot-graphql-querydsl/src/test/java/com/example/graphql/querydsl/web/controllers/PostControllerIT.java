@@ -16,6 +16,7 @@ import com.example.graphql.querydsl.entities.Post;
 import com.example.graphql.querydsl.entities.PostDetails;
 import com.example.graphql.querydsl.model.request.CreatePostRequest;
 import com.example.graphql.querydsl.model.request.PostCommentRequest;
+import com.example.graphql.querydsl.model.request.TagRequest;
 import com.example.graphql.querydsl.model.request.UpdatePostRequest;
 import com.example.graphql.querydsl.repositories.PostRepository;
 import java.time.LocalDateTime;
@@ -80,7 +81,8 @@ class PostControllerIT extends AbstractIntegrationTest {
                 "New Post",
                 "New Content",
                 "Junit",
-                List.of(new PostCommentRequest("First Review"), new PostCommentRequest("Second Review")));
+                List.of(new PostCommentRequest("First Review"), new PostCommentRequest("Second Review")),
+                List.of(new TagRequest("java")));
         this.mockMvc
                 .perform(post("/api/posts")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -101,7 +103,8 @@ class PostControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldReturn400WhenCreateNewPostWithoutTitleAndContent() throws Exception {
-        CreatePostRequest createPostRequest = new CreatePostRequest(null, null, null, new ArrayList<>());
+        CreatePostRequest createPostRequest =
+                new CreatePostRequest(null, null, null, new ArrayList<>(), new ArrayList<>());
 
         this.mockMvc
                 .perform(post("/api/posts")

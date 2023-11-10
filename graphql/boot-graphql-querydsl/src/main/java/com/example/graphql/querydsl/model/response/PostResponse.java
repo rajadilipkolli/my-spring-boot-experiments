@@ -8,4 +8,5 @@ public record PostResponse(
         String title,
         String content,
         LocalDateTime createdOn,
-        List<PostCommentResponse> postCommentResponses) {}
+        List<PostCommentResponse> postCommentResponses,
+        List<TagResponse> tagResponses) {}
