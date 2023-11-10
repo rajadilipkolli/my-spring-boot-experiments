@@ -14,7 +14,7 @@ class LayeredArchitectureTest {
     private static final String CONTROLLER = "Controller";
     private static final String MODEL = "Model";
     private static final String REPOSITORY = "Repository";
-    ;
+    private static final String MAPPER = "Mapper";
     private static final String SERVICE = "Service";
 
     @ArchTest
@@ -28,12 +28,16 @@ class LayeredArchitectureTest {
             .definedBy(REPOSITORY_PACKAGE)
             .layer(SERVICE)
             .definedBy(SERVICE_PACKAGE)
+            .layer(MAPPER)
+            .definedBy(MAPPER_PACKAGE)
             .whereLayer(CONTROLLER)
             .mayNotBeAccessedByAnyLayer()
             .whereLayer(MODEL)
-            .mayOnlyBeAccessedByLayers(REPOSITORY, SERVICE)
+            .mayOnlyBeAccessedByLayers(CONTROLLER, SERVICE, MAPPER)
             .whereLayer(REPOSITORY)
             .mayOnlyBeAccessedByLayers(SERVICE)
             .whereLayer(SERVICE)
-            .mayOnlyBeAccessedByLayers(CONTROLLER, SERVICE);
+            .mayOnlyBeAccessedByLayers(CONTROLLER)
+            .whereLayer(MAPPER)
+            .mayOnlyBeAccessedByLayers(SERVICE);
 }

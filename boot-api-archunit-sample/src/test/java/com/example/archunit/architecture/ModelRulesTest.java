@@ -4,7 +4,6 @@ import static com.example.archunit.architecture.ArchitectureConstants.DEFAULT_PA
 import static com.example.archunit.architecture.ArchitectureConstants.MODEL_PACKAGE;
 import static com.example.archunit.architecture.CommonRules.fieldsShouldHaveGetterRule;
 import static com.example.archunit.architecture.CommonRules.methodsShouldBePublicRule;
-import static com.example.archunit.architecture.CommonRules.publicAndFinalFieldsAreNotAllowedRule;
 import static com.example.archunit.architecture.CommonRules.springAnnotationsClassesAreNotAllowedRule;
 import static com.example.archunit.architecture.CommonRules.staticMethodsAreNotAllowedRule;
 import static com.example.archunit.architecture.CustomConditions.HAVE_EQUALS_AND_HASH_CODE;
@@ -34,14 +33,20 @@ class ModelRulesTest {
 
     // Fields
     @ArchTest
-    static final ArchRule fieldsShouldHaveGetter = fieldsShouldHaveGetterRule(Maps.newHashMap(), MODEL_PACKAGE);
-
-    @ArchTest
-    static final ArchRule publicAndFinalFieldsAreNotAllowed = publicAndFinalFieldsAreNotAllowedRule(MODEL_PACKAGE);
+    static final ArchRule fieldsShouldHaveGetter =
+            fieldsShouldHaveGetterRule(Maps.newHashMap(), MODEL_PACKAGE).allowEmptyShould(true);
 
     // Methods
     @ArchTest
     static final ArchRule methodsShouldBePublic = methodsShouldBePublicRule(MODEL_PACKAGE);
+
+    @ArchTest
+    static final ArchRule classesShouldBeRecordsOnly = classes()
+            .that()
+            .resideInAPackage(MODEL_PACKAGE)
+            .should()
+            .beRecords()
+            .because(String.format("Resources should be records in %s", MODEL_PACKAGE));
 
     @ArchTest
     static final ArchRule staticMethodsAreNotAllowed = staticMethodsAreNotAllowedRule(MODEL_PACKAGE);

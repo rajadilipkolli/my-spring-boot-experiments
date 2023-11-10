@@ -31,7 +31,7 @@ public class ClientController {
     private final ClientService clientService;
 
     @GetMapping
-    public PagedResult<ClientResponse> getAllClients(
+    public ResponseEntity<PagedResult<ClientResponse>> getAllClients(
             @RequestParam(value = "pageNo", defaultValue = AppConstants.DEFAULT_PAGE_NUMBER, required = false)
                     int pageNo,
             @RequestParam(value = "pageSize", defaultValue = AppConstants.DEFAULT_PAGE_SIZE, required = false)
@@ -41,7 +41,7 @@ public class ClientController {
             @RequestParam(value = "sortDir", defaultValue = AppConstants.DEFAULT_SORT_DIRECTION, required = false)
                     String sortDir) {
         FindClientsQuery findClientsQuery = new FindClientsQuery(pageNo, pageSize, sortBy, sortDir);
-        return clientService.findAllClients(findClientsQuery);
+        return ResponseEntity.ok(clientService.findAllClients(findClientsQuery));
     }
 
     @GetMapping("/{id}")

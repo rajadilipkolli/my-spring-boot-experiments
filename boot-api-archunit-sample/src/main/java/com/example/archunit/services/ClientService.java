@@ -8,13 +8,12 @@ import com.example.archunit.model.request.ClientRequest;
 import com.example.archunit.model.response.ClientResponse;
 import com.example.archunit.model.response.PagedResult;
 import com.example.archunit.repositories.ClientRepository;
+import com.example.archunit.utils.PageUtils;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,22 +28,13 @@ public class ClientService {
     public PagedResult<ClientResponse> findAllClients(FindClientsQuery findClientsQuery) {
 
         // create Pageable instance
-        Pageable pageable = createPageable(findClientsQuery);
+        Pageable pageable = PageUtils.createPageable(findClientsQuery);
 
         Page<Client> clientsPage = clientRepository.findAll(pageable);
 
         List<ClientResponse> clientResponseList = clientMapper.toResponseList(clientsPage.getContent());
 
         return new PagedResult<>(clientsPage, clientResponseList);
-    }
-
-    private Pageable createPageable(FindClientsQuery findClientsQuery) {
-        int pageNo = Math.max(findClientsQuery.pageNo() - 1, 0);
-        Sort sort = Sort.by(
-                findClientsQuery.sortDir().equalsIgnoreCase(Sort.Direction.ASC.name())
-                        ? Sort.Order.asc(findClientsQuery.sortBy())
-                        : Sort.Order.desc(findClientsQuery.sortBy()));
-        return PageRequest.of(pageNo, findClientsQuery.pageSize(), sort);
     }
 
     public Optional<ClientResponse> findClientById(Long id) {
