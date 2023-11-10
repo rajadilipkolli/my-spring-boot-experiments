@@ -5,8 +5,10 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.graphql.tester.AutoConfigureHttpGraphQlTester;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.graphql.test.tester.HttpGraphQlTester;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -15,6 +17,7 @@ import org.springframework.test.web.servlet.MockMvc;
         webEnvironment = RANDOM_PORT,
         classes = {ContainersConfig.class})
 @AutoConfigureMockMvc
+@AutoConfigureHttpGraphQlTester
 public abstract class AbstractIntegrationTest {
 
     @Autowired
@@ -22,4 +25,7 @@ public abstract class AbstractIntegrationTest {
 
     @Autowired
     protected ObjectMapper objectMapper;
+
+    @Autowired
+    protected HttpGraphQlTester graphQlTester;
 }

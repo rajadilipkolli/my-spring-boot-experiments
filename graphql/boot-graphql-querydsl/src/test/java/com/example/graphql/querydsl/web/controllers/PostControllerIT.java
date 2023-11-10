@@ -1,5 +1,6 @@
 package com.example.graphql.querydsl.web.controllers;
 
+import static com.example.graphql.querydsl.utils.TestData.getPost;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.Matchers.hasSize;
@@ -13,13 +14,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.example.graphql.querydsl.common.AbstractIntegrationTest;
 import com.example.graphql.querydsl.entities.Post;
-import com.example.graphql.querydsl.entities.PostDetails;
 import com.example.graphql.querydsl.model.request.CreatePostRequest;
 import com.example.graphql.querydsl.model.request.PostCommentRequest;
 import com.example.graphql.querydsl.model.request.TagRequest;
 import com.example.graphql.querydsl.model.request.UpdatePostRequest;
 import com.example.graphql.querydsl.repositories.PostRepository;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -153,13 +152,5 @@ class PostControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.title", is(post.getTitle())))
                 .andExpect(jsonPath("$.content", is(post.getContent())))
                 .andExpect(jsonPath("$.createdOn", is("2023-12-31T10:35:45")));
-    }
-
-    private Post getPost(String title, String content) {
-        Post post = new Post().setTitle(title).setContent(content);
-        post.addDetails(new PostDetails()
-                .setCreatedOn(LocalDateTime.of(2023, 12, 31, 10, 35, 45, 99))
-                .setCreatedBy("appUser"));
-        return post;
     }
 }
