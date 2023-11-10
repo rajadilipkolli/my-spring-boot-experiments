@@ -8,6 +8,6 @@
     "features": [],
     "buildTool": "maven",
     "packageFolder": "com/example/graphql/querydsl",
-    "liquibaseMigrationCounter": 4
+    "liquibaseMigrationCounter": 5
   }
 }

@@ -2,6 +2,7 @@ package com.example.graphql.querydsl.entities;
 
 import jakarta.persistence.*;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import lombok.AllArgsConstructor;
@@ -33,6 +34,9 @@ public class Post {
     @OneToOne(cascade = CascadeType.ALL, mappedBy = "post", orphanRemoval = true, fetch = FetchType.LAZY)
     private PostDetails details;
 
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PostTag> tags = new ArrayList<>();
+
     public Post setId(Long id) {
         this.id = id;
         return this;
@@ -61,6 +65,14 @@ public class Post {
         return this;
     }
 
+    public Post setTags(List<PostTag> postTags) {
+        if (postTags == null) {
+            postTags = new ArrayList<>();
+        }
+        this.tags = postTags;
+        return this;
+    }
+
     public void addComment(PostComment comment) {
         this.comments.add(comment);
         comment.setPost(this);
@@ -79,6 +91,23 @@ public class Post {
     public void removeDetails() {
         this.details.setPost(null);
         this.details = null;
+    }
+
+    public void addTag(Tag tag) {
+        PostTag postTag = new PostTag(this, tag);
+        this.tags.add(postTag);
+    }
+
+    public void removeTag(Tag tag) {
+        for (Iterator<PostTag> iterator = this.tags.iterator(); iterator.hasNext(); ) {
+            PostTag postTag = iterator.next();
+
+            if (postTag.getPost().equals(this) && postTag.getTag().equals(tag)) {
+                iterator.remove();
+                postTag.setPost(null);
+                postTag.setTag(null);
+            }
+        }
     }
 
     @Override

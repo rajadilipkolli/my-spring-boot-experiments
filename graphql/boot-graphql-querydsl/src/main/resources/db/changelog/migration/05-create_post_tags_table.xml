@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- https://docs.liquibase.com/concepts/changelogs/xml-format.html -->
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <property  name="string.type"  value="varchar(255)"  dbms="!postgresql"/>
+    <property  name="string.type"  value="text"  dbms="postgresql"/>
+
+    <changeSet author="app" id="createTable-post_tags">
+        <createTable tableName="post_tags">
+            <column name="created_on" type="DATETIME"/>
+            <column name="post_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_post_tag"/>
+            </column>
+            <column name="tag_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_post_tag"/>
+            </column>
+        </createTable>
+      
+        <addForeignKeyConstraint baseColumnNames="post_id" baseTableName="post_tags" constraintName="FK_POST_TAG_ON_POST"
+                                 referencedColumnNames="id" referencedTableName="posts"/>
+        <addForeignKeyConstraint baseColumnNames="tag_id" baseTableName="post_tags" constraintName="FK_POST_TAG_ON_TAG"
+                                 referencedColumnNames="id" referencedTableName="tags"/>
+    </changeSet>
+</databaseChangeLog>

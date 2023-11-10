@@ -27,6 +27,7 @@ public interface PostMapper {
     void mapPostWithRequest(UpdatePostRequest updatePostRequest, @MappingTarget Post post);
 
     @Mapping(target = "createdOn", source = "details.createdOn")
+    @Mapping(target = "postCommentResponses", source = "comments")
     PostResponse toResponse(Post post);
 
     List<PostResponse> toResponseList(List<Post> postList);

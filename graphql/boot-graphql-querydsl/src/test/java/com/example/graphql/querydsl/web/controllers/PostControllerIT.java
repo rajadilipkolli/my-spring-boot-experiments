@@ -80,7 +80,7 @@ class PostControllerIT extends AbstractIntegrationTest {
                 "New Post",
                 "New Content",
                 "Junit",
-                List.of(new PostCommentRequest("New Review"), new PostCommentRequest("Second Review")));
+                List.of(new PostCommentRequest("First Review"), new PostCommentRequest("Second Review")));
         this.mockMvc
                 .perform(post("/api/posts")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -89,7 +89,14 @@ class PostControllerIT extends AbstractIntegrationTest {
                 .andExpect(header().exists(HttpHeaders.LOCATION))
                 .andExpect(jsonPath("$.id", notNullValue()))
                 .andExpect(jsonPath("$.title", is(postRequest.title())))
-                .andExpect(jsonPath("$.content", is(postRequest.content())));
+                .andExpect(jsonPath("$.content", is(postRequest.content())))
+                .andExpect(jsonPath(
+                        "$.postCommentResponses.size()",
+                        is(postRequest.postCommentRequests().size())))
+                .andExpect(jsonPath("$.postCommentResponses[0].id", notNullValue()))
+                .andExpect(jsonPath("$.postCommentResponses[0].review", is("First Review")))
+                .andExpect(jsonPath("$.postCommentResponses[1].id", notNullValue()))
+                .andExpect(jsonPath("$.postCommentResponses[1].review", is("Second Review")));
     }
 
     @Test
