@@ -1,6 +1,7 @@
 package com.example.graphql.querydsl.mapper;
 
 import com.example.graphql.querydsl.entities.PostComment;
+import com.example.graphql.querydsl.model.request.CreatePostCommentRequest;
 import com.example.graphql.querydsl.model.request.PostCommentRequest;
 import com.example.graphql.querydsl.model.response.PostCommentResponse;
 import java.util.List;
@@ -8,13 +9,13 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
-@Mapper
+@Mapper(uses = PostCommentMapperHelper.class)
 public interface PostCommentMapper {
 
     @Mapping(target = "post", ignore = true)
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdOn", expression = "java(java.time.LocalDateTime.now())")
-    PostComment toEntity(PostCommentRequest postCommentRequest);
+    PostComment toEntity(CreatePostCommentRequest createPostCommentRequest);
 
     @Mapping(target = "post", ignore = true)
     @Mapping(target = "id", ignore = true)

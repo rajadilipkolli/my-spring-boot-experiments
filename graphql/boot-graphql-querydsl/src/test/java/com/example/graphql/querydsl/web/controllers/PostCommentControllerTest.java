@@ -19,6 +19,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.example.graphql.querydsl.entities.PostComment;
 import com.example.graphql.querydsl.exception.PostCommentNotFoundException;
 import com.example.graphql.querydsl.model.query.FindPostCommentsQuery;
+import com.example.graphql.querydsl.model.request.CreatePostCommentRequest;
 import com.example.graphql.querydsl.model.request.PostCommentRequest;
 import com.example.graphql.querydsl.model.response.PagedResult;
 import com.example.graphql.querydsl.model.response.PostCommentResponse;
@@ -115,8 +116,9 @@ class PostCommentControllerTest {
     void shouldCreateNewPostComment() throws Exception {
 
         PostCommentResponse postComment = new PostCommentResponse(1L, "some text", LocalDateTime.now());
-        PostCommentRequest postCommentRequest = new PostCommentRequest("some text");
-        given(postCommentService.savePostComment(any(PostCommentRequest.class))).willReturn(postComment);
+        CreatePostCommentRequest postCommentRequest = new CreatePostCommentRequest("some text", 1L);
+        given(postCommentService.savePostComment(any(CreatePostCommentRequest.class)))
+                .willReturn(postComment);
 
         this.mockMvc
                 .perform(post("/api/posts/comments")
@@ -130,7 +132,7 @@ class PostCommentControllerTest {
 
     @Test
     void shouldReturn400WhenCreateNewPostCommentWithoutReview() throws Exception {
-        PostCommentRequest postCommentRequest = new PostCommentRequest(null);
+        CreatePostCommentRequest postCommentRequest = new CreatePostCommentRequest(null, 9998L);
 
         this.mockMvc
                 .perform(post("/api/posts/comments")

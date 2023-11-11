@@ -4,6 +4,7 @@ import com.example.graphql.querydsl.entities.PostComment;
 import com.example.graphql.querydsl.exception.PostCommentNotFoundException;
 import com.example.graphql.querydsl.mapper.PostCommentMapper;
 import com.example.graphql.querydsl.model.query.FindPostCommentsQuery;
+import com.example.graphql.querydsl.model.request.CreatePostCommentRequest;
 import com.example.graphql.querydsl.model.request.PostCommentRequest;
 import com.example.graphql.querydsl.model.response.PagedResult;
 import com.example.graphql.querydsl.model.response.PostCommentResponse;
@@ -53,8 +54,8 @@ public class PostCommentService {
     }
 
     @Transactional
-    public PostCommentResponse savePostComment(PostCommentRequest postCommentRequest) {
-        PostComment postComment = postCommentMapper.toEntity(postCommentRequest);
+    public PostCommentResponse savePostComment(CreatePostCommentRequest createPostCommentRequest) {
+        PostComment postComment = postCommentMapper.toEntity(createPostCommentRequest);
         PostComment savedPostComment = postCommentRepository.save(postComment);
         return postCommentMapper.toResponse(savedPostComment);
     }

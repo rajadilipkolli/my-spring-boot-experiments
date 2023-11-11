@@ -2,6 +2,7 @@ package com.example.graphql.querydsl.web.controllers;
 
 import com.example.graphql.querydsl.exception.PostCommentNotFoundException;
 import com.example.graphql.querydsl.model.query.FindPostCommentsQuery;
+import com.example.graphql.querydsl.model.request.CreatePostCommentRequest;
 import com.example.graphql.querydsl.model.request.PostCommentRequest;
 import com.example.graphql.querydsl.model.response.PagedResult;
 import com.example.graphql.querydsl.model.response.PostCommentResponse;
@@ -56,8 +57,8 @@ public class PostCommentController {
 
     @PostMapping
     public ResponseEntity<PostCommentResponse> createPostComment(
-            @RequestBody @Validated PostCommentRequest postCommentRequest) {
-        PostCommentResponse response = postCommentService.savePostComment(postCommentRequest);
+            @RequestBody @Validated CreatePostCommentRequest createPostCommentRequest) {
+        PostCommentResponse response = postCommentService.savePostComment(createPostCommentRequest);
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/api/posts/comments/{id}")
                 .buildAndExpand(response.id())

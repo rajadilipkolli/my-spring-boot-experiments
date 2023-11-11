@@ -12,8 +12,10 @@ public final class TestData {
         post.addDetails(new PostDetails()
                 .setCreatedOn(LocalDateTime.of(2023, 12, 31, 10, 35, 45, 99))
                 .setCreatedBy("appUser"));
-        post.addComment(
-                new PostComment().setReview(review).setCreatedOn(LocalDateTime.of(2023, 12, 31, 10, 35, 45, 99)));
+        if (null != review) {
+            post.addComment(
+                    new PostComment().setReview(review).setCreatedOn(LocalDateTime.of(2023, 12, 31, 10, 35, 45, 99)));
+        }
         return post;
     }
 }
