@@ -12,7 +12,7 @@
 * [spring-boot-togglz-sample](boot-togglz-sample/README.md)
 * [spring-boot-ultimate-redis](boot-ultimate-redis/README.md)
 * [GraphQL](graphql/README.md)
-  * [spring-boot-graphql-querydsl](graphql/spring-boot-graphql-querydsl/README.md)
+  * [spring-boot-graphql-querydsl](graphql/boot-graphql-querydsl/README.md)
   * [GraphQl implementation using webflux](graphql/boot-graphql-webflux/README.md)
   * [GraphQl implementation using webmvc](graphql/boot-graphql-webmvc/README.md)
 * [httpClients](httpClients/README.md)

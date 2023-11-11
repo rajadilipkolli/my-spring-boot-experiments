@@ -41,6 +41,7 @@ public abstract class PostMapperDecorator implements PostMapper {
         setTags(createPostRequest.tags(), post);
     }
 
+    @Override
     public Post setTags(List<TagRequest> tagRequests, Post post) {
         if (!CollectionUtils.isEmpty(tagRequests)) {
             tagRequests.forEach(tagRequest -> {
