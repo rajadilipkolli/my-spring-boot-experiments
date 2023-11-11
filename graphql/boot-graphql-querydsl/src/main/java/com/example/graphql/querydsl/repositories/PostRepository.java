@@ -26,6 +26,6 @@ public interface PostRepository
             "select o from Post o left join fetch o.details pd left join fetch o.comments where pd.createdBy = :createdBy")
     List<Post> findByDetails_CreatedByEqualsIgnoreCase(@Param("createdBy") String createdBy);
 
-    @Query("select p from Post p left join fetch p.tags where p in :posts")
+    @Query("select p from Post p left join fetch p.tags where p in :posts ORDER BY p.id")
     List<Post> findAllPostsWithTags(@Param("posts") List<Post> posts);
 }
