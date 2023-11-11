@@ -8,6 +8,7 @@ import com.example.graphql.querydsl.entities.Post;
 import com.example.graphql.querydsl.model.request.PostCommentRequest;
 import com.example.graphql.querydsl.model.request.TagRequest;
 import com.example.graphql.querydsl.model.response.PostCommentResponse;
+import com.example.graphql.querydsl.model.response.PostResponse;
 import com.example.graphql.querydsl.model.response.TagResponse;
 import com.example.graphql.querydsl.repositories.PostRepository;
 import java.time.LocalDateTime;
@@ -31,9 +32,9 @@ class PostControllerQLIntTest extends AbstractIntegrationTest {
         postRepository.deleteAll();
 
         postList = new ArrayList<>();
-        postList.add(getPost("First Post", "First Content"));
-        postList.add(getPost("Second Post", "Second Content"));
-        postList.add(getPost("Third Post", "Third Content"));
+        postList.add(getPost("First Post", "First Content", "First Review"));
+        postList.add(getPost("Second Post", "Second Content", "Second Review"));
+        postList.add(getPost("Third Post", "Third Content", "Third Review"));
         postList = postRepository.saveAll(postList);
     }
 
@@ -53,7 +54,7 @@ class PostControllerQLIntTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void createPost() {
+    void testCreatePost() {
         Map<String, Object> inputValues = new HashMap<>();
         inputValues.put("title", "JunitTitle");
         inputValues.put("content", "JunitContent");
@@ -84,6 +85,69 @@ class PostControllerQLIntTest extends AbstractIntegrationTest {
                     assertThat(postCommentResponses.get(0).createdOn()).isInstanceOf(LocalDateTime.class);
                 })
                 .path("createPost.tags")
+                .entityList(TagResponse.class)
+                .hasSize(1)
+                .satisfies(
+                        tagResponses -> assertThat(tagResponses.get(0).name()).isEqualTo("junit"));
+    }
+
+    @Test
+    void testGetPostsByUserName() {
+        graphQlTester
+                .documentName("getPostsByUserName")
+                .variable("name", "appUser")
+                .execute()
+                .path("getPostsByUserName")
+                .entityList(PostResponse.class)
+                .hasSize(3)
+                .path("getPostsByUserName[0].id")
+                .entity(Long.class)
+                .satisfies(id -> assertThat(id).isGreaterThan(0))
+                .path("getPostsByUserName[0].title")
+                .entity(String.class)
+                .isEqualTo("First Post")
+                .path("getPostsByUserName[0].content")
+                .entity(String.class)
+                .isEqualTo("First Content")
+                .path("getPostsByUserName[0].comments")
+                .entityList(PostCommentResponse.class)
+                .hasSize(1)
+                .satisfies(postCommentResponses -> {
+                    assertThat(postCommentResponses.get(0).review()).isEqualTo("First Review");
+                    assertThat(postCommentResponses.get(0).createdOn()).isInstanceOf(LocalDateTime.class);
+                })
+                .path("getPostsByUserName[0].tags")
+                .entityList(TagResponse.class)
+                .hasSize(0);
+    }
+
+    @Test
+    void testAddTagsToPosts() {
+        Map<String, Object> inputValues = new HashMap<>();
+        inputValues.put("postId", postList.get(2).getId());
+        inputValues.put("tagNames", List.of(new TagRequest("junit")));
+
+        graphQlTester
+                .documentName("addTagsToPosts")
+                .variable("addTagRequest", inputValues)
+                .execute()
+                .path("addTagsToPost.id")
+                .entity(Long.class)
+                .satisfies(id -> assertThat(id).isGreaterThan(0))
+                .path("addTagsToPost.title")
+                .entity(String.class)
+                .isEqualTo("Third Post")
+                .path("addTagsToPost.content")
+                .entity(String.class)
+                .isEqualTo("Third Content")
+                .path("addTagsToPost.comments")
+                .entityList(PostCommentResponse.class)
+                .hasSize(1)
+                .satisfies(postCommentResponses -> {
+                    assertThat(postCommentResponses.get(0).review()).isEqualTo("Third Review");
+                    assertThat(postCommentResponses.get(0).createdOn()).isInstanceOf(LocalDateTime.class);
+                })
+                .path("addTagsToPost.tags")
                 .entityList(TagResponse.class)
                 .hasSize(1)
                 .satisfies(

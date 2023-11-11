@@ -4,11 +4,14 @@ import com.example.graphql.querydsl.entities.Post;
 import com.example.graphql.querydsl.entities.QPost;
 import com.querydsl.core.types.dsl.StringExpression;
 import com.querydsl.core.types.dsl.StringPath;
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.querydsl.binding.QuerydslBinderCustomizer;
 import org.springframework.data.querydsl.binding.QuerydslBindings;
 import org.springframework.data.querydsl.binding.SingleValueBinding;
+import org.springframework.data.repository.query.Param;
 
 public interface PostRepository
         extends JpaRepository<Post, Long>, QuerydslPredicateExecutor<Post>, QuerydslBinderCustomizer<QPost> {
@@ -18,4 +21,11 @@ public interface PostRepository
                 .first((SingleValueBinding<StringPath, String>) StringExpression::containsIgnoreCase);
         bindings.excluding(root.id);
     }
+
+    @Query(
+            "select o from Post o left join fetch o.details pd left join fetch o.comments where pd.createdBy = :createdBy")
+    List<Post> findByDetails_CreatedByEqualsIgnoreCase(@Param("createdBy") String createdBy);
+
+    @Query("select p from Post p left join fetch p.tags where p in :posts")
+    List<Post> findAllPostsWithTags(@Param("posts") List<Post> posts);
 }

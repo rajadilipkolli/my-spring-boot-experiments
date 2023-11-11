@@ -4,6 +4,7 @@ import com.example.graphql.querydsl.entities.Post;
 import com.example.graphql.querydsl.exception.PostNotFoundException;
 import com.example.graphql.querydsl.mapper.PostMapper;
 import com.example.graphql.querydsl.model.query.FindPostsQuery;
+import com.example.graphql.querydsl.model.request.AddTagRequest;
 import com.example.graphql.querydsl.model.request.CreatePostRequest;
 import com.example.graphql.querydsl.model.request.UpdatePostRequest;
 import com.example.graphql.querydsl.model.response.PagedResult;
@@ -79,5 +80,23 @@ public class PostService {
 
     public Long totalPosts() {
         return postRepository.count();
+    }
+
+    public List<PostResponse> getPostsByUserName(String name) {
+        List<Post> posts = postRepository.findByDetails_CreatedByEqualsIgnoreCase(name);
+        if (posts.isEmpty()) {
+            throw new PostNotFoundException(name);
+        } else {
+            // Fixing MultiBagException
+            List<Post> fullyMappedPosts = postRepository.findAllPostsWithTags(posts);
+            return postMapper.toResponseList(fullyMappedPosts);
+        }
+    }
+
+    @Transactional
+    public PostResponse addTagsToPost(AddTagRequest addTagRequest) {
+        Post post = postMapper.setTags(
+                addTagRequest.tagNames(), this.postRepository.getReferenceById(addTagRequest.postId()));
+        return postMapper.toResponse(this.postRepository.save(post));
     }
 }

@@ -1,0 +1,16 @@
+query getPostsByUserName($name: String!) {
+    getPostsByUserName(name: $name) {
+        id
+        title
+        content
+        comments {
+            id
+            review
+            createdOn
+        }
+        tags {
+            id
+            name
+        }
+    }
+}

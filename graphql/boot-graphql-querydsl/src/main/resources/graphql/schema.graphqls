@@ -1,9 +1,11 @@
 type Query {
     countPosts: Int!
+    getPostsByUserName(name : String!) : [PostResponse]
 }
 
 type Mutation {
     createPost(createPostRequest : CreatePostRequest! ) : PostResponse
+    addTagsToPost(addTagRequest: AddTagRequest!) : PostResponse
 }
 
 type PostResponse {
@@ -41,4 +43,9 @@ input TagRequest {
 
 input PostCommentRequest {
     review: String!
+}
+
+input AddTagRequest {
+    tagNames: [TagRequest]!
+    postId: ID
 }

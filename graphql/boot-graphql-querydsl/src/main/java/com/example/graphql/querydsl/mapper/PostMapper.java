@@ -2,15 +2,18 @@ package com.example.graphql.querydsl.mapper;
 
 import com.example.graphql.querydsl.entities.*;
 import com.example.graphql.querydsl.model.request.CreatePostRequest;
+import com.example.graphql.querydsl.model.request.TagRequest;
 import com.example.graphql.querydsl.model.request.UpdatePostRequest;
 import com.example.graphql.querydsl.model.response.PostResponse;
 import com.example.graphql.querydsl.model.response.TagResponse;
 import java.util.List;
+import org.mapstruct.DecoratedWith;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
-@Mapper(uses = PostMapperDecorator.class)
+@Mapper
+@DecoratedWith(PostMapperDecorator.class)
 public interface PostMapper {
 
     @Mapping(target = "tags", ignore = true)
@@ -35,4 +38,6 @@ public interface PostMapper {
     TagResponse postTagToTagResponse(PostTag tag);
 
     List<PostResponse> toResponseList(List<Post> postList);
+
+    Post setTags(List<TagRequest> tagRequests, Post post);
 }

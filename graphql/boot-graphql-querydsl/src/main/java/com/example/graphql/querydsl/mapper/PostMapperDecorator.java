@@ -22,7 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
 
 @Mapper
-public abstract class PostMapperDecorator {
+public abstract class PostMapperDecorator implements PostMapper {
 
     @Autowired
     private TagRepository tagRepository;
@@ -38,7 +38,10 @@ public abstract class PostMapperDecorator {
                     new PostComment().setReview(postCommentRequest.review()).setCreatedOn(LocalDateTime.now())));
         }
 
-        List<TagRequest> tagRequests = createPostRequest.tags();
+        setTags(createPostRequest.tags(), post);
+    }
+
+    public Post setTags(List<TagRequest> tagRequests, Post post) {
         if (!CollectionUtils.isEmpty(tagRequests)) {
             tagRequests.forEach(tagRequest -> {
                 Predicate predicate = QTag.tag.name.equalsIgnoreCase(tagRequest.name());
@@ -47,9 +50,11 @@ public abstract class PostMapperDecorator {
                     PostTag postTag = new PostTag(post, tag.get());
                     post.getTags().add(postTag);
                 } else {
-                    post.addTag(new Tag().setName(tagRequest.name().toLowerCase(Locale.ENGLISH)));
+                    post.addTag(tagRepository.save(
+                            new Tag().setName(tagRequest.name().toLowerCase(Locale.ENGLISH))));
                 }
             });
         }
+        return post;
     }
 }
