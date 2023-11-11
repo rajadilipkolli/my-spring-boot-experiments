@@ -6,7 +6,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.example.graphql.querydsl.common.AbstractIntegrationTest;
 import com.example.graphql.querydsl.entities.Post;
 import com.example.graphql.querydsl.model.request.PostCommentRequest;
+import com.example.graphql.querydsl.model.request.TagRequest;
 import com.example.graphql.querydsl.model.response.PostCommentResponse;
+import com.example.graphql.querydsl.model.response.TagResponse;
 import com.example.graphql.querydsl.repositories.PostRepository;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -57,6 +59,7 @@ class PostControllerQLIntTest extends AbstractIntegrationTest {
         inputValues.put("content", "JunitContent");
         inputValues.put("createdBy", "Junit");
         inputValues.put("comments", List.of(new PostCommentRequest("JunitReview")));
+        inputValues.put("tags", List.of(new TagRequest("junit")));
 
         graphQlTester
                 .documentName("createPost")
@@ -74,10 +77,16 @@ class PostControllerQLIntTest extends AbstractIntegrationTest {
                 .path("createPost.createdOn")
                 .entity(LocalDateTime.class)
                 .path("createPost.comments")
-                .entity(PostCommentResponse.class);
-        // .isEqualTo("PostCommentResponse[id=null, review=null, createdOn=null]")
-        // .path("createPost.tags")
-        // .entity(TagResponse.class)
-        // .isEqualTo("hi");
+                .entityList(PostCommentResponse.class)
+                .hasSize(1)
+                .satisfies(postCommentResponses -> {
+                    assertThat(postCommentResponses.get(0).review()).isEqualTo("JunitReview");
+                    assertThat(postCommentResponses.get(0).createdOn()).isInstanceOf(LocalDateTime.class);
+                })
+                .path("createPost.tags")
+                .entityList(TagResponse.class)
+                .hasSize(1)
+                .satisfies(
+                        tagResponses -> assertThat(tagResponses.get(0).name()).isEqualTo("junit"));
     }
 }

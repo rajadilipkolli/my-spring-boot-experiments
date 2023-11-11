@@ -12,8 +12,8 @@ type PostResponse {
     content: String
     createdBy: String
     createdOn: String
-    comments: PostCommentResponse
-    tags: TagResponse
+    comments: [PostCommentResponse]
+    tags: [TagResponse]
 }
 
 type TagResponse {

@@ -13,6 +13,7 @@ import com.example.graphql.querydsl.repositories.TagRepository;
 import com.querydsl.core.types.Predicate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
@@ -40,13 +41,13 @@ public abstract class PostMapperDecorator {
         List<TagRequest> tagRequests = createPostRequest.tags();
         if (!CollectionUtils.isEmpty(tagRequests)) {
             tagRequests.forEach(tagRequest -> {
-                Predicate predicate = QTag.tag.name.eq(tagRequest.name());
+                Predicate predicate = QTag.tag.name.equalsIgnoreCase(tagRequest.name());
                 Optional<Tag> tag = this.tagRepository.findOne(predicate);
                 if (tag.isPresent()) {
                     PostTag postTag = new PostTag(post, tag.get());
                     post.getTags().add(postTag);
                 } else {
-                    post.addTag(new Tag().setName(tagRequest.name()));
+                    post.addTag(new Tag().setName(tagRequest.name().toLowerCase(Locale.ENGLISH)));
                 }
             });
         }
