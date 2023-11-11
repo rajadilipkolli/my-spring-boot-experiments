@@ -1,3 +1,44 @@
 type Query {
     countPosts: Int!
 }
+
+type Mutation {
+    createPost(createPostRequest : CreatePostRequest! ) : PostResponse
+}
+
+type PostResponse {
+    id: ID
+    title: String
+    content: String
+    createdBy: String
+    createdOn: String
+    comments: PostCommentResponse
+    tags: TagResponse
+}
+
+type TagResponse {
+    id: ID
+    name: String
+}
+
+type PostCommentResponse {
+    id: ID
+    review: String
+    createdOn: String
+}
+
+input CreatePostRequest {
+    title: String!
+    content: String!
+    createdBy: String!
+    comments: [PostCommentRequest]
+    tags: [TagRequest]
+}
+
+input TagRequest {
+    name: String!
+}
+
+input PostCommentRequest {
+    review: String!
+}

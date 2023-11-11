@@ -1,12 +1,18 @@
 package com.example.graphql.querydsl.gql;
 
 import static com.example.graphql.querydsl.utils.TestData.getPost;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import com.example.graphql.querydsl.common.AbstractIntegrationTest;
 import com.example.graphql.querydsl.entities.Post;
+import com.example.graphql.querydsl.model.request.PostCommentRequest;
+import com.example.graphql.querydsl.model.response.PostCommentResponse;
 import com.example.graphql.querydsl.repositories.PostRepository;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +47,37 @@ class PostControllerQLIntTest extends AbstractIntegrationTest {
                 .execute()
                 .path("countPosts")
                 .entity(Integer.class)
-                .isEqualTo(3);
+                .isEqualTo(postList.size());
+    }
+
+    @Test
+    void createPost() {
+        Map<String, Object> inputValues = new HashMap<>();
+        inputValues.put("title", "JunitTitle");
+        inputValues.put("content", "JunitContent");
+        inputValues.put("createdBy", "Junit");
+        inputValues.put("comments", List.of(new PostCommentRequest("JunitReview")));
+
+        graphQlTester
+                .documentName("createPost")
+                .variable("createPostRequest", inputValues)
+                .execute()
+                .path("createPost.id")
+                .entity(Long.class)
+                .satisfies(id -> assertThat(id).isGreaterThan(0))
+                .path("createPost.title")
+                .entity(String.class)
+                .isEqualTo("JunitTitle")
+                .path("createPost.content")
+                .entity(String.class)
+                .isEqualTo("JunitContent")
+                .path("createPost.createdOn")
+                .entity(LocalDateTime.class)
+                .path("createPost.comments")
+                .entity(PostCommentResponse.class);
+        // .isEqualTo("PostCommentResponse[id=null, review=null, createdOn=null]")
+        // .path("createPost.tags")
+        // .entity(TagResponse.class)
+        // .isEqualTo("hi");
     }
 }

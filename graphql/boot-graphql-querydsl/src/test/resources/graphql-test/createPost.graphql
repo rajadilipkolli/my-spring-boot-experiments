@@ -1,0 +1,17 @@
+mutation createPost($createPostRequest : CreatePostRequest!) {
+    createPost(createPostRequest: $createPostRequest) {
+        id
+        title
+        content
+        createdOn
+        comments {
+            id
+            review
+            createdOn
+        }
+        tags {
+            id
+            name
+        }
+    }
+}

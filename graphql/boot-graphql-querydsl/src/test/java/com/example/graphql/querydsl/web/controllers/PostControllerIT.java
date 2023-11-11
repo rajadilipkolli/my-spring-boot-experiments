@@ -91,13 +91,12 @@ class PostControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.id", notNullValue()))
                 .andExpect(jsonPath("$.title", is(postRequest.title())))
                 .andExpect(jsonPath("$.content", is(postRequest.content())))
-                .andExpect(jsonPath(
-                        "$.postCommentResponses.size()",
-                        is(postRequest.postCommentRequests().size())))
-                .andExpect(jsonPath("$.postCommentResponses[0].id", notNullValue()))
-                .andExpect(jsonPath("$.postCommentResponses[0].review", is("First Review")))
-                .andExpect(jsonPath("$.postCommentResponses[1].id", notNullValue()))
-                .andExpect(jsonPath("$.postCommentResponses[1].review", is("Second Review")));
+                .andExpect(
+                        jsonPath("$.comments.size()", is(postRequest.comments().size())))
+                .andExpect(jsonPath("$.comments[0].id", notNullValue()))
+                .andExpect(jsonPath("$.comments[0].review", is("First Review")))
+                .andExpect(jsonPath("$.comments[1].id", notNullValue()))
+                .andExpect(jsonPath("$.comments[1].review", is("Second Review")));
     }
 
     @Test
