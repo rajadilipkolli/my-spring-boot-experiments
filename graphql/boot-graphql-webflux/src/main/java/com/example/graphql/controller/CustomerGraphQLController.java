@@ -7,7 +7,6 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
 import java.util.List;
 import java.util.Map;
-import lombok.RequiredArgsConstructor;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.BatchMapping;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
@@ -19,10 +18,13 @@ import reactor.core.publisher.Mono;
 
 @Controller
 @Validated
-@RequiredArgsConstructor
 public class CustomerGraphQLController {
 
     private final CustomerGraphQLService customerGraphQLService;
+
+    public CustomerGraphQLController(CustomerGraphQLService customerGraphQLService) {
+        this.customerGraphQLService = customerGraphQLService;
+    }
 
     //    @SchemaMapping(typeName = "Query", field = "customers") or
     @QueryMapping

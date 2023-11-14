@@ -8,18 +8,21 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Service
-@RequiredArgsConstructor
 public class CustomerGraphQLServiceImpl implements CustomerGraphQLService {
 
     private final CustomerRepository customerRepository;
 
     private final OrdersRepository ordersRepository;
+
+    public CustomerGraphQLServiceImpl(CustomerRepository customerRepository, OrdersRepository ordersRepository) {
+        this.customerRepository = customerRepository;
+        this.ordersRepository = ordersRepository;
+    }
 
     @Override
     public Flux<Customer> findAllCustomers() {
