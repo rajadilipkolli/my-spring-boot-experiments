@@ -25,18 +25,15 @@ jobs:
         with:
           fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
 
-      - uses: graalvm/setup-graalvm@v1
+      - name: Set up JDK
+        uses: actions/setup-java@v3.13.0
         with:
-          distribution: 'graalvm'
-          java-version: 17
+          java-version: 21
+          distribution: "microsoft"
           cache: "maven"
 
-      - name: Printing versions
-        run: |
-          echo "GRAALVM_HOME: $GRAALVM_HOME"
-          echo "JAVA_HOME: $JAVA_HOME"
-          java --version
-          native-image --version
+      - name: Grant execute permission for mvnw
+        run: chmod +x mvnw
 
       - name: Build and analyze
-        run: ./gradlew clean build bootBuildImage --info
+        run: ./mvnw clean verify

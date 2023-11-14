@@ -56,7 +56,7 @@
   - batch-boot-jpa-sample/pom.xml
   - boot-api-archunit-sample/pom.xml
   - boot-choas-monkey/pom.xml
-  - jpa/boot-data-envers/build.gradle
+  - jpa/boot-data-envers/pom.xml
   - jpa/boot-hibernate2ndlevelcache-sample/pom.xml
   - jpa/multitenancy/multitenancy-db/pom.xml
   - jpa/multitenancy/multidatasource-multitenancy/pom.xml

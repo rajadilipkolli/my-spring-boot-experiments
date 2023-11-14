@@ -1,6 +1,6 @@
 FROM eclipse-temurin:17.0.9_9-jre-focal as builder
 WORKDIR application
-ARG JAR_FILE=build/libs/boot-data-envers-0.0.1-SNAPSHOT.jar
+ARG JAR_FILE=target/boot-data-envers-0.0.1-SNAPSHOT.jar
 COPY ${JAR_FILE} application.jar
 RUN java -Djarmode=layertools -jar application.jar extract
 

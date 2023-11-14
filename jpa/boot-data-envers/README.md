@@ -2,31 +2,32 @@
 
 Spring Data Envers is a tool for auditing changes made to persistent entities in a Spring-based application. It allows developers to track and log changes made to entities over time, providing a historical view of the data. This can be useful for compliance and regulatory purposes, as well as for debugging and performance analysis. Spring Data Envers integrates with the Hibernate Envers library and offers a convenient and declarative way to enable auditing in a Spring application.
 
+
 ### Format code
 
 ```shell
-./gradlew spotlessApply
+$ ./mvnw spotless:apply
 ```
 
 ### Run tests
 
 ```shell
-./gradlew clean build
+$ ./mvnw clean verify
 ```
 
 ### Run locally
 
 ```shell
-docker-compose -f docker/docker-compose.yml up -d
-./gradlew bootRun -Plocal
+$ docker-compose -f docker/docker-compose.yml up -d
+$ ./mvnw spring-boot:run -Dspring-boot.run.profiles=local
 ```
 
 ### Using Testcontainers at Development Time
 You can run `TestApplication.java` from your IDE directly.
-You can also run the application using Gradle as follows:
+You can also run the application using Maven as follows:
 
 ```shell
-$ ./gradlew bootTestRun
+./mvnw spring-boot:test-run
 ```
 
 ### Useful Links
