@@ -31,5 +31,9 @@ jobs:
           java-version: 21
           distribution: "microsoft"
           cache: "maven"
+
+      - name: Grant execute permission for mvnw
+        run: chmod +x mvnw
+
       - name: Build and analyze
         run: ./mvnw clean verify
