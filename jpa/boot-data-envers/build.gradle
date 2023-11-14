@@ -22,8 +22,8 @@ if (project.hasProperty("ci")) {
 
 group = "com.example.envers"
 version = "0.0.1-SNAPSHOT"
-sourceCompatibility = 21
-targetCompatibility = 21
+sourceCompatibility = 17
+targetCompatibility = 17
 
 configurations {
     compileOnly {
