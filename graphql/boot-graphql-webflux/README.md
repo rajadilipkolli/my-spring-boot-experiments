@@ -2,15 +2,31 @@
 
 The spring-boot-starter-graphql is a starter dependency for Spring Boot applications that allows them to integrate with GraphQL APIs. It provides a set of tools and libraries that enable developers to easily build GraphQL-based applications and expose them through a GraphQL endpoint. The starter includes support for GraphQL queries, mutations, subscriptions, and schema definitions, as well as integration with Spring Boot's autoconfiguration and dependency injection features. 
 
+### Format code
+
+```shell
+$ ./mvnw spotless:apply
+```
 
 ### Run tests
+
 ```shell
-./gradlew clean build
+$ ./mvnw clean verify
 ```
 
 ### Run locally
+
 ```shell
-./gradlew bootRun -Plocal
+$ docker-compose -f docker/docker-compose.yml up -d
+$ ./mvnw spring-boot:run -Dspring-boot.run.profiles=local
+```
+
+### Using Testcontainers at Development Time
+You can run `TestApplication.java` from your IDE directly.
+You can also run the application using Maven as follows:
+
+```shell
+./mvnw spring-boot:test-run
 ```
 
 ### Useful Links

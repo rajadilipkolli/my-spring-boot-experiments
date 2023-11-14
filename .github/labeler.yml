@@ -68,7 +68,7 @@
   - boot-jobrunr-sample/pom.xml
   - boot-mongodb-elasticsearch/pom.xml
   - boot-opensearch-sample/pom.xml
-  - graphql/boot-graphql-webflux/build.gradle.kts
+  - graphql/boot-graphql-webflux/pom.xml
   - graphql/boot-graphql-querydsl/pom.xml
   - graphql/boot-graphql-webmvc/pom.xml
   - boot-strategy-plugin/build.gradle
