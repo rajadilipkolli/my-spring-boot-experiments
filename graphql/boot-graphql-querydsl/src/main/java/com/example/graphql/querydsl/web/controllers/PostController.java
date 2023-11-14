@@ -1,7 +1,7 @@
 package com.example.graphql.querydsl.web.controllers;
 
 import com.example.graphql.querydsl.exception.PostNotFoundException;
-import com.example.graphql.querydsl.model.query.FindPostsQuery;
+import com.example.graphql.querydsl.model.query.FindQuery;
 import com.example.graphql.querydsl.model.request.CreatePostRequest;
 import com.example.graphql.querydsl.model.request.UpdatePostRequest;
 import com.example.graphql.querydsl.model.response.PagedResult;
@@ -43,7 +43,7 @@ public class PostController {
                     String sortBy,
             @RequestParam(value = "sortDir", defaultValue = AppConstants.DEFAULT_SORT_DIRECTION, required = false)
                     String sortDir) {
-        FindPostsQuery findPostsQuery = new FindPostsQuery(pageNo, pageSize, sortBy, sortDir);
+        FindQuery findPostsQuery = new FindQuery(pageNo, pageSize, sortBy, sortDir);
         return postService.findAllPosts(findPostsQuery);
     }
 

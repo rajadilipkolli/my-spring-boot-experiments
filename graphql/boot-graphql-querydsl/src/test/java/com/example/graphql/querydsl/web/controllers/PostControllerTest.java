@@ -20,7 +20,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.example.graphql.querydsl.entities.Post;
 import com.example.graphql.querydsl.entities.PostDetails;
 import com.example.graphql.querydsl.exception.PostNotFoundException;
-import com.example.graphql.querydsl.model.query.FindPostsQuery;
+import com.example.graphql.querydsl.model.query.FindQuery;
 import com.example.graphql.querydsl.model.request.CreatePostRequest;
 import com.example.graphql.querydsl.model.request.UpdatePostRequest;
 import com.example.graphql.querydsl.model.response.PagedResult;
@@ -85,7 +85,7 @@ class PostControllerTest {
 
         Page<Post> page = new PageImpl<>(postList);
         PagedResult<PostResponse> postPagedResult = new PagedResult<>(page, getPostResponseList());
-        FindPostsQuery findPostsQuery = new FindPostsQuery(0, 10, "id", "asc");
+        FindQuery findPostsQuery = new FindQuery(0, 10, "id", "asc");
         given(postService.findAllPosts(findPostsQuery)).willReturn(postPagedResult);
 
         this.mockMvc

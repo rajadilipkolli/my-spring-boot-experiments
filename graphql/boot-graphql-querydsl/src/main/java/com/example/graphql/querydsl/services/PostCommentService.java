@@ -3,19 +3,18 @@ package com.example.graphql.querydsl.services;
 import com.example.graphql.querydsl.entities.PostComment;
 import com.example.graphql.querydsl.exception.PostCommentNotFoundException;
 import com.example.graphql.querydsl.mapper.PostCommentMapper;
-import com.example.graphql.querydsl.model.query.FindPostCommentsQuery;
+import com.example.graphql.querydsl.model.query.FindQuery;
 import com.example.graphql.querydsl.model.request.CreatePostCommentRequest;
 import com.example.graphql.querydsl.model.request.PostCommentRequest;
 import com.example.graphql.querydsl.model.response.PagedResult;
 import com.example.graphql.querydsl.model.response.PostCommentResponse;
 import com.example.graphql.querydsl.repositories.PostCommentRepository;
+import com.example.graphql.querydsl.utils.PageUtil;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,10 +26,10 @@ public class PostCommentService {
     private final PostCommentRepository postCommentRepository;
     private final PostCommentMapper postCommentMapper;
 
-    public PagedResult<PostCommentResponse> findAllPostComments(FindPostCommentsQuery findPostCommentsQuery) {
+    public PagedResult<PostCommentResponse> findAllPostComments(FindQuery findPostCommentsQuery) {
 
         // create Pageable instance
-        Pageable pageable = createPageable(findPostCommentsQuery);
+        Pageable pageable = PageUtil.createPageable(findPostCommentsQuery);
 
         Page<PostComment> postCommentsPage = postCommentRepository.findAll(pageable);
 
@@ -38,15 +37,6 @@ public class PostCommentService {
                 postCommentMapper.toResponseList(postCommentsPage.getContent());
 
         return new PagedResult<>(postCommentsPage, postCommentResponseList);
-    }
-
-    private Pageable createPageable(FindPostCommentsQuery findPostCommentsQuery) {
-        int pageNo = Math.max(findPostCommentsQuery.pageNo() - 1, 0);
-        Sort sort = Sort.by(
-                findPostCommentsQuery.sortDir().equalsIgnoreCase(Sort.Direction.ASC.name())
-                        ? Sort.Order.asc(findPostCommentsQuery.sortBy())
-                        : Sort.Order.desc(findPostCommentsQuery.sortBy()));
-        return PageRequest.of(pageNo, findPostCommentsQuery.pageSize(), sort);
     }
 
     public Optional<PostCommentResponse> findPostCommentById(Long id) {

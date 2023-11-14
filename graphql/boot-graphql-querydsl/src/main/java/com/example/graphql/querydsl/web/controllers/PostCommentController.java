@@ -1,7 +1,7 @@
 package com.example.graphql.querydsl.web.controllers;
 
 import com.example.graphql.querydsl.exception.PostCommentNotFoundException;
-import com.example.graphql.querydsl.model.query.FindPostCommentsQuery;
+import com.example.graphql.querydsl.model.query.FindQuery;
 import com.example.graphql.querydsl.model.request.CreatePostCommentRequest;
 import com.example.graphql.querydsl.model.request.PostCommentRequest;
 import com.example.graphql.querydsl.model.response.PagedResult;
@@ -43,7 +43,7 @@ public class PostCommentController {
                     String sortBy,
             @RequestParam(value = "sortDir", defaultValue = AppConstants.DEFAULT_SORT_DIRECTION, required = false)
                     String sortDir) {
-        FindPostCommentsQuery findPostCommentsQuery = new FindPostCommentsQuery(pageNo, pageSize, sortBy, sortDir);
+        FindQuery findPostCommentsQuery = new FindQuery(pageNo, pageSize, sortBy, sortDir);
         return postCommentService.findAllPostComments(findPostCommentsQuery);
     }
 

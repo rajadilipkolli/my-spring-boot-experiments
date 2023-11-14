@@ -1,7 +1,7 @@
 package com.example.graphql.querydsl.web.controllers;
 
 import com.example.graphql.querydsl.exception.TagNotFoundException;
-import com.example.graphql.querydsl.model.query.FindTagsQuery;
+import com.example.graphql.querydsl.model.query.FindQuery;
 import com.example.graphql.querydsl.model.request.TagRequest;
 import com.example.graphql.querydsl.model.response.PagedResult;
 import com.example.graphql.querydsl.model.response.TagResponse;
@@ -10,7 +10,6 @@ import com.example.graphql.querydsl.utils.AppConstants;
 import jakarta.validation.Valid;
 import java.net.URI;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -26,7 +25,6 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @RestController
 @RequestMapping("/api/tags")
-@Slf4j
 @RequiredArgsConstructor
 public class TagController {
 
@@ -42,7 +40,7 @@ public class TagController {
                     String sortBy,
             @RequestParam(value = "sortDir", defaultValue = AppConstants.DEFAULT_SORT_DIRECTION, required = false)
                     String sortDir) {
-        FindTagsQuery findTagsQuery = new FindTagsQuery(pageNo, pageSize, sortBy, sortDir);
+        FindQuery findTagsQuery = new FindQuery(pageNo, pageSize, sortBy, sortDir);
         return tagService.findAllTags(findTagsQuery);
     }
 

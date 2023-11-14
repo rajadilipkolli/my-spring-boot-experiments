@@ -18,7 +18,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.example.graphql.querydsl.entities.Tag;
 import com.example.graphql.querydsl.exception.TagNotFoundException;
-import com.example.graphql.querydsl.model.query.FindTagsQuery;
+import com.example.graphql.querydsl.model.query.FindQuery;
 import com.example.graphql.querydsl.model.request.TagRequest;
 import com.example.graphql.querydsl.model.response.PagedResult;
 import com.example.graphql.querydsl.model.response.TagResponse;
@@ -67,7 +67,7 @@ class TagControllerTest {
 
         Page<Tag> page = new PageImpl<>(tagList);
         PagedResult<TagResponse> tagPagedResult = new PagedResult<>(page, getTagResponseList());
-        FindTagsQuery findTagsQuery = new FindTagsQuery(0, 10, "id", "asc");
+        FindQuery findTagsQuery = new FindQuery(0, 10, "id", "asc");
         given(tagService.findAllTags(findTagsQuery)).willReturn(tagPagedResult);
 
         this.mockMvc

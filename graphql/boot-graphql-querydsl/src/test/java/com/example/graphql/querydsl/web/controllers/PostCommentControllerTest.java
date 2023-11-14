@@ -18,7 +18,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.example.graphql.querydsl.entities.PostComment;
 import com.example.graphql.querydsl.exception.PostCommentNotFoundException;
-import com.example.graphql.querydsl.model.query.FindPostCommentsQuery;
+import com.example.graphql.querydsl.model.query.FindQuery;
 import com.example.graphql.querydsl.model.request.CreatePostCommentRequest;
 import com.example.graphql.querydsl.model.request.PostCommentRequest;
 import com.example.graphql.querydsl.model.response.PagedResult;
@@ -69,7 +69,7 @@ class PostCommentControllerTest {
 
         Page<PostComment> page = new PageImpl<>(postCommentList);
         PagedResult<PostCommentResponse> postCommentPagedResult = new PagedResult<>(page, getPostCommentResponseList());
-        FindPostCommentsQuery findPostCommentsQuery = new FindPostCommentsQuery(0, 10, "id", "asc");
+        FindQuery findPostCommentsQuery = new FindQuery(0, 10, "id", "asc");
         given(postCommentService.findAllPostComments(findPostCommentsQuery)).willReturn(postCommentPagedResult);
 
         this.mockMvc
