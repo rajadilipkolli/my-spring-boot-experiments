@@ -23,5 +23,5 @@ public abstract class AbstractIntegrationTest {
     @Container
     @ServiceConnection
     protected static final PostgreSQLContainer<?> postgreSQLContainer =
-            new PostgreSQLContainer<>("postgres:15.4-alpine");
+            new PostgreSQLContainer<>("postgres:16.1-alpine");
 }
