@@ -33,7 +33,7 @@ public class CacheConfig implements CachingConfigurer {
 
     @Bean
     @Primary
-    public RedisCacheConfiguration defaultCacheConfig() {
+    RedisCacheConfiguration defaultCacheConfig() {
         RedisCacheGZIPSerializer serializerGzip = new RedisCacheGZIPSerializer();
 
         return RedisCacheConfiguration.defaultCacheConfig()
@@ -42,7 +42,7 @@ public class CacheConfig implements CachingConfigurer {
     }
 
     @Bean
-    public LettuceConnectionFactory redisConnectionFactory(
+    LettuceConnectionFactory redisConnectionFactory(
             CacheConfigurationProperties properties) {
         log.info(
                 "Redis (/Lettuce) configuration enabled. With cache timeout "
@@ -57,19 +57,19 @@ public class CacheConfig implements CachingConfigurer {
     }
 
     @Bean
-    public RedisTemplate<String, String> redisTemplate(RedisConnectionFactory cf) {
+    RedisTemplate<String, String> redisTemplate(RedisConnectionFactory cf) {
         RedisTemplate<String, String> redisTemplate = new RedisTemplate<>();
         redisTemplate.setConnectionFactory(cf);
         return redisTemplate;
     }
 
     @Bean
-    public RedisCacheConfiguration cacheConfiguration(CacheConfigurationProperties properties) {
+    RedisCacheConfiguration cacheConfiguration(CacheConfigurationProperties properties) {
         return createCacheConfiguration(properties.getTimeoutSeconds());
     }
 
     @Bean
-    public CacheManager cacheManager(
+    CacheManager cacheManager(
             RedisConnectionFactory redisConnectionFactory,
             CacheConfigurationProperties properties) {
         Map<String, RedisCacheConfiguration> cacheConfigurations = new HashMap<>();

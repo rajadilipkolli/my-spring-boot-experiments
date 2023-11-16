@@ -58,7 +58,7 @@ public class SecurityConfig {
     }
 
     @Bean(name = "userDetailsService")
-    public MapReactiveUserDetailsService userDetailsServiceWithPasswordEncoder(
+    MapReactiveUserDetailsService userDetailsServiceWithPasswordEncoder(
             PasswordEncoder passwordEncoder) {
         UserDetails user =
                 User.withUsername("user")

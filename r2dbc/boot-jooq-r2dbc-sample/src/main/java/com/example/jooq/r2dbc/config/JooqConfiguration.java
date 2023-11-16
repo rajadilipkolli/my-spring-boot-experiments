@@ -16,13 +16,13 @@ import org.springframework.r2dbc.connection.TransactionAwareConnectionFactoryPro
 public class JooqConfiguration {
 
     @Bean
-    public DSLContext dslContext(ConnectionFactory connectionFactory) {
+    DSLContext dslContext(ConnectionFactory connectionFactory) {
         return DSL.using(new TransactionAwareConnectionFactoryProxy(connectionFactory)).dsl();
     }
 
     @Bean
     @Order(0)
-    public DefaultExecuteListenerProvider jooqExceptionTranslatorExecuteListenerProvider() {
+    DefaultExecuteListenerProvider jooqExceptionTranslatorExecuteListenerProvider() {
         return new DefaultExecuteListenerProvider(new JooqExceptionTranslator());
     }
 }

@@ -33,13 +33,13 @@ public class PrimaryDataSourceConfiguration {
     private final TenantIdentifierResolver tenantIdentifierResolver;
 
     @Bean(name = "primaryEntityManagerFactory")
-    public LocalContainerEntityManagerFactoryBean primaryEntityManagerFactory(
+    LocalContainerEntityManagerFactoryBean primaryEntityManagerFactory(
             EntityManagerFactoryBuilder builder,
             @Qualifier("tenantRoutingDatasource") DataSource tenantRoutingDatasource,
             @Qualifier("multiTenantConnectionProviderImpl")
-                    MultiTenantConnectionProvider multiTenantConnectionProvider,
+            MultiTenantConnectionProvider multiTenantConnectionProvider,
             @Qualifier("tenantIdentifierResolver")
-                    CurrentTenantIdentifierResolver currentTenantIdentifierResolver) {
+            CurrentTenantIdentifierResolver currentTenantIdentifierResolver) {
         Map<String, Object> hibernateProps = new HashMap<>();
         hibernateProps.put(
                 AvailableSettings.MULTI_TENANT_CONNECTION_PROVIDER, multiTenantConnectionProvider);
@@ -58,9 +58,9 @@ public class PrimaryDataSourceConfiguration {
     }
 
     @Bean
-    public PlatformTransactionManager primaryTransactionManager(
-            final @Qualifier("primaryEntityManagerFactory") LocalContainerEntityManagerFactoryBean
-                            primaryEntityManagerFactory) {
+    PlatformTransactionManager primaryTransactionManager(
+            final  @Qualifier("primaryEntityManagerFactory") LocalContainerEntityManagerFactoryBean
+                    primaryEntityManagerFactory) {
         return new JpaTransactionManager(
                 Objects.requireNonNull(primaryEntityManagerFactory.getObject()));
     }

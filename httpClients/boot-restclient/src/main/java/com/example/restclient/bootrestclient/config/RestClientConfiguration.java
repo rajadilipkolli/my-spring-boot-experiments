@@ -8,7 +8,7 @@ import org.springframework.web.client.RestClient;
 public class RestClientConfiguration {
 
     @Bean
-    public RestClient webClient(RestClient.Builder builder) {
+    RestClient webClient(RestClient.Builder builder) {
         return builder.baseUrl("https://jsonplaceholder.typicode.com").build();
     }
 }

@@ -17,14 +17,14 @@ public class MultiDatasourceConfig {
     @Bean
     @Primary
     @ConfigurationProperties("datasource.primary")
-    public DataSourceProperties primaryDataSourceProperties() {
+    DataSourceProperties primaryDataSourceProperties() {
         return new DataSourceProperties();
     }
 
     @Bean
     @Primary
     @ConfigurationProperties("datasource.primary.configuration")
-    public DataSource primaryDataSource(DataSourceProperties primaryDataSourceProperties) {
+    DataSource primaryDataSource(DataSourceProperties primaryDataSourceProperties) {
         return primaryDataSourceProperties
                 .initializeDataSourceBuilder()
                 .type(HikariDataSource.class)
@@ -33,43 +33,43 @@ public class MultiDatasourceConfig {
 
     @Bean
     @ConfigurationProperties(prefix = "datasource.primary.liquibase")
-    public LiquibaseProperties primaryLiquibaseProperties() {
+    LiquibaseProperties primaryLiquibaseProperties() {
         return new LiquibaseProperties();
     }
 
     @Bean
-    public SpringLiquibase primaryLiquibase(
+    SpringLiquibase primaryLiquibase(
             @Qualifier("primaryDataSource") DataSource primaryDataSource,
             @Qualifier("primaryLiquibaseProperties")
-                    LiquibaseProperties primaryLiquibaseProperties) {
+            LiquibaseProperties primaryLiquibaseProperties) {
         return springLiquibase(primaryDataSource, primaryLiquibaseProperties);
     }
 
     @Bean
     @ConfigurationProperties("datasource.secondary")
-    public DataSourceProperties secondaryDataSourceProperties() {
+    DataSourceProperties secondaryDataSourceProperties() {
         return new DataSourceProperties();
     }
 
     @Bean
     @ConfigurationProperties("datasource.secondary.hikari")
-    public DataSource secondaryDataSource(
+    DataSource secondaryDataSource(
             @Qualifier("secondaryDataSourceProperties")
-                    DataSourceProperties secondaryDataSourceProperties) {
+            DataSourceProperties secondaryDataSourceProperties) {
         return secondaryDataSourceProperties.initializeDataSourceBuilder().build();
     }
 
     @Bean
     @ConfigurationProperties(prefix = "datasource.secondary.liquibase")
-    public LiquibaseProperties secondaryLiquibaseProperties() {
+    LiquibaseProperties secondaryLiquibaseProperties() {
         return new LiquibaseProperties();
     }
 
     @Bean
-    public SpringLiquibase secondaryLiquibase(
+    SpringLiquibase secondaryLiquibase(
             @Qualifier("secondaryDataSource") DataSource secondaryDataSource,
             @Qualifier("secondaryLiquibaseProperties")
-                    LiquibaseProperties secondaryLiquibaseProperties) {
+            LiquibaseProperties secondaryLiquibaseProperties) {
         return springLiquibase(secondaryDataSource, secondaryLiquibaseProperties);
     }
 

@@ -36,19 +36,19 @@ public class CardHolderDataSourceConfiguration {
 
     @Bean
     @ConfigurationProperties("app.datasource.cardholder.jpa")
-    public JpaProperties cardHolderJpaProperties() {
+    JpaProperties cardHolderJpaProperties() {
         return new JpaProperties();
     }
 
     @Bean
     @ConfigurationProperties("app.datasource.cardholder")
-    public DataSourceProperties cardHolderDataSourceProperties() {
+    DataSourceProperties cardHolderDataSourceProperties() {
         return new DataSourceProperties();
     }
 
     @Bean
     @ConfigurationProperties("app.datasource.cardholder.hikari")
-    public DataSource cardholderDataSource() {
+    DataSource cardholderDataSource() {
         return cardHolderDataSourceProperties()
                 .initializeDataSourceBuilder()
                 .type(HikariDataSource.class)
@@ -56,7 +56,7 @@ public class CardHolderDataSourceConfiguration {
     }
 
     @Bean
-    public LocalContainerEntityManagerFactoryBean cardHolderEntityManagerFactory(
+    LocalContainerEntityManagerFactoryBean cardHolderEntityManagerFactory(
             JpaProperties cardHolderJpaProperties) {
         EntityManagerFactoryBuilder builder =
                 createEntityManagerFactoryBuilder(cardHolderJpaProperties);
@@ -64,7 +64,7 @@ public class CardHolderDataSourceConfiguration {
     }
 
     @Bean
-    public PlatformTransactionManager cardHolderTransactionManager(
+    PlatformTransactionManager cardHolderTransactionManager(
             EntityManagerFactory cardHolderEntityManagerFactory) {
         return new JpaTransactionManager(cardHolderEntityManagerFactory);
     }

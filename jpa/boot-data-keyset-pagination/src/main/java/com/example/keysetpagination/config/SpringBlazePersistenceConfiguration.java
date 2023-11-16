@@ -23,9 +23,9 @@ public class SpringBlazePersistenceConfiguration {
         return config.createCriteriaBuilderFactory(entityManagerFactory);
     }
 
-    @Bean
     // inject the criteria builder factory which will be used along with the entity view manager
-    public EntityViewManager createEntityViewManager(
+    @Bean
+    EntityViewManager createEntityViewManager(
             CriteriaBuilderFactory cbf, EntityViewConfiguration entityViewConfiguration) {
         return entityViewConfiguration.createEntityViewManager(cbf);
     }

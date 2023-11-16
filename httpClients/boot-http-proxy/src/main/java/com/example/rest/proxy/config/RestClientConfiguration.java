@@ -18,7 +18,7 @@ public class RestClientConfiguration {
     private final ApplicationProperties applicationProperties;
 
     @Bean
-    public HttpServiceProxyFactory httpServiceProxyFactory(
+    HttpServiceProxyFactory httpServiceProxyFactory(
             RestClient.Builder builder, ObservationRegistry observationRegistry) {
         RestClient restClient =
                 builder.defaultHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
@@ -31,7 +31,7 @@ public class RestClientConfiguration {
     }
 
     @Bean
-    public JsonPlaceholderService jsonPlaceholderService(
+    JsonPlaceholderService jsonPlaceholderService(
             HttpServiceProxyFactory httpServiceProxyFactory) {
         return httpServiceProxyFactory.createClient(JsonPlaceholderService.class);
     }

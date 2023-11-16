@@ -39,19 +39,19 @@ public class MemberDataSourceConfiguration {
 
     @Bean
     @ConfigurationProperties("app.datasource.member.jpa")
-    public JpaProperties memberJpaProperties() {
+    JpaProperties memberJpaProperties() {
         return new JpaProperties();
     }
 
     @Bean
     @ConfigurationProperties("app.datasource.member")
-    public DataSourceProperties memberDataSourceProperties() {
+    DataSourceProperties memberDataSourceProperties() {
         return new DataSourceProperties();
     }
 
     @Bean
     @ConfigurationProperties("app.datasource.member.configuration")
-    public DataSource memberDataSource() {
+    DataSource memberDataSource() {
         return memberDataSourceProperties()
                 .initializeDataSourceBuilder()
                 .type(HikariDataSource.class)
@@ -59,7 +59,7 @@ public class MemberDataSourceConfiguration {
     }
 
     @Bean
-    public LocalContainerEntityManagerFactoryBean memberEntityManagerFactory(
+    LocalContainerEntityManagerFactoryBean memberEntityManagerFactory(
             JpaProperties memberJpaProperties) {
         EntityManagerFactoryBuilder builder =
                 createEntityManagerFactoryBuilder(memberJpaProperties);
@@ -68,7 +68,7 @@ public class MemberDataSourceConfiguration {
 
     @Primary
     @Bean
-    public PlatformTransactionManager memberTransactionManager(
+    PlatformTransactionManager memberTransactionManager(
             EntityManagerFactory memberEntityManagerFactory) {
         return new JpaTransactionManager(memberEntityManagerFactory);
     }

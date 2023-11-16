@@ -19,13 +19,13 @@ public class DatabaseConfig {
 
     @Bean
     @ConfigurationProperties(PRIMARY_DATABASE_PROPERTY_KEY_PREFIX)
-    public DataSourceProperties primaryDataSourceProperties() {
+    DataSourceProperties primaryDataSourceProperties() {
         return new DataSourceProperties();
     }
 
     @Bean
     @ConfigurationProperties(PRIMARY_DATABASE_PROPERTY_KEY_PREFIX + ".configuration")
-    public DataSource primaryDataSource(final DataSourceProperties primaryDataSourceProperties) {
+    DataSource primaryDataSource(final DataSourceProperties primaryDataSourceProperties) {
         return primaryDataSourceProperties
                 .initializeDataSourceBuilder()
                 .type(HikariDataSource.class)
@@ -34,13 +34,13 @@ public class DatabaseConfig {
 
     @Bean
     @ConfigurationProperties(REPLICA_DATABASE_PROPERTY_KEY_PREFIX)
-    public DataSourceProperties replicaDataSourceProperties() {
+    DataSourceProperties replicaDataSourceProperties() {
         return new DataSourceProperties();
     }
 
     @Bean
     @ConfigurationProperties(REPLICA_DATABASE_PROPERTY_KEY_PREFIX + ".configuration")
-    public DataSource replicaDataSource(final DataSourceProperties replicaDataSourceProperties) {
+    DataSource replicaDataSource(final DataSourceProperties replicaDataSourceProperties) {
         return replicaDataSourceProperties
                 .initializeDataSourceBuilder()
                 .type(HikariDataSource.class)
@@ -49,7 +49,7 @@ public class DatabaseConfig {
 
     @Bean
     @Primary
-    public DataSource dataSource(
+    DataSource dataSource(
             final DataSource primaryDataSource, final DataSource replicaDataSource) {
         final RoutingDataSource routingDataSource = new RoutingDataSource();
 
