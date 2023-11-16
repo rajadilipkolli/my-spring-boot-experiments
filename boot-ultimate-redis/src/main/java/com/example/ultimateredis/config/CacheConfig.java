@@ -42,8 +42,7 @@ public class CacheConfig implements CachingConfigurer {
     }
 
     @Bean
-    LettuceConnectionFactory redisConnectionFactory(
-            CacheConfigurationProperties properties) {
+    LettuceConnectionFactory redisConnectionFactory(CacheConfigurationProperties properties) {
         log.info(
                 "Redis (/Lettuce) configuration enabled. With cache timeout "
                         + properties.getTimeoutSeconds()

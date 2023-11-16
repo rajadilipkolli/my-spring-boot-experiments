@@ -49,8 +49,7 @@ public class DatabaseConfig {
 
     @Bean
     @Primary
-    DataSource dataSource(
-            final DataSource primaryDataSource, final DataSource replicaDataSource) {
+    DataSource dataSource(final DataSource primaryDataSource, final DataSource replicaDataSource) {
         final RoutingDataSource routingDataSource = new RoutingDataSource();
 
         final Map<Object, Object> targetDataSources = new HashMap<>();

@@ -31,8 +31,7 @@ public class RestClientConfiguration {
     }
 
     @Bean
-    JsonPlaceholderService jsonPlaceholderService(
-            HttpServiceProxyFactory httpServiceProxyFactory) {
+    JsonPlaceholderService jsonPlaceholderService(HttpServiceProxyFactory httpServiceProxyFactory) {
         return httpServiceProxyFactory.createClient(JsonPlaceholderService.class);
     }
 }

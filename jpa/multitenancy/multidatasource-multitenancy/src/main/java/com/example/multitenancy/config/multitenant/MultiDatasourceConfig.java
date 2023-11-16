@@ -41,7 +41,7 @@ public class MultiDatasourceConfig {
     SpringLiquibase primaryLiquibase(
             @Qualifier("primaryDataSource") DataSource primaryDataSource,
             @Qualifier("primaryLiquibaseProperties")
-            LiquibaseProperties primaryLiquibaseProperties) {
+                    LiquibaseProperties primaryLiquibaseProperties) {
         return springLiquibase(primaryDataSource, primaryLiquibaseProperties);
     }
 
@@ -55,7 +55,7 @@ public class MultiDatasourceConfig {
     @ConfigurationProperties("datasource.secondary.hikari")
     DataSource secondaryDataSource(
             @Qualifier("secondaryDataSourceProperties")
-            DataSourceProperties secondaryDataSourceProperties) {
+                    DataSourceProperties secondaryDataSourceProperties) {
         return secondaryDataSourceProperties.initializeDataSourceBuilder().build();
     }
 
@@ -69,7 +69,7 @@ public class MultiDatasourceConfig {
     SpringLiquibase secondaryLiquibase(
             @Qualifier("secondaryDataSource") DataSource secondaryDataSource,
             @Qualifier("secondaryLiquibaseProperties")
-            LiquibaseProperties secondaryLiquibaseProperties) {
+                    LiquibaseProperties secondaryLiquibaseProperties) {
         return springLiquibase(secondaryDataSource, secondaryLiquibaseProperties);
     }
 
