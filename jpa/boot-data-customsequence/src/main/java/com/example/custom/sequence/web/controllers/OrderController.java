@@ -6,7 +6,6 @@ import com.example.custom.sequence.model.response.PagedResult;
 import com.example.custom.sequence.services.OrderService;
 import com.example.custom.sequence.utils.AppConstants;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -28,7 +27,6 @@ public class OrderController {
 
     private final OrderService orderService;
 
-    @Autowired
     public OrderController(OrderService orderService) {
         this.orderService = orderService;
     }

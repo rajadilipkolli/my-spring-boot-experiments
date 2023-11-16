@@ -4,7 +4,6 @@ import com.example.multitenancy.secondary.entities.SecondaryCustomer;
 import com.example.multitenancy.secondary.repositories.SecondaryCustomerRepository;
 import java.util.List;
 import java.util.Optional;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,7 +13,6 @@ public class SecondaryCustomerService {
 
     private final SecondaryCustomerRepository secondaryCustomerRepository;
 
-    @Autowired
     public SecondaryCustomerService(SecondaryCustomerRepository secondaryCustomerRepository) {
         this.secondaryCustomerRepository = secondaryCustomerRepository;
     }

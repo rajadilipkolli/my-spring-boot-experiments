@@ -7,7 +7,6 @@ import com.example.custom.sequence.services.CustomerService;
 import com.example.custom.sequence.utils.AppConstants;
 import com.example.custom.sequence.web.api.CustomerAPI;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -29,7 +28,6 @@ public class CustomerController implements CustomerAPI {
 
     private final CustomerService customerService;
 
-    @Autowired
     public CustomerController(CustomerService customerService) {
         this.customerService = customerService;
     }

@@ -5,7 +5,6 @@ import com.example.choasmonkey.model.response.CustomerResponse;
 import com.example.choasmonkey.repositories.CustomerRepository;
 import java.util.List;
 import java.util.Optional;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -19,7 +18,6 @@ public class CustomerService {
 
     private final CustomerRepository customerRepository;
 
-    @Autowired
     public CustomerService(CustomerRepository customerRepository) {
         this.customerRepository = customerRepository;
     }

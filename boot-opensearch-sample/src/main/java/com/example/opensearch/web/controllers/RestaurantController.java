@@ -5,7 +5,6 @@ import com.example.opensearch.model.request.RestaurantRequest;
 import com.example.opensearch.model.response.PagedResult;
 import com.example.opensearch.services.RestaurantService;
 import com.example.opensearch.utils.AppConstants;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -26,7 +25,6 @@ public class RestaurantController {
 
     private final RestaurantService restaurantService;
 
-    @Autowired
     public RestaurantController(RestaurantService restaurantService) {
         this.restaurantService = restaurantService;
     }

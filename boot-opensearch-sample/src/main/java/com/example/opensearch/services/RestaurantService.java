@@ -4,7 +4,6 @@ import com.example.opensearch.entities.Restaurant;
 import com.example.opensearch.model.response.PagedResult;
 import com.example.opensearch.repositories.RestaurantRepository;
 import java.util.Optional;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -18,7 +17,6 @@ public class RestaurantService {
 
     private final RestaurantRepository restaurantRepository;
 
-    @Autowired
     public RestaurantService(RestaurantRepository restaurantRepository) {
         this.restaurantRepository = restaurantRepository;
     }

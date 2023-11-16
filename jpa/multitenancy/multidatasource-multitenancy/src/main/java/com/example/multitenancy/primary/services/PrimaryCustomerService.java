@@ -4,7 +4,6 @@ import com.example.multitenancy.primary.entities.PrimaryCustomer;
 import com.example.multitenancy.primary.repositories.PrimaryCustomerRepository;
 import java.util.List;
 import java.util.Optional;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,7 +13,6 @@ public class PrimaryCustomerService {
 
     private final PrimaryCustomerRepository primaryCustomerRepository;
 
-    @Autowired
     public PrimaryCustomerService(PrimaryCustomerRepository primaryCustomerRepository) {
         this.primaryCustomerRepository = primaryCustomerRepository;
     }

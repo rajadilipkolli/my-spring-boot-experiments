@@ -5,7 +5,6 @@ import com.example.multitenancy.db.services.CustomerService;
 import com.example.multitenancy.db.utils.AppConstants;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -27,7 +26,6 @@ public class CustomerController {
 
     private final CustomerService customerService;
 
-    @Autowired
     public CustomerController(CustomerService customerService) {
         this.customerService = customerService;
     }
