@@ -23,17 +23,17 @@ public class SearchController {
 
     @GetMapping("/search/borough")
     public ResponseEntity<PagedResult<Restaurant>> searchPhrase(
-            @RequestParam("query") String query,
-            @RequestParam(value = "limit", defaultValue = "10") Integer limit,
-            @RequestParam(value = "offset", defaultValue = "0") Integer offset) {
+            @RequestParam String query,
+            @RequestParam(defaultValue = "10") Integer limit,
+            @RequestParam(defaultValue = "0") Integer offset) {
         return ResponseEntity.ok(searchService.findByBorough(query, offset, limit));
     }
 
     @GetMapping("/search/multi")
     public ResponseEntity<PagedResult<Restaurant>> searchMulti(
-            @RequestParam("query") String query,
-            @RequestParam(value = "limit", defaultValue = "10") Integer limit,
-            @RequestParam(value = "offset", defaultValue = "0") Integer offset,
+            @RequestParam String query,
+            @RequestParam(defaultValue = "10") Integer limit,
+            @RequestParam(defaultValue = "0") Integer offset,
             @RequestParam(value = "prefix_phrase_enabled", defaultValue = "false")
                     Boolean prefixPhraseEnabled) {
         return ResponseEntity.ok(
@@ -42,96 +42,94 @@ public class SearchController {
 
     @GetMapping("/search/term/borough")
     public ResponseEntity<PagedResult<Restaurant>> searchTermForBorough(
-            @RequestParam("query") String query,
-            @RequestParam(value = "limit", defaultValue = "10") Integer limit,
-            @RequestParam(value = "offset", defaultValue = "0") Integer offset) {
+            @RequestParam String query,
+            @RequestParam(defaultValue = "10") Integer limit,
+            @RequestParam(defaultValue = "0") Integer offset) {
         return ResponseEntity.ok(searchService.termQueryForBorough(query, offset, limit));
     }
 
     @GetMapping("/search/terms")
     public ResponseEntity<PagedResult<Restaurant>> searchTerms(
             @RequestParam("query") List<String> queries,
-            @RequestParam(value = "limit", defaultValue = "10") Integer limit,
-            @RequestParam(value = "offset", defaultValue = "0") Integer offset) {
+            @RequestParam(defaultValue = "10") Integer limit,
+            @RequestParam(defaultValue = "0") Integer offset) {
         return ResponseEntity.ok(searchService.termsQueryForBorough(queries, offset, limit));
     }
 
     @GetMapping("/search/must/bool")
     public ResponseEntity<PagedResult<Restaurant>> queryBoolWithMust(
-            @RequestParam("borough") String borough,
-            @RequestParam("cuisine") String cuisine,
-            @RequestParam("name") String name,
-            @RequestParam(value = "limit", defaultValue = "10") Integer limit,
-            @RequestParam(value = "offset", defaultValue = "0") Integer offset) {
+            @RequestParam String borough,
+            @RequestParam String cuisine,
+            @RequestParam String name,
+            @RequestParam(defaultValue = "10") Integer limit,
+            @RequestParam(defaultValue = "0") Integer offset) {
         return ResponseEntity.ok(
                 searchService.queryBoolWithMust(borough, cuisine, name, offset, limit));
     }
 
     @GetMapping("/search/should/bool")
     public ResponseEntity<PagedResult<Restaurant>> searchBoolShould(
-            @RequestParam("borough") String borough,
-            @RequestParam("cuisine") String cuisine,
-            @RequestParam("name") String name,
-            @RequestParam(value = "limit", defaultValue = "10") Integer limit,
-            @RequestParam(value = "offset", defaultValue = "0") Integer offset) {
+            @RequestParam String borough,
+            @RequestParam String cuisine,
+            @RequestParam String name,
+            @RequestParam(defaultValue = "10") Integer limit,
+            @RequestParam(defaultValue = "0") Integer offset) {
         return ResponseEntity.ok(
                 searchService.queryBoolWithShould(borough, cuisine, name, offset, limit));
     }
 
     @GetMapping("/search/wildcard/borough")
     public ResponseEntity<PagedResult<Restaurant>> searchWildCardBorough(
-            @RequestParam("query") String query,
-            @RequestParam(value = "limit", defaultValue = "10") Integer limit,
-            @RequestParam(value = "offset", defaultValue = "0") Integer offset) {
+            @RequestParam String query,
+            @RequestParam(defaultValue = "10") Integer limit,
+            @RequestParam(defaultValue = "0") Integer offset) {
         return ResponseEntity.ok(searchService.wildcardSearch(query, offset, limit));
     }
 
     @GetMapping("/search/regexp/borough")
     public ResponseEntity<PagedResult<Restaurant>> searchRegularExpression(
-            @RequestParam("query") String query,
-            @RequestParam(value = "limit", defaultValue = "10") Integer limit,
-            @RequestParam(value = "offset", defaultValue = "0") Integer offset) {
+            @RequestParam String query,
+            @RequestParam(defaultValue = "10") Integer limit,
+            @RequestParam(defaultValue = "0") Integer offset) {
         return ResponseEntity.ok(searchService.regExpSearch(query, offset, limit));
     }
 
     @GetMapping("/search/simple")
     public ResponseEntity<PagedResult<Restaurant>> searchSimpleQueryForBoroughAndCuisine(
-            @RequestParam("query") String query,
-            @RequestParam(value = "limit", defaultValue = "10") Integer limit,
-            @RequestParam(value = "offset", defaultValue = "0") Integer offset) {
+            @RequestParam String query,
+            @RequestParam(defaultValue = "10") Integer limit,
+            @RequestParam(defaultValue = "0") Integer offset) {
         return ResponseEntity.ok(
                 searchService.searchSimpleQueryForBoroughAndCuisine(query, offset, limit));
     }
 
     @GetMapping("/search/restaurant/range")
     public ResponseEntity<PagedResult<Restaurant>> searchRestaurantIdRange(
-            @RequestParam("lowerLimit") Long lowerLimit,
-            @RequestParam("upperLimit") Long upperLimit,
-            @RequestParam(value = "limit", defaultValue = "10") Integer limit,
-            @RequestParam(value = "offset", defaultValue = "0") Integer offset) {
+            @RequestParam Long lowerLimit,
+            @RequestParam Long upperLimit,
+            @RequestParam(defaultValue = "10") Integer limit,
+            @RequestParam(defaultValue = "0") Integer offset) {
         return ResponseEntity.ok(
                 searchService.searchRestaurantIdRange(lowerLimit, upperLimit, offset, limit));
     }
 
     @GetMapping("/search/date/range")
     public ResponseEntity<PagedResult<Restaurant>> searchDateRange(
-            @RequestParam("fromDate") String fromDate,
-            @RequestParam("toDate") String toDate,
-            @RequestParam(value = "limit", defaultValue = "10") Integer limit,
-            @RequestParam(value = "offset", defaultValue = "0") Integer offset) {
+            @RequestParam String fromDate,
+            @RequestParam String toDate,
+            @RequestParam(defaultValue = "10") Integer limit,
+            @RequestParam(defaultValue = "0") Integer offset) {
         return ResponseEntity.ok(searchService.searchDateRange(fromDate, toDate, offset, limit));
     }
 
     @GetMapping("/search/aggregate")
     public ResponseEntity<PagedResult<Restaurant>> aggregateSearch(
-            @RequestParam(name = "searchKeyword") String searchKeyword,
-            @RequestParam(name = "fieldNames") List<String> fieldNames,
-            @RequestParam(required = false, name = "limit", defaultValue = "15") Integer limit,
-            @RequestParam(required = false, name = "offset", defaultValue = "0") Integer offset,
-            @RequestParam(required = false, defaultValue = "DESC", name = "sortOrder")
-                    String sortOrder,
-            @RequestParam(required = false, defaultValue = "id", name = "sortFields")
-                    String... sortFields) {
+            @RequestParam String searchKeyword,
+            @RequestParam List<String> fieldNames,
+            @RequestParam(required = false, defaultValue = "15") Integer limit,
+            @RequestParam(required = false, defaultValue = "0") Integer offset,
+            @RequestParam(required = false, defaultValue = "DESC") String sortOrder,
+            @RequestParam(required = false, defaultValue = "id") String... sortFields) {
         return ResponseEntity.ok(
                 searchService.aggregateSearch(
                         searchKeyword, fieldNames, sortOrder, limit, offset, sortFields));

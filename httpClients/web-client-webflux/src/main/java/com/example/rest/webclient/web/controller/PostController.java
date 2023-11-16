@@ -31,15 +31,9 @@ public class PostController {
 
     @GetMapping
     public Flux<PostDto> getAllPosts(
-            @RequestParam(
-                            value = "sortBy",
-                            defaultValue = AppConstants.DEFAULT_SORT_BY,
-                            required = false)
+            @RequestParam(defaultValue = AppConstants.DEFAULT_SORT_BY, required = false)
                     String sortBy,
-            @RequestParam(
-                            value = "sortDir",
-                            defaultValue = AppConstants.DEFAULT_SORT_DIRECTION,
-                            required = false)
+            @RequestParam(defaultValue = AppConstants.DEFAULT_SORT_DIRECTION, required = false)
                     String sortDir) {
         return postService.findAllPosts(sortBy, sortDir);
     }

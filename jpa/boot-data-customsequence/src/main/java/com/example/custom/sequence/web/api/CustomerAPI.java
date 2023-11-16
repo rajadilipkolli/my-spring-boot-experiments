@@ -75,7 +75,7 @@ public interface CustomerAPI {
             })
     ResponseEntity<CustomerResponse> getCustomerById(
             @Parameter(name = "id", description = "", required = true, in = ParameterIn.PATH)
-                    @PathVariable("id")
+                    @PathVariable
                     String id);
 
     /**

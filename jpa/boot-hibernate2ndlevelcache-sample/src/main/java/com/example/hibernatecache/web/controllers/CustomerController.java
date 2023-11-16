@@ -29,25 +29,13 @@ public class CustomerController {
 
     @GetMapping
     public PagedResult<CustomerResponse> getAllCustomers(
-            @RequestParam(
-                            value = "pageNo",
-                            defaultValue = AppConstants.DEFAULT_PAGE_NUMBER,
-                            required = false)
+            @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_NUMBER, required = false)
                     int pageNo,
-            @RequestParam(
-                            value = "pageSize",
-                            defaultValue = AppConstants.DEFAULT_PAGE_SIZE,
-                            required = false)
+            @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_SIZE, required = false)
                     int pageSize,
-            @RequestParam(
-                            value = "sortBy",
-                            defaultValue = AppConstants.DEFAULT_SORT_BY,
-                            required = false)
+            @RequestParam(defaultValue = AppConstants.DEFAULT_SORT_BY, required = false)
                     String sortBy,
-            @RequestParam(
-                            value = "sortDir",
-                            defaultValue = AppConstants.DEFAULT_SORT_DIRECTION,
-                            required = false)
+            @RequestParam(defaultValue = AppConstants.DEFAULT_SORT_DIRECTION, required = false)
                     String sortDir) {
         return customerService.findAllCustomers(pageNo, pageSize, sortBy, sortDir);
     }
@@ -61,8 +49,7 @@ public class CustomerController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<CustomerResponse> searchCustomer(
-            @RequestParam("firstName") String firstName) {
+    public ResponseEntity<CustomerResponse> searchCustomer(@RequestParam String firstName) {
         return customerService
                 .findCustomerByFirstName(firstName)
                 .map(ResponseEntity::ok)

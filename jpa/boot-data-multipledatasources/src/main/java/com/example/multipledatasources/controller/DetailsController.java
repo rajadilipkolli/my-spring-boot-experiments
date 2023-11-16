@@ -14,7 +14,7 @@ public class DetailsController {
     private final DetailsService detailsService;
 
     @GetMapping("/details/{memberId}")
-    ResponseDto getDetails(@PathVariable("memberId") String memberId) {
+    ResponseDto getDetails(@PathVariable String memberId) {
         return detailsService.getDetails(memberId);
     }
 }

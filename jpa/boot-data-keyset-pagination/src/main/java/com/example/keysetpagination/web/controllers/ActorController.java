@@ -33,28 +33,16 @@ public class ActorController {
 
     @GetMapping
     public PagedResult<ActorResponse> findAllActors(
-            @RequestParam(
-                            value = "pageNo",
-                            defaultValue = AppConstants.DEFAULT_PAGE_NUMBER,
-                            required = false)
+            @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_NUMBER, required = false)
                     int pageNo,
-            @RequestParam(
-                            value = "pageSize",
-                            defaultValue = AppConstants.DEFAULT_PAGE_SIZE,
-                            required = false)
+            @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_SIZE, required = false)
                     int pageSize,
-            @RequestParam(
-                            value = "sortBy",
-                            defaultValue = AppConstants.DEFAULT_SORT_BY,
-                            required = false)
+            @RequestParam(defaultValue = AppConstants.DEFAULT_SORT_BY, required = false)
                     String sortBy,
-            @RequestParam(
-                            value = "sortDir",
-                            defaultValue = AppConstants.DEFAULT_SORT_DIRECTION,
-                            required = false)
+            @RequestParam(defaultValue = AppConstants.DEFAULT_SORT_DIRECTION, required = false)
                     String sortDir,
-            @RequestParam(value = "lowest", required = false) Long lowest,
-            @RequestParam(value = "highest", required = false) Long highest) {
+            @RequestParam(required = false) Long lowest,
+            @RequestParam(required = false) Long highest) {
 
         FindActorsQuery findActorsQuery =
                 new FindActorsQuery(pageNo, pageSize, lowest, highest, sortBy, sortDir);
@@ -64,28 +52,16 @@ public class ActorController {
 
     @PostMapping("/search")
     public PagedResult<ActorResponse> searchActors(
-            @RequestParam(
-                            value = "pageNo",
-                            defaultValue = AppConstants.DEFAULT_PAGE_NUMBER,
-                            required = false)
+            @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_NUMBER, required = false)
                     int pageNo,
-            @RequestParam(
-                            value = "pageSize",
-                            defaultValue = AppConstants.DEFAULT_PAGE_SIZE,
-                            required = false)
+            @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_SIZE, required = false)
                     int pageSize,
-            @RequestParam(
-                            value = "sortBy",
-                            defaultValue = AppConstants.DEFAULT_SORT_BY,
-                            required = false)
+            @RequestParam(defaultValue = AppConstants.DEFAULT_SORT_BY, required = false)
                     String sortBy,
-            @RequestParam(
-                            value = "sortDir",
-                            defaultValue = AppConstants.DEFAULT_SORT_DIRECTION,
-                            required = false)
+            @RequestParam(defaultValue = AppConstants.DEFAULT_SORT_DIRECTION, required = false)
                     String sortDir,
-            @RequestParam(value = "lowest", required = false) Long lowest,
-            @RequestParam(value = "highest", required = false) Long highest,
+            @RequestParam(required = false) Long lowest,
+            @RequestParam(required = false) Long highest,
             @RequestBody ActorsFilter[] actorsFilters) {
 
         FindActorsQuery findActorsQuery =

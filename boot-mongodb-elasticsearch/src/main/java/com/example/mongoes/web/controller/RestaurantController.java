@@ -32,15 +32,14 @@ public class RestaurantController {
 
     @GetMapping
     public Mono<ResponseEntity<SearchPage<Restaurant>>> findAllRestaurants(
-            @Valid @RequestParam(value = "limit", defaultValue = "10") @Size(max = 999)
-                    Integer limit,
-            @RequestParam(value = "offset", defaultValue = "0") Integer offset) {
+            @Valid @RequestParam(defaultValue = "10") @Size(max = 999) Integer limit,
+            @RequestParam(defaultValue = "0") Integer offset) {
         return restaurantService.findAllRestaurants(offset, limit).map(ResponseEntity::ok);
     }
 
     @GetMapping("/name/{restaurantName}")
     public Mono<ResponseEntity<Restaurant>> findRestaurantByName(
-            @PathVariable("restaurantName") String restaurantName) {
+            @PathVariable String restaurantName) {
         return restaurantService
                 .findByRestaurantName(restaurantName)
                 .map(ResponseEntity::ok)
@@ -48,8 +47,7 @@ public class RestaurantController {
     }
 
     @GetMapping("/{restaurantId}")
-    public Mono<ResponseEntity<Restaurant>> findRestaurantById(
-            @PathVariable("restaurantId") Long restaurantId) {
+    public Mono<ResponseEntity<Restaurant>> findRestaurantById(@PathVariable Long restaurantId) {
         return restaurantService
                 .findByRestaurantId(restaurantId)
                 .map(ResponseEntity::ok)
@@ -72,7 +70,7 @@ public class RestaurantController {
 
     @PutMapping("/{restaurantId}/grades/")
     public Mono<ResponseEntity<Restaurant>> addNotesToRestaurant(
-            @PathVariable("restaurantId") Long restaurantId, @RequestBody Grades grades) {
+            @PathVariable Long restaurantId, @RequestBody Grades grades) {
         return restaurantService.addGrade(grades, restaurantId).map(ResponseEntity::ok);
     }
 
