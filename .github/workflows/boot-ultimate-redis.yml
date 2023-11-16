@@ -28,7 +28,7 @@ jobs:
         uses: actions/setup-java@v3.13.0
         with:
           java-version: "21"
-          distribution: "microsoft"
+          distribution: "temurin"
           cache: "maven"
       - name: Build with Maven
         run: ./mvnw clean verify

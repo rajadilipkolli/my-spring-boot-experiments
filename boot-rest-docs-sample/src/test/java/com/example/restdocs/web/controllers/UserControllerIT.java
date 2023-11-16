@@ -57,7 +57,7 @@ class UserControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldFindUserById() throws Exception {
-        User user = userList.get(0);
+        User user = userList.getFirst();
         Long userId = user.getId();
 
         this.mockMvc
@@ -115,7 +115,7 @@ class UserControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldUpdateUser() throws Exception {
-        User user = userList.get(0);
+        User user = userList.getFirst();
         UserRequest userRequest =
                 new UserRequest("Updated User", "Last Name", 50, Gender.FEMALE, "9848022334");
 
@@ -135,7 +135,7 @@ class UserControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldDeleteUser() throws Exception {
-        User user = userList.get(0);
+        User user = userList.getFirst();
 
         this.mockMvc
                 .perform(delete("/api/users/{id}", user.getId()))

@@ -88,8 +88,7 @@ public class RestaurantController {
                                                 .map(Restaurant::getName))))
                 .body(
                         new GenericMessage(
-                                String.format(
-                                        "restaurant with name %s created",
-                                        restaurantRequest.name())));
+                                "restaurant with name %s created"
+                                        .formatted(restaurantRequest.name())));
     }
 }

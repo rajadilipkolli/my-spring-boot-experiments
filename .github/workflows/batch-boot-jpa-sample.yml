@@ -22,7 +22,7 @@ jobs:
         working-directory: batch-boot-jpa-sample
     strategy:
       matrix:
-        distribution: [ 'microsoft' ]
+        distribution: [ 'temurin' ]
         java: [ '21' ]
     steps:
       - uses: actions/checkout@v4

@@ -92,7 +92,7 @@ class ReactiveCommentsControllerIT extends AbstractIntegrationTest {
                 .uri(
                         uriBuilder -> {
                             uriBuilder.queryParam(
-                                    "postId", expectedPostComments.get(0).getPostId());
+                                    "postId", expectedPostComments.getFirst().getPostId());
                             uriBuilder.queryParam("sortBy", "title");
                             uriBuilder.path("/api/posts/comments/");
                             return uriBuilder.build();

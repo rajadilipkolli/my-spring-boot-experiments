@@ -24,7 +24,7 @@ public class StringPrefixedNumberFormattedSequenceIdGenerator extends SequenceSt
     @Override
     public Serializable generate(SharedSessionContractImplementor session, Object object)
             throws HibernateException {
-        return valuePrefix + String.format(numberFormat, super.generate(session, object));
+        return valuePrefix + numberFormat.formatted(super.generate(session, object));
     }
 
     @Override

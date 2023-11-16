@@ -56,12 +56,12 @@ public class Order {
         if (this == o) return true;
         if (o == null) return false;
         Class<?> oEffectiveClass =
-                o instanceof HibernateProxy
-                        ? ((HibernateProxy) o).getHibernateLazyInitializer().getPersistentClass()
+                o instanceof HibernateProxy hp
+                        ? hp.getHibernateLazyInitializer().getPersistentClass()
                         : o.getClass();
         Class<?> thisEffectiveClass =
-                this instanceof HibernateProxy
-                        ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass()
+                this instanceof HibernateProxy hp
+                        ? hp.getHibernateLazyInitializer().getPersistentClass()
                         : this.getClass();
         if (thisEffectiveClass != oEffectiveClass) return false;
         Order order = (Order) o;
@@ -70,11 +70,8 @@ public class Order {
 
     @Override
     public final int hashCode() {
-        return this instanceof HibernateProxy
-                ? ((HibernateProxy) this)
-                        .getHibernateLazyInitializer()
-                        .getPersistentClass()
-                        .hashCode()
+        return this instanceof HibernateProxy hp
+                ? hp.getHibernateLazyInitializer().getPersistentClass().hashCode()
                 : getClass().hashCode();
     }
 }

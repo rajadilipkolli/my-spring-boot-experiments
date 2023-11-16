@@ -130,7 +130,7 @@ class ActorControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldFindActorById() throws Exception {
-        Actor actor = actorList.get(0);
+        Actor actor = actorList.getFirst();
         Long actorId = actor.getId();
 
         this.mockMvc
@@ -178,7 +178,7 @@ class ActorControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldUpdateActor() throws Exception {
-        Long actorId = actorList.get(0).getId();
+        Long actorId = actorList.getFirst().getId();
         ActorRequest actorRequest = new ActorRequest("Updated Actor");
 
         this.mockMvc
@@ -193,7 +193,7 @@ class ActorControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldDeleteActor() throws Exception {
-        Actor actor = actorList.get(0);
+        Actor actor = actorList.getFirst();
 
         this.mockMvc
                 .perform(delete("/api/actors/{id}", actor.getId()))

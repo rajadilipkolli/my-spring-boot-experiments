@@ -64,7 +64,7 @@ class AuthorEntityControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldFindAuthorById() throws Exception {
-        AuthorEntity authorEntity = authorEntityList.get(0);
+        AuthorEntity authorEntity = authorEntityList.getFirst();
         Long authorId = authorEntity.getId();
 
         this.mockMvc
@@ -117,7 +117,7 @@ class AuthorEntityControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldUpdateAuthor() throws Exception {
-        AuthorEntity authorEntity = authorEntityList.get(0);
+        AuthorEntity authorEntity = authorEntityList.getFirst();
         authorEntity.setFirstName("Updated Author");
 
         this.mockMvc
@@ -131,7 +131,7 @@ class AuthorEntityControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldDeleteAuthor() throws Exception {
-        AuthorEntity authorEntity = authorEntityList.get(0);
+        AuthorEntity authorEntity = authorEntityList.getFirst();
 
         this.mockMvc
                 .perform(delete("/api/authors/{id}", authorEntity.getId()))

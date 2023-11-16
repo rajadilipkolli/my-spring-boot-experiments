@@ -15,7 +15,7 @@
     <description>Demo project for using multiple datasource's in a Spring Boot Application</description>
 
     <properties>
-        <java.version>17</java.version>
+        <java.version>21</java.version>
 
         <spotless.version>2.40.0</spotless.version>
         <springdoc-openapi.version>2.2.0</springdoc-openapi.version>

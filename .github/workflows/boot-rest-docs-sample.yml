@@ -33,7 +33,7 @@ jobs:
         uses: actions/setup-java@v3.13.0
         with:
           java-version: ${{ matrix.java }}
-          distribution: ${{ matrix.distribution }}
+          distribution: temurin
           cache: 'maven'
       - name: Build and analyze
         run: ./mvnw clean verify

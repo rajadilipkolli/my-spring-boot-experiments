@@ -55,7 +55,7 @@ class PostEntityControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldFindPostById() throws Exception {
-        PostEntity postEntity = postEntityList.get(0);
+        PostEntity postEntity = postEntityList.getFirst();
         Long postId = postEntity.getId();
 
         this.mockMvc
@@ -99,7 +99,7 @@ class PostEntityControllerIT extends AbstractIntegrationTest {
 
         this.mockMvc
                 .perform(
-                        put("/api/posts/{id}", postEntityList.get(0).getId())
+                        put("/api/posts/{id}", postEntityList.getFirst().getId())
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(postEntity)))
                 .andExpect(status().isOk())
@@ -108,7 +108,7 @@ class PostEntityControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldDeletePost() throws Exception {
-        PostEntity postEntity = postEntityList.get(0);
+        PostEntity postEntity = postEntityList.getFirst();
 
         this.mockMvc
                 .perform(delete("/api/posts/{id}", postEntity.getId()))

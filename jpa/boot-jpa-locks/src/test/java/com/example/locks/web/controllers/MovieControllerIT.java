@@ -58,7 +58,7 @@ class MovieControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldFindMovieById() throws Exception {
-        Movie movie = movieList.get(0);
+        Movie movie = movieList.getFirst();
         Long movieId = movie.getId();
 
         this.mockMvc
@@ -104,7 +104,7 @@ class MovieControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldUpdateMovie() throws Exception {
-        Long movieId = movieList.get(0).getId();
+        Long movieId = movieList.getFirst().getId();
         MovieRequest movieRequest = new MovieRequest("Updated Movie");
 
         this.mockMvc
@@ -118,7 +118,7 @@ class MovieControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldDeleteMovie() throws Exception {
-        Movie movie = movieList.get(0);
+        Movie movie = movieList.getFirst();
 
         this.mockMvc
                 .perform(delete("/api/movies/{id}", movie.getId()))

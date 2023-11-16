@@ -33,7 +33,10 @@ class OrderMessageSenderTest {
     @Test
     void testSendOrder() throws JsonProcessingException {
         String convertedString =
-                "{\"orderNumber\":\"1\",\"productId\":\"P1\"," + "\"amount\":10.0}";
+                """
+                {"orderNumber":"1","productId":"P1",\
+                "amount":10.0}\
+                """;
         // given
         given(this.objectMapper.writeValueAsString(MockObjectCreator.getOrder()))
                 .willReturn(convertedString);

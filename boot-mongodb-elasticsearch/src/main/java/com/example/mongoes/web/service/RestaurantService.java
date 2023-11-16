@@ -78,7 +78,7 @@ public class RestaurantService {
                                             Integer.valueOf(
                                                     addressDoc.get("zipcode", String.class)));
                                     List<Double> obj = addressDoc.getList("coord", Double.class);
-                                    Point geoJsonPoint = new Point(obj.get(0), obj.get(1));
+                                    Point geoJsonPoint = new Point(obj.getFirst(), obj.get(1));
                                     address.setLocation(geoJsonPoint);
                                     restaurant.setAddress(address);
                                     List<Grades> gradesList =
@@ -193,7 +193,7 @@ public class RestaurantService {
         } else {
             changeStreamOptionsBuilder =
                     ChangeStreamOptions.builder()
-                            .resumeAt(resumeTokenList.get(0).getResumeTimestamp());
+                            .resumeAt(resumeTokenList.getFirst().getResumeTimestamp());
         }
         changeStreamOptionsBuilder.returnFullDocumentOnUpdate();
         return changeStreamOptionsBuilder.build();

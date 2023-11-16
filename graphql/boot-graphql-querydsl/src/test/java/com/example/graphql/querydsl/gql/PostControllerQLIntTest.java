@@ -81,14 +81,14 @@ class PostControllerQLIntTest extends AbstractIntegrationTest {
                 .entityList(PostCommentResponse.class)
                 .hasSize(1)
                 .satisfies(postCommentResponses -> {
-                    assertThat(postCommentResponses.get(0).review()).isEqualTo("JunitReview");
-                    assertThat(postCommentResponses.get(0).createdOn()).isInstanceOf(LocalDateTime.class);
+                    assertThat(postCommentResponses.getFirst().review()).isEqualTo("JunitReview");
+                    assertThat(postCommentResponses.getFirst().createdOn()).isInstanceOf(LocalDateTime.class);
                 })
                 .path("createPost.tags")
                 .entityList(TagResponse.class)
                 .hasSize(1)
-                .satisfies(
-                        tagResponses -> assertThat(tagResponses.get(0).name()).isEqualTo("junit"));
+                .satisfies(tagResponses ->
+                        assertThat(tagResponses.getFirst().name()).isEqualTo("junit"));
     }
 
     @Test
@@ -113,8 +113,8 @@ class PostControllerQLIntTest extends AbstractIntegrationTest {
                 .entityList(PostCommentResponse.class)
                 .hasSize(1)
                 .satisfies(postCommentResponses -> {
-                    assertThat(postCommentResponses.get(0).review()).isEqualTo("First Review");
-                    assertThat(postCommentResponses.get(0).createdOn()).isInstanceOf(LocalDateTime.class);
+                    assertThat(postCommentResponses.getFirst().review()).isEqualTo("First Review");
+                    assertThat(postCommentResponses.getFirst().createdOn()).isInstanceOf(LocalDateTime.class);
                 })
                 .path("getPostsByUserName[0].tags")
                 .entityList(TagResponse.class)
@@ -144,13 +144,13 @@ class PostControllerQLIntTest extends AbstractIntegrationTest {
                 .entityList(PostCommentResponse.class)
                 .hasSize(1)
                 .satisfies(postCommentResponses -> {
-                    assertThat(postCommentResponses.get(0).review()).isEqualTo("Third Review");
-                    assertThat(postCommentResponses.get(0).createdOn()).isInstanceOf(LocalDateTime.class);
+                    assertThat(postCommentResponses.getFirst().review()).isEqualTo("Third Review");
+                    assertThat(postCommentResponses.getFirst().createdOn()).isInstanceOf(LocalDateTime.class);
                 })
                 .path("addTagsToPost.tags")
                 .entityList(TagResponse.class)
                 .hasSize(1)
-                .satisfies(
-                        tagResponses -> assertThat(tagResponses.get(0).name()).isEqualTo("junit"));
+                .satisfies(tagResponses ->
+                        assertThat(tagResponses.getFirst().name()).isEqualTo("junit"));
     }
 }

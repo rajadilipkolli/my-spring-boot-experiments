@@ -73,7 +73,8 @@ class PostEntityControllerTest {
     @Test
     void shouldFindPostById() throws Exception {
         Long postId = 1L;
-        given(postService.findPostById(postId)).willReturn(Optional.of(postResponseList.get(0)));
+        given(postService.findPostById(postId))
+                .willReturn(Optional.of(postResponseList.getFirst()));
 
         this.mockMvc
                 .perform(get("/api/posts/{id}", postId))
@@ -102,7 +103,8 @@ class PostEntityControllerTest {
 
     @Test
     void shouldCreateNewPost() throws Exception {
-        given(postService.savePost(any(NewPostRequest.class))).willReturn(postResponseList.get(0));
+        given(postService.savePost(any(NewPostRequest.class)))
+                .willReturn(postResponseList.getFirst());
 
         NewPostRequest postEntity =
                 new NewPostRequest(
@@ -196,7 +198,8 @@ class PostEntityControllerTest {
     void shouldDeletePost() throws Exception {
         Long postId = 1L;
         PostEntity postEntity = new PostEntity().setId(postId).setContent("First Post");
-        given(postService.findPostById(postId)).willReturn(Optional.of(postResponseList.get(0)));
+        given(postService.findPostById(postId))
+                .willReturn(Optional.of(postResponseList.getFirst()));
         doNothing().when(postService).deletePostById(postEntity.getId());
 
         this.mockMvc

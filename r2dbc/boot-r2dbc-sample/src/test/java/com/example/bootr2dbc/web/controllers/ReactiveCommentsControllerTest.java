@@ -79,7 +79,7 @@ class ReactiveCommentsControllerTest {
                 .uri(
                         uriBuilder -> {
                             uriBuilder.queryParam(
-                                    "postId", expectedCommentsList.get(0).getPostId());
+                                    "postId", expectedCommentsList.getFirst().getPostId());
                             uriBuilder.queryParam("sortBy", "title");
                             uriBuilder.path("/api/posts/comments/");
                             return uriBuilder.build();

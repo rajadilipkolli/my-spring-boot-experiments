@@ -26,16 +26,20 @@ public class LoggingAspect {
     }
 
     @Pointcut(
-            "within(@org.springframework.stereotype.Repository *)"
-                    + " || within(@org.springframework.stereotype.Service *)"
-                    + " || within(@org.springframework.web.bind.annotation.RestController *)")
+            """
+            within(@org.springframework.stereotype.Repository *)\
+             || within(@org.springframework.stereotype.Service *)\
+             || within(@org.springframework.web.bind.annotation.RestController *)\
+            """)
     public void springBeanPointcut() {
         // pointcut definition
     }
 
     @Pointcut(
-            "@within(com.example.custom.sequence.config.logging.Loggable) || "
-                    + "@annotation(com.example.custom.sequence.config.logging.Loggable)")
+            """
+            @within(com.example.custom.sequence.config.logging.Loggable) || \
+            @annotation(com.example.custom.sequence.config.logging.Loggable)\
+            """)
     public void applicationPackagePointcut() {
         // pointcut definition
     }

@@ -73,7 +73,7 @@ class SecondaryCustomerControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldFindCustomerById() throws Exception {
-        SecondaryCustomer secondaryCustomer = secondaryCustomerList.get(0);
+        SecondaryCustomer secondaryCustomer = secondaryCustomerList.getFirst();
         Long customerId = secondaryCustomer.getId();
 
         this.mockMvc
@@ -129,7 +129,7 @@ class SecondaryCustomerControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldUpdateCustomer() throws Exception {
-        SecondaryCustomer secondaryCustomer = secondaryCustomerList.get(0);
+        SecondaryCustomer secondaryCustomer = secondaryCustomerList.getFirst();
         secondaryCustomer.setName("Updated Customer");
 
         this.mockMvc
@@ -144,7 +144,7 @@ class SecondaryCustomerControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldDeleteCustomer() throws Exception {
-        SecondaryCustomer secondaryCustomer = secondaryCustomerList.get(0);
+        SecondaryCustomer secondaryCustomer = secondaryCustomerList.getFirst();
 
         this.mockMvc
                 .perform(

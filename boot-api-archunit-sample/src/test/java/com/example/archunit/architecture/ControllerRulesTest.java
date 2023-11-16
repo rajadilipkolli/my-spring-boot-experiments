@@ -41,7 +41,7 @@ class ControllerRulesTest {
             .beAnnotatedWith(RestController.class)
             .andShould()
             .notBeAnnotatedWith(Controller.class)
-            .because(String.format(ANNOTATED_EXPLANATION, CONTROLLER_SUFFIX, "@RestController")
+            .because(ANNOTATED_EXPLANATION.formatted(CONTROLLER_SUFFIX, "@RestController")
                     + ", and not with @Controller");
 
     // Fields

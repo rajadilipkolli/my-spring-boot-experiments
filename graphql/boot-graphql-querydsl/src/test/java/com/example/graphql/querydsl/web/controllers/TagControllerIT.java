@@ -58,7 +58,7 @@ class TagControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldFindTagById() throws Exception {
-        Tag tag = tagList.get(0);
+        Tag tag = tagList.getFirst();
         Long tagId = tag.getId();
 
         this.mockMvc
@@ -104,7 +104,7 @@ class TagControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldUpdateTag() throws Exception {
-        Long tagId = tagList.get(0).getId();
+        Long tagId = tagList.getFirst().getId();
         TagRequest tagRequest = new TagRequest("Updated Tag");
 
         this.mockMvc
@@ -118,7 +118,7 @@ class TagControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldDeleteTag() throws Exception {
-        Tag tag = tagList.get(0);
+        Tag tag = tagList.getFirst();
 
         this.mockMvc
                 .perform(delete("/api/tags/{id}", tag.getId()))

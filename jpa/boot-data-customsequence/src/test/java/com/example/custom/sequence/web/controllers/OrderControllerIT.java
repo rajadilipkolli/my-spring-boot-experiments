@@ -62,7 +62,7 @@ class OrderControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldFindOrderById() throws Exception {
-        Order order = orderList.get(0);
+        Order order = orderList.getFirst();
         String orderId = order.getId();
 
         this.mockMvc
@@ -109,7 +109,7 @@ class OrderControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldUpdateOrder() throws Exception {
-        Order order = orderList.get(0);
+        Order order = orderList.getFirst();
         order.setText("Updated Order");
 
         this.mockMvc
@@ -124,7 +124,7 @@ class OrderControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldDeleteOrder() throws Exception {
-        Order order = orderList.get(0);
+        Order order = orderList.getFirst();
 
         this.mockMvc
                 .perform(delete("/api/orders/{id}", order.getId()))

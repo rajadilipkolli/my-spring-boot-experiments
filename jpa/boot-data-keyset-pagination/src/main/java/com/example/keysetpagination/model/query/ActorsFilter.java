@@ -18,7 +18,7 @@ public class ActorsFilter {
 
     @JsonIgnore
     public String getValue() {
-        return values.get(0);
+        return values.getFirst();
     }
 
     public void setValue(String value) {
@@ -35,7 +35,7 @@ public class ActorsFilter {
         if (values == null || values.isEmpty()) {
             return null;
         }
-        return values.get(0);
+        return values.getFirst();
     }
 
     public void setLow(String low) {

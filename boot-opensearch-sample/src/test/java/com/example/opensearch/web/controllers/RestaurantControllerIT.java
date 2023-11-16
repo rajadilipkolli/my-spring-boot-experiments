@@ -70,7 +70,7 @@ class RestaurantControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldFindRestaurantById() throws Exception {
-        Restaurant restaurant = restaurantList.get(0);
+        Restaurant restaurant = restaurantList.getFirst();
         String restaurantId = restaurant.getId();
 
         this.mockMvc
@@ -129,7 +129,7 @@ class RestaurantControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldUpdateRestaurant() throws Exception {
-        Restaurant restaurant = restaurantList.get(0);
+        Restaurant restaurant = restaurantList.getFirst();
         restaurant.setName("Updated Restaurant");
 
         this.mockMvc
@@ -144,7 +144,7 @@ class RestaurantControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldDeleteRestaurant() throws Exception {
-        Restaurant restaurant = restaurantList.get(0);
+        Restaurant restaurant = restaurantList.getFirst();
 
         this.mockMvc
                 .perform(delete("/api/restaurants/{id}", restaurant.getId()))

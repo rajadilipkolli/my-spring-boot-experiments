@@ -73,7 +73,7 @@ class PrimaryCustomerControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldFindCustomerById() throws Exception {
-        PrimaryCustomer primaryCustomer = primaryCustomerList.get(0);
+        PrimaryCustomer primaryCustomer = primaryCustomerList.getFirst();
         Long customerId = primaryCustomer.getId();
 
         this.mockMvc
@@ -125,7 +125,7 @@ class PrimaryCustomerControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldUpdateCustomer() throws Exception {
-        PrimaryCustomer primaryCustomer = primaryCustomerList.get(0);
+        PrimaryCustomer primaryCustomer = primaryCustomerList.getFirst();
         primaryCustomer.setText("Updated Customer");
 
         this.mockMvc
@@ -141,7 +141,7 @@ class PrimaryCustomerControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldDeleteCustomer() throws Exception {
-        PrimaryCustomer primaryCustomer = primaryCustomerList.get(0);
+        PrimaryCustomer primaryCustomer = primaryCustomerList.getFirst();
 
         this.mockMvc
                 .perform(

@@ -46,7 +46,7 @@ class ModelRulesTest {
             .resideInAPackage(MODEL_PACKAGE)
             .should()
             .beRecords()
-            .because(String.format("Resources should be records in %s", MODEL_PACKAGE));
+            .because("Resources should be records in %s".formatted(MODEL_PACKAGE));
 
     @ArchTest
     static final ArchRule staticMethodsAreNotAllowed = staticMethodsAreNotAllowedRule(MODEL_PACKAGE);

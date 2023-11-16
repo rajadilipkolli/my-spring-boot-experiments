@@ -73,10 +73,10 @@ class PostCommentEntityControllerTest {
 
     @Test
     void shouldFindPostCommentById() throws Exception {
-        PostCommentResponse postCommentResponse = postCommentResponseList.get(0);
+        PostCommentResponse postCommentResponse = postCommentResponseList.getFirst();
         Long postCommentId = postCommentResponse.postId();
         given(postCommentService.findPostCommentById(postCommentId))
-                .willReturn(Optional.of(postCommentResponseList.get(0)));
+                .willReturn(Optional.of(postCommentResponseList.getFirst()));
 
         this.mockMvc
                 .perform(get("/api/postcomments/{id}", postCommentId))
@@ -154,7 +154,7 @@ class PostCommentEntityControllerTest {
 
     @Test
     void shouldUpdatePostComment() throws Exception {
-        PostCommentResponse postCommentResponse = postCommentResponseList.get(0);
+        PostCommentResponse postCommentResponse = postCommentResponseList.getFirst();
         Long postCommentId = postCommentResponse.postId();
         PostCommentRequest postCommentRequest =
                 new PostCommentRequest("First Title", "First Content", postCommentId, true);
@@ -192,10 +192,10 @@ class PostCommentEntityControllerTest {
 
     @Test
     void shouldDeletePostComment() throws Exception {
-        PostCommentResponse postCommentResponse = postCommentResponseList.get(0);
+        PostCommentResponse postCommentResponse = postCommentResponseList.getFirst();
         Long postCommentId = postCommentResponse.postId();
         given(postCommentService.findPostCommentById(postCommentId))
-                .willReturn(Optional.of(postCommentResponseList.get(0)));
+                .willReturn(Optional.of(postCommentResponseList.getFirst()));
         doNothing().when(postCommentService).deletePostCommentById(postCommentId);
 
         this.mockMvc

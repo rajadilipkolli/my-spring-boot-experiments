@@ -58,7 +58,7 @@ class ClientControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldFindClientById() throws Exception {
-        Client client = clientList.get(0);
+        Client client = clientList.getFirst();
         Long clientId = client.getId();
 
         this.mockMvc
@@ -104,7 +104,7 @@ class ClientControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldUpdateClient() throws Exception {
-        Long clientId = clientList.get(0).getId();
+        Long clientId = clientList.getFirst().getId();
         ClientRequest clientRequest = new ClientRequest("Updated Client");
 
         this.mockMvc
@@ -118,7 +118,7 @@ class ClientControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldDeleteClient() throws Exception {
-        Client client = clientList.get(0);
+        Client client = clientList.getFirst();
 
         this.mockMvc
                 .perform(delete("/api/clients/{id}", client.getId()))

@@ -55,7 +55,7 @@ class PostControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldFindPostById() throws Exception {
-        Post post = postList.get(0);
+        Post post = postList.getFirst();
         Long postId = post.getId();
 
         this.mockMvc
@@ -109,7 +109,7 @@ class PostControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldUpdatePost() throws Exception {
-        Post post = postList.get(0);
+        Post post = postList.getFirst();
         post.setTitle("Updated Post Title");
 
         this.mockMvc
@@ -124,7 +124,7 @@ class PostControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldDeletePost() throws Exception {
-        Post post = postList.get(0);
+        Post post = postList.getFirst();
 
         this.mockMvc
                 .perform(delete("/api/posts/{id}", post.getId()))

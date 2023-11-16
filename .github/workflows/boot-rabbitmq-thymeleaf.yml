@@ -32,7 +32,7 @@ jobs:
         uses: actions/setup-java@v3.13.0
         with:
           java-version: ${{ matrix.java }}
-          distribution: 'zulu'
+          distribution: 'temurin'
           cache: 'maven'
       - name: Build with Maven and analyze
         run: ./mvnw -B clean verify package --file pom.xml 

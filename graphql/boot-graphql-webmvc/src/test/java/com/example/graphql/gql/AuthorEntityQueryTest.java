@@ -93,10 +93,11 @@ class AuthorEntityQueryTest {
                 .satisfy(
                         responseErrors -> {
                             assertThat(responseErrors.size()).isEqualTo(1);
-                            assertThat(responseErrors.get(0).getPath())
+                            assertThat(responseErrors.getFirst().getPath())
                                     .isEqualTo("findAuthorByEmailId");
-                            assertThat(responseErrors.get(0).getErrorType()).isEqualTo(NOT_FOUND);
-                            assertThat(responseErrors.get(0).getMessage())
+                            assertThat(responseErrors.getFirst().getErrorType())
+                                    .isEqualTo(NOT_FOUND);
+                            assertThat(responseErrors.getFirst().getMessage())
                                     .isEqualTo("Author: junit@email.com was not found.");
                         });
 

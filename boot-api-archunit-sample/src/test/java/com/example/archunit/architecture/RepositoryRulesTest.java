@@ -23,7 +23,7 @@ class RepositoryRulesTest {
             .resideInAPackage(REPOSITORY_PACKAGE)
             .should()
             .beAnnotatedWith(Repository.class)
-            .because(String.format(ANNOTATED_EXPLANATION, REPOSITORY_SUFFIX, "@Repository"));
+            .because(ANNOTATED_EXPLANATION.formatted(REPOSITORY_SUFFIX, "@Repository"));
 
     @ArchTest
     static final ArchRule classesShouldBeInterfaces = interfacesAreOnlyAllowedRule(REPOSITORY_PACKAGE);
