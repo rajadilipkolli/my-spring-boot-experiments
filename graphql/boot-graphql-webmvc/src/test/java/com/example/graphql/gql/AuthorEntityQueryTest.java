@@ -92,7 +92,7 @@ class AuthorEntityQueryTest {
                 .errors()
                 .satisfy(
                         responseErrors -> {
-                            assertThat(responseErrors.size()).isEqualTo(1);
+                            assertThat(responseErrors).hasSize(1);
                             assertThat(responseErrors.getFirst().getPath())
                                     .isEqualTo("findAuthorByEmailId");
                             assertThat(responseErrors.getFirst().getErrorType())
