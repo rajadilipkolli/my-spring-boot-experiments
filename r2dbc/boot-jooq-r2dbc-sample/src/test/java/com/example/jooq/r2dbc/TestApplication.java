@@ -13,7 +13,7 @@ public class TestApplication {
     @Bean
     @ServiceConnection
     PostgreSQLContainer<?> postgreSQLContainer() {
-        return new PostgreSQLContainer<>("postgres:16.0-alpine")
+        return new PostgreSQLContainer<>("postgres:16.1-alpine")
                 .withCopyFileToContainer(
                         MountableFile.forClasspathResource("init.sql"),
                         "/docker-entrypoint-initdb.d/init.sql");

@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.1.5</version>
+        <version>3.2.0-RC2</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.example.jooq.r2dbc</groupId>
@@ -220,7 +220,7 @@
                                     MYSQL: mysql:8.0.33
                                     MARIADB: mariadb:10.11
                                 -->
-                                <containerImage>postgres:16.0-alpine</containerImage>
+                                <containerImage>postgres:16.1-alpine</containerImage>
                             </database>
                             <flyway>
                                 <!--
@@ -459,4 +459,14 @@
             </snapshots>
         </repository>
     </repositories>
+    <pluginRepositories>
+        <pluginRepository>
+            <id>spring-milestones</id>
+            <name>Spring Milestones</name>
+            <url>https://repo.spring.io/milestone</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </pluginRepository>
+    </pluginRepositories>
 </project>
