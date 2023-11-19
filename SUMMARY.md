@@ -20,7 +20,7 @@
   * [rest-template](httpClients/boot-rest-template/README.md)
   * [rest-client](httpClients/boot-restclient/README.md)
   * [web-client-mvc](httpClients/boot-web-client-mvc/README.md)
-  * [web-client-webflux](httpClients/web-client-webflux/README.md)
+  * [web-client-webflux](httpClients/boot-web-client-webflux/README.md)
 * [jmh-benchmark](jmh-benchmark/README.md)
 * [jpa](jpa/README.md)
   * [Custom Sequence](jpa/boot-data-customsequence/README.md)

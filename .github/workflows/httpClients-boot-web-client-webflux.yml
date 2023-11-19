@@ -1,12 +1,12 @@
-name: spring-boot-httpClients-web-client-webflux
+name: httpClients-boot-web-client-webflux
 on:
   push:
     paths:
-      - "httpClients/web-client-webflux/**"
+      - "httpClients/boot-web-client-webflux/**"
     branches: [main]
   pull_request:
     paths:
-      - "httpClients/web-client-webflux/**"
+      - "httpClients/boot-web-client-webflux/**"
     types:
       - opened
       - synchronize
@@ -18,13 +18,13 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: "httpClients/web-client-webflux"
+        working-directory: "httpClients/boot-web-client-webflux"
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
 
-      - name: Set up JDK 17
+      - name: Set up JDK 21
         uses: actions/setup-java@v3.13.0
         with:
           java-version: 21

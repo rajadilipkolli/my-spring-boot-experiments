@@ -1,4 +1,4 @@
-# web-client-webflux
+# boot-web-client-webflux
 
 ### Run tests
 `$ ./mvnw clean verify`

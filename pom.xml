@@ -30,7 +30,7 @@
         <module>httpClients/boot-restclient</module>
         <module>httpClients/boot-rest-template</module>
         <module>httpClients/boot-web-client-mvc</module>
-        <module>httpClients/web-client-webflux</module>
+        <module>httpClients/boot-web-client-webflux</module>
         <module>jpa/boot-data-customsequence</module>
         <module>jpa/boot-data-envers</module>
         <module>jpa/boot-data-keyset-pagination</module>

@@ -43,11 +43,11 @@
 "component: opensearch":
   - boot-opensearch-sample/**/*
 "component: httpclients":
-  - httpClients/web-client-webflux/**/*
   - httpClients/boot-http-proxy/**/*
-  - httpClients/boot-restclient/**/*
   - httpClients/boot-rest-template/**/*
-  - httpClients/web-client-mvc/**/*
+  - httpClients/boot-restclient/**/*
+  - httpClients/boot-web-client-mvc/**/*
+  - httpClients/boot-web-client-webflux/**/*
 "status: waiting-for-triage":
   - ./*
   - ./**/*
@@ -80,6 +80,6 @@
   - httpClients/boot-http-proxy/pom.xml
   - httpClients/boot-restclient/pom.xml
   - httpClients/boot-rest-template/pom.xml
-  - httpClients/web-client-webmvc/pom.xml
-  - httpClients/web-client-webflux/pom.xml
+  - httpClients/boot-web-client-mvc/pom.xml
+  - httpClients/boot-web-client-webflux/pom.xml
   - open-api-spring-boot/pom.xml
