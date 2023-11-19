@@ -3,6 +3,8 @@ package com.example.rest.webclient.exception;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.validation.FieldError;
@@ -12,7 +14,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.support.WebExchangeBindException;
 
 @ControllerAdvice
-public class GlobalErrorHandlingControllerAdvice {
+@Order(Ordered.HIGHEST_PRECEDENCE)
+public class GlobalErrorHandling {
 
     @ExceptionHandler(WebExchangeBindException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
