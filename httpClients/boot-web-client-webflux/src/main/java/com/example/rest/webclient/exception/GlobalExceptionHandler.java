@@ -15,7 +15,7 @@ import org.springframework.web.bind.support.WebExchangeBindException;
 
 @ControllerAdvice
 @Order(Ordered.HIGHEST_PRECEDENCE)
-public class GlobalErrorHandling {
+public class GlobalExceptionHandler {
 
     @ExceptionHandler(WebExchangeBindException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
