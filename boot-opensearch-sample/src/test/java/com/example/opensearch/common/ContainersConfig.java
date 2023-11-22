@@ -10,7 +10,7 @@ public class ContainersConfig {
 
     @Container
     public static OpensearchContainer openSearchContainer =
-            new OpensearchContainer(DockerImageName.parse("opensearchproject/opensearch:2.10.0"));
+            new OpensearchContainer(DockerImageName.parse("opensearchproject/opensearch:2.11.0"));
 
     static {
         openSearchContainer.start();
