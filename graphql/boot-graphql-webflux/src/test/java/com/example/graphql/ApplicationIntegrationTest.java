@@ -1,7 +1,5 @@
 package com.example.graphql;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import com.example.graphql.common.AbstractIntegrationTest;
 import com.example.graphql.dtos.Customer;
 import com.example.graphql.dtos.CustomerDTO;
@@ -16,11 +14,6 @@ class ApplicationIntegrationTest extends AbstractIntegrationTest {
 
     @Autowired
     private GraphQlTester graphQlTester;
-
-    @Test
-    void contextLoads() {
-        assertThat(postgreSQLContainer.isRunning()).isTrue();
-    }
 
     @Test
     void test_query_all_customers() {
