@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ControllerAdvice
-public class ErrorDetailProblemHandlingControllerAdvice {
+public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -40,6 +40,5 @@ public class ErrorDetailProblemHandlingControllerAdvice {
         return problemDetail;
     }
 
-    static record ApiValidationError(
-            String object, String field, Object rejectedValue, String message) {}
+    record ApiValidationError(String object, String field, Object rejectedValue, String message) {}
 }
