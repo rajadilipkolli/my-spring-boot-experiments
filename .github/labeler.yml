@@ -1,53 +1,62 @@
-"component : archunit":
- - boot-api-archunit-sample/**/*
 "component : spring-batch":
  - batch-boot-jpa-sample/**/*
+"component : archunit":
+ - boot-api-archunit-sample/**/*
 "component : choas-monkey":
  - boot-choas-monkey/**/*
-"component: graphql-webflux":
-  - graphql/boot-graphql-webflux/**/*
-"component: graphql-webmvc":
-  - graphql/boot-graphql-webmvc/**/*
-"component: graphql-querydsl":
-  - graphql/boot-graphql-querydsl/**/*
-"component: hibernate2ndlevelcache-sample":
-  - jpa/boot-hibernate2ndlevelcache-sample/**/*
-"component: jobrunr":
-  - boot-jobrunr-sample/**/*
-"component: data-envers":
-  - jpa/boot-data-envers/**/*
-"component: jpa-multitenancy":
-  - jpa/multitenancy/**/*
-"component: multiple-datasources":
-  - jpa/boot-data-multipledatasources/**/*
-"component: read-replica-postgres":
-  - jpa/boot-read-replica-postgresql/**/*
-"component: customsequence":
- - jpa/boot-data-customsequence/**/*
 "component: mongodb-elasticsearch":
   - boot-mongodb-elasticsearch/**/*
+"component: opensearch":
+  - boot-opensearch-sample/**/*
+"component: rabbitmq-thymeleaf":
+  - boot-rabbitmq-thymeleaf/**/*
+"component: rest-docs":
+  - boot-rest-docs-sample/**/*
 "component: strategy-plugin":
   - boot-strategy-plugin/**/*
 "component: togglz":
   - boot-togglz-sample/**/*
 "component: ultimate-redis":
   - boot-ultimate-redis/**/*
-"component: rabbitmq-thymeleaf":
-  - boot-rabbitmq-thymeleaf/**/*
-"component: r2dbc":
-  - r2dbc/boot-jooq-r2dbc-sample/**/*
-"component: openapi":
-  - open-api-spring-boot/**/*
-"component: rest-docs":
-  - boot-rest-docs-sample/**/*
-"component: opensearch":
-  - boot-opensearch-sample/**/*
+"component: graphql-webflux":
+  - graphql/boot-graphql-webflux/**/*
+"component: graphql-webmvc":
+  - graphql/boot-graphql-webmvc/**/*
+"component: graphql-querydsl":
+  - graphql/boot-graphql-querydsl/**/*
 "component: httpclients":
   - httpClients/boot-http-proxy/**/*
   - httpClients/boot-rest-template/**/*
   - httpClients/boot-restclient/**/*
   - httpClients/boot-web-client-mvc/**/*
   - httpClients/boot-web-client-webflux/**/*
+"component: jmh-benchmark":
+  - jmh-benchmark/**/*
+"component: customsequence":
+ - jpa/boot-data-customsequence/**/*
+"component: data-envers":
+  - jpa/boot-data-envers/**/*
+"component: keyset-pagination":
+  - jpa/boot-data-keyset-pagination/**/*
+"component: multiple-datasources":
+  - jpa/boot-data-multipledatasources/**/*
+"component: hibernate2ndlevelcache-sample":
+  - jpa/boot-hibernate2ndlevelcache-sample/**/*
+"component: jpa-lock":
+  - jpa/boot-jpa-locks/**/*
+"component: read-replica-postgres":
+  - jpa/boot-read-replica-postgresql/**/*
+"component: jpa-multitenancy":
+  - jpa/multitenancy/**/*
+"component: openapi":
+  - open-api-spring-boot/**/*
+"component: r2dbc":
+  - r2dbc/boot-jooq-r2dbc-sample/**/*
+  - r2dbc/boot-r2dbc-sample/**/*
+"component: jobrunr":
+  - scheduler/boot-jobrunr-sample/**/*
+"component: quartz":
+  - scheduler/boot-scheduler-quartz/**/*
 "status: waiting-for-triage":
   - ./*
   - ./**/*
@@ -56,30 +65,35 @@
   - batch-boot-jpa-sample/pom.xml
   - boot-api-archunit-sample/pom.xml
   - boot-choas-monkey/pom.xml
+  - boot-mongodb-elasticsearch/pom.xml
+  - boot-opensearch-sample/pom.xml
+  - boot-rabbitmq-thymeleaf/pom.xml
+  - boot-rest-docs-sample/pom.xml
+  - boot-strategy-plugin/build.gradle
+  - boot-togglz-sample/pom.xml
+  - boot-ultimate-redis/pom.xml
+  - graphql/boot-graphql-querydsl/pom.xml
+  - graphql/boot-graphql-webflux/pom.xml
+  - graphql/boot-graphql-webmvc/pom.xml
+  - httpClients/boot-http-proxy/pom.xml
+  - httpClients/boot-rest-template/pom.xml
+  - httpClients/boot-restclient/pom.xml
+  - httpClients/boot-web-client-mvc/pom.xml
+  - httpClients/boot-web-client-webflux/pom.xml
+  - jmh-benchmark/pom.xml
+  - jpa/boot-data-customsequence/pom.xml
   - jpa/boot-data-envers/pom.xml
+  - jpa/boot-data-keyset-pagination/pom.xml
+  - jpa/boot-data-multipledatasources/pom.xml
   - jpa/boot-hibernate2ndlevelcache-sample/pom.xml
+  - jpa/boot-data-jpa-locks/pom.xml
+  - jpa/boot-read-replica-postgresql/pom.xml
   - jpa/multitenancy/multitenancy-db/pom.xml
   - jpa/multitenancy/multidatasource-multitenancy/pom.xml
   - jpa/multitenancy/partition/pom.xml
   - jpa/multitenancy/schema/pom.xml
-  - jpa/boot-data-multipledatasources/pom.xml
-  - jpa/boot-read-replica-postgresql/pom.xml
-  - jpa/boot-data-customsequence/pom.xml
-  - boot-jobrunr-sample/pom.xml
-  - boot-mongodb-elasticsearch/pom.xml
-  - boot-opensearch-sample/pom.xml
-  - graphql/boot-graphql-webflux/pom.xml
-  - graphql/boot-graphql-querydsl/pom.xml
-  - graphql/boot-graphql-webmvc/pom.xml
-  - boot-strategy-plugin/build.gradle
-  - boot-togglz-sample/pom.xml
-  - boot-ultimate-redis/pom.xml
-  - boot-rabbitmq-thymeleaf/pom.xml
-  - boot-rest-docs-sample/pom.xml
-  - r2dbc/boot-jooq-r2dbc-sample/pom.xml
-  - httpClients/boot-http-proxy/pom.xml
-  - httpClients/boot-restclient/pom.xml
-  - httpClients/boot-rest-template/pom.xml
-  - httpClients/boot-web-client-mvc/pom.xml
-  - httpClients/boot-web-client-webflux/pom.xml
   - open-api-spring-boot/pom.xml
+  - r2dbc/boot-jooq-r2dbc-sample/pom.xml
+  - r2dbc/boot-r2dbc-sample/pom.xml
+  - scheduler/boot-jobrunr-sample/pom.xml
+  - scheduler/boot-scheduler-quartz/pom.xml
