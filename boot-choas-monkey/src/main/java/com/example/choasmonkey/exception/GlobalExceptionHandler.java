@@ -2,6 +2,8 @@ package com.example.choasmonkey.exception;
 
 import java.util.List;
 import java.util.Objects;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
@@ -12,7 +14,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ControllerAdvice
-public class ErrorDetailProblemHandlingControllerAdvice {
+@Order(Ordered.HIGHEST_PRECEDENCE)
+public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -37,6 +40,5 @@ public class ErrorDetailProblemHandlingControllerAdvice {
         return problemDetail;
     }
 
-    static record ApiValidationError(
-            String object, String field, Object rejectedValue, String message) {}
+    record ApiValidationError(String object, String field, Object rejectedValue, String message) {}
 }

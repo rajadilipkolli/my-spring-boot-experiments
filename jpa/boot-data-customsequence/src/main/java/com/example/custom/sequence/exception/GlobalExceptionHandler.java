@@ -1,9 +1,10 @@
 package com.example.custom.sequence.exception;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
@@ -13,8 +14,9 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
+@Order(Ordered.HIGHEST_PRECEDENCE)
 @ControllerAdvice
-public class ErrorDetailProblemHandlingControllerAdvice {
+public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -32,28 +34,14 @@ public class ErrorDetailProblemHandlingControllerAdvice {
                                             fieldError.getObjectName(),
                                             fieldError.getField(),
                                             fieldError.getRejectedValue(),
-                                            Objects.requireNonNull(fieldError.getDefaultMessage()));
+                                            Objects.requireNonNull(
+                                                    fieldError.getDefaultMessage(), ""));
                                 })
+                        .sorted(Comparator.comparing(ApiValidationError::field))
                         .toList();
         problemDetail.setProperty("violations", validationErrorsList);
         return problemDetail;
     }
 
-    @Data
-    @AllArgsConstructor
-    static class ApiValidationError {
-
-        private String object;
-
-        private String field;
-
-        private Object rejectedValue;
-
-        private String message;
-
-        ApiValidationError(String object, String message) {
-            this.object = object;
-            this.message = message;
-        }
-    }
+    record ApiValidationError(String object, String field, Object rejectedValue, String message) {}
 }
