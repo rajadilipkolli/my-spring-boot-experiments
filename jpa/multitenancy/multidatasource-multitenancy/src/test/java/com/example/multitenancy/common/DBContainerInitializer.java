@@ -6,6 +6,7 @@ import org.testcontainers.containers.OracleContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.utility.DockerImageName;
 
 @Testcontainers(disabledWithoutDocker = true, parallel = true)
 public class DBContainerInitializer {
@@ -16,7 +17,8 @@ public class DBContainerInitializer {
 
     @Container
     private static final OracleContainer ORACLE_CONTAINER =
-            new OracleContainer("gvenzl/oracle-xe:slim-faststart");
+            new OracleContainer(
+                    DockerImageName.parse("gvenzl/oracle-xe").withTag("slim-faststart"));
 
     @DynamicPropertySource
     static void addsDynamicProperties(DynamicPropertyRegistry propertyRegistry) {
