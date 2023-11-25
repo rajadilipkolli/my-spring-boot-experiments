@@ -49,7 +49,7 @@ class SpringBatchIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void testMyJob() throws Exception {
+    void myJob() throws Exception {
         // given
         JobParameters jobParameters = this.jobLauncherTestUtils.getUniqueJobParameters();
 
