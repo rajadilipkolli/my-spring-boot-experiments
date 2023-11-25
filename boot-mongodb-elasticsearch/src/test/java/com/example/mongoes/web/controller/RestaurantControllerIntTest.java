@@ -10,10 +10,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.data.geo.Point;
 import org.springframework.http.MediaType;
 
-public class RestaurantControllerIntTest extends AbstractIntegrationTest {
+class RestaurantControllerIntTest extends AbstractIntegrationTest {
 
     @Test
-    void testCreateRestaurant() {
+    void createRestaurant() {
         Address address = new Address();
         address.setLocation(new Point(-73.9, 40.8));
         Grades grade = new Grades("A", LocalDateTime.of(2022, 1, 1, 1, 1, 1), 15);

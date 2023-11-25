@@ -12,7 +12,7 @@ class ApplicationIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     @Disabled
-    void testWithInRangeEndPoint() {
+    void withInRangeEndPoint() {
         Function<UriBuilder, URI> uriFunction =
                 uriBuilder ->
                         uriBuilder

@@ -83,7 +83,7 @@ class AuthorEntityQueryTest {
     }
 
     @Test
-    void testFindAuthorByEmailId() {
+    void findAuthorByEmailId() {
         given(authorService.findAuthorByEmailId("junit@email.com")).willReturn(Optional.empty());
         graphQlTester
                 .documentName("findAuthorByEmail")

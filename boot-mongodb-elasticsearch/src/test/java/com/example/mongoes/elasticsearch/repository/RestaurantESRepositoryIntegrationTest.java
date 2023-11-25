@@ -69,7 +69,7 @@ class RestaurantESRepositoryIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void testFindByRestaurantId() {
+    void findByRestaurantId() {
         var findByRestaurantId = this.restaurantESRepository.findByRestaurantId(1L);
 
         StepVerifier.create(findByRestaurantId).expectNextCount(0).verifyComplete();
@@ -89,7 +89,7 @@ class RestaurantESRepositoryIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void testFindByName() {
+    void findByName() {
         var findNameMono = this.restaurantESRepository.findByName(RESTAURANT_NAME);
 
         StepVerifier.create(findNameMono)
@@ -105,7 +105,7 @@ class RestaurantESRepositoryIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void testFindByBorough() {
+    void findByBorough() {
         var findByBoroughMono =
                 this.restaurantESRepository.findByBorough(
                         BOROUGH_NAME,
@@ -125,7 +125,7 @@ class RestaurantESRepositoryIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void testFindByBoroughAndCuisineAndName() {
+    void findByBoroughAndCuisineAndName() {
         var findByBoroughAndCuisineAndNameMono =
                 this.restaurantESRepository.findByBoroughAndCuisineAndName(
                         BOROUGH_NAME, CUISINE_NAME, RESTAURANT_NAME, PageRequest.of(0, 10));
@@ -143,7 +143,7 @@ class RestaurantESRepositoryIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void testFindByBoroughOrCuisineOrName() {
+    void findByBoroughOrCuisineOrName() {
         var findByBoroughOrCuisineOrNameMono =
                 this.restaurantESRepository.findByBoroughOrCuisineOrName(
                         BOROUGH_NAME,
@@ -172,7 +172,7 @@ class RestaurantESRepositoryIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     @Disabled
-    void testSearchWithin() {
+    void searchWithin() {
         Flux<SearchHit<Restaurant>> searchHitFlux =
                 this.restaurantESRepository.searchWithin(new GeoPoint(40.8, -73.9), 50d, "km");
 
@@ -192,7 +192,7 @@ class RestaurantESRepositoryIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void testTermQueryForBorough() {
+    void termQueryForBorough() {
         var termQueryForBoroughMono =
                 this.restaurantESRepository.termQueryForBorough(
                         BOROUGH_NAME,
@@ -219,7 +219,7 @@ class RestaurantESRepositoryIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void testTermsQueryForBorough() {
+    void termsQueryForBorough() {
         Mono<SearchPage<Restaurant>> response =
                 this.restaurantESRepository.termsQueryForBorough(
                         List.of(BOROUGH_NAME),
@@ -246,7 +246,7 @@ class RestaurantESRepositoryIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void testQueryBoolWithShould() {
+    void queryBoolWithShould() {
         Mono<SearchPage<Restaurant>> queryBoolWithShouldMono =
                 this.restaurantESRepository.queryBoolWithShould(
                         BOROUGH_NAME,
@@ -275,7 +275,7 @@ class RestaurantESRepositoryIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void testWildcardSearch() {
+    void wildcardSearch() {
         var wildcardSearchMono =
                 this.restaurantESRepository.wildcardSearch("Spumoni", PageRequest.of(0, 5));
 
@@ -315,7 +315,7 @@ class RestaurantESRepositoryIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void testRegExpSearch() {
+    void regExpSearch() {
         var regExpSearchMono =
                 this.restaurantESRepository.regExpSearch(
                         "B.[a-z]*",
@@ -342,7 +342,7 @@ class RestaurantESRepositoryIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void testSearchSimpleQueryForBoroughAndCuisine() {
+    void searchSimpleQueryForBoroughAndCuisine() {
         var searchSimpleQueryForBoroughAndCuisine =
                 this.restaurantESRepository.searchSimpleQueryForBoroughAndCuisine(
                         BOROUGH_NAME,
@@ -369,7 +369,7 @@ class RestaurantESRepositoryIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void testSearchRestaurantIdRange() {
+    void searchRestaurantIdRange() {
         Mono<SearchPage<Restaurant>> searchRestaurantIdRange =
                 this.restaurantESRepository.searchRestaurantIdRange(0L, 10L, PageRequest.of(0, 5));
 
@@ -394,7 +394,7 @@ class RestaurantESRepositoryIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void testSearchDateRange() {
+    void searchDateRange() {
         var searchDateRangeMono =
                 this.restaurantESRepository.searchDateRange(
                         LocalDateTime.of(2021, 12, 31, 23, 59, 59).toString(),
@@ -422,7 +422,7 @@ class RestaurantESRepositoryIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void testFindAll() {
+    void findAll() {
         Mono<SearchPage<Restaurant>> findAllMono =
                 this.restaurantESRepository.findAll(
                         PageRequest.of(0, 5, Sort.by(Sort.Direction.ASC, "restaurant_id")));
@@ -448,7 +448,7 @@ class RestaurantESRepositoryIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void testAggregation() {
+    void aggregation() {
         Mono<SearchPage<Restaurant>> aggregationMono =
                 this.restaurantESRepository.aggregateSearch(
                         "Pizza",

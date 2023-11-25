@@ -129,7 +129,7 @@ class GQLApplicationIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void testAddCommentToPost() {
+    void addCommentToPost() {
         PostCommentRequest postCommentRequest =
                 new PostCommentRequest("JunitTitle", "JunitContent", 1L, true);
 
