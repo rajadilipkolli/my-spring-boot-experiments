@@ -1,11 +1,10 @@
 package com.example.locks.entities;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.List;
 import java.util.Objects;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -23,21 +22,42 @@ public class Movie {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
-    private Long id;
+    private Long movieId;
 
-    @Column(nullable = false)
-    private String text;
+    private String movieTitle;
+
+    private LocalDate releaseDate;
+
+    private BigDecimal budget;
+
+    @OneToMany(mappedBy = "movie")
+    private List<Review> reviews;
+
+    @ManyToOne
+    @JoinColumn(name = "director_id")
+    private Director director;
+
+    @ManyToMany
+    @JoinTable(
+            name = "movie_genre",
+            joinColumns = @JoinColumn(name = "movie_id"),
+            inverseJoinColumns = @JoinColumn(name = "genre_id"))
+    private List<Genre> genres;
+
+    @ManyToMany(mappedBy = "movies")
+    private List<Actor> actors;
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
         Movie movie = (Movie) o;
-        return id != null && Objects.equals(id, movie.id);
+        return movieId != null && Objects.equals(movieId, movie.movieId);
     }
 
     @Override
     public int hashCode() {
         return getClass().hashCode();
     }
+
 }

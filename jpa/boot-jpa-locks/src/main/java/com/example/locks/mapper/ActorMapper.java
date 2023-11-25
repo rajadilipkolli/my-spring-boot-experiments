@@ -11,16 +11,16 @@ public class ActorMapper {
 
     public Actor toEntity(ActorRequest actorRequest) {
         Actor actor = new Actor();
-        actor.setText(actorRequest.text());
+        actor.setActorName(actorRequest.text());
         return actor;
     }
 
     public void mapActorWithRequest(Actor actor, ActorRequest actorRequest) {
-        actor.setText(actorRequest.text());
+        actor.setActorName(actorRequest.text());
     }
 
     public ActorResponse toResponse(Actor actor) {
-        return new ActorResponse(actor.getId(), actor.getText());
+        return new ActorResponse(actor.getActorId(), actor.getActorName());
     }
 
     public List<ActorResponse> toResponseList(List<Actor> actorList) {

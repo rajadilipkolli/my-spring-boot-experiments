@@ -11,16 +11,16 @@ public class MovieMapper {
 
     public Movie toEntity(MovieRequest movieRequest) {
         Movie movie = new Movie();
-        movie.setText(movieRequest.text());
+        movie.setMovieTitle(movieRequest.text());
         return movie;
     }
 
     public void mapMovieWithRequest(Movie movie, MovieRequest movieRequest) {
-        movie.setText(movieRequest.text());
+        movie.setMovieTitle(movieRequest.text());
     }
 
     public MovieResponse toResponse(Movie movie) {
-        return new MovieResponse(movie.getId(), movie.getText());
+        return new MovieResponse(movie.getMovieId(), movie.getMovieTitle());
     }
 
     public List<MovieResponse> toResponseList(List<Movie> movieList) {
