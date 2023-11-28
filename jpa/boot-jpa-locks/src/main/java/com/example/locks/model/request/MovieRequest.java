@@ -1,5 +1,6 @@
 package com.example.locks.model.request;
 
-import jakarta.validation.constraints.NotEmpty;
+import java.math.BigDecimal;
+import java.time.LocalDate;
 
-public record MovieRequest(@NotEmpty(message = "Text cannot be empty") String text) {}
+public record MovieRequest(String movieTitle, LocalDate releaseDate, BigDecimal budget) {}

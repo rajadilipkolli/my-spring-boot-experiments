@@ -56,7 +56,7 @@ public class MovieController {
         MovieResponse response = movieService.saveMovie(movieRequest);
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/api/movies/{id}")
-                .buildAndExpand(response.id())
+                .buildAndExpand(response.movieId())
                 .toUri();
         return ResponseEntity.created(location).body(response);
     }

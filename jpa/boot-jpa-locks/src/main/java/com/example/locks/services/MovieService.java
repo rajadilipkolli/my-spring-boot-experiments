@@ -8,8 +8,6 @@ import com.example.locks.model.request.MovieRequest;
 import com.example.locks.model.response.MovieResponse;
 import com.example.locks.model.response.PagedResult;
 import com.example.locks.repositories.MovieRepository;
-import java.util.List;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -17,6 +15,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional(readOnly = true)
@@ -33,7 +34,7 @@ public class MovieService {
 
         Page<Movie> moviesPage = movieRepository.findAll(pageable);
 
-        List<MovieResponse> movieResponseList = movieMapper.toResponseList(moviesPage.getContent());
+        List<MovieResponse> movieResponseList = movieMapper.moviesListToMovieResponseList(moviesPage.getContent());
 
         return new PagedResult<>(moviesPage, movieResponseList);
     }
@@ -48,27 +49,24 @@ public class MovieService {
     }
 
     public Optional<MovieResponse> findMovieById(Long id) {
-        return movieRepository.findById(id).map(movieMapper::toResponse);
+        return movieRepository.findById(id).map(movieMapper::movieToMovieResponse);
     }
 
     @Transactional
     public MovieResponse saveMovie(MovieRequest movieRequest) {
-        Movie movie = movieMapper.toEntity(movieRequest);
+        Movie movie = movieMapper.movieRequestToMovie(movieRequest);
         Movie savedMovie = movieRepository.save(movie);
-        return movieMapper.toResponse(savedMovie);
+        return movieMapper.movieToMovieResponse(savedMovie);
     }
 
     @Transactional
     public MovieResponse updateMovie(Long id, MovieRequest movieRequest) {
         Movie movie = movieRepository.findById(id).orElseThrow(() -> new MovieNotFoundException(id));
 
-        // Update the movie object with data from movieRequest
-        movieMapper.mapMovieWithRequest(movie, movieRequest);
-
         // Save the updated movie object
-        Movie updatedMovie = movieRepository.save(movie);
+        Movie updatedMovie = movieRepository.save(movieMapper.movieRequestToMovieWithId(movieRequest, movie.getMovieId()));
 
-        return movieMapper.toResponse(updatedMovie);
+        return movieMapper.movieToMovieResponse(updatedMovie);
     }
 
     @Transactional

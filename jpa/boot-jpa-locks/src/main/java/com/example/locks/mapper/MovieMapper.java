@@ -3,27 +3,28 @@ package com.example.locks.mapper;
 import com.example.locks.entities.Movie;
 import com.example.locks.model.request.MovieRequest;
 import com.example.locks.model.response.MovieResponse;
+import org.mapstruct.Mapper;
+
 import java.util.List;
-import org.springframework.stereotype.Service;
+import java.util.stream.Collectors;
 
-@Service
-public class MovieMapper {
+@Mapper
+public interface MovieMapper {
 
-    public Movie toEntity(MovieRequest movieRequest) {
-        Movie movie = new Movie();
-        movie.setMovieTitle(movieRequest.text());
+    Movie movieRequestToMovie(MovieRequest movieRequest);
+
+    default Movie movieRequestToMovieWithId(MovieRequest movieRequest, Long movieId) {
+        var movie = movieRequestToMovie(movieRequest);
+        movie.setMovieId(movieId);
         return movie;
     }
 
-    public void mapMovieWithRequest(Movie movie, MovieRequest movieRequest) {
-        movie.setMovieTitle(movieRequest.text());
+    MovieRequest MovieToMovieRequest(Movie movie);
+
+    MovieResponse movieToMovieResponse(Movie movie);
+
+    default List<MovieResponse> moviesListToMovieResponseList(List<Movie> moviesList) {
+        return moviesList.stream().map(this::movieToMovieResponse).collect(Collectors.toList());
     }
 
-    public MovieResponse toResponse(Movie movie) {
-        return new MovieResponse(movie.getMovieId(), movie.getMovieTitle());
-    }
-
-    public List<MovieResponse> toResponseList(List<Movie> movieList) {
-        return movieList.stream().map(this::toResponse).toList();
-    }
 }
