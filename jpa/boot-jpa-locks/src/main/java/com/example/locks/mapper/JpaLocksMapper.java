@@ -1,5 +1,6 @@
 package com.example.locks.mapper;
 
+import com.example.locks.entities.Actor;
 import com.example.locks.entities.Movie;
 import com.example.locks.model.request.MovieRequest;
 import com.example.locks.model.response.MovieResponse;
@@ -12,6 +13,14 @@ import java.util.stream.Collectors;
 public interface JpaLocksMapper {
 
     Movie movieRequestToMovie(MovieRequest movieRequest);
+
+    default Movie movieRequestToMovieEntity(MovieRequest movieRequest) {
+        var movie = movieRequestToMovie(movieRequest);
+        for (Actor a : movie.getActors()) {
+            a.setMovies(List.of(movie));
+        }
+        return movie;
+    }
 
     default Movie movieRequestToMovieWithId(MovieRequest movieRequest, Long movieId) {
         var movie = movieRequestToMovie(movieRequest);

@@ -1,3 +1,6 @@
 package com.example.locks.model.response;
 
-public record ActorResponse(Long id, String text) {}
+import java.time.LocalDate;
+
+public record ActorResponse(Long actorId, String actorName, LocalDate dob, String nationality) {
+}

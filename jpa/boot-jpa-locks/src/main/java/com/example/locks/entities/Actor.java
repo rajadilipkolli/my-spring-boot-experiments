@@ -1,15 +1,15 @@
 package com.example.locks.entities;
 
 import jakarta.persistence.*;
-
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Objects;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.Hibernate;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Table(name = "actors")
@@ -29,7 +29,7 @@ public class Actor {
 
     private String nationality;
 
-    @ManyToMany
+    @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(
             name = "actor_movie",
             joinColumns = @JoinColumn(name = "actor_id"),
