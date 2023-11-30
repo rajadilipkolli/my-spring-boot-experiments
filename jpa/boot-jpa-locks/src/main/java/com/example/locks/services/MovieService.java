@@ -2,7 +2,7 @@ package com.example.locks.services;
 
 import com.example.locks.entities.Movie;
 import com.example.locks.exception.MovieNotFoundException;
-import com.example.locks.mapper.MovieMapper;
+import com.example.locks.mapper.JpaLocksMapper;
 import com.example.locks.model.query.FindMoviesQuery;
 import com.example.locks.model.request.MovieRequest;
 import com.example.locks.model.response.MovieResponse;
@@ -25,7 +25,7 @@ import java.util.Optional;
 public class MovieService {
 
     private final MovieRepository movieRepository;
-    private final MovieMapper movieMapper;
+    private final JpaLocksMapper jpaLocksMapper;
 
     public PagedResult<MovieResponse> findAllMovies(FindMoviesQuery findMoviesQuery) {
 
@@ -34,7 +34,7 @@ public class MovieService {
 
         Page<Movie> moviesPage = movieRepository.findAll(pageable);
 
-        List<MovieResponse> movieResponseList = movieMapper.moviesListToMovieResponseList(moviesPage.getContent());
+        List<MovieResponse> movieResponseList = jpaLocksMapper.moviesListToMovieResponseList(moviesPage.getContent());
 
         return new PagedResult<>(moviesPage, movieResponseList);
     }
@@ -49,14 +49,14 @@ public class MovieService {
     }
 
     public Optional<MovieResponse> findMovieById(Long id) {
-        return movieRepository.findById(id).map(movieMapper::movieToMovieResponse);
+        return movieRepository.findById(id).map(jpaLocksMapper::movieToMovieResponse);
     }
 
     @Transactional
     public MovieResponse saveMovie(MovieRequest movieRequest) {
-        Movie movie = movieMapper.movieRequestToMovie(movieRequest);
+        Movie movie = jpaLocksMapper.movieRequestToMovie(movieRequest);
         Movie savedMovie = movieRepository.save(movie);
-        return movieMapper.movieToMovieResponse(savedMovie);
+        return jpaLocksMapper.movieToMovieResponse(savedMovie);
     }
 
     @Transactional
@@ -64,9 +64,9 @@ public class MovieService {
         Movie movie = movieRepository.findById(id).orElseThrow(() -> new MovieNotFoundException(id));
 
         // Save the updated movie object
-        Movie updatedMovie = movieRepository.save(movieMapper.movieRequestToMovieWithId(movieRequest, movie.getMovieId()));
+        Movie updatedMovie = movieRepository.save(jpaLocksMapper.movieRequestToMovieWithId(movieRequest, movie.getMovieId()));
 
-        return movieMapper.movieToMovieResponse(updatedMovie);
+        return jpaLocksMapper.movieToMovieResponse(updatedMovie);
     }
 
     @Transactional

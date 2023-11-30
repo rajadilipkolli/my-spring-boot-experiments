@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Mapper
-public interface MovieMapper {
+public interface JpaLocksMapper {
 
     Movie movieRequestToMovie(MovieRequest movieRequest);
 
@@ -18,8 +18,6 @@ public interface MovieMapper {
         movie.setMovieId(movieId);
         return movie;
     }
-
-    MovieRequest MovieToMovieRequest(Movie movie);
 
     MovieResponse movieToMovieResponse(Movie movie);
 
