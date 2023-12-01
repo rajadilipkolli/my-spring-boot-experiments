@@ -5,5 +5,5 @@ import java.time.LocalDate;
 import java.util.List;
 
 public record MovieResponse(Long movieId, String movieTitle, LocalDate releaseDate, BigDecimal budget,
-                            DirectorResponse director, List<ActorResponse> actors) {
+                            DirectorResponse director, List<ActorResponse> actors, List<ReviewResponse> reviews) {
 }

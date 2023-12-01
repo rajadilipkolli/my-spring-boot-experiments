@@ -1,8 +1,14 @@
 package com.example.locks.entities;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
+@Getter
+@Setter
+@NoArgsConstructor
 @Table(name = "review")
 public class Review {
 
@@ -14,7 +20,7 @@ public class Review {
 
     private String review;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "movie_id")
     private Movie movie;
 

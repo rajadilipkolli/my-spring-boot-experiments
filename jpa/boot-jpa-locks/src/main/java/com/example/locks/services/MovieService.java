@@ -1,6 +1,5 @@
 package com.example.locks.services;
 
-import com.example.locks.entities.Actor;
 import com.example.locks.entities.Movie;
 import com.example.locks.exception.MovieNotFoundException;
 import com.example.locks.mapper.JpaLocksMapper;
@@ -10,6 +9,7 @@ import com.example.locks.model.response.MovieResponse;
 import com.example.locks.model.response.PagedResult;
 import com.example.locks.repositories.ActorRepository;
 import com.example.locks.repositories.MovieRepository;
+import com.example.locks.repositories.ReviewRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -18,10 +18,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
@@ -30,6 +28,7 @@ public class MovieService {
 
     private final MovieRepository movieRepository;
     private final ActorRepository actorRepository;
+    private final ReviewRepository reviewRepository;
     private final JpaLocksMapper jpaLocksMapper;
 
     public PagedResult<MovieResponse> findAllMovies(FindMoviesQuery findMoviesQuery) {
@@ -61,6 +60,7 @@ public class MovieService {
     public MovieResponse saveMovie(MovieRequest movieRequest) {
         Movie movie = jpaLocksMapper.movieRequestToMovieEntity(movieRequest);
         actorRepository.saveAll(movie.getActors());
+        reviewRepository.saveAll(movie.getReviews());
         Movie savedMovie = movieRepository.save(movie);
         return jpaLocksMapper.movieToMovieResponse(savedMovie);
     }
