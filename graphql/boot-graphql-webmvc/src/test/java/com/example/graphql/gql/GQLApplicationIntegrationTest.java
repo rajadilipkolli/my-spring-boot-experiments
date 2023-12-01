@@ -8,13 +8,18 @@ import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.HashMap;
 import java.util.Map;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class GQLApplicationIntegrationTest extends AbstractIntegrationTest {
 
     @Test
+    @Order(1)
     void allAuthors() {
         graphQlTester
                 .documentName("allAuthors")
@@ -33,6 +38,7 @@ class GQLApplicationIntegrationTest extends AbstractIntegrationTest {
                 .hasSize(4);
     }
 
+    @Order(2)
     @ParameterizedTest
     @CsvSource({
         "user1@example.com, first name1, last name1, Title1",
@@ -67,6 +73,7 @@ class GQLApplicationIntegrationTest extends AbstractIntegrationTest {
                 .hasSize(3);
     }
 
+    @Order(3)
     @Test
     void createAuthor() {
         Map<String, Object> inputValues = new HashMap<>();
@@ -94,6 +101,7 @@ class GQLApplicationIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @Order(4)
     void createPost() {
         Map<String, Object> inputValues = new HashMap<>();
         inputValues.put("title", "JunitTitle");
@@ -129,6 +137,8 @@ class GQLApplicationIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @Order(5)
+    // adding ordering to make sure others are not failed
     void addCommentToPost() {
         PostCommentRequest postCommentRequest =
                 new PostCommentRequest("JunitTitle", "JunitContent", 1L, true);
