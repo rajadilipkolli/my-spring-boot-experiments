@@ -8,6 +8,7 @@ import com.example.locks.model.request.MovieRequest;
 import com.example.locks.model.response.MovieResponse;
 import com.example.locks.model.response.PagedResult;
 import com.example.locks.repositories.ActorRepository;
+import com.example.locks.repositories.GenreRepository;
 import com.example.locks.repositories.MovieRepository;
 import com.example.locks.repositories.ReviewRepository;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +30,7 @@ public class MovieService {
     private final MovieRepository movieRepository;
     private final ActorRepository actorRepository;
     private final ReviewRepository reviewRepository;
+    private final GenreRepository genreRepository;
     private final JpaLocksMapper jpaLocksMapper;
 
     public PagedResult<MovieResponse> findAllMovies(FindMoviesQuery findMoviesQuery) {
@@ -61,6 +63,7 @@ public class MovieService {
         Movie movie = jpaLocksMapper.movieRequestToMovieEntity(movieRequest);
         actorRepository.saveAll(movie.getActors());
         reviewRepository.saveAll(movie.getReviews());
+        genreRepository.saveAll(movie.getGenres());
         Movie savedMovie = movieRepository.save(movie);
         return jpaLocksMapper.movieToMovieResponse(savedMovie);
     }

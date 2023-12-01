@@ -1,10 +1,14 @@
 package com.example.locks.entities;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.List;
 
 @Entity
+@Getter
+@Setter
 @Table(name = "genre")
 public class Genre {
 

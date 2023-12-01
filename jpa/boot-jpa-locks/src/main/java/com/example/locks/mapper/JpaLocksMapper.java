@@ -1,6 +1,7 @@
 package com.example.locks.mapper;
 
 import com.example.locks.entities.Actor;
+import com.example.locks.entities.Genre;
 import com.example.locks.entities.Movie;
 import com.example.locks.entities.Review;
 import com.example.locks.model.request.MovieRequest;
@@ -21,6 +22,8 @@ public interface JpaLocksMapper {
             a.setMovies(List.of(movie));
         for (Review r : movie.getReviews())
             r.setMovie(movie);
+        for (Genre g : movie.getGenres())
+            g.setMovies(List.of(movie));
         return movie;
     }
 
