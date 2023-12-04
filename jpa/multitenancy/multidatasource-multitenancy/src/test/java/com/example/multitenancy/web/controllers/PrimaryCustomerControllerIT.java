@@ -12,20 +12,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.example.multitenancy.common.AbstractIntegrationTest;
-import com.example.multitenancy.config.multitenant.TenantIdentifierResolver;
 import com.example.multitenancy.primary.entities.PrimaryCustomer;
-import com.example.multitenancy.primary.repositories.PrimaryCustomerRepository;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 
 class PrimaryCustomerControllerIT extends AbstractIntegrationTest {
-
-    @Autowired private PrimaryCustomerRepository primaryCustomerRepository;
-    @Autowired private TenantIdentifierResolver tenantIdentifierResolver;
 
     private List<PrimaryCustomer> primaryCustomerList = null;
 
