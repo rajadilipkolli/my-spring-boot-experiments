@@ -1,6 +1,7 @@
 package com.example.opensearch.web.controllers;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.closeTo;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -190,24 +191,19 @@ class SearchControllerIT extends AbstractIntegrationTest {
     }
 
     @Test
-    @Disabled
     void testSearchWildCardBorough() throws Exception {
         this.mockMvc
                 .perform(get("/search/wildcard/borough").param("query", "ines"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.size()", is(2)))
-                .andExpect(jsonPath("$.totalElements", is(2)))
+                .andExpect(jsonPath("$.data.size()", is(1)))
+                .andExpect(jsonPath("$.totalElements", is(1)))
                 .andExpect(jsonPath("$.pageNumber", is(1)))
                 .andExpect(jsonPath("$.totalPages", is(1)))
                 .andExpect(jsonPath("$.isFirst", is(true)))
                 .andExpect(jsonPath("$.isLast", is(true)))
                 .andExpect(jsonPath("$.hasNext", is(false)))
                 .andExpect(jsonPath("$.hasPrevious", is(false)))
-                .andExpect(jsonPath("$.data[0].content.id", is("2"))) // Check the first item's "id"
-                .andExpect(
-                        jsonPath(
-                                "$.data[1].content.id",
-                                is("40363920"))); // Check the second item's "id"
+                .andExpect(jsonPath("$.data[0].content.id", is("40363920")));
     }
 
     @Test
@@ -325,27 +321,18 @@ class SearchControllerIT extends AbstractIntegrationTest {
     }
 
     @Test
-    @Disabled
     void searchRestaurantsWithInRange() throws Exception {
         this.mockMvc
                 .perform(
                         get("/search/restaurant/withInRange")
-                                .param("lat", "40.8")
+                                .param("lat", "40.75")
                                 .param("lon", "-73.9")
                                 .param("distance", "50"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.size()", is(2)))
-                .andExpect(jsonPath("$.totalElements", is(2)))
-                .andExpect(jsonPath("$.pageNumber", is(1)))
-                .andExpect(jsonPath("$.totalPages", is(1)))
-                .andExpect(jsonPath("$.isFirst", is(true)))
-                .andExpect(jsonPath("$.isLast", is(true)))
-                .andExpect(jsonPath("$.hasNext", is(false)))
-                .andExpect(jsonPath("$.hasPrevious", is(false)))
-                .andExpect(jsonPath("$.data[0].content.id", is("2"))) // Check the first item's "id"
-                .andExpect(
-                        jsonPath(
-                                "$.data[1].content.id",
-                                is("40363920"))); // Check the second item's "id"
+                .andExpect(jsonPath("$.size()", is(1)))
+                .andExpect(jsonPath("$[0].name", is("Lb Spumoni Gardens")))
+                .andExpect(jsonPath("$[0].dist", is(5.559751998519038)))
+                .andExpect(jsonPath("$[0].location.x", is(closeTo(-73.9, 0.001))))
+                .andExpect(jsonPath("$[0].location.y", is(closeTo(40.8, 0.001))));
     }
 }
