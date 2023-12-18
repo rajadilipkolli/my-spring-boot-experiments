@@ -26,8 +26,10 @@ class PostControllerIT extends AbstractIntegrationTest {
     }
 
     @AfterEach
-    public void teardown() {
-        wireMockServer.stop();
+    public void tearDown() {
+        if (wireMockServer != null) {
+            wireMockServer.stop();
+        }
     }
 
     @Test
