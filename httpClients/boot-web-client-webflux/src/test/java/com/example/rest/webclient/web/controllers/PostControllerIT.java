@@ -1,6 +1,7 @@
 package com.example.rest.webclient.web.controllers;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static org.hamcrest.Matchers.is;
 
 import com.example.rest.webclient.common.AbstractIntegrationTest;
 import com.example.rest.webclient.model.PostDto;
@@ -69,5 +70,34 @@ class PostControllerIT extends AbstractIntegrationTest {
                 .verifyComplete();
 
         wireMockServer.verify(getRequestedFor(urlEqualTo("/posts")));
+    }
+
+    @Test
+    void shouldFindPostById() throws JsonProcessingException {
+        Long postId = 1L;
+        PostDto post = new PostDto(postId, "text 1", 1L, "First Body");
+
+        wireMockServer.stubFor(
+                get(urlEqualTo("/posts/1"))
+                        .willReturn(
+                                aResponse()
+                                        .withHeader(
+                                                HttpHeaders.CONTENT_TYPE,
+                                                MediaType.APPLICATION_JSON_VALUE)
+                                        .withBody(this.objectMapper.writeValueAsString(post))));
+
+        this.webTestClient
+                .get()
+                .uri("/api/posts/{id}", postId)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(PostDto.class)
+                .value(PostDto::title, is(post.title()))
+                .value(PostDto::body, is(post.body()))
+                .value(PostDto::id, is(post.id()))
+                .value(PostDto::userId, is(post.userId()));
+
+        wireMockServer.verify(getRequestedFor(urlEqualTo("/posts/1")));
     }
 }

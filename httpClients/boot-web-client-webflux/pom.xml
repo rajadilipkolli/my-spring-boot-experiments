@@ -95,25 +95,12 @@
         </dependency>
         <dependency>
             <groupId>org.wiremock</groupId>
-            <artifactId>wiremock</artifactId>
+            <artifactId>wiremock-standalone</artifactId>
             <version>3.3.1</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
     
-    <!-- Once wiremock supports Jetty 12+, remove this. Added this as a workaround-->
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>org.eclipse.jetty</groupId>
-                <artifactId>jetty-bom</artifactId>
-                <version>11.0.19</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
-
     <build>
         <plugins>
             <plugin>
