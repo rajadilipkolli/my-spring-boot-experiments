@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class MultiTenantConnectionProviderImpl
-        implements MultiTenantConnectionProvider, HibernatePropertiesCustomizer {
+        implements MultiTenantConnectionProvider<String>, HibernatePropertiesCustomizer {
 
     private final DataSource dataSource;
 
