@@ -11,16 +11,9 @@ public class DBContainerInitializer
         implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
     private static final PostgreSQLContainer<?> sqlContainer =
-            new PostgreSQLContainer<>("postgres:16.1-alpine")
-                    .withDatabaseName("integration-tests-db")
-                    .withUsername("username")
-                    .withPassword("password");
+            new PostgreSQLContainer<>("postgres:16.1-alpine");
 
-    private static final MariaDBContainer<?> mariaDBContainer =
-            new MariaDBContainer<>("mariadb")
-                    .withDatabaseName("integration-tests-db")
-                    .withUsername("username")
-                    .withPassword("password");
+    private static final MariaDBContainer<?> mariaDBContainer = new MariaDBContainer<>("mariadb");
 
     static {
         Startables.deepStart(sqlContainer, mariaDBContainer).join();
