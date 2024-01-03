@@ -39,3 +39,8 @@ dependencies {
 tasks.named('test') {
 	useJUnitPlatform()
 }
+
+tasks.named("bootBuildImage") {
+	environment["BP_HEALTH_CHECKER_ENABLED"] = "true"
+	buildpacks = ["urn:cnb:builder:paketo-buildpacks/java", "gcr.io/paketo-buildpacks/health-checker:latest"]
+}
