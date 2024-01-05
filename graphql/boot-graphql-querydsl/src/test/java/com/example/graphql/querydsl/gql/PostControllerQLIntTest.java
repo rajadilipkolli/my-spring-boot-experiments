@@ -39,7 +39,7 @@ class PostControllerQLIntTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void testCountPosts() {
+    void countPosts() {
         graphQlTester
                 .document(
                         """
@@ -54,7 +54,7 @@ class PostControllerQLIntTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void testCreatePost() {
+    void createPost() {
         Map<String, Object> inputValues = new HashMap<>();
         inputValues.put("title", "JunitTitle");
         inputValues.put("content", "JunitContent");
@@ -92,7 +92,7 @@ class PostControllerQLIntTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void testGetPostsByUserName() {
+    void getPostsByUserName() {
         graphQlTester
                 .documentName("getPostsByUserName")
                 .variable("name", "appUser")
@@ -122,7 +122,7 @@ class PostControllerQLIntTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void testAddTagsToPosts() {
+    void addTagsToPosts() {
         Map<String, Object> inputValues = new HashMap<>();
         inputValues.put("postId", postList.get(2).getId());
         inputValues.put("tagNames", List.of(new TagRequest("junit")));

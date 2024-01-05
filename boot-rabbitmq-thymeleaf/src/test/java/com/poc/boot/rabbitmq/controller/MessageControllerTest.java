@@ -32,7 +32,7 @@ class MessageControllerTest {
     @MockBean private OrderMessageSender orderMessageSender;
 
     @Test
-    void testHandleMessage() throws Exception {
+    void handleMessage() throws Exception {
 
         willDoNothing().given(this.orderMessageSender).sendOrder(MockObjectCreator.getOrder());
 
@@ -47,7 +47,7 @@ class MessageControllerTest {
     }
 
     @Test
-    void testHandleMessageThrowsException() throws Exception {
+    void handleMessageThrowsException() throws Exception {
         willThrow(
                         new JsonProcessingException("Exception") {
                             @Serial private static final long serialVersionUID = 1L;

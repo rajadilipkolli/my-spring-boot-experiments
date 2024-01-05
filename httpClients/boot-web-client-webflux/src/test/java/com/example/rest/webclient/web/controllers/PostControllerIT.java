@@ -21,20 +21,20 @@ class PostControllerIT extends AbstractIntegrationTest {
     private WireMockServer wireMockServer;
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         wireMockServer = new WireMockServer(9091);
         wireMockServer.start();
     }
 
     @AfterEach
-    public void tearDown() {
+    void tearDown() {
         if (wireMockServer != null) {
             wireMockServer.stop();
         }
     }
 
     @Test
-    void testFindAllPosts() throws JsonProcessingException {
+    void findAllPosts() throws JsonProcessingException {
         // Prepare mock data
         List<PostDto> mockPosts =
                 List.of(

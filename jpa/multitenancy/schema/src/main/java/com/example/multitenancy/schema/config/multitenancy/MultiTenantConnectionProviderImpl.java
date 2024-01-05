@@ -8,9 +8,11 @@ import lombok.RequiredArgsConstructor;
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.engine.jdbc.connections.spi.MultiTenantConnectionProvider;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernatePropertiesCustomizer;
+import org.springframework.boot.sql.init.dependency.DependsOnDatabaseInitialization;
 import org.springframework.stereotype.Component;
 
 @Component
+@DependsOnDatabaseInitialization
 @RequiredArgsConstructor
 public class MultiTenantConnectionProviderImpl
         implements MultiTenantConnectionProvider<String>, HibernatePropertiesCustomizer {

@@ -3,10 +3,12 @@ package com.example.multitenancy.db.config.multitenant;
 import java.util.HashMap;
 import javax.sql.DataSource;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.sql.init.dependency.DependsOnDatabaseInitialization;
 import org.springframework.jdbc.datasource.lookup.AbstractRoutingDataSource;
 import org.springframework.stereotype.Component;
 
 @Component
+@DependsOnDatabaseInitialization
 public class TenantRoutingDatasource extends AbstractRoutingDataSource {
 
     private final TenantIdentifierResolver tenantIdentifierResolver;

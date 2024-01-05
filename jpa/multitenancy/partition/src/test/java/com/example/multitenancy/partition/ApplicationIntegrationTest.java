@@ -48,7 +48,7 @@ class ApplicationIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void testSequenceCollision() throws Exception {
+    void sequenceCollision() throws Exception {
         long count = this.customerRepository.count();
         for (int i = 0; i < 153; i++) {
             Customer customer = new Customer(null, RandomStringUtils.randomAlphanumeric(10), null);

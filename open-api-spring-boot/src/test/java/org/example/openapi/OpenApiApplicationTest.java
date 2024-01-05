@@ -19,7 +19,7 @@ class OpenApiApplicationTest {
     @Autowired protected MockMvc mockMvc;
 
     @Test
-    void testLoadingSwagger() throws Exception {
+    void loadingSwagger() throws Exception {
         this.mockMvc.perform(get("/"))
             .andExpect(status().isFound());
     }

@@ -16,7 +16,7 @@ class ApplicationIntegrationTest extends AbstractIntegrationTest {
     private GraphQlTester graphQlTester;
 
     @Test
-    void test_query_all_customers() {
+    void query_all_customers() {
         this.graphQlTester
                 .document(
                         """
@@ -38,7 +38,7 @@ class ApplicationIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void test_query_customers_by_name() {
+    void query_customers_by_name() {
         this.graphQlTester
                 .document(
                         """
@@ -58,7 +58,7 @@ class ApplicationIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void test_query_insert() {
+    void query_insert() {
         String randomString = RandomStringUtils.randomAlphabetic(5);
         String query =
                 """

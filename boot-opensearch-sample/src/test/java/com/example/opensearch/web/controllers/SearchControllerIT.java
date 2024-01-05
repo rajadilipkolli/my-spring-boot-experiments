@@ -132,7 +132,7 @@ class SearchControllerIT extends AbstractIntegrationTest {
     }
 
     @Test
-    void testQueryBoolWithMust() throws Exception {
+    void queryBoolWithMust() throws Exception {
         this.mockMvc
                 .perform(
                         get("/search/must/bool")
@@ -176,7 +176,7 @@ class SearchControllerIT extends AbstractIntegrationTest {
     }
 
     @Test
-    void testSearchWildCardBoroughFail() throws Exception {
+    void searchWildCardBoroughFail() throws Exception {
         this.mockMvc
                 .perform(get("/search/wildcard/borough").param("query", "Spumoni"))
                 .andExpect(status().isOk())
@@ -191,7 +191,7 @@ class SearchControllerIT extends AbstractIntegrationTest {
     }
 
     @Test
-    void testSearchWildCardBorough() throws Exception {
+    void searchWildCardBorough() throws Exception {
         this.mockMvc
                 .perform(get("/search/wildcard/borough").param("query", "ines"))
                 .andExpect(status().isOk())

@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.sql.init.dependency.DependsOnDatabaseInitialization;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -38,6 +39,7 @@ public class MultiDatasourceConfig {
     }
 
     @Bean
+    @DependsOnDatabaseInitialization
     SpringLiquibase primaryLiquibase(
             @Qualifier("primaryDataSource") DataSource primaryDataSource,
             @Qualifier("primaryLiquibaseProperties")
@@ -66,6 +68,7 @@ public class MultiDatasourceConfig {
     }
 
     @Bean
+    @DependsOnDatabaseInitialization
     SpringLiquibase secondaryLiquibase(
             @Qualifier("secondaryDataSource") DataSource secondaryDataSource,
             @Qualifier("secondaryLiquibaseProperties")

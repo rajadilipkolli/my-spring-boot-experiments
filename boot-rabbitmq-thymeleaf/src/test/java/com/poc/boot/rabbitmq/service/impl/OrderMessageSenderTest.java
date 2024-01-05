@@ -31,7 +31,7 @@ class OrderMessageSenderTest {
     @InjectMocks private OrderMessageSenderImpl orderMessageSender;
 
     @Test
-    void testSendOrder() throws JsonProcessingException {
+    void sendOrder() throws JsonProcessingException {
         String convertedString =
                 """
                 {"orderNumber":"1","productId":"P1",\
@@ -57,7 +57,7 @@ class OrderMessageSenderTest {
     }
 
     @Test
-    void testSendOrderException() throws Exception {
+    void sendOrderException() throws Exception {
         given(this.objectMapper.writeValueAsString(MockObjectCreator.getOrder()))
                 .willThrow(
                         new JsonProcessingException("Exception") {

@@ -31,7 +31,7 @@ class BootRestClientApplicationTests {
     private MockRestServiceServer mockServer;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         mockServer = MockRestServiceServer.bindTo(builder).ignoreExpectOrder(true).build();
     }
 

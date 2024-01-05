@@ -14,7 +14,7 @@ class ResponseDtoJsonTest {
     @Autowired private JacksonTester<ResponseDto> json;
 
     @Test
-    void testSerialize() throws Exception {
+    void serialize() throws Exception {
 
         ResponseDto responseDto = new ResponseDto("1", "1234-5678-9012-3456", "raja");
 
@@ -30,7 +30,7 @@ class ResponseDtoJsonTest {
     }
 
     @Test
-    void testDeserialize() throws Exception {
+    void deserialize() throws Exception {
 
         String jsonContent =
                 """

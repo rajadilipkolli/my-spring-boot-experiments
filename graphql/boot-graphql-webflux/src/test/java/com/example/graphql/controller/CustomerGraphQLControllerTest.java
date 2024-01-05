@@ -26,7 +26,7 @@ class CustomerGraphQLControllerTest {
     private CustomerGraphQLService customerGraphQLService;
 
     @Test
-    void test_query_all_customers() {
+    void query_all_customers() {
         Customer customer = new Customer(1, "junit");
         given(customerGraphQLService.findAllCustomers()).willReturn(Flux.just(customer));
         given(customerGraphQLService.findAllOrdersByCustomers(List.of(customer)))

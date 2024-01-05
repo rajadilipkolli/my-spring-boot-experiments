@@ -38,7 +38,7 @@ class RabbitMQIntegrationTest {
     }
 
     @Test
-    void testSendingMessage() throws Exception {
+    void sendingMessage() throws Exception {
         Order order = new Order("1", "P1", 10d);
         long count = trackingStateRepository.countByStatus("processed");
         mockMvc.perform(
@@ -58,7 +58,7 @@ class RabbitMQIntegrationTest {
     }
 
     @Test
-    void testSendingFailedMessage() throws Exception {
+    void sendingFailedMessage() throws Exception {
         long count = trackingStateRepository.countByStatus("processed");
         Order order = new Order("2", "P2", -10d);
         mockMvc.perform(post("/sendMsg").flashAttr("order", order))

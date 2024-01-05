@@ -21,3 +21,6 @@ spring:
     open-in-view: false
     hibernate:
       ddl-auto: validate
+  threads:
+    virtual:
+      enabled: true
