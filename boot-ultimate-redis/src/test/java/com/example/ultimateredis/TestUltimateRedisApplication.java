@@ -15,7 +15,7 @@ class TestUltimateRedisApplication {
     @ServiceConnection(name = "redis")
     GenericContainer<?> redisContainer(DynamicPropertyRegistry dynamicPropertyRegistry) {
         GenericContainer redisContiner =
-                new GenericContainer<>(DockerImageName.parse("redis").withTag("7.2.3-alpine"))
+                new GenericContainer<>(DockerImageName.parse("redis").withTag("7.2.4-alpine"))
                         .withExposedPorts(6379);
         dynamicPropertyRegistry.add("cache.redis-port", () -> redisContiner.getMappedPort(6379));
         dynamicPropertyRegistry.add("cache.redis-host", redisContiner::getHost);
