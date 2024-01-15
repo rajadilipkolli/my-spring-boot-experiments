@@ -34,7 +34,7 @@ class ApplicationIntegrationTest extends AbstractIntegrationTest {
                 .path("customers[*]")
                 .hasValue()
                 .entityList(CustomerDTO.class)
-                .hasSizeGreaterThan(4);
+                .hasSize(4);
     }
 
     @Test
