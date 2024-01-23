@@ -16,7 +16,7 @@
 
     <properties>
         <java.version>21</java.version>
-        <spotless.version>2.42.0</spotless.version>
+        <spotless.version>2.43.0</spotless.version>
         <commons-io.version>2.15.1</commons-io.version>
     </properties>
 
