@@ -19,30 +19,34 @@ public class LoggingAspect {
 
     private final Logger log = LoggerFactory.getLogger(this.getClass());
 
-    private final Environment env;
+    private final Environment environment;
 
-    public LoggingAspect(Environment env) {
-        this.env = env;
+    public LoggingAspect(Environment environment) {
+        this.environment = environment;
     }
 
     @Pointcut(
-            "within(@org.springframework.stereotype.Repository *)"
-                    + " || within(@org.springframework.stereotype.Service *)"
-                    + " || within(@org.springframework.web.bind.annotation.RestController *)")
+            """
+            within(@org.springframework.stereotype.Repository *)
+             || within(@org.springframework.stereotype.Service *)
+             || within(@org.springframework.web.bind.annotation.RestController *)
+            """)
     public void springBeanPointcut() {
         // pointcut definition
     }
 
     @Pointcut(
-            "@within(com.example.bootbatchjpa.config.logging.Loggable) || "
-                    + "@annotation(com.example.bootbatchjpa.config.logging.Loggable)")
+            """
+            @within(com.example.bootbatchjpa.config.logging.Loggable)
+             || @annotation(com.example.bootbatchjpa.config.logging.Loggable)
+            """)
     public void applicationPackagePointcut() {
         // pointcut definition
     }
 
     @AfterThrowing(pointcut = "applicationPackagePointcut()", throwing = "e")
     public void logAfterThrowing(JoinPoint joinPoint, Throwable e) {
-        if (env.acceptsProfiles(Profiles.of(AppConstants.PROFILE_NOT_PROD))) {
+        if (environment.acceptsProfiles(Profiles.of(AppConstants.PROFILE_NOT_PROD))) {
             log.error(
                     "Exception in {}.{}() with cause = '{}' and exception = '{}'",
                     joinPoint.getSignature().getDeclaringTypeName(),
