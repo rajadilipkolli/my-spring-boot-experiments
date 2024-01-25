@@ -36,9 +36,9 @@ class ActorControllerIT extends AbstractIntegrationTest {
         actorRepository.deleteAll();
 
         actorList = new ArrayList<>();
-        actorList.add(new Actor(null, "First Actor", LocalDate.now()));
-        actorList.add(new Actor(null, "Second Actor", LocalDate.now()));
-        actorList.add(new Actor(null, "Third Actor", LocalDate.now()));
+        actorList.add(new Actor().setName("First Actor").setCreatedOn(LocalDate.now()));
+        actorList.add(new Actor().setName("Second Actor").setCreatedOn(LocalDate.now()));
+        actorList.add(new Actor().setName("Third Actor").setCreatedOn(LocalDate.now()));
         actorList = actorRepository.saveAll(actorList);
     }
 
@@ -62,7 +62,7 @@ class ActorControllerIT extends AbstractIntegrationTest {
                         .getResponse()
                         .getContentAsString();
 
-        PagedResult pagedResult = objectMapper.readValue(contentAsString, PagedResult.class);
+        PagedResult<Actor> pagedResult = objectMapper.readValue(contentAsString, PagedResult.class);
 
         this.mockMvc
                 .perform(
@@ -99,15 +99,15 @@ class ActorControllerIT extends AbstractIntegrationTest {
                                         """
                                 [
                                   {
-                                    "kind": "EQ",
+                                    "queryOperator": "EQ",
                                     "field": "createdOn",
                                     "values": [
                                       "%s"
                                     ]
                                   },
                                   {
-                                    "kind": "ENDS_WITH",
-                                    "field": "title",
+                                    "queryOperator": "ENDS_WITH",
+                                    "field": "name",
                                     "values": [
                                       "Actor"
                                     ]
@@ -137,7 +137,7 @@ class ActorControllerIT extends AbstractIntegrationTest {
                 .perform(get("/api/actors/{id}", actorId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(actor.getId()), Long.class))
-                .andExpect(jsonPath("$.text", is(actor.getText())));
+                .andExpect(jsonPath("$.name", is(actor.getName())));
     }
 
     @Test
@@ -151,7 +151,7 @@ class ActorControllerIT extends AbstractIntegrationTest {
                 .andExpect(status().isCreated())
                 .andExpect(header().exists(HttpHeaders.LOCATION))
                 .andExpect(jsonPath("$.id", notNullValue()))
-                .andExpect(jsonPath("$.text", is(actorRequest.text())));
+                .andExpect(jsonPath("$.name", is(actorRequest.name())));
     }
 
     @Test
@@ -171,8 +171,8 @@ class ActorControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.detail", is("Invalid request content.")))
                 .andExpect(jsonPath("$.instance", is("/api/actors")))
                 .andExpect(jsonPath("$.violations", hasSize(1)))
-                .andExpect(jsonPath("$.violations[0].field", is("text")))
-                .andExpect(jsonPath("$.violations[0].message", is("Text cannot be empty")))
+                .andExpect(jsonPath("$.violations[0].field", is("name")))
+                .andExpect(jsonPath("$.violations[0].message", is("Name cannot be blank")))
                 .andReturn();
     }
 
@@ -188,7 +188,7 @@ class ActorControllerIT extends AbstractIntegrationTest {
                                 .content(objectMapper.writeValueAsString(actorRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(actorId), Long.class))
-                .andExpect(jsonPath("$.text", is(actorRequest.text())));
+                .andExpect(jsonPath("$.name", is(actorRequest.name())));
     }
 
     @Test
@@ -199,6 +199,6 @@ class ActorControllerIT extends AbstractIntegrationTest {
                 .perform(delete("/api/actors/{id}", actor.getId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(actor.getId()), Long.class))
-                .andExpect(jsonPath("$.text", is(actor.getText())));
+                .andExpect(jsonPath("$.name", is(actor.getName())));
     }
 }

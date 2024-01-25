@@ -70,7 +70,7 @@ class ActorControllerTest {
 
             mockMvc.perform(get("/api/actors/{id}", actorId))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.text", is(actor.text())));
+                    .andExpect(jsonPath("$.name", is(actor.name())));
         }
 
         @Test
@@ -114,7 +114,7 @@ class ActorControllerTest {
                     .andExpect(status().isCreated())
                     .andExpect(header().exists(HttpHeaders.LOCATION))
                     .andExpect(jsonPath("$.id", notNullValue()))
-                    .andExpect(jsonPath("$.text", is(actor.text())));
+                    .andExpect(jsonPath("$.name", is(actor.name())));
         }
 
         @Test
@@ -133,8 +133,8 @@ class ActorControllerTest {
                     .andExpect(jsonPath("$.detail", is("Invalid request content.")))
                     .andExpect(jsonPath("$.instance", is("/api/actors")))
                     .andExpect(jsonPath("$.violations", hasSize(1)))
-                    .andExpect(jsonPath("$.violations[0].field", is("text")))
-                    .andExpect(jsonPath("$.violations[0].message", is("Text cannot be empty")))
+                    .andExpect(jsonPath("$.violations[0].field", is("name")))
+                    .andExpect(jsonPath("$.violations[0].message", is("Name cannot be blank")))
                     .andReturn();
         }
     }
@@ -155,7 +155,7 @@ class ActorControllerTest {
                                     .content(objectMapper.writeValueAsString(actorRequest)))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.id", is(actorId), Long.class))
-                    .andExpect(jsonPath("$.text", is(actor.text())));
+                    .andExpect(jsonPath("$.name", is(actor.name())));
         }
 
         @Test
@@ -199,7 +199,7 @@ class ActorControllerTest {
 
             mockMvc.perform(delete("/api/actors/{id}", actorId))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.text", is(actor.text())));
+                    .andExpect(jsonPath("$.name", is(actor.name())));
         }
 
         @Test
@@ -230,7 +230,7 @@ class ActorControllerTest {
                 .map(
                         actor ->
                                 new ActorResponse(
-                                        actor.getId(), actor.getText(), actor.getCreatedOn()))
+                                        actor.getId(), actor.getName(), actor.getCreatedOn()))
                 .toList();
     }
 }

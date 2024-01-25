@@ -38,7 +38,7 @@ class ActorServiceTest {
         assertThat(optionalActor).isPresent();
         ActorResponse actor = optionalActor.get();
         assertThat(actor.id()).isEqualTo(1L);
-        assertThat(actor.text()).isEqualTo("junitTest");
+        assertThat(actor.name()).isEqualTo("junitTest");
     }
 
     @Test
@@ -54,7 +54,7 @@ class ActorServiceTest {
     private Actor getActor() {
         Actor actor = new Actor();
         actor.setId(1L);
-        actor.setText("junitTest");
+        actor.setName("junitTest");
         actor.setCreatedOn(LocalDate.now());
         return actor;
     }

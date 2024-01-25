@@ -8,13 +8,13 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class ActorsFilter {
+public class SearchCriteria {
 
-    private Kind kind;
+    private QueryOperator queryOperator;
     private String field;
     private List<String> values;
 
-    public ActorsFilter() {}
+    public SearchCriteria() {}
 
     @JsonIgnore
     public String getValue() {
@@ -64,14 +64,16 @@ public class ActorsFilter {
         values.set(1, high);
     }
 
-    public enum Kind {
+    public enum QueryOperator {
         EQ,
+        NE,
         LT,
         GT,
         GTE,
         LTE,
         BETWEEN,
         IN,
+        LIKE,
         CONTAINS,
         STARTS_WITH,
         ENDS_WITH

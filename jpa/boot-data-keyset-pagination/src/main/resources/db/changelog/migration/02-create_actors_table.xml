@@ -4,7 +4,7 @@
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
-         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.23.xsd">
 
     <property  name="string.type"  value="varchar(255)"  dbms="!postgresql"/>
     <property  name="string.type"  value="text"  dbms="postgresql"/>
@@ -19,7 +19,7 @@
             <column name="id" type="bigint" defaultValueSequenceNext="actors_seq">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
-            <column name="text" type="${string.type}">
+            <column name="name" type="${string.type}">
                 <constraints nullable="false" unique="true"/>
             </column>
             <column name="created_on" type="date">

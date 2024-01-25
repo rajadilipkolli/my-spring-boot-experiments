@@ -1,8 +1,8 @@
 package com.example.keysetpagination.web.controllers;
 
 import com.example.keysetpagination.exception.ActorNotFoundException;
-import com.example.keysetpagination.model.query.ActorsFilter;
 import com.example.keysetpagination.model.query.FindActorsQuery;
+import com.example.keysetpagination.model.query.SearchCriteria;
 import com.example.keysetpagination.model.request.ActorRequest;
 import com.example.keysetpagination.model.response.ActorResponse;
 import com.example.keysetpagination.model.response.PagedResult;
@@ -62,12 +62,12 @@ public class ActorController {
                     String sortDir,
             @RequestParam(required = false) Long lowest,
             @RequestParam(required = false) Long highest,
-            @RequestBody ActorsFilter[] actorsFilters) {
+            @RequestBody SearchCriteria[] searchCriteria) {
 
         FindActorsQuery findActorsQuery =
                 new FindActorsQuery(pageNo, pageSize, lowest, highest, sortBy, sortDir);
 
-        return actorService.findAll(actorsFilters, findActorsQuery);
+        return actorService.findAll(searchCriteria, findActorsQuery);
     }
 
     @GetMapping("/{id}")

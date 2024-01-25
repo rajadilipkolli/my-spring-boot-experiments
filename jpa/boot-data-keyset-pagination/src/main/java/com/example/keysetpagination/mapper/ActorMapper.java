@@ -12,17 +12,17 @@ public class ActorMapper {
 
     public Actor toEntity(ActorRequest actorRequest) {
         Actor actor = new Actor();
-        actor.setText(actorRequest.text());
+        actor.setName(actorRequest.name());
         actor.setCreatedOn(LocalDate.now());
         return actor;
     }
 
     public void mapActorWithRequest(Actor actor, ActorRequest actorRequest) {
-        actor.setText(actorRequest.text());
+        actor.setName(actorRequest.name());
     }
 
     public ActorResponse toResponse(Actor actor) {
-        return new ActorResponse(actor.getId(), actor.getText(), actor.getCreatedOn());
+        return new ActorResponse(actor.getId(), actor.getName(), actor.getCreatedOn());
     }
 
     public List<ActorResponse> toResponseList(List<Actor> actorList) {

@@ -11,13 +11,11 @@ import java.util.Objects;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import org.hibernate.Hibernate;
 
 @Entity
 @Table(name = "actors")
 @Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class Actor {
@@ -27,10 +25,25 @@ public class Actor {
     private Long id;
 
     @Column(nullable = false, unique = true)
-    private String text;
+    private String name;
 
     @Column(name = "created_on", nullable = false)
     private LocalDate createdOn;
+
+    public Actor setId(Long id) {
+        this.id = id;
+        return this;
+    }
+
+    public Actor setName(String name) {
+        this.name = name;
+        return this;
+    }
+
+    public Actor setCreatedOn(LocalDate createdOn) {
+        this.createdOn = createdOn;
+        return this;
+    }
 
     @Override
     public boolean equals(Object o) {
