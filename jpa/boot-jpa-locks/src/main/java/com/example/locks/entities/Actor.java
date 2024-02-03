@@ -30,10 +30,6 @@ public class Actor {
     private String nationality;
 
     @ManyToMany(cascade = CascadeType.ALL)
-    @JoinTable(
-            name = "actor_movie",
-            joinColumns = @JoinColumn(name = "actor_id"),
-            inverseJoinColumns = @JoinColumn(name = "movie_id"))
     private List<Movie> movies;
 
     @Override

@@ -61,9 +61,6 @@ public class MovieService {
     @Transactional
     public MovieResponse saveMovie(MovieRequest movieRequest) {
         Movie movie = jpaLocksMapper.movieRequestToMovieEntity(movieRequest);
-        actorRepository.saveAll(movie.getActors());
-        reviewRepository.saveAll(movie.getReviews());
-        genreRepository.saveAll(movie.getGenres());
         Movie savedMovie = movieRepository.save(movie);
         return jpaLocksMapper.movieToMovieResponse(savedMovie);
     }
