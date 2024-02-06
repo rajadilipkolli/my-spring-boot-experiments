@@ -1,17 +1,15 @@
 package com.example.locks.entities;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import java.util.Objects;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.Hibernate;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Table(name = "actors")
@@ -23,17 +21,23 @@ public class Actor {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
-    private Long id;
+    private Long actorId;
 
-    @Column(nullable = false)
-    private String text;
+    private String actorName;
+
+    private LocalDate dob;
+
+    private String nationality;
+
+    @ManyToMany(cascade = CascadeType.ALL)
+    private List<Movie> movies;
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
         Actor actor = (Actor) o;
-        return id != null && Objects.equals(id, actor.id);
+        return actorId != null && Objects.equals(actorId, actor.actorId);
     }
 
     @Override

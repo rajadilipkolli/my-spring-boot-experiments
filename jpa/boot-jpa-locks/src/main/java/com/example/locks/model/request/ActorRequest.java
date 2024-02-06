@@ -1,5 +1,6 @@
 package com.example.locks.model.request;
 
-import jakarta.validation.constraints.NotEmpty;
+import java.time.LocalDate;
 
-public record ActorRequest(@NotEmpty(message = "Text cannot be empty") String text) {}
+public record ActorRequest(String actorName, LocalDate dob, String nationality) {
+}
