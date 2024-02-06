@@ -16,12 +16,15 @@
                         startValue="1"
                         />
         <createTable tableName="movies">
-            <column name="id" type="bigint" defaultValueSequenceNext="movies_seq">
+            <column name="movie_id" type="bigint" defaultValueSequenceNext="movies_seq">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
-            <column name="text" type="${string.type}">
+            <column name="movie_title" type="${string.type}">
                 <constraints nullable="false"/>
             </column>
+            <column name="budget" type="java.math.BigDecimal"/>
+            <column name="release_date" type="date"/>
+            <column name="director_id" type="bigint"/>
         </createTable>
     </changeSet>
 </databaseChangeLog>

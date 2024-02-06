@@ -11,17 +11,19 @@
 
     <changeSet author="app" id="createTable-actors">
         <createSequence
-                        sequenceName="actors_seq"
-                        incrementBy="50"
-                        startValue="1"
-                        />
+                sequenceName="actors_seq"
+                incrementBy="50"
+                startValue="1"
+        />
         <createTable tableName="actors">
-            <column name="id" type="bigint" defaultValueSequenceNext="actors_seq">
+            <column name="actor_id" type="bigint" defaultValueSequenceNext="actors_seq">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
-            <column name="text" type="${string.type}">
+            <column name="actor_name" type="${string.type}">
                 <constraints nullable="false"/>
             </column>
+            <column name="nationality" type="${string.type}" />
+            <column name="dob" type="date" />
         </createTable>
     </changeSet>
 </databaseChangeLog>
