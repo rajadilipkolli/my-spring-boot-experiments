@@ -20,5 +20,7 @@
 
     <logger name="com.example.locks" level="DEBUG"/>
     <logger name="org.springframework" level="INFO"/>
+    <logger name="org.mapstruct" level="DEBUG" />
+
 
 </configuration>
