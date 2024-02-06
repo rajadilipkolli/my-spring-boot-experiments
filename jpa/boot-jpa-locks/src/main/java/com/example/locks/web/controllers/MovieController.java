@@ -36,7 +36,7 @@ public class MovieController {
     public PagedResult<MovieResponse> getAllMovies(
             @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_NUMBER, required = false) int pageNo,
             @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_SIZE, required = false) int pageSize,
-            @RequestParam(defaultValue = AppConstants.DEFAULT_SORT_BY, required = false) String sortBy,
+            @RequestParam(defaultValue = "movieId", required = false) String sortBy,
             @RequestParam(defaultValue = AppConstants.DEFAULT_SORT_DIRECTION, required = false) String sortDir) {
         FindMoviesQuery findMoviesQuery = new FindMoviesQuery(pageNo, pageSize, sortBy, sortDir);
         return movieService.findAllMovies(findMoviesQuery);

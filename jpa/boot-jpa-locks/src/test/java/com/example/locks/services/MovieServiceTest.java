@@ -1,6 +1,25 @@
-/*
 package com.example.locks.services;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.willDoNothing;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
+import com.example.locks.entities.Movie;
+import com.example.locks.mapper.JpaLocksMapper;
+import com.example.locks.model.response.MovieResponse;
+import com.example.locks.repositories.MovieRepository;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Optional;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class MovieServiceTest {
@@ -18,14 +37,14 @@ class MovieServiceTest {
     void findMovieById() {
         // given
         given(movieRepository.findById(1L)).willReturn(Optional.of(getMovie()));
-        given(movieMapper.toResponse(any(Movie.class))).willReturn(getMovieResponse());
+        given(movieMapper.movieToMovieResponse(any(Movie.class))).willReturn(getMovieResponse());
         // when
         Optional<MovieResponse> optionalMovie = movieService.findMovieById(1L);
         // then
         assertThat(optionalMovie).isPresent();
         MovieResponse movie = optionalMovie.get();
-        assertThat(movie.id()).isEqualTo(1L);
-        assertThat(movie.text()).isEqualTo("junitTest");
+        assertThat(movie.movieId()).isEqualTo(1L);
+        assertThat(movie.movieTitle()).isEqualTo("junitTest");
     }
 
     @Test
@@ -39,14 +58,18 @@ class MovieServiceTest {
     }
 
     private Movie getMovie() {
-        Movie movie = new Movie();
-        movie.setId(1L);
-        movie.setText("junitTest");
-        return movie;
+        return new Movie().setMovieId(1L).setMovieTitle("junitTest").setReleaseDate(LocalDate.of(2024, 12, 24));
     }
 
     private MovieResponse getMovieResponse() {
-        return new MovieResponse(1L, "junitTest");
+        return new MovieResponse(
+                1L,
+                "junitTest",
+                LocalDate.of(2024, 12, 24),
+                BigDecimal.TEN,
+                null,
+                new ArrayList<>(),
+                new ArrayList<>(),
+                new ArrayList<>());
     }
 }
-*/

@@ -1,6 +1,29 @@
-/*
 package com.example.locks.web.controllers;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.Matchers.hasSize;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import com.example.locks.common.AbstractIntegrationTest;
+import com.example.locks.entities.Movie;
+import com.example.locks.model.request.MovieRequest;
+import com.example.locks.repositories.MovieRepository;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 
 class MovieControllerIT extends AbstractIntegrationTest {
 
@@ -14,9 +37,9 @@ class MovieControllerIT extends AbstractIntegrationTest {
         movieRepository.deleteAllInBatch();
 
         movieList = new ArrayList<>();
-        movieList.add(new Movie(null, "First Movie"));
-        movieList.add(new Movie(null, "Second Movie"));
-        movieList.add(new Movie(null, "Third Movie"));
+        movieList.add(new Movie().setMovieTitle("First Movie"));
+        movieList.add(new Movie().setMovieTitle("Second Movie"));
+        movieList.add(new Movie().setMovieTitle("Third Movie"));
         movieList = movieRepository.saveAll(movieList);
     }
 
@@ -38,61 +61,75 @@ class MovieControllerIT extends AbstractIntegrationTest {
     @Test
     void shouldFindMovieById() throws Exception {
         Movie movie = movieList.getFirst();
-        Long movieId = movie.getId();
+        Long movieId = movie.getMovieId();
 
         this.mockMvc
                 .perform(get("/api/movies/{id}", movieId))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(movie.getId()), Long.class))
-                .andExpect(jsonPath("$.text", is(movie.getText())));
+                .andExpect(jsonPath("$.movieId", is(movie.getMovieId()), Long.class))
+                .andExpect(jsonPath("$.movieTitle", is(movie.getMovieTitle())));
     }
 
     @Test
     void shouldCreateNewMovie() throws Exception {
-        MovieRequest movieRequest = new MovieRequest("New Movie");
+        MovieRequest movieRequest = new MovieRequest(
+                "New Movie",
+                LocalDate.of(2024, 12, 24),
+                BigDecimal.TEN,
+                null,
+                new ArrayList<>(),
+                new ArrayList<>(),
+                new ArrayList<>());
         this.mockMvc
                 .perform(post("/api/movies")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(movieRequest)))
                 .andExpect(status().isCreated())
                 .andExpect(header().exists(HttpHeaders.LOCATION))
-                .andExpect(jsonPath("$.id", notNullValue()))
-                .andExpect(jsonPath("$.text", is(movieRequest.text())));
+                .andExpect(jsonPath("$.movieId", notNullValue()))
+                .andExpect(jsonPath("$.movieTitle", is(movieRequest.movieTitle())));
     }
 
     @Test
     void shouldReturn400WhenCreateNewMovieWithoutText() throws Exception {
-        MovieRequest movieRequest = new MovieRequest(null);
+        MovieRequest movieRequest = new MovieRequest(null, null, null, null, null, null, null);
 
         this.mockMvc
                 .perform(post("/api/movies")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(movieRequest)))
                 .andExpect(status().isBadRequest())
-                .andExpect(header().string("Content-Type", is("application/problem+json")))
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                 .andExpect(jsonPath("$.type", is("about:blank")))
                 .andExpect(jsonPath("$.title", is("Constraint Violation")))
                 .andExpect(jsonPath("$.status", is(400)))
                 .andExpect(jsonPath("$.detail", is("Invalid request content.")))
                 .andExpect(jsonPath("$.instance", is("/api/movies")))
                 .andExpect(jsonPath("$.violations", hasSize(1)))
-                .andExpect(jsonPath("$.violations[0].field", is("text")))
-                .andExpect(jsonPath("$.violations[0].message", is("Text cannot be empty")))
+                .andExpect(jsonPath("$.violations[0].field", is("movieTitle")))
+                .andExpect(jsonPath("$.violations[0].message", is("MovieTitle cant be Blank")))
                 .andReturn();
     }
 
     @Test
     void shouldUpdateMovie() throws Exception {
-        Long movieId = movieList.getFirst().getId();
-        MovieRequest movieRequest = new MovieRequest("Updated Movie");
+        Movie movie = movieList.getFirst();
+        MovieRequest movieRequest = new MovieRequest(
+                "Updated Movie",
+                movie.getReleaseDate(),
+                movie.getBudget(),
+                null,
+                new ArrayList<>(),
+                new ArrayList<>(),
+                new ArrayList<>());
 
         this.mockMvc
-                .perform(put("/api/movies/{id}", movieId)
+                .perform(put("/api/movies/{id}", movie.getMovieId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(movieRequest)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(movieId), Long.class))
-                .andExpect(jsonPath("$.text", is(movieRequest.text())));
+                .andExpect(jsonPath("$.movieId", is(movie.getMovieId()), Long.class))
+                .andExpect(jsonPath("$.movieTitle", is(movieRequest.movieTitle())));
     }
 
     @Test
@@ -100,10 +137,9 @@ class MovieControllerIT extends AbstractIntegrationTest {
         Movie movie = movieList.getFirst();
 
         this.mockMvc
-                .perform(delete("/api/movies/{id}", movie.getId()))
+                .perform(delete("/api/movies/{id}", movie.getMovieId()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(movie.getId()), Long.class))
-                .andExpect(jsonPath("$.text", is(movie.getText())));
+                .andExpect(jsonPath("$.movieId", is(movie.getMovieId()), Long.class))
+                .andExpect(jsonPath("$.movieTitle", is(movie.getMovieTitle())));
     }
 }
-*/

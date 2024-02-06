@@ -8,13 +8,11 @@ import java.util.Objects;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import org.hibernate.Hibernate;
 
 @Entity
 @Table(name = "movies")
 @Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class Movie {
@@ -36,15 +34,57 @@ public class Movie {
     @JoinColumn(name = "director_id")
     private Director director;
 
-    @ManyToMany(cascade = CascadeType.ALL)
+    @ManyToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     @JoinTable(
             name = "movie_genre",
             joinColumns = @JoinColumn(name = "movie_id"),
             inverseJoinColumns = @JoinColumn(name = "genre_id"))
     private List<Genre> genres;
 
-    @ManyToMany(mappedBy = "movies", cascade = CascadeType.ALL)
+    @ManyToMany(
+            mappedBy = "movies",
+            cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     private List<Actor> actors;
+
+    public Movie setMovieId(Long movieId) {
+        this.movieId = movieId;
+        return this;
+    }
+
+    public Movie setMovieTitle(String movieTitle) {
+        this.movieTitle = movieTitle;
+        return this;
+    }
+
+    public Movie setReleaseDate(LocalDate releaseDate) {
+        this.releaseDate = releaseDate;
+        return this;
+    }
+
+    public Movie setBudget(BigDecimal budget) {
+        this.budget = budget;
+        return this;
+    }
+
+    public Movie setReviews(List<Review> reviews) {
+        this.reviews = reviews;
+        return this;
+    }
+
+    public Movie setDirector(Director director) {
+        this.director = director;
+        return this;
+    }
+
+    public Movie setGenres(List<Genre> genres) {
+        this.genres = genres;
+        return this;
+    }
+
+    public Movie setActors(List<Actor> actors) {
+        this.actors = actors;
+        return this;
+    }
 
     @Override
     public boolean equals(Object o) {
