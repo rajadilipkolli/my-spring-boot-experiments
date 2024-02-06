@@ -17,7 +17,7 @@ import lombok.Setter;
 public class Director {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long directorId;
 
     private String directorName;

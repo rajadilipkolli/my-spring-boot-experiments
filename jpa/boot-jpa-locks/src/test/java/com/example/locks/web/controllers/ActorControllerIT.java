@@ -66,7 +66,7 @@ class ActorControllerIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(get("/api/actors/{id}", actorId))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(actor.getActorId()), Long.class))
+                .andExpect(jsonPath("$.actorId", is(actor.getActorId()), Long.class))
                 .andExpect(jsonPath("$.actorName", is(actor.getActorName())));
     }
 
@@ -80,7 +80,7 @@ class ActorControllerIT extends AbstractIntegrationTest {
                         .content(objectMapper.writeValueAsString(actorRequest)))
                 .andExpect(status().isCreated())
                 .andExpect(header().exists(HttpHeaders.LOCATION))
-                .andExpect(jsonPath("$.id", notNullValue()))
+                .andExpect(jsonPath("$.actorId", notNullValue()))
                 .andExpect(jsonPath("$.actorName", is(actorRequest.actorName())));
     }
 
@@ -115,7 +115,7 @@ class ActorControllerIT extends AbstractIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(actorRequest)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(actor.getActorId()), Long.class))
+                .andExpect(jsonPath("$.actorId", is(actor.getActorId()), Long.class))
                 .andExpect(jsonPath("$.actorName", is(actorRequest.actorName())));
     }
 
@@ -126,7 +126,7 @@ class ActorControllerIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(delete("/api/actors/{id}", actor.getActorId()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(actor.getActorId()), Long.class))
+                .andExpect(jsonPath("$.actorId", is(actor.getActorId()), Long.class))
                 .andExpect(jsonPath("$.actorName", is(actor.getActorName())));
     }
 }

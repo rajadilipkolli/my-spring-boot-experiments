@@ -13,7 +13,7 @@ import lombok.Setter;
 public class Review {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long reviewId;
 
     private Double rating;

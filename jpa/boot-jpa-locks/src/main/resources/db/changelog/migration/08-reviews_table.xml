@@ -4,7 +4,7 @@
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
-         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.23.xsd">
 
     <property  name="string.type"  value="varchar(255)"  dbms="!postgresql"/>
     <property  name="string.type"  value="text"  dbms="postgresql"/>
@@ -25,5 +25,9 @@
             <column name="rating" type="double" />
             <column name="movie_id" type="bigint"/>
         </createTable>
+        
+        <addForeignKeyConstraint baseTableName="reviews" baseColumnNames="movie_id" constraintName="FK_MOVIES_ID"
+                                 referencedTableName="movies"
+                                 referencedColumnNames="movie_id" />
     </changeSet>
 </databaseChangeLog>
