@@ -11,6 +11,8 @@ import com.example.locks.repositories.ActorRepository;
 import com.example.locks.repositories.GenreRepository;
 import com.example.locks.repositories.MovieRepository;
 import com.example.locks.repositories.ReviewRepository;
+import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -18,9 +20,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.Optional;
 
 @Service
 @Transactional(readOnly = true)
@@ -70,7 +69,8 @@ public class MovieService {
         Movie movie = movieRepository.findById(id).orElseThrow(() -> new MovieNotFoundException(id));
 
         // Save the updated movie object
-        Movie updatedMovie = movieRepository.save(jpaLocksMapper.movieRequestToMovieWithId(movieRequest, movie.getMovieId()));
+        Movie updatedMovie =
+                movieRepository.save(jpaLocksMapper.movieRequestToMovieWithId(movieRequest, movie.getMovieId()));
 
         return jpaLocksMapper.movieToMovieResponse(updatedMovie);
     }

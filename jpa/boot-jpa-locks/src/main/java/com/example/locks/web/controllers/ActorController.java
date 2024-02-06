@@ -1,8 +1,7 @@
 package com.example.locks.web.controllers;
 
-import com.example.locks.exception.MovieNotFoundException;
+import com.example.locks.exception.ActorNotFoundException;
 import com.example.locks.model.response.ActorResponse;
-import com.example.locks.model.response.MovieResponse;
 import com.example.locks.services.ActorService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

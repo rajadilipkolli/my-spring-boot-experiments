@@ -23,5 +23,4 @@ public class Review {
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "movie_id")
     private Movie movie;
-
 }

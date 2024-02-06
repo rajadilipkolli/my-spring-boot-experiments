@@ -1,22 +1,17 @@
 package com.example.locks.entities;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import org.hibernate.Hibernate;
-
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import org.hibernate.Hibernate;
 
 @Entity
 @Table(name = "actors")
 @Getter
-@Setter
 @NoArgsConstructor
-@AllArgsConstructor
 public class Actor {
 
     @Id
@@ -31,6 +26,31 @@ public class Actor {
 
     @ManyToMany(cascade = CascadeType.ALL)
     private List<Movie> movies;
+
+    public Actor setActorId(Long actorId) {
+        this.actorId = actorId;
+        return this;
+    }
+
+    public Actor setActorName(String actorName) {
+        this.actorName = actorName;
+        return this;
+    }
+
+    public Actor setDob(LocalDate dob) {
+        this.dob = dob;
+        return this;
+    }
+
+    public Actor setNationality(String nationality) {
+        this.nationality = nationality;
+        return this;
+    }
+
+    public Actor setMovies(List<Movie> movies) {
+        this.movies = movies;
+        return this;
+    }
 
     @Override
     public boolean equals(Object o) {

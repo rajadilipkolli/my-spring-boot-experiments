@@ -15,6 +15,7 @@ import com.example.locks.common.AbstractIntegrationTest;
 import com.example.locks.entities.Actor;
 import com.example.locks.model.request.ActorRequest;
 import com.example.locks.repositories.ActorRepository;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,9 +36,10 @@ class ActorControllerIT extends AbstractIntegrationTest {
         actorRepository.deleteAllInBatch();
 
         actorList = new ArrayList<>();
-        actorList.add(new Actor(null, "First Actor"));
-        actorList.add(new Actor(null, "Second Actor"));
-        actorList.add(new Actor(null, "Third Actor"));
+        actorList.add(
+                new Actor().setActorName("First Actor").setDob(LocalDate.now().minusYears(30)));
+        actorList.add(new Actor().setActorName("Second Actor").setNationality("Indian"));
+        actorList.add(new Actor().setActorName("Third Actor").setMovies(new ArrayList<>()));
         actorList = actorRepository.saveAll(actorList);
     }
 
@@ -59,18 +61,19 @@ class ActorControllerIT extends AbstractIntegrationTest {
     @Test
     void shouldFindActorById() throws Exception {
         Actor actor = actorList.getFirst();
-        Long actorId = actor.getId();
+        Long actorId = actor.getActorId();
 
         this.mockMvc
                 .perform(get("/api/actors/{id}", actorId))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(actor.getId()), Long.class))
-                .andExpect(jsonPath("$.text", is(actor.getText())));
+                .andExpect(jsonPath("$.id", is(actor.getActorId()), Long.class))
+                .andExpect(jsonPath("$.actorName", is(actor.getActorName())));
     }
 
     @Test
     void shouldCreateNewActor() throws Exception {
-        ActorRequest actorRequest = new ActorRequest("New Actor");
+        ActorRequest actorRequest =
+                new ActorRequest("New Actor", LocalDate.now().minusYears(50), "Indian");
         this.mockMvc
                 .perform(post("/api/actors")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -78,12 +81,12 @@ class ActorControllerIT extends AbstractIntegrationTest {
                 .andExpect(status().isCreated())
                 .andExpect(header().exists(HttpHeaders.LOCATION))
                 .andExpect(jsonPath("$.id", notNullValue()))
-                .andExpect(jsonPath("$.text", is(actorRequest.text())));
+                .andExpect(jsonPath("$.actorName", is(actorRequest.actorName())));
     }
 
     @Test
     void shouldReturn400WhenCreateNewActorWithoutText() throws Exception {
-        ActorRequest actorRequest = new ActorRequest(null);
+        ActorRequest actorRequest = new ActorRequest(null, null, null);
 
         this.mockMvc
                 .perform(post("/api/actors")
@@ -104,16 +107,16 @@ class ActorControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldUpdateActor() throws Exception {
-        Long actorId = actorList.getFirst().getId();
-        ActorRequest actorRequest = new ActorRequest("Updated Actor");
+        Actor actor = actorList.getFirst();
+        ActorRequest actorRequest = new ActorRequest("Updated Actor", actor.getDob(), actor.getNationality());
 
         this.mockMvc
-                .perform(put("/api/actors/{id}", actorId)
+                .perform(put("/api/actors/{id}", actor.getActorId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(actorRequest)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(actorId), Long.class))
-                .andExpect(jsonPath("$.text", is(actorRequest.text())));
+                .andExpect(jsonPath("$.id", is(actor.getActorId()), Long.class))
+                .andExpect(jsonPath("$.actorName", is(actorRequest.actorName())));
     }
 
     @Test
@@ -121,9 +124,9 @@ class ActorControllerIT extends AbstractIntegrationTest {
         Actor actor = actorList.getFirst();
 
         this.mockMvc
-                .perform(delete("/api/actors/{id}", actor.getId()))
+                .perform(delete("/api/actors/{id}", actor.getActorId()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(actor.getId()), Long.class))
-                .andExpect(jsonPath("$.text", is(actor.getText())));
+                .andExpect(jsonPath("$.id", is(actor.getActorId()), Long.class))
+                .andExpect(jsonPath("$.actorName", is(actor.getActorName())));
     }
 }

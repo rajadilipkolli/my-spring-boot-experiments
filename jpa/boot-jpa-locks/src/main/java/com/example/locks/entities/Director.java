@@ -1,13 +1,12 @@
 package com.example.locks.entities;
 
 import jakarta.persistence.*;
+import java.time.LocalDate;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.time.LocalDate;
-import java.util.List;
 
 @Entity
 @Table(name = "director")

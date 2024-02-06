@@ -7,10 +7,9 @@ import com.example.locks.entities.Review;
 import com.example.locks.model.request.MovieRequest;
 import com.example.locks.model.response.ActorResponse;
 import com.example.locks.model.response.MovieResponse;
-import org.mapstruct.Mapper;
-
 import java.util.List;
 import java.util.stream.Collectors;
+import org.mapstruct.Mapper;
 
 @Mapper
 public interface JpaLocksMapper {
@@ -19,12 +18,9 @@ public interface JpaLocksMapper {
 
     default Movie movieRequestToMovieEntity(MovieRequest movieRequest) {
         var movie = movieRequestToMovie(movieRequest);
-        for (Actor a : movie.getActors())
-            a.setMovies(List.of(movie));
-        for (Review r : movie.getReviews())
-            r.setMovie(movie);
-        for (Genre g : movie.getGenres())
-            g.setMovies(List.of(movie));
+        for (Actor a : movie.getActors()) a.setMovies(List.of(movie));
+        for (Review r : movie.getReviews()) r.setMovie(movie);
+        for (Genre g : movie.getGenres()) g.setMovies(List.of(movie));
         return movie;
     }
 
@@ -41,5 +37,4 @@ public interface JpaLocksMapper {
     }
 
     ActorResponse actorToActorResponse(Actor actor);
-
 }
