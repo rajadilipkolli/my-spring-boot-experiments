@@ -5,6 +5,7 @@ import com.example.locks.entities.Genre;
 import com.example.locks.entities.Movie;
 import com.example.locks.entities.Review;
 import com.example.locks.model.request.MovieRequest;
+import com.example.locks.model.response.ActorResponse;
 import com.example.locks.model.response.MovieResponse;
 import org.mapstruct.Mapper;
 
@@ -38,5 +39,7 @@ public interface JpaLocksMapper {
     default List<MovieResponse> moviesListToMovieResponseList(List<Movie> moviesList) {
         return moviesList.stream().map(this::movieToMovieResponse).collect(Collectors.toList());
     }
+
+    ActorResponse actorToActorResponse(Actor actor);
 
 }
