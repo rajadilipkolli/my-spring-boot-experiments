@@ -30,7 +30,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -66,12 +65,11 @@ class MovieControllerTest {
     }
 
     @Test
-    @Disabled
     void shouldFetchAllMovies() throws Exception {
 
         Page<Movie> page = new PageImpl<>(movieList);
         PagedResult<MovieResponse> moviePagedResult = new PagedResult<>(page, getMovieResponseList());
-        FindMoviesQuery findMoviesQuery = new FindMoviesQuery(0, 10, "movieTitle", "asc");
+        FindMoviesQuery findMoviesQuery = new FindMoviesQuery(0, 10, "movieId", "asc");
         given(movieService.findAllMovies(findMoviesQuery)).willReturn(moviePagedResult);
 
         this.mockMvc

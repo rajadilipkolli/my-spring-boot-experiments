@@ -2,7 +2,9 @@ package com.example.locks.web.controllers;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.in;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -12,9 +14,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.example.locks.common.AbstractIntegrationTest;
+import com.example.locks.entities.Director;
+import com.example.locks.entities.Genre;
 import com.example.locks.entities.Movie;
+import com.example.locks.model.request.DirectorRequest;
+import com.example.locks.model.request.GenreRequest;
 import com.example.locks.model.request.MovieRequest;
+import com.example.locks.model.request.ReviewRequest;
 import com.example.locks.repositories.MovieRepository;
+import com.example.locks.repositories.ReviewRepository;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -30,14 +38,21 @@ class MovieControllerIT extends AbstractIntegrationTest {
     @Autowired
     private MovieRepository movieRepository;
 
+    @Autowired
+    private ReviewRepository reviewRepository;
+
     private List<Movie> movieList = null;
 
     @BeforeEach
     void setUp() {
+        reviewRepository.deleteAllInBatch();
         movieRepository.deleteAllInBatch();
 
         movieList = new ArrayList<>();
-        movieList.add(new Movie().setMovieTitle("First Movie"));
+        movieList.add(new Movie()
+                .setMovieTitle("First Movie")
+                .setDirector(new Director(null, "First Director", LocalDate.now(), "indian", new ArrayList<>()))
+                .setGenres(List.of(new Genre().setGenreName("Comedy"))));
         movieList.add(new Movie().setMovieTitle("Second Movie"));
         movieList.add(new Movie().setMovieTitle("Third Movie"));
         movieList = movieRepository.saveAll(movieList);
@@ -76,10 +91,10 @@ class MovieControllerIT extends AbstractIntegrationTest {
                 "New Movie",
                 LocalDate.of(2024, 12, 24),
                 BigDecimal.TEN,
-                null,
+                new DirectorRequest("New Director", LocalDate.now().minusYears(50), "Indian"),
                 new ArrayList<>(),
-                new ArrayList<>(),
-                new ArrayList<>());
+                List.of(new ReviewRequest(5.0D, "Excellent"), new ReviewRequest(4.5D, "Super")),
+                List.of(new GenreRequest("Comedy")));
         this.mockMvc
                 .perform(post("/api/movies")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -87,11 +102,22 @@ class MovieControllerIT extends AbstractIntegrationTest {
                 .andExpect(status().isCreated())
                 .andExpect(header().exists(HttpHeaders.LOCATION))
                 .andExpect(jsonPath("$.movieId", notNullValue()))
-                .andExpect(jsonPath("$.movieTitle", is(movieRequest.movieTitle())));
+                .andExpect(jsonPath("$.movieTitle", is(movieRequest.movieTitle())))
+                .andExpect(
+                        jsonPath("$.releaseDate", is(LocalDate.of(2024, 12, 24).toString())))
+                .andExpect(jsonPath("$.director.directorName")
+                        .value(movieRequest.director().directorName()))
+                .andExpect(jsonPath("$.director.nationality")
+                        .value(movieRequest.director().nationality()))
+                .andExpect(jsonPath("$.actors", is(empty())))
+                .andExpect(jsonPath("$.reviews.size()", is(2)))
+                .andExpect(jsonPath("$.reviews[0].rating", is(in(new Double[] {5.0D, 4.5D}))))
+                .andExpect(jsonPath("$.reviews[1].rating", is(in(new Double[] {5.0D, 4.5D}))))
+                .andExpect(jsonPath("$.genres[0].genreName").value("Comedy"));
     }
 
     @Test
-    void shouldReturn400WhenCreateNewMovieWithoutText() throws Exception {
+    void shouldReturn400WhenCreateNewMovieWithoutTitle() throws Exception {
         MovieRequest movieRequest = new MovieRequest(null, null, null, null, null, null, null);
 
         this.mockMvc
@@ -118,7 +144,10 @@ class MovieControllerIT extends AbstractIntegrationTest {
                 "Updated Movie",
                 movie.getReleaseDate(),
                 movie.getBudget(),
-                null,
+                new DirectorRequest(
+                        movie.getDirector().getDirectorName(),
+                        movie.getDirector().getDob(),
+                        movie.getDirector().getNationality()),
                 new ArrayList<>(),
                 new ArrayList<>(),
                 new ArrayList<>());
@@ -129,7 +158,11 @@ class MovieControllerIT extends AbstractIntegrationTest {
                         .content(objectMapper.writeValueAsString(movieRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.movieId", is(movie.getMovieId()), Long.class))
-                .andExpect(jsonPath("$.movieTitle", is(movieRequest.movieTitle())));
+                .andExpect(jsonPath("$.movieTitle", is(movieRequest.movieTitle())))
+                .andExpect(jsonPath("$.director.directorName", is("First Director")))
+                .andExpect(jsonPath("$.actors", is(empty())))
+                .andExpect(jsonPath("$.reviews", is(empty())))
+                .andExpect(jsonPath("$.genres", is(empty())));
     }
 
     @Test

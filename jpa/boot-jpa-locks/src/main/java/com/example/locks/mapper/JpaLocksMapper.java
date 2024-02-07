@@ -11,11 +11,13 @@ import com.example.locks.model.response.MovieResponse;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
 @Mapper
 public interface JpaLocksMapper {
 
+    @Mapping(target = "movieId", ignore = true)
     Movie movieRequestToMovie(MovieRequest movieRequest);
 
     default Movie movieRequestToMovieEntity(MovieRequest movieRequest) {
@@ -26,11 +28,7 @@ public interface JpaLocksMapper {
         return movie;
     }
 
-    default Movie movieRequestToMovieWithId(MovieRequest movieRequest, Long movieId) {
-        var movie = movieRequestToMovie(movieRequest);
-        movie.setMovieId(movieId);
-        return movie;
-    }
+    Movie updateMovieRequestToMovie(MovieRequest movieRequest, @MappingTarget Movie movie);
 
     MovieResponse movieToMovieResponse(Movie movie);
 
@@ -42,6 +40,7 @@ public interface JpaLocksMapper {
 
     List<ActorResponse> actorToActorResponseList(List<Actor> actors);
 
+    @Mapping(target = "actorId", ignore = true)
     Actor toActorEntity(ActorRequest actorRequest);
 
     void mapActorWithRequest(ActorRequest actorRequest, @MappingTarget Actor actor);

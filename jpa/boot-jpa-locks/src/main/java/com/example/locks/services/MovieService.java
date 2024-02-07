@@ -7,10 +7,7 @@ import com.example.locks.model.query.FindMoviesQuery;
 import com.example.locks.model.request.MovieRequest;
 import com.example.locks.model.response.MovieResponse;
 import com.example.locks.model.response.PagedResult;
-import com.example.locks.repositories.ActorRepository;
-import com.example.locks.repositories.GenreRepository;
 import com.example.locks.repositories.MovieRepository;
-import com.example.locks.repositories.ReviewRepository;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -27,9 +24,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class MovieService {
 
     private final MovieRepository movieRepository;
-    private final ActorRepository actorRepository;
-    private final ReviewRepository reviewRepository;
-    private final GenreRepository genreRepository;
     private final JpaLocksMapper jpaLocksMapper;
 
     public PagedResult<MovieResponse> findAllMovies(FindMoviesQuery findMoviesQuery) {
@@ -69,8 +63,7 @@ public class MovieService {
         Movie movie = movieRepository.findById(id).orElseThrow(() -> new MovieNotFoundException(id));
 
         // Save the updated movie object
-        Movie updatedMovie =
-                movieRepository.save(jpaLocksMapper.movieRequestToMovieWithId(movieRequest, movie.getMovieId()));
+        Movie updatedMovie = movieRepository.save(jpaLocksMapper.updateMovieRequestToMovie(movieRequest, movie));
 
         return jpaLocksMapper.movieToMovieResponse(updatedMovie);
     }
