@@ -55,7 +55,8 @@ class PostDetailsEntityControllerIT extends AbstractIntegrationTest {
     @Test
     void shouldUpdatePostDetails() throws Exception {
 
-        PostDetailsRequest postDetailsRequest = new PostDetailsRequest("Updated PostDetails");
+        PostDetailsRequest postDetailsRequest =
+                new PostDetailsRequest("Updated PostDetails", "Junit");
 
         Long postDetailsId = post.getId();
         this.mockMvc

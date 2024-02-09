@@ -47,9 +47,12 @@ class PostEntityControllerTest {
 
     private List<PostResponse> postResponseList =
             List.of(
-                    new PostResponse(null, "First Post", false, null, null, null, null),
-                    new PostResponse(null, "Second Post", false, null, null, null, null),
-                    new PostResponse(null, "Third Post", false, null, null, null, null));
+                    new PostResponse(
+                            null, "First Post", false, null, null, null, null, new ArrayList<>()),
+                    new PostResponse(
+                            null, "Second Post", false, null, null, null, null, new ArrayList<>()),
+                    new PostResponse(
+                            null, "Third Post", false, null, null, null, null, new ArrayList<>()));
 
     @BeforeEach
     void setUp() {
@@ -112,7 +115,7 @@ class PostEntityControllerTest {
                         "First Post",
                         "junit1@email.com",
                         false,
-                        new PostDetailsRequest("detailsKey"),
+                        new PostDetailsRequest("detailsKey", "JunitCreatedBy"),
                         null);
         this.mockMvc
                 .perform(
@@ -156,10 +159,11 @@ class PostEntityControllerTest {
                         "Updated Content",
                         "junit1@email.com",
                         false,
-                        new PostDetailsRequest("detailsKey"),
+                        new PostDetailsRequest("detailsKey", "JunitCreatedBy"),
                         null);
         PostResponse value =
-                new PostResponse(null, "Updated Content", false, null, null, null, null);
+                new PostResponse(
+                        null, "Updated Content", false, null, null, null, null, new ArrayList<>());
         given(postService.updatePost(postId, postEntity)).willReturn(Optional.of(value));
 
         this.mockMvc

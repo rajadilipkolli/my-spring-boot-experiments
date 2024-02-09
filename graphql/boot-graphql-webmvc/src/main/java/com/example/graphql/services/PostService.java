@@ -47,7 +47,6 @@ public class PostService {
                 .map(post -> myConversionService.convert(post, PostResponse.class));
     }
 
-    @Transactional
     public PostResponse savePost(NewPostRequest newPostRequest) {
         return myConversionService.convert(createPost(newPostRequest), PostResponse.class);
     }
@@ -71,13 +70,14 @@ public class PostService {
         return this.postRepository.save(postEntity);
     }
 
+    @Transactional
     public Optional<PostResponse> updatePost(Long id, NewPostRequest newPostRequest) {
         return postRepository
                 .findById(id)
                 .map(
                         postEntity -> {
                             mapNewPostRequestToPostEntityMapper.updatePostEntity(
-                                    newPostRequest, postEntity);
+                                    newPostRequest, postEntity, tagRepository);
                             PostEntity updatedPostEntity = postRepository.save(postEntity);
                             return myConversionService.convert(
                                     updatedPostEntity, PostResponse.class);

@@ -82,7 +82,8 @@ class PostDetailsEntityControllerTest {
         Long postDetailsId = 1L;
         PostDetailsEntity postDetails =
                 new PostDetailsEntity().setId(postDetailsId).setCreatedBy("updated");
-        PostDetailsRequest postDetailsRequest = new PostDetailsRequest("junitDetailsKey");
+        PostDetailsRequest postDetailsRequest =
+                new PostDetailsRequest("junitDetailsKey", "junitCreatedBy");
         given(postDetailsService.findDetailsById(postDetailsId))
                 .willReturn(Optional.of(postDetails));
         given(postDetailsService.updatePostDetails(postDetails, postDetailsRequest))

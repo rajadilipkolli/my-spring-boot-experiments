@@ -1,6 +1,7 @@
 package com.example.graphql.model.response;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public record PostResponse(
         String title,
@@ -9,4 +10,5 @@ public record PostResponse(
         LocalDateTime createdAt,
         LocalDateTime modifiedAt,
         LocalDateTime publishedAt,
-        PostDetailsResponse details) {}
+        PostDetailsResponse details,
+        List<TagResponse> tags) {}
