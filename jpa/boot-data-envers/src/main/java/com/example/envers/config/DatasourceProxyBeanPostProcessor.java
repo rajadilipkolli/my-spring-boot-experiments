@@ -1,6 +1,6 @@
-package com.example.locks.config;
+package com.example.envers.config;
 
-import static com.example.locks.utils.AppConstants.PROFILE_NOT_PROD;
+import static com.example.envers.utils.AppConstants.PROFILE_NOT_PROD;
 
 import java.lang.reflect.Method;
 import javax.sql.DataSource;

@@ -48,3 +48,4 @@ You can also run the application using Maven as follows:
 ### Reference:
  
  * Alerts - https://github.com/emredmrcan/tutorials/tree/main/monitoring
+ * Auditing Strategy - https://vladmihalcea.com/the-best-way-to-implement-an-audit-log-using-hibernate-envers/

@@ -24,7 +24,9 @@ public class Initializer implements CommandLineRunner {
         customerObj.setAddress("customerAddress");
         Customer persistedCustomer = this.customerRepository.save(customerObj);
         persistedCustomer.setName("updatedCustomer");
-        this.customerRepository.save(persistedCustomer);
+        Customer updatedCustomer = this.customerRepository.save(persistedCustomer);
+        updatedCustomer.setName("updatedCustomer1");
+        this.customerRepository.save(updatedCustomer);
 
         Revisions<Integer, Customer> revisions = this.customerRepository.findRevisions(persistedCustomer.getId());
         log.info("revisions ");

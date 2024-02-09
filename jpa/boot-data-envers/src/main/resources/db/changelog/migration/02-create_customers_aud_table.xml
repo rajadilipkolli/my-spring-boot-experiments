@@ -22,6 +22,7 @@
             <column name="revtype" type="${intType}">
                 <constraints nullable="false"/>
             </column>
+            <column name="REVEND" type="integer"/>
             <column name="name" type="${stringType}"/>
             <column name="address" type="${stringType}"/>
         </createTable>
