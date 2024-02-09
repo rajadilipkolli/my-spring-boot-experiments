@@ -21,13 +21,12 @@ import com.example.graphql.repositories.PostTagRepository;
 import com.example.graphql.repositories.TagRepository;
 import java.util.ArrayList;
 import java.util.List;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 
-@Disabled
 class PostEntityControllerIT extends AbstractIntegrationTest {
 
     @Autowired private PostRepository postRepository;
@@ -38,14 +37,13 @@ class PostEntityControllerIT extends AbstractIntegrationTest {
 
     @BeforeEach
     void setUp() {
-        tagRepository.deleteAll();
-        postTagRepository.deleteAll();
         postRepository.deleteAll();
 
         postEntityList = new ArrayList<>();
         PostEntity firstPost = new PostEntity().setContent("First Post");
         firstPost.setDetails(new PostDetailsEntity().setDetailsKey("Junit1"));
         firstPost.addTag(new TagEntity().setTagName("junit"));
+        firstPost.addTag(new TagEntity().setTagName("spring"));
         postEntityList.add(firstPost);
         PostEntity secondPost = new PostEntity().setContent("Second Post");
         secondPost.setDetails(new PostDetailsEntity().setDetailsKey("Junit2"));
@@ -54,6 +52,12 @@ class PostEntityControllerIT extends AbstractIntegrationTest {
         thirdPost.setDetails(new PostDetailsEntity().setDetailsKey("Junit3"));
         postEntityList.add(thirdPost);
         postEntityList = postRepository.saveAll(postEntityList);
+    }
+
+    @AfterEach
+    void tearDown() {
+        postTagRepository.deleteAll();
+        tagRepository.deleteAll();
     }
 
     @Test
@@ -110,7 +114,9 @@ class PostEntityControllerIT extends AbstractIntegrationTest {
                         new PostDetailsRequest(
                                 postEntityListFirst.getDetails().getDetailsKey(),
                                 postEntityListFirst.getDetails().getCreatedBy()),
-                        List.of(new TagsRequest("java", "Programming Language")));
+                        List.of(
+                                new TagsRequest("java", "Programming Language"),
+                                new TagsRequest("spring", "Architecture Language")));
 
         this.mockMvc
                 .perform(
@@ -121,7 +127,7 @@ class PostEntityControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.title", is(newPostRequest.title())))
                 .andExpect(jsonPath("$.content", is(newPostRequest.content())))
                 .andExpect(jsonPath("$.published", is(newPostRequest.published())))
-                .andExpect(jsonPath("$.tags.size()", is(1)));
+                .andExpect(jsonPath("$.tags.size()", is(2)));
     }
 
     @Test
