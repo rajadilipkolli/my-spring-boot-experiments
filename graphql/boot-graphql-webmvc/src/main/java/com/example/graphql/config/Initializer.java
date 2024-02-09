@@ -4,7 +4,9 @@ import com.example.graphql.entities.AuthorEntity;
 import com.example.graphql.entities.PostCommentEntity;
 import com.example.graphql.entities.PostDetailsEntity;
 import com.example.graphql.entities.PostEntity;
+import com.example.graphql.entities.TagEntity;
 import com.example.graphql.repositories.AuthorRepository;
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.stream.LongStream;
 import lombok.RequiredArgsConstructor;
@@ -49,6 +51,12 @@ public class Initializer implements CommandLineRunner {
                             postEntity.setDetails(post1Details);
                             postEntity.addComment(post1Comment);
                             postEntity.addComment(post1Comment2);
+                            if (i == 1) {
+                                postEntity.addTag(
+                                        new TagEntity()
+                                                .setTagName("java")
+                                                .setTagDescription("new java language"));
+                            }
 
                             PostEntity postEntity1 =
                                     new PostEntity()
@@ -72,7 +80,8 @@ public class Initializer implements CommandLineRunner {
                                             .setEmail("user" + i + "@example.com")
                                             .setFirstName("first name" + i)
                                             .setLastName("last name" + i)
-                                            .setMobile(9848922338L);
+                                            .setMobile(9848922338L)
+                                            .setRegisteredAt(LocalDateTime.now());
                             authorEntity.addPost(postEntity);
                             authorEntity.addPost(postEntity1);
                             this.authorRepository.save(authorEntity);

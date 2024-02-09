@@ -30,9 +30,9 @@ class TagEntityControllerIT extends AbstractIntegrationTest {
         tagRepository.deleteAll();
 
         tagEntityList = new ArrayList<>();
-        tagEntityList.add(TagEntity.builder().tagName("First Tag").build());
-        tagEntityList.add(TagEntity.builder().tagName("Second Tag").build());
-        tagEntityList.add(TagEntity.builder().tagName("Third Tag").build());
+        tagEntityList.add(new TagEntity().setTagName("First Tag"));
+        tagEntityList.add(new TagEntity().setTagName("Second Tag"));
+        tagEntityList.add(new TagEntity().setTagName("Third Tag"));
         tagEntityList = tagRepository.saveAll(tagEntityList);
     }
 
