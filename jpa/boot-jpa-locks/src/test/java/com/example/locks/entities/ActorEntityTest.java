@@ -16,7 +16,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 
 @DataJpaTest
 @Disabled
-public class ActorEntityTest {
+class ActorEntityTest {
 
     @Autowired
     private TestEntityManager entityManager;
@@ -26,7 +26,7 @@ public class ActorEntityTest {
 
     @Test
     @Transactional
-    public void testPessimisticWriteLock() {
+    void testPessimisticWriteLock() {
         Actor entityToSave = new Actor();
         entityToSave.setActorName("TestEntityName");
 

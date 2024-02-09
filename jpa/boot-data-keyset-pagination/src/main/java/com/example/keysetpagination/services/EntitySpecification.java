@@ -15,7 +15,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
@@ -29,7 +28,7 @@ public class EntitySpecification<T> {
                     Stream.of(searchCriteria)
                             .filter(Objects::nonNull)
                             .map(this::createSpecification)
-                            .collect(Collectors.toList());
+                            .toList();
 
             return Specification.allOf(specifications);
         }

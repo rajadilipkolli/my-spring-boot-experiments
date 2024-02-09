@@ -22,7 +22,7 @@ import com.example.locks.model.request.GenreRequest;
 import com.example.locks.model.request.MovieRequest;
 import com.example.locks.model.request.ReviewRequest;
 import com.example.locks.repositories.MovieRepository;
-import com.example.locks.repositories.ReviewRepository;
+import com.example.locks.repositories.ReviewsRepository;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -39,7 +39,7 @@ class MovieControllerIT extends AbstractIntegrationTest {
     private MovieRepository movieRepository;
 
     @Autowired
-    private ReviewRepository reviewRepository;
+    private ReviewsRepository reviewRepository;
 
     private List<Movie> movieList = null;
 

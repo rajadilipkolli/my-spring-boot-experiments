@@ -10,7 +10,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @Table(name = "reviews")
-public class Review {
+public class Reviews {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)

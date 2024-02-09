@@ -61,6 +61,15 @@ public interface NewPostRequestToPostEntityMapper {
                                                     .contains(tagEntity.getTagName()))
                             .toList();
 
+            for (TagEntity tagEntity : tagEntitiesToUpdate) {
+                for (TagsRequest tagsRequest : newPostRequest.tags()) {
+                    if (tagEntity.getTagName().equalsIgnoreCase(tagsRequest.tagName())) {
+                        tagEntity.setTagDescription(tagsRequest.tagDescription());
+                        break;
+                    }
+                }
+            }
+
             List<TagsRequest> tagEntitiesToInsert =
                     newPostRequest.tags().stream()
                             .filter(

@@ -28,7 +28,7 @@ public class Movie {
     private BigDecimal budget;
 
     @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL)
-    private List<Review> reviews;
+    private List<Reviews> reviews;
 
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "director_id")
@@ -66,7 +66,7 @@ public class Movie {
         return this;
     }
 
-    public Movie setReviews(List<Review> reviews) {
+    public Movie setReviews(List<Reviews> reviews) {
         this.reviews = reviews;
         return this;
     }
