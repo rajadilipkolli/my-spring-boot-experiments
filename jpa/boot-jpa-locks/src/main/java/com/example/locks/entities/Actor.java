@@ -34,7 +34,7 @@ public class Actor {
     private String nationality;
 
     @Version
-    Long version = 0L;
+    Short version = 0;
 
     @ManyToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     private List<Movie> movies;
@@ -61,6 +61,11 @@ public class Actor {
 
     public Actor setMovies(List<Movie> movies) {
         this.movies = movies;
+        return this;
+    }
+
+    public Actor setVersion(Short version) {
+        this.version = version;
         return this;
     }
 
