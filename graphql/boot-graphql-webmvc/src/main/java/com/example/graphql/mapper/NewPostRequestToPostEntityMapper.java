@@ -40,16 +40,15 @@ public interface NewPostRequestToPostEntityMapper {
             List<TagEntity> tagEntitiesFromDb =
                     postEntity.getTags().stream().map(PostTagEntity::getTagEntity).toList();
 
-            List<TagEntity> tagEntitiesToRemove =
-                    tagEntitiesFromDb.stream()
-                            .filter(
-                                    tagEntity ->
-                                            !newPostRequest.tags().stream()
-                                                    .map(TagsRequest::tagName)
-                                                    .toList()
-                                                    .contains(tagEntity.getTagName()))
-                            .toList();
-            tagEntitiesToRemove.forEach(postEntity::removeTag);
+            // Tag Entities To remove
+            tagEntitiesFromDb.stream()
+                    .filter(
+                            tagEntity ->
+                                    !newPostRequest.tags().stream()
+                                            .map(TagsRequest::tagName)
+                                            .toList()
+                                            .contains(tagEntity.getTagName()))
+                    .forEach(postEntity::removeTag);
 
             List<TagEntity> tagEntitiesToUpdate =
                     tagEntitiesFromDb.stream()
@@ -70,18 +69,17 @@ public interface NewPostRequestToPostEntityMapper {
                 }
             }
 
-            List<TagsRequest> tagEntitiesToInsert =
-                    newPostRequest.tags().stream()
-                            .filter(
-                                    tagsRequest ->
-                                            !tagEntitiesToUpdate.stream()
-                                                    .map(TagEntity::getTagName)
-                                                    .toList()
-                                                    .contains(tagsRequest.tagName()))
-                            .toList();
-
-            tagEntitiesToInsert.forEach(
-                    tagsRequest -> postEntity.addTag(getTagEntity(tagRepository, tagsRequest)));
+            // new TagEntites to Insert
+            newPostRequest.tags().stream()
+                    .filter(
+                            tagsRequest ->
+                                    !tagEntitiesToUpdate.stream()
+                                            .map(TagEntity::getTagName)
+                                            .toList()
+                                            .contains(tagsRequest.tagName()))
+                    .forEach(
+                            tagsRequest ->
+                                    postEntity.addTag(getTagEntity(tagRepository, tagsRequest)));
         }
     }
 

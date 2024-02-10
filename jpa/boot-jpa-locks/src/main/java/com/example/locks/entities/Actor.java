@@ -1,6 +1,14 @@
 package com.example.locks.entities;
 
-import jakarta.persistence.*;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
@@ -18,13 +26,17 @@ public class Actor {
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long actorId;
 
+    @Column(nullable = false)
     private String actorName;
 
     private LocalDate dob;
 
     private String nationality;
 
-    @ManyToMany(cascade = CascadeType.ALL)
+    @Version
+    Long version = 0L;
+
+    @ManyToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     private List<Movie> movies;
 
     public Actor setActorId(Long actorId) {

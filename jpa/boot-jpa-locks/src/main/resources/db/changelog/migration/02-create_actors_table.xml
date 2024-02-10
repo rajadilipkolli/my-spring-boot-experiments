@@ -24,6 +24,7 @@
             </column>
             <column name="nationality" type="${string.type}" />
             <column name="dob" type="date" />
+            <column name="version" type="smallint" />
         </createTable>
     </changeSet>
 </databaseChangeLog>
