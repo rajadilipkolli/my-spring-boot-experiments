@@ -36,7 +36,7 @@ public class Customer {
     private String address;
 
     @Version
-    Long version = 0L;
+    Short version = 0;
 
     @Override
     public boolean equals(Object o) {

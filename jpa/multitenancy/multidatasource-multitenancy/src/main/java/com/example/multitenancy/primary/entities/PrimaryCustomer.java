@@ -34,7 +34,7 @@ public class PrimaryCustomer {
     @Setter(AccessLevel.NONE)
     @Version
     @Column(name = "version")
-    private Long version;
+    private Short version;
 
     @Column(nullable = false)
     @TenantId

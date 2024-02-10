@@ -22,7 +22,7 @@
                 <constraints nullable="false"/>
             </column>
             <column name="address" type="${stringType}"/>
-            <column name="version" type="bigint">
+            <column name="version" type="tinyint">
                 <constraints nullable="false"/>
             </column>
         </createTable>

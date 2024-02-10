@@ -31,7 +31,7 @@
                 <constraints nullable="false" unique="true" uniqueConstraintName="uc_authors_email" />
             </column>
             <column name="registered_at" type="timestamptz" />
-            <column name="version" type="bigint">
+            <column name="version" type="tinyint">
                 <constraints nullable="false" />
             </column>
         </createTable>

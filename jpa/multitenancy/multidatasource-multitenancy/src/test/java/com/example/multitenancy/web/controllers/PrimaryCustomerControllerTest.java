@@ -47,9 +47,9 @@ class PrimaryCustomerControllerTest {
     @BeforeEach
     void setUp() {
         this.primaryCustomerList = new ArrayList<>();
-        this.primaryCustomerList.add(new PrimaryCustomer(1L, "text 1", 0L, "dbsystc"));
-        this.primaryCustomerList.add(new PrimaryCustomer(2L, "text 2", 0L, "dbsystc"));
-        this.primaryCustomerList.add(new PrimaryCustomer(3L, "text 3", 0L, "dbsystc"));
+        this.primaryCustomerList.add(new PrimaryCustomer(1L, "text 1", (short) 0, "dbsystc"));
+        this.primaryCustomerList.add(new PrimaryCustomer(2L, "text 2", (short) 0, "dbsystc"));
+        this.primaryCustomerList.add(new PrimaryCustomer(3L, "text 3", (short) 0, "dbsystc"));
     }
 
     @Test
@@ -65,7 +65,8 @@ class PrimaryCustomerControllerTest {
     @Test
     void shouldFindCustomerById() throws Exception {
         Long customerId = 1L;
-        PrimaryCustomer primaryCustomer = new PrimaryCustomer(customerId, "text 1", 0L, "dbsystc");
+        PrimaryCustomer primaryCustomer =
+                new PrimaryCustomer(customerId, "text 1", (short) 0, "dbsystc");
         given(primaryCustomerService.findCustomerById(customerId))
                 .willReturn(Optional.of(primaryCustomer));
 
@@ -94,7 +95,8 @@ class PrimaryCustomerControllerTest {
         given(primaryCustomerService.saveCustomer(any(PrimaryCustomer.class)))
                 .willAnswer((invocation) -> invocation.getArgument(0));
 
-        PrimaryCustomer primaryCustomer = new PrimaryCustomer(1L, "some text", 0L, "dbsystc");
+        PrimaryCustomer primaryCustomer =
+                new PrimaryCustomer(1L, "some text", (short) 0, "dbsystc");
         this.mockMvc
                 .perform(
                         post("/api/customers/primary")
@@ -108,7 +110,7 @@ class PrimaryCustomerControllerTest {
 
     @Test
     void shouldReturn400WhenCreateNewCustomerWithoutText() throws Exception {
-        PrimaryCustomer primaryCustomer = new PrimaryCustomer(null, null, 0L, "dbsystc");
+        PrimaryCustomer primaryCustomer = new PrimaryCustomer(null, null, (short) 0, "dbsystc");
 
         this.mockMvc
                 .perform(
@@ -133,7 +135,7 @@ class PrimaryCustomerControllerTest {
     void shouldUpdateCustomer() throws Exception {
         Long customerId = 1L;
         PrimaryCustomer primaryCustomer =
-                new PrimaryCustomer(customerId, "Updated text", 0L, "dbsystc");
+                new PrimaryCustomer(customerId, "Updated text", (short) 0, "dbsystc");
         given(primaryCustomerService.findCustomerById(customerId))
                 .willReturn(Optional.of(primaryCustomer));
         given(primaryCustomerService.saveCustomer(any(PrimaryCustomer.class)))
@@ -154,7 +156,7 @@ class PrimaryCustomerControllerTest {
         Long customerId = 1L;
         given(primaryCustomerService.findCustomerById(customerId)).willReturn(Optional.empty());
         PrimaryCustomer primaryCustomer =
-                new PrimaryCustomer(customerId, "Updated text", 0L, "dbsystc");
+                new PrimaryCustomer(customerId, "Updated text", (short) 0, "dbsystc");
 
         this.mockMvc
                 .perform(
@@ -169,7 +171,7 @@ class PrimaryCustomerControllerTest {
     void shouldDeleteCustomer() throws Exception {
         Long customerId = 1L;
         PrimaryCustomer primaryCustomer =
-                new PrimaryCustomer(customerId, "Some text", 0L, "dbsystc");
+                new PrimaryCustomer(customerId, "Some text", (short) 0, "dbsystc");
         given(primaryCustomerService.findCustomerById(customerId))
                 .willReturn(Optional.of(primaryCustomer));
         doNothing().when(primaryCustomerService).deleteCustomerById(primaryCustomer.getId());

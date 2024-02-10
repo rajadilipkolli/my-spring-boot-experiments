@@ -53,5 +53,5 @@ public class Post {
 
     @Column("version")
     @Version
-    private Long version;
+    private Short version;
 }

@@ -45,7 +45,7 @@ public class AuthorEntity implements Serializable {
 
     private LocalDateTime registeredAt;
 
-    @Version private Long version;
+    @Version private Short version;
 
     @OneToMany(mappedBy = "authorEntity", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PostEntity> postEntities = new ArrayList<>();
@@ -85,7 +85,7 @@ public class AuthorEntity implements Serializable {
         return this;
     }
 
-    public AuthorEntity setVersion(Long version) {
+    public AuthorEntity setVersion(Short version) {
         this.version = version;
         return this;
     }

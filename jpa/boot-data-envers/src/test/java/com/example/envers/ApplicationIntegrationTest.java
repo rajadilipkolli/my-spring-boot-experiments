@@ -76,6 +76,6 @@ class ApplicationIntegrationTest extends AbstractIntegrationTest {
 
         assertThat(finalRevision).satisfies(rev -> assertThat(rev.getEntity())
                 .extracting(Customer::getId, Customer::getName, Customer::getVersion)
-                .containsExactly(customer.getId(), null, 0L));
+                .containsExactly(customer.getId(), null, (short) 0));
     }
 }
