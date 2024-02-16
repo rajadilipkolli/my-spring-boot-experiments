@@ -8,16 +8,20 @@ import com.example.locks.model.request.ActorRequest;
 import com.example.locks.model.response.ActorResponse;
 import com.example.locks.model.response.PagedResult;
 import com.example.locks.repositories.ActorRepository;
-import java.util.List;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.PessimisticLockingFailureException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @Slf4j
@@ -76,5 +80,31 @@ public class ActorService {
     @Transactional
     public void deleteActorById(Long id) {
         actorRepository.deleteById(id);
+    }
+
+    @Transactional
+    public void updateActorWithLock(Long id, String name) {
+        try {
+            obtainPessimisticLockAndUpdate(id, name);
+        } catch (PessimisticLockingFailureException e) {
+            log.info("Received exception for request {}", name);
+            log.error("Found pessimistic lock exception!", e);
+            sleepForAWhile();
+//            updateActorWithLock(id, name);
+        }
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void obtainPessimisticLockAndUpdate(Long id, String name) {
+        Actor actor = actorRepository.getActorAndObtainPessimisticWriteLockingOnItById(id);
+        actor.setActorName(name);
+    }
+
+    private void sleepForAWhile() {
+        try {
+            TimeUnit.MILLISECONDS.sleep(2000);
+        } catch (InterruptedException ie) {
+            Thread.currentThread().interrupt();
+        }
     }
 }

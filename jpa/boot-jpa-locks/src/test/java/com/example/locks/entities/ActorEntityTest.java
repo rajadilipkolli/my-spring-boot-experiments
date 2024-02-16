@@ -1,53 +1,52 @@
 package com.example.locks.entities;
 
-import static jakarta.persistence.LockModeType.PESSIMISTIC_WRITE;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.springframework.test.util.AssertionErrors.assertEquals;
-
 import com.example.locks.repositories.ActorRepository;
-import jakarta.persistence.PessimisticLockException;
-import jakarta.transaction.Transactional;
-import org.junit.jupiter.api.Disabled;
+import com.example.locks.services.ActorService;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
-@DataJpaTest
-@Disabled
-class ActorEntityTest {
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
-    @Autowired
-    private TestEntityManager entityManager;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.springframework.test.util.AssertionErrors.assertEquals;
+
+//@DataJpaTest
+@SpringBootTest
+@Slf4j
+@ActiveProfiles("local")
+public class ActorEntityTest {
 
     @Autowired
     private ActorRepository actorRepository;
 
+    @Autowired
+    private ActorService actorService;
+
     @Test
-    @Transactional
-    void testPessimisticWriteLock() {
-        Actor entityToSave = new Actor();
-        entityToSave.setActorName("TestEntityName");
+    public void testPessimisticWriteLock() throws InterruptedException {
 
-        // When
-        //        Actor savedEntity = actorRepository.save(entityToSave);
-        Actor savedEntity = entityManager.persistAndFlush(entityToSave);
+        final Actor srcItem = actorRepository.save(new Actor().setActorId(1L).setActorName("Actor"));
+        var findData = actorRepository.findById(1L);
+        assertEquals("Data Saved", "Actor", findData.orElse(new Actor()).getActorName());
 
-        // Then
-        assertNotNull(savedEntity.getActorId(), "Saved entity should have a non-null ID");
-        assertEquals("Checking Data is saved", savedEntity.getActorName(), "TestEntityName");
-        var savedActor = actorRepository.findById(1L).get();
-        assertEquals("validating data is saved", savedActor.getActorName(), "TestEntityName");
+        final List<String> actorNames = Arrays.asList("PK", "MB");
+        final ExecutorService executor = Executors.newFixedThreadPool(actorNames.size());
 
-        entityManager.getEntityManager().lock(savedEntity, PESSIMISTIC_WRITE);
 
-        savedActor.setActorName("UpdatedEntityName");
+        for (String actor : actorNames) {
+            executor.execute(() -> actorService.updateActorWithLock(srcItem.getActorId(), actor));
+        }
 
-        //         Try to save the entity with the update
-        assertThrows(PessimisticLockException.class, () -> {
-            entityManager.persistAndFlush(savedActor);
-            entityManager.flush();
-        });
+        executor.shutdown();
+        assertTrue(executor.awaitTermination(1, TimeUnit.MINUTES));
+
     }
+
 }
