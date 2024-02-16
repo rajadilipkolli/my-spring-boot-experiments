@@ -82,21 +82,23 @@ public class ActorService {
     }
 
     @Transactional
-    public void updateActorWithLock(Long id, String name) {
+    public Actor updateActorWithLock(Long id, String name) {
         try {
-            obtainPessimisticLockAndUpdate(id, name);
+            return obtainPessimisticLockAndUpdate(id, name);
         } catch (PessimisticLockingFailureException e) {
             log.info("Received exception for request {}", name);
             log.error("Found pessimistic lock exception!", e);
             sleepForAWhile();
             //            updateActorWithLock(id, name);
         }
+        return null;
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void obtainPessimisticLockAndUpdate(Long id, String name) {
+    public Actor obtainPessimisticLockAndUpdate(Long id, String name) {
         Actor actor = actorRepository.getActorAndObtainPessimisticWriteLockingOnItById(id);
         actor.setActorName(name);
+        return actorRepository.save(actor);
     }
 
     private void sleepForAWhile() {
