@@ -1,12 +1,11 @@
 package com.example.locks.entities;
 
+import com.example.locks.common.AbstractIntegrationTest;
 import com.example.locks.repositories.ActorRepository;
 import com.example.locks.services.ActorService;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
 
 import java.util.Arrays;
 import java.util.List;
@@ -17,11 +16,8 @@ import java.util.concurrent.TimeUnit;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.util.AssertionErrors.assertEquals;
 
-//@DataJpaTest
-@SpringBootTest
 @Slf4j
-@ActiveProfiles("local")
-public class ActorEntityTest {
+public class ActorEntityTest extends AbstractIntegrationTest {
 
     @Autowired
     private ActorRepository actorRepository;
