@@ -28,7 +28,7 @@ public class ActorEntityTest extends AbstractIntegrationTest {
     public void testPessimisticWriteLock() throws InterruptedException {
 
         final Actor srcItem = actorRepository.save(new Actor().setActorId(1L).setActorName("Actor"));
-        var findData = actorRepository.findById(srcItem.getActorId);
+        var findData = actorRepository.findById(srcItem.getActorId());
         assertEquals("Data Saved", "Actor", findData.orElse(new Actor()).getActorName());
 
         final List<String> actorNames = Arrays.asList("PK", "MB");
