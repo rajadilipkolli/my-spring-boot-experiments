@@ -4,10 +4,9 @@ import com.example.locks.entities.Actor;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockModeType;
 import jakarta.persistence.Query;
+import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
-import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -21,9 +20,7 @@ public class CustomizedActorRepositoryImpl implements CustomizedActorRepository 
     }
 
     @Override
-    public void setLockTimeout(long timeoutDurationInMs) {
-
-    }
+    public void setLockTimeout(long timeoutDurationInMs) {}
 
     @Override
     public Actor getActorAndObtainPessimisticWriteLockingOnItById(Long id) {
@@ -59,5 +56,4 @@ public class CustomizedActorRepositoryImpl implements CustomizedActorRepository 
 
         return query;
     }
-
 }
