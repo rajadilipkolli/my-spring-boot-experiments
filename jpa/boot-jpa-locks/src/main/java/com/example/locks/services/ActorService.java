@@ -8,7 +8,6 @@ import com.example.locks.model.request.ActorRequest;
 import com.example.locks.model.response.ActorResponse;
 import com.example.locks.model.response.PagedResult;
 import com.example.locks.repositories.ActorRepository;
-import jakarta.annotation.Resource;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -31,9 +30,6 @@ public class ActorService {
     private final JpaLocksMapper mapper;
 
     private final ActorRepository actorRepository;
-
-    @Resource
-    private ActorService actorService;
 
     public PagedResult<ActorResponse> findAllActors(FindActorsQuery findActorsQuery) {
 
@@ -88,7 +84,7 @@ public class ActorService {
     @Transactional
     public void updateActorWithLock(Long id, String name) {
         try {
-            actorService.obtainPessimisticLockAndUpdate(id, name);
+            obtainPessimisticLockAndUpdate(id, name);
         } catch (PessimisticLockingFailureException e) {
             log.info("Received exception for request {}", name);
             log.error("Found pessimistic lock exception!", e);
