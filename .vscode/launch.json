@@ -93,6 +93,16 @@
             "projectName": "boot-http-proxy",
             "args": "",
             "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-TestApplication<boot-graphql-webflux>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.example.graphql.TestApplication",
+            "projectName": "boot-graphql-webflux",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
         }
     ]
 }
