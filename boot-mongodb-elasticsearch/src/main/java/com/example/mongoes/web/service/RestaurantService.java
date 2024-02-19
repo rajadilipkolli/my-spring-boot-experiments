@@ -203,7 +203,7 @@ public class RestaurantService {
         return this.changeStreamResumeRepository.findAll().toStream().toList();
     }
 
-    public Mono<SearchPage<Restaurant>> findAllRestaurants(Integer offset, Integer limit) {
+    public Mono<SearchPage<Restaurant>> findAllRestaurants(int offset, int limit) {
         Sort sort = Sort.by(Sort.Direction.DESC, "restaurant_id");
         Pageable pageable = PageRequest.of(offset, limit, sort);
         return this.restaurantESRepository.findAll(pageable);

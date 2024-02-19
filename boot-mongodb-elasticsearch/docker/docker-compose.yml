@@ -3,13 +3,14 @@ version: "3.9"
 services:
   mongodb:
     hostname: mongodb
-    image: mongo:6.0.13
+    image: mongo:7.0.5
     volumes:
       - mongodb:/data/db
     ports:
       - "27017:27017"
     healthcheck:
-      test: test $$(echo "rs.initiate().ok || rs.status().ok" | mongo --quiet) -eq 1
+      test: |
+        mongosh --eval "try { rs.status().ok } catch (e) { rs.initiate({ _id: 'rs0', members: [{ _id: 0, host: 'localhost:27017' }] }).ok }"
       interval: 10s
       start_period: 30s
     command: ["/usr/bin/mongod", "--replSet", "rs0", "--bind_ip_all"]
