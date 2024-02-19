@@ -7,7 +7,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.1.5</version>
+        <version>3.2.2</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.learning.shedlock</groupId>
@@ -21,13 +21,12 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
         <java.version>17</java.version>
-        <spring-cloud.version>2022.0.4</spring-cloud.version>
-        <springdoc-openapi.version>2.2.0</springdoc-openapi.version>
-        <commons-io.version>2.15.0</commons-io.version>
+        <springdoc-openapi.version>2.3.0</springdoc-openapi.version>
+        <shedlock.version>5.11.0</shedlock.version>
 
         <project.testresult.directory>${project.build.directory}/test-results</project.testresult.directory>
-        <spotless.version>2.40.0</spotless.version>
-        <dependency-check-maven.version>8.4.2</dependency-check-maven.version>
+        <spotless.version>2.43.0</spotless.version>
+        <dependency-check-maven.version>9.0.9</dependency-check-maven.version>
         <properties-maven-plugin.version>1.2.1</properties-maven-plugin.version>
         <sonar-maven-plugin.version>3.10.0.2594</sonar-maven-plugin.version>
         <jacoco-maven-plugin.version>0.8.11</jacoco-maven-plugin.version>
@@ -88,13 +87,14 @@
             <version>${springdoc-openapi.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
+            <groupId>net.javacrumbs.shedlock</groupId>
+            <artifactId>shedlock-spring</artifactId>
+            <version>${shedlock.version}</version>
         </dependency>
         <dependency>
-            <groupId>commons-io</groupId>
-            <artifactId>commons-io</artifactId>
-            <version>${commons-io.version}</version>
+            <groupId>net.javacrumbs.shedlock</groupId>
+            <artifactId>shedlock-provider-jdbc-template</artifactId>
+            <version>${shedlock.version}</version>
         </dependency>
 
         <dependency>
@@ -108,11 +108,6 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.awaitility</groupId>
-            <artifactId>awaitility</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>junit-jupiter</artifactId>
             <scope>test</scope>
@@ -123,18 +118,6 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>org.springframework.cloud</groupId>
-                <artifactId>spring-cloud-dependencies</artifactId>
-                <version>${spring-cloud.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
 
     <build>
         <plugins>
