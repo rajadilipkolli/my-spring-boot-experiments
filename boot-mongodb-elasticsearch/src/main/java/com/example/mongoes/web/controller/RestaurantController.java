@@ -32,8 +32,8 @@ public class RestaurantController {
 
     @GetMapping
     public Mono<ResponseEntity<SearchPage<Restaurant>>> findAllRestaurants(
-            @Valid @RequestParam(defaultValue = "10") @Size(max = 999) Integer limit,
-            @RequestParam(defaultValue = "0") Integer offset) {
+            @Valid @RequestParam(defaultValue = "10") @Size(max = 999) int limit,
+            @RequestParam(defaultValue = "0") int offset) {
         return restaurantService.findAllRestaurants(offset, limit).map(ResponseEntity::ok);
     }
 
