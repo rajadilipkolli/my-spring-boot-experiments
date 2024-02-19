@@ -8,10 +8,10 @@ import javax.sql.DataSource;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.testcontainers.context.ImportTestcontainers;
+import org.springframework.context.annotation.Import;
 
 @DataJpaTest(properties = {"spring.jpa.hibernate.ddl-auto=validate", "spring.test.database.replace=none"})
-@ImportTestcontainers(ContainersConfig.class)
+@Import(ContainersConfig.class)
 class SchemaValidationTest {
 
     @Autowired
