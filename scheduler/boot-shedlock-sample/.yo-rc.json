@@ -8,6 +8,6 @@
     "features": [],
     "buildTool": "maven",
     "packageFolder": "com/learning/shedlock",
-    "liquibaseMigrationCounter": 1
+    "liquibaseMigrationCounter": 2
   }
 }
