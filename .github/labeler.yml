@@ -104,6 +104,10 @@
   - changed-files:
       - any-glob-to-any-file:
           - scheduler/boot-scheduler-quartz/**/*
+"component: shedlock":
+  - changed-files:
+      - any-glob-to-any-file:
+          - scheduler/boot-shedlock-sample/**/*
 "type: documentation": 
   - changed-files:
       - any-glob-to-any-file: 'docs/**/*'

@@ -1,0 +1,13 @@
+{
+  "generator-springboot": {
+    "appName": "boot-shedlock-sample",
+    "packageName": "com.learning.shedlock",
+    "databaseType": "postgresql",
+    "dbMigrationTool": "liquibase",
+    "dbMigrationFormat": "xml",
+    "features": [],
+    "buildTool": "maven",
+    "packageFolder": "com/learning/shedlock",
+    "liquibaseMigrationCounter": 1
+  }
+}
