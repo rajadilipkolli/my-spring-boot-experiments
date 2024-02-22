@@ -12,6 +12,8 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.stream.IntStream;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,5 +67,36 @@ class ActorServiceIntTest extends AbstractIntegrationTest {
             assertThat(updatedActor.getActorName()).isEqualTo("newName");
             assertThat(updatedActor.getVersion()).isEqualTo((short) 2);
         });
+    }
+
+    @Test
+    void testPessimisticReadLock() throws ExecutionException, InterruptedException {
+        ActorResponse actorResponse = actorService.saveActor(new ActorRequest("Actor", null, "Indian"));
+
+        Optional<Actor> optionalActor = actorRepository.findById(actorResponse.actorId());
+        assertThat(optionalActor).isPresent();
+        Actor actor = optionalActor.get();
+        Short version = actor.getVersion();
+        assertThat(actor.getActorName()).isEqualTo("Actor");
+        assertThat(actor.getVersion()).isEqualTo((short) 0);
+        // Obtaining a pessimistic read lock concurrently by two requests on the same record
+        List<CompletableFuture<Actor>> completableFutureList = IntStream.range(0, 2)
+                .boxed()
+                .map(actorName -> CompletableFuture.supplyAsync(() -> {
+                    var readLockActor = new Actor();
+                    try {
+                        readLockActor = actorService.getActorWithPessimisticReadLock(actorResponse.actorId());
+                    } catch (Exception e) {
+                        log.error("exception occurred", e);
+                    }
+                    return readLockActor;
+                }))
+                .toList();
+
+        CompletableFuture.allOf(completableFutureList.toArray(CompletableFuture[]::new))
+                .join();
+        // As pessimistic read lock is a shared lock it will give read access to every request
+        assertThat(completableFutureList.get(0).get().getActorName()).isEqualTo("Actor");
+        assertThat(completableFutureList.get(1).get().getActorName()).isEqualTo("Actor");
     }
 }
