@@ -1,4 +1,4 @@
-FROM eclipse-temurin:17.0.10_7-jre-focal as builder
+FROM eclipse-temurin:17.0.10_7-jre-focal AS builder
 WORKDIR application
 ARG JAR_FILE=target/boot-jpa-locks-0.0.1-SNAPSHOT.jar
 COPY ${JAR_FILE} application.jar

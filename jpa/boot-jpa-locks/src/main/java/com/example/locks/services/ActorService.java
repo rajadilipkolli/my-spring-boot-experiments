@@ -20,7 +20,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
@@ -90,12 +89,10 @@ public class ActorService {
             log.info("Received exception for request {}", name);
             log.error("Found pessimistic lock exception!", e);
             sleepForAWhile();
-            //            updateActorWithLock(id, name);
         }
         return null;
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public Actor obtainPessimisticLockAndUpdate(Long id, String name) {
         Actor actor = actorRepository.getActorAndObtainPessimisticLockingOnItById(id, LockModeType.PESSIMISTIC_WRITE);
         actor.setActorName(name);
