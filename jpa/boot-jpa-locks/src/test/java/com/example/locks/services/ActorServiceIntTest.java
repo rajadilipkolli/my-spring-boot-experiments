@@ -82,7 +82,6 @@ class ActorServiceIntTest extends AbstractIntegrationTest {
         Optional<Actor> optionalActor = actorRepository.findById(actorResponse.actorId());
         assertThat(optionalActor).isPresent();
         Actor actor = optionalActor.get();
-        Short version = actor.getVersion();
         assertThat(actor.getActorName()).isEqualTo("Actor");
         assertThat(actor.getVersion()).isEqualTo((short) 0);
         // Obtaining a pessimistic read lock concurrently by two requests on the same record
@@ -116,9 +115,7 @@ class ActorServiceIntTest extends AbstractIntegrationTest {
         assertThat(actor.getActorName()).isEqualTo("Actor");
         assertThat(actor.getVersion()).isEqualTo((short) 0);
         // Obtaining a pessimistic read lock and holding lock for 5 sec
-        CompletableFuture.runAsync(() -> {
-            actorService.getActorWithPessimisticReadLock(actor.getActorId());
-        });
+        CompletableFuture.runAsync(() -> actorService.getActorWithPessimisticReadLock(actor.getActorId()));
         // As pessimistic read lock obtained on the record update can't be performed until the lock is released
         await().atMost(Duration.ofSeconds(10)).pollDelay(Duration.ofSeconds(1)).untilAsserted(() -> {
             ActorResponse updatedActor =
