@@ -69,12 +69,12 @@ public class CustomizedActorRepositoryImpl implements CustomizedActorRepository 
     }
 
     @Override
-    public Actor getActorAndObtainPessimisticWriteLockingOnItById(Long id) {
+    public Actor getActorAndObtainPessimisticLockingOnItById(Long id, LockModeType lockModeType) {
         log.info("Trying to obtain pessimistic lock ...");
 
         Query query = em.createQuery("select actor from Actor actor where actor.id = :id");
         query.setParameter("id", id);
-        query.setLockMode(LockModeType.PESSIMISTIC_WRITE);
+        query.setLockMode(lockModeType);
         query = setLockTimeoutIfRequired(query);
         Actor actor = (Actor) query.getSingleResult();
 
