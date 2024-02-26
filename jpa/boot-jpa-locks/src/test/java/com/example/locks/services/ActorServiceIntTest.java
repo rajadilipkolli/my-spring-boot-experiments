@@ -87,15 +87,8 @@ class ActorServiceIntTest extends AbstractIntegrationTest {
         // Obtaining a pessimistic read lock concurrently by two requests on the same record
         List<CompletableFuture<Actor>> completableFutureList = IntStream.range(0, 2)
                 .boxed()
-                .map(actorName -> CompletableFuture.supplyAsync(() -> {
-                    var readLockActor = new Actor();
-                    try {
-                        readLockActor = actorService.getActorWithPessimisticReadLock(actorResponse.actorId());
-                    } catch (Exception e) {
-                        log.error("exception occurred", e);
-                    }
-                    return readLockActor;
-                }))
+                .map(actorName -> CompletableFuture.supplyAsync(
+                        () -> actorService.getActorWithPessimisticReadLock(actorResponse.actorId())))
                 .toList();
 
         CompletableFuture.allOf(completableFutureList.toArray(CompletableFuture[]::new))
