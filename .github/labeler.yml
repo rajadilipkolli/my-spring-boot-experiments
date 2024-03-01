@@ -104,6 +104,10 @@
   - changed-files:
       - any-glob-to-any-file:
           - scheduler/boot-scheduler-quartz/**/*
+"component: shedlock":
+  - changed-files:
+      - any-glob-to-any-file:
+          - scheduler/boot-shedlock-sample/**/*
 "type: documentation": 
   - changed-files:
       - any-glob-to-any-file: 'docs/**/*'
@@ -145,3 +149,4 @@
           - r2dbc/boot-r2dbc-sample/pom.xml
           - scheduler/boot-jobrunr-sample/pom.xml
           - scheduler/boot-scheduler-quartz/pom.xml
+          - scheduler/boot-shedlock-sample/pom.xml

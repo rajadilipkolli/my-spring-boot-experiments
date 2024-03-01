@@ -12,7 +12,10 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.stream.IntStream;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -24,6 +27,11 @@ class ActorServiceIntTest extends AbstractIntegrationTest {
 
     @Autowired
     private ActorRepository actorRepository;
+
+    @BeforeEach
+    void setUp() {
+        actorRepository.deleteAllInBatch();
+    }
 
     @Test
     void testPessimisticWriteLock() {
@@ -64,6 +72,48 @@ class ActorServiceIntTest extends AbstractIntegrationTest {
             Actor updatedActor = actorService.updateActorWithLock(actorResponse.actorId(), "newName");
             assertThat(updatedActor.getActorName()).isEqualTo("newName");
             assertThat(updatedActor.getVersion()).isEqualTo((short) 2);
+        });
+    }
+
+    @Test
+    void testPessimisticReadLock() throws ExecutionException, InterruptedException {
+        ActorResponse actorResponse = actorService.saveActor(new ActorRequest("Actor", null, "Indian"));
+
+        Optional<Actor> optionalActor = actorRepository.findById(actorResponse.actorId());
+        assertThat(optionalActor).isPresent();
+        Actor actor = optionalActor.get();
+        assertThat(actor.getActorName()).isEqualTo("Actor");
+        assertThat(actor.getVersion()).isEqualTo((short) 0);
+        // Obtaining a pessimistic read lock concurrently by two requests on the same record
+        List<CompletableFuture<Actor>> completableFutureList = IntStream.range(0, 2)
+                .boxed()
+                .map(actorName -> CompletableFuture.supplyAsync(
+                        () -> actorService.getActorWithPessimisticReadLock(actorResponse.actorId())))
+                .toList();
+
+        CompletableFuture.allOf(completableFutureList.toArray(CompletableFuture[]::new))
+                .join();
+        // As pessimistic read lock is a shared lock it will give read access to every request
+        assertThat(completableFutureList.get(0).get().getActorName()).isEqualTo("Actor");
+        assertThat(completableFutureList.get(1).get().getActorName()).isEqualTo("Actor");
+    }
+
+    @Test
+    void testUpdatePessimisticReadLock() {
+        ActorResponse actorResponse = actorService.saveActor(new ActorRequest("Actor", null, "Indian"));
+
+        Optional<Actor> optionalActor = actorRepository.findById(actorResponse.actorId());
+        assertThat(optionalActor).isPresent();
+        Actor actor = optionalActor.get();
+        assertThat(actor.getActorName()).isEqualTo("Actor");
+        assertThat(actor.getVersion()).isEqualTo((short) 0);
+        // Obtaining a pessimistic read lock and holding lock for 5 sec
+        CompletableFuture.runAsync(() -> actorService.getActorWithPessimisticReadLock(actor.getActorId()));
+        // As pessimistic read lock obtained on the record update can't be performed until the lock is released
+        await().atMost(Duration.ofSeconds(10)).pollDelay(Duration.ofSeconds(1)).untilAsserted(() -> {
+            ActorResponse updatedActor =
+                    actorService.updateActor(actor.getActorId(), new ActorRequest("updateActor", null, "Indian"));
+            assertThat(updatedActor.actorName()).isEqualTo("updateActor");
         });
     }
 }

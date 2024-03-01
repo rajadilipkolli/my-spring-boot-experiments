@@ -8,6 +8,7 @@ import com.example.locks.model.request.ActorRequest;
 import com.example.locks.model.response.ActorResponse;
 import com.example.locks.model.response.PagedResult;
 import com.example.locks.repositories.ActorRepository;
+import jakarta.persistence.LockModeType;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -19,7 +20,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
@@ -89,14 +89,12 @@ public class ActorService {
             log.info("Received exception for request {}", name);
             log.error("Found pessimistic lock exception!", e);
             sleepForAWhile();
-            //            updateActorWithLock(id, name);
         }
         return null;
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public Actor obtainPessimisticLockAndUpdate(Long id, String name) {
-        Actor actor = actorRepository.getActorAndObtainPessimisticWriteLockingOnItById(id);
+        Actor actor = actorRepository.getActorAndObtainPessimisticLockingOnItById(id, LockModeType.PESSIMISTIC_WRITE);
         actor.setActorName(name);
         return actorRepository.save(actor);
     }
@@ -107,5 +105,10 @@ public class ActorService {
         } catch (InterruptedException ie) {
             Thread.currentThread().interrupt();
         }
+    }
+
+    @Transactional
+    public Actor getActorWithPessimisticReadLock(Long id) {
+        return actorRepository.getActorAndObtainPessimisticLockingOnItById(id, LockModeType.PESSIMISTIC_READ);
     }
 }
