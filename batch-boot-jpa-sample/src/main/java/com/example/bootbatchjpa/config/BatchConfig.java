@@ -3,6 +3,7 @@ package com.example.bootbatchjpa.config;
 import com.example.bootbatchjpa.entities.Customer;
 import com.example.bootbatchjpa.model.CustomerDTO;
 import jakarta.persistence.EntityManagerFactory;
+import jakarta.validation.ConstraintViolationException;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
@@ -15,6 +16,8 @@ import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
+import org.springframework.batch.item.ItemProcessor;
+import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.database.JpaPagingItemReader;
 import org.springframework.batch.item.database.builder.JpaPagingItemReaderBuilder;
 import org.springframework.beans.factory.annotation.Value;
@@ -40,23 +43,12 @@ public class BatchConfig implements JobExecutionListener {
                         .allowStartIfComplete(true)
                         .<Customer, CustomerDTO>chunk(10, transactionManager)
                         .reader(jpaPagingItemReader)
-                        .processor(
-                                customer ->
-                                        new CustomerDTO(
-                                                customer.getName(),
-                                                customer.getAddress(),
-                                                customer.getGender()))
-                        .writer(
-                                items -> {
-                                    log.info(
-                                            "Writing chunk of size {} at :{}",
-                                            items.size(),
-                                            LocalDateTime.now());
-                                    items.forEach(
-                                            customerDTO ->
-                                                    log.info("Read customer: {}", customerDTO));
-                                })
-                        .faultTolerant()
+                        .processor(getCustomerCustomerDTOItemProcessor())
+                        .writer(getCustomerDTOItemWriter())
+                        .faultTolerant() // tell to spring batch that this step can face errors
+                        .skip(Exception.class) // skip all Exception
+                        .noSkip(ConstraintViolationException.class) // but do not skip this one
+                        .skipLimit(20) // the number of times you want to skip Exception.class
                         .build();
 
         return new JobBuilder("all-customers-job", jobRepository)
@@ -65,6 +57,18 @@ public class BatchConfig implements JobExecutionListener {
                 .listener(this)
                 .start(step)
                 .build();
+    }
+
+    private ItemWriter<CustomerDTO> getCustomerDTOItemWriter() {
+        return items -> {
+            log.info("Writing chunk of size {} at :{}", items.size(), LocalDateTime.now());
+            items.forEach(customerDTO -> log.info("Read customer: {}", customerDTO));
+        };
+    }
+
+    private ItemProcessor<Customer, CustomerDTO> getCustomerCustomerDTOItemProcessor() {
+        return customer ->
+                new CustomerDTO(customer.getName(), customer.getAddress(), customer.getGender());
     }
 
     @Bean

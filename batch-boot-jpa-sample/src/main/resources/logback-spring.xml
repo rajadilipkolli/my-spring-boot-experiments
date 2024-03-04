@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
+    <!-- Include default Spring Boot Logback configurations -->
     <include resource="org/springframework/boot/logging/logback/defaults.xml" />
+    <!-- Include default CONSOLE and FILE appenders -->
     <include resource="org/springframework/boot/logging/logback/console-appender.xml" />
+
     <springProperty scope="context" name="appName" source="spring.application.name"/>
 
     <springProfile name="default">
@@ -10,7 +13,8 @@
         </root>
     </springProfile>
     <springProfile name="!default">
-        <property name="LOG_FILE" value="logs/${appName}.log"/>
+        <!-- Define the log file location -->
+        <property name="LOG_FILE" value="${LOG_FILE:-${LOG_PATH:-${LOG_TEMP:-${java.io.tmpdir:-/tmp}}}/logs/${appName}.log}"/>
         <include resource="org/springframework/boot/logging/logback/file-appender.xml" />
         <root level="INFO">
             <appender-ref ref="FILE" />
