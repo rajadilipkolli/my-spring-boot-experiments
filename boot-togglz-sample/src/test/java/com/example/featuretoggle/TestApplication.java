@@ -14,7 +14,7 @@ public class TestApplication {
     @ServiceConnection
     @RestartScope
     MySQLContainer<?> sqlContainer() {
-        return new MySQLContainer<>("mysql:8.2");
+        return new MySQLContainer<>("mysql:8.3");
     }
 
     public static void main(String[] args) {

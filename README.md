@@ -5,6 +5,7 @@
 
 <!-- TOC -->
 * [spring boot integration experiments](#spring-boot-integration-experiments)
+    * [Tech Stack](#tech-stack)
     * [Useful Docker Commands](#useful-docker-commands)
     * [Useful git Commands](#useful-git-commands)
 <!-- TOC -->
@@ -29,7 +30,7 @@ The following table list all sample codes related to the spring boot integration
 | [MultiTenancy Schema Based](./jpa/multitenancy/schema)                                  | The application, demonstrates running multi tenancy in JPA using schema based i.e Shared Database with Separate Schema                                                                                         | Completed |
 | [MultiTenancy with multipledatsources](./jpa/multitenancy/multidatasource-multitenancy) | The application, demonstrates running multi tenancy in JPA using all strategies using multidatasources                                                                                                         | Completed |
 | [mongodb-elasticsearch-integration](./boot-mongodb-elasticsearch)                       | The application, demonstrates saving the data in MongoDb and then searching in ElasticSearch for quick Search, GeoSpatial Search                                                                               | WIP       |
-| [spring-boot-graphql-querydsl](./graphql/spring-boot-graphql-querydsl)                  | The application, demonstrates the way to connect to database using graph ql and querydsl                                                                                                                       | WIP       |
+| [spring-boot-graphql-querydsl](./graphql/boot-graphql-querydsl)                         | The application, demonstrates the way to connect to database using graph ql and querydsl                                                                                                                       | WIP       |
 | [spring-boot-graphql-webmvc](./graphql/boot-graphql-webmvc)                             | The application, demonstrates how to apply graphql concepts to the spring boot project                                                                                                                         | WIP       |
 | [Choas Engineering Principles](./boot-choas-monkey)                                     | The application, demonstrates how to apply choas engineering concepts to the spring boot project, test using Gatling to demonstrate the difference                                                             | WIP       |
 | [Feature Toggles](./boot-togglz-sample)                                                 | The application, demonstrates how to apply feature toggles concepts to the spring boot project                                                                                                                 | WIP       |
