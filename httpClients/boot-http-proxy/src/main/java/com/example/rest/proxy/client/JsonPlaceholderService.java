@@ -1,6 +1,7 @@
 package com.example.rest.proxy.client;
 
 import com.example.rest.proxy.entities.Post;
+import com.example.rest.proxy.model.response.PostCommentDto;
 import java.util.List;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -16,6 +17,9 @@ public interface JsonPlaceholderService {
 
     @GetExchange("/posts/{id}")
     Post loadPostById(@PathVariable Long id);
+
+    @GetExchange("/posts/{id}/comments")
+    List<PostCommentDto> loadPostCommentsById(@PathVariable Long id);
 
     @PostExchange("/posts")
     Post createPost(@RequestBody Post post);

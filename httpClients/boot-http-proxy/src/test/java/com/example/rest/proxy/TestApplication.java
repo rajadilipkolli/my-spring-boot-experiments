@@ -14,7 +14,7 @@ public class TestApplication {
     @ServiceConnection
     @RestartScope
     PostgreSQLContainer<?> postgresContainer() {
-        return new PostgreSQLContainer<>("postgres:16.0-alpine");
+        return new PostgreSQLContainer<>("postgres:16.2-alpine");
     }
 
     public static void main(String[] args) {

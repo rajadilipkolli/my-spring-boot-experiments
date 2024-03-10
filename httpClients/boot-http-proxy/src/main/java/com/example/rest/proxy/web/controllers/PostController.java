@@ -2,6 +2,7 @@ package com.example.rest.proxy.web.controllers;
 
 import com.example.rest.proxy.entities.Post;
 import com.example.rest.proxy.model.response.PagedResult;
+import com.example.rest.proxy.model.response.PostResponse;
 import com.example.rest.proxy.services.PostService;
 import com.example.rest.proxy.utils.AppConstants;
 import lombok.RequiredArgsConstructor;
@@ -40,7 +41,7 @@ public class PostController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Post> getPostById(@PathVariable Long id) {
+    public ResponseEntity<PostResponse> getPostById(@PathVariable Long id) {
         return postService
                 .findPostById(id)
                 .map(ResponseEntity::ok)
@@ -49,7 +50,7 @@ public class PostController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Post createPost(@RequestBody @Validated Post post) {
+    public PostResponse createPost(@RequestBody @Validated Post post) {
         return postService.savePost(post);
     }
 
@@ -60,13 +61,13 @@ public class PostController {
                 .map(
                         postObj -> {
                             post.setId(id);
-                            return ResponseEntity.ok(postService.savePost(post));
+                            return ResponseEntity.ok(postService.save(post));
                         })
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Post> deletePost(@PathVariable Long id) {
+    public ResponseEntity<PostResponse> deletePost(@PathVariable Long id) {
         return postService
                 .findPostById(id)
                 .map(

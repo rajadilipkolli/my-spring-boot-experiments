@@ -32,9 +32,9 @@ class PostControllerIT extends AbstractIntegrationTest {
         postRepository.deleteAllInBatch();
 
         postList = new ArrayList<>();
-        postList.add(new Post(null, "First Post", 1L, "First Body"));
-        postList.add(new Post(null, "Second Post", 1L, "Second Body"));
-        postList.add(new Post(null, "Third Post", 1L, "ThirdBody"));
+        postList.add(new Post(null, "First Post", 1L, "First Body", new ArrayList<>()));
+        postList.add(new Post(null, "Second Post", 1L, "Second Body", new ArrayList<>()));
+        postList.add(new Post(null, "Third Post", 1L, "ThirdBody", new ArrayList<>()));
         postList = postRepository.saveAll(postList);
     }
 
@@ -61,7 +61,7 @@ class PostControllerIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(get("/api/posts/{id}", postId))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(post.getId()), Long.class))
+                .andExpect(jsonPath("$.postId", is(post.getId()), Long.class))
                 .andExpect(jsonPath("$.title", is(post.getTitle())))
                 .andExpect(jsonPath("$.userId", is(post.getUserId()), Long.class))
                 .andExpect(jsonPath("$.body", is(post.getBody())));
@@ -69,20 +69,22 @@ class PostControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldCreateNewPost() throws Exception {
-        Post post = new Post(null, "New Post", 1L, "First Body");
+        Post post = new Post(null, "New Post", 1L, "First Body", new ArrayList<>());
         this.mockMvc
                 .perform(
                         post("/api/posts")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(post)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id", notNullValue()))
-                .andExpect(jsonPath("$.title", is(post.getTitle())));
+                .andExpect(jsonPath("$.postId", notNullValue()))
+                .andExpect(jsonPath("$.title", is(post.getTitle())))
+                .andExpect(jsonPath("$.userId", is(post.getUserId()), Long.class))
+                .andExpect(jsonPath("$.body", is(post.getBody())));
     }
 
     @Test
     void shouldReturn400WhenCreateNewPostWithoutTitleAndBody() throws Exception {
-        Post post = new Post(null, null, 0L, null);
+        Post post = new Post(null, null, 0L, null, new ArrayList<>());
 
         this.mockMvc
                 .perform(
@@ -119,7 +121,9 @@ class PostControllerIT extends AbstractIntegrationTest {
                                 .content(objectMapper.writeValueAsString(post)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(post.getId()), Long.class))
-                .andExpect(jsonPath("$.title", is(post.getTitle())));
+                .andExpect(jsonPath("$.title", is(post.getTitle())))
+                .andExpect(jsonPath("$.userId", is(post.getUserId()), Long.class))
+                .andExpect(jsonPath("$.body", is(post.getBody())));
     }
 
     @Test
@@ -129,7 +133,9 @@ class PostControllerIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(delete("/api/posts/{id}", post.getId()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(post.getId()), Long.class))
-                .andExpect(jsonPath("$.title", is(post.getTitle())));
+                .andExpect(jsonPath("$.postId", is(post.getId()), Long.class))
+                .andExpect(jsonPath("$.title", is(post.getTitle())))
+                .andExpect(jsonPath("$.userId", is(post.getUserId()), Long.class))
+                .andExpect(jsonPath("$.body", is(post.getBody())));
     }
 }

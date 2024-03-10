@@ -1,13 +1,17 @@
 package com.example.rest.proxy.entities;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Positive;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -38,6 +42,9 @@ public class Post {
     @Column(nullable = false)
     @NotEmpty(message = "Body cannot be empty")
     private String body;
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "post", orphanRemoval = true)
+    private List<PostComment> postComments = new ArrayList<>();
 
     @Override
     public boolean equals(Object o) {
