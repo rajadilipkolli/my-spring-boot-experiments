@@ -1,5 +1,7 @@
 package com.example.graphql;
 
+import static graphql.ErrorType.ValidationError;
+
 import com.example.graphql.common.AbstractIntegrationTest;
 import com.example.graphql.dtos.Customer;
 import com.example.graphql.dtos.CustomerDTO;
@@ -20,16 +22,16 @@ class ApplicationIntegrationTest extends AbstractIntegrationTest {
         this.graphQlTester
                 .document(
                         """
-            {
-              customers {
-                id
-                name
-                orders {
-                  id
-                }
-              }
-            }
-            """)
+                        query {
+                          customers {
+                            id
+                            name
+                            orders {
+                              id
+                            }
+                          }
+                        }
+                        """)
                 .execute()
                 .path("customers[*]")
                 .hasValue()
@@ -42,13 +44,13 @@ class ApplicationIntegrationTest extends AbstractIntegrationTest {
         this.graphQlTester
                 .document(
                         """
-                query ($name: String) {
-                   customersByName(name: $name) {
-                     id
-                     name
-                   }
-                 }
-                """)
+                        query ($name: String) {
+                           customersByName(name: $name) {
+                             id
+                             name
+                           }
+                         }
+                        """)
                 .variable("name", "raja")
                 .execute()
                 .path("customersByName[*]")
@@ -62,13 +64,13 @@ class ApplicationIntegrationTest extends AbstractIntegrationTest {
         String randomString = RandomStringUtils.randomAlphabetic(5);
         String query =
                 """
-                    mutation addCustomer($cname: String) {
-                      addCustomer(name: $cname) {
-                        id
-                        name
-                      }
-                    }
-                    """;
+                mutation addCustomer($cname: String) {
+                  addCustomer(name: $cname) {
+                    id
+                    name
+                  }
+                }
+                """;
         this.graphQlTester
                 .document(query)
                 .variable("cname", randomString)
@@ -80,5 +82,32 @@ class ApplicationIntegrationTest extends AbstractIntegrationTest {
                 .path("addCustomer.name")
                 .entity(String.class)
                 .isEqualTo(randomString);
+    }
+
+    @Test
+    void query_insert_failure() {
+        String query =
+                """
+                mutation addCustomer($cname: String) {
+                  addCustomer(name: $cname) {
+                    id
+                    name
+                  }
+                }
+                """;
+        this.graphQlTester
+                .document(query)
+                .variable("cname", null)
+                .execute()
+                .errors()
+                .expect(error -> error.getErrorType() == ValidationError)
+                .verify()
+                .path("$.data")
+                .matchesJson(
+                        """
+                        {
+                            "addCustomer": null
+                        }
+                        """);
     }
 }

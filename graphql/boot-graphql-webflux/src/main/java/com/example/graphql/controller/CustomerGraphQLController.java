@@ -49,7 +49,7 @@ public class CustomerGraphQLController {
     }
 
     @MutationMapping
-    Mono<Customer> addCustomer(@Argument @NotBlank String name) {
+    Mono<Customer> addCustomer(@Argument @NotBlank(message = "Name cant be blank") String name) {
         return this.customerGraphQLService.addCustomer(name);
     }
 
