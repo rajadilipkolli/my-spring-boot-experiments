@@ -24,5 +24,5 @@ public interface JsonPlaceholderService {
     Post updatePostById(@PathVariable Long id, @RequestBody Post post);
 
     @DeleteExchange("/posts/{id}")
-    Post deletePostById(@PathVariable Long id);
+    void deletePostById(@PathVariable Long id);
 }

@@ -2,10 +2,10 @@ package com.example.restclient.bootrestclient.config;
 
 import java.net.http.HttpClient;
 import java.time.Duration;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.JdkClientHttpRequestFactory;
 import org.springframework.web.client.RestClient;
@@ -20,7 +20,11 @@ public class RestClientConfiguration {
         String baseUrl = "https://jsonplaceholder.typicode.com";
         DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory(baseUrl);
         return builder.uriBuilderFactory(factory)
-                .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .defaultHeaders(
+                        httpHeaders -> {
+                            httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+                            httpHeaders.setAccept(List.of(MediaType.APPLICATION_JSON));
+                        })
                 .requestFactory(new JdkClientHttpRequestFactory(jdkClient))
                 .requestInterceptor(
                         (request, body, execution) -> {
