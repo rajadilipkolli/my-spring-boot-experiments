@@ -118,8 +118,7 @@ class PostControllerTest {
         PostResponse postResponse =
                 new PostResponse(postId, 1L, "Updated text", "First Body", new ArrayList<>());
         given(postService.findPostById(postId)).willReturn(Optional.of(postResponse));
-        given(postService.save(any(Post.class)))
-                .willAnswer((invocation) -> invocation.getArgument(0));
+        given(postService.saveAndConvertToResponse(any(Post.class))).willReturn(postResponse);
 
         this.mockMvc
                 .perform(

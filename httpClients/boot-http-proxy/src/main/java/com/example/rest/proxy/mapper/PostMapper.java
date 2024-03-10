@@ -5,7 +5,6 @@ import com.example.rest.proxy.entities.PostComment;
 import com.example.rest.proxy.model.response.PostCommentDto;
 import com.example.rest.proxy.model.response.PostResponse;
 import com.example.rest.proxy.repositories.PostRepository;
-import java.util.ArrayList;
 import java.util.List;
 import org.springframework.stereotype.Component;
 
@@ -43,7 +42,11 @@ public class PostMapper {
 
     public PostResponse mapToPostResponse(Post post) {
         return new PostResponse(
-                post.getId(), post.getUserId(), post.getTitle(), post.getBody(), new ArrayList<>());
+                post.getId(),
+                post.getUserId(),
+                post.getTitle(),
+                post.getBody(),
+                mapToCommentResponseList(post.getPostComments()));
     }
 
     public List<PostResponse> mapToPostResponseList(List<Post> postList) {

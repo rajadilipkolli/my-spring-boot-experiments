@@ -2,9 +2,11 @@ package com.example.rest.proxy.web.controllers;
 
 import com.example.rest.proxy.entities.Post;
 import com.example.rest.proxy.model.response.PagedResult;
+import com.example.rest.proxy.model.response.PostCommentDto;
 import com.example.rest.proxy.model.response.PostResponse;
 import com.example.rest.proxy.services.PostService;
 import com.example.rest.proxy.utils.AppConstants;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -48,6 +50,14 @@ public class PostController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    @GetMapping("/{id}/comments")
+    public ResponseEntity<List<PostCommentDto>> getPostCommentsById(@PathVariable Long id) {
+        return postService
+                .findPostCommentsById(id)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public PostResponse createPost(@RequestBody @Validated Post post) {
@@ -55,13 +65,13 @@ public class PostController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Post> updatePost(@PathVariable Long id, @RequestBody Post post) {
+    public ResponseEntity<PostResponse> updatePost(@PathVariable Long id, @RequestBody Post post) {
         return postService
                 .findPostById(id)
                 .map(
                         postObj -> {
                             post.setId(id);
-                            return ResponseEntity.ok(postService.save(post));
+                            return ResponseEntity.ok(postService.saveAndConvertToResponse(post));
                         })
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }

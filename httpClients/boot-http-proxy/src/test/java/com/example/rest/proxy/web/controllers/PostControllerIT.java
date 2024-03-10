@@ -120,7 +120,7 @@ class PostControllerIT extends AbstractIntegrationTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(post)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(post.getId()), Long.class))
+                .andExpect(jsonPath("$.postId", is(post.getId()), Long.class))
                 .andExpect(jsonPath("$.title", is(post.getTitle())))
                 .andExpect(jsonPath("$.userId", is(post.getUserId()), Long.class))
                 .andExpect(jsonPath("$.body", is(post.getBody())));
