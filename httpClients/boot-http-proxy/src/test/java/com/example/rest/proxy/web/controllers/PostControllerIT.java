@@ -1,5 +1,6 @@
 package com.example.rest.proxy.web.controllers;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.Matchers.hasSize;
@@ -65,6 +66,25 @@ class PostControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.title", is(post.getTitle())))
                 .andExpect(jsonPath("$.userId", is(post.getUserId()), Long.class))
                 .andExpect(jsonPath("$.body", is(post.getBody())));
+    }
+
+    @Test
+    void shouldFindPostByIdBySavingData() throws Exception {
+        long count = this.postRepository.count();
+
+        this.mockMvc
+                .perform(get("/api/posts/{id}", 75))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.postId", notNullValue()))
+                .andExpect(jsonPath("$.title", is("dignissimos eum dolor ut enim et delectus in")))
+                .andExpect(jsonPath("$.userId", is(8)))
+                .andExpect(
+                        jsonPath(
+                                "$.body",
+                                is(
+                                        "commodi non non omnis et voluptas sit\nautem aut nobis magnam et sapiente voluptatem\net laborum repellat qui delectus facilis temporibus\nrerum amet et nemo voluptate expedita adipisci error dolorem")));
+
+        assertThat(this.postRepository.count()).isEqualTo(count + 1);
     }
 
     @Test

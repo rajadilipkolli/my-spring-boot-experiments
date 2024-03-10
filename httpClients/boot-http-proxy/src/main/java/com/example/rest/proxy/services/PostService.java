@@ -24,7 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.HttpClientErrorException;
 
 @Service
-@Transactional(readOnly = true)
+@Transactional
 @RequiredArgsConstructor
 public class PostService {
 
@@ -33,6 +33,7 @@ public class PostService {
     private final JsonPlaceholderService jsonPlaceholderService;
     private final PostMapper postMapper;
 
+    @Transactional(readOnly = true)
     public PagedResult<PostResponse> findAllPosts(
             int pageNo, int pageSize, String sortBy, String sortDir) {
         Sort sort =
@@ -86,7 +87,6 @@ public class PostService {
                 postMapper.mapToEntityList(postCommentDtoList, postRepository));
     }
 
-    @Transactional
     public PostResponse savePost(Post post) {
         Post fetchedPost = jsonPlaceholderService.createPost(post);
         Post savedPost = save(fetchedPost);
@@ -97,13 +97,11 @@ public class PostService {
         return postRepository.save(postEntity);
     }
 
-    @Transactional
     public PostResponse saveAndConvertToResponse(Post post) {
         Post savedPost = save(post);
         return postMapper.mapToPostResponse(savedPost);
     }
 
-    @Transactional
     public void deletePostById(Long id) {
         jsonPlaceholderService.deletePostById(id);
         postRepository.deleteById(id);

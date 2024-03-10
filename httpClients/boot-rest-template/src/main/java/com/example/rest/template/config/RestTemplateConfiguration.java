@@ -7,13 +7,20 @@ import java.util.Iterator;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.hc.client5.http.ConnectionKeepAliveStrategy;
 import org.apache.hc.client5.http.HttpRoute;
+import org.apache.hc.client5.http.config.ConnectionConfig;
 import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
+import org.apache.hc.client5.http.socket.ConnectionSocketFactory;
+import org.apache.hc.client5.http.socket.PlainConnectionSocketFactory;
+import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
 import org.apache.hc.core5.http.Header;
 import org.apache.hc.core5.http.HttpHeaders;
 import org.apache.hc.core5.http.HttpHost;
+import org.apache.hc.core5.http.config.Registry;
+import org.apache.hc.core5.http.config.RegistryBuilder;
+import org.apache.hc.core5.http.io.SocketConfig;
 import org.apache.hc.core5.util.TimeValue;
 import org.apache.hc.core5.util.Timeout;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -34,8 +41,19 @@ public class RestTemplateConfiguration {
 
     @Bean
     PoolingHttpClientConnectionManager poolingConnectionManager() {
+        Registry<ConnectionSocketFactory> registry =
+                RegistryBuilder.<ConnectionSocketFactory>create()
+                        .register("http", PlainConnectionSocketFactory.getSocketFactory())
+                        .register("https", SSLConnectionSocketFactory.getSocketFactory())
+                        .build();
         PoolingHttpClientConnectionManager poolingConnectionManager =
-                new PoolingHttpClientConnectionManager();
+                new PoolingHttpClientConnectionManager(registry);
+
+        poolingConnectionManager.setDefaultSocketConfig(
+                SocketConfig.custom().setSoTimeout(Timeout.ofSeconds(2)).build());
+        poolingConnectionManager.setDefaultConnectionConfig(
+                ConnectionConfig.custom().setConnectTimeout(Timeout.ofSeconds(2)).build());
+
         // set a total amount of connections across all HTTP routes
         poolingConnectionManager.setMaxTotal(MAX_TOTAL_CONNECTIONS);
         // set a maximum amount of connections for each HTTP route in pool
@@ -53,7 +71,7 @@ public class RestTemplateConfiguration {
             ConnectionKeepAliveStrategy connectionKeepAliveStrategy) {
         RequestConfig requestConfig =
                 RequestConfig.custom()
-                        .setConnectTimeout(Timeout.ofSeconds(CONNECTION_TIMEOUT))
+                        .setConnectionKeepAlive(TimeValue.ofSeconds(CONNECTION_TIMEOUT))
                         .setConnectionRequestTimeout(Timeout.ofSeconds(REQUEST_TIMEOUT))
                         .setResponseTimeout(Timeout.ofSeconds(SOCKET_TIMEOUT))
                         .build();
