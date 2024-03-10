@@ -19,6 +19,7 @@ import org.apache.hc.core5.util.Timeout;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.MediaType;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -73,7 +74,7 @@ public class RestTemplateConfiguration {
                 Header element = headerIterator.next();
                 String param = element.getName();
                 String value = element.getValue();
-                if (value != null && param.equalsIgnoreCase("timeout")) {
+                if (value != null && param.equalsIgnoreCase(HttpHeaders.TIMEOUT)) {
                     return TimeValue.ofSeconds(Long.parseLong(value));
                 }
             }
@@ -88,6 +89,9 @@ public class RestTemplateConfiguration {
 
         return restTemplateBuilder
                 .setConnectTimeout(Duration.ofSeconds(60))
+                .defaultHeader(
+                        org.springframework.http.HttpHeaders.CONTENT_TYPE,
+                        MediaType.APPLICATION_JSON_VALUE)
                 .requestFactory(() -> new HttpComponentsClientHttpRequestFactory(httpClient))
                 .interceptors(
                         ((request, body, execution) -> {
@@ -110,9 +114,9 @@ public class RestTemplateConfiguration {
             public void run() {
                 // only if connection pool is initialised
                 if (pool != null) {
-                    log.info("cleaning connection pool");
                     pool.closeExpired();
                     pool.closeIdle(TimeValue.ofSeconds(IDLE_CONNECTION_WAIT_TIME));
+                    log.info("Idle connection monitor: Closing expired and idle connections");
                 }
             }
         };

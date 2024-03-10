@@ -54,7 +54,7 @@ public class PostController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<PostDto> deletePost(@PathVariable Long id) {
+    public ResponseEntity<String> deletePost(@PathVariable Long id) {
         return postService
                 .findPostById(id)
                 .map(postDto -> ResponseEntity.ok(postService.deletePostById(id)))

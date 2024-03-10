@@ -71,11 +71,11 @@ public class PostService {
                         .body(PostDto.class));
     }
 
-    public PostDto deletePostById(Long id) {
+    public String deletePostById(Long id) {
         return restClient
                 .delete()
                 .uri(uriBuilder -> uriBuilder.path("/posts/{postId}").build(id))
                 .retrieve()
-                .body(PostDto.class);
+                .body(String.class);
     }
 }

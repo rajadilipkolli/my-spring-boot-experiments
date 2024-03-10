@@ -151,12 +151,9 @@ class PostControllerTest {
         Long postId = 1L;
         PostDto post = new PostDto(1L, postId, "Some text", "First Body");
         given(postService.findPostById(postId)).willReturn(Optional.of(post));
-        given(postService.deletePostById(post.id())).willReturn(post);
+        given(postService.deletePostById(post.id())).willReturn("");
 
-        this.mockMvc
-                .perform(delete("/api/posts/{id}", post.id()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.title", is(post.title())));
+        this.mockMvc.perform(delete("/api/posts/{id}", post.id())).andExpect(status().isOk());
     }
 
     @Test
