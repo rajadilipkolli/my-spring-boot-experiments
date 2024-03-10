@@ -11,8 +11,8 @@ public class TestApplication {
 
     @ServiceConnection
     @Bean
-    PostgreSQLContainer<?> sqlContainer() {
-        return new PostgreSQLContainer<>("postgres:16.0-alpine");
+    PostgreSQLContainer<?> postgreSQLContainer() {
+        return new PostgreSQLContainer<>("postgres:16.2-alpine");
     }
 
     public static void main(String[] args) {
