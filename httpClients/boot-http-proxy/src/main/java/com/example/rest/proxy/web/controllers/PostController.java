@@ -28,7 +28,7 @@ public class PostController {
     private final PostService postService;
 
     @GetMapping
-    public PagedResult<Post> getAllPosts(
+    public PagedResult<PostResponse> getAllPosts(
             @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_NUMBER, required = false)
                     int pageNo,
             @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_SIZE, required = false)

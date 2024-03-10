@@ -11,17 +11,18 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class PostMapper {
-    public List<PostCommentDto> mapToResponseList(List<PostComment> postCommentList) {
-        return postCommentList.stream()
-                .map(
-                        postComment ->
-                                new PostCommentDto(
-                                        postComment.getPost().getId(),
-                                        postComment.getId(),
-                                        postComment.getName(),
-                                        postComment.getEmail(),
-                                        postComment.getBody()))
-                .toList();
+
+    public PostCommentDto mapToCommentResponse(PostComment postComment) {
+        return new PostCommentDto(
+                postComment.getPost().getId(),
+                postComment.getId(),
+                postComment.getName(),
+                postComment.getEmail(),
+                postComment.getBody());
+    }
+
+    public List<PostCommentDto> mapToCommentResponseList(List<PostComment> postCommentList) {
+        return postCommentList.stream().map(this::mapToCommentResponse).toList();
     }
 
     public List<PostComment> mapToEntityList(
@@ -41,8 +42,11 @@ public class PostMapper {
     }
 
     public PostResponse mapToPostResponse(Post post) {
-
         return new PostResponse(
                 post.getId(), post.getUserId(), post.getTitle(), post.getBody(), new ArrayList<>());
+    }
+
+    public List<PostResponse> mapToPostResponseList(List<Post> postList) {
+        return postList.stream().map(this::mapToPostResponse).toList();
     }
 }

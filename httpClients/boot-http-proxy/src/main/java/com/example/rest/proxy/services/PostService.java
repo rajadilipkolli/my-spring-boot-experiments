@@ -33,7 +33,8 @@ public class PostService {
     private final JsonPlaceholderService jsonPlaceholderService;
     private final PostMapper postMapper;
 
-    public PagedResult<Post> findAllPosts(int pageNo, int pageSize, String sortBy, String sortDir) {
+    public PagedResult<PostResponse> findAllPosts(
+            int pageNo, int pageSize, String sortBy, String sortDir) {
         Sort sort =
                 sortDir.equalsIgnoreCase(Sort.Direction.ASC.name())
                         ? Sort.by(sortBy).ascending()
@@ -41,9 +42,19 @@ public class PostService {
 
         // create Pageable instance
         Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
-        Page<Post> postsPage = postRepository.findAll(pageable);
+        Page<Post> page = postRepository.findAll(pageable);
 
-        return new PagedResult<>(postsPage);
+        List<PostResponse> postResponses = postMapper.mapToPostResponseList(page.getContent());
+
+        return new PagedResult<>(
+                postResponses,
+                page.getTotalElements(),
+                page.getNumber() + 1,
+                page.getTotalPages(),
+                page.isFirst(),
+                page.isLast(),
+                page.hasNext(),
+                page.hasPrevious());
     }
 
     public Optional<PostResponse> findPostById(Long postId) {
@@ -67,7 +78,7 @@ public class PostService {
                     jsonPlaceholderService::loadPostCommentsById;
             postCommentList = callService(postId, loadPostById.andThen(this::savePostComments));
         }
-        return Optional.of(postMapper.mapToResponseList(postCommentList));
+        return Optional.of(postMapper.mapToCommentResponseList(postCommentList));
     }
 
     private List<PostComment> savePostComments(List<PostCommentDto> postCommentDtos) {
