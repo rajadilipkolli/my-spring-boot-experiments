@@ -16,7 +16,6 @@ import org.apache.hc.client5.http.socket.ConnectionSocketFactory;
 import org.apache.hc.client5.http.socket.PlainConnectionSocketFactory;
 import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
 import org.apache.hc.core5.http.Header;
-import org.apache.hc.core5.http.HttpHeaders;
 import org.apache.hc.core5.http.HttpHost;
 import org.apache.hc.core5.http.config.Registry;
 import org.apache.hc.core5.http.config.RegistryBuilder;
@@ -50,9 +49,11 @@ public class RestTemplateConfiguration {
                 new PoolingHttpClientConnectionManager(registry);
 
         poolingConnectionManager.setDefaultSocketConfig(
-                SocketConfig.custom().setSoTimeout(Timeout.ofSeconds(2)).build());
+                SocketConfig.custom().setSoTimeout(Timeout.ofSeconds(REQUEST_TIMEOUT)).build());
         poolingConnectionManager.setDefaultConnectionConfig(
-                ConnectionConfig.custom().setConnectTimeout(Timeout.ofSeconds(2)).build());
+                ConnectionConfig.custom()
+                        .setConnectTimeout(Timeout.ofSeconds(CONNECTION_TIMEOUT))
+                        .build());
 
         // set a total amount of connections across all HTTP routes
         poolingConnectionManager.setMaxTotal(MAX_TOTAL_CONNECTIONS);
@@ -87,12 +88,12 @@ public class RestTemplateConfiguration {
     @Bean
     ConnectionKeepAliveStrategy connectionKeepAliveStrategy() {
         return (httpResponse, httpContext) -> {
-            Iterator<Header> headerIterator = httpResponse.headerIterator(HttpHeaders.KEEP_ALIVE);
+            Iterator<Header> headerIterator = httpResponse.headerIterator("keep-alive");
             while (headerIterator.hasNext()) {
                 Header element = headerIterator.next();
                 String param = element.getName();
                 String value = element.getValue();
-                if (value != null && param.equalsIgnoreCase(HttpHeaders.TIMEOUT)) {
+                if (value != null && param.equalsIgnoreCase("timeout")) {
                     return TimeValue.ofSeconds(Long.parseLong(value));
                 }
             }
