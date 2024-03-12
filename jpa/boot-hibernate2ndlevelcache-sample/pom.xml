@@ -102,7 +102,7 @@
         <dependency>
             <groupId>org.redisson</groupId>
             <artifactId>redisson-hibernate-6</artifactId>
-            <version>3.27.1</version>
+            <version>3.27.2</version>
         </dependency>
         <dependency>
             <groupId>io.hypersistence</groupId>
