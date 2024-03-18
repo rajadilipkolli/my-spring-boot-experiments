@@ -8,7 +8,6 @@ import com.example.locks.model.request.ActorRequest;
 import com.example.locks.model.response.ActorResponse;
 import com.example.locks.model.response.PagedResult;
 import com.example.locks.repositories.ActorRepository;
-import jakarta.persistence.LockModeType;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -94,14 +93,18 @@ public class ActorService {
     }
 
     public Actor obtainPessimisticLockAndUpdate(Long id, String name) {
-        Actor actor = actorRepository.getActorAndObtainPessimisticLockingOnItById(id, LockModeType.PESSIMISTIC_WRITE);
-        actor.setActorName(name);
-        return actorRepository.save(actor);
+        Optional<Actor> actor = actorRepository.findByIdWithPessimisticWriteLock(id);
+        sleepForAWhile();
+        actor.ifPresent(obj -> {
+            obj.setActorName(name);
+            actorRepository.save(obj);
+        });
+        return actor.orElseThrow(() -> new ActorNotFoundException(id));
     }
 
     private void sleepForAWhile() {
         try {
-            TimeUnit.MILLISECONDS.sleep(2000);
+            TimeUnit.MILLISECONDS.sleep(5000);
         } catch (InterruptedException ie) {
             Thread.currentThread().interrupt();
         }
@@ -109,6 +112,6 @@ public class ActorService {
 
     @Transactional
     public Actor getActorWithPessimisticReadLock(Long id) {
-        return actorRepository.getActorAndObtainPessimisticLockingOnItById(id, LockModeType.PESSIMISTIC_READ);
+        return actorRepository.findByIdWithPessimisticReadLock(id).orElseThrow(() -> new ActorNotFoundException(id));
     }
 }
