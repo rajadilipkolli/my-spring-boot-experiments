@@ -1,5 +1,8 @@
 package com.example.locks.utils;
 
+import lombok.experimental.UtilityClass;
+
+@UtilityClass
 public final class AppConstants {
     public static final String PROFILE_PROD = "prod";
     public static final String PROFILE_NOT_PROD = "!" + PROFILE_PROD;
@@ -10,5 +13,4 @@ public final class AppConstants {
     public static final String DEFAULT_SORT_BY = "actorName";
     public static final String DEFAULT_SORT_DIRECTION = "asc";
 
-    private AppConstants() {}
 }

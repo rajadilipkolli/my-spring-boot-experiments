@@ -94,8 +94,8 @@ public class ActorService {
 
     public Actor obtainPessimisticLockAndUpdate(Long id, String name) {
         Optional<Actor> actor = actorRepository.findByIdWithPessimisticWriteLock(id);
-        sleepForAWhile();
         actor.ifPresent(obj -> {
+            sleepForAWhile();
             obj.setActorName(name);
             actorRepository.save(obj);
         });
