@@ -104,7 +104,7 @@ public class ActorService {
 
     private void sleepForAWhile() {
         try {
-            TimeUnit.MILLISECONDS.sleep(5000);
+            TimeUnit.SECONDS.sleep(5);
         } catch (InterruptedException ie) {
             Thread.currentThread().interrupt();
         }
