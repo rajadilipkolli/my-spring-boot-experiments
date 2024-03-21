@@ -7,7 +7,11 @@ import com.scheduler.quartz.service.JobsService;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.SchedulerException;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api")
@@ -32,7 +36,7 @@ public class JobsController {
 
     @PostMapping(value = "/saveOrUpdate")
     public Message saveOrUpdate(ScheduleJob job) {
-        log.info("params, job = {}", job);
+        log.info("saveOrUpdateJob  params : {}", job);
         Message message = Message.failure();
         try {
             jobsService.saveOrUpdate(job);
@@ -46,7 +50,7 @@ public class JobsController {
 
     @PostMapping(value = "/pauseJob")
     public Message pauseJob(ScheduleJob job) {
-        log.info("params, job = {}", job);
+        log.info("pauseJob params = {}", job);
         Message message = Message.failure();
         try {
             jobsService.pauseJob(job);
@@ -60,7 +64,7 @@ public class JobsController {
 
     @DeleteMapping(value = "/deleteJob")
     public Message deleteJob(ScheduleJob job) {
-        log.info("params, job = {}", job);
+        log.info("deleteJob params : {}", job);
         Message message = Message.failure();
         try {
             jobsService.deleteJob(job);
