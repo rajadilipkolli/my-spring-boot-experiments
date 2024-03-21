@@ -26,11 +26,6 @@ import org.springframework.data.redis.serializer.RedisSerializationContext;
 @Slf4j
 public class CacheConfig implements CachingConfigurer {
 
-    private RedisCacheConfiguration createCacheConfiguration(long timeoutInSeconds) {
-        return RedisCacheConfiguration.defaultCacheConfig()
-                .entryTtl(Duration.ofSeconds(timeoutInSeconds));
-    }
-
     @Bean
     @Primary
     RedisCacheConfiguration defaultCacheConfig() {
@@ -63,14 +58,20 @@ public class CacheConfig implements CachingConfigurer {
     }
 
     @Bean
-    RedisCacheConfiguration cacheConfiguration(CacheConfigurationProperties properties) {
+    RedisCacheConfiguration defaultCacheConfiguration(CacheConfigurationProperties properties) {
         return createCacheConfiguration(properties.getTimeoutSeconds());
+    }
+
+    private RedisCacheConfiguration createCacheConfiguration(long timeoutSeconds) {
+        return RedisCacheConfiguration.defaultCacheConfig()
+                .entryTtl(Duration.ofSeconds(timeoutSeconds));
     }
 
     @Bean
     CacheManager cacheManager(
             RedisConnectionFactory redisConnectionFactory,
-            CacheConfigurationProperties properties) {
+            CacheConfigurationProperties properties,
+            RedisCacheConfiguration defaultCacheConfiguration) {
         Map<String, RedisCacheConfiguration> cacheConfigurations = new HashMap<>();
 
         for (Entry<String, Long> cacheNameAndTimeout :
@@ -81,7 +82,7 @@ public class CacheConfig implements CachingConfigurer {
         }
 
         return RedisCacheManager.builder(redisConnectionFactory)
-                .cacheDefaults(cacheConfiguration(properties))
+                .cacheDefaults(defaultCacheConfiguration)
                 .withInitialCacheConfigurations(cacheConfigurations)
                 .build();
     }
