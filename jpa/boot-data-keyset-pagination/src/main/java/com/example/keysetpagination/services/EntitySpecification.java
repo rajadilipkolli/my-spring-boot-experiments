@@ -95,8 +95,7 @@ public class EntitySpecification<T> {
                             return criteriaBuilder.like(
                                     (Expression<String>) path,
                                     "%" + format.parse(searchCriteria.getValue(), parserContext));
-                        case CONTAINS:
-                        case LIKE:
+                        case CONTAINS, LIKE:
                             return criteriaBuilder.like(
                                     (Expression<String>) path,
                                     "%"
