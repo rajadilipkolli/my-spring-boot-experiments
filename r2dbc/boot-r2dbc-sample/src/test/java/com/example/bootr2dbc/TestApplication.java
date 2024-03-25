@@ -12,7 +12,7 @@ public class TestApplication {
     @Bean
     @ServiceConnection
     PostgreSQLContainer<?> postgreSQLContainer() {
-        return new PostgreSQLContainer<>("postgres:16.0-alpine");
+        return new PostgreSQLContainer<>("postgres:16.2-alpine");
     }
 
     public static void main(String[] args) {
