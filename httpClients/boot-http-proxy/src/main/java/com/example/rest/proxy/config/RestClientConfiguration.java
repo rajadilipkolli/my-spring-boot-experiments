@@ -19,6 +19,7 @@ import org.apache.hc.core5.http.config.RegistryBuilder;
 import org.apache.hc.core5.http.io.SocketConfig;
 import org.apache.hc.core5.util.TimeValue;
 import org.apache.hc.core5.util.Timeout;
+import org.springframework.boot.web.client.RestClientCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
@@ -69,12 +70,11 @@ public class RestClientConfiguration {
     }
 
     @Bean
-    HttpServiceProxyFactory httpServiceProxyFactory(
-            RestClient.Builder builder,
-            ObservationRegistry observationRegistry,
-            CloseableHttpClient httpClient) {
-        RestClient restClient =
-                builder.defaultHeaders(
+    RestClientCustomizer restClientCustomizer(
+            ObservationRegistry observationRegistry, CloseableHttpClient httpClient) {
+        return restClientBuilder ->
+                restClientBuilder
+                        .defaultHeaders(
                                 httpHeaders -> {
                                     httpHeaders.setContentType(MediaType.APPLICATION_JSON);
                                     httpHeaders.setAccept(List.of(MediaType.APPLICATION_JSON));
@@ -90,9 +90,12 @@ public class RestClientConfiguration {
                                     log.info("HTTP Headers: {}", request.getHeaders());
 
                                     return execution.execute(request, body);
-                                })
-                        .build();
-        RestClientAdapter webClientAdapter = RestClientAdapter.create(restClient);
+                                });
+    }
+
+    @Bean
+    HttpServiceProxyFactory httpServiceProxyFactory(RestClient.Builder restClientBuilder) {
+        RestClientAdapter webClientAdapter = RestClientAdapter.create(restClientBuilder.build());
         return HttpServiceProxyFactory.builderFor(webClientAdapter).build();
     }
 
