@@ -17,6 +17,7 @@ import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.client.JdkClientHttpRequestFactory;
 import org.springframework.lang.NonNull;
 import org.springframework.util.StreamUtils;
+import org.springframework.web.client.RestClient;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 
 @Configuration(proxyBeanMethods = false)
@@ -24,7 +25,7 @@ import org.springframework.web.util.DefaultUriBuilderFactory;
 public class RestClientConfiguration {
 
     @Bean
-    public RestClientCustomizer restClientCustomizer(
+    RestClientCustomizer restClientCustomizer(
             @NonNull BufferingClientHttpRequestFactory bufferingClientHttpRequestFactory) {
         String baseUrl = "https://jsonplaceholder.typicode.com";
         DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory(baseUrl);
@@ -45,6 +46,11 @@ public class RestClientConfiguration {
                                     logResponse(response);
                                     return response;
                                 });
+    }
+
+    @Bean
+    RestClient restClient(RestClient.Builder restClientBuilder) {
+        return restClientBuilder.build();
     }
 
     private void logResponse(ClientHttpResponse response) throws IOException {

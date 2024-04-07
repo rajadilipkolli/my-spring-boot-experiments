@@ -94,8 +94,8 @@ public class RestClientConfiguration {
     }
 
     @Bean
-    HttpServiceProxyFactory httpServiceProxyFactory(RestClient restClient) {
-        RestClientAdapter webClientAdapter = RestClientAdapter.create(restClient);
+    HttpServiceProxyFactory httpServiceProxyFactory(RestClient.Builder restClientBuilder) {
+        RestClientAdapter webClientAdapter = RestClientAdapter.create(restClientBuilder.build());
         return HttpServiceProxyFactory.builderFor(webClientAdapter).build();
     }
 
