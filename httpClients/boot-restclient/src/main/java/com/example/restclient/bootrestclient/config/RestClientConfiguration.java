@@ -7,6 +7,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.web.client.RestClientCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpRequest;
@@ -16,7 +17,6 @@ import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.client.JdkClientHttpRequestFactory;
 import org.springframework.lang.NonNull;
 import org.springframework.util.StreamUtils;
-import org.springframework.web.client.RestClient;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 
 @Configuration(proxyBeanMethods = false)
@@ -24,27 +24,27 @@ import org.springframework.web.util.DefaultUriBuilderFactory;
 public class RestClientConfiguration {
 
     @Bean
-    RestClient restClient(
-            RestClient.Builder builder,
+    public RestClientCustomizer restClientCustomizer(
             @NonNull BufferingClientHttpRequestFactory bufferingClientHttpRequestFactory) {
         String baseUrl = "https://jsonplaceholder.typicode.com";
         DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory(baseUrl);
         factory.setEncodingMode(DefaultUriBuilderFactory.EncodingMode.URI_COMPONENT);
-        return builder.uriBuilderFactory(factory)
-                .defaultHeaders(
-                        httpHeaders -> {
-                            httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-                            httpHeaders.setAccept(List.of(MediaType.APPLICATION_JSON));
-                        })
-                .requestFactory(bufferingClientHttpRequestFactory)
-                .requestInterceptor(
-                        (request, body, execution) -> {
-                            logRequest(request, body);
-                            ClientHttpResponse response = execution.execute(request, body);
-                            logResponse(response);
-                            return response;
-                        })
-                .build();
+        return restClientBuilder ->
+                restClientBuilder
+                        .uriBuilderFactory(factory)
+                        .defaultHeaders(
+                                httpHeaders -> {
+                                    httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+                                    httpHeaders.setAccept(List.of(MediaType.APPLICATION_JSON));
+                                })
+                        .requestFactory(bufferingClientHttpRequestFactory)
+                        .requestInterceptor(
+                                (request, body, execution) -> {
+                                    logRequest(request, body);
+                                    ClientHttpResponse response = execution.execute(request, body);
+                                    logResponse(response);
+                                    return response;
+                                });
     }
 
     private void logResponse(ClientHttpResponse response) throws IOException {

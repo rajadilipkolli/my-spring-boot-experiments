@@ -1,6 +1,13 @@
 package com.example.rest.template.config;
 
-import static com.example.rest.template.utils.AppConstants.*;
+import static com.example.rest.template.utils.AppConstants.CONNECTION_TIMEOUT;
+import static com.example.rest.template.utils.AppConstants.DEFAULT_KEEP_ALIVE_TIME;
+import static com.example.rest.template.utils.AppConstants.IDLE_CONNECTION_WAIT_TIME;
+import static com.example.rest.template.utils.AppConstants.MAX_LOCALHOST_CONNECTIONS;
+import static com.example.rest.template.utils.AppConstants.MAX_ROUTE_CONNECTIONS;
+import static com.example.rest.template.utils.AppConstants.MAX_TOTAL_CONNECTIONS;
+import static com.example.rest.template.utils.AppConstants.REQUEST_TIMEOUT;
+import static com.example.rest.template.utils.AppConstants.SOCKET_TIMEOUT;
 
 import java.time.Duration;
 import java.util.Iterator;
@@ -49,7 +56,7 @@ public class RestTemplateConfiguration {
                 new PoolingHttpClientConnectionManager(registry);
 
         poolingConnectionManager.setDefaultSocketConfig(
-                SocketConfig.custom().setSoTimeout(Timeout.ofSeconds(REQUEST_TIMEOUT)).build());
+                SocketConfig.custom().setSoTimeout(Timeout.ofSeconds(SOCKET_TIMEOUT)).build());
         poolingConnectionManager.setDefaultConnectionConfig(
                 ConnectionConfig.custom()
                         .setConnectTimeout(Timeout.ofSeconds(CONNECTION_TIMEOUT))
