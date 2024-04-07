@@ -25,6 +25,11 @@ import org.springframework.web.util.DefaultUriBuilderFactory;
 public class RestClientConfiguration {
 
     @Bean
+    RestClient restClient(RestClient.Builder restClientBuilder) {
+        return restClientBuilder.build();
+    }
+
+    @Bean
     RestClientCustomizer restClientCustomizer(
             ApplicationProperties applicationProperties,
             @NonNull BufferingClientHttpRequestFactory bufferingClientHttpRequestFactory) {
@@ -47,11 +52,6 @@ public class RestClientConfiguration {
                                     logResponse(response);
                                     return response;
                                 });
-    }
-
-    @Bean
-    RestClient restClient(RestClient.Builder restClientBuilder) {
-        return restClientBuilder.build();
     }
 
     private void logResponse(ClientHttpResponse response) throws IOException {
