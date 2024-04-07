@@ -26,9 +26,10 @@ public class RestClientConfiguration {
 
     @Bean
     RestClientCustomizer restClientCustomizer(
+            ApplicationProperties applicationProperties,
             @NonNull BufferingClientHttpRequestFactory bufferingClientHttpRequestFactory) {
-        String baseUrl = "https://jsonplaceholder.typicode.com";
-        DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory(baseUrl);
+        DefaultUriBuilderFactory factory =
+                new DefaultUriBuilderFactory(applicationProperties.getExternalCallUrl());
         factory.setEncodingMode(DefaultUriBuilderFactory.EncodingMode.URI_COMPONENT);
         return restClientBuilder ->
                 restClientBuilder
