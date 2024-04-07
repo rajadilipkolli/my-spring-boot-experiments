@@ -1,16 +1,25 @@
 package com.example.restclient.bootrestclient.config;
 
-import lombok.Data;
+import jakarta.validation.constraints.NotBlank;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.NestedConfigurationProperty;
+import org.springframework.validation.annotation.Validated;
 
-@Data
+@Getter
+@Setter
+@Validated
 @ConfigurationProperties("application")
 public class ApplicationProperties {
 
+    @NotBlank(message = "External Call URL cant be Blank")
     private String externalCallUrl;
-    private Cors cors = new Cors();
 
-    @Data
+    @NestedConfigurationProperty private Cors cors = new Cors();
+
+    @Getter
+    @Setter
     public static class Cors {
         private String pathPattern = "/api/**";
         private String allowedMethods = "*";
