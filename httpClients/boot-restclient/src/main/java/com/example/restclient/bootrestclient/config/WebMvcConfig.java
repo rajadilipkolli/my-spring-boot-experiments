@@ -1,4 +1,4 @@
-package com.example.rest.proxy.config;
+package com.example.restclient.bootrestclient.config;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
