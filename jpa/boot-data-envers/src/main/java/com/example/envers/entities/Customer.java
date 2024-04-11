@@ -11,7 +11,6 @@ import java.util.Objects;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.Hibernate;
 import org.hibernate.envers.Audited;
@@ -19,7 +18,6 @@ import org.hibernate.envers.Audited;
 @Entity
 @Table(name = "customers")
 @Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Audited
@@ -36,7 +34,27 @@ public class Customer {
     private String address;
 
     @Version
-    Short version = 0;
+    Short version;
+
+    public Customer setId(Long id) {
+        this.id = id;
+        return this;
+    }
+
+    public Customer setName(String name) {
+        this.name = name;
+        return this;
+    }
+
+    public Customer setAddress(String address) {
+        this.address = address;
+        return this;
+    }
+
+    public Customer setVersion(Short version) {
+        this.version = version;
+        return this;
+    }
 
     @Override
     public boolean equals(Object o) {

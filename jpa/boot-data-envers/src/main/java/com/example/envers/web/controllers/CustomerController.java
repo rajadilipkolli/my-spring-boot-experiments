@@ -8,10 +8,12 @@ import com.example.envers.model.response.PagedResult;
 import com.example.envers.model.response.RevisionResult;
 import com.example.envers.services.CustomerService;
 import com.example.envers.utils.AppConstants;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import java.net.URI;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -53,6 +55,12 @@ public class CustomerController {
     @GetMapping("/{id}/revisions")
     public ResponseEntity<List<RevisionResult>> findCustomerRevisionsById(@PathVariable Long id) {
         return ResponseEntity.ok(customerService.findCustomerRevisionsById(id));
+    }
+
+    @Operation(summary = "Get Customer Version History By Id")
+    @GetMapping("/{id}/history")
+    public PagedResult<RevisionResult> getCustomerHistoryById(@PathVariable("id") Long id, Pageable pageable) {
+        return customerService.findCustomerHistoryById(id, pageable);
     }
 
     @PostMapping

@@ -19,29 +19,27 @@ class ApplicationIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     void initialRevision() {
-        Customer cust = new Customer();
-        cust.setName("junit");
-        cust.setAddress("address");
-        Customer customer = customerRepository.save(cust);
+        Customer cust = new Customer().setName("junitName").setAddress("junitAddress");
+        Customer savedCustomer = customerRepository.save(cust);
 
-        Revisions<Integer, Customer> revisions = customerRepository.findRevisions(customer.getId());
+        Revisions<Integer, Customer> revisions = customerRepository.findRevisions(savedCustomer.getId());
 
         assertThat(revisions).isNotEmpty().allSatisfy(revision -> assertThat(revision.getEntity())
                 .extracting(Customer::getId, Customer::getName, Customer::getVersion)
-                .containsExactly(customer.getId(), customer.getName(), customer.getVersion()));
+                .containsExactly(savedCustomer.getId(), savedCustomer.getName(), null));
     }
 
     @Test
     void updateIncreasesRevisionNumber() {
-        var cust = new Customer();
-        cust.setName("text");
+        Customer cust = new Customer().setName("text");
         Customer customer = customerRepository.save(cust);
 
         customer.setName("If");
 
-        customerRepository.save(customer);
+        Customer updatedCustomer = customerRepository.save(customer);
 
-        Optional<Revision<Integer, Customer>> revision = customerRepository.findLastChangeRevision(customer.getId());
+        Optional<Revision<Integer, Customer>> revision =
+                customerRepository.findLastChangeRevision(updatedCustomer.getId());
 
         assertThat(revision)
                 .isPresent()
@@ -55,8 +53,7 @@ class ApplicationIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     void deletedItemWillHaveRevisionRetained() {
-        var cust = new Customer();
-        cust.setName("junit");
+        Customer cust = new Customer().setName("junitName").setAddress("junitAddress");
         Customer customer = customerRepository.save(cust);
 
         customerRepository.delete(customer);
@@ -71,11 +68,11 @@ class ApplicationIntegrationTest extends AbstractIntegrationTest {
         Revision<Integer, Customer> finalRevision = iterator.next();
 
         assertThat(initialRevision).satisfies(rev -> assertThat(rev.getEntity())
-                .extracting(Customer::getId, Customer::getName, Customer::getVersion)
-                .containsExactly(customer.getId(), customer.getName(), customer.getVersion()));
+                .extracting(Customer::getId, Customer::getName, Customer::getAddress, Customer::getVersion)
+                .containsExactly(customer.getId(), customer.getName(), customer.getAddress(), null));
 
         assertThat(finalRevision).satisfies(rev -> assertThat(rev.getEntity())
-                .extracting(Customer::getId, Customer::getName, Customer::getVersion)
-                .containsExactly(customer.getId(), null, (short) 0));
+                .extracting(Customer::getId, Customer::getName, Customer::getAddress, Customer::getVersion)
+                .containsExactly(customer.getId(), null, null, null));
     }
 }

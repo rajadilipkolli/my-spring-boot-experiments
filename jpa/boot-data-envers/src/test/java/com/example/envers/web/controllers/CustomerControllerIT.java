@@ -37,9 +37,9 @@ class CustomerControllerIT extends AbstractIntegrationTest {
         customerRepository.deleteAllInBatch();
 
         customerList = new ArrayList<>();
-        customerList.add(new Customer(null, "First Customer", "Junit Address", (short) 0));
-        customerList.add(new Customer(null, "Second Customer", "Junit Address", (short) 0));
-        customerList.add(new Customer(null, "Third Customer", "Junit Address", (short) 0));
+        customerList.add(new Customer().setName("First Customer").setAddress("Junit Address"));
+        customerList.add(new Customer().setName("First Customer").setAddress("Junit Address"));
+        customerList.add(new Customer().setName("First Customer").setAddress("Junit Address"));
         customerList = customerRepository.saveAll(customerList);
     }
 
@@ -88,6 +88,44 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                     .andExpect(jsonPath("$[0].revisionNumber", notNullValue()))
                     .andExpect(jsonPath("$[0].revisionType", is("INSERT")));
         }
+
+        @Test
+        void shouldFindCustomerHistoryById() throws Exception {
+            Customer customer = customerList.getFirst();
+            customerRepository.saveAndFlush(customer.setAddress("newAddress"));
+            Long customerId = customer.getId();
+
+            mockMvc.perform(get("/api/customers/{id}/history?page=0&size=10&sort=revision_Number,desc", customerId))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.data.size()", is(2)))
+                    .andExpect(jsonPath("$.totalElements", is(2)))
+                    .andExpect(jsonPath("$.pageNumber", is(1)))
+                    .andExpect(jsonPath("$.totalPages", is(1)))
+                    .andExpect(jsonPath("$.isFirst", is(true)))
+                    .andExpect(jsonPath("$.isLast", is(true)))
+                    .andExpect(jsonPath("$.hasNext", is(false)))
+                    .andExpect(jsonPath("$.hasPrevious", is(false)))
+                    .andExpect(jsonPath("$.data[0].entity.id", is(customer.getId()), Long.class))
+                    .andExpect(jsonPath("$.data[0].entity.name", is(customer.getName())))
+                    .andExpect(jsonPath("$.data[0].entity.address", is(customer.getAddress())))
+                    .andExpect(jsonPath("$.data[0].revisionNumber", notNullValue()))
+                    .andExpect(jsonPath("$.data[0].revisionType", is("UPDATE")))
+                    .andExpect(jsonPath("$.data[0].revisionInstant", notNullValue()));
+        }
+
+        @Test
+        void cantFindCustomerHistoryById() throws Exception {
+            Customer customer = customerList.getFirst();
+            Long customerId = customer.getId() + 10_000;
+
+            mockMvc.perform(get("/api/customers/{id}/history?page=0&size=10&sort=revision_Number,asc", customerId))
+                    .andExpect(status().isNotFound())
+                    .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
+                    .andExpect(jsonPath("$.type", is("http://api.boot-data-envers.com/errors/not-found")))
+                    .andExpect(jsonPath("$.title", is("Not Found")))
+                    .andExpect(jsonPath("$.status", is(404)))
+                    .andExpect(jsonPath("$.detail").value("Customer with Id '%d' not found".formatted(customerId)));
+        }
     }
 
     @Test
@@ -113,7 +151,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(customerRequest)))
                 .andExpect(status().isBadRequest())
-                .andExpect(header().string("Content-Type", is("application/problem+json")))
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                 .andExpect(jsonPath("$.type", is("about:blank")))
                 .andExpect(jsonPath("$.title", is("Constraint Violation")))
                 .andExpect(jsonPath("$.status", is(400)))

@@ -107,7 +107,7 @@ class CustomerControllerTest {
 
             mockMvc.perform(get("/api/customers/{id}", customerId))
                     .andExpect(status().isNotFound())
-                    .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
+                    .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                     .andExpect(jsonPath("$.type", is("http://api.boot-data-envers.com/errors/not-found")))
                     .andExpect(jsonPath("$.title", is("Not Found")))
                     .andExpect(jsonPath("$.status", is(404)))
@@ -143,7 +143,7 @@ class CustomerControllerTest {
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(customerRequest)))
                     .andExpect(status().isBadRequest())
-                    .andExpect(header().string("Content-Type", is("application/problem+json")))
+                    .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is("application/problem+json")))
                     .andExpect(jsonPath("$.type", is("about:blank")))
                     .andExpect(jsonPath("$.title", is("Constraint Violation")))
                     .andExpect(jsonPath("$.status", is(400)))
@@ -187,7 +187,7 @@ class CustomerControllerTest {
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(customerRequest)))
                     .andExpect(status().isNotFound())
-                    .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
+                    .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                     .andExpect(jsonPath("$.type", is("http://api.boot-data-envers.com/errors/not-found")))
                     .andExpect(jsonPath("$.title", is("Not Found")))
                     .andExpect(jsonPath("$.status", is(404)))
@@ -217,7 +217,7 @@ class CustomerControllerTest {
             given(customerService.findCustomerById(customerId)).willReturn(Optional.empty());
 
             mockMvc.perform(delete("/api/customers/{id}", customerId))
-                    .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
+                    .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                     .andExpect(jsonPath("$.type", is("http://api.boot-data-envers.com/errors/not-found")))
                     .andExpect(jsonPath("$.title", is("Not Found")))
                     .andExpect(jsonPath("$.status", is(404)))
