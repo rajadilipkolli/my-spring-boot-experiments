@@ -58,13 +58,13 @@ public class CustomerService {
     }
 
     public List<RevisionResult> findCustomerRevisionsById(Long id) {
-        List<CompletableFuture<RevisionResult>> revisionDtoCF = customerRepository
+        List<CompletableFuture<RevisionResult>> revisionCFList = customerRepository
                 .findRevisions(id)
                 .get()
                 .map(customerRevision -> CompletableFuture.supplyAsync(
                         () -> customerRevisionToRevisionDTOMapper.convert(customerRevision)))
                 .toList();
-        return revisionDtoCF.stream().map(CompletableFuture::join).toList();
+        return revisionCFList.stream().map(CompletableFuture::join).toList();
     }
 
     public PagedResult<RevisionResult> findCustomerHistoryById(Long id, Pageable pageRequest) {
@@ -72,18 +72,17 @@ public class CustomerService {
             throw new CustomerNotFoundException(id);
         }
 
-        RevisionSort sortDir;
-        Optional<Sort.Direction> direction =
-                pageRequest.getSort().stream().map(Sort.Order::getDirection).findFirst();
-        if (direction.isPresent()) {
-            if (Sort.Direction.ASC.name().equalsIgnoreCase(direction.get().name())) {
-                sortDir = RevisionSort.asc();
-            } else {
-                sortDir = RevisionSort.desc();
-            }
-        } else {
-            sortDir = RevisionSort.desc();
-        }
+        RevisionSort sortDir = pageRequest.getSort().stream()
+                .map(Sort.Order::getDirection)
+                .findFirst()
+                .map(direction -> {
+                    if (Sort.Direction.ASC.name().equalsIgnoreCase(direction.name())) {
+                        return RevisionSort.asc();
+                    } else {
+                        return RevisionSort.desc();
+                    }
+                })
+                .orElse(RevisionSort.desc());
 
         Pageable pageable = PageRequest.of(pageRequest.getPageNumber(), pageRequest.getPageSize(), sortDir);
         Page<Revision<Integer, Customer>> customerRevisions = customerRepository.findRevisions(id, pageable);
