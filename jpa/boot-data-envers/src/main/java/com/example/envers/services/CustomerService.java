@@ -10,6 +10,7 @@ import com.example.envers.model.response.CustomerResponse;
 import com.example.envers.model.response.PagedResult;
 import com.example.envers.model.response.RevisionResult;
 import com.example.envers.repositories.CustomerRepository;
+import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -18,6 +19,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.history.Revision;
+import org.springframework.data.history.RevisionSort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -63,6 +66,35 @@ public class CustomerService {
                         () -> customerRevisionToRevisionDTOMapper.convert(customerRevision)))
                 .toList();
         return revisionDtoCF.stream().map(CompletableFuture::join).toList();
+    }
+
+    public PagedResult<RevisionResult> findCustomerHistoryById(Long id, Pageable pageRequest) {
+        if (customerRepository.findById(id).isEmpty()) {
+            throw new EntityNotFoundException("Customer with id %d not found".formatted(id));
+        }
+
+        RevisionSort sortDir;
+        Optional<Sort.Direction> direction =
+                pageRequest.getSort().stream().map(Sort.Order::getDirection).findFirst();
+        if (direction.isPresent()) {
+            if (Sort.Direction.ASC.name().equalsIgnoreCase(direction.get().name())) {
+                sortDir = RevisionSort.asc();
+            } else {
+                sortDir = RevisionSort.desc();
+            }
+        } else {
+            sortDir = RevisionSort.desc();
+        }
+
+        Pageable pageable = PageRequest.of(pageRequest.getPageNumber(), pageRequest.getPageSize(), sortDir);
+        Page<Revision<Integer, Customer>> customerRevisions = customerRepository.findRevisions(id, pageable);
+        List<CompletableFuture<RevisionResult>> revisionCFResultList = customerRevisions.getContent().stream()
+                .map(customerRevision -> CompletableFuture.supplyAsync(
+                        () -> customerRevisionToRevisionDTOMapper.convert(customerRevision)))
+                .toList();
+        List<RevisionResult> revisionResultList =
+                revisionCFResultList.stream().map(CompletableFuture::join).toList();
+        return new PagedResult<>(customerRevisions, revisionResultList);
     }
 
     @Transactional
