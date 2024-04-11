@@ -10,7 +10,6 @@ import com.example.envers.model.response.CustomerResponse;
 import com.example.envers.model.response.PagedResult;
 import com.example.envers.model.response.RevisionResult;
 import com.example.envers.repositories.CustomerRepository;
-import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -70,7 +69,7 @@ public class CustomerService {
 
     public PagedResult<RevisionResult> findCustomerHistoryById(Long id, Pageable pageRequest) {
         if (customerRepository.findById(id).isEmpty()) {
-            throw new EntityNotFoundException("Customer with id %d not found".formatted(id));
+            throw new CustomerNotFoundException(id);
         }
 
         RevisionSort sortDir;

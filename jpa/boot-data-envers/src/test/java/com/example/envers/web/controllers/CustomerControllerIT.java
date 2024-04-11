@@ -112,6 +112,20 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                     .andExpect(jsonPath("$.data[0].revisionType", is("UPDATE")))
                     .andExpect(jsonPath("$.data[0].revisionInstant", notNullValue()));
         }
+
+        @Test
+        void cantFindCustomerHistoryById() throws Exception {
+            Customer customer = customerList.getFirst();
+            Long customerId = customer.getId() + 10_000;
+
+            mockMvc.perform(get("/api/customers/{id}/history?page=0&size=10&sort=revision_Number,asc", customerId))
+                    .andExpect(status().isNotFound())
+                    .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
+                    .andExpect(jsonPath("$.type", is("http://api.boot-data-envers.com/errors/not-found")))
+                    .andExpect(jsonPath("$.title", is("Not Found")))
+                    .andExpect(jsonPath("$.status", is(404)))
+                    .andExpect(jsonPath("$.detail").value("Customer with Id '%d' not found".formatted(customerId)));
+        }
     }
 
     @Test
@@ -137,7 +151,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(customerRequest)))
                 .andExpect(status().isBadRequest())
-                .andExpect(header().string("Content-Type", is("application/problem+json")))
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                 .andExpect(jsonPath("$.type", is("about:blank")))
                 .andExpect(jsonPath("$.title", is("Constraint Violation")))
                 .andExpect(jsonPath("$.status", is(400)))
