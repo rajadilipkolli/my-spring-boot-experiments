@@ -70,7 +70,7 @@ class PostCommentControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldFindPostCommentById() throws Exception {
-        PostComment postComment = savedPost.getComments().get(0);
+        PostComment postComment = savedPost.getComments().getFirst();
         Long postCommentId = postComment.getId();
 
         this.mockMvc
@@ -119,7 +119,7 @@ class PostCommentControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldUpdatePostComment() throws Exception {
-        Long postCommentId = savedPost.getComments().get(0).getId();
+        Long postCommentId = savedPost.getComments().getFirst().getId();
         PostCommentRequest postCommentRequest = new PostCommentRequest("Updated PostComment");
 
         this.mockMvc
@@ -133,7 +133,7 @@ class PostCommentControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldDeletePostComment() throws Exception {
-        PostComment postComment = savedPost.getComments().get(0);
+        PostComment postComment = savedPost.getComments().getFirst();
 
         this.mockMvc
                 .perform(delete("/api/posts/comments/{id}", postComment.getId()))

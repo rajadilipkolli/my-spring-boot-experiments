@@ -181,7 +181,7 @@ public class SearchService {
                 .searchWithin(location, distance, unit)
                 .flatMap(
                         restaurantSearchHit -> {
-                            Double dist = (Double) restaurantSearchHit.getSortValues().get(0);
+                            Double dist = (Double) restaurantSearchHit.getSortValues().getFirst();
                             Restaurant eRestaurant = restaurantSearchHit.getContent();
                             return Mono.just(
                                     new ResultData(

@@ -94,7 +94,7 @@ class ActorServiceIntTest extends AbstractIntegrationTest {
         CompletableFuture.allOf(completableFutureList.toArray(CompletableFuture[]::new))
                 .join();
         // As pessimistic read lock is a shared lock it will give read access to every request
-        assertThat(completableFutureList.get(0).get().getActorName()).isEqualTo("Actor");
+        assertThat(completableFutureList.getFirst().get().getActorName()).isEqualTo("Actor");
         assertThat(completableFutureList.get(1).get().getActorName()).isEqualTo("Actor");
     }
 

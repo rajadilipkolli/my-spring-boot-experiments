@@ -59,7 +59,7 @@ public class CustomerController {
 
     @Operation(summary = "Get Customer Version History By Id")
     @GetMapping("/{id}/history")
-    public PagedResult<RevisionResult> getCustomerHistoryById(@PathVariable("id") Long id, Pageable pageable) {
+    public PagedResult<RevisionResult> getCustomerHistoryById(@PathVariable Long id, Pageable pageable) {
         return customerService.findCustomerHistoryById(id, pageable);
     }
 

@@ -169,7 +169,7 @@ public class RestaurantSearchService {
         return this.restaurantRepository.searchWithin(location, distance, unit).stream()
                 .map(
                         restaurantSearchHit -> {
-                            Double dist = (Double) restaurantSearchHit.getSortValues().get(0);
+                            Double dist = (Double) restaurantSearchHit.getSortValues().getFirst();
                             Restaurant eRestaurant = restaurantSearchHit.getContent();
                             return new ResultData(
                                     eRestaurant.getName(),
