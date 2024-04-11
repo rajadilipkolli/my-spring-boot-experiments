@@ -58,7 +58,7 @@ class JobControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldFindJobById() throws Exception {
-        Job job = jobList.get(0);
+        Job job = jobList.getFirst();
         Long jobId = job.getId();
 
         this.mockMvc
@@ -104,7 +104,7 @@ class JobControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldUpdateJob() throws Exception {
-        Long jobId = jobList.get(0).getId();
+        Long jobId = jobList.getFirst().getId();
         JobRequest jobRequest = new JobRequest("Updated Job");
 
         this.mockMvc
@@ -118,7 +118,7 @@ class JobControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldDeleteJob() throws Exception {
-        Job job = jobList.get(0);
+        Job job = jobList.getFirst();
 
         this.mockMvc
                 .perform(delete("/api/jobs/{id}", job.getId()))

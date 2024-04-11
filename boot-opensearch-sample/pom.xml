@@ -61,7 +61,7 @@
             <artifactId>jaxb-runtime</artifactId>
             <scope>provided</scope>
         </dependency>
-         <dependency>
+        <dependency>
             <groupId>org.opensearch.client</groupId>
             <artifactId>spring-data-opensearch-starter</artifactId>
             <version>${opensearch.version}</version>
