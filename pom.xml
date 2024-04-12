@@ -17,6 +17,7 @@
         <module>batch-boot-jpa-sample</module>
         <module>boot-api-archunit-sample</module>
         <module>boot-choas-monkey</module>
+        <module>boot-grafana-lgtm</module>
         <module>boot-mongodb-elasticsearch</module>
         <module>boot-opensearch-sample</module>
         <module>boot-rabbitmq-thymeleaf</module>
