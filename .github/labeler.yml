@@ -7,6 +7,9 @@
 "component : choas-monkey":
   - changed-files:
       - any-glob-to-any-file: 'boot-choas-monkey/**/*'
+"component : grafana-lgtm":
+  - changed-files:
+      - any-glob-to-any-file: 'boot-grafana-lgtm/**/*'
 "component: mongodb-elasticsearch":
   - changed-files:
       - any-glob-to-any-file: 'boot-mongodb-elasticsearch/**/*'
