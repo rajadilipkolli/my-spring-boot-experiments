@@ -8,20 +8,13 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
 import java.util.Objects;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import java.util.StringJoiner;
 import org.hibernate.Hibernate;
 import org.hibernate.envers.Audited;
 
 @Entity
 @Table(name = "customers")
-@Getter
-@NoArgsConstructor
-@AllArgsConstructor
 @Audited
-@ToString
 public class Customer {
 
     @Id
@@ -36,9 +29,17 @@ public class Customer {
     @Version
     Short version;
 
+    public Long getId() {
+        return id;
+    }
+
     public Customer setId(Long id) {
         this.id = id;
         return this;
+    }
+
+    public String getName() {
+        return name;
     }
 
     public Customer setName(String name) {
@@ -46,9 +47,17 @@ public class Customer {
         return this;
     }
 
+    public String getAddress() {
+        return address;
+    }
+
     public Customer setAddress(String address) {
         this.address = address;
         return this;
+    }
+
+    public Short getVersion() {
+        return version;
     }
 
     public Customer setVersion(Short version) {
@@ -67,5 +76,15 @@ public class Customer {
     @Override
     public int hashCode() {
         return getClass().hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", Customer.class.getSimpleName() + "[", "]")
+                .add("id=" + id)
+                .add("name='" + name + "'")
+                .add("address='" + address + "'")
+                .add("version=" + version)
+                .toString();
     }
 }
