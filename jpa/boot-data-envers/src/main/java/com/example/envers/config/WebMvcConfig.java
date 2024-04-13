@@ -1,18 +1,21 @@
 package com.example.envers.config;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.lang.NonNull;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
-@RequiredArgsConstructor
 public class WebMvcConfig implements WebMvcConfigurer {
 
     private final ApplicationProperties properties;
 
+    public WebMvcConfig(ApplicationProperties properties) {
+        this.properties = properties;
+    }
+
     @Override
-    public void addCorsMappings(CorsRegistry registry) {
+    public void addCorsMappings(@NonNull CorsRegistry registry) {
         ApplicationProperties.Cors propertiesCors = properties.getCors();
         registry.addMapping(propertiesCors.getPathPattern())
                 .allowedMethods(propertiesCors.getAllowedMethods())

@@ -13,7 +13,6 @@ import com.example.envers.repositories.CustomerRepository;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -25,12 +24,20 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Transactional(readOnly = true)
-@RequiredArgsConstructor
 public class CustomerService {
 
     private final CustomerRepository customerRepository;
     private final CustomerRevisionToRevisionResultMapper customerRevisionToRevisionDTOMapper;
     private final CustomerMapper customerMapper;
+
+    public CustomerService(
+            CustomerRepository customerRepository,
+            CustomerRevisionToRevisionResultMapper customerRevisionToRevisionDTOMapper,
+            CustomerMapper customerMapper) {
+        this.customerRepository = customerRepository;
+        this.customerRevisionToRevisionDTOMapper = customerRevisionToRevisionDTOMapper;
+        this.customerMapper = customerMapper;
+    }
 
     public PagedResult<CustomerResponse> findAllCustomers(FindCustomersQuery findCustomersQuery) {
 

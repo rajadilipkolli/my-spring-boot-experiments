@@ -1,28 +1,25 @@
 package com.example.envers.web.controllers;
 
-import static org.hamcrest.CoreMatchers.is;
+import static io.restassured.RestAssured.given;
 import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.example.envers.common.AbstractIntegrationTest;
 import com.example.envers.entities.Customer;
 import com.example.envers.model.request.CustomerRequest;
 import com.example.envers.repositories.CustomerRepository;
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.http.HttpHeaders;
+import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 
 class CustomerControllerIT extends AbstractIntegrationTest {
@@ -34,28 +31,30 @@ class CustomerControllerIT extends AbstractIntegrationTest {
 
     @BeforeEach
     void setUp() {
+        RestAssured.port = localServerPort;
         customerRepository.deleteAllInBatch();
 
         customerList = new ArrayList<>();
-        customerList.add(new Customer().setName("First Customer").setAddress("Junit Address"));
-        customerList.add(new Customer().setName("First Customer").setAddress("Junit Address"));
-        customerList.add(new Customer().setName("First Customer").setAddress("Junit Address"));
+        customerList.add(new Customer().setName("First Customer").setAddress("Junit Address1"));
+        customerList.add(new Customer().setName("Second Customer").setAddress("Junit Address2"));
+        customerList.add(new Customer().setName("Third Customer").setAddress("Junit Address3"));
         customerList = customerRepository.saveAll(customerList);
     }
 
     @Test
-    void shouldFetchAllCustomers() throws Exception {
-        this.mockMvc
-                .perform(get("/api/customers"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.size()", is(customerList.size())))
-                .andExpect(jsonPath("$.totalElements", is(3)))
-                .andExpect(jsonPath("$.pageNumber", is(1)))
-                .andExpect(jsonPath("$.totalPages", is(1)))
-                .andExpect(jsonPath("$.isFirst", is(true)))
-                .andExpect(jsonPath("$.isLast", is(true)))
-                .andExpect(jsonPath("$.hasNext", is(false)))
-                .andExpect(jsonPath("$.hasPrevious", is(false)));
+    void shouldFetchAllCustomers() {
+        given().when()
+                .get("/api/customers")
+                .then()
+                .statusCode(HttpStatus.SC_OK)
+                .body("data.size()", equalTo(customerList.size()))
+                .body("totalElements", equalTo(3))
+                .body("pageNumber", equalTo(1))
+                .body("totalPages", equalTo(1))
+                .body("isFirst", equalTo(true))
+                .body("isLast", equalTo(true))
+                .body("hasNext", equalTo(false))
+                .body("hasPrevious", equalTo(false));
     }
 
     @Nested
@@ -63,130 +62,159 @@ class CustomerControllerIT extends AbstractIntegrationTest {
     class Find {
 
         @Test
-        void shouldFindCustomerById() throws Exception {
+        void shouldFindCustomerById() {
             Customer customer = customerList.getFirst();
             Long customerId = customer.getId();
 
-            mockMvc.perform(get("/api/customers/{id}", customerId))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.id", is(customer.getId()), Long.class))
-                    .andExpect(jsonPath("$.name", is(customer.getName())))
-                    .andExpect(jsonPath("$.address", is(customer.getAddress())));
+            given().pathParam("id", customerId)
+                    .when()
+                    .get("/api/customers/{id}")
+                    .then()
+                    .statusCode(HttpStatus.SC_OK)
+                    .contentType(ContentType.JSON)
+                    .body("id", equalTo(customer.getId().intValue()))
+                    .body("name", equalTo(customer.getName()))
+                    .body("address", equalTo(customer.getAddress()));
         }
 
         @Test
-        void shouldFindCustomerRevisionsById() throws Exception {
+        void shouldFindCustomerRevisionsById() {
             Customer customer = customerList.getFirst();
             Long customerId = customer.getId();
 
-            mockMvc.perform(get("/api/customers/{id}/revisions", customerId))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.size()", is(1)))
-                    .andExpect(jsonPath("$[0].entity.id", is(customer.getId()), Long.class))
-                    .andExpect(jsonPath("$[0].entity.name", is(customer.getName())))
-                    .andExpect(jsonPath("$[0].entity.address", is(customer.getAddress())))
-                    .andExpect(jsonPath("$[0].revisionNumber", notNullValue()))
-                    .andExpect(jsonPath("$[0].revisionType", is("INSERT")));
+            given().pathParam("id", customerId)
+                    .when()
+                    .get("/api/customers/{id}/revisions")
+                    .then()
+                    .statusCode(HttpStatus.SC_OK)
+                    .contentType(ContentType.JSON)
+                    .body("size()", equalTo(1))
+                    .body("[0].entity.id", equalTo(customer.getId().intValue()))
+                    .body("[0].entity.name", equalTo(customer.getName()))
+                    .body("[0].entity.address", equalTo(customer.getAddress()))
+                    .body("[0].revisionNumber", notNullValue())
+                    .body("[0].revisionType", equalTo("INSERT"));
         }
 
         @Test
-        void shouldFindCustomerHistoryById() throws Exception {
+        void shouldFindCustomerHistoryById() {
             Customer customer = customerList.getFirst();
             customerRepository.saveAndFlush(customer.setAddress("newAddress"));
             Long customerId = customer.getId();
 
-            mockMvc.perform(get("/api/customers/{id}/history?page=0&size=10&sort=revision_Number,desc", customerId))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.data.size()", is(2)))
-                    .andExpect(jsonPath("$.totalElements", is(2)))
-                    .andExpect(jsonPath("$.pageNumber", is(1)))
-                    .andExpect(jsonPath("$.totalPages", is(1)))
-                    .andExpect(jsonPath("$.isFirst", is(true)))
-                    .andExpect(jsonPath("$.isLast", is(true)))
-                    .andExpect(jsonPath("$.hasNext", is(false)))
-                    .andExpect(jsonPath("$.hasPrevious", is(false)))
-                    .andExpect(jsonPath("$.data[0].entity.id", is(customer.getId()), Long.class))
-                    .andExpect(jsonPath("$.data[0].entity.name", is(customer.getName())))
-                    .andExpect(jsonPath("$.data[0].entity.address", is(customer.getAddress())))
-                    .andExpect(jsonPath("$.data[0].revisionNumber", notNullValue()))
-                    .andExpect(jsonPath("$.data[0].revisionType", is("UPDATE")))
-                    .andExpect(jsonPath("$.data[0].revisionInstant", notNullValue()));
+            given().pathParam("id", customerId)
+                    .queryParam("page", 0)
+                    .queryParam("size", 10)
+                    .queryParam("sort", "revision_Number,desc")
+                    .when()
+                    .get("/api/customers/{id}/history")
+                    .then()
+                    .statusCode(HttpStatus.SC_OK)
+                    .contentType(ContentType.JSON)
+                    .body("data.size()", equalTo(2))
+                    .body("totalElements", equalTo(2))
+                    .body("pageNumber", equalTo(1))
+                    .body("totalPages", equalTo(1))
+                    .body("isFirst", equalTo(true))
+                    .body("isLast", equalTo(true))
+                    .body("hasNext", equalTo(false))
+                    .body("hasPrevious", equalTo(false))
+                    .body("data[0].entity.id", equalTo(customer.getId().intValue()))
+                    .body("data[0].entity.name", equalTo(customer.getName()))
+                    .body("data[0].entity.address", equalTo(customer.getAddress()))
+                    .body("data[0].revisionNumber", notNullValue())
+                    .body("data[0].revisionType", equalTo("UPDATE"))
+                    .body("data[0].revisionInstant", notNullValue());
         }
 
         @Test
-        void cantFindCustomerHistoryById() throws Exception {
+        void cantFindCustomerHistoryById() {
             Customer customer = customerList.getFirst();
             Long customerId = customer.getId() + 10_000;
 
-            mockMvc.perform(get("/api/customers/{id}/history?page=0&size=10&sort=revision_Number,asc", customerId))
-                    .andExpect(status().isNotFound())
-                    .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
-                    .andExpect(jsonPath("$.type", is("http://api.boot-data-envers.com/errors/not-found")))
-                    .andExpect(jsonPath("$.title", is("Not Found")))
-                    .andExpect(jsonPath("$.status", is(404)))
-                    .andExpect(jsonPath("$.detail").value("Customer with Id '%d' not found".formatted(customerId)));
+            given().pathParam("id", customerId)
+                    .queryParam("page", 0)
+                    .queryParam("size", 10)
+                    .queryParam("sort", "revision_Number,desc")
+                    .when()
+                    .get("/api/customers/{id}/history")
+                    .then()
+                    .statusCode(HttpStatus.SC_NOT_FOUND)
+                    .contentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE)
+                    .body("type", equalTo("http://api.boot-data-envers.com/errors/not-found"))
+                    .body("title", equalTo("Not Found"))
+                    .body("status", equalTo(404))
+                    .body("detail", equalTo("Customer with Id '%d' not found".formatted(customerId)));
         }
     }
 
     @Test
-    void shouldCreateNewCustomer() throws Exception {
+    void shouldCreateNewCustomer() {
         CustomerRequest customerRequest = new CustomerRequest("New Customer", "Junit Address");
-        this.mockMvc
-                .perform(post("/api/customers")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(customerRequest)))
-                .andExpect(status().isCreated())
-                .andExpect(header().exists(HttpHeaders.LOCATION))
-                .andExpect(jsonPath("$.id", notNullValue()))
-                .andExpect(jsonPath("$.name", is(customerRequest.name())))
-                .andExpect(jsonPath("$.address", is(customerRequest.address())));
+        given().contentType(ContentType.JSON)
+                .body(customerRequest)
+                .when()
+                .post("/api/customers")
+                .then()
+                .statusCode(HttpStatus.SC_CREATED)
+                .header(HttpHeaders.LOCATION, notNullValue())
+                .contentType(ContentType.JSON)
+                .body("id", notNullValue())
+                .body("name", equalTo(customerRequest.name()))
+                .body("address", equalTo(customerRequest.address()));
     }
 
     @Test
-    void shouldReturn400WhenCreateNewCustomerWithoutName() throws Exception {
+    void shouldReturn400WhenCreateNewCustomerWithoutName() {
         CustomerRequest customerRequest = new CustomerRequest(null, null);
 
-        this.mockMvc
-                .perform(post("/api/customers")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(customerRequest)))
-                .andExpect(status().isBadRequest())
-                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
-                .andExpect(jsonPath("$.type", is("about:blank")))
-                .andExpect(jsonPath("$.title", is("Constraint Violation")))
-                .andExpect(jsonPath("$.status", is(400)))
-                .andExpect(jsonPath("$.detail", is("Invalid request content.")))
-                .andExpect(jsonPath("$.instance", is("/api/customers")))
-                .andExpect(jsonPath("$.violations", hasSize(1)))
-                .andExpect(jsonPath("$.violations[0].field", is("name")))
-                .andExpect(jsonPath("$.violations[0].message", is("Name cannot be empty")))
-                .andReturn();
+        given().contentType(ContentType.JSON)
+                .body(customerRequest)
+                .when()
+                .post("/api/customers")
+                .then()
+                .statusCode(HttpStatus.SC_BAD_REQUEST)
+                .contentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE)
+                .body("type", equalTo("about:blank"))
+                .body("title", equalTo("Constraint Violation"))
+                .body("status", equalTo(400))
+                .body("detail", equalTo("Invalid request content."))
+                .body("instance", equalTo("/api/customers"))
+                .body("violations", hasSize(1))
+                .body("violations[0].field", equalTo("name"))
+                .body("violations[0].message", equalTo("Name cannot be empty"));
     }
 
     @Test
-    void shouldUpdateCustomer() throws Exception {
+    void shouldUpdateCustomer() {
         Long customerId = customerList.getFirst().getId();
         CustomerRequest customerRequest = new CustomerRequest("Updated Customer", "Junit Address");
 
-        this.mockMvc
-                .perform(put("/api/customers/{id}", customerId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(customerRequest)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(customerId), Long.class))
-                .andExpect(jsonPath("$.name", is(customerRequest.name())))
-                .andExpect(jsonPath("$.address", is("Junit Address")));
+        given().pathParam("id", customerId)
+                .contentType(ContentType.JSON)
+                .body(customerRequest)
+                .when()
+                .put("/api/customers/{id}")
+                .then()
+                .statusCode(HttpStatus.SC_OK)
+                .contentType(ContentType.JSON)
+                .body("id", equalTo(customerId.intValue()))
+                .body("name", equalTo(customerRequest.name()))
+                .body("address", equalTo("Junit Address"));
     }
 
     @Test
-    void shouldDeleteCustomer() throws Exception {
+    void shouldDeleteCustomer() {
         Customer customer = customerList.getFirst();
 
-        this.mockMvc
-                .perform(delete("/api/customers/{id}", customer.getId()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(customer.getId()), Long.class))
-                .andExpect(jsonPath("$.name", is(customer.getName())))
-                .andExpect(jsonPath("$.address", is("Junit Address")));
+        given().pathParam("id", customer.getId())
+                .when()
+                .delete("/api/customers/{id}")
+                .then()
+                .statusCode(HttpStatus.SC_OK)
+                .contentType(ContentType.JSON)
+                .body("id", equalTo(customer.getId().intValue()))
+                .body("name", equalTo(customer.getName()))
+                .body("address", equalTo(customer.getAddress()));
     }
 }
