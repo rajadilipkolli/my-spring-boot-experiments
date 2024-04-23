@@ -10,13 +10,14 @@ import org.springframework.lang.Nullable;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.util.UriBuilder;
 
 @Service
 @Retryable(
-        retryFor = {Exception.class},
-        maxAttempts = 3,
+        retryFor = {HttpServerErrorException.class},
+        maxAttempts = 2,
         backoff = @Backoff(delay = 5000))
 public class HttpClientService {
 
