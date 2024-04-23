@@ -1,81 +1,63 @@
 package com.example.restclient.bootrestclient.services;
 
-import com.example.restclient.bootrestclient.exception.MyCustomRuntimeException;
 import com.example.restclient.bootrestclient.model.response.PostDto;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpStatusCode;
-import org.springframework.http.MediaType;
+import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestClient;
 
 @Service
 public class PostService {
 
-    private final RestClient restClient;
+    private final HttpClientService httpClientService;
 
-    public PostService(RestClient restClient) {
-        this.restClient = restClient;
+    public PostService(HttpClientService httpClientService) {
+        this.httpClientService = httpClientService;
     }
 
     public List<PostDto> findAllPosts() {
-        return restClient
-                .get()
-                .uri("/posts")
-                .accept(MediaType.APPLICATION_JSON)
-                .retrieve()
-                .body(new ParameterizedTypeReference<List<PostDto>>() {});
+        return httpClientService.callAndFetchResponse(
+                uriBuilder -> uriBuilder.path("/posts").build(),
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<List<PostDto>>() {});
     }
 
     public Optional<PostDto> findPostById(Long id) {
-        return Optional.ofNullable(
-                restClient
-                        .get()
-                        .uri(uriBuilder -> uriBuilder.path("/posts/{postId}").build(id))
-                        .accept(MediaType.APPLICATION_JSON)
-                        .retrieve()
-                        .onStatus(
-                                HttpStatusCode::is4xxClientError,
-                                (request, response) -> {
-                                    throw new MyCustomRuntimeException(
-                                            response.getStatusCode(), response.getHeaders());
-                                })
-                        .body(PostDto.class));
+        PostDto response =
+                httpClientService.callAndFetchResponse(
+                        uriBuilder -> uriBuilder.path("/posts/{postId}").build(id),
+                        HttpMethod.GET,
+                        Map.of("apiKey", "123456"),
+                        PostDto.class);
+        return Optional.ofNullable(response);
     }
 
     public PostDto savePost(PostDto post) {
-        return restClient
-                .post()
-                .uri("/posts")
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(post)
-                .retrieve()
-                .body(PostDto.class);
+        return httpClientService.callAndFetchResponse(
+                uriBuilder -> uriBuilder.path("/posts").build(),
+                HttpMethod.POST,
+                post,
+                PostDto.class);
     }
 
     public Optional<PostDto> updatePostById(Long id, PostDto postDto) {
-        return Optional.ofNullable(
-                restClient
-                        .put()
-                        .uri(uriBuilder -> uriBuilder.path("/posts/{postId}").build(id))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .body(postDto)
-                        .retrieve()
-                        .onStatus(
-                                HttpStatusCode::is4xxClientError,
-                                (request, response) -> {
-                                    throw new MyCustomRuntimeException(
-                                            response.getStatusCode(), response.getHeaders());
-                                })
-                        .body(PostDto.class));
+        PostDto response =
+                httpClientService.callAndFetchResponse(
+                        uriBuilder -> uriBuilder.path("/posts/{postId}").build(id),
+                        HttpMethod.PUT,
+                        postDto,
+                        PostDto.class);
+        return Optional.ofNullable(response);
     }
 
     public String deletePostById(Long id) {
-        return restClient
-                .delete()
-                .uri(uriBuilder -> uriBuilder.path("/posts/{postId}").build(id))
-                .retrieve()
-                .body(String.class);
+        return httpClientService.callAndFetchResponse(
+                uriBuilder -> uriBuilder.path("/posts/{postId}").build(id),
+                HttpMethod.DELETE,
+                null,
+                String.class);
     }
 }
