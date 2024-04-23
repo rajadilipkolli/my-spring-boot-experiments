@@ -2,6 +2,7 @@ package com.example.restclient.bootrestclient.services;
 
 import com.example.restclient.bootrestclient.model.response.PostDto;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
@@ -29,7 +30,7 @@ public class PostService {
                 httpClientService.callAndFetchResponse(
                         uriBuilder -> uriBuilder.path("/posts/{postId}").build(id),
                         HttpMethod.GET,
-                        null,
+                        Map.of("apiKey", "123456"),
                         PostDto.class);
         return Optional.ofNullable(response);
     }
