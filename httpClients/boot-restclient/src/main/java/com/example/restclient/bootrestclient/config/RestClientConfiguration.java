@@ -16,12 +16,14 @@ import org.springframework.http.client.BufferingClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.client.JdkClientHttpRequestFactory;
 import org.springframework.lang.NonNull;
+import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 
 @Configuration(proxyBeanMethods = false)
 @Slf4j
+@EnableRetry
 public class RestClientConfiguration {
 
     @Bean
@@ -90,7 +92,10 @@ public class RestClientConfiguration {
 
     @Bean
     JdkClientHttpRequestFactory jdkClientHttpRequestFactory(@NonNull HttpClient jdkClient) {
-        return new JdkClientHttpRequestFactory(jdkClient);
+        JdkClientHttpRequestFactory jdkClientHttpRequestFactory =
+                new JdkClientHttpRequestFactory(jdkClient);
+        jdkClientHttpRequestFactory.setReadTimeout(Duration.ofSeconds(60));
+        return jdkClientHttpRequestFactory;
     }
 
     // BufferingClientHttpRequestFactory allows us to read the response body multiple times for a
