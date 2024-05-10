@@ -12,6 +12,6 @@ public class ContainersConfig {
     @Bean
     @ServiceConnection
     PostgreSQLContainer<?> postgreSQLContainer() {
-        return new PostgreSQLContainer<>(DockerImageName.parse("postgres:16.2-alpine"));
+        return new PostgreSQLContainer<>(DockerImageName.parse("postgres:16.3-alpine"));
     }
 }

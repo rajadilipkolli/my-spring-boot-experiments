@@ -10,7 +10,7 @@ import org.testcontainers.utility.DockerImageName;
 public class DBContainerInitializer {
 
     private static final PostgreSQLContainer<?> POSTGRE_SQL_CONTAINER =
-            new PostgreSQLContainer<>(DockerImageName.parse("postgres").withTag("16.1-alpine"))
+            new PostgreSQLContainer<>(DockerImageName.parse("postgres").withTag("16.3-alpine"))
                     .withReuse(true);
 
     private static final OracleContainer ORACLE_CONTAINER =

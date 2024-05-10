@@ -4,12 +4,13 @@ import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.utility.DockerImageName;
 
 public class DBContainerInitializer
         implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
     private static final PostgreSQLContainer<?> sqlContainer =
-            new PostgreSQLContainer<>("postgres:15-alpine")
+            new PostgreSQLContainer<>(DockerImageName.parse("postgres:16.3-alpine"))
                     .withDatabaseName("integration-tests-db")
                     .withUsername("username")
                     .withPassword("password");
