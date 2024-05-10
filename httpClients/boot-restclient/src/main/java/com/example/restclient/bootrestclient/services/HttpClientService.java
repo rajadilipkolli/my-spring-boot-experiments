@@ -29,28 +29,35 @@ public class HttpClientService {
         this.restClient = restClient;
     }
 
-    <T> T callAndFetchResponse(
+    <T> T callAndFetchResponseForGetMethod(
             Function<UriBuilder, URI> uriFunction,
-            HttpMethod httpMethod,
-            @Nullable Object body,
-            Class<T> bodyType) {
-        return callServer(uriFunction, httpMethod, null, body, bodyType, null);
-    }
-
-    <T> T callAndFetchResponse(
-            Function<UriBuilder, URI> uriFunction,
-            HttpMethod httpMethod,
             @Nullable Map<String, String> headers,
             Class<T> bodyType) {
-        return callServer(uriFunction, httpMethod, headers, null, bodyType, null);
+        return callServer(uriFunction, HttpMethod.GET, headers, null, bodyType, null);
     }
 
-    <T> T callAndFetchResponse(
-            Function<UriBuilder, URI> uriFunction,
-            HttpMethod httpMethod,
-            @Nullable Object body,
-            ParameterizedTypeReference<T> bodyType) {
-        return callServer(uriFunction, httpMethod, null, body, null, bodyType);
+    <T> T callAndFetchResponseForGetMethod(
+            Function<UriBuilder, URI> uriFunction, ParameterizedTypeReference<T> bodyType) {
+        return callServer(uriFunction, HttpMethod.GET, null, null, null, bodyType);
+    }
+
+    <T> T callAndFetchResponseForPostMethod(
+            Function<UriBuilder, URI> uriFunction, Object body, Class<T> bodyType) {
+        return callServer(uriFunction, HttpMethod.POST, null, body, bodyType, null);
+    }
+
+    public <T> T callAndFetchResponseForPutMethod(
+            Function<UriBuilder, URI> uriFunction, Object body, Class<T> bodyType) {
+        return callServer(uriFunction, HttpMethod.PUT, null, body, bodyType, null);
+    }
+
+    String callAndFetchResponseForDeleteMethod(Function<UriBuilder, URI> uriFunction) {
+        return callAndFetchResponseForDeleteMethod(uriFunction, String.class);
+    }
+
+    <T> T callAndFetchResponseForDeleteMethod(
+            Function<UriBuilder, URI> uriFunction, Class<T> bodyType) {
+        return callServer(uriFunction, HttpMethod.DELETE, null, null, bodyType, null);
     }
 
     private <T> T callServer(

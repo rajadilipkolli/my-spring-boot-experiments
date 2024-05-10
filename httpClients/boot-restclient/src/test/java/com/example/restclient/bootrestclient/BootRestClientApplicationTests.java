@@ -2,6 +2,7 @@ package com.example.restclient.bootrestclient;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.client.ExpectedCount.times;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.header;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
@@ -14,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.client.MockRestServiceServer;
@@ -50,6 +52,7 @@ class BootRestClientApplicationTests {
         mockServer
                 .expect(times(1), requestTo("https://jsonplaceholder.typicode.com/posts/1"))
                 .andExpect(method(HttpMethod.GET))
+                .andExpect(header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
                 .andRespond(withSuccess(mockApiResponse, MediaType.APPLICATION_JSON));
 
         // Perform the test
@@ -93,6 +96,7 @@ class BootRestClientApplicationTests {
         mockServer
                 .expect(times(1), requestTo("https://jsonplaceholder.typicode.com/posts"))
                 .andExpect(method(HttpMethod.POST))
+                .andExpect(header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
                 .andRespond(withSuccess(mockApiResponse, MediaType.APPLICATION_JSON));
 
         // Perform the test
