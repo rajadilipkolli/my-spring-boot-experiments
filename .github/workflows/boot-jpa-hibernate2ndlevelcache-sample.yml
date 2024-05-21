@@ -31,11 +31,5 @@ jobs:
           java-version: 21
           distribution: "temurin"
           cache: "maven"
-      - name: Start up redis via Docker Compose
-        run: |
-          cd docker
-          docker compose up -d redis
-          sleep 5
-          docker ps -a
       - name: Build and analyze
         run: ./mvnw clean verify
