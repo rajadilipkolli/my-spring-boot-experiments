@@ -14,12 +14,12 @@ class TestUltimateRedisApplication {
     @Bean
     @ServiceConnection(name = "redis")
     GenericContainer<?> redisContainer(DynamicPropertyRegistry dynamicPropertyRegistry) {
-        GenericContainer redisContiner =
+        GenericContainer<?> redisContainer =
                 new GenericContainer<>(DockerImageName.parse("redis").withTag("7.2.5-alpine"))
                         .withExposedPorts(6379);
-        dynamicPropertyRegistry.add("cache.redis-port", () -> redisContiner.getMappedPort(6379));
-        dynamicPropertyRegistry.add("cache.redis-host", redisContiner::getHost);
-        return redisContiner;
+        dynamicPropertyRegistry.add("cache.redis-port", () -> redisContainer.getMappedPort(6379));
+        dynamicPropertyRegistry.add("cache.redis-host", redisContainer::getHost);
+        return redisContainer;
     }
 
     public static void main(String[] args) {

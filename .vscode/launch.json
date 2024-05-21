@@ -113,6 +113,16 @@
             "projectName": "boot-shedlock-sample",
             "args": "--spring.profiles.active=local",
             "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-TestApplication<boot-hibernate2ndlevelcache-sample>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.example.hibernatecache.TestApplication",
+            "projectName": "boot-hibernate2ndlevelcache-sample",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
         }
     ]
 }
