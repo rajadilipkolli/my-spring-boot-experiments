@@ -18,29 +18,25 @@ import org.testcontainers.utility.DockerImageName;
 public class TestApplication {
 
     @Bean
-    @ServiceConnection("redis")
+    @ServiceConnection(name = "redis")
     GenericContainer<?> redisContainer() throws IOException {
-        GenericContainer redisContiner =
+        GenericContainer<?> redisContainer =
                 new GenericContainer<>(DockerImageName.parse("redis").withTag("7.2.5-alpine"))
                         .withExposedPorts(6379);
-        redisContiner.start();
+        redisContainer.start();
         String ymlContent =
                 """
                 singleServerConfig:
                   address: "redis://%s:%d"
                 """;
-        String formatted =
-                ymlContent.formatted(redisContiner.getHost(), redisContiner.getMappedPort(6379));
+        String finalYml =
+                ymlContent.formatted(redisContainer.getHost(), redisContainer.getMappedPort(6379));
         String resourcesPath = new ClassPathResource("").getURL().getPath();
-
         String yamlFilePath = resourcesPath + "redisson-test.yml";
-
-        // Create the YML FIle
-        File yamlFile = new File(yamlFilePath);
-        FileWriter writer = new FileWriter(yamlFile);
-        writer.write(formatted);
-        writer.close();
-        return redisContiner;
+        try (FileWriter writer = new FileWriter(new File(yamlFilePath))) {
+            writer.write(finalYml);
+        }
+        return redisContainer;
     }
 
     public static void main(String[] args) {
