@@ -7,7 +7,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.2.6</version>
+        <version>3.3.0</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.example.archunit</groupId>
@@ -78,8 +78,8 @@
             <scope>runtime</scope>
         </dependency>
         <dependency>
-            <groupId>org.flywaydb</groupId>
-            <artifactId>flyway-core</artifactId>
+            <groupId>org.liquibase</groupId>
+            <artifactId>liquibase-core</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springdoc</groupId>
@@ -220,7 +220,7 @@
                 <configuration>
                     <java>
                         <palantirJavaFormat>
-                            <version>2.38.0</version>
+                            <version>2.41.0</version>
                         </palantirJavaFormat>
                         <importOrder />
                         <removeUnusedImports />

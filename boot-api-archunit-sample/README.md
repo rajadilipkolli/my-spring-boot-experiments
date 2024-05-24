@@ -41,7 +41,10 @@ You can also run the application using Maven as follows:
 * Swagger UI: http://localhost:8080/swagger-ui.html
 * Actuator Endpoint: http://localhost:8080/actuator
 
+### Lessons
+* Migrated from flyway to liquibase bacause flyway is stopping upgrade to latest version of postgres
+
 Here are some of technologies that I used to develop this example:
-* Spring Boot - 3.2.0
+* Spring Boot - 3.3.0
 * Archunit - 1.2.0
 * Junit5
