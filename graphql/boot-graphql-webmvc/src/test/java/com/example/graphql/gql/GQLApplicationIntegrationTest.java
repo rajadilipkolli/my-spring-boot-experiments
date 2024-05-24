@@ -141,7 +141,7 @@ class GQLApplicationIntegrationTest extends AbstractIntegrationTest {
     // adding ordering to make sure others are not failed
     void addCommentToPost() {
         PostCommentRequest postCommentRequest =
-                new PostCommentRequest("JunitTitle", "JunitContent", 1L, true);
+                new PostCommentRequest("JunitTitle", "JunitContent", "1", true);
 
         graphQlTester
                 .documentName("addCommentToPost")

@@ -75,7 +75,10 @@ class PostCommentEntityControllerIT extends AbstractIntegrationTest {
     void shouldCreateNewPostComment() throws Exception {
         PostCommentRequest postCommentRequest =
                 new PostCommentRequest(
-                        "First PostComment", "First Content", postEntity.getId(), true);
+                        "First PostComment",
+                        "First Content",
+                        String.valueOf(postEntity.getId()),
+                        true);
 
         this.mockMvc
                 .perform(
@@ -100,7 +103,7 @@ class PostCommentEntityControllerIT extends AbstractIntegrationTest {
                 new PostCommentRequest(
                         "Updated PostComment",
                         postCommentEntity.getContent(),
-                        postEntity.getId(),
+                        String.valueOf(postEntity.getId()),
                         postCommentEntity.isPublished());
         this.mockMvc
                 .perform(

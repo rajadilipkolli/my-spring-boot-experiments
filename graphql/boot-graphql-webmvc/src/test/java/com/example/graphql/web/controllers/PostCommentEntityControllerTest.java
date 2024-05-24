@@ -108,7 +108,7 @@ class PostCommentEntityControllerTest {
                         LocalDateTime.now());
 
         PostCommentRequest postCommentRequest =
-                new PostCommentRequest("First PostComment", "First Content", 1L, true);
+                new PostCommentRequest("First PostComment", "First Content", "1", true);
 
         given(postCommentService.addCommentToPost(postCommentRequest))
                 .willReturn(postCommentResponse);
@@ -128,7 +128,7 @@ class PostCommentEntityControllerTest {
 
     @Test
     void shouldReturn400WhenCreateNewPostCommentWithoutText() throws Exception {
-        PostCommentRequest postComment = new PostCommentRequest(null, null, -100L, null);
+        PostCommentRequest postComment = new PostCommentRequest(null, null, null, null);
 
         this.mockMvc
                 .perform(
@@ -145,7 +145,10 @@ class PostCommentEntityControllerTest {
                 .andExpect(
                         jsonPath("$.violations[0].message", is("CommentContent must not be blank")))
                 .andExpect(jsonPath("$.violations[1].field", is("postId")))
-                .andExpect(jsonPath("$.violations[1].message", is("PostId must be greater than 0")))
+                .andExpect(
+                        jsonPath(
+                                "$.violations[1].message",
+                                is("PostId must must not be blank and greater than 0")))
                 .andExpect(jsonPath("$.violations[2].field", is("title")))
                 .andExpect(
                         jsonPath("$.violations[2].message", is("CommentTitle must not be blank")))
@@ -157,7 +160,8 @@ class PostCommentEntityControllerTest {
         PostCommentResponse postCommentResponse = postCommentResponseList.getFirst();
         Long postCommentId = postCommentResponse.postId();
         PostCommentRequest postCommentRequest =
-                new PostCommentRequest("First Title", "First Content", postCommentId, true);
+                new PostCommentRequest(
+                        "First Title", "First Content", String.valueOf(postCommentId), true);
         PostCommentEntity postCommentEntity = new PostCommentEntity();
         postCommentEntity.setTitle("UpdatedTitle");
         given(postCommentService.findCommentById(postCommentId))

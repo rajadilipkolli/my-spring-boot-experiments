@@ -23,6 +23,6 @@ public interface PostCommentRequestToEntityMapper {
             @Context PostRepository postRepository) {
         // Set the PostEntity reference using the postId from the request
         postCommentEntity.setPostEntity(
-                postRepository.getReferenceById(postCommentRequest.postId()));
+                postRepository.getReferenceById(Long.valueOf(postCommentRequest.postId())));
     }
 }
