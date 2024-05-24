@@ -123,6 +123,16 @@
             "projectName": "boot-hibernate2ndlevelcache-sample",
             "args": "",
             "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-TestApplication<batch-boot-jpa-sample>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.example.bootbatchjpa.TestApplication",
+            "projectName": "batch-boot-jpa-sample",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
         }
     ]
 }

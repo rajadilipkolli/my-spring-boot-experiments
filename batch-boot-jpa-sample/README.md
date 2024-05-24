@@ -25,3 +25,4 @@ You can also run the application using Maven as follows:
 * Swagger UI: http://localhost:8080/swagger-ui.html
 * Actuator Endpoint: http://localhost:8080/actuator
 * PgAdmin : http://localhost:5050
+* SBOM : http://localhost:8080/actuator/sbom/application
