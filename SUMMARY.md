@@ -29,6 +29,7 @@
   * [KeySet Pagination](jpa/boot-data-keyset-pagination/README.md)
   * [multiple datasources using Spring Boot](jpa/boot-data-multipledatasources/README.md),
   * [spring-boot-hibernate2ndlevelcache-sample](jpa/boot-hibernate2ndlevelcache-sample/README.md)
+  * [JNDI in embedded Tomcat](jpa/boot-jndi-sample/README.md)
   * [JPA locsks implementation](jpa/boot-jpa-locks/README.md)
   * [read-replica-with-spring-boot](jpa/boot-read-replica-postgresql/README.md)
   * [MultiTenancy using Hibernate in Spring Data JPA](jpa/multitenancy/README.md)
