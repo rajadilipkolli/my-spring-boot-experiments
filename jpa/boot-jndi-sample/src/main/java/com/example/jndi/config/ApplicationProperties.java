@@ -5,8 +5,13 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
 
 @Data
-@ConfigurationProperties("application")
+@ConfigurationProperties("application.datasource")
 public class ApplicationProperties {
+
+    private String driverClassName;
+    private String url;
+    private String username;
+    private String password;
 
     @NestedConfigurationProperty
     private Cors cors = new Cors();
