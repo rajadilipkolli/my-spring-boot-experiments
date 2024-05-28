@@ -3,10 +3,10 @@ package com.example.jndi;
 import com.example.jndi.common.ContainersConfig;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.testcontainers.context.ImportTestcontainers;
+import org.springframework.context.annotation.Import;
 
 @DataJpaTest(properties = {"spring.jpa.hibernate.ddl-auto=validate", "spring.test.database.replace=none"})
-@ImportTestcontainers(ContainersConfig.class)
+@Import(ContainersConfig.class)
 class SchemaValidationTest {
 
     @Test
