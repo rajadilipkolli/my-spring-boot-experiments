@@ -1,25 +1,26 @@
 # boot-jndi-sample
 
-### Format code
+## Format code
 
 ```shell
 $ ./mvnw spotless:apply
 ```
 
-### Run tests
+## Run tests
 
 ```shell
 $ ./mvnw clean verify
 ```
 
-### Run locally
+## Run locally
 
 ```shell
 $ docker-compose -f docker/docker-compose.yml up -d
 $ ./mvnw spring-boot:run -Dspring-boot.run.profiles=local
 ```
 
-### Using Testcontainers at Development Time
+## Using Testcontainers at Development Time
+
 You can run `TestApplication.java` from your IDE directly.
 You can also run the application using Maven as follows:
 
@@ -27,7 +28,7 @@ You can also run the application using Maven as follows:
 ./mvnw spring-boot:test-run
 ```
 
+## Useful Links
 
-### Useful Links
-* Swagger UI: http://localhost:8080/swagger-ui.html
-* Actuator Endpoint: http://localhost:8080/actuator
+* Swagger UI: [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html)
+* Actuator Endpoint: [http://localhost:8080/actuator](http://localhost:8080/actuator)
