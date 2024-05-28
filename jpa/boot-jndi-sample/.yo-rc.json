@@ -1,0 +1,13 @@
+{
+  "generator-springboot": {
+    "appName": "boot-jndi-sample",
+    "packageName": "com.example.jndi",
+    "databaseType": "postgresql",
+    "dbMigrationTool": "liquibase",
+    "dbMigrationFormat": "xml",
+    "features": [],
+    "buildTool": "maven",
+    "packageFolder": "com/example/jndi",
+    "liquibaseMigrationCounter": 2
+  }
+}
