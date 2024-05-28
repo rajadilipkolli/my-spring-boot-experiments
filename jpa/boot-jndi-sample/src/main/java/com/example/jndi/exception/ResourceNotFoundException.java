@@ -1,7 +1,6 @@
 package com.example.jndi.exception;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 
 public class ResourceNotFoundException extends RuntimeException {
 
@@ -11,7 +10,7 @@ public class ResourceNotFoundException extends RuntimeException {
         super(errorMessage);
     }
 
-    public HttpStatusCode getHttpStatus() {
+    public HttpStatus getHttpStatus() {
         return httpStatus;
     }
 }
