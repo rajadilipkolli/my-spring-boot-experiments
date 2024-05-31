@@ -1,19 +1,13 @@
 package com.example.custom.sequence;
 
+import com.example.custom.sequence.common.ContainersConfig;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
-import org.springframework.context.annotation.Bean;
-import org.testcontainers.containers.MariaDBContainer;
+import org.springframework.context.annotation.Import;
 
 @TestConfiguration(proxyBeanMethods = false)
+@Import(ContainersConfig.class)
 public class TestApplication {
-
-    @Bean
-    @ServiceConnection
-    MariaDBContainer<?> mariaDbContainer() {
-        return new MariaDBContainer<>("mariadb:11.4");
-    }
 
     public static void main(String[] args) {
         SpringApplication.from(Application::main).with(TestApplication.class).run(args);
