@@ -16,7 +16,7 @@ public class TestRabbitMQApplication {
     @RestartScope
     RabbitMQContainer rabbitMQContainer() {
         return new RabbitMQContainer(
-                DockerImageName.parse("rabbitmq").withTag("3.13.0-management"));
+                DockerImageName.parse("rabbitmq").withTag("3.13.3-management"));
     }
 
     public static void main(String[] args) {
