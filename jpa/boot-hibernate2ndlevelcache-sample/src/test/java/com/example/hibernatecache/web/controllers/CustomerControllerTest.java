@@ -23,8 +23,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -44,22 +42,6 @@ class CustomerControllerTest {
     @MockBean private CustomerService customerService;
 
     @Autowired private ObjectMapper objectMapper;
-
-    private List<Customer> customerList;
-
-    @BeforeEach
-    void setUp() {
-        this.customerList = new ArrayList<>();
-        this.customerList.add(
-                new Customer(
-                        1L, "firstName 1", "lastName 1", "email1@junit.com", "9876543211", null));
-        this.customerList.add(
-                new Customer(
-                        2L, "firstName 2", "lastName 2", "email2@junit.com", "9876543212", null));
-        this.customerList.add(
-                new Customer(
-                        3L, "firstName 3", "lastName 3", "email3@junit.com", "9876543213", null));
-    }
 
     @Test
     void shouldFetchAllCustomers() throws Exception {
@@ -82,7 +64,6 @@ class CustomerControllerTest {
                 .andExpect(jsonPath("$.hasPrevious", is(false)));
     }
 
-    @NotNull
     private static List<CustomerResponse> getCustomerResponses() {
         List<CustomerResponse> customerMappedList = new ArrayList<>();
         customerMappedList.add(

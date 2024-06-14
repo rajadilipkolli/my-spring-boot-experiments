@@ -14,8 +14,8 @@ Here's a brief overview of other propagation modes:
 
 The isolation and propagation levels you should use depend on your specific needs. In general:
 
-* If you need to ensure that your data remains consistent and you want to prevent dirty reads, non-repeatable reads, and phantom reads, you should use a higher isolation level like **SERIALIZABLE**. However, this comes at the cost of performance, as it locks the data for the duration of the transaction.
-* If performance is a priority and you can tolerate some inconsistencies, you should use a lower isolation level like **READ_UNCOMMITTED**.
+* If you need to ensure that your data remains consistent, and you want to prevent dirty reads, non-repeatable reads, and phantom reads, you should use a higher isolation level like **SERIALIZABLE**. However, this comes at the cost of performance, as it locks the data for the duration of the transaction.
+* If performance is a priority, and you can tolerate some inconsistencies, you should use a lower isolation level like **READ_UNCOMMITTED**.
 * Regarding propagation, if you need to execute multiple operations as a single unit of work, use **PROPAGATION_REQUIRED**. If you need to isolate some operations from your current transaction, use **PROPAGATION_REQUIRES_NEW**. If you're going to execute some operations outside a transaction, use PROPAGATION_SUPPORTS.
 
 Remember, choosing the right isolation and propagation level is a trade-off between data consistency and performance.

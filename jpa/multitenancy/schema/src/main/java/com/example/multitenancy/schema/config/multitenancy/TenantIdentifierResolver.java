@@ -1,20 +1,19 @@
 package com.example.multitenancy.schema.config.multitenancy;
 
 import java.util.Map;
+
+import lombok.Setter;
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.context.spi.CurrentTenantIdentifierResolver;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernatePropertiesCustomizer;
 import org.springframework.stereotype.Component;
 
+@Setter
 @Component
 public class TenantIdentifierResolver
-        implements CurrentTenantIdentifierResolver, HibernatePropertiesCustomizer {
+        implements CurrentTenantIdentifierResolver<String>, HibernatePropertiesCustomizer {
 
     private String currentTenant = "unknown";
-
-    public void setCurrentTenant(String tenant) {
-        currentTenant = tenant;
-    }
 
     @Override
     public String resolveCurrentTenantIdentifier() {

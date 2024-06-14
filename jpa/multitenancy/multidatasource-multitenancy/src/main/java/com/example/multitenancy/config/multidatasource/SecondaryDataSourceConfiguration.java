@@ -37,9 +37,9 @@ public class SecondaryDataSourceConfiguration {
             EntityManagerFactoryBuilder builder,
             @Qualifier("tenantRoutingDatasource") DataSource tenantRoutingDatasource,
             @Qualifier("multiTenantConnectionProviderImpl")
-                    MultiTenantConnectionProvider multiTenantConnectionProvider,
+                    MultiTenantConnectionProvider<String> multiTenantConnectionProvider,
             @Qualifier("tenantIdentifierResolver")
-                    CurrentTenantIdentifierResolver currentTenantIdentifierResolver) {
+                    CurrentTenantIdentifierResolver<String> currentTenantIdentifierResolver) {
         Map<String, Object> hibernateProps = new HashMap<>();
         hibernateProps.put(
                 AvailableSettings.MULTI_TENANT_CONNECTION_PROVIDER, multiTenantConnectionProvider);

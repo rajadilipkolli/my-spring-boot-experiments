@@ -25,6 +25,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,15 +62,7 @@ class OrderControllerTest {
 
     @Test
     void shouldFetchAllOrders() throws Exception {
-        List<OrderResponse> orderResponseList = new ArrayList<>();
-        orderResponseList.add(
-                new OrderResponse("1", "text 1", new CustomerResponse("1", "customer1")));
-        orderResponseList.add(
-                new OrderResponse("2", "text 2", new CustomerResponse("1", "customer1")));
-        orderResponseList.add(
-                new OrderResponse("3", "text 3", new CustomerResponse("1", "customer1")));
-        Page<OrderResponse> page = new PageImpl<>(orderResponseList);
-        PagedResult<OrderResponse> orderPagedResult = new PagedResult<>(page);
+        PagedResult<OrderResponse> orderPagedResult = getOrderResponsePagedResult();
         given(orderService.findAllOrders(0, 10, "id", "asc")).willReturn(orderPagedResult);
 
         this.mockMvc
@@ -82,6 +76,18 @@ class OrderControllerTest {
                 .andExpect(jsonPath("$.isLast", is(true)))
                 .andExpect(jsonPath("$.hasNext", is(false)))
                 .andExpect(jsonPath("$.hasPrevious", is(false)));
+    }
+
+    private static @NotNull PagedResult<OrderResponse> getOrderResponsePagedResult() {
+        List<OrderResponse> orderResponseList = new ArrayList<>();
+        orderResponseList.add(
+                new OrderResponse("1", "text 1", new CustomerResponse("1", "customer1")));
+        orderResponseList.add(
+                new OrderResponse("2", "text 2", new CustomerResponse("1", "customer1")));
+        orderResponseList.add(
+                new OrderResponse("3", "text 3", new CustomerResponse("1", "customer1")));
+        Page<OrderResponse> page = new PageImpl<>(orderResponseList);
+        return new PagedResult<>(page);
     }
 
     @Test
