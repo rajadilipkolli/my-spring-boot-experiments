@@ -48,6 +48,7 @@ public class TomcatConfigs {
                 resource.setName("jdbc/myDatasourceName");
                 resource.setType(DataSource.class.getName());
                 resource.setProperty("factory", "com.zaxxer.hikari.HikariJNDIFactory");
+                resource.setProperty("autoCommit", "false");
                 resource.setProperty("driverClassName", applicationProperties.getDriverClassName());
                 resource.setProperty("jdbcUrl", applicationProperties.getUrl());
                 resource.setProperty("username", applicationProperties.getUsername());

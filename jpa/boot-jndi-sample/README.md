@@ -1,5 +1,7 @@
 # boot-jndi-sample
 
+JNDI using embedded Tomcat and Hikari DataSource
+
 ## Format code
 
 ```shell

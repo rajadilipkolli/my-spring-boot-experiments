@@ -19,8 +19,8 @@ public class ApplicationProperties {
     @Data
     public static class Cors {
         private String pathPattern = "/api/**";
-        private String allowedMethods = "*";
-        private String allowedHeaders = "*";
+        private String allowedMethods = "GET, POST, PUT, DELETE";
+        private String allowedHeaders = "Content-Type, Accept";
         private String allowedOriginPatterns = "*";
         private boolean allowCredentials = true;
     }
