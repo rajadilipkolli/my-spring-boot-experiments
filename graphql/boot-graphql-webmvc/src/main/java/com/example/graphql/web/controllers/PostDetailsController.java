@@ -5,7 +5,6 @@ import com.example.graphql.model.request.PostDetailsRequest;
 import com.example.graphql.projections.PostDetailsInfo;
 import com.example.graphql.services.PostDetailsService;
 import java.util.List;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -41,11 +40,10 @@ public class PostDetailsController {
             @PathVariable Long id, @RequestBody PostDetailsRequest postDetailsEntity) {
         return postDetailsService
                 .findDetailsById(id)
-                .map(
+                .flatMap(
                         postDetailsObj ->
                                 postDetailsService.updatePostDetails(
                                         postDetailsObj, postDetailsEntity))
-                .map(Optional::get)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }

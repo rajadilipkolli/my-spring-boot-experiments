@@ -5,7 +5,7 @@ The HTTP client is built on top of the Java URLConnection class and provides a h
 It also provides additional features such as automatic handling of authentication and redirects, support for HTTP proxies, and more.
 Overall, the HTTP client can help to make your application more efficient and easier to work with when it comes to sending and receiving HTTP requests.
 
-The following table list all sample codes related to the spring boot integrations with external system.
+The following table lists all sample codes related to the spring boot integrations with external system.
 
 | Name                                            | Description 		                                                                                                                                       |
 |-------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------|
