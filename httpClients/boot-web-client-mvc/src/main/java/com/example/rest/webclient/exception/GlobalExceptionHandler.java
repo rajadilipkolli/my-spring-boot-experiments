@@ -42,6 +42,6 @@ public class GlobalExceptionHandler {
         return problemDetail;
     }
 
-    static record ApiValidationError(
+    record ApiValidationError(
             String object, String field, Object rejectedValue, String message) {}
 }

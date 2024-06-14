@@ -126,7 +126,7 @@ public class RestaurantSearchService {
         return new PagedResult<>(searchPage, map);
     }
 
-    Function<Map<String, Aggregation>, Map<String, Map<String, Long>>> aggregationFunction =
+    final Function<Map<String, Aggregation>, Map<String, Map<String, Long>>> aggregationFunction =
             aggregationMap -> {
                 Map<String, Map<String, Long>> resultMap = new HashMap<>();
                 aggregationMap.forEach(

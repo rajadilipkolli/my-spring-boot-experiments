@@ -115,7 +115,7 @@ class ReactiveCommentsControllerTest {
     }
 
     @Test
-    void shouldReturn404WhenFetchingNonExistingReactiveComments() throws Exception {
+    void shouldReturn404WhenFetchingNonExistingReactiveComments() {
         ReactiveComments reactiveComments = reactiveCommentsFlux.next().block();
         UUID reactiveCommentsId = reactiveComments.getId();
 

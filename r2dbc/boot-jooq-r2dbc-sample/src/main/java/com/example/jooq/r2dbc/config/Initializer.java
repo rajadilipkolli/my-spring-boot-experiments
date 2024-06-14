@@ -123,7 +123,7 @@ public class Initializer implements CommandLineRunner {
                                 .orderBy(POSTS.CREATED_AT))
                 .subscribe(
                         data -> log.debug("Retrieved data: {}", data.into(PostResponse.class)),
-                        error -> log.debug("error: " + error),
+                        error -> log.debug("error: ", error),
                         () -> log.debug("done"));
     }
 }

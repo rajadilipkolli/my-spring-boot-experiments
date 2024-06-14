@@ -5,7 +5,7 @@ services:
         image: ghcr.io/rajadilipkolli/my-spring-boot-experiments/boot-strategy-plugin:latest
         container_name: strategy-plugin-service
         ports:
-            - 8080:8080
+            - "8080:8080"
         depends_on: 
             grafana:
                 condition: service_healthy

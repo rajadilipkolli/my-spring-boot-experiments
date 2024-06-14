@@ -87,7 +87,7 @@ class PostDetailsEntityControllerTest {
         given(postDetailsService.findDetailsById(postDetailsId))
                 .willReturn(Optional.of(postDetails));
         given(postDetailsService.updatePostDetails(postDetails, postDetailsRequest))
-                .willReturn(getPostDetails());
+                .willReturn(Optional.of(getPostDetails()));
 
         this.mockMvc
                 .perform(

@@ -31,7 +31,7 @@ public class Post {
     private List<PostComment> comments = new ArrayList<>();
 
     @JoinColumn(name = "details_Id")
-    @OneToOne(cascade = CascadeType.ALL, mappedBy = "post", orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToOne(cascade = CascadeType.ALL, mappedBy = "post", orphanRemoval = true)
     private PostDetails details;
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)

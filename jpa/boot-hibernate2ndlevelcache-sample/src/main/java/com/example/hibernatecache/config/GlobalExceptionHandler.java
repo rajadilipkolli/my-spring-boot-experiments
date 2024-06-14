@@ -33,7 +33,7 @@ public class GlobalExceptionHandler {
                                     return new ApiValidationError(
                                             fieldError.getObjectName(),
                                             fieldError.getField(),
-                                            fieldError.getRejectedValue(),
+                                            Objects.requireNonNull(fieldError.getRejectedValue()),
                                             Objects.requireNonNull(
                                                     fieldError.getDefaultMessage(), ""));
                                 })
