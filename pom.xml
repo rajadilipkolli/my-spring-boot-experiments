@@ -37,6 +37,7 @@
         <module>jpa/boot-data-keyset-pagination</module>
         <module>jpa/boot-data-multipledatasources</module>
         <module>jpa/boot-hibernate2ndlevelcache-sample</module>
+        <module>jpa/boot-jndi-sample</module>
         <module>jpa/boot-jpa-locks</module>
         <module>jpa/boot-read-replica-postgresql</module>
         <module>jpa/multitenancy/multidatasource-multitenancy</module>
