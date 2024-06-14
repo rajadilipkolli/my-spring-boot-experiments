@@ -7,6 +7,7 @@ import com.example.graphql.model.request.AuthorRequest;
 import com.example.graphql.model.response.AuthorResponse;
 import com.example.graphql.repositories.AuthorRepository;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.convert.ConversionService;
@@ -45,7 +46,7 @@ public class AuthorService {
         AuthorEntity authorEntity =
                 this.appConversionService.convert(authorRequest, AuthorEntity.class);
         return this.appConversionService.convert(
-                authorRepository.save(authorEntity), AuthorResponse.class);
+                authorRepository.save(Objects.requireNonNull(authorEntity)), AuthorResponse.class);
     }
 
     public Optional<AuthorResponse> updateAuthor(AuthorRequest authorRequest, Long id) {

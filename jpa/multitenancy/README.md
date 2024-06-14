@@ -4,10 +4,8 @@
 
  - This allows you to create a single entity class that can be shared by multiple tenants, giving each tenant its own independent instance of the data.
 
-Lets see how it works by using three different approaches:
+Let's see how it works by using three different approaches:
 
- > Partition tables by tenant id.  ->  Single table having partition (Supported Only from Hibernate 6)
-
- > Use a separate schema per tenant. -> Single Database having multiple schemas
-
- > Use a separate database per tenant. -> Different Databases having same schema (Could be having different aws regions)
+- Partition tables by tenant id.  &#8594;  Single table having partition (Supported Only from Hibernate 6)
+- Use a separate schema per tenant. &#8594; Single Database having multiple schemas
+- Use a separate database per tenant. &#8594; Different Databases having same schema (Could be having different aws regions)

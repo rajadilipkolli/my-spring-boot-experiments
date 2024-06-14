@@ -45,7 +45,7 @@ class PostEntityControllerTest {
 
     private List<PostEntity> postEntityList;
 
-    private List<PostResponse> postResponseList =
+    private final List<PostResponse> postResponseList =
             List.of(
                     new PostResponse(
                             null, "First Post", false, null, null, null, null, new ArrayList<>()),

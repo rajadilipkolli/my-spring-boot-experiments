@@ -41,10 +41,10 @@ public interface CustomerAPI {
                         })
             })
     PagedResult<Customer> getAllCustomers(
-            @Parameter(name = "pageNo", description = "", in = ParameterIn.QUERY) int pageNo,
-            @Parameter(name = "pageSize", description = "", in = ParameterIn.QUERY) int pageSize,
-            @Parameter(name = "sortBy", description = "", in = ParameterIn.QUERY) String sortBy,
-            @Parameter(name = "sortDir", description = "", in = ParameterIn.QUERY) String sortDir);
+            @Parameter(name = "pageNo", in = ParameterIn.QUERY) int pageNo,
+            @Parameter(name = "pageSize", in = ParameterIn.QUERY) int pageSize,
+            @Parameter(name = "sortBy", in = ParameterIn.QUERY) String sortBy,
+            @Parameter(name = "sortDir", in = ParameterIn.QUERY) String sortDir);
 
     /**
      * GET /api/customers/{id}
@@ -74,8 +74,7 @@ public interface CustomerAPI {
                         })
             })
     ResponseEntity<CustomerResponse> getCustomerById(
-            @Parameter(name = "id", description = "", required = true, in = ParameterIn.PATH)
-                    @PathVariable
+            @Parameter(name = "id", required = true, in = ParameterIn.PATH) @PathVariable
                     String id);
 
     /**
@@ -105,6 +104,5 @@ public interface CustomerAPI {
                                     schema = @Schema(implementation = ProblemDetail.class))
                         })
             })
-    CustomerResponse createCustomer(
-            @Valid @RequestBody(description = "", required = true) Customer customer);
+    CustomerResponse createCustomer(@Valid @RequestBody(required = true) Customer customer);
 }

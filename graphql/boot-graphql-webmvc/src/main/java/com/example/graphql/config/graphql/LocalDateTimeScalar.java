@@ -55,17 +55,16 @@ public class LocalDateTimeScalar {
                         // Will be String if the value is specified via external variables object,
                         // and a StringValue
                         // if provided direct in the query.
-                        if (input instanceof StringValue stringValue) {
-                            return parseString(stringValue.getValue());
-                        }
-                        if (input instanceof String inputString) {
-                            return parseString(inputString);
-                        }
-                        if (input instanceof LocalDateTime localDateTime) {
-                            return localDateTime;
-                        }
-                        throw new CoercingParseValueException(
-                                "Expected a 'String' but was '" + typeName(input) + "'.");
+                        return switch (input) {
+                            case StringValue stringValue -> parseString(stringValue.getValue());
+                            case String inputString -> parseString(inputString);
+                            case LocalDateTime localDateTime -> localDateTime;
+                            default ->
+                                    throw new CoercingParseValueException(
+                                            "Expected a 'String' but was '"
+                                                    + typeName(input)
+                                                    + "'.");
+                        };
                     }
 
                     private LocalDateTime parseString(String input) {

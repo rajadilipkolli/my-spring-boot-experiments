@@ -32,10 +32,10 @@ public class PostDetailsService {
     }
 
     @Transactional
-    public PostDetailsInfo updatePostDetails(
+    public Optional<PostDetailsInfo> updatePostDetails(
             PostDetailsEntity postDetailsObj, PostDetailsRequest postDetailsRequest) {
         postDetailsObj.setDetailsKey(postDetailsRequest.detailsKey());
         PostDetailsEntity persistedDetails = postDetailsRepository.save(postDetailsObj);
-        return findPostDetailsById(persistedDetails.getId()).get();
+        return findPostDetailsById(persistedDetails.getId());
     }
 }

@@ -160,7 +160,8 @@ class RestaurantESRepositoryIntegrationTest extends AbstractIntegrationTest {
                             assertThat(searchPage.isEmpty()).isFalse();
                             assertThat(searchPage.hasContent()).isTrue();
                             assertThat(searchPage.stream().count()).isEqualTo(2);
-                            Restaurant restaurant1 = searchPage.getContent().get(0).getContent();
+                            Restaurant restaurant1 =
+                                    searchPage.getContent().getFirst().getContent();
                             assertThat(restaurant1.getRestaurantId()).isEqualTo(2L);
                             assertThat(restaurant1.getName()).isEqualTo(RESTAURANT_NAME);
                             assertThat(restaurant1.getBorough()).isEqualTo(BOROUGH_NAME);
@@ -208,7 +209,8 @@ class RestaurantESRepositoryIntegrationTest extends AbstractIntegrationTest {
                             assertThat(searchPage.isEmpty()).isFalse();
                             assertThat(searchPage.hasContent()).isTrue();
                             assertThat(searchPage.stream().count()).isEqualTo(2);
-                            Restaurant restaurant1 = searchPage.getContent().get(0).getContent();
+                            Restaurant restaurant1 =
+                                    searchPage.getContent().getFirst().getContent();
                             assertThat(restaurant1.getRestaurantId()).isEqualTo(2L);
                             assertThat(restaurant1.getName()).isEqualTo(RESTAURANT_NAME);
                             assertThat(restaurant1.getBorough()).isEqualTo(BOROUGH_NAME);
@@ -235,7 +237,8 @@ class RestaurantESRepositoryIntegrationTest extends AbstractIntegrationTest {
                             assertThat(searchPage.isEmpty()).isFalse();
                             assertThat(searchPage.hasContent()).isTrue();
                             assertThat(searchPage.stream().count()).isEqualTo(2);
-                            Restaurant restaurant1 = searchPage.getContent().get(0).getContent();
+                            Restaurant restaurant1 =
+                                    searchPage.getContent().getFirst().getContent();
                             assertThat(restaurant1.getRestaurantId()).isEqualTo(2L);
                             assertThat(restaurant1.getName()).isEqualTo(RESTAURANT_NAME);
                             assertThat(restaurant1.getBorough()).isEqualTo(BOROUGH_NAME);
@@ -264,7 +267,8 @@ class RestaurantESRepositoryIntegrationTest extends AbstractIntegrationTest {
                             assertThat(searchPage.isEmpty()).isFalse();
                             assertThat(searchPage.hasContent()).isTrue();
                             assertThat(searchPage.stream().count()).isEqualTo(2);
-                            Restaurant restaurant1 = searchPage.getContent().get(0).getContent();
+                            Restaurant restaurant1 =
+                                    searchPage.getContent().getFirst().getContent();
                             assertThat(restaurant1.getRestaurantId()).isEqualTo(2L);
                             assertThat(restaurant1.getName()).isEqualTo(RESTAURANT_NAME);
                             assertThat(restaurant1.getBorough()).isEqualTo(BOROUGH_NAME);
@@ -304,7 +308,8 @@ class RestaurantESRepositoryIntegrationTest extends AbstractIntegrationTest {
                             assertThat(searchPage.isEmpty()).isFalse();
                             assertThat(searchPage.hasContent()).isTrue();
                             assertThat(searchPage.stream().count()).isEqualTo(1);
-                            Restaurant restaurant1 = searchPage.getContent().get(0).getContent();
+                            Restaurant restaurant1 =
+                                    searchPage.getContent().getFirst().getContent();
                             assertThat(restaurant1.getRestaurantId()).isEqualTo(40363920L);
                             assertThat(restaurant1.getName()).isEqualTo("Yono gardens");
                             assertThat(restaurant1.getBorough()).isEqualTo(BOROUGH_NAME);
@@ -331,7 +336,8 @@ class RestaurantESRepositoryIntegrationTest extends AbstractIntegrationTest {
                             assertThat(searchPage.isEmpty()).isFalse();
                             assertThat(searchPage.hasContent()).isTrue();
                             assertThat(searchPage.stream().count()).isEqualTo(2);
-                            Restaurant restaurant1 = searchPage.getContent().get(0).getContent();
+                            Restaurant restaurant1 =
+                                    searchPage.getContent().getFirst().getContent();
                             assertThat(restaurant1.getRestaurantId()).isEqualTo(2L);
                             assertThat(restaurant1.getName()).isEqualTo(RESTAURANT_NAME);
                             assertThat(restaurant1.getBorough()).isEqualTo(BOROUGH_NAME);
@@ -358,7 +364,8 @@ class RestaurantESRepositoryIntegrationTest extends AbstractIntegrationTest {
                             assertThat(searchPage.isEmpty()).isFalse();
                             assertThat(searchPage.hasContent()).isTrue();
                             assertThat(searchPage.stream().count()).isEqualTo(2);
-                            Restaurant restaurant1 = searchPage.getContent().get(0).getContent();
+                            Restaurant restaurant1 =
+                                    searchPage.getContent().getFirst().getContent();
                             assertThat(restaurant1.getRestaurantId()).isEqualTo(2L);
                             assertThat(restaurant1.getName()).isEqualTo(RESTAURANT_NAME);
                             assertThat(restaurant1.getBorough()).isEqualTo(BOROUGH_NAME);
@@ -383,7 +390,8 @@ class RestaurantESRepositoryIntegrationTest extends AbstractIntegrationTest {
                             assertThat(searchPage.isEmpty()).isFalse();
                             assertThat(searchPage.hasContent()).isTrue();
                             assertThat(searchPage.stream().count()).isEqualTo(1);
-                            Restaurant restaurant1 = searchPage.getContent().get(0).getContent();
+                            Restaurant restaurant1 =
+                                    searchPage.getContent().getFirst().getContent();
                             assertThat(restaurant1.getRestaurantId()).isEqualTo(2L);
                             assertThat(restaurant1.getName()).isEqualTo(RESTAURANT_NAME);
                             assertThat(restaurant1.getBorough()).isEqualTo(BOROUGH_NAME);
@@ -411,7 +419,8 @@ class RestaurantESRepositoryIntegrationTest extends AbstractIntegrationTest {
                             assertThat(searchPage.isEmpty()).isFalse();
                             assertThat(searchPage.hasContent()).isTrue();
                             assertThat(searchPage.stream().count()).isEqualTo(2);
-                            Restaurant restaurant1 = searchPage.getContent().get(0).getContent();
+                            Restaurant restaurant1 =
+                                    searchPage.getContent().getFirst().getContent();
                             assertThat(restaurant1.getRestaurantId()).isEqualTo(2L);
                             assertThat(restaurant1.getName()).isEqualTo(RESTAURANT_NAME);
                             assertThat(restaurant1.getBorough()).isEqualTo(BOROUGH_NAME);
@@ -437,7 +446,8 @@ class RestaurantESRepositoryIntegrationTest extends AbstractIntegrationTest {
                             assertThat(searchPage.isEmpty()).isFalse();
                             assertThat(searchPage.hasContent()).isTrue();
                             assertThat(searchPage.stream().count()).isEqualTo(2);
-                            Restaurant restaurant1 = searchPage.getContent().get(0).getContent();
+                            Restaurant restaurant1 =
+                                    searchPage.getContent().getFirst().getContent();
                             assertThat(restaurant1.getRestaurantId()).isEqualTo(2L);
                             assertThat(restaurant1.getName()).isEqualTo(RESTAURANT_NAME);
                             assertThat(restaurant1.getBorough()).isEqualTo(BOROUGH_NAME);
@@ -471,7 +481,8 @@ class RestaurantESRepositoryIntegrationTest extends AbstractIntegrationTest {
                                     .isNotNull()
                                     .isExactlyInstanceOf(ElasticsearchAggregations.class);
                             assertThat(searchPage.stream().count()).isEqualTo(1);
-                            Restaurant restaurant1 = searchPage.getContent().get(0).getContent();
+                            Restaurant restaurant1 =
+                                    searchPage.getContent().getFirst().getContent();
                             assertThat(restaurant1.getRestaurantId()).isEqualTo(2L);
                             assertThat(restaurant1.getName()).isEqualTo(RESTAURANT_NAME);
                             assertThat(restaurant1.getBorough()).isEqualTo(BOROUGH_NAME);

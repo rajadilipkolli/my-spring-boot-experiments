@@ -43,8 +43,10 @@ class ApplicationIntegrationTest extends AbstractIntegrationTest {
 
         assertThat(revision)
                 .isPresent()
-                .hasValueSatisfying(rev ->
-                        assertThat(rev.getRevisionNumber()).isPresent().get().isEqualTo(5))
+                .hasValueSatisfying(rev -> {
+                    assertThat(rev.getRevisionNumber()).isPresent();
+                    assertThat(rev.getRevisionNumber().get()).isEqualTo(5);
+                })
                 .hasValueSatisfying(rev -> assertThat(rev.getEntity())
                         .extracting(Customer::getName)
                         .asString()

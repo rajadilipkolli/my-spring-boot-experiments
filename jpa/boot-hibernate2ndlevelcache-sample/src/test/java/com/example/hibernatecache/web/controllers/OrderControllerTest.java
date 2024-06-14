@@ -49,7 +49,7 @@ class OrderControllerTest {
 
     private List<Order> orderList;
 
-    Customer customer =
+    final Customer customer =
             new Customer(1L, "firstName 1", "lastName 1", "email1@junit.com", "9876543211", null);
 
     @BeforeEach

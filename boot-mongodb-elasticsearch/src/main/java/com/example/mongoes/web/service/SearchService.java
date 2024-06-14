@@ -133,7 +133,7 @@ public class SearchService {
                         });
     }
 
-    Function<Map<String, ElasticsearchAggregation>, Map<String, Map<String, Long>>>
+    final Function<Map<String, ElasticsearchAggregation>, Map<String, Map<String, Long>>>
             aggregationFunction =
                     aggregationMap -> {
                         Map<String, Map<String, Long>> resultMap = new HashMap<>();
