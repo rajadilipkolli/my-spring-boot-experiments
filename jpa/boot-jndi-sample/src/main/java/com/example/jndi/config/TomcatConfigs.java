@@ -2,7 +2,6 @@ package com.example.jndi.config;
 
 import javax.naming.NamingException;
 import javax.sql.DataSource;
-
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
