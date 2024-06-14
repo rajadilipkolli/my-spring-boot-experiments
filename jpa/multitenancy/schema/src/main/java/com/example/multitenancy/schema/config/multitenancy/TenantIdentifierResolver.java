@@ -1,7 +1,6 @@
 package com.example.multitenancy.schema.config.multitenancy;
 
 import java.util.Map;
-
 import lombok.Setter;
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.context.spi.CurrentTenantIdentifierResolver;

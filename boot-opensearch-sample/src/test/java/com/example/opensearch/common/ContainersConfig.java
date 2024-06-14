@@ -19,7 +19,6 @@ public class ContainersConfig {
 
     @DynamicPropertySource
     static void setApplicationProperties(DynamicPropertyRegistry dynamicPropertyRegistry) {
-        dynamicPropertyRegistry.add(
-                "opensearch.uris", openSearchContainer::getHttpHostAddress);
+        dynamicPropertyRegistry.add("opensearch.uris", openSearchContainer::getHttpHostAddress);
     }
 }

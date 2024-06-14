@@ -17,5 +17,4 @@ public enum DatabaseType {
     DatabaseType(String schemaName) {
         this.schemaName = schemaName;
     }
-
 }

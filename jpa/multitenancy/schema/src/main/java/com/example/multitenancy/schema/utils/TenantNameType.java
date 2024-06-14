@@ -12,5 +12,4 @@ public enum TenantNameType {
     TenantNameType(String tenantName) {
         this.tenantName = tenantName;
     }
-
 }

@@ -28,5 +28,4 @@ public class GlobalErrorWebExceptionHandler extends DefaultErrorWebExceptionHand
     protected RouterFunction<ServerResponse> getRoutingFunction(ErrorAttributes errorAttributes) {
         return RouterFunctions.route(RequestPredicates.all(), this::renderErrorResponse);
     }
-
 }

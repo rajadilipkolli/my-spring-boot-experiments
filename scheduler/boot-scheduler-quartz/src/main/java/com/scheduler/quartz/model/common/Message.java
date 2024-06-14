@@ -44,8 +44,10 @@ public class Message implements Serializable {
 
     @Setter
     boolean valid;
+
     @Setter
     String msg;
+
     Object data;
 
     public void setData(Object data) {

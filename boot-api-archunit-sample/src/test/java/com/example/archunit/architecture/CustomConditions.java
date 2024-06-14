@@ -43,8 +43,7 @@ public class CustomConditions {
 
     private static ArchCondition<JavaField> buildFieldHaveGetterAndSetterCondition(
             boolean forceSetters, Map<String, String> exclusions) {
-        return new ArchCondition<>(
-                forceSetters ? HAVE_GETTER_AND_SETTER_DESCRIPTION : HAVE_GETTER_DESCRIPTION) {
+        return new ArchCondition<>(forceSetters ? HAVE_GETTER_AND_SETTER_DESCRIPTION : HAVE_GETTER_DESCRIPTION) {
 
             @Override
             public void check(JavaField field, ConditionEvents events) {

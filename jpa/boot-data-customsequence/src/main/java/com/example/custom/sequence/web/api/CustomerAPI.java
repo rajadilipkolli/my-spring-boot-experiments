@@ -74,8 +74,7 @@ public interface CustomerAPI {
                         })
             })
     ResponseEntity<CustomerResponse> getCustomerById(
-            @Parameter(name = "id", required = true, in = ParameterIn.PATH)
-                    @PathVariable
+            @Parameter(name = "id", required = true, in = ParameterIn.PATH) @PathVariable
                     String id);
 
     /**
@@ -105,6 +104,5 @@ public interface CustomerAPI {
                                     schema = @Schema(implementation = ProblemDetail.class))
                         })
             })
-    CustomerResponse createCustomer(
-            @Valid @RequestBody(required = true) Customer customer);
+    CustomerResponse createCustomer(@Valid @RequestBody(required = true) Customer customer);
 }
