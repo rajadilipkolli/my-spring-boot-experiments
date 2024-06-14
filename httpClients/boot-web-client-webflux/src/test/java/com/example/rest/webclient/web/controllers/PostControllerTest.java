@@ -109,7 +109,7 @@ class PostControllerTest {
     }
 
     @Test
-    void shouldReturn400WhenCreateNewPostWithoutTitle() throws Exception {
+    void shouldReturn400WhenCreateNewPostWithoutTitle() {
         PostDto post = new PostDto(null, null, null, null);
 
         this.webTestClient

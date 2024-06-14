@@ -4,7 +4,7 @@ import io.r2dbc.spi.ConnectionFactory;
 import org.jooq.DSLContext;
 import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultExecuteListenerProvider;
-import org.springframework.boot.autoconfigure.jooq.JooqExceptionTranslator;
+import org.springframework.boot.autoconfigure.jooq.ExceptionTranslatorExecuteListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -23,6 +23,6 @@ public class JooqConfiguration {
     @Bean
     @Order(0)
     DefaultExecuteListenerProvider jooqExceptionTranslatorExecuteListenerProvider() {
-        return new DefaultExecuteListenerProvider(new JooqExceptionTranslator());
+        return new DefaultExecuteListenerProvider(ExceptionTranslatorExecuteListener.DEFAULT);
     }
 }

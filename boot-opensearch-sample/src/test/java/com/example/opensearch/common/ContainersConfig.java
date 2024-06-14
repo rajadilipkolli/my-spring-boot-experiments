@@ -9,7 +9,7 @@ import org.testcontainers.utility.DockerImageName;
 public class ContainersConfig {
 
     @Container
-    public static OpensearchContainer<?> openSearchContainer =
+    public static final OpensearchContainer<?> openSearchContainer =
             new OpensearchContainer<>(DockerImageName.parse("opensearchproject/opensearch:2.14.0"))
                     .withEnv("OPENSEARCH_INITIAL_ADMIN_PASSWORD", "admin");
 
@@ -19,7 +19,6 @@ public class ContainersConfig {
 
     @DynamicPropertySource
     static void setApplicationProperties(DynamicPropertyRegistry dynamicPropertyRegistry) {
-        dynamicPropertyRegistry.add(
-                "opensearch.uris", () -> openSearchContainer.getHttpHostAddress());
+        dynamicPropertyRegistry.add("opensearch.uris", openSearchContainer::getHttpHostAddress);
     }
 }

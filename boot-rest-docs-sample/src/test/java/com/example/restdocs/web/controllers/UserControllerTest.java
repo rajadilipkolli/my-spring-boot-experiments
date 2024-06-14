@@ -128,7 +128,6 @@ class UserControllerTest {
                                         parameterWithName("id")
                                                 .description("The id of the user to retrieve")),
                                 responseFields(getUserFieldDescriptor())));
-        ;
     }
 
     @Test
@@ -165,7 +164,6 @@ class UserControllerTest {
                                 preprocessResponse(prettyPrint()),
                                 requestFields(getUserRequestFieldDescriptor()),
                                 responseFields(getUserFieldDescriptor())));
-        ;
     }
 
     @Test

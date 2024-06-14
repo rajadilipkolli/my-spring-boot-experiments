@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 
 @Component("tenantIdentifierResolver")
 public class TenantIdentifierResolver
-        implements CurrentTenantIdentifierResolver, HibernatePropertiesCustomizer {
+        implements CurrentTenantIdentifierResolver<String>, HibernatePropertiesCustomizer {
 
     private String currentTenant = "unknown";
 

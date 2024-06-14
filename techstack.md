@@ -503,6 +503,6 @@ Full tech stack [here](/techstack.md)
 |[org.webjars:jquery](http://webjars.org)|v3.7.1|11/16/23|Raja Kolli |MIT|N/A|
 
 <br/>
-<div align='center'>
+<div align='center'></div>
 
 Generated via [Stack File](https://github.com/marketplace/stack-file)

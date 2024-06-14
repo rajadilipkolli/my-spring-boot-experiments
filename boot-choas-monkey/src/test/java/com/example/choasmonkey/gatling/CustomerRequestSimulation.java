@@ -21,12 +21,12 @@ import java.util.stream.Stream;
 
 public class CustomerRequestSimulation extends Simulation {
 
-    HttpProtocolBuilder httpProtocol =
+    final HttpProtocolBuilder httpProtocol =
             http.baseUrl("http://localhost:8080")
                     .acceptHeader("application/json")
                     .userAgentHeader("Gatling/Performance Test");
 
-    Iterator<Map<String, Object>> feeder =
+    final Iterator<Map<String, Object>> feeder =
             Stream.generate(
                             (Supplier<Map<String, Object>>)
                                     () ->
@@ -34,7 +34,7 @@ public class CustomerRequestSimulation extends Simulation {
                                                     "text", UUID.randomUUID().toString()))
                     .iterator();
 
-    ScenarioBuilder scn =
+    final ScenarioBuilder scn =
             CoreDsl.scenario("Load Test Creating Customers")
                     .feed(feeder)
                     .exec(

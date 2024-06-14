@@ -20,9 +20,7 @@ import com.example.rest.proxy.model.response.PostResponse;
 import com.example.rest.proxy.services.PostService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -40,16 +38,6 @@ class PostControllerTest {
     @MockBean private PostService postService;
 
     @Autowired private ObjectMapper objectMapper;
-
-    private List<Post> postList;
-
-    @BeforeEach
-    void setUp() {
-        this.postList = new ArrayList<>();
-        this.postList.add(new Post(1L, "text 1", 1L, "First Body", new ArrayList<>()));
-        this.postList.add(new Post(2L, "text 2", 1L, "Second Body", new ArrayList<>()));
-        this.postList.add(new Post(3L, "text 3", 1L, "Third Body", new ArrayList<>()));
-    }
 
     @Test
     void shouldFindPostById() throws Exception {

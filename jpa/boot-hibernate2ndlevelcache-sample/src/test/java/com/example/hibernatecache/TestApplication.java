@@ -1,7 +1,6 @@
 package com.example.hibernatecache;
 
 import com.example.hibernatecache.common.ContainersConfig;
-import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import org.springframework.boot.SpringApplication;
@@ -33,7 +32,7 @@ public class TestApplication {
                 ymlContent.formatted(redisContainer.getHost(), redisContainer.getMappedPort(6379));
         String resourcesPath = new ClassPathResource("").getURL().getPath();
         String yamlFilePath = resourcesPath + "redisson-test.yml";
-        try (FileWriter writer = new FileWriter(new File(yamlFilePath))) {
+        try (FileWriter writer = new FileWriter(yamlFilePath)) {
             writer.write(finalYml);
         }
         return redisContainer;
