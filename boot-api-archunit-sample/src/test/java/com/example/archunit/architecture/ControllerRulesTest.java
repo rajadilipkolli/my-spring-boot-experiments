@@ -9,6 +9,7 @@ import static com.example.archunit.architecture.CommonRules.componentAnnotationI
 import static com.example.archunit.architecture.CommonRules.fieldsShouldNotBePublic;
 import static com.example.archunit.architecture.CommonRules.privateMethodsAreNotAllowedRule;
 import static com.example.archunit.architecture.CommonRules.publicConstructorsRule;
+import static com.example.archunit.architecture.CommonRules.publicMethodsAreNotAllowedRule;
 import static com.example.archunit.architecture.CommonRules.staticMethodsAreNotAllowedRule;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.methods;
@@ -44,6 +45,14 @@ class ControllerRulesTest {
             .because(ANNOTATED_EXPLANATION.formatted(CONTROLLER_SUFFIX, "@RestController")
                     + ", and not with @Controller");
 
+    @ArchTest
+    static final ArchRule classes_should_not_be_public = classes()
+            .that()
+            .resideInAPackage(CONTROLLER_PACKAGE)
+            .should()
+            .bePackagePrivate()
+            .because("Classes in %s package should be declared package-private");
+
     // Fields
     @ArchTest
     static final ArchRule fields_should_not_be_public = fieldsShouldNotBePublic(CONTROLLER_PACKAGE);
@@ -60,12 +69,15 @@ class ControllerRulesTest {
     static final ArchRule private_methods_are_not_allowed = privateMethodsAreNotAllowedRule(CONTROLLER_PACKAGE);
 
     @ArchTest
+    static final ArchRule public_methods_are_not_allowed = publicMethodsAreNotAllowedRule(CONTROLLER_PACKAGE);
+
+    @ArchTest
     static final ArchRule static_methods_are_not_allowed = staticMethodsAreNotAllowedRule(CONTROLLER_PACKAGE);
 
     @ArchTest
     static final ArchRule methods_should_return_response_entity = methods()
             .that()
-            .arePublic()
+            .arePackagePrivate()
             .and()
             .areDeclaredInClassesThat()
             .resideInAPackage(CONTROLLER_PACKAGE)
@@ -76,7 +88,7 @@ class ControllerRulesTest {
     @ArchTest
     static final ArchRule methods_should_be_annotated_with_valid_annotations = methods()
             .that()
-            .arePublic()
+            .arePackagePrivate()
             .and()
             .areDeclaredInClassesThat()
             .resideInAPackage(CONTROLLER_PACKAGE)

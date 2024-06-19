@@ -26,12 +26,12 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 @RestController
 @RequestMapping("/api/clients")
 @RequiredArgsConstructor
-public class ClientController {
+class ClientController {
 
     private final ClientService clientService;
 
     @GetMapping
-    public ResponseEntity<PagedResult<ClientResponse>> getAllClients(
+    ResponseEntity<PagedResult<ClientResponse>> getAllClients(
             @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_NUMBER, required = false) int pageNo,
             @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_SIZE, required = false) int pageSize,
             @RequestParam(defaultValue = AppConstants.DEFAULT_SORT_BY, required = false) String sortBy,
@@ -41,7 +41,7 @@ public class ClientController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ClientResponse> getClientById(@PathVariable Long id) {
+    ResponseEntity<ClientResponse> getClientById(@PathVariable Long id) {
         return clientService
                 .findClientById(id)
                 .map(ResponseEntity::ok)
@@ -49,7 +49,7 @@ public class ClientController {
     }
 
     @PostMapping
-    public ResponseEntity<ClientResponse> createClient(@RequestBody @Validated ClientRequest clientRequest) {
+    ResponseEntity<ClientResponse> createClient(@RequestBody @Validated ClientRequest clientRequest) {
         ClientResponse response = clientService.saveClient(clientRequest);
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/api/clients/{id}")
@@ -59,13 +59,13 @@ public class ClientController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ClientResponse> updateClient(
+    ResponseEntity<ClientResponse> updateClient(
             @PathVariable Long id, @RequestBody @Valid ClientRequest clientRequest) {
         return ResponseEntity.ok(clientService.updateClient(id, clientRequest));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<ClientResponse> deleteClient(@PathVariable Long id) {
+    ResponseEntity<ClientResponse> deleteClient(@PathVariable Long id) {
         return clientService
                 .findClientById(id)
                 .map(client -> {

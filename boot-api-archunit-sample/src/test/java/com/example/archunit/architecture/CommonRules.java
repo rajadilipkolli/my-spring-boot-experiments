@@ -161,6 +161,16 @@ public class CommonRules {
                 .because("Private methods are not allowed in %s".formatted(packageName));
     }
 
+    static ArchRule publicMethodsAreNotAllowedRule(String packageName) {
+        return methods()
+                .that()
+                .areDeclaredInClassesThat()
+                .resideInAPackage(packageName)
+                .should()
+                .notBePublic()
+                .because("Public methods are not allowed in %s".formatted(packageName));
+    }
+
     static ArchRule staticMethodsAreNotAllowedRule(String packageName) {
         return methods()
                 .that()
