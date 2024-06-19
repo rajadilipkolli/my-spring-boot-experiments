@@ -59,7 +59,7 @@ class GeneralCodingRulesTest {
 
     // Methods
     @ArchTest
-    static final ArchRule beanMethodsShouldBePublic = methods()
+    static final ArchRule beanMethodsShouldBePackagePrivate = methods()
             .that()
             .areAnnotatedWith(Bean.class)
             .should()
