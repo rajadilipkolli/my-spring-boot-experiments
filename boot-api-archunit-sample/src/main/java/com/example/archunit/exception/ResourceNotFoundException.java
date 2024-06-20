@@ -5,13 +5,13 @@ import org.springframework.http.HttpStatusCode;
 
 public class ResourceNotFoundException extends RuntimeException {
 
-    private static final HttpStatus httpStatus = HttpStatus.NOT_FOUND;
+    private static final HttpStatus HTTP_STATUS = HttpStatus.NOT_FOUND;
 
     public ResourceNotFoundException(String errorMessage) {
         super(errorMessage);
     }
 
     public HttpStatusCode getHttpStatus() {
-        return httpStatus;
+        return HTTP_STATUS;
     }
 }

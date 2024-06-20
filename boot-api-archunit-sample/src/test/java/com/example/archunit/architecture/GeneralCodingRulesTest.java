@@ -8,6 +8,7 @@ import static com.tngtech.archunit.library.GeneralCodingRules.NO_CLASSES_SHOULD_
 import static com.tngtech.archunit.library.GeneralCodingRules.NO_CLASSES_SHOULD_USE_JAVA_UTIL_LOGGING;
 import static com.tngtech.archunit.library.GeneralCodingRules.NO_CLASSES_SHOULD_USE_JODATIME;
 
+import com.tngtech.archunit.core.domain.JavaModifier;
 import com.tngtech.archunit.core.importer.ImportOption;
 import com.tngtech.archunit.junit.AnalyzeClasses;
 import com.tngtech.archunit.junit.ArchTest;
@@ -48,14 +49,18 @@ class GeneralCodingRulesTest {
             .haveName("LOGGER")
             .because("Logger variables should be private, static and final, and it should be named as LOGGER");
 
-    /*
     @ArchTest
-    static final ArchRule finalStaticVariablesInUppercase = fields().that().areStatic().and().areFinal()
-            .and().doNotHaveName("serialVersionUID")
-            .and().doNotHaveModifier(JavaModifier.SYNTHETIC)
-            .should().haveNameMatching(".*^[A-Z].*")
+    static final ArchRule finalStaticVariablesInUppercase = fields().that()
+            .areStatic()
+            .and()
+            .areFinal()
+            .and()
+            .doNotHaveName("serialVersionUID")
+            .and()
+            .doNotHaveModifier(JavaModifier.SYNTHETIC)
+            .should()
+            .haveNameMatching(".*^[A-Z].*")
             .because("Variables with static and final modifiers should be named in uppercase");
-    */
 
     // Methods
     @ArchTest
