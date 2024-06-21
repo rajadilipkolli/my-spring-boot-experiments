@@ -9,4 +9,4 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
         basePackageClasses = CustomerRepository.class,
         repositoryBaseClass = BaseJpaRepositoryImpl.class)
 @Configuration(proxyBeanMethods = false)
-public class JpaConfiguration {}
+class JpaConfiguration {}

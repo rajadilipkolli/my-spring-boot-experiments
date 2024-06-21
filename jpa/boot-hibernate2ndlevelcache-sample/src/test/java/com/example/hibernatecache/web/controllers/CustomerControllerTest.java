@@ -5,6 +5,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -15,7 +16,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.example.hibernatecache.entities.Customer;
+import com.example.hibernatecache.exception.CustomerNotFoundException;
+import com.example.hibernatecache.model.query.FindCustomersQuery;
+import com.example.hibernatecache.model.request.CustomerRequest;
 import com.example.hibernatecache.model.response.CustomerResponse;
 import com.example.hibernatecache.model.response.PagedResult;
 import com.example.hibernatecache.services.CustomerService;
@@ -50,7 +53,8 @@ class CustomerControllerTest {
         Page<CustomerResponse> page = new PageImpl<>(customerMappedList);
         PagedResult<CustomerResponse> customerPagedResult =
                 new PagedResult<>(page, customerMappedList);
-        given(customerService.findAllCustomers(0, 10, "id", "asc")).willReturn(customerPagedResult);
+        given(customerService.findAllCustomers(new FindCustomersQuery(0, 10, "id", "asc")))
+                .willReturn(customerPagedResult);
 
         this.mockMvc
                 .perform(get("/api/customers"))
@@ -108,12 +112,14 @@ class CustomerControllerTest {
         CustomerResponse customer =
                 new CustomerResponse(
                         3L, "firstName 3", "lastName 3", "email3@junit.com", "9876543213", null);
-        given(customerService.saveCustomer(any(Customer.class))).willReturn(customer);
+        CustomerRequest customerRequest =
+                new CustomerRequest("firstName 3", "lastName 3", "email3@junit.com", "9876543213");
+        given(customerService.saveCustomer(any(CustomerRequest.class))).willReturn(customer);
         this.mockMvc
                 .perform(
                         post("/api/customers")
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(customer)))
+                                .content(objectMapper.writeValueAsString(customerRequest)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.customerId", notNullValue()))
                 .andExpect(jsonPath("$.firstName", is(customer.firstName())));
@@ -121,7 +127,7 @@ class CustomerControllerTest {
 
     @Test
     void shouldReturn400WhenCreateNewCustomerWithoutFirstName() throws Exception {
-        Customer customer = new Customer(null, null, null, null, "9876543213", null);
+        CustomerRequest customer = new CustomerRequest(null, null, null, "9876543213");
 
         this.mockMvc
                 .perform(
@@ -137,21 +143,16 @@ class CustomerControllerTest {
                 .andExpect(jsonPath("$.instance", is("/api/customers")))
                 .andExpect(jsonPath("$.violations", hasSize(1)))
                 .andExpect(jsonPath("$.violations[0].field", is("firstName")))
-                .andExpect(jsonPath("$.violations[0].message", is("FirstName cannot be empty")))
+                .andExpect(jsonPath("$.violations[0].message", is("FirstName cannot be blank")))
                 .andReturn();
     }
 
     @Test
     void shouldUpdateCustomer() throws Exception {
         Long customerId = 1L;
-        Customer customer =
-                new Customer(
-                        customerId,
-                        "firstName Updated",
-                        "lastName 3",
-                        "email3@junit.com",
-                        "9876543213",
-                        null);
+        CustomerRequest customerRequest =
+                new CustomerRequest(
+                        "firstName Updated", "lastName 3", "email3@junit.com", "9876543213");
         CustomerResponse customerResponse =
                 new CustomerResponse(
                         customerId,
@@ -160,15 +161,14 @@ class CustomerControllerTest {
                         "email3@junit.com",
                         "9876543213",
                         null);
-        given(customerService.findById(customerId)).willReturn(Optional.of(customer));
-        given(customerService.updateCustomer(any(Customer.class), any(Customer.class)))
+        given(customerService.updateCustomer(eq(customerId), any(CustomerRequest.class)))
                 .willReturn(customerResponse);
 
         this.mockMvc
                 .perform(
                         put("/api/customers/{id}", customerId)
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(customer)))
+                                .content(objectMapper.writeValueAsString(customerRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.firstName", is(customerResponse.firstName())));
     }
@@ -176,17 +176,30 @@ class CustomerControllerTest {
     @Test
     void shouldReturn404WhenUpdatingNonExistingCustomer() throws Exception {
         Long customerId = 1L;
-        given(customerService.findCustomerById(customerId)).willReturn(Optional.empty());
-        Customer customer =
-                new Customer(
-                        3L, "firstName 3", "lastName 3", "email3@junit.com", "9876543213", null);
-
+        CustomerRequest customerRequest =
+                new CustomerRequest("firstName 3", "lastName 3", "email3@junit.com", "9876543213");
+        given(customerService.updateCustomer(customerId, customerRequest))
+                .willThrow(new CustomerNotFoundException(customerId));
         this.mockMvc
                 .perform(
                         put("/api/customers/{id}", customerId)
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(customer)))
-                .andExpect(status().isNotFound());
+                                .content(objectMapper.writeValueAsString(customerRequest)))
+                .andExpect(status().isNotFound())
+                .andExpect(
+                        header().string(
+                                        "Content-Type",
+                                        is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
+                .andExpect(
+                        jsonPath(
+                                "$.type",
+                                is(
+                                        "http://api.boot-hibernate2ndlevelcache-sample.com/errors/not-found")))
+                .andExpect(jsonPath("$.title", is("Not Found")))
+                .andExpect(jsonPath("$.status", is(404)))
+                .andExpect(
+                        jsonPath("$.detail")
+                                .value("Customer with Id '%d' not found".formatted(customerId)));
     }
 
     @Test

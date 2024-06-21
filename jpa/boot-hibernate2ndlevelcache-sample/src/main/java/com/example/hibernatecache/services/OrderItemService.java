@@ -1,7 +1,10 @@
 package com.example.hibernatecache.services;
 
 import com.example.hibernatecache.entities.OrderItem;
-import com.example.hibernatecache.mapper.ConversionService;
+import com.example.hibernatecache.exception.OrderItemNotFoundException;
+import com.example.hibernatecache.mapper.OrderItemMapper;
+import com.example.hibernatecache.model.query.FindOrderItemsQuery;
+import com.example.hibernatecache.model.request.OrderItemRequest;
 import com.example.hibernatecache.model.response.OrderItemResponse;
 import com.example.hibernatecache.model.response.PagedResult;
 import com.example.hibernatecache.repositories.OrderItemRepository;
@@ -21,46 +24,61 @@ import org.springframework.transaction.annotation.Transactional;
 public class OrderItemService {
 
     private final OrderItemRepository orderItemRepository;
-    private final ConversionService mapper;
+    private final OrderItemMapper orderItemMapper;
 
     public PagedResult<OrderItemResponse> findAllOrderItems(
-            int pageNo, int pageSize, String sortBy, String sortDir) {
-        Sort sort =
-                sortDir.equalsIgnoreCase(Sort.Direction.ASC.name())
-                        ? Sort.by(sortBy).ascending()
-                        : Sort.by(sortBy).descending();
+            FindOrderItemsQuery findOrderItemsQuery) {
 
         // create Pageable instance
-        Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
-        Page<OrderItem> orderItemsPage = orderItemRepository.findAll(pageable);
-        List<OrderItemResponse> orderItemResponses =
-                mapper.orderItemListToOrderItemResponseList(orderItemsPage.getContent());
+        Pageable pageable = createPageable(findOrderItemsQuery);
 
-        return new PagedResult<>(orderItemsPage, orderItemResponses);
+        Page<OrderItem> orderItemsPage = orderItemRepository.findAll(pageable);
+
+        List<OrderItemResponse> orderItemResponseList =
+                orderItemMapper.toResponseList(orderItemsPage.getContent());
+
+        return new PagedResult<>(orderItemsPage, orderItemResponseList);
+    }
+
+    private Pageable createPageable(FindOrderItemsQuery findOrderItemsQuery) {
+        int pageNo = Math.max(findOrderItemsQuery.pageNo() - 1, 0);
+        Sort sort =
+                Sort.by(
+                        findOrderItemsQuery.sortDir().equalsIgnoreCase(Sort.Direction.ASC.name())
+                                ? Sort.Order.asc(findOrderItemsQuery.sortBy())
+                                : Sort.Order.desc(findOrderItemsQuery.sortBy()));
+        return PageRequest.of(pageNo, findOrderItemsQuery.pageSize(), sort);
     }
 
     public Optional<OrderItemResponse> findOrderItemById(Long id) {
-        return findById(id).map(mapper::orderItemToOrderItemResponse);
+        return orderItemRepository.findById(id).map(orderItemMapper::toResponse);
     }
 
     @Transactional
-    public OrderItemResponse saveOrderItem(OrderItem orderItem) {
-        OrderItem saved = orderItemRepository.persist(orderItem);
-        return mapper.orderItemToOrderItemResponse(saved);
+    public OrderItemResponse saveOrderItem(OrderItemRequest orderItemRequest) {
+        OrderItem orderItem = orderItemMapper.toEntity(orderItemRequest);
+        OrderItem savedOrderItem = orderItemRepository.persist(orderItem);
+        return orderItemMapper.toResponse(savedOrderItem);
+    }
+
+    @Transactional
+    public OrderItemResponse updateOrderItem(Long id, OrderItemRequest orderItemRequest) {
+        OrderItem orderItem =
+                orderItemRepository
+                        .findById(id)
+                        .orElseThrow(() -> new OrderItemNotFoundException(id));
+
+        // Update the orderItem object with data from orderItemRequest
+        orderItemMapper.mapOrderItemWithRequest(orderItemRequest, orderItem);
+
+        // Save the updated orderItem object
+        OrderItem updatedOrderItem = orderItemRepository.merge(orderItem);
+
+        return orderItemMapper.toResponse(updatedOrderItem);
     }
 
     @Transactional
     public void deleteOrderItemById(Long id) {
         orderItemRepository.deleteById(id);
-    }
-
-    public Optional<OrderItem> findById(Long id) {
-        return orderItemRepository.findById(id);
-    }
-
-    @Transactional
-    public OrderItemResponse updateOrder(OrderItem orderObj) {
-        OrderItem updated = orderItemRepository.update(orderObj);
-        return mapper.orderItemToOrderItemResponse(updated);
     }
 }

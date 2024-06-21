@@ -18,7 +18,7 @@ import org.springframework.util.ReflectionUtils;
 
 @Configuration(proxyBeanMethods = false)
 @Profile(PROFILE_NOT_PROD)
-public class DatasourceProxyBeanPostProcessor implements BeanPostProcessor {
+class DatasourceProxyBeanPostProcessor implements BeanPostProcessor {
 
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) {

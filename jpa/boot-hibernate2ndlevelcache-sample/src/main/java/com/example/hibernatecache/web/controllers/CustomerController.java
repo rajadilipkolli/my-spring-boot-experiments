@@ -1,12 +1,15 @@
 package com.example.hibernatecache.web.controllers;
 
-import com.example.hibernatecache.entities.Customer;
+import com.example.hibernatecache.exception.CustomerNotFoundException;
+import com.example.hibernatecache.model.query.FindCustomersQuery;
+import com.example.hibernatecache.model.request.CustomerRequest;
 import com.example.hibernatecache.model.response.CustomerResponse;
 import com.example.hibernatecache.model.response.PagedResult;
 import com.example.hibernatecache.services.CustomerService;
 import com.example.hibernatecache.utils.AppConstants;
+import jakarta.validation.Valid;
+import java.net.URI;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -17,35 +20,49 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @RestController
 @RequestMapping("/api/customers")
 @RequiredArgsConstructor
-public class CustomerController {
+class CustomerController {
 
     private final CustomerService customerService;
 
     @GetMapping
-    public PagedResult<CustomerResponse> getAllCustomers(
-            @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_NUMBER, required = false)
+    PagedResult<CustomerResponse> getAllCustomers(
+            @RequestParam(
+                            value = "pageNo",
+                            defaultValue = AppConstants.DEFAULT_PAGE_NUMBER,
+                            required = false)
                     int pageNo,
-            @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_SIZE, required = false)
+            @RequestParam(
+                            value = "pageSize",
+                            defaultValue = AppConstants.DEFAULT_PAGE_SIZE,
+                            required = false)
                     int pageSize,
-            @RequestParam(defaultValue = AppConstants.DEFAULT_SORT_BY, required = false)
+            @RequestParam(
+                            value = "sortBy",
+                            defaultValue = AppConstants.DEFAULT_SORT_BY,
+                            required = false)
                     String sortBy,
-            @RequestParam(defaultValue = AppConstants.DEFAULT_SORT_DIRECTION, required = false)
+            @RequestParam(
+                            value = "sortDir",
+                            defaultValue = AppConstants.DEFAULT_SORT_DIRECTION,
+                            required = false)
                     String sortDir) {
-        return customerService.findAllCustomers(pageNo, pageSize, sortBy, sortDir);
+        FindCustomersQuery findCustomersQuery =
+                new FindCustomersQuery(pageNo, pageSize, sortBy, sortDir);
+        return customerService.findAllCustomers(findCustomersQuery);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<CustomerResponse> getCustomerById(@PathVariable Long id) {
+    ResponseEntity<CustomerResponse> getCustomerById(@PathVariable Long id) {
         return customerService
                 .findCustomerById(id)
                 .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+                .orElseThrow(() -> new CustomerNotFoundException(id));
     }
 
     @GetMapping("/search")
@@ -57,26 +74,25 @@ public class CustomerController {
     }
 
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public CustomerResponse createCustomer(@RequestBody @Validated Customer customer) {
-        return customerService.saveCustomer(customer);
+    ResponseEntity<CustomerResponse> createCustomer(
+            @RequestBody @Validated CustomerRequest customerRequest) {
+        CustomerResponse response = customerService.saveCustomer(customerRequest);
+        URI location =
+                ServletUriComponentsBuilder.fromCurrentRequest()
+                        .path("/api/customers/{id}")
+                        .buildAndExpand(response.customerId())
+                        .toUri();
+        return ResponseEntity.created(location).body(response);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<CustomerResponse> updateCustomer(
-            @PathVariable Long id, @RequestBody Customer customerRequest) {
-        return customerService
-                .findById(id)
-                .map(
-                        customerObj ->
-                                ResponseEntity.ok(
-                                        customerService.updateCustomer(
-                                                customerRequest, customerObj)))
-                .orElseGet(() -> ResponseEntity.notFound().build());
+    ResponseEntity<CustomerResponse> updateCustomer(
+            @PathVariable Long id, @RequestBody @Valid CustomerRequest customerRequest) {
+        return ResponseEntity.ok(customerService.updateCustomer(id, customerRequest));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<CustomerResponse> deleteCustomer(@PathVariable Long id) {
+    ResponseEntity<CustomerResponse> deleteCustomer(@PathVariable Long id) {
         return customerService
                 .findCustomerById(id)
                 .map(
@@ -84,6 +100,6 @@ public class CustomerController {
                             customerService.deleteCustomerById(id);
                             return ResponseEntity.ok(customer);
                         })
-                .orElseGet(() -> ResponseEntity.notFound().build());
+                .orElseThrow(() -> new CustomerNotFoundException(id));
     }
 }

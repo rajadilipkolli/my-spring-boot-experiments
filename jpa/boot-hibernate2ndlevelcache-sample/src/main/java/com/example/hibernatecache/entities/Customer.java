@@ -1,8 +1,13 @@
 package com.example.hibernatecache.entities;
 
-import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotEmpty;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -26,12 +31,12 @@ public class Customer {
     private Long id;
 
     @Column(nullable = false)
-    @NotEmpty(message = "FirstName cannot be empty")
     private String firstName;
 
     private String lastName;
 
-    @Email private String email;
+    @Column(nullable = false, unique = true)
+    private String email;
 
     private String phone;
 

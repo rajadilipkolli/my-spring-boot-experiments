@@ -24,11 +24,13 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 
 class OrderControllerIT extends AbstractIntegrationTest {
 
     @Autowired private OrderRepository orderRepository;
+
     @Autowired private CustomerRepository customerRepository;
 
     private List<Order> orderList = null;
@@ -95,6 +97,7 @@ class OrderControllerIT extends AbstractIntegrationTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(orderRequest)))
                 .andExpect(status().isCreated())
+                .andExpect(header().exists(HttpHeaders.LOCATION))
                 .andExpect(jsonPath("$.orderId", notNullValue()))
                 .andExpect(jsonPath("$.customerId", is(savedCustomer.getId()), Long.class))
                 .andExpect(jsonPath("$.name", is(orderRequest.name())))
@@ -104,13 +107,13 @@ class OrderControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldReturn400WhenCreateNewOrderWithoutName() throws Exception {
-        OrderRequest order = new OrderRequest(null, null, BigDecimal.ZERO);
+        OrderRequest orderRequest = new OrderRequest(null, null, BigDecimal.ZERO);
 
         this.mockMvc
                 .perform(
                         post("/api/orders")
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(order)))
+                                .content(objectMapper.writeValueAsString(orderRequest)))
                 .andExpect(status().isBadRequest())
                 .andExpect(header().string("Content-Type", is("application/problem+json")))
                 .andExpect(jsonPath("$.type", is("about:blank")))
