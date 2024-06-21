@@ -20,7 +20,6 @@ import com.example.hibernatecache.repositories.CustomerRepository;
 import com.example.hibernatecache.repositories.OrderItemRepository;
 import com.example.hibernatecache.repositories.OrderRepository;
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -51,19 +50,20 @@ class OrderItemControllerIT extends AbstractIntegrationTest {
                                 .setFirstName("firstName 1")
                                 .setLastName("lastName 1")
                                 .setEmail("email1@junit.com")
-                                .setPhone("9876543211"));
-        savedOrder =
-                orderRepository.persist(
-                        new Order()
-                                .setName("First Order")
-                                .setPrice(BigDecimal.TEN)
-                                .setCustomer(savedCustomer));
-
-        orderItemList = new ArrayList<>();
-        orderItemList.add(new OrderItem().setText("First OrderItem").setOrder(savedOrder));
-        orderItemList.add(new OrderItem().setText("Second OrderItem").setOrder(savedOrder));
-        orderItemList.add(new OrderItem().setText("Third OrderItem").setOrder(savedOrder));
-        orderItemList = orderItemRepository.persistAll(orderItemList);
+                                .setPhone("9876543211")
+                                .addOrder(
+                                        new Order()
+                                                .setName("First Order")
+                                                .setPrice(BigDecimal.TEN)
+                                                .addOrderItem(
+                                                        new OrderItem().setText("First OrderItem"))
+                                                .addOrderItem(
+                                                        new OrderItem().setText("Second OrderItem"))
+                                                .addOrderItem(
+                                                        new OrderItem()
+                                                                .setText("Third OrderItem"))));
+        savedOrder = savedCustomer.getOrders().getFirst();
+        orderItemList = savedOrder.getOrderItems();
     }
 
     @Test
@@ -71,6 +71,10 @@ class OrderItemControllerIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(get("/api/order/items"))
                 .andExpect(status().isOk())
+                .andExpect(
+                        header().string(
+                                        HttpHeaders.CONTENT_TYPE,
+                                        is(MediaType.APPLICATION_JSON_VALUE)))
                 .andExpect(jsonPath("$.data.size()", is(orderItemList.size())))
                 .andExpect(jsonPath("$.totalElements", is(3)))
                 .andExpect(jsonPath("$.pageNumber", is(1)))
@@ -89,6 +93,10 @@ class OrderItemControllerIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(get("/api/order/items/{id}", orderItemId))
                 .andExpect(status().isOk())
+                .andExpect(
+                        header().string(
+                                        HttpHeaders.CONTENT_TYPE,
+                                        is(MediaType.APPLICATION_JSON_VALUE)))
                 .andExpect(jsonPath("$.orderItemId", is(orderItem.getId()), Long.class))
                 .andExpect(jsonPath("$.text", is(orderItem.getText())));
     }
@@ -104,6 +112,10 @@ class OrderItemControllerIT extends AbstractIntegrationTest {
                                 .content(objectMapper.writeValueAsString(orderItemRequest)))
                 .andExpect(status().isCreated())
                 .andExpect(header().exists(HttpHeaders.LOCATION))
+                .andExpect(
+                        header().string(
+                                        HttpHeaders.CONTENT_TYPE,
+                                        is(MediaType.APPLICATION_JSON_VALUE)))
                 .andExpect(jsonPath("$.orderItemId", notNullValue()))
                 .andExpect(jsonPath("$.text", is(orderItemRequest.text())));
     }
@@ -118,7 +130,10 @@ class OrderItemControllerIT extends AbstractIntegrationTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(orderItemRequest)))
                 .andExpect(status().isBadRequest())
-                .andExpect(header().string("Content-Type", is("application/problem+json")))
+                .andExpect(
+                        header().string(
+                                        HttpHeaders.CONTENT_TYPE,
+                                        is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                 .andExpect(jsonPath("$.type", is("about:blank")))
                 .andExpect(jsonPath("$.title", is("Constraint Violation")))
                 .andExpect(jsonPath("$.status", is(400)))
@@ -142,6 +157,10 @@ class OrderItemControllerIT extends AbstractIntegrationTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(orderItemRequest)))
                 .andExpect(status().isOk())
+                .andExpect(
+                        header().string(
+                                        HttpHeaders.CONTENT_TYPE,
+                                        is(MediaType.APPLICATION_JSON_VALUE)))
                 .andExpect(jsonPath("$.orderItemId", is(orderItemId), Long.class))
                 .andExpect(jsonPath("$.text", is(orderItemRequest.text())));
     }
@@ -153,6 +172,10 @@ class OrderItemControllerIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(delete("/api/order/items/{id}", orderItem.getId()))
                 .andExpect(status().isOk())
+                .andExpect(
+                        header().string(
+                                        HttpHeaders.CONTENT_TYPE,
+                                        is(MediaType.APPLICATION_JSON_VALUE)))
                 .andExpect(jsonPath("$.orderItemId", is(orderItem.getId()), Long.class))
                 .andExpect(jsonPath("$.text", is(orderItem.getText())));
     }

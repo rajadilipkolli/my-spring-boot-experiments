@@ -7,13 +7,18 @@ import java.util.List;
 import org.mapstruct.IterableMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingConstants;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValueCheckStrategy;
 
-@Mapper(componentModel = "spring", nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
+@Mapper(
+        componentModel = MappingConstants.ComponentModel.SPRING,
+        nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS,
+        suppressTimestampInGenerated = true)
 public interface OrderItemMapper {
 
     @Mapping(target = "order.id", source = "orderId")
+    @Mapping(target = "id", ignore = true)
     OrderItem toEntity(OrderItemRequest orderItemRequest);
 
     @Mapping(source = "id", target = "orderItemId")

@@ -88,6 +88,18 @@ public class Order {
         return this;
     }
 
+    public Order addOrderItem(OrderItem orderItem) {
+        this.orderItems.add(orderItem);
+        orderItem.setOrder(this);
+        return this;
+    }
+
+    public Order removeOrderItem(OrderItem orderItem) {
+        this.orderItems.remove(orderItem);
+        orderItem.setOrder(null);
+        return this;
+    }
+
     @Override
     public final boolean equals(Object o) {
         if (this == o) return true;

@@ -4,13 +4,20 @@ import com.example.hibernatecache.entities.Customer;
 import com.example.hibernatecache.model.request.CustomerRequest;
 import com.example.hibernatecache.model.response.CustomerResponse;
 import java.util.List;
+import org.mapstruct.InjectionStrategy;
 import org.mapstruct.IterableMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingConstants;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValueCheckStrategy;
 
-@Mapper(componentModel = "spring", nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
+@Mapper(
+        componentModel = MappingConstants.ComponentModel.SPRING,
+        nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS,
+        uses = OrderMapper.class,
+        injectionStrategy = InjectionStrategy.CONSTRUCTOR,
+        suppressTimestampInGenerated = true)
 public interface CustomerMapper {
 
     Customer toEntity(CustomerRequest customerRequest);
