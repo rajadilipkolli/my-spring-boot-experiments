@@ -56,32 +56,37 @@ class OrderControllerTest {
     private List<Order> orderList;
 
     final Customer customer =
-            new Customer(1L, "firstName 1", "lastName 1", "email1@junit.com", "9876543211", null);
+            new Customer()
+                    .setId(1L)
+                    .setFirstName("firstName 1")
+                    .setLastName("lastName 1")
+                    .setEmail("email1@junit.com")
+                    .setPhone("9876543211");
 
     @BeforeEach
     void setUp() {
         this.orderList = new ArrayList<>();
         this.orderList.add(
-                new Order(
-                        1L,
-                        "text 1",
-                        BigDecimal.TEN,
-                        customer,
-                        List.of(new OrderItem(1L, "item1", null))));
+                new Order()
+                        .setId(1L)
+                        .setName("text 1")
+                        .setPrice(BigDecimal.TEN)
+                        .setCustomer(customer)
+                        .setOrderItems(List.of(new OrderItem().setId(1L).setText("item1"))));
         this.orderList.add(
-                new Order(
-                        2L,
-                        "text 2",
-                        BigDecimal.TEN,
-                        customer,
-                        List.of(new OrderItem(2L, "item2", null))));
+                new Order()
+                        .setId(2L)
+                        .setName("text 2")
+                        .setPrice(BigDecimal.TEN)
+                        .setCustomer(customer)
+                        .setOrderItems(List.of(new OrderItem().setId(2L).setText("item2"))));
         this.orderList.add(
-                new Order(
-                        3L,
-                        "text 3",
-                        BigDecimal.TEN,
-                        customer,
-                        List.of(new OrderItem(3L, "item3", null))));
+                new Order()
+                        .setId(3L)
+                        .setName("text 3")
+                        .setPrice(BigDecimal.TEN)
+                        .setCustomer(customer)
+                        .setOrderItems(List.of(new OrderItem().setId(3L).setText("item3"))));
     }
 
     @Test

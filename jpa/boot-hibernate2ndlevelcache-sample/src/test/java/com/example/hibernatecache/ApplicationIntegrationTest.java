@@ -20,13 +20,12 @@ class ApplicationIntegrationTest extends AbstractIntegrationTest {
     void contextLoads() throws Exception {
 
         Customer customer =
-                new Customer(
-                        null,
-                        "firstNameTest",
-                        "lastName test",
-                        "emailtest@junit.com",
-                        "9876543211",
-                        null);
+                new Customer()
+                        .setFirstName("firstNameTest")
+                        .setLastName("lastName test")
+                        .setEmail("emailtest@junit.com")
+                        .setPhone("9876543211");
+
         SQLStatementCountValidator.reset();
         this.mockMvc
                 .perform(

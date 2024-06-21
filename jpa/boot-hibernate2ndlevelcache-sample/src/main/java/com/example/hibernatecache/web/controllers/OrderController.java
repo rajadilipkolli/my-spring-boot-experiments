@@ -9,7 +9,6 @@ import com.example.hibernatecache.services.OrderService;
 import com.example.hibernatecache.utils.AppConstants;
 import jakarta.validation.Valid;
 import java.net.URI;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -25,10 +24,13 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @RestController
 @RequestMapping("/api/orders")
-@RequiredArgsConstructor
 class OrderController {
 
     private final OrderService orderService;
+
+    OrderController(OrderService orderService) {
+        this.orderService = orderService;
+    }
 
     @GetMapping
     PagedResult<OrderResponse> getAllOrders(

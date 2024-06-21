@@ -58,13 +58,24 @@ class OrderItemControllerTest {
     @BeforeEach
     void setUp() {
         Customer savedCustomer =
-                new Customer(
-                        null, "firstName 1", "lastName 1", "email1@junit.com", "9876543211", null);
-        savedOrder = new Order(null, "First Order", BigDecimal.TEN, savedCustomer, null);
-        this.orderItemList = new ArrayList<>();
-        this.orderItemList.add(new OrderItem(1L, "text 1", savedOrder));
-        this.orderItemList.add(new OrderItem(2L, "text 2", savedOrder));
-        this.orderItemList.add(new OrderItem(3L, "text 3", savedOrder));
+                new Customer()
+                        .setId(1L)
+                        .setFirstName("firstName 1")
+                        .setLastName("lastName 1")
+                        .setEmail("email1@junit.com")
+                        .setPhone("9876543211");
+        savedOrder =
+                new Order()
+                        .setName("First Order")
+                        .setPrice(BigDecimal.TEN)
+                        .setCustomer(savedCustomer);
+        orderItemList = new ArrayList<>();
+        orderItemList.add(
+                new OrderItem().setId(1L).setText("First OrderItem").setOrder(savedOrder));
+        orderItemList.add(
+                new OrderItem().setId(2L).setText("Second OrderItem").setOrder(savedOrder));
+        orderItemList.add(
+                new OrderItem().setId(3L).setText("Third OrderItem").setOrder(savedOrder));
     }
 
     @Test
