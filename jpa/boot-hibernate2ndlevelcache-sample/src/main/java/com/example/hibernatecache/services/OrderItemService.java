@@ -10,7 +10,6 @@ import com.example.hibernatecache.model.response.PagedResult;
 import com.example.hibernatecache.repositories.OrderItemRepository;
 import java.util.List;
 import java.util.Optional;
-import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -20,11 +19,16 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Transactional(readOnly = true)
-@RequiredArgsConstructor
 public class OrderItemService {
 
     private final OrderItemRepository orderItemRepository;
     private final OrderItemMapper orderItemMapper;
+
+    public OrderItemService(
+            OrderItemRepository orderItemRepository, OrderItemMapper orderItemMapper) {
+        this.orderItemRepository = orderItemRepository;
+        this.orderItemMapper = orderItemMapper;
+    }
 
     public PagedResult<OrderItemResponse> findAllOrderItems(
             FindOrderItemsQuery findOrderItemsQuery) {

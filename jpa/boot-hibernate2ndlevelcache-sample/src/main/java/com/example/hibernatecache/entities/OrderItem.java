@@ -11,18 +11,10 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotEmpty;
 import java.util.Objects;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 import org.hibernate.proxy.HibernateProxy;
 
 @Entity
 @Table(name = "order_items")
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
 @Cacheable
 public class OrderItem {
 
@@ -37,6 +29,33 @@ public class OrderItem {
     @ManyToOne
     @JoinColumn(name = "order_id")
     private Order order;
+
+    public Long getId() {
+        return id;
+    }
+
+    public OrderItem setId(Long id) {
+        this.id = id;
+        return this;
+    }
+
+    public @NotEmpty(message = "Text cannot be empty") String getText() {
+        return text;
+    }
+
+    public OrderItem setText(@NotEmpty(message = "Text cannot be empty") String text) {
+        this.text = text;
+        return this;
+    }
+
+    public Order getOrder() {
+        return order;
+    }
+
+    public OrderItem setOrder(Order order) {
+        this.order = order;
+        return this;
+    }
 
     @Override
     public final boolean equals(Object o) {

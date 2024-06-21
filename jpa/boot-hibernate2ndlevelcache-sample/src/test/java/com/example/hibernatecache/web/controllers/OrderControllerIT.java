@@ -44,17 +44,27 @@ class OrderControllerIT extends AbstractIntegrationTest {
 
         savedCustomer =
                 customerRepository.persist(
-                        new Customer(
-                                null,
-                                "firstName 1",
-                                "lastName 1",
-                                "email1@junit.com",
-                                "9876543211",
-                                null));
+                        new Customer()
+                                .setFirstName("firstName 1")
+                                .setLastName("lastName 1")
+                                .setEmail("email1@junit.com")
+                                .setPhone("9876543211"));
         orderList = new ArrayList<>();
-        orderList.add(new Order(null, "First Order", BigDecimal.TEN, savedCustomer, null));
-        orderList.add(new Order(null, "Second Order", BigDecimal.TEN, savedCustomer, null));
-        orderList.add(new Order(null, "Third Order", BigDecimal.TEN, savedCustomer, null));
+        orderList.add(
+                new Order()
+                        .setName("First Order")
+                        .setPrice(BigDecimal.TEN)
+                        .setCustomer(savedCustomer));
+        orderList.add(
+                new Order()
+                        .setName("Second Order")
+                        .setPrice(BigDecimal.TEN)
+                        .setCustomer(savedCustomer));
+        orderList.add(
+                new Order()
+                        .setName("Third Order")
+                        .setPrice(BigDecimal.TEN)
+                        .setCustomer(savedCustomer));
         orderList = orderRepository.persistAll(orderList);
     }
 

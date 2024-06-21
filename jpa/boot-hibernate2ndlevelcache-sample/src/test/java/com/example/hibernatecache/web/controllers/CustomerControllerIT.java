@@ -39,14 +39,23 @@ class CustomerControllerIT extends AbstractIntegrationTest {
 
         customerList = new ArrayList<>();
         customerList.add(
-                new Customer(
-                        null, "firstName 1", "lastName 1", "email1@junit.com", "9876543211", null));
+                new Customer()
+                        .setFirstName("firstName 1")
+                        .setLastName("lastName 1")
+                        .setEmail("email1@junit.com")
+                        .setPhone("9876543211"));
         customerList.add(
-                new Customer(
-                        null, "firstName 2", "lastName 2", "email2@junit.com", "9876543212", null));
+                new Customer()
+                        .setFirstName("firstName 2")
+                        .setLastName("lastName 2")
+                        .setEmail("email2@junit.com")
+                        .setPhone("9876543212"));
         customerList.add(
-                new Customer(
-                        null, "firstName 3", "lastName 3", "email3@junit.com", "9876543213", null));
+                new Customer()
+                        .setFirstName("firstName 3")
+                        .setLastName("lastName 3")
+                        .setEmail("email3@junit.com")
+                        .setPhone("9876543213"));
         customerList = customerRepository.persistAll(customerList);
     }
 
