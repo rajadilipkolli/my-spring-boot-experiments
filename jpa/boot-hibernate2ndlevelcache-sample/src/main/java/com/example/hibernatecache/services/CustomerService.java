@@ -1,7 +1,7 @@
 package com.example.hibernatecache.services;
 
 import com.example.hibernatecache.entities.Customer;
-import com.example.hibernatecache.mapper.Mapper;
+import com.example.hibernatecache.mapper.ConversionService;
 import com.example.hibernatecache.model.response.CustomerResponse;
 import com.example.hibernatecache.model.response.PagedResult;
 import com.example.hibernatecache.repositories.CustomerRepository;
@@ -21,7 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class CustomerService {
 
     private final CustomerRepository customerRepository;
-    private final Mapper mapper;
+    private final ConversionService mapper;
 
     public PagedResult<CustomerResponse> findAllCustomers(
             int pageNo, int pageSize, String sortBy, String sortDir) {

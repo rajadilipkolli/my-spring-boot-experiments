@@ -7,7 +7,7 @@ import static org.mockito.BDDMockito.verify;
 import static org.mockito.BDDMockito.willDoNothing;
 
 import com.example.hibernatecache.entities.OrderItem;
-import com.example.hibernatecache.mapper.Mapper;
+import com.example.hibernatecache.mapper.ConversionService;
 import com.example.hibernatecache.model.response.OrderItemResponse;
 import com.example.hibernatecache.model.response.PagedResult;
 import com.example.hibernatecache.repositories.OrderItemRepository;
@@ -28,7 +28,7 @@ import org.springframework.data.domain.Sort;
 class OrderItemServiceTest {
 
     @Mock private OrderItemRepository orderItemRepository;
-    @Mock private Mapper mapper;
+    @Mock private ConversionService mapper;
 
     @InjectMocks private OrderItemService orderItemService;
 

@@ -9,14 +9,13 @@ import com.example.hibernatecache.model.response.OrderItemResponse;
 import com.example.hibernatecache.model.response.OrderResponse;
 import java.util.List;
 import org.mapstruct.IterableMapping;
+import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValueCheckStrategy;
 
-@org.mapstruct.Mapper(
-        componentModel = "spring",
-        nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
-public interface Mapper {
+@Mapper(componentModel = "spring", nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
+public interface ConversionService {
 
     @Mapping(source = "id", target = "customerId")
     CustomerResponse mapToCustomerResponse(Customer customer);
