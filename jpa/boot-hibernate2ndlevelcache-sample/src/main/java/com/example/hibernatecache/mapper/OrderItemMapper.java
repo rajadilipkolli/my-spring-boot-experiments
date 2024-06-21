@@ -13,7 +13,7 @@ import org.mapstruct.NullValueCheckStrategy;
 @Mapper(componentModel = "spring", nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
 public interface OrderItemMapper {
 
-    @Mapping(target = "order", ignore = true)
+    @Mapping(target = "order.id", source = "orderId")
     OrderItem toEntity(OrderItemRequest orderItemRequest);
 
     @Mapping(source = "id", target = "orderItemId")

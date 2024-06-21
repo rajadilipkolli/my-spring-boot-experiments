@@ -57,7 +57,7 @@ public class OrderItemService {
     @Transactional
     public OrderItemResponse saveOrderItem(OrderItemRequest orderItemRequest) {
         OrderItem orderItem = orderItemMapper.toEntity(orderItemRequest);
-        OrderItem savedOrderItem = orderItemRepository.save(orderItem);
+        OrderItem savedOrderItem = orderItemRepository.persist(orderItem);
         return orderItemMapper.toResponse(savedOrderItem);
     }
 
@@ -72,7 +72,7 @@ public class OrderItemService {
         orderItemMapper.mapOrderItemWithRequest(orderItemRequest, orderItem);
 
         // Save the updated orderItem object
-        OrderItem updatedOrderItem = orderItemRepository.save(orderItem);
+        OrderItem updatedOrderItem = orderItemRepository.merge(orderItem);
 
         return orderItemMapper.toResponse(updatedOrderItem);
     }

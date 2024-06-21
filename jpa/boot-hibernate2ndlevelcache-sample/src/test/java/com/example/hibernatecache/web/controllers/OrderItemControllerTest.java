@@ -130,7 +130,7 @@ class OrderItemControllerTest {
     void shouldCreateNewOrderItem() throws Exception {
 
         OrderItemResponse orderItem = new OrderItemResponse(1L, "some text");
-        OrderItemRequest orderItemRequest = new OrderItemRequest("some text");
+        OrderItemRequest orderItemRequest = new OrderItemRequest("some text", 1L);
         given(orderItemService.saveOrderItem(any(OrderItemRequest.class))).willReturn(orderItem);
 
         this.mockMvc
@@ -146,7 +146,7 @@ class OrderItemControllerTest {
 
     @Test
     void shouldReturn400WhenCreateNewOrderItemWithoutText() throws Exception {
-        OrderItemRequest orderItemRequest = new OrderItemRequest(null);
+        OrderItemRequest orderItemRequest = new OrderItemRequest(null, null);
 
         this.mockMvc
                 .perform(
@@ -170,7 +170,7 @@ class OrderItemControllerTest {
     void shouldUpdateOrderItem() throws Exception {
         Long orderItemId = 1L;
         OrderItemResponse orderItem = new OrderItemResponse(orderItemId, "Updated text");
-        OrderItemRequest orderItemRequest = new OrderItemRequest("Updated text");
+        OrderItemRequest orderItemRequest = new OrderItemRequest("Updated text", 1L);
         given(orderItemService.updateOrderItem(eq(orderItemId), any(OrderItemRequest.class)))
                 .willReturn(orderItem);
 
@@ -187,7 +187,7 @@ class OrderItemControllerTest {
     @Test
     void shouldReturn404WhenUpdatingNonExistingOrderItem() throws Exception {
         Long orderItemId = 1L;
-        OrderItemRequest orderItemRequest = new OrderItemRequest("Updated text");
+        OrderItemRequest orderItemRequest = new OrderItemRequest("Updated text", 1L);
         given(orderItemService.updateOrderItem(eq(orderItemId), any(OrderItemRequest.class)))
                 .willThrow(new OrderItemNotFoundException(orderItemId));
 

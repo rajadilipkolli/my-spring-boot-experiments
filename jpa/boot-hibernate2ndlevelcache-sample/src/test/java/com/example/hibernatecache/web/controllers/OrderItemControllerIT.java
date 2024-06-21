@@ -94,7 +94,8 @@ class OrderItemControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldCreateNewOrderItem() throws Exception {
-        OrderItemRequest orderItemRequest = new OrderItemRequest("New OrderItem");
+        OrderItemRequest orderItemRequest =
+                new OrderItemRequest("New OrderItem", savedOrder.getId());
         this.mockMvc
                 .perform(
                         post("/api/order/items")
@@ -108,7 +109,7 @@ class OrderItemControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldReturn400WhenCreateNewOrderItemWithoutText() throws Exception {
-        OrderItemRequest orderItemRequest = new OrderItemRequest(null);
+        OrderItemRequest orderItemRequest = new OrderItemRequest(null, null);
 
         this.mockMvc
                 .perform(
@@ -131,7 +132,8 @@ class OrderItemControllerIT extends AbstractIntegrationTest {
     @Test
     void shouldUpdateOrderItem() throws Exception {
         Long orderItemId = orderItemList.getFirst().getId();
-        OrderItemRequest orderItemRequest = new OrderItemRequest("Updated OrderItem");
+        OrderItemRequest orderItemRequest =
+                new OrderItemRequest("Updated OrderItem", savedOrder.getId());
 
         this.mockMvc
                 .perform(
