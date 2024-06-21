@@ -48,7 +48,8 @@ class CustomerControllerTest {
         List<CustomerResponse> customerMappedList = getCustomerResponses();
 
         Page<CustomerResponse> page = new PageImpl<>(customerMappedList);
-        PagedResult<CustomerResponse> customerPagedResult = new PagedResult<>(page);
+        PagedResult<CustomerResponse> customerPagedResult =
+                new PagedResult<>(page, customerMappedList);
         given(customerService.findAllCustomers(0, 10, "id", "asc")).willReturn(customerPagedResult);
 
         this.mockMvc

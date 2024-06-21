@@ -85,7 +85,7 @@ class OrderControllerTest {
                         new OrderResponse(1L, 2L, "text 2", BigDecimal.TEN, new ArrayList<>()),
                         new OrderResponse(1L, 3L, "text 3", BigDecimal.TEN, new ArrayList<>()));
         Page<OrderResponse> page = new PageImpl<>(orderResponseList);
-        return new PagedResult<>(page);
+        return new PagedResult<>(page, orderResponseList);
     }
 
     @Test

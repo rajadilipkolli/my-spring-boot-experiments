@@ -70,7 +70,8 @@ class OrderItemControllerTest {
                         new OrderItemResponse(2L, "text 2"),
                         new OrderItemResponse(3L, "text 3"));
         Page<OrderItemResponse> page = new PageImpl<>(orderItemResponseList);
-        PagedResult<OrderItemResponse> orderItemPagedResult = new PagedResult<>(page);
+        PagedResult<OrderItemResponse> orderItemPagedResult =
+                new PagedResult<>(page, orderItemResponseList);
         given(orderItemService.findAllOrderItems(0, 10, "id", "asc"))
                 .willReturn(orderItemPagedResult);
 

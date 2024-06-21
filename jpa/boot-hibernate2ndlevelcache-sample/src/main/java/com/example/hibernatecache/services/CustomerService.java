@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -36,9 +35,7 @@ public class CustomerService {
         Page<Customer> customersPage = customerRepository.findAll(pageable);
         List<CustomerResponse> customerResponses =
                 mapper.mapToCustomerResponseList(customersPage.getContent());
-        Page<CustomerResponse> customerResponsePage =
-                new PageImpl<>(customerResponses, pageable, customersPage.getTotalElements());
-        return new PagedResult<>(customerResponsePage);
+        return new PagedResult<>(customersPage, customerResponses);
     }
 
     public Optional<CustomerResponse> findCustomerById(Long id) {

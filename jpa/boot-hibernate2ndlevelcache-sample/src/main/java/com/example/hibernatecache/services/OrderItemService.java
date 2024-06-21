@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -37,8 +36,7 @@ public class OrderItemService {
         List<OrderItemResponse> orderItemResponses =
                 mapper.orderItemListToOrderItemResponseList(orderItemsPage.getContent());
 
-        return new PagedResult<>(
-                new PageImpl<>(orderItemResponses, pageable, orderItemsPage.getTotalElements()));
+        return new PagedResult<>(orderItemsPage, orderItemResponses);
     }
 
     public Optional<OrderItemResponse> findOrderItemById(Long id) {
