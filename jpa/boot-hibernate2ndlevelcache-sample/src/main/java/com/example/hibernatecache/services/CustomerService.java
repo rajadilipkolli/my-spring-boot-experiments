@@ -73,7 +73,7 @@ public class CustomerService {
                 customerRepository
                         .findById(id)
                         .orElseThrow(() -> new CustomerNotFoundException(id));
-
+      
         // Update the customer object with data from customerRequest
         customerMapper.updateCustomerWithRequest(customerRequest, customer);
 
