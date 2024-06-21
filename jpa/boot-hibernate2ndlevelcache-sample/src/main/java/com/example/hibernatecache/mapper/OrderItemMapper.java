@@ -21,5 +21,6 @@ public interface OrderItemMapper {
     @IterableMapping(elementTargetType = OrderItemResponse.class)
     List<OrderItemResponse> toResponseList(List<OrderItem> list);
 
-    void mapOrderItemWithRequest(OrderItemRequest orderItemRequest, @MappingTarget OrderItem orderItem);
+    void mapOrderItemWithRequest(
+            OrderItemRequest orderItemRequest, @MappingTarget OrderItem orderItem);
 }

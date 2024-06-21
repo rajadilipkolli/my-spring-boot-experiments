@@ -30,14 +30,11 @@ import org.springframework.http.MediaType;
 
 class OrderItemControllerIT extends AbstractIntegrationTest {
 
-    @Autowired
-    private OrderItemRepository orderItemRepository;
+    @Autowired private OrderItemRepository orderItemRepository;
 
-    @Autowired
-    private OrderRepository orderRepository;
+    @Autowired private OrderRepository orderRepository;
 
-    @Autowired
-    private CustomerRepository customerRepository;
+    @Autowired private CustomerRepository customerRepository;
 
     private List<OrderItem> orderItemList = null;
     Order savedOrder;
@@ -48,9 +45,18 @@ class OrderItemControllerIT extends AbstractIntegrationTest {
         orderRepository.deleteAll();
         customerRepository.deleteAll();
 
-        Customer savedCustomer = customerRepository.persist(
-                new Customer(null, "firstName 1", "lastName 1", "email1@junit.com", "9876543211", null));
-        savedOrder = orderRepository.persist(new Order(null, "First Order", BigDecimal.TEN, savedCustomer, null));
+        Customer savedCustomer =
+                customerRepository.persist(
+                        new Customer(
+                                null,
+                                "firstName 1",
+                                "lastName 1",
+                                "email1@junit.com",
+                                "9876543211",
+                                null));
+        savedOrder =
+                orderRepository.persist(
+                        new Order(null, "First Order", BigDecimal.TEN, savedCustomer, null));
 
         orderItemList = new ArrayList<>();
         orderItemList.add(new OrderItem(null, "First OrderItem", savedOrder));
@@ -90,9 +96,10 @@ class OrderItemControllerIT extends AbstractIntegrationTest {
     void shouldCreateNewOrderItem() throws Exception {
         OrderItemRequest orderItemRequest = new OrderItemRequest("New OrderItem");
         this.mockMvc
-                .perform(post("/api/order/items")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(orderItemRequest)))
+                .perform(
+                        post("/api/order/items")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(orderItemRequest)))
                 .andExpect(status().isCreated())
                 .andExpect(header().exists(HttpHeaders.LOCATION))
                 .andExpect(jsonPath("$.orderItemId", notNullValue()))
@@ -104,9 +111,10 @@ class OrderItemControllerIT extends AbstractIntegrationTest {
         OrderItemRequest orderItemRequest = new OrderItemRequest(null);
 
         this.mockMvc
-                .perform(post("/api/order/items")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(orderItemRequest)))
+                .perform(
+                        post("/api/order/items")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(orderItemRequest)))
                 .andExpect(status().isBadRequest())
                 .andExpect(header().string("Content-Type", is("application/problem+json")))
                 .andExpect(jsonPath("$.type", is("about:blank")))
@@ -126,9 +134,10 @@ class OrderItemControllerIT extends AbstractIntegrationTest {
         OrderItemRequest orderItemRequest = new OrderItemRequest("Updated OrderItem");
 
         this.mockMvc
-                .perform(put("/api/order/items/{id}", orderItemId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(orderItemRequest)))
+                .perform(
+                        put("/api/order/items/{id}", orderItemId)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(orderItemRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.orderItemId", is(orderItemId), Long.class))
                 .andExpect(jsonPath("$.text", is(orderItemRequest.text())));

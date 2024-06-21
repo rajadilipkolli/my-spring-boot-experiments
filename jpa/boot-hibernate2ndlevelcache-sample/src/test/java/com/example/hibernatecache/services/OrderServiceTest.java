@@ -11,6 +11,8 @@ import com.example.hibernatecache.entities.Order;
 import com.example.hibernatecache.mapper.OrderMapper;
 import com.example.hibernatecache.model.response.OrderResponse;
 import com.example.hibernatecache.repositories.OrderRepository;
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,14 +23,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class OrderServiceTest {
 
-    @Mock
-    private OrderRepository orderRepository;
+    @Mock private OrderRepository orderRepository;
 
-    @Mock
-    private OrderMapper orderMapper;
+    @Mock private OrderMapper orderMapper;
 
-    @InjectMocks
-    private OrderService orderService;
+    @InjectMocks private OrderService orderService;
 
     @Test
     void findOrderById() {
@@ -40,8 +39,8 @@ class OrderServiceTest {
         // then
         assertThat(optionalOrder).isPresent();
         OrderResponse order = optionalOrder.get();
-        assertThat(order.id()).isEqualTo(1L);
-        assertThat(order.text()).isEqualTo("junitTest");
+        assertThat(order.orderId()).isEqualTo(1L);
+        assertThat(order.name()).isEqualTo("junitTest");
     }
 
     @Test
@@ -57,11 +56,11 @@ class OrderServiceTest {
     private Order getOrder() {
         Order order = new Order();
         order.setId(1L);
-        order.setText("junitTest");
+        order.setName("junitTest");
         return order;
     }
 
     private OrderResponse getOrderResponse() {
-        return new OrderResponse(1L, "junitTest");
+        return new OrderResponse(1L, 1L, "junitTest", BigDecimal.TEN, new ArrayList<>());
     }
 }

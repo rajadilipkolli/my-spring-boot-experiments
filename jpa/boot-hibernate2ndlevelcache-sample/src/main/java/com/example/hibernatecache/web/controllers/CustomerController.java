@@ -32,15 +32,28 @@ class CustomerController {
 
     @GetMapping
     PagedResult<CustomerResponse> getAllCustomers(
-            @RequestParam(value = "pageNo", defaultValue = AppConstants.DEFAULT_PAGE_NUMBER, required = false)
+            @RequestParam(
+                            value = "pageNo",
+                            defaultValue = AppConstants.DEFAULT_PAGE_NUMBER,
+                            required = false)
                     int pageNo,
-            @RequestParam(value = "pageSize", defaultValue = AppConstants.DEFAULT_PAGE_SIZE, required = false)
+            @RequestParam(
+                            value = "pageSize",
+                            defaultValue = AppConstants.DEFAULT_PAGE_SIZE,
+                            required = false)
                     int pageSize,
-            @RequestParam(value = "sortBy", defaultValue = AppConstants.DEFAULT_SORT_BY, required = false)
+            @RequestParam(
+                            value = "sortBy",
+                            defaultValue = AppConstants.DEFAULT_SORT_BY,
+                            required = false)
                     String sortBy,
-            @RequestParam(value = "sortDir", defaultValue = AppConstants.DEFAULT_SORT_DIRECTION, required = false)
+            @RequestParam(
+                            value = "sortDir",
+                            defaultValue = AppConstants.DEFAULT_SORT_DIRECTION,
+                            required = false)
                     String sortDir) {
-        FindCustomersQuery findCustomersQuery = new FindCustomersQuery(pageNo, pageSize, sortBy, sortDir);
+        FindCustomersQuery findCustomersQuery =
+                new FindCustomersQuery(pageNo, pageSize, sortBy, sortDir);
         return customerService.findAllCustomers(findCustomersQuery);
     }
 
@@ -53,12 +66,14 @@ class CustomerController {
     }
 
     @PostMapping
-    ResponseEntity<CustomerResponse> createCustomer(@RequestBody @Validated CustomerRequest customerRequest) {
+    ResponseEntity<CustomerResponse> createCustomer(
+            @RequestBody @Validated CustomerRequest customerRequest) {
         CustomerResponse response = customerService.saveCustomer(customerRequest);
-        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
-                .path("/api/customers/{id}")
-                .buildAndExpand(response.customerId())
-                .toUri();
+        URI location =
+                ServletUriComponentsBuilder.fromCurrentRequest()
+                        .path("/api/customers/{id}")
+                        .buildAndExpand(response.customerId())
+                        .toUri();
         return ResponseEntity.created(location).body(response);
     }
 
@@ -72,10 +87,11 @@ class CustomerController {
     ResponseEntity<CustomerResponse> deleteCustomer(@PathVariable Long id) {
         return customerService
                 .findCustomerById(id)
-                .map(customer -> {
-                    customerService.deleteCustomerById(id);
-                    return ResponseEntity.ok(customer);
-                })
+                .map(
+                        customer -> {
+                            customerService.deleteCustomerById(id);
+                            return ResponseEntity.ok(customer);
+                        })
                 .orElseThrow(() -> new CustomerNotFoundException(id));
     }
 }

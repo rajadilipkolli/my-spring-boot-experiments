@@ -35,6 +35,7 @@ public class Customer {
 
     private String lastName;
 
+    @Column(nullable = false, unique = true)
     private String email;
 
     private String phone;

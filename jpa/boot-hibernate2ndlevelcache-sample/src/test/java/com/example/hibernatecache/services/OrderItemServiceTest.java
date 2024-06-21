@@ -9,26 +9,52 @@ import static org.mockito.BDDMockito.willDoNothing;
 
 import com.example.hibernatecache.entities.OrderItem;
 import com.example.hibernatecache.mapper.OrderItemMapper;
+import com.example.hibernatecache.model.query.FindOrderItemsQuery;
 import com.example.hibernatecache.model.response.OrderItemResponse;
+import com.example.hibernatecache.model.response.PagedResult;
 import com.example.hibernatecache.repositories.OrderItemRepository;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.*;
 
 @ExtendWith(MockitoExtension.class)
 class OrderItemServiceTest {
 
-    @Mock
-    private OrderItemRepository orderItemRepository;
+    @Mock private OrderItemRepository orderItemRepository;
 
-    @Mock
-    private OrderItemMapper orderItemMapper;
+    @Mock private OrderItemMapper orderItemMapper;
 
-    @InjectMocks
-    private OrderItemService orderItemService;
+    @InjectMocks private OrderItemService orderItemService;
+
+    @Test
+    void findAllOrderItems() {
+        // given
+        Pageable pageable = PageRequest.of(0, 10, Sort.by(Sort.Direction.ASC, "id"));
+        Page<OrderItem> orderItemPage = new PageImpl<>(List.of(getOrderItem()));
+        given(orderItemRepository.findAll(pageable)).willReturn(orderItemPage);
+        given(orderItemMapper.toResponseList(List.of(getOrderItem())))
+                .willReturn(List.of(getOrderItemResponse()));
+
+        // when
+        PagedResult<OrderItemResponse> pagedResult =
+                orderItemService.findAllOrderItems(new FindOrderItemsQuery(0, 10, "id", "asc"));
+
+        // then
+        assertThat(pagedResult).isNotNull();
+        assertThat(pagedResult.data()).isNotEmpty().hasSize(1);
+        assertThat(pagedResult.hasNext()).isFalse();
+        assertThat(pagedResult.pageNumber()).isEqualTo(1);
+        assertThat(pagedResult.totalPages()).isEqualTo(1);
+        assertThat(pagedResult.isFirst()).isTrue();
+        assertThat(pagedResult.isLast()).isTrue();
+        assertThat(pagedResult.hasPrevious()).isFalse();
+        assertThat(pagedResult.totalElements()).isEqualTo(1);
+    }
 
     @Test
     void findOrderItemById() {
@@ -40,7 +66,7 @@ class OrderItemServiceTest {
         // then
         assertThat(optionalOrderItem).isPresent();
         OrderItemResponse orderItem = optionalOrderItem.get();
-        assertThat(orderItem.id()).isEqualTo(1L);
+        assertThat(orderItem.orderItemId()).isEqualTo(1L);
         assertThat(orderItem.text()).isEqualTo("junitTest");
     }
 

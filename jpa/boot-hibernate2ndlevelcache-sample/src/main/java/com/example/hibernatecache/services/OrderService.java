@@ -33,17 +33,19 @@ public class OrderService {
 
         Page<Order> ordersPage = orderRepository.findAll(pageable);
 
-        List<OrderResponse> orderResponseList = orderMapper.mapToOrderResponseList(ordersPage.getContent());
+        List<OrderResponse> orderResponseList =
+                orderMapper.mapToOrderResponseList(ordersPage.getContent());
 
         return new PagedResult<>(ordersPage, orderResponseList);
     }
 
     private Pageable createPageable(FindOrdersQuery findOrdersQuery) {
         int pageNo = Math.max(findOrdersQuery.pageNo() - 1, 0);
-        Sort sort = Sort.by(
-                findOrdersQuery.sortDir().equalsIgnoreCase(Sort.Direction.ASC.name())
-                        ? Sort.Order.asc(findOrdersQuery.sortBy())
-                        : Sort.Order.desc(findOrdersQuery.sortBy()));
+        Sort sort =
+                Sort.by(
+                        findOrdersQuery.sortDir().equalsIgnoreCase(Sort.Direction.ASC.name())
+                                ? Sort.Order.asc(findOrdersQuery.sortBy())
+                                : Sort.Order.desc(findOrdersQuery.sortBy()));
         return PageRequest.of(pageNo, findOrdersQuery.pageSize(), sort);
     }
 
@@ -60,7 +62,8 @@ public class OrderService {
 
     @Transactional
     public OrderResponse updateOrder(Long id, OrderRequest orderRequest) {
-        Order order = orderRepository.findById(id).orElseThrow(() -> new OrderNotFoundException(id));
+        Order order =
+                orderRepository.findById(id).orElseThrow(() -> new OrderNotFoundException(id));
 
         // Update the order object with data from orderRequest
         orderMapper.updateOrderWithRequest(orderRequest, order);

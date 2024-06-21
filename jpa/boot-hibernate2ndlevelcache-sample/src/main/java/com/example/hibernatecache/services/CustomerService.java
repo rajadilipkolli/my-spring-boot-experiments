@@ -33,17 +33,19 @@ public class CustomerService {
 
         Page<Customer> customersPage = customerRepository.findAll(pageable);
 
-        List<CustomerResponse> customerResponseList = customerMapper.toResponseList(customersPage.getContent());
+        List<CustomerResponse> customerResponseList =
+                customerMapper.toResponseList(customersPage.getContent());
 
         return new PagedResult<>(customersPage, customerResponseList);
     }
 
     private Pageable createPageable(FindCustomersQuery findCustomersQuery) {
         int pageNo = Math.max(findCustomersQuery.pageNo() - 1, 0);
-        Sort sort = Sort.by(
-                findCustomersQuery.sortDir().equalsIgnoreCase(Sort.Direction.ASC.name())
-                        ? Sort.Order.asc(findCustomersQuery.sortBy())
-                        : Sort.Order.desc(findCustomersQuery.sortBy()));
+        Sort sort =
+                Sort.by(
+                        findCustomersQuery.sortDir().equalsIgnoreCase(Sort.Direction.ASC.name())
+                                ? Sort.Order.asc(findCustomersQuery.sortBy())
+                                : Sort.Order.desc(findCustomersQuery.sortBy()));
         return PageRequest.of(pageNo, findCustomersQuery.pageSize(), sort);
     }
 
@@ -60,7 +62,10 @@ public class CustomerService {
 
     @Transactional
     public CustomerResponse updateCustomer(Long id, CustomerRequest customerRequest) {
-        Customer customer = customerRepository.findById(id).orElseThrow(() -> new CustomerNotFoundException(id));
+        Customer customer =
+                customerRepository
+                        .findById(id)
+                        .orElseThrow(() -> new CustomerNotFoundException(id));
 
         // Update the customer object with data from customerRequest
         customerMapper.updateCustomerWithRequest(customerRequest, customer);

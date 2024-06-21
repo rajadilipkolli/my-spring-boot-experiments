@@ -6,7 +6,9 @@ import io.hypersistence.utils.spring.repository.HibernateRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
 
 public interface OrderRepository
-        extends BaseJpaRepository<Order, Long>, HibernateRepository<Order>, PagingAndSortingRepository<Order, Long> {
+        extends BaseJpaRepository<Order, Long>,
+                HibernateRepository<Order>,
+                PagingAndSortingRepository<Order, Long> {
 
     void deleteAll();
 }
