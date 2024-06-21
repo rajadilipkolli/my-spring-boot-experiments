@@ -1,7 +1,7 @@
 version: '3.8'
 services:
 
-  my-spring-hibernate2ndlevelcache:
+  boot-hibernate2ndlevelcache-sample:
     build: ..
     ports:
       - "18080:8080"

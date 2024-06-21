@@ -5,10 +5,7 @@
     "databaseType": "postgresql",
     "dbMigrationTool": "liquibase",
     "dbMigrationFormat": "xml",
-    "features": [
-      "elk",
-      "monitoring"
-    ],
+    "features": [],
     "buildTool": "maven",
     "packageFolder": "com/example/hibernatecache",
     "liquibaseMigrationCounter": 3

@@ -1,12 +1,15 @@
 package com.example.hibernatecache.web.controllers;
 
+import com.example.hibernatecache.exception.OrderNotFoundException;
+import com.example.hibernatecache.model.query.FindOrdersQuery;
 import com.example.hibernatecache.model.request.OrderRequest;
 import com.example.hibernatecache.model.response.OrderResponse;
 import com.example.hibernatecache.model.response.PagedResult;
 import com.example.hibernatecache.services.OrderService;
 import com.example.hibernatecache.utils.AppConstants;
+import jakarta.validation.Valid;
+import java.net.URI;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -17,63 +20,58 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @RestController
 @RequestMapping("/api/orders")
 @RequiredArgsConstructor
-public class OrderController {
+class OrderController {
 
     private final OrderService orderService;
 
     @GetMapping
-    public PagedResult<OrderResponse> getAllOrders(
-            @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_NUMBER, required = false)
+    PagedResult<OrderResponse> getAllOrders(
+            @RequestParam(value = "pageNo", defaultValue = AppConstants.DEFAULT_PAGE_NUMBER, required = false)
                     int pageNo,
-            @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_SIZE, required = false)
+            @RequestParam(value = "pageSize", defaultValue = AppConstants.DEFAULT_PAGE_SIZE, required = false)
                     int pageSize,
-            @RequestParam(defaultValue = AppConstants.DEFAULT_SORT_BY, required = false)
+            @RequestParam(value = "sortBy", defaultValue = AppConstants.DEFAULT_SORT_BY, required = false)
                     String sortBy,
-            @RequestParam(defaultValue = AppConstants.DEFAULT_SORT_DIRECTION, required = false)
+            @RequestParam(value = "sortDir", defaultValue = AppConstants.DEFAULT_SORT_DIRECTION, required = false)
                     String sortDir) {
-        return orderService.findAllOrders(pageNo, pageSize, sortBy, sortDir);
+        FindOrdersQuery findOrdersQuery = new FindOrdersQuery(pageNo, pageSize, sortBy, sortDir);
+        return orderService.findAllOrders(findOrdersQuery);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<OrderResponse> getOrderById(@PathVariable Long id) {
-        return orderService
-                .findOrderById(id)
-                .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+    ResponseEntity<OrderResponse> getOrderById(@PathVariable Long id) {
+        return orderService.findOrderById(id).map(ResponseEntity::ok).orElseThrow(() -> new OrderNotFoundException(id));
     }
 
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public OrderResponse createOrder(@RequestBody @Validated OrderRequest orderRequest) {
-        return orderService.saveOrderRequest(orderRequest);
+    ResponseEntity<OrderResponse> createOrder(@RequestBody @Validated OrderRequest orderRequest) {
+        OrderResponse response = orderService.saveOrder(orderRequest);
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
+                .path("/api/orders/{id}")
+                .buildAndExpand(response.orderId())
+                .toUri();
+        return ResponseEntity.created(location).body(response);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<OrderResponse> updateOrder(
-            @PathVariable Long id, @RequestBody OrderRequest orderRequest) {
-        return orderService
-                .findById(id)
-                .map(
-                        orderObj ->
-                                ResponseEntity.ok(orderService.updateOrder(orderObj, orderRequest)))
-                .orElseGet(() -> ResponseEntity.notFound().build());
+    ResponseEntity<OrderResponse> updateOrder(@PathVariable Long id, @RequestBody @Valid OrderRequest orderRequest) {
+        return ResponseEntity.ok(orderService.updateOrder(id, orderRequest));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<OrderResponse> deleteOrder(@PathVariable Long id) {
+    ResponseEntity<OrderResponse> deleteOrder(@PathVariable Long id) {
         return orderService
                 .findOrderById(id)
-                .map(
-                        order -> {
-                            orderService.deleteOrderById(id);
-                            return ResponseEntity.ok(order);
-                        })
-                .orElseGet(() -> ResponseEntity.notFound().build());
+                .map(order -> {
+                    orderService.deleteOrderById(id);
+                    return ResponseEntity.ok(order);
+                })
+                .orElseThrow(() -> new OrderNotFoundException(id));
     }
 }

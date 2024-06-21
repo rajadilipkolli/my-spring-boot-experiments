@@ -1,5 +1,8 @@
 package com.example.hibernatecache.config;
 
+import com.example.hibernatecache.exception.ResourceNotFoundException;
+import java.net.URI;
+import java.time.Instant;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -22,25 +25,36 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     ProblemDetail onException(MethodArgumentNotValidException methodArgumentNotValidException) {
         ProblemDetail problemDetail =
-                ProblemDetail.forStatusAndDetail(
-                        HttpStatusCode.valueOf(400), "Invalid request content.");
+                ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(400), "Invalid request content.");
         problemDetail.setTitle("Constraint Violation");
-        List<ApiValidationError> validationErrorsList =
-                methodArgumentNotValidException.getAllErrors().stream()
-                        .map(
-                                objectError -> {
-                                    FieldError fieldError = (FieldError) objectError;
-                                    return new ApiValidationError(
-                                            fieldError.getObjectName(),
-                                            fieldError.getField(),
-                                            fieldError.getRejectedValue(),
-                                            Objects.requireNonNull(
-                                                    fieldError.getDefaultMessage(), ""));
-                                })
-                        .sorted(Comparator.comparing(ApiValidationError::field))
-                        .toList();
+        List<ApiValidationError> validationErrorsList = methodArgumentNotValidException.getAllErrors().stream()
+                .map(objectError -> {
+                    FieldError fieldError = (FieldError) objectError;
+                    return new ApiValidationError(
+                            fieldError.getObjectName(),
+                            fieldError.getField(),
+                            fieldError.getRejectedValue(),
+                            Objects.requireNonNull(fieldError.getDefaultMessage(), ""));
+                })
+                .sorted(Comparator.comparing(ApiValidationError::field))
+                .toList();
         problemDetail.setProperty("violations", validationErrorsList);
         return problemDetail;
+    }
+
+    @ExceptionHandler(Exception.class)
+    ProblemDetail onException(Exception exception) {
+        if (exception instanceof ResourceNotFoundException resourceNotFoundException) {
+            ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+                    resourceNotFoundException.getHttpStatus(), resourceNotFoundException.getMessage());
+            problemDetail.setTitle("Not Found");
+            problemDetail.setType(URI.create("http://api.boot-hibernate2ndlevelcache-sample.com/errors/not-found"));
+            problemDetail.setProperty("errorCategory", "Generic");
+            problemDetail.setProperty("timestamp", Instant.now());
+            return problemDetail;
+        } else {
+            return ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(500), exception.getMessage());
+        }
     }
 
     record ApiValidationError(String object, String field, Object rejectedValue, String message) {}

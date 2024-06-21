@@ -24,12 +24,16 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 
 class OrderControllerIT extends AbstractIntegrationTest {
 
-    @Autowired private OrderRepository orderRepository;
-    @Autowired private CustomerRepository customerRepository;
+    @Autowired
+    private OrderRepository orderRepository;
+
+    @Autowired
+    private CustomerRepository customerRepository;
 
     private List<Order> orderList = null;
 
@@ -40,15 +44,8 @@ class OrderControllerIT extends AbstractIntegrationTest {
         orderRepository.deleteAll();
         customerRepository.deleteAll();
 
-        savedCustomer =
-                customerRepository.persist(
-                        new Customer(
-                                null,
-                                "firstName 1",
-                                "lastName 1",
-                                "email1@junit.com",
-                                "9876543211",
-                                null));
+        savedCustomer = customerRepository.persist(
+                new Customer(null, "firstName 1", "lastName 1", "email1@junit.com", "9876543211", null));
         orderList = new ArrayList<>();
         orderList.add(new Order(null, "First Order", BigDecimal.TEN, savedCustomer, null));
         orderList.add(new Order(null, "Second Order", BigDecimal.TEN, savedCustomer, null));
@@ -87,14 +84,13 @@ class OrderControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldCreateNewOrder() throws Exception {
-        OrderRequest orderRequest =
-                new OrderRequest(savedCustomer.getId(), "New Order", BigDecimal.TEN);
+        OrderRequest orderRequest = new OrderRequest(savedCustomer.getId(), "New Order", BigDecimal.TEN);
         this.mockMvc
-                .perform(
-                        post("/api/orders")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(orderRequest)))
+                .perform(post("/api/orders")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(orderRequest)))
                 .andExpect(status().isCreated())
+                .andExpect(header().exists(HttpHeaders.LOCATION))
                 .andExpect(jsonPath("$.orderId", notNullValue()))
                 .andExpect(jsonPath("$.customerId", is(savedCustomer.getId()), Long.class))
                 .andExpect(jsonPath("$.name", is(orderRequest.name())))
@@ -104,13 +100,12 @@ class OrderControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldReturn400WhenCreateNewOrderWithoutName() throws Exception {
-        OrderRequest order = new OrderRequest(null, null, BigDecimal.ZERO);
+        OrderRequest orderRequest = new OrderRequest(null, null, BigDecimal.ZERO);
 
         this.mockMvc
-                .perform(
-                        post("/api/orders")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(order)))
+                .perform(post("/api/orders")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(orderRequest)))
                 .andExpect(status().isBadRequest())
                 .andExpect(header().string("Content-Type", is("application/problem+json")))
                 .andExpect(jsonPath("$.type", is("about:blank")))
@@ -122,10 +117,7 @@ class OrderControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.violations[0].field", is("name")))
                 .andExpect(jsonPath("$.violations[0].message", is("Name cannot be blank")))
                 .andExpect(jsonPath("$.violations[1].field", is("price")))
-                .andExpect(
-                        jsonPath(
-                                "$.violations[1].message",
-                                is("Value must be greater than or equal to 0.01")))
+                .andExpect(jsonPath("$.violations[1].message", is("Value must be greater than or equal to 0.01")))
                 .andReturn();
     }
 
@@ -136,10 +128,9 @@ class OrderControllerIT extends AbstractIntegrationTest {
 
         Long orderId = orderList.getFirst().getId();
         this.mockMvc
-                .perform(
-                        put("/api/orders/{id}", orderId)
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(orderRequest)))
+                .perform(put("/api/orders/{id}", orderId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(orderRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.orderId", is(orderId), Long.class))
                 .andExpect(jsonPath("$.customerId", is(customerId), Long.class))

@@ -20,19 +20,12 @@ class ApplicationIntegrationTest extends AbstractIntegrationTest {
     void contextLoads() throws Exception {
 
         Customer customer =
-                new Customer(
-                        null,
-                        "firstNameTest",
-                        "lastName test",
-                        "emailtest@junit.com",
-                        "9876543211",
-                        null);
+                new Customer(null, "firstNameTest", "lastName test", "emailtest@junit.com", "9876543211", null);
         SQLStatementCountValidator.reset();
         this.mockMvc
-                .perform(
-                        post("/api/customers")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(customer)))
+                .perform(post("/api/customers")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(customer)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.firstName", is(customer.getFirstName())));
         assertInsertCount(1);
@@ -41,9 +34,8 @@ class ApplicationIntegrationTest extends AbstractIntegrationTest {
         SQLStatementCountValidator.reset();
         for (int i = 0; i < 10; i++) {
             this.mockMvc
-                    .perform(
-                            get("/api/customers/search?firstName=firstNameTest")
-                                    .contentType(MediaType.APPLICATION_JSON))
+                    .perform(get("/api/customers/search?firstName=firstNameTest")
+                            .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.firstName", is(customer.getFirstName())))
                     .andExpect(jsonPath("$.lastName", is(customer.getLastName())))

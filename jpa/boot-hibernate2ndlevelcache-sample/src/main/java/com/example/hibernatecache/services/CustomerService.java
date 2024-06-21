@@ -1,7 +1,10 @@
 package com.example.hibernatecache.services;
 
 import com.example.hibernatecache.entities.Customer;
-import com.example.hibernatecache.mapper.ConversionService;
+import com.example.hibernatecache.exception.CustomerNotFoundException;
+import com.example.hibernatecache.mapper.CustomerMapper;
+import com.example.hibernatecache.model.query.FindCustomersQuery;
+import com.example.hibernatecache.model.request.CustomerRequest;
 import com.example.hibernatecache.model.response.CustomerResponse;
 import com.example.hibernatecache.model.response.PagedResult;
 import com.example.hibernatecache.repositories.CustomerRepository;
@@ -21,50 +24,55 @@ import org.springframework.transaction.annotation.Transactional;
 public class CustomerService {
 
     private final CustomerRepository customerRepository;
-    private final ConversionService mapper;
+    private final CustomerMapper customerMapper;
 
-    public PagedResult<CustomerResponse> findAllCustomers(
-            int pageNo, int pageSize, String sortBy, String sortDir) {
-        Sort sort =
-                sortDir.equalsIgnoreCase(Sort.Direction.ASC.name())
-                        ? Sort.by(sortBy).ascending()
-                        : Sort.by(sortBy).descending();
+    public PagedResult<CustomerResponse> findAllCustomers(FindCustomersQuery findCustomersQuery) {
 
         // create Pageable instance
-        Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
+        Pageable pageable = createPageable(findCustomersQuery);
+
         Page<Customer> customersPage = customerRepository.findAll(pageable);
-        List<CustomerResponse> customerResponses =
-                mapper.mapToCustomerResponseList(customersPage.getContent());
-        return new PagedResult<>(customersPage, customerResponses);
+
+        List<CustomerResponse> customerResponseList = customerMapper.toResponseList(customersPage.getContent());
+
+        return new PagedResult<>(customersPage, customerResponseList);
+    }
+
+    private Pageable createPageable(FindCustomersQuery findCustomersQuery) {
+        int pageNo = Math.max(findCustomersQuery.pageNo() - 1, 0);
+        Sort sort = Sort.by(
+                findCustomersQuery.sortDir().equalsIgnoreCase(Sort.Direction.ASC.name())
+                        ? Sort.Order.asc(findCustomersQuery.sortBy())
+                        : Sort.Order.desc(findCustomersQuery.sortBy()));
+        return PageRequest.of(pageNo, findCustomersQuery.pageSize(), sort);
     }
 
     public Optional<CustomerResponse> findCustomerById(Long id) {
-        return findById(id).map(mapper::mapToCustomerResponse);
+        return customerRepository.findById(id).map(customerMapper::toResponse);
     }
 
     @Transactional
-    public CustomerResponse saveCustomer(Customer customer) {
-        Customer saved = customerRepository.persist(customer);
-        return mapper.mapToCustomerResponse(saved);
+    public CustomerResponse saveCustomer(CustomerRequest customerRequest) {
+        Customer customer = customerMapper.toEntity(customerRequest);
+        Customer savedCustomer = customerRepository.persist(customer);
+        return customerMapper.toResponse(savedCustomer);
+    }
+
+    @Transactional
+    public CustomerResponse updateCustomer(Long id, CustomerRequest customerRequest) {
+        Customer customer = customerRepository.findById(id).orElseThrow(() -> new CustomerNotFoundException(id));
+
+        // Update the customer object with data from customerRequest
+        customerMapper.updateCustomerWithRequest(customerRequest, customer);
+
+        // Save the updated customer object
+        Customer updatedCustomer = customerRepository.merge(customer);
+
+        return customerMapper.toResponse(updatedCustomer);
     }
 
     @Transactional
     public void deleteCustomerById(Long id) {
         customerRepository.deleteById(id);
-    }
-
-    public Optional<CustomerResponse> findCustomerByFirstName(String firstName) {
-        return customerRepository.findByFirstName(firstName).map(mapper::mapToCustomerResponse);
-    }
-
-    public Optional<Customer> findById(Long id) {
-        return customerRepository.findById(id);
-    }
-
-    @Transactional
-    public CustomerResponse updateCustomer(Customer customerRequest, Customer savedCustomer) {
-        mapper.updateCustomerWithRequest(customerRequest, savedCustomer);
-        Customer updated = customerRepository.update(savedCustomer);
-        return mapper.mapToCustomerResponse(updated);
     }
 }

@@ -2,10 +2,13 @@ package com.example.hibernatecache.config;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.NestedConfigurationProperty;
 
 @Data
 @ConfigurationProperties("application")
 public class ApplicationProperties {
+
+    @NestedConfigurationProperty
     private Cors cors = new Cors();
 
     @Data

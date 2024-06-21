@@ -5,6 +5,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -17,7 +18,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.example.hibernatecache.entities.Customer;
 import com.example.hibernatecache.entities.Order;
+import com.example.hibernatecache.entities.OrderItem;
+import com.example.hibernatecache.exception.OrderNotFoundException;
+import com.example.hibernatecache.model.query.FindOrdersQuery;
 import com.example.hibernatecache.model.request.OrderRequest;
+import com.example.hibernatecache.model.response.OrderItemResponse;
 import com.example.hibernatecache.model.response.OrderResponse;
 import com.example.hibernatecache.model.response.PagedResult;
 import com.example.hibernatecache.services.OrderService;
@@ -33,6 +38,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -41,16 +47,18 @@ import org.springframework.test.web.servlet.MockMvc;
 @ActiveProfiles(PROFILE_TEST)
 class OrderControllerTest {
 
-    @Autowired private MockMvc mockMvc;
+    @Autowired
+    private MockMvc mockMvc;
 
-    @MockBean private OrderService orderService;
+    @MockBean
+    private OrderService orderService;
 
-    @Autowired private ObjectMapper objectMapper;
+    @Autowired
+    private ObjectMapper objectMapper;
 
     private List<Order> orderList;
 
-    final Customer customer =
-            new Customer(1L, "firstName 1", "lastName 1", "email1@junit.com", "9876543211", null);
+    final Customer customer = new Customer(1L, "firstName 1", "lastName 1", "email1@junit.com", "9876543211", null);
 
     @BeforeEach
     void setUp() {
@@ -62,8 +70,11 @@ class OrderControllerTest {
 
     @Test
     void shouldFetchAllOrders() throws Exception {
-        PagedResult<OrderResponse> orderPagedResult = getOrderResponsePagedResult();
-        given(orderService.findAllOrders(0, 10, "id", "asc")).willReturn(orderPagedResult);
+
+        Page<Order> page = new PageImpl<>(orderList);
+        PagedResult<OrderResponse> orderPagedResult = new PagedResult<>(page, getOrderResponseList());
+        FindOrdersQuery findOrdersQuery = new FindOrdersQuery(0, 10, "id", "asc");
+        given(orderService.findAllOrders(findOrdersQuery)).willReturn(orderPagedResult);
 
         this.mockMvc
                 .perform(get("/api/orders"))
@@ -78,21 +89,10 @@ class OrderControllerTest {
                 .andExpect(jsonPath("$.hasPrevious", is(false)));
     }
 
-    private PagedResult<OrderResponse> getOrderResponsePagedResult() {
-        List<OrderResponse> orderResponseList =
-                List.of(
-                        new OrderResponse(1L, 1L, "text 1", BigDecimal.TEN, new ArrayList<>()),
-                        new OrderResponse(1L, 2L, "text 2", BigDecimal.TEN, new ArrayList<>()),
-                        new OrderResponse(1L, 3L, "text 3", BigDecimal.TEN, new ArrayList<>()));
-        Page<OrderResponse> page = new PageImpl<>(orderResponseList);
-        return new PagedResult<>(page, orderResponseList);
-    }
-
     @Test
     void shouldFindOrderById() throws Exception {
         Long orderId = 1L;
-        OrderResponse order =
-                new OrderResponse(1L, orderId, "text 1", BigDecimal.TEN, new ArrayList<>());
+        OrderResponse order = new OrderResponse(1L, orderId, "text 1", BigDecimal.TEN, new ArrayList<>());
         given(orderService.findOrderById(orderId)).willReturn(Optional.of(order));
 
         this.mockMvc
@@ -106,35 +106,40 @@ class OrderControllerTest {
         Long orderId = 1L;
         given(orderService.findOrderById(orderId)).willReturn(Optional.empty());
 
-        this.mockMvc.perform(get("/api/orders/{id}", orderId)).andExpect(status().isNotFound());
+        this.mockMvc
+                .perform(get("/api/orders/{id}", orderId))
+                .andExpect(status().isNotFound())
+                .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
+                .andExpect(jsonPath("$.type", is("http://api.boot-hibernate2ndlevelcache-sample.com/errors/not-found")))
+                .andExpect(jsonPath("$.title", is("Not Found")))
+                .andExpect(jsonPath("$.status", is(404)))
+                .andExpect(jsonPath("$.detail").value("Order with Id '%d' not found".formatted(orderId)));
     }
 
     @Test
     void shouldCreateNewOrder() throws Exception {
 
-        OrderRequest order = new OrderRequest(1L, "some text", BigDecimal.TEN);
-        OrderResponse orderResponse =
-                new OrderResponse(1L, 1L, "some text", BigDecimal.TEN, new ArrayList<>());
-        given(orderService.saveOrderRequest(any(OrderRequest.class))).willReturn(orderResponse);
+        OrderRequest orderRequest = new OrderRequest(1L, "some text", BigDecimal.TEN);
+        OrderResponse orderResponse = new OrderResponse(1L, 1L, "some text", BigDecimal.TEN, new ArrayList<>());
+        given(orderService.saveOrder(any(OrderRequest.class))).willReturn(orderResponse);
         this.mockMvc
-                .perform(
-                        post("/api/orders")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(order)))
+                .perform(post("/api/orders")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(orderRequest)))
                 .andExpect(status().isCreated())
+                .andExpect(header().exists(HttpHeaders.LOCATION))
                 .andExpect(jsonPath("$.orderId", notNullValue()))
-                .andExpect(jsonPath("$.name", is(order.name())));
+                .andExpect(jsonPath("$.name", is(orderRequest.name())));
     }
 
     @Test
     void shouldReturn400WhenCreateNewOrderWithoutName() throws Exception {
-        OrderRequest order = new OrderRequest(null, null, null);
+        OrderRequest orderRequest = new OrderRequest(null, null, null);
 
         this.mockMvc
-                .perform(
-                        post("/api/orders")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(order)))
+                .perform(post("/api/orders")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(orderRequest)))
                 .andExpect(status().isBadRequest())
                 .andExpect(header().string("Content-Type", is("application/problem+json")))
                 .andExpect(jsonPath("$.type", is("about:blank")))
@@ -153,48 +158,47 @@ class OrderControllerTest {
     @Test
     void shouldUpdateOrder() throws Exception {
         Long orderId = 1L;
-        OrderRequest orderRequest =
-                new OrderRequest(customer.getId(), "Updated text", BigDecimal.TEN);
-        Order order = new Order(orderId, "New text", BigDecimal.TEN, customer, new ArrayList<>());
-        given(orderService.findById(orderId)).willReturn(Optional.of(order));
-        given(orderService.updateOrder(any(Order.class), any(OrderRequest.class)))
-                .willReturn(
-                        new OrderResponse(
-                                customer.getId(),
-                                orderId,
-                                "Updated text",
-                                BigDecimal.TEN,
-                                new ArrayList<>()));
+        OrderRequest orderRequest = new OrderRequest(customer.getId(), "Updated text", BigDecimal.TEN);
+        OrderResponse orderResponse =
+                new OrderResponse(customer.getId(), orderId, "New text", BigDecimal.TEN, new ArrayList<>());
+        given(orderService.findOrderById(orderId)).willReturn(Optional.of(orderResponse));
+        given(orderService.updateOrder(eq(orderId), any(OrderRequest.class)))
+                .willReturn(new OrderResponse(
+                        customer.getId(), orderId, "Updated text", BigDecimal.TEN, new ArrayList<>()));
 
         this.mockMvc
-                .perform(
-                        put("/api/orders/{id}", orderId)
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(orderRequest)))
+                .perform(put("/api/orders/{id}", orderId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(orderRequest)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name", is("Updated text")));
+                .andExpect(jsonPath("$.id", is(orderId), Long.class))
+                .andExpect(jsonPath("$.name", is(orderRequest.name())));
     }
 
     @Test
     void shouldReturn404WhenUpdatingNonExistingOrder() throws Exception {
         Long orderId = 1L;
-        given(orderService.findOrderById(orderId)).willReturn(Optional.empty());
-        Order order = new Order(orderId, "Updated text", BigDecimal.TEN, customer, null);
+        OrderRequest orderRequest = new OrderRequest(orderId, "Updated text", BigDecimal.TEN);
+        given(orderService.updateOrder(eq(orderId), any(OrderRequest.class)))
+                .willThrow(new OrderNotFoundException(orderId));
 
         this.mockMvc
-                .perform(
-                        put("/api/orders/{id}", orderId)
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(order)))
-                .andExpect(status().isNotFound());
+                .perform(put("/api/orders/{id}", orderId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(orderRequest)))
+                .andExpect(status().isNotFound())
+                .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
+                .andExpect(jsonPath("$.type", is("http://api.boot-hibernate2ndlevelcache-sample.com/errors/not-found")))
+                .andExpect(jsonPath("$.title", is("Not Found")))
+                .andExpect(jsonPath("$.status", is(404)))
+                .andExpect(jsonPath("$.detail").value("Order with Id '%d' not found".formatted(orderId)));
     }
 
     @Test
     void shouldDeleteOrder() throws Exception {
         Long orderId = 1L;
         OrderResponse order =
-                new OrderResponse(
-                        customer.getId(), orderId, "Some text", BigDecimal.TEN, new ArrayList<>());
+                new OrderResponse(customer.getId(), orderId, "Some text", BigDecimal.TEN, new ArrayList<>());
         given(orderService.findOrderById(orderId)).willReturn(Optional.of(order));
         doNothing().when(orderService).deleteOrderById(orderId);
 
@@ -209,6 +213,29 @@ class OrderControllerTest {
         Long orderId = 1L;
         given(orderService.findOrderById(orderId)).willReturn(Optional.empty());
 
-        this.mockMvc.perform(delete("/api/orders/{id}", orderId)).andExpect(status().isNotFound());
+        this.mockMvc
+                .perform(delete("/api/orders/{id}", orderId))
+                .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
+                .andExpect(jsonPath("$.type", is("http://api.boot-hibernate2ndlevelcache-sample.com/errors/not-found")))
+                .andExpect(jsonPath("$.title", is("Not Found")))
+                .andExpect(jsonPath("$.status", is(404)))
+                .andExpect(jsonPath("$.detail").value("Order with Id '%d' not found".formatted(orderId)));
+    }
+
+    List<OrderResponse> getOrderResponseList() {
+        return orderList.stream()
+                .map(order -> new OrderResponse(
+                        order.getCustomer().getId(),
+                        order.getId(),
+                        order.getName(),
+                        order.getPrice(),
+                        getOrderItemResponse(order.getOrderItems())))
+                .toList();
+    }
+
+    private List<OrderItemResponse> getOrderItemResponse(List<OrderItem> orderItems) {
+        return orderItems.stream()
+                .map(orderItem -> new OrderItemResponse(orderItem.getId(), orderItem.getText()))
+                .toList();
     }
 }

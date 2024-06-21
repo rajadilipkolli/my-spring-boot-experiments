@@ -13,6 +13,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.example.hibernatecache.common.AbstractIntegrationTest;
 import com.example.hibernatecache.entities.Customer;
+import com.example.hibernatecache.model.request.CustomerRequest;
 import com.example.hibernatecache.repositories.CustomerRepository;
 import com.example.hibernatecache.repositories.OrderRepository;
 import java.util.ArrayList;
@@ -20,12 +21,16 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 
 class CustomerControllerIT extends AbstractIntegrationTest {
 
-    @Autowired private CustomerRepository customerRepository;
-    @Autowired private OrderRepository orderRepository;
+    @Autowired
+    private CustomerRepository customerRepository;
+
+    @Autowired
+    private OrderRepository orderRepository;
 
     private List<Customer> customerList = null;
 
@@ -35,15 +40,9 @@ class CustomerControllerIT extends AbstractIntegrationTest {
         customerRepository.deleteAll();
 
         customerList = new ArrayList<>();
-        customerList.add(
-                new Customer(
-                        null, "firstName 1", "lastName 1", "email1@junit.com", "9876543211", null));
-        customerList.add(
-                new Customer(
-                        null, "firstName 2", "lastName 2", "email2@junit.com", "9876543212", null));
-        customerList.add(
-                new Customer(
-                        null, "firstName 3", "lastName 3", "email3@junit.com", "9876543213", null));
+        customerList.add(new Customer(null, "firstName 1", "lastName 1", "email1@junit.com", "9876543211", null));
+        customerList.add(new Customer(null, "firstName 2", "lastName 2", "email2@junit.com", "9876543212", null));
+        customerList.add(new Customer(null, "firstName 3", "lastName 3", "email3@junit.com", "9876543213", null));
         customerList = customerRepository.persistAll(customerList);
     }
 
@@ -78,31 +77,29 @@ class CustomerControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldCreateNewCustomer() throws Exception {
-        Customer customer =
-                new Customer(
-                        null, "firstName 4", "lastName 4", "email4@junit.com", "9876543213", null);
+        CustomerRequest customerRequest =
+                new CustomerRequest("firstName 4", "lastName 4", "email4@junit.com", "9876543213");
         this.mockMvc
-                .perform(
-                        post("/api/customers")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(customer)))
+                .perform(post("/api/customers")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(customerRequest)))
                 .andExpect(status().isCreated())
+                .andExpect(header().exists(HttpHeaders.LOCATION))
                 .andExpect(jsonPath("$.customerId", notNullValue()))
-                .andExpect(jsonPath("$.firstName", is(customer.getFirstName())))
-                .andExpect(jsonPath("$.lastName", is(customer.getLastName())))
-                .andExpect(jsonPath("$.email", is(customer.getEmail())))
-                .andExpect(jsonPath("$.phone", is(customer.getPhone())));
+                .andExpect(jsonPath("$.firstName", is(customerRequest.firstName())))
+                .andExpect(jsonPath("$.lastName", is(customerRequest.lastName())))
+                .andExpect(jsonPath("$.email", is(customerRequest.email())))
+                .andExpect(jsonPath("$.phone", is(customerRequest.phone())));
     }
 
     @Test
     void shouldReturn400WhenCreateNewCustomerWithoutText() throws Exception {
-        Customer customer = new Customer(null, null, null, null, null, null);
+        CustomerRequest customerRequest = new CustomerRequest(null, null, null, null);
 
         this.mockMvc
-                .perform(
-                        post("/api/customers")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(customer)))
+                .perform(post("/api/customers")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(customerRequest)))
                 .andExpect(status().isBadRequest())
                 .andExpect(header().string("Content-Type", is("application/problem+json")))
                 .andExpect(jsonPath("$.type", is("about:blank")))
@@ -119,18 +116,19 @@ class CustomerControllerIT extends AbstractIntegrationTest {
     @Test
     void shouldUpdateCustomer() throws Exception {
         Customer customer = customerList.getFirst();
-        customer.setFirstName("Updated Customer");
+        CustomerRequest customerRequest = new CustomerRequest(
+                "Updated Customer", customer.getLastName(), customer.getEmail(), customer.getPhone());
 
         this.mockMvc
-                .perform(
-                        put("/api/customers/{id}", customer.getId())
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(customer)))
+                .perform(put("/api/customers/{id}", customer.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(customerRequest)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.firstName", is(customer.getFirstName())))
-                .andExpect(jsonPath("$.lastName", is(customer.getLastName())))
-                .andExpect(jsonPath("$.email", is(customer.getEmail())))
-                .andExpect(jsonPath("$.phone", is(customer.getPhone())));
+                .andExpect(jsonPath("$.id", is(customer.getId()), Long.class))
+                .andExpect(jsonPath("$.firstName", is(customerRequest.firstName())))
+                .andExpect(jsonPath("$.lastName", is(customerRequest.lastName())))
+                .andExpect(jsonPath("$.email", is(customerRequest.email())))
+                .andExpect(jsonPath("$.phone", is(customerRequest.phone())));
     }
 
     @Test
