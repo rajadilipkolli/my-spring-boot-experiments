@@ -13,6 +13,7 @@ import org.mapstruct.NullValueCheckStrategy;
 @Mapper(componentModel = "spring", nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
 public interface OrderItemMapper {
 
+    @Mapping(target = "order", ignore = true)
     OrderItem toEntity(OrderItemRequest orderItemRequest);
 
     @Mapping(source = "id", target = "orderItemId")
@@ -21,6 +22,7 @@ public interface OrderItemMapper {
     @IterableMapping(elementTargetType = OrderItemResponse.class)
     List<OrderItemResponse> toResponseList(List<OrderItem> list);
 
+    @Mapping(target = "order", ignore = true)
     void mapOrderItemWithRequest(
             OrderItemRequest orderItemRequest, @MappingTarget OrderItem orderItem);
 }

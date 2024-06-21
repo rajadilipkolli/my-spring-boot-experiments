@@ -65,6 +65,14 @@ class CustomerController {
                 .orElseThrow(() -> new CustomerNotFoundException(id));
     }
 
+    @GetMapping("/search")
+    public ResponseEntity<CustomerResponse> searchCustomer(@RequestParam String firstName) {
+        return customerService
+                .findCustomerByFirstName(firstName)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
     @PostMapping
     ResponseEntity<CustomerResponse> createCustomer(
             @RequestBody @Validated CustomerRequest customerRequest) {

@@ -1,17 +1,16 @@
 package com.example.hibernatecache.exception;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 
 public class ResourceNotFoundException extends RuntimeException {
 
-    private static final HttpStatus httpStatus = HttpStatus.NOT_FOUND;
+    private static final HttpStatus HTTP_STATUS = HttpStatus.NOT_FOUND;
 
     public ResourceNotFoundException(String errorMessage) {
         super(errorMessage);
     }
 
-    public HttpStatusCode getHttpStatus() {
-        return httpStatus;
+    public HttpStatus getHttpStatus() {
+        return HTTP_STATUS;
     }
 }

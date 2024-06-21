@@ -5,6 +5,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -144,6 +145,32 @@ class CustomerControllerTest {
                 .andExpect(jsonPath("$.violations[0].field", is("firstName")))
                 .andExpect(jsonPath("$.violations[0].message", is("FirstName cannot be blank")))
                 .andReturn();
+    }
+
+    @Test
+    void shouldUpdateCustomer() throws Exception {
+        Long customerId = 1L;
+        CustomerRequest customerRequest =
+                new CustomerRequest(
+                        "firstName Updated", "lastName 3", "email3@junit.com", "9876543213");
+        CustomerResponse customerResponse =
+                new CustomerResponse(
+                        customerId,
+                        "firstName Updated",
+                        "lastName 3",
+                        "email3@junit.com",
+                        "9876543213",
+                        null);
+        given(customerService.updateCustomer(eq(customerId), any(CustomerRequest.class)))
+                .willReturn(customerResponse);
+
+        this.mockMvc
+                .perform(
+                        put("/api/customers/{id}", customerId)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(customerRequest)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.firstName", is(customerResponse.firstName())));
     }
 
     @Test

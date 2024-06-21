@@ -115,7 +115,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.instance", is("/api/customers")))
                 .andExpect(jsonPath("$.violations", hasSize(1)))
                 .andExpect(jsonPath("$.violations[0].field", is("firstName")))
-                .andExpect(jsonPath("$.violations[0].message", is("FirstName cannot be empty")))
+                .andExpect(jsonPath("$.violations[0].message", is("FirstName cannot be blank")))
                 .andReturn();
     }
 
@@ -135,7 +135,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(customerRequest)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(customer.getId()), Long.class))
+                .andExpect(jsonPath("$.customerId", is(customer.getId()), Long.class))
                 .andExpect(jsonPath("$.firstName", is(customerRequest.firstName())))
                 .andExpect(jsonPath("$.lastName", is(customerRequest.lastName())))
                 .andExpect(jsonPath("$.email", is(customerRequest.email())))

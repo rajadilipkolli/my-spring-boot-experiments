@@ -53,6 +53,10 @@ public class CustomerService {
         return customerRepository.findById(id).map(customerMapper::toResponse);
     }
 
+    public Optional<CustomerResponse> findCustomerByFirstName(String firstName) {
+        return customerRepository.findByFirstName(firstName).map(customerMapper::toResponse);
+    }
+
     @Transactional
     public CustomerResponse saveCustomer(CustomerRequest customerRequest) {
         Customer customer = customerMapper.toEntity(customerRequest);
