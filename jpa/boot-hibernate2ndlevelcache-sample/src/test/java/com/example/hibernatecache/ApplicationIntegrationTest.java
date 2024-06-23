@@ -9,7 +9,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.example.hibernatecache.common.AbstractIntegrationTest;
-import com.example.hibernatecache.entities.Customer;
+import com.example.hibernatecache.model.request.CustomerRequest;
 import io.hypersistence.utils.jdbc.validator.SQLStatementCountValidator;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
@@ -19,19 +19,19 @@ class ApplicationIntegrationTest extends AbstractIntegrationTest {
     @Test
     void contextLoads() throws Exception {
 
-        Customer customer = new Customer()
-                .setFirstName("firstNameTest")
-                .setLastName("lastName test")
-                .setEmail("emailtest@junit.com")
-                .setPhone("9876543211");
+        CustomerRequest customerRequest =
+                new CustomerRequest("firstNameTest", "lastName test", "emailtest@junit.com", "9876543211");
 
         SQLStatementCountValidator.reset();
         this.mockMvc
                 .perform(post("/api/customers")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(customer)))
+                        .content(objectMapper.writeValueAsString(customerRequest)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.firstName", is(customer.getFirstName())));
+                .andExpect(jsonPath("$.firstName", is(customerRequest.firstName())))
+                .andExpect(jsonPath("$.lastName", is(customerRequest.lastName())))
+                .andExpect(jsonPath("$.email", is(customerRequest.email())))
+                .andExpect(jsonPath("$.phone", is(customerRequest.phone())));
         assertInsertCount(1);
         // For selecting next sequence value
         assertSelectCount(1);
@@ -41,10 +41,10 @@ class ApplicationIntegrationTest extends AbstractIntegrationTest {
                     .perform(get("/api/customers/search?firstName=firstNameTest")
                             .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.firstName", is(customer.getFirstName())))
-                    .andExpect(jsonPath("$.lastName", is(customer.getLastName())))
-                    .andExpect(jsonPath("$.email", is(customer.getEmail())))
-                    .andExpect(jsonPath("$.phone", is(customer.getPhone())));
+                    .andExpect(jsonPath("$.firstName", is(customerRequest.firstName())))
+                    .andExpect(jsonPath("$.lastName", is(customerRequest.lastName())))
+                    .andExpect(jsonPath("$.email", is(customerRequest.email())))
+                    .andExpect(jsonPath("$.phone", is(customerRequest.phone())));
         }
         assertSelectCount(1);
     }

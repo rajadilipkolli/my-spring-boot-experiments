@@ -1,7 +1,10 @@
 package com.example.hibernatecache.web.controllers;
 
+import static io.hypersistence.utils.jdbc.validator.SQLStatementCountValidator.assertInsertCount;
+import static io.hypersistence.utils.jdbc.validator.SQLStatementCountValidator.assertSelectCount;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -13,9 +16,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.example.hibernatecache.common.AbstractIntegrationTest;
 import com.example.hibernatecache.entities.Customer;
+import com.example.hibernatecache.entities.Order;
+import com.example.hibernatecache.entities.OrderItem;
 import com.example.hibernatecache.model.request.CustomerRequest;
 import com.example.hibernatecache.repositories.CustomerRepository;
 import com.example.hibernatecache.repositories.OrderRepository;
+import io.hypersistence.utils.jdbc.validator.SQLStatementCountValidator;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -44,7 +51,13 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                 .setFirstName("firstName 1")
                 .setLastName("lastName 1")
                 .setEmail("email1@junit.com")
-                .setPhone("9876543211"));
+                .setPhone("9876543211")
+                .addOrder(new Order()
+                        .setName("First Order")
+                        .setPrice(BigDecimal.TEN)
+                        .addOrderItem(new OrderItem().setText("First OrderItem"))
+                        .addOrderItem(new OrderItem().setText("Second OrderItem"))
+                        .addOrderItem(new OrderItem().setText("Third OrderItem"))));
         customerList.add(new Customer()
                 .setFirstName("firstName 2")
                 .setLastName("lastName 2")
@@ -55,7 +68,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                 .setLastName("lastName 3")
                 .setEmail("email3@junit.com")
                 .setPhone("9876543213"));
-        customerList = customerRepository.persistAll(customerList);
+        customerList = customerRepository.persistAllAndFlush(customerList);
     }
 
     @Test
@@ -79,14 +92,43 @@ class CustomerControllerIT extends AbstractIntegrationTest {
         Customer customer = customerList.getFirst();
         Long customerId = customer.getId();
 
+        SQLStatementCountValidator.reset();
         this.mockMvc
                 .perform(get("/api/customers/{id}", customerId))
                 .andExpect(status().isOk())
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_JSON_VALUE)))
+                .andExpect(jsonPath("$.customerId", is(customerId), Long.class))
                 .andExpect(jsonPath("$.firstName", is(customer.getFirstName())))
                 .andExpect(jsonPath("$.lastName", is(customer.getLastName())))
                 .andExpect(jsonPath("$.email", is(customer.getEmail())))
-                .andExpect(jsonPath("$.phone", is(customer.getPhone())));
+                .andExpect(jsonPath("$.phone", is(customer.getPhone())))
+                .andExpect(jsonPath("$.orders.size()", is(1)));
+
+        assertInsertCount(0);
+        // For selecting customer and order
+        assertSelectCount(2);
+    }
+
+    @Test
+    void shouldFindCustomerByFirstname() throws Exception {
+        Customer customer = customerList.getFirst();
+        String customerFirstName = customer.getFirstName();
+
+        SQLStatementCountValidator.reset();
+        this.mockMvc
+                .perform(get("/api/customers/search?firstName=" + customerFirstName))
+                .andExpect(status().isOk())
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_JSON_VALUE)))
+                .andExpect(jsonPath("$.customerId", is(customer.getId()), Long.class))
+                .andExpect(jsonPath("$.firstName", is(customer.getFirstName())))
+                .andExpect(jsonPath("$.lastName", is(customer.getLastName())))
+                .andExpect(jsonPath("$.email", is(customer.getEmail())))
+                .andExpect(jsonPath("$.phone", is(customer.getPhone())))
+                .andExpect(jsonPath("$.orders.size()", is(1)));
+
+        assertInsertCount(0);
+        // For selecting customer and then orderItems
+        assertSelectCount(2);
     }
 
     @Test
@@ -104,7 +146,8 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.firstName", is(customerRequest.firstName())))
                 .andExpect(jsonPath("$.lastName", is(customerRequest.lastName())))
                 .andExpect(jsonPath("$.email", is(customerRequest.email())))
-                .andExpect(jsonPath("$.phone", is(customerRequest.phone())));
+                .andExpect(jsonPath("$.phone", is(customerRequest.phone())))
+                .andExpect(jsonPath("$.orders", empty()));
     }
 
     @Test
@@ -146,7 +189,8 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.firstName", is(customerRequest.firstName())))
                 .andExpect(jsonPath("$.lastName", is(customerRequest.lastName())))
                 .andExpect(jsonPath("$.email", is(customerRequest.email())))
-                .andExpect(jsonPath("$.phone", is(customerRequest.phone())));
+                .andExpect(jsonPath("$.phone", is(customerRequest.phone())))
+                .andExpect(jsonPath("$.orders.size()", is(1)));
     }
 
     @Test
@@ -157,9 +201,11 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                 .perform(delete("/api/customers/{id}", customer.getId()))
                 .andExpect(status().isOk())
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_JSON_VALUE)))
+                .andExpect(jsonPath("$.customerId", is(customer.getId()), Long.class))
                 .andExpect(jsonPath("$.firstName", is(customer.getFirstName())))
                 .andExpect(jsonPath("$.lastName", is(customer.getLastName())))
                 .andExpect(jsonPath("$.email", is(customer.getEmail())))
-                .andExpect(jsonPath("$.phone", is(customer.getPhone())));
+                .andExpect(jsonPath("$.phone", is(customer.getPhone())))
+                .andExpect(jsonPath("$.orders.size()", is(1)));
     }
 }

@@ -21,7 +21,7 @@ public interface CustomerRepository
 
     @Transactional(readOnly = true)
     @QueryHints(@QueryHint(name = HINT_CACHEABLE, value = "true"))
-    @EntityGraph(attributePaths = "orders")
+    @EntityGraph(attributePaths = {"orders"})
     Optional<Customer> findByFirstName(String firstName);
 
     @Transactional
