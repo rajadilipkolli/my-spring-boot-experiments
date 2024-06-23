@@ -22,11 +22,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class CustomerServiceTest {
 
-    @Mock private CustomerRepository customerRepository;
+    @Mock
+    private CustomerRepository customerRepository;
 
-    @Mock private CustomerMapper customerMapper;
+    @Mock
+    private CustomerMapper customerMapper;
 
-    @InjectMocks private CustomerService customerService;
+    @InjectMocks
+    private CustomerService customerService;
 
     @Test
     void findCustomerById() {
@@ -60,7 +63,6 @@ class CustomerServiceTest {
     }
 
     private CustomerResponse getCustomerResponse() {
-        return new CustomerResponse(
-                1L, "junitTest", "lastName", "email", "phone", Collections.emptyList());
+        return new CustomerResponse(1L, "junitTest", "lastName", "email", "phone", Collections.emptyList());
     }
 }

@@ -24,33 +24,29 @@ public class OrderItemService {
     private final OrderItemRepository orderItemRepository;
     private final OrderItemMapper orderItemMapper;
 
-    public OrderItemService(
-            OrderItemRepository orderItemRepository, OrderItemMapper orderItemMapper) {
+    public OrderItemService(OrderItemRepository orderItemRepository, OrderItemMapper orderItemMapper) {
         this.orderItemRepository = orderItemRepository;
         this.orderItemMapper = orderItemMapper;
     }
 
-    public PagedResult<OrderItemResponse> findAllOrderItems(
-            FindOrderItemsQuery findOrderItemsQuery) {
+    public PagedResult<OrderItemResponse> findAllOrderItems(FindOrderItemsQuery findOrderItemsQuery) {
 
         // create Pageable instance
         Pageable pageable = createPageable(findOrderItemsQuery);
 
         Page<OrderItem> orderItemsPage = orderItemRepository.findAll(pageable);
 
-        List<OrderItemResponse> orderItemResponseList =
-                orderItemMapper.toResponseList(orderItemsPage.getContent());
+        List<OrderItemResponse> orderItemResponseList = orderItemMapper.toResponseList(orderItemsPage.getContent());
 
         return new PagedResult<>(orderItemsPage, orderItemResponseList);
     }
 
     private Pageable createPageable(FindOrderItemsQuery findOrderItemsQuery) {
         int pageNo = Math.max(findOrderItemsQuery.pageNo() - 1, 0);
-        Sort sort =
-                Sort.by(
-                        findOrderItemsQuery.sortDir().equalsIgnoreCase(Sort.Direction.ASC.name())
-                                ? Sort.Order.asc(findOrderItemsQuery.sortBy())
-                                : Sort.Order.desc(findOrderItemsQuery.sortBy()));
+        Sort sort = Sort.by(
+                findOrderItemsQuery.sortDir().equalsIgnoreCase(Sort.Direction.ASC.name())
+                        ? Sort.Order.asc(findOrderItemsQuery.sortBy())
+                        : Sort.Order.desc(findOrderItemsQuery.sortBy()));
         return PageRequest.of(pageNo, findOrderItemsQuery.pageSize(), sort);
     }
 
@@ -67,10 +63,7 @@ public class OrderItemService {
 
     @Transactional
     public OrderItemResponse updateOrderItem(Long id, OrderItemRequest orderItemRequest) {
-        OrderItem orderItem =
-                orderItemRepository
-                        .findById(id)
-                        .orElseThrow(() -> new OrderItemNotFoundException(id));
+        OrderItem orderItem = orderItemRepository.findById(id).orElseThrow(() -> new OrderItemNotFoundException(id));
 
         // Update the orderItem object with data from orderItemRequest
         orderItemMapper.mapOrderItemWithRequest(orderItemRequest, orderItem);

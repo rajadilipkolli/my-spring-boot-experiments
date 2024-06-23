@@ -23,11 +23,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class OrderServiceTest {
 
-    @Mock private OrderRepository orderRepository;
+    @Mock
+    private OrderRepository orderRepository;
 
-    @Mock private OrderMapper orderMapper;
+    @Mock
+    private OrderMapper orderMapper;
 
-    @InjectMocks private OrderService orderService;
+    @InjectMocks
+    private OrderService orderService;
 
     @Test
     void findOrderById() {

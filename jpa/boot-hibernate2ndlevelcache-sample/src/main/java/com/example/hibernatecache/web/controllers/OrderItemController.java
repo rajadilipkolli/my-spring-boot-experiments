@@ -34,28 +34,15 @@ class OrderItemController {
 
     @GetMapping
     PagedResult<OrderItemResponse> getAllOrderItems(
-            @RequestParam(
-                            value = "pageNo",
-                            defaultValue = AppConstants.DEFAULT_PAGE_NUMBER,
-                            required = false)
+            @RequestParam(value = "pageNo", defaultValue = AppConstants.DEFAULT_PAGE_NUMBER, required = false)
                     int pageNo,
-            @RequestParam(
-                            value = "pageSize",
-                            defaultValue = AppConstants.DEFAULT_PAGE_SIZE,
-                            required = false)
+            @RequestParam(value = "pageSize", defaultValue = AppConstants.DEFAULT_PAGE_SIZE, required = false)
                     int pageSize,
-            @RequestParam(
-                            value = "sortBy",
-                            defaultValue = AppConstants.DEFAULT_SORT_BY,
-                            required = false)
+            @RequestParam(value = "sortBy", defaultValue = AppConstants.DEFAULT_SORT_BY, required = false)
                     String sortBy,
-            @RequestParam(
-                            value = "sortDir",
-                            defaultValue = AppConstants.DEFAULT_SORT_DIRECTION,
-                            required = false)
+            @RequestParam(value = "sortDir", defaultValue = AppConstants.DEFAULT_SORT_DIRECTION, required = false)
                     String sortDir) {
-        FindOrderItemsQuery findOrderItemsQuery =
-                new FindOrderItemsQuery(pageNo, pageSize, sortBy, sortDir);
+        FindOrderItemsQuery findOrderItemsQuery = new FindOrderItemsQuery(pageNo, pageSize, sortBy, sortDir);
         return orderItemService.findAllOrderItems(findOrderItemsQuery);
     }
 
@@ -68,14 +55,12 @@ class OrderItemController {
     }
 
     @PostMapping
-    ResponseEntity<OrderItemResponse> createOrderItem(
-            @RequestBody @Validated OrderItemRequest orderItemRequest) {
+    ResponseEntity<OrderItemResponse> createOrderItem(@RequestBody @Validated OrderItemRequest orderItemRequest) {
         OrderItemResponse response = orderItemService.saveOrderItem(orderItemRequest);
-        URI location =
-                ServletUriComponentsBuilder.fromCurrentRequest()
-                        .path("/api/order/items/{id}")
-                        .buildAndExpand(response.orderItemId())
-                        .toUri();
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
+                .path("/api/order/items/{id}")
+                .buildAndExpand(response.orderItemId())
+                .toUri();
         return ResponseEntity.created(location).body(response);
     }
 
@@ -89,11 +74,10 @@ class OrderItemController {
     ResponseEntity<OrderItemResponse> deleteOrderItem(@PathVariable Long id) {
         return orderItemService
                 .findOrderItemById(id)
-                .map(
-                        orderItem -> {
-                            orderItemService.deleteOrderItemById(id);
-                            return ResponseEntity.ok(orderItem);
-                        })
+                .map(orderItem -> {
+                    orderItemService.deleteOrderItemById(id);
+                    return ResponseEntity.ok(orderItem);
+                })
                 .orElseThrow(() -> new OrderItemNotFoundException(id));
     }
 }

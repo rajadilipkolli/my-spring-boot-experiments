@@ -25,11 +25,14 @@ import org.springframework.data.domain.*;
 @ExtendWith(MockitoExtension.class)
 class OrderItemServiceTest {
 
-    @Mock private OrderItemRepository orderItemRepository;
+    @Mock
+    private OrderItemRepository orderItemRepository;
 
-    @Mock private OrderItemMapper orderItemMapper;
+    @Mock
+    private OrderItemMapper orderItemMapper;
 
-    @InjectMocks private OrderItemService orderItemService;
+    @InjectMocks
+    private OrderItemService orderItemService;
 
     @Test
     void findAllOrderItems() {
@@ -37,8 +40,7 @@ class OrderItemServiceTest {
         Pageable pageable = PageRequest.of(0, 10, Sort.by(Sort.Direction.ASC, "id"));
         Page<OrderItem> orderItemPage = new PageImpl<>(List.of(getOrderItem()));
         given(orderItemRepository.findAll(pageable)).willReturn(orderItemPage);
-        given(orderItemMapper.toResponseList(List.of(getOrderItem())))
-                .willReturn(List.of(getOrderItemResponse()));
+        given(orderItemMapper.toResponseList(List.of(getOrderItem()))).willReturn(List.of(getOrderItemResponse()));
 
         // when
         PagedResult<OrderItemResponse> pagedResult =

@@ -19,19 +19,17 @@ class ApplicationIntegrationTest extends AbstractIntegrationTest {
     @Test
     void contextLoads() throws Exception {
 
-        Customer customer =
-                new Customer()
-                        .setFirstName("firstNameTest")
-                        .setLastName("lastName test")
-                        .setEmail("emailtest@junit.com")
-                        .setPhone("9876543211");
+        Customer customer = new Customer()
+                .setFirstName("firstNameTest")
+                .setLastName("lastName test")
+                .setEmail("emailtest@junit.com")
+                .setPhone("9876543211");
 
         SQLStatementCountValidator.reset();
         this.mockMvc
-                .perform(
-                        post("/api/customers")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(customer)))
+                .perform(post("/api/customers")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(customer)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.firstName", is(customer.getFirstName())));
         assertInsertCount(1);
@@ -40,9 +38,8 @@ class ApplicationIntegrationTest extends AbstractIntegrationTest {
         SQLStatementCountValidator.reset();
         for (int i = 0; i < 10; i++) {
             this.mockMvc
-                    .perform(
-                            get("/api/customers/search?firstName=firstNameTest")
-                                    .contentType(MediaType.APPLICATION_JSON))
+                    .perform(get("/api/customers/search?firstName=firstNameTest")
+                            .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.firstName", is(customer.getFirstName())))
                     .andExpect(jsonPath("$.lastName", is(customer.getLastName())))

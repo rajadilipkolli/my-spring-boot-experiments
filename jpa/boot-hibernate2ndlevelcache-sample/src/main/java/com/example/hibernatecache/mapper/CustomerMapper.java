@@ -28,6 +28,5 @@ public interface CustomerMapper {
     @Mapping(source = "id", target = "customerId")
     CustomerResponse toResponse(Customer customer);
 
-    void updateCustomerWithRequest(
-            CustomerRequest customerRequest, @MappingTarget Customer savedCustomer);
+    void updateCustomerWithRequest(CustomerRequest customerRequest, @MappingTarget Customer savedCustomer);
 }

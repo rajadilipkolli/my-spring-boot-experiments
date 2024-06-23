@@ -46,47 +46,40 @@ import org.springframework.test.web.servlet.MockMvc;
 @ActiveProfiles(PROFILE_TEST)
 class OrderItemControllerTest {
 
-    @Autowired private MockMvc mockMvc;
+    @Autowired
+    private MockMvc mockMvc;
 
-    @MockBean private OrderItemService orderItemService;
+    @MockBean
+    private OrderItemService orderItemService;
 
-    @Autowired private ObjectMapper objectMapper;
+    @Autowired
+    private ObjectMapper objectMapper;
 
     private List<OrderItem> orderItemList;
     private Order savedOrder;
 
     @BeforeEach
     void setUp() {
-        Customer savedCustomer =
-                new Customer()
-                        .setId(1L)
-                        .setFirstName("firstName 1")
-                        .setLastName("lastName 1")
-                        .setEmail("email1@junit.com")
-                        .setPhone("9876543211");
-        savedOrder =
-                new Order()
-                        .setName("First Order")
-                        .setPrice(BigDecimal.TEN)
-                        .setCustomer(savedCustomer);
+        Customer savedCustomer = new Customer()
+                .setId(1L)
+                .setFirstName("firstName 1")
+                .setLastName("lastName 1")
+                .setEmail("email1@junit.com")
+                .setPhone("9876543211");
+        savedOrder = new Order().setName("First Order").setPrice(BigDecimal.TEN).setCustomer(savedCustomer);
         orderItemList = new ArrayList<>();
-        orderItemList.add(
-                new OrderItem().setId(1L).setText("First OrderItem").setOrder(savedOrder));
-        orderItemList.add(
-                new OrderItem().setId(2L).setText("Second OrderItem").setOrder(savedOrder));
-        orderItemList.add(
-                new OrderItem().setId(3L).setText("Third OrderItem").setOrder(savedOrder));
+        orderItemList.add(new OrderItem().setId(1L).setText("First OrderItem").setOrder(savedOrder));
+        orderItemList.add(new OrderItem().setId(2L).setText("Second OrderItem").setOrder(savedOrder));
+        orderItemList.add(new OrderItem().setId(3L).setText("Third OrderItem").setOrder(savedOrder));
     }
 
     @Test
     void shouldFetchAllOrderItems() throws Exception {
 
         Page<OrderItem> page = new PageImpl<>(orderItemList);
-        PagedResult<OrderItemResponse> orderItemPagedResult =
-                new PagedResult<>(page, getOrderItemResponseList());
+        PagedResult<OrderItemResponse> orderItemPagedResult = new PagedResult<>(page, getOrderItemResponseList());
         FindOrderItemsQuery findOrderItemsQuery = new FindOrderItemsQuery(0, 10, "id", "asc");
-        given(orderItemService.findAllOrderItems(findOrderItemsQuery))
-                .willReturn(orderItemPagedResult);
+        given(orderItemService.findAllOrderItems(findOrderItemsQuery)).willReturn(orderItemPagedResult);
 
         this.mockMvc
                 .perform(get("/api/order/items"))
@@ -121,20 +114,11 @@ class OrderItemControllerTest {
         this.mockMvc
                 .perform(get("/api/order/items/{id}", orderItemId))
                 .andExpect(status().isNotFound())
-                .andExpect(
-                        header().string(
-                                        "Content-Type",
-                                        is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
-                .andExpect(
-                        jsonPath(
-                                "$.type",
-                                is(
-                                        "http://api.boot-hibernate2ndlevelcache-sample.com/errors/not-found")))
+                .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
+                .andExpect(jsonPath("$.type", is("http://api.boot-hibernate2ndlevelcache-sample.com/errors/not-found")))
                 .andExpect(jsonPath("$.title", is("Not Found")))
                 .andExpect(jsonPath("$.status", is(404)))
-                .andExpect(
-                        jsonPath("$.detail")
-                                .value("OrderItem with Id '%d' not found".formatted(orderItemId)));
+                .andExpect(jsonPath("$.detail").value("OrderItem with Id '%d' not found".formatted(orderItemId)));
     }
 
     @Test
@@ -145,10 +129,9 @@ class OrderItemControllerTest {
         given(orderItemService.saveOrderItem(any(OrderItemRequest.class))).willReturn(orderItem);
 
         this.mockMvc
-                .perform(
-                        post("/api/order/items")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(orderItemRequest)))
+                .perform(post("/api/order/items")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(orderItemRequest)))
                 .andExpect(status().isCreated())
                 .andExpect(header().exists(HttpHeaders.LOCATION))
                 .andExpect(jsonPath("$.orderItemId", notNullValue()))
@@ -160,10 +143,9 @@ class OrderItemControllerTest {
         OrderItemRequest orderItemRequest = new OrderItemRequest(null, null);
 
         this.mockMvc
-                .perform(
-                        post("/api/order/items")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(orderItemRequest)))
+                .perform(post("/api/order/items")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(orderItemRequest)))
                 .andExpect(status().isBadRequest())
                 .andExpect(header().string("Content-Type", is("application/problem+json")))
                 .andExpect(jsonPath("$.type", is("about:blank")))
@@ -186,10 +168,9 @@ class OrderItemControllerTest {
                 .willReturn(orderItem);
 
         this.mockMvc
-                .perform(
-                        put("/api/order/items/{id}", orderItemId)
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(orderItemRequest)))
+                .perform(put("/api/order/items/{id}", orderItemId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(orderItemRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.orderItemId", is(orderItemId), Long.class))
                 .andExpect(jsonPath("$.text", is(orderItem.text())));
@@ -203,25 +184,15 @@ class OrderItemControllerTest {
                 .willThrow(new OrderItemNotFoundException(orderItemId));
 
         this.mockMvc
-                .perform(
-                        put("/api/order/items/{id}", orderItemId)
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(orderItemRequest)))
+                .perform(put("/api/order/items/{id}", orderItemId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(orderItemRequest)))
                 .andExpect(status().isNotFound())
-                .andExpect(
-                        header().string(
-                                        "Content-Type",
-                                        is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
-                .andExpect(
-                        jsonPath(
-                                "$.type",
-                                is(
-                                        "http://api.boot-hibernate2ndlevelcache-sample.com/errors/not-found")))
+                .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
+                .andExpect(jsonPath("$.type", is("http://api.boot-hibernate2ndlevelcache-sample.com/errors/not-found")))
                 .andExpect(jsonPath("$.title", is("Not Found")))
                 .andExpect(jsonPath("$.status", is(404)))
-                .andExpect(
-                        jsonPath("$.detail")
-                                .value("OrderItem with Id '%d' not found".formatted(orderItemId)));
+                .andExpect(jsonPath("$.detail").value("OrderItem with Id '%d' not found".formatted(orderItemId)));
     }
 
     @Test
@@ -244,20 +215,11 @@ class OrderItemControllerTest {
 
         this.mockMvc
                 .perform(delete("/api/order/items/{id}", orderItemId))
-                .andExpect(
-                        header().string(
-                                        "Content-Type",
-                                        is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
-                .andExpect(
-                        jsonPath(
-                                "$.type",
-                                is(
-                                        "http://api.boot-hibernate2ndlevelcache-sample.com/errors/not-found")))
+                .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
+                .andExpect(jsonPath("$.type", is("http://api.boot-hibernate2ndlevelcache-sample.com/errors/not-found")))
                 .andExpect(jsonPath("$.title", is("Not Found")))
                 .andExpect(jsonPath("$.status", is(404)))
-                .andExpect(
-                        jsonPath("$.detail")
-                                .value("OrderItem with Id '%d' not found".formatted(orderItemId)));
+                .andExpect(jsonPath("$.detail").value("OrderItem with Id '%d' not found".formatted(orderItemId)));
     }
 
     List<OrderItemResponse> getOrderItemResponseList() {

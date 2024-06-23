@@ -25,17 +25,15 @@ class LoggingAspect {
         this.env = env;
     }
 
-    @Pointcut(
-            "within(@org.springframework.stereotype.Repository *)"
-                    + " || within(@org.springframework.stereotype.Service *)"
-                    + " || within(@org.springframework.web.bind.annotation.RestController *)")
+    @Pointcut("within(@org.springframework.stereotype.Repository *)"
+            + " || within(@org.springframework.stereotype.Service *)"
+            + " || within(@org.springframework.web.bind.annotation.RestController *)")
     public void springBeanPointcut() {
         // pointcut definition
     }
 
-    @Pointcut(
-            "@within(com.example.hibernatecache.config.logging.Loggable) || "
-                    + "@annotation(com.example.hibernatecache.config.logging.Loggable)")
+    @Pointcut("@within(com.example.hibernatecache.config.logging.Loggable) || "
+            + "@annotation(com.example.hibernatecache.config.logging.Loggable)")
     public void applicationPackagePointcut() {
         // pointcut definition
     }

@@ -23,16 +23,14 @@ public class ContainersConfig {
     @ServiceConnection(name = "redis")
     GenericContainer<?> redisContainer() throws IOException {
         GenericContainer<?> redisContainer =
-                new GenericContainer<>(DockerImageName.parse("redis").withTag("7.2.5-alpine"))
-                        .withExposedPorts(6379);
+                new GenericContainer<>(DockerImageName.parse("redis").withTag("7.2.5-alpine")).withExposedPorts(6379);
         redisContainer.start();
         String ymlContent =
                 """
                 singleServerConfig:
                   address: "redis://%s:%d"
                 """;
-        String finalYml =
-                ymlContent.formatted(redisContainer.getHost(), redisContainer.getMappedPort(6379));
+        String finalYml = ymlContent.formatted(redisContainer.getHost(), redisContainer.getMappedPort(6379));
         String resourcesPath = new ClassPathResource("").getURL().getPath();
         String yamlFilePath = resourcesPath + "redisson-test.yml";
         try (FileWriter writer = new FileWriter(yamlFilePath)) {

@@ -29,9 +29,11 @@ import org.springframework.http.MediaType;
 
 class OrderControllerIT extends AbstractIntegrationTest {
 
-    @Autowired private OrderRepository orderRepository;
+    @Autowired
+    private OrderRepository orderRepository;
 
-    @Autowired private CustomerRepository customerRepository;
+    @Autowired
+    private CustomerRepository customerRepository;
 
     private List<Order> orderList = null;
 
@@ -42,29 +44,18 @@ class OrderControllerIT extends AbstractIntegrationTest {
         orderRepository.deleteAll();
         customerRepository.deleteAll();
 
-        savedCustomer =
-                customerRepository.persist(
-                        new Customer()
-                                .setFirstName("firstName 1")
-                                .setLastName("lastName 1")
-                                .setEmail("email1@junit.com")
-                                .setPhone("9876543211"));
+        savedCustomer = customerRepository.persist(new Customer()
+                .setFirstName("firstName 1")
+                .setLastName("lastName 1")
+                .setEmail("email1@junit.com")
+                .setPhone("9876543211"));
         orderList = new ArrayList<>();
         orderList.add(
-                new Order()
-                        .setName("First Order")
-                        .setPrice(BigDecimal.TEN)
-                        .setCustomer(savedCustomer));
+                new Order().setName("First Order").setPrice(BigDecimal.TEN).setCustomer(savedCustomer));
         orderList.add(
-                new Order()
-                        .setName("Second Order")
-                        .setPrice(BigDecimal.TEN)
-                        .setCustomer(savedCustomer));
+                new Order().setName("Second Order").setPrice(BigDecimal.TEN).setCustomer(savedCustomer));
         orderList.add(
-                new Order()
-                        .setName("Third Order")
-                        .setPrice(BigDecimal.TEN)
-                        .setCustomer(savedCustomer));
+                new Order().setName("Third Order").setPrice(BigDecimal.TEN).setCustomer(savedCustomer));
         orderList = orderRepository.persistAll(orderList);
     }
 
@@ -99,13 +90,11 @@ class OrderControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldCreateNewOrder() throws Exception {
-        OrderRequest orderRequest =
-                new OrderRequest(savedCustomer.getId(), "New Order", BigDecimal.TEN);
+        OrderRequest orderRequest = new OrderRequest(savedCustomer.getId(), "New Order", BigDecimal.TEN);
         this.mockMvc
-                .perform(
-                        post("/api/orders")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(orderRequest)))
+                .perform(post("/api/orders")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(orderRequest)))
                 .andExpect(status().isCreated())
                 .andExpect(header().exists(HttpHeaders.LOCATION))
                 .andExpect(jsonPath("$.orderId", notNullValue()))
@@ -120,10 +109,9 @@ class OrderControllerIT extends AbstractIntegrationTest {
         OrderRequest orderRequest = new OrderRequest(null, null, BigDecimal.ZERO);
 
         this.mockMvc
-                .perform(
-                        post("/api/orders")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(orderRequest)))
+                .perform(post("/api/orders")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(orderRequest)))
                 .andExpect(status().isBadRequest())
                 .andExpect(header().string("Content-Type", is("application/problem+json")))
                 .andExpect(jsonPath("$.type", is("about:blank")))
@@ -135,10 +123,7 @@ class OrderControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.violations[0].field", is("name")))
                 .andExpect(jsonPath("$.violations[0].message", is("Name cannot be blank")))
                 .andExpect(jsonPath("$.violations[1].field", is("price")))
-                .andExpect(
-                        jsonPath(
-                                "$.violations[1].message",
-                                is("Value must be greater than or equal to 0.01")))
+                .andExpect(jsonPath("$.violations[1].message", is("Value must be greater than or equal to 0.01")))
                 .andReturn();
     }
 
@@ -149,10 +134,9 @@ class OrderControllerIT extends AbstractIntegrationTest {
 
         Long orderId = orderList.getFirst().getId();
         this.mockMvc
-                .perform(
-                        put("/api/orders/{id}", orderId)
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(orderRequest)))
+                .perform(put("/api/orders/{id}", orderId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(orderRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.orderId", is(orderId), Long.class))
                 .andExpect(jsonPath("$.customerId", is(customerId), Long.class))

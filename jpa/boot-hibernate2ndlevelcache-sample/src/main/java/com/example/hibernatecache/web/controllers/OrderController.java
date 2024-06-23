@@ -34,25 +34,13 @@ class OrderController {
 
     @GetMapping
     PagedResult<OrderResponse> getAllOrders(
-            @RequestParam(
-                            value = "pageNo",
-                            defaultValue = AppConstants.DEFAULT_PAGE_NUMBER,
-                            required = false)
+            @RequestParam(value = "pageNo", defaultValue = AppConstants.DEFAULT_PAGE_NUMBER, required = false)
                     int pageNo,
-            @RequestParam(
-                            value = "pageSize",
-                            defaultValue = AppConstants.DEFAULT_PAGE_SIZE,
-                            required = false)
+            @RequestParam(value = "pageSize", defaultValue = AppConstants.DEFAULT_PAGE_SIZE, required = false)
                     int pageSize,
-            @RequestParam(
-                            value = "sortBy",
-                            defaultValue = AppConstants.DEFAULT_SORT_BY,
-                            required = false)
+            @RequestParam(value = "sortBy", defaultValue = AppConstants.DEFAULT_SORT_BY, required = false)
                     String sortBy,
-            @RequestParam(
-                            value = "sortDir",
-                            defaultValue = AppConstants.DEFAULT_SORT_DIRECTION,
-                            required = false)
+            @RequestParam(value = "sortDir", defaultValue = AppConstants.DEFAULT_SORT_DIRECTION, required = false)
                     String sortDir) {
         FindOrdersQuery findOrdersQuery = new FindOrdersQuery(pageNo, pageSize, sortBy, sortDir);
         return orderService.findAllOrders(findOrdersQuery);
@@ -60,26 +48,21 @@ class OrderController {
 
     @GetMapping("/{id}")
     ResponseEntity<OrderResponse> getOrderById(@PathVariable Long id) {
-        return orderService
-                .findOrderById(id)
-                .map(ResponseEntity::ok)
-                .orElseThrow(() -> new OrderNotFoundException(id));
+        return orderService.findOrderById(id).map(ResponseEntity::ok).orElseThrow(() -> new OrderNotFoundException(id));
     }
 
     @PostMapping
     ResponseEntity<OrderResponse> createOrder(@RequestBody @Validated OrderRequest orderRequest) {
         OrderResponse response = orderService.saveOrder(orderRequest);
-        URI location =
-                ServletUriComponentsBuilder.fromCurrentRequest()
-                        .path("/api/orders/{id}")
-                        .buildAndExpand(response.orderId())
-                        .toUri();
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
+                .path("/api/orders/{id}")
+                .buildAndExpand(response.orderId())
+                .toUri();
         return ResponseEntity.created(location).body(response);
     }
 
     @PutMapping("/{id}")
-    ResponseEntity<OrderResponse> updateOrder(
-            @PathVariable Long id, @RequestBody @Valid OrderRequest orderRequest) {
+    ResponseEntity<OrderResponse> updateOrder(@PathVariable Long id, @RequestBody @Valid OrderRequest orderRequest) {
         return ResponseEntity.ok(orderService.updateOrder(id, orderRequest));
     }
 
@@ -87,11 +70,10 @@ class OrderController {
     ResponseEntity<OrderResponse> deleteOrder(@PathVariable Long id) {
         return orderService
                 .findOrderById(id)
-                .map(
-                        order -> {
-                            orderService.deleteOrderById(id);
-                            return ResponseEntity.ok(order);
-                        })
+                .map(order -> {
+                    orderService.deleteOrderById(id);
+                    return ResponseEntity.ok(order);
+                })
                 .orElseThrow(() -> new OrderNotFoundException(id));
     }
 }

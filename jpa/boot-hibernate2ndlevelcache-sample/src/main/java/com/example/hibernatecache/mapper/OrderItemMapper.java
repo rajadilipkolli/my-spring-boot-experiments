@@ -28,6 +28,5 @@ public interface OrderItemMapper {
     List<OrderItemResponse> toResponseList(List<OrderItem> list);
 
     @Mapping(target = "order", ignore = true)
-    void mapOrderItemWithRequest(
-            OrderItemRequest orderItemRequest, @MappingTarget OrderItem orderItem);
+    void mapOrderItemWithRequest(OrderItemRequest orderItemRequest, @MappingTarget OrderItem orderItem);
 }
