@@ -32,15 +32,12 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 public class MemberDataSourceConfiguration {
 
     private final PersistenceUnitManager persistenceUnitManager;
+    private final JpaProperties jpaProperties;
 
-    public MemberDataSourceConfiguration(ObjectProvider<PersistenceUnitManager> persistenceUnitManager) {
+    public MemberDataSourceConfiguration(
+            ObjectProvider<PersistenceUnitManager> persistenceUnitManager, JpaProperties jpaProperties) {
         this.persistenceUnitManager = persistenceUnitManager.getIfAvailable();
-    }
-
-    @Bean
-    @ConfigurationProperties("app.datasource.member.jpa")
-    JpaProperties memberJpaProperties() {
-        return new JpaProperties();
+        this.jpaProperties = jpaProperties;
     }
 
     @Bean
@@ -59,9 +56,8 @@ public class MemberDataSourceConfiguration {
     }
 
     @Bean
-    LocalContainerEntityManagerFactoryBean memberEntityManagerFactory(
-            JpaProperties memberJpaProperties, DataSource memberDataSource) {
-        EntityManagerFactoryBuilder builder = createEntityManagerFactoryBuilder(memberJpaProperties);
+    LocalContainerEntityManagerFactoryBean memberEntityManagerFactory(DataSource memberDataSource) {
+        EntityManagerFactoryBuilder builder = createEntityManagerFactoryBuilder();
         return builder.dataSource(memberDataSource).packages(Member.class).build();
     }
 
@@ -71,13 +67,13 @@ public class MemberDataSourceConfiguration {
         return new JpaTransactionManager(memberEntityManagerFactory);
     }
 
-    private EntityManagerFactoryBuilder createEntityManagerFactoryBuilder(JpaProperties memberJpaProperties) {
-        JpaVendorAdapter jpaVendorAdapter = createJpaVendorAdapter(memberJpaProperties);
+    private EntityManagerFactoryBuilder createEntityManagerFactoryBuilder() {
+        JpaVendorAdapter jpaVendorAdapter = createJpaVendorAdapter();
         return new EntityManagerFactoryBuilder(
-                jpaVendorAdapter, memberJpaProperties.getProperties(), this.persistenceUnitManager);
+                jpaVendorAdapter, jpaProperties.getProperties(), this.persistenceUnitManager);
     }
 
-    private JpaVendorAdapter createJpaVendorAdapter(JpaProperties jpaProperties) {
+    private JpaVendorAdapter createJpaVendorAdapter() {
         AbstractJpaVendorAdapter adapter = new HibernateJpaVendorAdapter();
         adapter.setShowSql(jpaProperties.isShowSql());
         if (jpaProperties.getDatabase() != null) {

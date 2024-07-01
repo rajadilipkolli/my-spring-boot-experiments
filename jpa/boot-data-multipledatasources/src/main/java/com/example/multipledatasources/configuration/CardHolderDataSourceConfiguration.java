@@ -29,15 +29,12 @@ import org.springframework.transaction.PlatformTransactionManager;
 public class CardHolderDataSourceConfiguration {
 
     private final PersistenceUnitManager persistenceUnitManager;
+    private final JpaProperties jpaProperties;
 
-    public CardHolderDataSourceConfiguration(ObjectProvider<PersistenceUnitManager> persistenceUnitManager) {
+    public CardHolderDataSourceConfiguration(
+            ObjectProvider<PersistenceUnitManager> persistenceUnitManager, JpaProperties jpaProperties) {
         this.persistenceUnitManager = persistenceUnitManager.getIfAvailable();
-    }
-
-    @Bean
-    @ConfigurationProperties("app.datasource.cardholder.jpa")
-    JpaProperties cardHolderJpaProperties() {
-        return new JpaProperties();
+        this.jpaProperties = jpaProperties;
     }
 
     @Bean
@@ -56,9 +53,8 @@ public class CardHolderDataSourceConfiguration {
     }
 
     @Bean
-    LocalContainerEntityManagerFactoryBean cardHolderEntityManagerFactory(
-            JpaProperties cardHolderJpaProperties, DataSource cardholderDataSource) {
-        EntityManagerFactoryBuilder builder = createEntityManagerFactoryBuilder(cardHolderJpaProperties);
+    LocalContainerEntityManagerFactoryBean cardHolderEntityManagerFactory(DataSource cardholderDataSource) {
+        EntityManagerFactoryBuilder builder = createEntityManagerFactoryBuilder();
         return builder.dataSource(cardholderDataSource)
                 .packages(CardHolder.class)
                 .build();
@@ -69,13 +65,13 @@ public class CardHolderDataSourceConfiguration {
         return new JpaTransactionManager(cardHolderEntityManagerFactory);
     }
 
-    private EntityManagerFactoryBuilder createEntityManagerFactoryBuilder(JpaProperties cardHolderJpaProperties) {
-        JpaVendorAdapter jpaVendorAdapter = createJpaVendorAdapter(cardHolderJpaProperties);
+    private EntityManagerFactoryBuilder createEntityManagerFactoryBuilder() {
+        JpaVendorAdapter jpaVendorAdapter = createJpaVendorAdapter();
         return new EntityManagerFactoryBuilder(
-                jpaVendorAdapter, cardHolderJpaProperties.getProperties(), this.persistenceUnitManager);
+                jpaVendorAdapter, jpaProperties.getProperties(), this.persistenceUnitManager);
     }
 
-    private JpaVendorAdapter createJpaVendorAdapter(JpaProperties jpaProperties) {
+    private JpaVendorAdapter createJpaVendorAdapter() {
         AbstractJpaVendorAdapter adapter = new HibernateJpaVendorAdapter();
         adapter.setShowSql(jpaProperties.isShowSql());
         if (jpaProperties.getDatabase() != null) {
