@@ -1,6 +1,7 @@
 package com.example.multipledatasources.configuration;
 
 import com.example.multipledatasources.model.cardholder.CardHolder;
+import com.example.multipledatasources.repository.cardholder.CardHolderRepository;
 import com.zaxxer.hikari.HikariDataSource;
 import jakarta.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
@@ -22,15 +23,14 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 @Configuration
 @EnableJpaRepositories(
-        basePackages = "com.example.multipledatasources.repository.cardholder",
+        basePackageClasses = CardHolderRepository.class,
         entityManagerFactoryRef = "cardHolderEntityManagerFactory",
         transactionManagerRef = "cardHolderTransactionManager")
 public class CardHolderDataSourceConfiguration {
 
     private final PersistenceUnitManager persistenceUnitManager;
 
-    public CardHolderDataSourceConfiguration(
-            ObjectProvider<PersistenceUnitManager> persistenceUnitManager) {
+    public CardHolderDataSourceConfiguration(ObjectProvider<PersistenceUnitManager> persistenceUnitManager) {
         this.persistenceUnitManager = persistenceUnitManager.getIfAvailable();
     }
 
@@ -57,25 +57,22 @@ public class CardHolderDataSourceConfiguration {
 
     @Bean
     LocalContainerEntityManagerFactoryBean cardHolderEntityManagerFactory(
-            JpaProperties cardHolderJpaProperties) {
-        EntityManagerFactoryBuilder builder =
-                createEntityManagerFactoryBuilder(cardHolderJpaProperties);
-        return builder.dataSource(cardholderDataSource()).packages(CardHolder.class).build();
+            JpaProperties cardHolderJpaProperties, DataSource cardholderDataSource) {
+        EntityManagerFactoryBuilder builder = createEntityManagerFactoryBuilder(cardHolderJpaProperties);
+        return builder.dataSource(cardholderDataSource)
+                .packages(CardHolder.class)
+                .build();
     }
 
     @Bean
-    PlatformTransactionManager cardHolderTransactionManager(
-            EntityManagerFactory cardHolderEntityManagerFactory) {
+    PlatformTransactionManager cardHolderTransactionManager(EntityManagerFactory cardHolderEntityManagerFactory) {
         return new JpaTransactionManager(cardHolderEntityManagerFactory);
     }
 
-    private EntityManagerFactoryBuilder createEntityManagerFactoryBuilder(
-            JpaProperties cardHolderJpaProperties) {
+    private EntityManagerFactoryBuilder createEntityManagerFactoryBuilder(JpaProperties cardHolderJpaProperties) {
         JpaVendorAdapter jpaVendorAdapter = createJpaVendorAdapter(cardHolderJpaProperties);
         return new EntityManagerFactoryBuilder(
-                jpaVendorAdapter,
-                cardHolderJpaProperties.getProperties(),
-                this.persistenceUnitManager);
+                jpaVendorAdapter, cardHolderJpaProperties.getProperties(), this.persistenceUnitManager);
     }
 
     private JpaVendorAdapter createJpaVendorAdapter(JpaProperties jpaProperties) {

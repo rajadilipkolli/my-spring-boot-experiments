@@ -41,7 +41,8 @@ class ApplicationIntegrationTest {
         registry.add("app.datasource.member.password", POSTGRE_SQL_CONTAINER::getPassword);
     }
 
-    @Autowired private MockMvc mockMvc;
+    @Autowired
+    private MockMvc mockMvc;
 
     @Test
     void verifyBootStrap() throws Exception {

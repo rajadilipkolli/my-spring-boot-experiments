@@ -11,7 +11,8 @@ import org.springframework.boot.test.json.JsonContent;
 @JsonTest
 class ResponseDtoJsonTest {
 
-    @Autowired private JacksonTester<ResponseDto> json;
+    @Autowired
+    private JacksonTester<ResponseDto> json;
 
     @Test
     void serialize() throws Exception {
@@ -22,9 +23,7 @@ class ResponseDtoJsonTest {
 
         assertThat(result).hasJsonPathStringValue("$.memberId");
         assertThat(result).extractingJsonPathStringValue("$.memberId").isEqualTo("1");
-        assertThat(result)
-                .extractingJsonPathStringValue("$.cardNumber")
-                .isEqualTo("1234-5678-9012-3456");
+        assertThat(result).extractingJsonPathStringValue("$.cardNumber").isEqualTo("1234-5678-9012-3456");
         assertThat(result).extractingJsonPathStringValue("$.memberName").isEqualTo("raja");
         assertThat(result).doesNotHaveJsonPath("$.enabled");
     }

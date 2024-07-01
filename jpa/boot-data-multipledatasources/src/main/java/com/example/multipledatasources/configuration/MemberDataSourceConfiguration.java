@@ -1,6 +1,7 @@
 package com.example.multipledatasources.configuration;
 
 import com.example.multipledatasources.model.member.Member;
+import com.example.multipledatasources.repository.member.MemberRepository;
 import com.zaxxer.hikari.HikariDataSource;
 import jakarta.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
@@ -25,15 +26,14 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @Configuration
 @EnableTransactionManagement
 @EnableJpaRepositories(
-        basePackages = "com.example.multipledatasources.repository.member",
+        basePackageClasses = MemberRepository.class,
         entityManagerFactoryRef = "memberEntityManagerFactory",
         transactionManagerRef = "memberTransactionManager")
 public class MemberDataSourceConfiguration {
 
     private final PersistenceUnitManager persistenceUnitManager;
 
-    public MemberDataSourceConfiguration(
-            ObjectProvider<PersistenceUnitManager> persistenceUnitManager) {
+    public MemberDataSourceConfiguration(ObjectProvider<PersistenceUnitManager> persistenceUnitManager) {
         this.persistenceUnitManager = persistenceUnitManager.getIfAvailable();
     }
 
@@ -60,21 +60,18 @@ public class MemberDataSourceConfiguration {
 
     @Bean
     LocalContainerEntityManagerFactoryBean memberEntityManagerFactory(
-            JpaProperties memberJpaProperties) {
-        EntityManagerFactoryBuilder builder =
-                createEntityManagerFactoryBuilder(memberJpaProperties);
-        return builder.dataSource(memberDataSource()).packages(Member.class).build();
+            JpaProperties memberJpaProperties, DataSource memberDataSource) {
+        EntityManagerFactoryBuilder builder = createEntityManagerFactoryBuilder(memberJpaProperties);
+        return builder.dataSource(memberDataSource).packages(Member.class).build();
     }
 
     @Primary
     @Bean
-    PlatformTransactionManager memberTransactionManager(
-            EntityManagerFactory memberEntityManagerFactory) {
+    PlatformTransactionManager memberTransactionManager(EntityManagerFactory memberEntityManagerFactory) {
         return new JpaTransactionManager(memberEntityManagerFactory);
     }
 
-    private EntityManagerFactoryBuilder createEntityManagerFactoryBuilder(
-            JpaProperties memberJpaProperties) {
+    private EntityManagerFactoryBuilder createEntityManagerFactoryBuilder(JpaProperties memberJpaProperties) {
         JpaVendorAdapter jpaVendorAdapter = createJpaVendorAdapter(memberJpaProperties);
         return new EntityManagerFactoryBuilder(
                 jpaVendorAdapter, memberJpaProperties.getProperties(), this.persistenceUnitManager);

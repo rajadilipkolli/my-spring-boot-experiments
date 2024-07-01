@@ -18,11 +18,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class DetailsServiceImplTest {
 
-    @Mock private CardHolderRepository cardHolderRepository;
+    @Mock
+    private CardHolderRepository cardHolderRepository;
 
-    @Mock private MemberRepository memberRepository;
+    @Mock
+    private MemberRepository memberRepository;
 
-    @InjectMocks private DetailsServiceImpl detailsService;
+    @InjectMocks
+    private DetailsServiceImpl detailsService;
 
     @Test
     void getDetails() {

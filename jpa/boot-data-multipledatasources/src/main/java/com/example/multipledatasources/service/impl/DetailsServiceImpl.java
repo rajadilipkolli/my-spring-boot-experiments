@@ -19,8 +19,7 @@ public class DetailsServiceImpl implements DetailsService {
 
     @Override
     public ResponseDto getDetails(String memberId) {
-        Optional<CardHolder> cardHolderByMemberId =
-                this.cardHolderRepository.findByMemberId(memberId);
+        Optional<CardHolder> cardHolderByMemberId = this.cardHolderRepository.findByMemberId(memberId);
         Optional<Member> memberByMemberId = this.memberRepository.findByMemberId(memberId);
         if (cardHolderByMemberId.isPresent() && memberByMemberId.isPresent()) {
             return new ResponseDto(
