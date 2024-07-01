@@ -13,12 +13,8 @@ import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-import org.springframework.orm.jpa.JpaTransactionManager;
-import org.springframework.orm.jpa.JpaVendorAdapter;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.persistenceunit.PersistenceUnitManager;
-import org.springframework.orm.jpa.vendor.AbstractJpaVendorAdapter;
-import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.PlatformTransactionManager;
 
 @Configuration
@@ -26,15 +22,11 @@ import org.springframework.transaction.PlatformTransactionManager;
         basePackageClasses = CardHolderRepository.class,
         entityManagerFactoryRef = "cardHolderEntityManagerFactory",
         transactionManagerRef = "cardHolderTransactionManager")
-public class CardHolderDataSourceConfiguration {
-
-    private final PersistenceUnitManager persistenceUnitManager;
-    private final JpaProperties jpaProperties;
+public class CardHolderDataSourceConfiguration extends BaseDataSourceConfiguration {
 
     public CardHolderDataSourceConfiguration(
             ObjectProvider<PersistenceUnitManager> persistenceUnitManager, JpaProperties jpaProperties) {
-        this.persistenceUnitManager = persistenceUnitManager.getIfAvailable();
-        this.jpaProperties = jpaProperties;
+        super(persistenceUnitManager, jpaProperties);
     }
 
     @Bean
@@ -62,25 +54,6 @@ public class CardHolderDataSourceConfiguration {
 
     @Bean
     PlatformTransactionManager cardHolderTransactionManager(EntityManagerFactory cardHolderEntityManagerFactory) {
-        return new JpaTransactionManager(cardHolderEntityManagerFactory);
-    }
-
-    private EntityManagerFactoryBuilder createEntityManagerFactoryBuilder() {
-        JpaVendorAdapter jpaVendorAdapter = createJpaVendorAdapter();
-        return new EntityManagerFactoryBuilder(
-                jpaVendorAdapter, jpaProperties.getProperties(), this.persistenceUnitManager);
-    }
-
-    private JpaVendorAdapter createJpaVendorAdapter() {
-        AbstractJpaVendorAdapter adapter = new HibernateJpaVendorAdapter();
-        adapter.setShowSql(jpaProperties.isShowSql());
-        if (jpaProperties.getDatabase() != null) {
-            adapter.setDatabase(jpaProperties.getDatabase());
-        }
-        if (jpaProperties.getDatabasePlatform() != null) {
-            adapter.setDatabasePlatform(jpaProperties.getDatabasePlatform());
-        }
-        adapter.setGenerateDdl(jpaProperties.isGenerateDdl());
-        return adapter;
+        return createTransactionManager(cardHolderEntityManagerFactory);
     }
 }
