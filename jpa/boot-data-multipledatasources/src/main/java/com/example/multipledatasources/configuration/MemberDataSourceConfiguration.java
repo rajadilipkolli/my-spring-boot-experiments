@@ -14,33 +14,20 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-import org.springframework.orm.jpa.JpaTransactionManager;
-import org.springframework.orm.jpa.JpaVendorAdapter;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.persistenceunit.PersistenceUnitManager;
-import org.springframework.orm.jpa.vendor.AbstractJpaVendorAdapter;
-import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @Configuration
-@EnableTransactionManagement
 @EnableJpaRepositories(
         basePackageClasses = MemberRepository.class,
         entityManagerFactoryRef = "memberEntityManagerFactory",
         transactionManagerRef = "memberTransactionManager")
-public class MemberDataSourceConfiguration {
+public class MemberDataSourceConfiguration extends BaseDataSourceConfiguration {
 
-    private final PersistenceUnitManager persistenceUnitManager;
-
-    public MemberDataSourceConfiguration(ObjectProvider<PersistenceUnitManager> persistenceUnitManager) {
-        this.persistenceUnitManager = persistenceUnitManager.getIfAvailable();
-    }
-
-    @Bean
-    @ConfigurationProperties("app.datasource.member.jpa")
-    JpaProperties memberJpaProperties() {
-        return new JpaProperties();
+    public MemberDataSourceConfiguration(
+            ObjectProvider<PersistenceUnitManager> persistenceUnitManager, JpaProperties jpaProperties) {
+        super(persistenceUnitManager, jpaProperties);
     }
 
     @Bean
@@ -59,34 +46,14 @@ public class MemberDataSourceConfiguration {
     }
 
     @Bean
-    LocalContainerEntityManagerFactoryBean memberEntityManagerFactory(
-            JpaProperties memberJpaProperties, DataSource memberDataSource) {
-        EntityManagerFactoryBuilder builder = createEntityManagerFactoryBuilder(memberJpaProperties);
+    LocalContainerEntityManagerFactoryBean memberEntityManagerFactory(DataSource memberDataSource) {
+        EntityManagerFactoryBuilder builder = createEntityManagerFactoryBuilder();
         return builder.dataSource(memberDataSource).packages(Member.class).build();
     }
 
     @Primary
     @Bean
     PlatformTransactionManager memberTransactionManager(EntityManagerFactory memberEntityManagerFactory) {
-        return new JpaTransactionManager(memberEntityManagerFactory);
-    }
-
-    private EntityManagerFactoryBuilder createEntityManagerFactoryBuilder(JpaProperties memberJpaProperties) {
-        JpaVendorAdapter jpaVendorAdapter = createJpaVendorAdapter(memberJpaProperties);
-        return new EntityManagerFactoryBuilder(
-                jpaVendorAdapter, memberJpaProperties.getProperties(), this.persistenceUnitManager);
-    }
-
-    private JpaVendorAdapter createJpaVendorAdapter(JpaProperties jpaProperties) {
-        AbstractJpaVendorAdapter adapter = new HibernateJpaVendorAdapter();
-        adapter.setShowSql(jpaProperties.isShowSql());
-        if (jpaProperties.getDatabase() != null) {
-            adapter.setDatabase(jpaProperties.getDatabase());
-        }
-        if (jpaProperties.getDatabasePlatform() != null) {
-            adapter.setDatabasePlatform(jpaProperties.getDatabasePlatform());
-        }
-        adapter.setGenerateDdl(jpaProperties.isGenerateDdl());
-        return adapter;
+        return createTransactionManager(memberEntityManagerFactory);
     }
 }
