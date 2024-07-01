@@ -18,13 +18,10 @@ public class TestMultipleDataSourcesApplication {
 
     static {
         Startables.deepStart(MY_SQL_CONTAINER, POSTGRE_SQL_CONTAINER).join();
-        Runtime.getRuntime()
-                .addShutdownHook(
-                        new Thread(
-                                () -> {
-                                    MY_SQL_CONTAINER.stop();
-                                    POSTGRE_SQL_CONTAINER.stop();
-                                }));
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            MY_SQL_CONTAINER.stop();
+            POSTGRE_SQL_CONTAINER.stop();
+        }));
     }
 
     public static void main(String[] args) {
