@@ -11,7 +11,7 @@ import org.testcontainers.utility.DockerImageName;
 public class TestMultipleDataSourcesApplication {
 
     private static final MySQLContainer<?> MY_SQL_CONTAINER =
-            new MySQLContainer<>(DockerImageName.parse("mysql").withTag("8.4"));
+            new MySQLContainer<>(DockerImageName.parse("mysql").withTag("9.0"));
 
     private static final PostgreSQLContainer<?> POSTGRE_SQL_CONTAINER =
             new PostgreSQLContainer<>(DockerImageName.parse("postgres").withTag("16.3-alpine"));

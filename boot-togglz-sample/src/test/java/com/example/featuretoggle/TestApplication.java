@@ -6,6 +6,7 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.context.annotation.Bean;
 import org.testcontainers.containers.MySQLContainer;
+import org.testcontainers.utility.DockerImageName;
 
 @TestConfiguration(proxyBeanMethods = false)
 public class TestApplication {
@@ -14,7 +15,7 @@ public class TestApplication {
     @ServiceConnection
     @RestartScope
     MySQLContainer<?> sqlContainer() {
-        return new MySQLContainer<>("mysql:8.4");
+        return new MySQLContainer<>(DockerImageName.parse("mysql:9.0"));
     }
 
     public static void main(String[] args) {

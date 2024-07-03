@@ -25,7 +25,7 @@ import org.testcontainers.utility.DockerImageName;
 class ApplicationIntegrationTest {
 
     @Container
-    private static final MySQLContainer<?> MY_SQL_CONTAINER = new MySQLContainer<>("mysql:8.4");
+    private static final MySQLContainer<?> MY_SQL_CONTAINER = new MySQLContainer<>("mysql:9.0");
 
     @Container
     private static final PostgreSQLContainer<?> POSTGRE_SQL_CONTAINER =
