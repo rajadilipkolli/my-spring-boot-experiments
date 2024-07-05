@@ -1,6 +1,6 @@
 package com.example.custom.sequence.entities;
 
-import com.example.custom.sequence.config.StringPrefixedNumberFormattedSequenceIdGenerator;
+import com.example.custom.sequence.config.StringPrefixedSequence;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -17,7 +17,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.Hibernate;
-import org.hibernate.annotations.GenericGenerator;
 
 @Entity
 @Table(name = "orders")
@@ -29,9 +28,7 @@ public class Order {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "custom_seq")
-    @GenericGenerator(
-            name = "custom_seq",
-            type = StringPrefixedNumberFormattedSequenceIdGenerator.class)
+    @StringPrefixedSequence(numberFormat = "%09d")
     private String id;
 
     @Column(nullable = false)
