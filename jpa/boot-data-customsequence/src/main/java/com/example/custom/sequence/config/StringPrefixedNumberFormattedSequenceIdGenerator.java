@@ -1,25 +1,33 @@
 package com.example.custom.sequence.config;
 
 import java.io.Serializable;
+import java.lang.reflect.Member;
 import java.util.Properties;
 import org.hibernate.HibernateException;
 import org.hibernate.MappingException;
 import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.hibernate.id.enhanced.SequenceStyleGenerator;
-import org.hibernate.internal.util.config.ConfigurationHelper;
+import org.hibernate.id.factory.spi.CustomIdGeneratorCreationContext;
 import org.hibernate.service.ServiceRegistry;
 import org.hibernate.type.Type;
 import org.hibernate.type.spi.TypeConfiguration;
 
 public class StringPrefixedNumberFormattedSequenceIdGenerator extends SequenceStyleGenerator {
 
-    public static final String VALUE_PREFIX_PARAMETER = "valuePrefix";
-    public static final String VALUE_PREFIX_DEFAULT = "";
     private String valuePrefix;
-
-    public static final String NUMBER_FORMAT_PARAMETER = "numberFormat";
-    public static final String NUMBER_FORMAT_DEFAULT = "%d";
     private String numberFormat;
+
+    StringPrefixedNumberFormattedSequenceIdGenerator() {
+        super();
+    }
+
+    public StringPrefixedNumberFormattedSequenceIdGenerator(
+            StringPrefixedSequence config,
+            Member annotatedMember,
+            CustomIdGeneratorCreationContext context) {
+        valuePrefix = config.valuePrefix();
+        numberFormat = config.numberFormat();
+    }
 
     @Override
     public Serializable generate(SharedSessionContractImplementor session, Object object)
@@ -34,10 +42,5 @@ public class StringPrefixedNumberFormattedSequenceIdGenerator extends SequenceSt
                 new TypeConfiguration().getBasicTypeRegistry().getRegisteredType(Long.class),
                 params,
                 serviceRegistry);
-        valuePrefix =
-                ConfigurationHelper.getString(VALUE_PREFIX_PARAMETER, params, VALUE_PREFIX_DEFAULT);
-        numberFormat =
-                ConfigurationHelper.getString(
-                        NUMBER_FORMAT_PARAMETER, params, NUMBER_FORMAT_DEFAULT);
     }
 }

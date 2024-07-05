@@ -1,6 +1,6 @@
 package com.example.custom.sequence.entities;
 
-import com.example.custom.sequence.config.StringPrefixedNumberFormattedSequenceIdGenerator;
+import com.example.custom.sequence.config.StringPrefixedSequence;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -18,8 +18,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.Hibernate;
-import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.annotations.Parameter;
 
 @Entity
 @Table(name = "customers")
@@ -31,21 +29,7 @@ public class Customer {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "custom_seq")
-    @GenericGenerator(
-            name = "custom_seq",
-            type = StringPrefixedNumberFormattedSequenceIdGenerator.class,
-            parameters = {
-                @Parameter(
-                        name =
-                                StringPrefixedNumberFormattedSequenceIdGenerator
-                                        .VALUE_PREFIX_PARAMETER,
-                        value = "CUS_"),
-                @Parameter(
-                        name =
-                                StringPrefixedNumberFormattedSequenceIdGenerator
-                                        .NUMBER_FORMAT_PARAMETER,
-                        value = "%05d")
-            })
+    @StringPrefixedSequence(valuePrefix = "CUS_", numberFormat = "%05d")
     private String id;
 
     @Column(nullable = false)
