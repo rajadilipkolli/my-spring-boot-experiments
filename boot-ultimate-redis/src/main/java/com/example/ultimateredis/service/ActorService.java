@@ -25,8 +25,8 @@ public class ActorService {
         return actorRepository.findById(id);
     }
 
-    public Actor saveActor(Actor Actor) {
-        return actorRepository.save(Actor);
+    public Actor saveActor(Actor actor) {
+        return actorRepository.save(actor);
     }
 
     public List<Actor> saveActors(List<Actor> actors) {
