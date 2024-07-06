@@ -4,15 +4,17 @@ import com.example.graphql.querydsl.entities.PostComment;
 import com.example.graphql.querydsl.model.request.CreatePostCommentRequest;
 import com.example.graphql.querydsl.repositories.PostRepository;
 import org.mapstruct.AfterMapping;
-import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
-@Mapper
-public abstract class PostCommentMapperHelper {
+@Service
+class PostCommentMapperHelper {
 
-    @Autowired
-    private PostRepository postRepository;
+    private final PostRepository postRepository;
+
+    public PostCommentMapperHelper(PostRepository postRepository) {
+        this.postRepository = postRepository;
+    }
 
     @AfterMapping
     void setPost(CreatePostCommentRequest createPostCommentRequest, @MappingTarget PostComment postComment) {

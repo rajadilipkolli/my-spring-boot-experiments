@@ -16,16 +16,18 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import org.mapstruct.AfterMapping;
-import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-@Mapper
-public abstract class PostMapperHelper {
+@Service
+class PostMapperHelper {
 
-    @Autowired
-    private TagRepository tagRepository;
+    private final TagRepository tagRepository;
+
+    PostMapperHelper(TagRepository tagRepository) {
+        this.tagRepository = tagRepository;
+    }
 
     @AfterMapping
     void setAfterMappingToPost(CreatePostRequest createPostRequest, @MappingTarget Post post) {

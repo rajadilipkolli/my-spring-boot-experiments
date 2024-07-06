@@ -5,16 +5,17 @@ import com.example.graphql.querydsl.model.request.CreatePostCommentRequest;
 import com.example.graphql.querydsl.model.request.PostCommentRequest;
 import com.example.graphql.querydsl.model.response.PostCommentResponse;
 import java.util.List;
+import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
-@Mapper(uses = PostCommentMapperHelper.class)
+@Mapper(uses = PostCommentMapperHelper.class, injectionStrategy = InjectionStrategy.CONSTRUCTOR)
 public interface PostCommentMapper {
 
     @Mapping(target = "post", ignore = true)
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "createdOn", expression = "java(java.time.LocalDateTime.now())")
+    @Mapping(target = "createdOn", expression = "java(LocalDateTime.now())")
     PostComment toEntity(CreatePostCommentRequest createPostCommentRequest);
 
     @Mapping(target = "post", ignore = true)

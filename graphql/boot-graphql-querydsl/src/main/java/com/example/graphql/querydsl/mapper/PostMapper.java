@@ -7,11 +7,12 @@ import com.example.graphql.querydsl.model.request.UpdatePostRequest;
 import com.example.graphql.querydsl.model.response.PostResponse;
 import com.example.graphql.querydsl.model.response.TagResponse;
 import java.util.List;
+import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
-@Mapper(uses = PostMapperHelper.class)
+@Mapper(uses = PostMapperHelper.class, injectionStrategy = InjectionStrategy.CONSTRUCTOR)
 public interface PostMapper {
 
     @Mapping(target = "tags", ignore = true)
