@@ -32,3 +32,7 @@ jobs:
           cache: "maven"
       - name: Build with Maven
         run: ./mvnw clean verify
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env: 
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
