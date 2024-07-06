@@ -14,12 +14,8 @@ import org.hibernate.type.spi.TypeConfiguration;
 
 public class StringPrefixedNumberFormattedSequenceIdGenerator extends SequenceStyleGenerator {
 
-    private String valuePrefix;
-    private String numberFormat;
-
-    StringPrefixedNumberFormattedSequenceIdGenerator() {
-        super();
-    }
+    private final String valuePrefix;
+    private final String numberFormat;
 
     public StringPrefixedNumberFormattedSequenceIdGenerator(
             StringPrefixedSequence config,

@@ -2,6 +2,7 @@ package com.example.custom.sequence.web.controllers;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.Matchers.hasLength;
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -21,6 +22,7 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 
 class OrderControllerIT extends AbstractIntegrationTest {
@@ -82,6 +84,7 @@ class OrderControllerIT extends AbstractIntegrationTest {
                                 .content(objectMapper.writeValueAsString(order)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id", notNullValue(), String.class))
+                .andExpect(jsonPath("$.id", hasLength(9)))
                 .andExpect(jsonPath("$.text", is(order.getText())));
     }
 
@@ -95,7 +98,10 @@ class OrderControllerIT extends AbstractIntegrationTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(order)))
                 .andExpect(status().isBadRequest())
-                .andExpect(header().string("Content-Type", is("application/problem+json")))
+                .andExpect(
+                        header().string(
+                                        HttpHeaders.CONTENT_TYPE,
+                                        is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                 .andExpect(jsonPath("$.type", is("about:blank")))
                 .andExpect(jsonPath("$.title", is("Constraint Violation")))
                 .andExpect(jsonPath("$.status", is(400)))

@@ -1,8 +1,9 @@
 package com.example.custom.sequence.web.controllers;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.hasLength;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.startsWith;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -74,7 +75,8 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(customer)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id", containsString("CUS_")))
+                .andExpect(jsonPath("$.id", startsWith("CUS")))
+                .andExpect(jsonPath("$.id", hasLength(8)))
                 .andExpect(jsonPath("$.text", is(customer.getText())));
     }
 

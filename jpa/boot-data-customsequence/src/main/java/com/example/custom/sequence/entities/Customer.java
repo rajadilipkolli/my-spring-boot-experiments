@@ -29,7 +29,7 @@ public class Customer {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "custom_seq")
-    @StringPrefixedSequence(valuePrefix = "CUS_", numberFormat = "%05d")
+    @StringPrefixedSequence(valuePrefix = "CUS", numberFormat = "%05d")
     private String id;
 
     @Column(nullable = false)
