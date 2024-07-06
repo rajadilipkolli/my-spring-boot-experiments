@@ -4,7 +4,7 @@ services:
   mongo1:
     container_name: mongo1
     hostname: mongo1
-    image: mongo:7.0.12
+    image: mongo:6.0.16
     extra_hosts:
       - "host.docker.internal:host-gateway"
       - "docker.for.win.host.internal:host-gateway"
@@ -20,7 +20,7 @@ services:
   mongo2:
     container_name: mongo2
     hostname: mongo2
-    image: mongo:7.0.12
+    image: mongo:6.0.16
     extra_hosts:
       - "host.docker.internal:host-gateway"
       - "docker.for.win.host.internal:host-gateway"
@@ -33,7 +33,7 @@ services:
   mongo3:
     container_name: mongo3
     hostname: mongo3
-    image: mongo:7.0.12
+    image: mongo:6.0.16
     extra_hosts:
       - "host.docker.internal:host-gateway"
       - "docker.for.win.host.internal:host-gateway"
