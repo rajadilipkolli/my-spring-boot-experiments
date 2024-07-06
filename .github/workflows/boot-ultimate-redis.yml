@@ -36,3 +36,5 @@ jobs:
         uses: SonarSource/sonarcloud-github-action@master
         env: 
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_ORGANIZATION: 'rajadilipkolli'
+          SONAR_PROJECTKEY: 'rajadilipkolli_my-spring-boot-experiments'
