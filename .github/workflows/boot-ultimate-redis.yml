@@ -30,11 +30,8 @@ jobs:
           java-version: "21"
           distribution: "temurin"
           cache: "maven"
-      - name: Build with Maven
-        run: ./mvnw clean verify
-      - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@master
-        env: 
+      - name: Build and analyze
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_ORGANIZATION: 'rajadilipkolli'
-          SONAR_PROJECTKEY: 'rajadilipkolli_my-spring-boot-experiments'
+        run: ./mvnw -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=rajadilipkolli_my-spring-boot-experiments
