@@ -19,7 +19,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 @Service
 @RequiredArgsConstructor
-public class RestTemplateRestClient implements RestClient {
+public class RestTemplateClientImpl implements RestTemplateClient {
 
     private final RestTemplate restTemplate;
 

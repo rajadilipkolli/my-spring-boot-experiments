@@ -4,7 +4,7 @@ import com.example.rest.template.model.request.ApplicationRestRequest;
 import com.example.rest.template.model.response.ApplicationRestResponse;
 import org.springframework.core.ParameterizedTypeReference;
 
-public interface RestClient {
+public interface RestTemplateClient {
 
     <T> ApplicationRestResponse<T> get(
             ApplicationRestRequest applicationRestRequest, Class<T> responseType);

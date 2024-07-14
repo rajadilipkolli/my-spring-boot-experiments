@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class RestHandler {
 
-    private final RestClient restClient;
+    private final RestTemplateClient restTemplateClient;
 
     public ApplicationRestResponse<String> get(ApplicationRestRequest applicationRestRequest) {
 
@@ -25,7 +25,7 @@ public class RestHandler {
     public <T> ApplicationRestResponse<T> get(
             ApplicationRestRequest applicationRestRequest, Class<T> responseClass) {
 
-        return this.restClient.get(applicationRestRequest, responseClass);
+        return this.restTemplateClient.get(applicationRestRequest, responseClass);
     }
 
     public <T> T getBody(ApplicationRestRequest applicationRestRequest, Class<T> responseClass) {
@@ -36,7 +36,7 @@ public class RestHandler {
     public <T> T getBody(
             ApplicationRestRequest applicationRestRequest,
             ParameterizedTypeReference<T> responseType) {
-        return this.restClient.get(applicationRestRequest, responseType);
+        return this.restTemplateClient.get(applicationRestRequest, responseType);
     }
 
     public ApplicationRestResponse<String> post(ApplicationRestRequest applicationRestRequest) {
@@ -47,7 +47,7 @@ public class RestHandler {
     public <T> ApplicationRestResponse<T> post(
             ApplicationRestRequest applicationRestRequest, Class<T> responseClass) {
 
-        return this.restClient.post(applicationRestRequest, responseClass);
+        return this.restTemplateClient.post(applicationRestRequest, responseClass);
     }
 
     public ApplicationRestResponse<String> put(ApplicationRestRequest applicationRestRequest) {
@@ -58,18 +58,18 @@ public class RestHandler {
     public <T> ApplicationRestResponse<T> put(
             ApplicationRestRequest applicationRestRequest, Class<T> responseClass) {
 
-        return this.restClient.put(applicationRestRequest, responseClass);
+        return this.restTemplateClient.put(applicationRestRequest, responseClass);
     }
 
     public <T> ApplicationRestResponse<T> patch(
             ApplicationRestRequest applicationRestRequest, Class<T> responseClass) {
 
-        return this.restClient.patch(applicationRestRequest, responseClass);
+        return this.restTemplateClient.patch(applicationRestRequest, responseClass);
     }
 
     public <T> ApplicationRestResponse<T> delete(
             ApplicationRestRequest applicationRestRequest, Class<T> responseClass) {
 
-        return this.restClient.delete(applicationRestRequest, responseClass);
+        return this.restTemplateClient.delete(applicationRestRequest, responseClass);
     }
 }
