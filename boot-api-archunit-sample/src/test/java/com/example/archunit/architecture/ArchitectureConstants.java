@@ -10,6 +10,7 @@ public class ArchitectureConstants {
     // Packages
     public static final String CONTROLLER_PACKAGE = "..controllers..";
     public static final String MODEL_PACKAGE = "..model..";
+    public static final String ENTITY_PACKAGE = "..entities..";
     public static final String MAPPER_PACKAGE = "..mapper..";
     public static final String REPOSITORY_PACKAGE = "..repositories..";
     public static final String SERVICE_PACKAGE = "..services..";

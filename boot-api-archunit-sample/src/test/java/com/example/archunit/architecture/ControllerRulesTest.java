@@ -46,7 +46,7 @@ class ControllerRulesTest {
                     + ", and not with @Controller");
 
     @ArchTest
-    static final ArchRule classes_should_not_be_public = classes()
+    static final ArchRule classes_should_be_package_private = classes()
             .that()
             .resideInAPackage(CONTROLLER_PACKAGE)
             .should()
