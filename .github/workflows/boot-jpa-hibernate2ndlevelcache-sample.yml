@@ -33,3 +33,10 @@ jobs:
           cache: "maven"
       - name: Build and analyze
         run: ./mvnw clean verify
+      - if: ${{ github.ref == 'refs/heads/main' }}
+        name: SonarBuild
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: ./mvnw -B sonar:sonar -Dsonar.projectKey=rajadilipkolli_my-spring-boot-experiments
+
