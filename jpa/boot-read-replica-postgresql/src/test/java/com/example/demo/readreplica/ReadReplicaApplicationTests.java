@@ -85,6 +85,16 @@ class ReadReplicaApplicationTests {
 
     @Order(4)
     @Test
+    void shouldNotDeleteViaReplica() {
+        String deleteSQL = "DELETE FROM articles WHERE id = ?";
+        Object[] params = {4};
+        assertThatThrownBy(() -> replicaJdbcTemplate.update(deleteSQL, params))
+                .isInstanceOf(UncategorizedSQLException.class)
+                .hasMessageContaining("cannot execute DELETE in a read-only transaction");
+    }
+
+    @Order(5)
+    @Test
     void shouldDeleteViaPrimary() {
         String deleteSQL = "DELETE FROM articles WHERE id = ?";
         Object[] params = {4};
