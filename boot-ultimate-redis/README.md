@@ -5,6 +5,18 @@ The blog post about this repository can be found [HERE](https://programmerfriend
 
 ![Spring Boot Redis](https://github.com/programmerfriend/programmerfriend.github.io/blob/master/img/content/robust-boot_title.png?raw=true "Spring Boot Redis")
 
+## View Keys using cli
+
+Connect to redis-cli using below command
+```shell
+docker exec -it redis-server redis-cli
+```
+
+Run keys * command to view all keys
+```shell
+keys *
+```
+
 ## Run the service
 ```shell
 ./mvnw spring-boot:run

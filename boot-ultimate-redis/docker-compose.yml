@@ -1,12 +1,11 @@
-version: '3.7'
-
 services:
   redis:
     image: 'redis:7.2.5-alpine'
+    container_name: redis-server
     ports:
-      - '127.0.0.1:6379:6379/tcp'
+      - '6379:6379'
     volumes:
-      - 'redis_data:/data:rw'
+      - 'redis_data:/data'
     healthcheck:
       test: redis-cli ping
       interval: 3s
