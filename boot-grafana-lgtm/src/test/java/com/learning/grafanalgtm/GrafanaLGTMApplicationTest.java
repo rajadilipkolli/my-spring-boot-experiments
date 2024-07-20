@@ -16,7 +16,7 @@ import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.grafana.LgtmStackContainer;
 
 @SpringBootTest(
         classes = {TestGrafanaLGTMApplication.class},
@@ -25,7 +25,7 @@ import org.testcontainers.containers.GenericContainer;
 class GrafanaLGTMApplicationTest {
 
     @Autowired
-    private GenericContainer<?> lgtmContainer;
+    private LgtmStackContainer lgtmContainer;
 
     @LocalServerPort
     private int localServerPort;

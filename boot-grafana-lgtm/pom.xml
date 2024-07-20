@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.3.1</version>
+        <version>3.3.2</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.example.grafanalgtm</groupId>
@@ -60,6 +60,13 @@
             <groupId>org.testcontainers</groupId>
             <artifactId>junit-jupiter</artifactId>
             <scope>test</scope>
+        </dependency>
+        <!-- Remove version when spring boot supports-->
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>grafana</artifactId>
+            <scope>test</scope>
+            <version>1.20.0</version>
         </dependency>
         <dependency>
             <groupId>io.rest-assured</groupId>

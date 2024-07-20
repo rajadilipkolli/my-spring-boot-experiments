@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@Transactional
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class PostService {
 
@@ -36,10 +36,12 @@ public class PostService {
         return postRepository.findById(id);
     }
 
+    @Transactional
     public Post savePost(Post post) {
         return postRepository.save(post);
     }
 
+    @Transactional
     public void deletePostById(Long id) {
         postRepository.deleteById(id);
     }
