@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 
 @Configuration(proxyBeanMethods = false)
-public class DatabaseConfig {
+class DatabaseConfig {
 
     private static final String PRIMARY_DATABASE_PROPERTY_KEY_PREFIX = "spring.primary.datasource";
     private static final String REPLICA_DATABASE_PROPERTY_KEY_PREFIX = "spring.replica.datasource";

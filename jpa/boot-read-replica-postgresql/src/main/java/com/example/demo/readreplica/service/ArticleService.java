@@ -7,15 +7,17 @@ import com.example.demo.readreplica.entities.Comment;
 import com.example.demo.readreplica.repository.ArticleRepository;
 import java.util.List;
 import java.util.Optional;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@RequiredArgsConstructor
 public class ArticleService {
 
     private final ArticleRepository articleRepository;
+
+    ArticleService(ArticleRepository articleRepository) {
+        this.articleRepository = articleRepository;
+    }
 
     public Optional<ArticleDTO> findArticleById(Integer id) {
         return this.articleRepository.findByArticleId(id).map(this::convertToArticleDTO);

@@ -13,7 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Aspect
 @Component
 @Order(0)
-public class ReadOnlyRouteInterceptor {
+class ReadOnlyRouteInterceptor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ReadOnlyRouteInterceptor.class);
 
