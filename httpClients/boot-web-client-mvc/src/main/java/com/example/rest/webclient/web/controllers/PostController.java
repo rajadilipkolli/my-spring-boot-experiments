@@ -20,21 +20,21 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/posts")
 @Slf4j
-public class PostController {
+class PostController {
 
     private final PostService postService;
 
-    public PostController(PostService postService) {
+    PostController(PostService postService) {
         this.postService = postService;
     }
 
     @GetMapping
-    public List<PostDto> getAllPosts() {
+    List<PostDto> getAllPosts() {
         return postService.findAllPosts();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<PostDto> getPostById(@PathVariable Long id) {
+    ResponseEntity<PostDto> getPostById(@PathVariable Long id) {
         return postService
                 .findPostById(id)
                 .map(ResponseEntity::ok)
@@ -43,12 +43,12 @@ public class PostController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public PostDto createPost(@RequestBody @Validated PostDto post) {
+    PostDto createPost(@RequestBody @Validated PostDto post) {
         return postService.savePost(post);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<PostDto> updatePost(@PathVariable Long id, @RequestBody PostDto post) {
+    ResponseEntity<PostDto> updatePost(@PathVariable Long id, @RequestBody PostDto post) {
         return postService
                 .updatePostById(id, post)
                 .map(ResponseEntity::ok)
@@ -56,7 +56,7 @@ public class PostController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<PostDto> deletePost(@PathVariable Long id) {
+    ResponseEntity<PostDto> deletePost(@PathVariable Long id) {
         return postService
                 .findPostById(id)
                 .map(

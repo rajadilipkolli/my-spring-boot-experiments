@@ -15,13 +15,13 @@ import org.springframework.stereotype.Component;
 
 @Aspect
 @Component
-public class LoggingAspect {
+class LoggingAspect {
 
-    private final Logger log = LoggerFactory.getLogger(this.getClass());
+    private static final Logger log = LoggerFactory.getLogger(LoggingAspect.class);
 
     private final Environment env;
 
-    public LoggingAspect(Environment env) {
+    LoggingAspect(Environment env) {
         this.env = env;
     }
 

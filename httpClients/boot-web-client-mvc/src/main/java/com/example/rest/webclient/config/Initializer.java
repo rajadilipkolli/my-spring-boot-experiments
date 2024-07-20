@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Slf4j
-public class Initializer implements CommandLineRunner {
+class Initializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) {

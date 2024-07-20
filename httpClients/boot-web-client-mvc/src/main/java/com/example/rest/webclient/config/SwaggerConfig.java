@@ -6,5 +6,7 @@ import io.swagger.v3.oas.annotations.servers.Server;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration(proxyBeanMethods = false)
-@OpenAPIDefinition(info = @Info(title = "web-client", version = "v1"), servers = @Server(url = "/"))
-public class SwaggerConfig {}
+@OpenAPIDefinition(
+        info = @Info(title = "web-client-mvc", version = "v1"),
+        servers = @Server(url = "/"))
+class SwaggerConfig {}

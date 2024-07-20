@@ -9,7 +9,6 @@ import org.springframework.boot.web.reactive.function.client.WebClientCustomizer
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.netty.http.client.HttpClient;
@@ -17,17 +16,12 @@ import reactor.netty.resources.ConnectionProvider;
 import reactor.util.retry.Retry;
 
 @Configuration(proxyBeanMethods = false)
-public class WebClientConfiguration {
+class WebClientConfiguration {
 
     @Bean
     WebClient webClient(WebClient.Builder builder) {
         return builder.baseUrl("https://jsonplaceholder.typicode.com")
-                .defaultHeaders(
-                        httpHeaders -> {
-                            httpHeaders.add(HttpHeaders.ACCEPT_ENCODING, "gzip");
-                            httpHeaders.add(
-                                    HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
-                        })
+                .defaultHeader(HttpHeaders.ACCEPT_ENCODING, "gzip")
                 .filter(
                         (request, next) ->
                                 next.exchange(request)
