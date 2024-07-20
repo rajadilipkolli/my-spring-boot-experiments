@@ -22,23 +22,22 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/customers")
 @Slf4j
-public class CustomerController {
+class CustomerController {
 
     private final CustomerService customerService;
 
-    public CustomerController(CustomerService customerService) {
+    CustomerController(CustomerService customerService) {
         this.customerService = customerService;
     }
 
     @GetMapping
-    public List<Customer> getAllCustomers(
-            @RequestHeader(AppConstants.X_TENANT_ID) String tenantId) {
+    List<Customer> getAllCustomers(@RequestHeader(AppConstants.X_TENANT_ID) String tenantId) {
         log.info("fetching all customer for tenant : {}", tenantId);
         return customerService.findAllCustomers();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Customer> getCustomerById(
+    ResponseEntity<Customer> getCustomerById(
             @PathVariable Long id, @RequestHeader(AppConstants.X_TENANT_ID) String tenantId) {
         log.info("fetching customer by id {} for tenant : {}", id, tenantId);
         return customerService
@@ -49,7 +48,7 @@ public class CustomerController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Customer createCustomer(
+    Customer createCustomer(
             @RequestBody @Validated Customer customer,
             @RequestHeader(AppConstants.X_TENANT_ID) String tenantId) {
         log.info("creating customer by for tenant : {}", tenantId);
@@ -57,7 +56,7 @@ public class CustomerController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Customer> updateCustomer(
+    ResponseEntity<Customer> updateCustomer(
             @PathVariable Long id,
             @RequestBody Customer customer,
             @RequestHeader(AppConstants.X_TENANT_ID) String tenantId) {
@@ -73,7 +72,7 @@ public class CustomerController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Customer> deleteCustomer(
+    ResponseEntity<Customer> deleteCustomer(
             @PathVariable Long id, @RequestHeader(AppConstants.X_TENANT_ID) String tenantId) {
         log.info("deleting customer by id {} for tenant : {}", id, tenantId);
         return customerService

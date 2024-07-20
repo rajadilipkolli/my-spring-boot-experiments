@@ -11,23 +11,24 @@ import org.testcontainers.utility.DockerImageName;
 public class DBContainerInitializer
         implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
-    private static final PostgreSQLContainer<?> sqlContainer =
+    private static final PostgreSQLContainer<?> POSTGRE_SQL_CONTAINER =
             new PostgreSQLContainer<>(DockerImageName.parse("postgres:16.3-alpine"));
 
-    private static final MariaDBContainer<?> mariaDBContainer = new MariaDBContainer<>("mariadb");
+    private static final MariaDBContainer<?> MARIA_DB_CONTAINER =
+            new MariaDBContainer<>(DockerImageName.parse("mariadb").withTag("11.4"));
 
     static {
-        Startables.deepStart(sqlContainer, mariaDBContainer).join();
+        Startables.deepStart(POSTGRE_SQL_CONTAINER, MARIA_DB_CONTAINER).join();
     }
 
     public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
         TestPropertyValues.of(
-                        "datasource.primary.url=" + sqlContainer.getJdbcUrl(),
-                        "datasource.primary.username=" + sqlContainer.getUsername(),
-                        "datasource.primary.password=" + sqlContainer.getPassword(),
-                        "datasource.secondary.url=" + mariaDBContainer.getJdbcUrl(),
-                        "datasource.secondary.username=" + mariaDBContainer.getUsername(),
-                        "datasource.secondary.password=" + mariaDBContainer.getPassword())
+                        "datasource.primary.url=" + POSTGRE_SQL_CONTAINER.getJdbcUrl(),
+                        "datasource.primary.username=" + POSTGRE_SQL_CONTAINER.getUsername(),
+                        "datasource.primary.password=" + POSTGRE_SQL_CONTAINER.getPassword(),
+                        "datasource.secondary.url=" + MARIA_DB_CONTAINER.getJdbcUrl(),
+                        "datasource.secondary.username=" + MARIA_DB_CONTAINER.getUsername(),
+                        "datasource.secondary.password=" + MARIA_DB_CONTAINER.getPassword())
                 .applyTo(configurableApplicationContext.getEnvironment());
     }
 }

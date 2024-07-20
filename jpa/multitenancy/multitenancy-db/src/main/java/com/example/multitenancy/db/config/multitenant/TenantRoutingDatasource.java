@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @DependsOnDatabaseInitialization
-public class TenantRoutingDatasource extends AbstractRoutingDataSource {
+class TenantRoutingDatasource extends AbstractRoutingDataSource {
 
     private final TenantIdentifierResolver tenantIdentifierResolver;
 

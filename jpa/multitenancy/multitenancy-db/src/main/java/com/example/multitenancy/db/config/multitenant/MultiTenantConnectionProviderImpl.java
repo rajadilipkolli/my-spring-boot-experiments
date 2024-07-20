@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @DependsOnDatabaseInitialization
-public class MultiTenantConnectionProviderImpl
+class MultiTenantConnectionProviderImpl
         implements MultiTenantConnectionProvider<String>, HibernatePropertiesCustomizer {
 
     private final DataSource tenantRoutingDatasource;
