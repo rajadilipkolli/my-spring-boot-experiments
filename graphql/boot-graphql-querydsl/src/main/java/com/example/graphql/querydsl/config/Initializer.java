@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class Initializer implements CommandLineRunner {
+class Initializer implements CommandLineRunner {
 
     private final PostRepository postRepository;
 

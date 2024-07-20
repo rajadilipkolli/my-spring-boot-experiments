@@ -15,6 +15,7 @@ import org.springframework.data.repository.query.Param;
 
 public interface PostRepository
         extends JpaRepository<Post, Long>, QuerydslPredicateExecutor<Post>, QuerydslBinderCustomizer<QPost> {
+
     @Override
     default void customize(QuerydslBindings bindings, QPost root) {
         bindings.bind(String.class)
