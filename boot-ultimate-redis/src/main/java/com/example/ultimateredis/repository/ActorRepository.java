@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ActorRepository extends CrudRepository<Actor, String> {
+
     Optional<Actor> findByName(String name);
 
     Optional<Actor> findByNameAndAge(String name, Integer age);
