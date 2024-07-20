@@ -7,7 +7,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.2.6</version>
+        <version>3.3.2</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.example.graphql.querydsl</groupId>
@@ -86,11 +86,12 @@
             <groupId>org.liquibase</groupId>
             <artifactId>liquibase-core</artifactId>
         </dependency>
+
         <dependency>
             <groupId>com.querydsl</groupId>
-            <artifactId>querydsl-apt</artifactId>
-            <version>${querydsl.version}</version>
+            <artifactId>querydsl-jpa-codegen</artifactId>
             <classifier>jakarta</classifier>
+            <version>${querydsl.version}</version>
             <scope>provided</scope>
         </dependency>
 
@@ -173,8 +174,6 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
-                    <!-- depending on your project -->
-                    <!-- depending on your project -->
                     <annotationProcessorPaths>
                         <path>
                             <groupId>org.mapstruct</groupId>
@@ -186,6 +185,22 @@
                             <groupId>org.projectlombok</groupId>
                             <artifactId>lombok</artifactId>
                             <version>${lombok.version}</version>
+                        </path>
+                        <path>
+                            <groupId>com.querydsl</groupId>
+                            <artifactId>querydsl-apt</artifactId>
+                            <classifier>jakarta</classifier>
+                            <version>${querydsl.version}</version>
+                        </path>
+                        <path>
+                            <groupId>jakarta.persistence</groupId>
+                            <artifactId>jakarta.persistence-api</artifactId>
+                            <version>3.2.0</version>
+                        </path>
+                        <path>
+                            <groupId>jakarta.annotation</groupId>
+                            <artifactId>jakarta.annotation-api</artifactId>
+                            <version>2.1.1</version>
                         </path>
                         <!-- This is needed when using Lombok 1.18.16 and above -->
                         <path>
@@ -211,22 +226,6 @@
                     </compilerArgs>
                     <release>${java.version}</release>
                 </configuration>
-            </plugin>
-            <plugin>
-                <groupId>com.mysema.maven</groupId>
-                <artifactId>apt-maven-plugin</artifactId>
-                <version>1.1.3</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>process</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>target/generated-sources/annotations</outputDirectory>
-                            <processor>com.querydsl.apt.jpa.JPAAnnotationProcessor</processor>
-                        </configuration>
-                    </execution>
-                </executions>
             </plugin>
             <plugin>
                 <groupId>io.github.git-commit-id</groupId>
@@ -318,9 +317,9 @@
                         <palantirJavaFormat>
                             <version>2.47.0</version>
                         </palantirJavaFormat>
-                        <importOrder />
-                        <removeUnusedImports />
-                        <formatAnnotations />
+                        <importOrder/>
+                        <removeUnusedImports/>
+                        <formatAnnotations/>
                     </java>
                 </configuration>
                 <executions>
