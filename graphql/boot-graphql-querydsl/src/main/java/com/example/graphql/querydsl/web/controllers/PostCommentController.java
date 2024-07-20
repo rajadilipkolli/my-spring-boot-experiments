@@ -10,8 +10,6 @@ import com.example.graphql.querydsl.services.PostCommentService;
 import com.example.graphql.querydsl.utils.AppConstants;
 import jakarta.validation.Valid;
 import java.net.URI;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -27,14 +25,16 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @RestController
 @RequestMapping("/api/posts/comments")
-@Slf4j
-@RequiredArgsConstructor
-public class PostCommentController {
+class PostCommentController {
 
     private final PostCommentService postCommentService;
 
+    PostCommentController(PostCommentService postCommentService) {
+        this.postCommentService = postCommentService;
+    }
+
     @GetMapping
-    public PagedResult<PostCommentResponse> getAllPostComments(
+    PagedResult<PostCommentResponse> getAllPostComments(
             @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_NUMBER, required = false) int pageNo,
             @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_SIZE, required = false) int pageSize,
             @RequestParam(defaultValue = AppConstants.DEFAULT_SORT_BY, required = false) String sortBy,
@@ -44,7 +44,7 @@ public class PostCommentController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<PostCommentResponse> getPostCommentById(@PathVariable Long id) {
+    ResponseEntity<PostCommentResponse> getPostCommentById(@PathVariable Long id) {
         return postCommentService
                 .findPostCommentById(id)
                 .map(ResponseEntity::ok)
@@ -52,7 +52,7 @@ public class PostCommentController {
     }
 
     @PostMapping
-    public ResponseEntity<PostCommentResponse> createPostComment(
+    ResponseEntity<PostCommentResponse> createPostComment(
             @RequestBody @Validated CreatePostCommentRequest createPostCommentRequest) {
         PostCommentResponse response = postCommentService.savePostComment(createPostCommentRequest);
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
@@ -63,13 +63,13 @@ public class PostCommentController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<PostCommentResponse> updatePostComment(
+    ResponseEntity<PostCommentResponse> updatePostComment(
             @PathVariable Long id, @RequestBody @Valid PostCommentRequest postCommentRequest) {
         return ResponseEntity.ok(postCommentService.updatePostComment(id, postCommentRequest));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<PostCommentResponse> deletePostComment(@PathVariable Long id) {
+    ResponseEntity<PostCommentResponse> deletePostComment(@PathVariable Long id) {
         return postCommentService
                 .findPostCommentById(id)
                 .map(postComment -> {

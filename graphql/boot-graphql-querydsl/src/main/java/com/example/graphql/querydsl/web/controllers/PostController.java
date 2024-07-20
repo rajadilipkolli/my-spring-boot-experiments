@@ -10,8 +10,6 @@ import com.example.graphql.querydsl.services.PostService;
 import com.example.graphql.querydsl.utils.AppConstants;
 import jakarta.validation.Valid;
 import java.net.URI;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -27,14 +25,16 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @RestController
 @RequestMapping("/api/posts")
-@Slf4j
-@RequiredArgsConstructor
-public class PostController {
+class PostController {
 
     private final PostService postService;
 
+    PostController(PostService postService) {
+        this.postService = postService;
+    }
+
     @GetMapping
-    public PagedResult<PostResponse> getAllPosts(
+    PagedResult<PostResponse> getAllPosts(
             @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_NUMBER, required = false) int pageNo,
             @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_SIZE, required = false) int pageSize,
             @RequestParam(defaultValue = AppConstants.DEFAULT_SORT_BY, required = false) String sortBy,
@@ -44,12 +44,12 @@ public class PostController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<PostResponse> getPostById(@PathVariable Long id) {
+    ResponseEntity<PostResponse> getPostById(@PathVariable Long id) {
         return postService.findPostById(id).map(ResponseEntity::ok).orElseThrow(() -> new PostNotFoundException(id));
     }
 
     @PostMapping
-    public ResponseEntity<PostResponse> createPost(@RequestBody @Validated CreatePostRequest createPostRequest) {
+    ResponseEntity<PostResponse> createPost(@RequestBody @Validated CreatePostRequest createPostRequest) {
         PostResponse response = postService.savePost(createPostRequest);
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/api/posts/{id}")
@@ -59,13 +59,12 @@ public class PostController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<PostResponse> updatePost(
-            @PathVariable Long id, @RequestBody @Valid UpdatePostRequest postRequest) {
+    ResponseEntity<PostResponse> updatePost(@PathVariable Long id, @RequestBody @Valid UpdatePostRequest postRequest) {
         return ResponseEntity.ok(postService.updatePost(id, postRequest));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<PostResponse> deletePost(@PathVariable Long id) {
+    ResponseEntity<PostResponse> deletePost(@PathVariable Long id) {
         return postService
                 .findPostById(id)
                 .map(post -> {

@@ -9,7 +9,6 @@ import com.example.graphql.querydsl.services.TagService;
 import com.example.graphql.querydsl.utils.AppConstants;
 import jakarta.validation.Valid;
 import java.net.URI;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -25,13 +24,16 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @RestController
 @RequestMapping("/api/tags")
-@RequiredArgsConstructor
-public class TagController {
+class TagController {
 
     private final TagService tagService;
 
+    TagController(TagService tagService) {
+        this.tagService = tagService;
+    }
+
     @GetMapping
-    public PagedResult<TagResponse> getAllTags(
+    PagedResult<TagResponse> getAllTags(
             @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_NUMBER, required = false) int pageNo,
             @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_SIZE, required = false) int pageSize,
             @RequestParam(defaultValue = AppConstants.DEFAULT_SORT_BY, required = false) String sortBy,
@@ -41,12 +43,12 @@ public class TagController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<TagResponse> getTagById(@PathVariable Long id) {
+    ResponseEntity<TagResponse> getTagById(@PathVariable Long id) {
         return tagService.findTagById(id).map(ResponseEntity::ok).orElseThrow(() -> new TagNotFoundException(id));
     }
 
     @PostMapping
-    public ResponseEntity<TagResponse> createTag(@RequestBody @Validated TagRequest tagRequest) {
+    ResponseEntity<TagResponse> createTag(@RequestBody @Validated TagRequest tagRequest) {
         TagResponse response = tagService.saveTag(tagRequest);
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/api/tags/{id}")
@@ -56,12 +58,12 @@ public class TagController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<TagResponse> updateTag(@PathVariable Long id, @RequestBody @Valid TagRequest tagRequest) {
+    ResponseEntity<TagResponse> updateTag(@PathVariable Long id, @RequestBody @Valid TagRequest tagRequest) {
         return ResponseEntity.ok(tagService.updateTag(id, tagRequest));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<TagResponse> deleteTag(@PathVariable Long id) {
+    ResponseEntity<TagResponse> deleteTag(@PathVariable Long id) {
         return tagService
                 .findTagById(id)
                 .map(tag -> {

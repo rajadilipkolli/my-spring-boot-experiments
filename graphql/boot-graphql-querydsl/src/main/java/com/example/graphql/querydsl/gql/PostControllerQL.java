@@ -5,35 +5,37 @@ import com.example.graphql.querydsl.model.request.CreatePostRequest;
 import com.example.graphql.querydsl.model.response.PostResponse;
 import com.example.graphql.querydsl.services.PostService;
 import java.util.List;
-import lombok.RequiredArgsConstructor;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.stereotype.Controller;
 
 @Controller
-@RequiredArgsConstructor
-public class PostControllerQL {
+class PostControllerQL {
 
     private final PostService postService;
 
+    PostControllerQL(PostService postService) {
+        this.postService = postService;
+    }
+
     @QueryMapping
-    public Long countPosts() {
+    Long countPosts() {
         return this.postService.totalPosts();
     }
 
     @QueryMapping
-    public List<PostResponse> getPostsByUserName(@Argument("name") String name) {
+    List<PostResponse> getPostsByUserName(@Argument("name") String name) {
         return this.postService.getPostsByUserName(name);
     }
 
     @MutationMapping
-    public PostResponse createPost(@Argument("createPostRequest") CreatePostRequest createPostRequest) {
+    PostResponse createPost(@Argument("createPostRequest") CreatePostRequest createPostRequest) {
         return this.postService.savePost(createPostRequest);
     }
 
     @MutationMapping
-    public PostResponse addTagsToPost(@Argument("addTagRequest") AddTagRequest addTagRequest) {
+    PostResponse addTagsToPost(@Argument("addTagRequest") AddTagRequest addTagRequest) {
         return this.postService.addTagsToPost(addTagRequest);
     }
 }
