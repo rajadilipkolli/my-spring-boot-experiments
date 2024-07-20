@@ -45,15 +45,15 @@ public class RestClientConfiguration {
                                 httpHeaders -> {
                                     httpHeaders.setContentType(MediaType.APPLICATION_JSON);
                                     httpHeaders.setAccept(List.of(MediaType.APPLICATION_JSON));
-                                })
-                        .requestFactory(bufferingClientHttpRequestFactory)
-                        .requestInterceptor(
-                                (request, body, execution) -> {
-                                    logRequest(request, body);
-                                    ClientHttpResponse response = execution.execute(request, body);
-                                    logResponse(response);
-                                    return response;
                                 });
+        // .requestFactory(bufferingClientHttpRequestFactory)
+        // .requestInterceptor(
+        //         (request, body, execution) -> {
+        //             logRequest(request, body);
+        //             ClientHttpResponse response = execution.execute(request, body);
+        //             logResponse(response);
+        //             return response;
+        //         });
     }
 
     private void logResponse(ClientHttpResponse response) throws IOException {

@@ -1,89 +1,52 @@
 package com.example.ultimateredis.config;
 
+import io.lettuce.core.RedisURI;
 import java.time.Duration;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.cache.RedisCacheManagerBuilderCustomizer;
+import org.springframework.boot.autoconfigure.data.redis.LettuceClientConfigurationBuilderCustomizer;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cache.Cache;
-import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CachingConfigurer;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.interceptor.CacheErrorHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
-import org.springframework.data.redis.cache.RedisCacheManager;
-import org.springframework.data.redis.connection.RedisConnectionFactory;
-import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
-import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
 
 @Configuration(proxyBeanMethods = false)
 @EnableConfigurationProperties(CacheConfigurationProperties.class)
+@EnableCaching
 @Slf4j
 public class CacheConfig implements CachingConfigurer {
 
     @Bean
-    @Primary
-    RedisCacheConfiguration defaultCacheConfig() {
+    RedisCacheManagerBuilderCustomizer redisCacheManagerBuilderCustomizer(
+            CacheConfigurationProperties cacheConfigurationProperties) {
         RedisCacheGZIPSerializer serializerGzip = new RedisCacheGZIPSerializer();
-
-        return RedisCacheConfiguration.defaultCacheConfig()
-                .serializeValuesWith(
-                        RedisSerializationContext.SerializationPair.fromSerializer(serializerGzip));
+        return builder -> {
+            builder.cacheDefaults()
+                    .disableCachingNullValues()
+                    .serializeValuesWith(
+                            RedisSerializationContext.SerializationPair.fromSerializer(
+                                    serializerGzip));
+            cacheConfigurationProperties
+                    .getCacheExpirations()
+                    .forEach(
+                            (cacheName, timeout) ->
+                                    builder.withCacheConfiguration(
+                                            cacheName,
+                                            RedisCacheConfiguration.defaultCacheConfig()
+                                                    .entryTtl(Duration.ofSeconds(timeout))));
+        };
     }
 
     @Bean
-    LettuceConnectionFactory redisConnectionFactory(CacheConfigurationProperties properties) {
-        log.info(
-                "Redis (/Lettuce) configuration enabled. With cache timeout {} seconds.",
-                properties.getTimeoutSeconds());
-
-        RedisStandaloneConfiguration redisStandaloneConfiguration =
-                new RedisStandaloneConfiguration();
-        redisStandaloneConfiguration.setHostName(properties.getRedisHost());
-        redisStandaloneConfiguration.setPort(properties.getRedisPort());
-        return new LettuceConnectionFactory(redisStandaloneConfiguration);
-    }
-
-    @Bean
-    RedisTemplate<String, String> redisTemplate(RedisConnectionFactory cf) {
-        RedisTemplate<String, String> redisTemplate = new RedisTemplate<>();
-        redisTemplate.setConnectionFactory(cf);
-        return redisTemplate;
-    }
-
-    @Bean
-    RedisCacheConfiguration defaultCacheConfiguration(CacheConfigurationProperties properties) {
-        return createCacheConfiguration(properties.getTimeoutSeconds());
-    }
-
-    private RedisCacheConfiguration createCacheConfiguration(long timeoutSeconds) {
-        return RedisCacheConfiguration.defaultCacheConfig()
-                .entryTtl(Duration.ofSeconds(timeoutSeconds));
-    }
-
-    @Bean
-    CacheManager cacheManager(
-            RedisConnectionFactory redisConnectionFactory,
-            CacheConfigurationProperties properties,
-            RedisCacheConfiguration defaultCacheConfiguration) {
-        Map<String, RedisCacheConfiguration> cacheConfigurations = new HashMap<>();
-
-        for (Entry<String, Long> cacheNameAndTimeout :
-                properties.getCacheExpirations().entrySet()) {
-            cacheConfigurations.put(
-                    cacheNameAndTimeout.getKey(),
-                    createCacheConfiguration(cacheNameAndTimeout.getValue()));
-        }
-
-        return RedisCacheManager.builder(redisConnectionFactory)
-                .cacheDefaults(defaultCacheConfiguration)
-                .withInitialCacheConfigurations(cacheConfigurations)
-                .build();
+    LettuceClientConfigurationBuilderCustomizer lettuceClientConfigurationBuilderCustomizer(
+            CacheConfigurationProperties properties) {
+        return clientConfigurationBuilder ->
+                clientConfigurationBuilder.apply(RedisURI.create(properties.getRedisURI()));
     }
 
     @Override

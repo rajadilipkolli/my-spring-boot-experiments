@@ -19,8 +19,7 @@ class TestUltimateRedisApplication {
                 new RedisContainer(DockerImageName.parse("redis").withTag("7.2.5-alpine"))
                         .withStartupAttempts(5)
                         .withStartupTimeout(Duration.ofMinutes(10));
-        dynamicPropertyRegistry.add("cache.redis-port", redisContainer::getRedisPort);
-        dynamicPropertyRegistry.add("cache.redis-host", redisContainer::getRedisHost);
+        dynamicPropertyRegistry.add("cache.redis-uri", redisContainer::getRedisURI);
         return redisContainer;
     }
 

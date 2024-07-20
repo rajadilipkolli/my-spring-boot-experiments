@@ -10,8 +10,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class CacheConfigurationProperties {
 
     private long timeoutSeconds = 60;
-    private int redisPort = 6379;
-    private String redisHost = "localhost";
+    private String redisURI;
     // Mapping of cacheNames to expire-after-write timeout in seconds
     private Map<String, Long> cacheExpirations = new HashMap<>();
 }
