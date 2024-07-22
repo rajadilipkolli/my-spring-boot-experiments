@@ -13,7 +13,6 @@ import com.example.rest.proxy.repositories.PostRepository;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
-import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -24,8 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.HttpClientErrorException;
 
 @Service
-@Transactional
-@RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class PostService {
 
     private final PostRepository postRepository;
@@ -33,7 +31,17 @@ public class PostService {
     private final JsonPlaceholderService jsonPlaceholderService;
     private final PostMapper postMapper;
 
-    @Transactional(readOnly = true)
+    public PostService(
+            PostRepository postRepository,
+            PostCommentRepository postCommentRepository,
+            JsonPlaceholderService jsonPlaceholderService,
+            PostMapper postMapper) {
+        this.postRepository = postRepository;
+        this.postCommentRepository = postCommentRepository;
+        this.jsonPlaceholderService = jsonPlaceholderService;
+        this.postMapper = postMapper;
+    }
+
     public PagedResult<PostResponse> findAllPosts(
             int pageNo, int pageSize, String sortBy, String sortDir) {
         Sort sort =
@@ -58,6 +66,7 @@ public class PostService {
                 page.hasPrevious());
     }
 
+    @Transactional
     public Optional<PostResponse> findPostById(Long postId) {
         Post post =
                 postRepository
@@ -82,17 +91,20 @@ public class PostService {
         return Optional.of(postMapper.mapToCommentResponseList(postCommentList));
     }
 
+    @Transactional
     public List<PostComment> savePostComments(List<PostCommentDto> postCommentDtoList) {
         return postCommentRepository.saveAll(
                 postMapper.mapToEntityList(postCommentDtoList, postRepository));
     }
 
+    @Transactional
     public PostResponse savePost(Post post) {
         Post fetchedPost = jsonPlaceholderService.createPost(post);
-        Post savedPost = save(fetchedPost);
+        Post savedPost = postRepository.save(fetchedPost);
         return postMapper.mapToPostResponse(savedPost);
     }
 
+    @Transactional
     public Post save(Post postEntity) {
         return postRepository.save(postEntity);
     }
@@ -102,6 +114,7 @@ public class PostService {
         return postMapper.mapToPostResponse(savedPost);
     }
 
+    @Transactional
     public void deletePostById(Long id) {
         jsonPlaceholderService.deletePostById(id);
         postRepository.deleteById(id);
