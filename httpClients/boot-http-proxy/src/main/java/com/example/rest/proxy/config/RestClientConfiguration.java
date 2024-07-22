@@ -3,8 +3,6 @@ package com.example.rest.proxy.config;
 import com.example.rest.proxy.client.JsonPlaceholderService;
 import io.micrometer.observation.ObservationRegistry;
 import java.util.List;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.hc.client5.http.config.ConnectionConfig;
 import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.client5.http.impl.DefaultConnectionKeepAliveStrategy;
@@ -27,13 +25,16 @@ import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.support.RestClientAdapter;
 import org.springframework.web.service.invoker.HttpServiceProxyFactory;
+import org.zalando.logbook.spring.LogbookClientHttpRequestInterceptor;
 
 @Configuration(proxyBeanMethods = false)
-@RequiredArgsConstructor
-@Slf4j
-public class RestClientConfiguration {
+class RestClientConfiguration {
 
     private final ApplicationProperties applicationProperties;
+
+    RestClientConfiguration(ApplicationProperties applicationProperties) {
+        this.applicationProperties = applicationProperties;
+    }
 
     @Bean
     public CloseableHttpClient httpClient() {
@@ -71,7 +72,9 @@ public class RestClientConfiguration {
 
     @Bean
     RestClientCustomizer restClientCustomizer(
-            ObservationRegistry observationRegistry, CloseableHttpClient httpClient) {
+            ObservationRegistry observationRegistry,
+            CloseableHttpClient httpClient,
+            LogbookClientHttpRequestInterceptor interceptor) {
         return restClientBuilder ->
                 restClientBuilder
                         .defaultHeaders(
@@ -82,15 +85,7 @@ public class RestClientConfiguration {
                         .baseUrl(applicationProperties.getPostServiceUrl())
                         .requestFactory(new HttpComponentsClientHttpRequestFactory(httpClient))
                         .observationRegistry(observationRegistry)
-                        .requestInterceptor(
-                                (request, body, execution) -> {
-                                    // log the http request
-                                    log.info("URI: {}", request.getURI());
-                                    log.info("HTTP Method: {}", request.getMethod().name());
-                                    log.info("HTTP Headers: {}", request.getHeaders());
-
-                                    return execution.execute(request, body);
-                                });
+                        .requestInterceptor(interceptor);
     }
 
     @Bean

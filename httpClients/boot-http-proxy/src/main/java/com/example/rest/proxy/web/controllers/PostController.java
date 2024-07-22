@@ -7,7 +7,6 @@ import com.example.rest.proxy.model.response.PostResponse;
 import com.example.rest.proxy.services.PostService;
 import com.example.rest.proxy.utils.AppConstants;
 import java.util.List;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -24,13 +23,16 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/posts")
-@RequiredArgsConstructor
-public class PostController {
+class PostController {
 
     private final PostService postService;
 
+    PostController(PostService postService) {
+        this.postService = postService;
+    }
+
     @GetMapping
-    public PagedResult<PostResponse> getAllPosts(
+    PagedResult<PostResponse> getAllPosts(
             @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_NUMBER, required = false)
                     int pageNo,
             @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_SIZE, required = false)
@@ -43,7 +45,7 @@ public class PostController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<PostResponse> getPostById(@PathVariable Long id) {
+    ResponseEntity<PostResponse> getPostById(@PathVariable Long id) {
         return postService
                 .findPostById(id)
                 .map(ResponseEntity::ok)
@@ -51,7 +53,7 @@ public class PostController {
     }
 
     @GetMapping("/{id}/comments")
-    public ResponseEntity<List<PostCommentDto>> getPostCommentsById(@PathVariable Long id) {
+    ResponseEntity<List<PostCommentDto>> getPostCommentsById(@PathVariable Long id) {
         return postService
                 .findPostCommentsById(id)
                 .map(ResponseEntity::ok)
@@ -60,12 +62,12 @@ public class PostController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public PostResponse createPost(@RequestBody @Validated Post post) {
+    PostResponse createPost(@RequestBody @Validated Post post) {
         return postService.savePost(post);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<PostResponse> updatePost(@PathVariable Long id, @RequestBody Post post) {
+    ResponseEntity<PostResponse> updatePost(@PathVariable Long id, @RequestBody Post post) {
         return postService
                 .findPostById(id)
                 .map(
@@ -77,7 +79,7 @@ public class PostController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<PostResponse> deletePost(@PathVariable Long id) {
+    ResponseEntity<PostResponse> deletePost(@PathVariable Long id) {
         return postService
                 .findPostById(id)
                 .map(
