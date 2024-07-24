@@ -8,8 +8,6 @@ import java.util.concurrent.TimeUnit;
 import org.springframework.boot.web.reactive.function.client.WebClientCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.netty.http.client.HttpClient;
@@ -21,18 +19,7 @@ public class WebClientConfiguration {
 
     @Bean
     WebClient webClient(WebClient.Builder builder, ApplicationProperties applicationProperties) {
-        return builder.baseUrl(applicationProperties.getJsonPlaceholderUrl())
-                .defaultHeaders(
-                        httpHeaders -> {
-                            httpHeaders.add(HttpHeaders.ACCEPT_ENCODING, "gzip");
-                            httpHeaders.add(
-                                    HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
-                        })
-                .filter(
-                        (request, next) ->
-                                next.exchange(request)
-                                        .retryWhen(Retry.backoff(3, Duration.ofMillis(100))))
-                .build();
+        return builder.baseUrl(applicationProperties.getJsonPlaceholderUrl()).build();
     }
 
     @Bean
@@ -58,6 +45,12 @@ public class WebClientConfiguration {
                                                                 5, TimeUnit.SECONDS)));
 
         return webClientBuilder ->
-                webClientBuilder.clientConnector(new ReactorClientHttpConnector(httpClient));
+                webClientBuilder
+                        .filter(
+                                (request, next) ->
+                                        next.exchange(request)
+                                                .retryWhen(
+                                                        Retry.backoff(3, Duration.ofMillis(100))))
+                        .clientConnector(new ReactorClientHttpConnector(httpClient));
     }
 }
