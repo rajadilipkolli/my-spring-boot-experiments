@@ -20,13 +20,7 @@ class WebClientConfiguration {
 
     @Bean
     WebClient webClient(WebClient.Builder builder) {
-        return builder.baseUrl("https://jsonplaceholder.typicode.com")
-                .defaultHeader(HttpHeaders.ACCEPT_ENCODING, "gzip")
-                .filter(
-                        (request, next) ->
-                                next.exchange(request)
-                                        .retryWhen(Retry.backoff(3, Duration.ofMillis(100))))
-                .build();
+        return builder.baseUrl("https://jsonplaceholder.typicode.com").build();
     }
 
     @Bean
@@ -52,6 +46,13 @@ class WebClientConfiguration {
                                                                 5, TimeUnit.SECONDS)));
 
         return webClientBuilder ->
-                webClientBuilder.clientConnector(new ReactorClientHttpConnector(httpClient));
+                webClientBuilder
+                        .defaultHeader(HttpHeaders.ACCEPT_ENCODING, "gzip")
+                        .filter(
+                                (request, next) ->
+                                        next.exchange(request)
+                                                .retryWhen(
+                                                        Retry.backoff(3, Duration.ofMillis(100))))
+                        .clientConnector(new ReactorClientHttpConnector(httpClient));
     }
 }
