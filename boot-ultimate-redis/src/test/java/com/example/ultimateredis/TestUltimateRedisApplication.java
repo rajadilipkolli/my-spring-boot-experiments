@@ -16,7 +16,7 @@ class TestUltimateRedisApplication {
     @ServiceConnection(name = "redis")
     RedisContainer redisContainer(DynamicPropertyRegistry dynamicPropertyRegistry) {
         RedisContainer redisContainer =
-                new RedisContainer(DockerImageName.parse("redis").withTag("7.2.5-alpine"))
+                new RedisContainer(DockerImageName.parse("redis").withTag("7.4.0-alpine"))
                         .withStartupAttempts(5)
                         .withStartupTimeout(Duration.ofMinutes(10));
         dynamicPropertyRegistry.add("cache.redis-uri", redisContainer::getRedisURI);
