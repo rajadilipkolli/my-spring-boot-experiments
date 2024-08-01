@@ -9,7 +9,6 @@ import com.example.archunit.services.ClientService;
 import com.example.archunit.utils.AppConstants;
 import jakarta.validation.Valid;
 import java.net.URI;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -25,10 +24,13 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @RestController
 @RequestMapping("/api/clients")
-@RequiredArgsConstructor
 class ClientController {
 
     private final ClientService clientService;
+
+    ClientController(ClientService clientService) {
+        this.clientService = clientService;
+    }
 
     @GetMapping
     ResponseEntity<PagedResult<ClientResponse>> getAllClients(

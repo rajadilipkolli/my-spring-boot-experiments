@@ -7,8 +7,8 @@ import static com.example.archunit.architecture.ArchitectureConstants.DEFAULT_PA
 import static com.example.archunit.architecture.CommonRules.beanMethodsAreNotAllowedRule;
 import static com.example.archunit.architecture.CommonRules.componentAnnotationIsNotAllowedRule;
 import static com.example.archunit.architecture.CommonRules.fieldsShouldNotBePublic;
+import static com.example.archunit.architecture.CommonRules.packagePrivateConstructorsRule;
 import static com.example.archunit.architecture.CommonRules.privateMethodsAreNotAllowedRule;
-import static com.example.archunit.architecture.CommonRules.publicConstructorsRule;
 import static com.example.archunit.architecture.CommonRules.publicMethodsAreNotAllowedRule;
 import static com.example.archunit.architecture.CommonRules.staticMethodsAreNotAllowedRule;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes;
@@ -59,7 +59,7 @@ class ControllerRulesTest {
 
     // Constructors
     @ArchTest
-    static final ArchRule constructors_should_not_be_private = publicConstructorsRule(CONTROLLER_PACKAGE);
+    static final ArchRule constructors_should_be_package_private = packagePrivateConstructorsRule(CONTROLLER_PACKAGE);
 
     // Methods
     @ArchTest

@@ -140,6 +140,19 @@ public class CommonRules {
                 .because("Public constructors are only allowed in %s".formatted(packageName));
     }
 
+    static ArchRule packagePrivateConstructorsRule(String packageName) {
+        return constructors()
+                .that()
+                .areDeclaredInClassesThat()
+                .resideInAPackage(packageName)
+                .and()
+                .areDeclaredInClassesThat()
+                .areNotAnonymousClasses()
+                .should()
+                .bePackagePrivate()
+                .because("Package Private constructors are only allowed in %s".formatted(packageName));
+    }
+
     // Methods
     static ArchRule beanMethodsAreNotAllowedRule(String packageName) {
         return methods()
