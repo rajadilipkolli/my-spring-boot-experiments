@@ -10,7 +10,7 @@ public class ContainersConfig {
 
     @Container
     public static final OpensearchContainer<?> openSearchContainer =
-            new OpensearchContainer<>(DockerImageName.parse("opensearchproject/opensearch:2.15.0"))
+            new OpensearchContainer<>(DockerImageName.parse("opensearchproject/opensearch:2.16.0"))
                     .withEnv("OPENSEARCH_INITIAL_ADMIN_PASSWORD", "admin");
 
     static {
