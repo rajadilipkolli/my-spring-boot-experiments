@@ -4,7 +4,6 @@ import com.example.bootbatchjpa.entities.Customer;
 import com.example.bootbatchjpa.model.response.PagedResult;
 import com.example.bootbatchjpa.services.CustomerService;
 import com.example.bootbatchjpa.utils.AppConstants;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -21,13 +20,16 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/customers")
-@RequiredArgsConstructor
-public class CustomerController {
+class CustomerController {
 
     private final CustomerService customerService;
 
+    CustomerController(CustomerService customerService) {
+        this.customerService = customerService;
+    }
+
     @GetMapping
-    public PagedResult<Customer> getAllCustomers(
+    PagedResult<Customer> getAllCustomers(
             @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_NUMBER, required = false)
                     int pageNo,
             @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_SIZE, required = false)
@@ -40,7 +42,7 @@ public class CustomerController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Customer> getCustomerById(@PathVariable Long id) {
+    ResponseEntity<Customer> getCustomerById(@PathVariable Long id) {
         return customerService
                 .findCustomerById(id)
                 .map(ResponseEntity::ok)
@@ -49,13 +51,12 @@ public class CustomerController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Customer createCustomer(@RequestBody @Validated Customer customer) {
+    Customer createCustomer(@RequestBody @Validated Customer customer) {
         return customerService.saveCustomer(customer);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Customer> updateCustomer(
-            @PathVariable Long id, @RequestBody Customer customer) {
+    ResponseEntity<Customer> updateCustomer(@PathVariable Long id, @RequestBody Customer customer) {
         return customerService
                 .findCustomerById(id)
                 .map(
@@ -67,7 +68,7 @@ public class CustomerController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Customer> deleteCustomer(@PathVariable Long id) {
+    ResponseEntity<Customer> deleteCustomer(@PathVariable Long id) {
         return customerService
                 .findCustomerById(id)
                 .map(

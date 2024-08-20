@@ -1,8 +1,5 @@
 package com.example.bootbatchjpa.utils;
 
-import lombok.experimental.UtilityClass;
-
-@UtilityClass
 public final class AppConstants {
     public static final String PROFILE_PROD = "prod";
     public static final String PROFILE_NOT_PROD = "!" + PROFILE_PROD;
@@ -12,4 +9,9 @@ public final class AppConstants {
     public static final String DEFAULT_PAGE_SIZE = "10";
     public static final String DEFAULT_SORT_BY = "id";
     public static final String DEFAULT_SORT_DIRECTION = "asc";
+
+    private AppConstants() {
+        throw new UnsupportedOperationException(
+                "This is a utility class and cannot be instantiated");
+    }
 }
