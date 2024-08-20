@@ -5,7 +5,6 @@ import com.example.bootbatchjpa.entities.Customer;
 import com.example.bootbatchjpa.model.response.PagedResult;
 import com.example.bootbatchjpa.repositories.CustomerRepository;
 import java.util.Optional;
-import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -14,14 +13,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@Transactional
+@Transactional(readOnly = true)
 @Loggable
-@RequiredArgsConstructor
 public class CustomerService {
 
     private final CustomerRepository customerRepository;
 
-    @Transactional(readOnly = true)
+    public CustomerService(CustomerRepository customerRepository) {
+        this.customerRepository = customerRepository;
+    }
+
     public PagedResult<Customer> findAllCustomers(
             int pageNo, int pageSize, String sortBy, String sortDir) {
         Sort sort =
@@ -36,15 +37,16 @@ public class CustomerService {
         return new PagedResult<>(customersPage);
     }
 
-    @Transactional(readOnly = true)
     public Optional<Customer> findCustomerById(Long id) {
         return customerRepository.findById(id);
     }
 
+    @Transactional
     public Customer saveCustomer(Customer customer) {
         return customerRepository.save(customer);
     }
 
+    @Transactional
     public void deleteCustomerById(Long id) {
         customerRepository.deleteById(id);
     }

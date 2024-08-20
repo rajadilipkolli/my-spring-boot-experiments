@@ -8,18 +8,10 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotEmpty;
 import java.util.Objects;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 import org.hibernate.Hibernate;
 
 @Entity
 @Table(name = "customers")
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
 public class Customer {
 
     @Id
@@ -33,6 +25,51 @@ public class Customer {
     private String address;
 
     private String gender;
+
+    public Customer(Long id, String name, String address, String gender) {
+        this.id = id;
+        this.name = name;
+        this.address = address;
+        this.gender = gender;
+    }
+
+    public Customer() {}
+
+    public Long getId() {
+        return id;
+    }
+
+    public Customer setId(Long id) {
+        this.id = id;
+        return this;
+    }
+
+    public @NotEmpty(message = "Name cannot be empty") String getName() {
+        return name;
+    }
+
+    public Customer setName(@NotEmpty(message = "Name cannot be empty") String name) {
+        this.name = name;
+        return this;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public Customer setAddress(String address) {
+        this.address = address;
+        return this;
+    }
+
+    public String getGender() {
+        return gender;
+    }
+
+    public Customer setGender(String gender) {
+        this.gender = gender;
+        return this;
+    }
 
     @Override
     public boolean equals(Object o) {
