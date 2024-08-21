@@ -1,13 +1,15 @@
 package com.example.ultimateredis.service;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
-@Slf4j
 @Service
 public class CacheServiceWithCustomKey {
+
+    private static final Logger log = LoggerFactory.getLogger(CacheServiceWithCustomKey.class);
 
     @Cacheable(cacheNames = "myCache", key = "'myPrefix_'.concat(#relevant)")
     public String cacheThis(String relevant, String unRelevantTrackingId) {
