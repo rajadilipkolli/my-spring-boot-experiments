@@ -1,5 +1,6 @@
 package com.example.ultimateredis.config;
 
+import com.example.ultimateredis.utils.AppConstants;
 import io.lettuce.core.ReadFrom;
 import java.time.Duration;
 import org.springframework.boot.autoconfigure.cache.RedisCacheManagerBuilderCustomizer;
@@ -43,7 +44,7 @@ public class CacheConfig implements CachingConfigurer {
     }
 
     @Bean
-    @Profile("sentinel")
+    @Profile(AppConstants.PROFILE_SENTINEL)
     LettuceClientConfigurationBuilderCustomizer lettuceClientConfigurationBuilderCustomizer() {
         return clientConfigurationBuilder ->
                 clientConfigurationBuilder.readFrom(ReadFrom.REPLICA_PREFERRED);
