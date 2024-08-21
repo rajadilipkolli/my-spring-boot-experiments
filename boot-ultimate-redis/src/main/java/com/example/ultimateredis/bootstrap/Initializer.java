@@ -7,19 +7,28 @@ import com.example.ultimateredis.service.ControlledCacheServiceWithGenericKey;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
 @Component
-@Slf4j
-@RequiredArgsConstructor
 public class Initializer implements CommandLineRunner {
+
+    private static final Logger log = LoggerFactory.getLogger(Initializer.class);
 
     private final CacheServiceWithCustomKey cacheService;
     private final ActorService actorService;
     private final ControlledCacheServiceWithGenericKey controlledCacheServiceWithGenericKey;
+
+    public Initializer(
+            CacheServiceWithCustomKey cacheService,
+            ActorService actorService,
+            ControlledCacheServiceWithGenericKey controlledCacheServiceWithGenericKey) {
+        this.cacheService = cacheService;
+        this.actorService = actorService;
+        this.controlledCacheServiceWithGenericKey = controlledCacheServiceWithGenericKey;
+    }
 
     @Override
     public void run(String... args) {
@@ -52,13 +61,20 @@ public class Initializer implements CommandLineRunner {
         actorService.deleteActorById(savedActor.getId());
         log.info("deleted Actor: {}", actorService.findActorById(savedActor.getId()).isEmpty());
 
-        List<Actor> savedActors =
-                actorService.saveActors(
-                        List.of(new Actor(null, "tom", 30), new Actor(null, "brad", 45)));
+        actorService.saveActors(List.of(new Actor(null, "tom", 30), new Actor(null, "brad", 45)));
         Optional<Actor> actorTom = actorService.findActorByNameAndAge("tom", 30);
-        log.info("Fetched Actor with Age using Data: {}", actorTom.get());
-        sampleName = actorService.findActorByNameAndAge("tom", 60);
-        log.info("Fetched Actor: {}", sampleName.isPresent());
+        if (actorTom.isPresent()) {
+            log.info("Saved Actor using Data: {}", actorTom.get());
+            sampleName = actorService.findActorByNameAndAge("tom", 60);
+            log.info("Fetched Actor: {}", sampleName.isPresent());
+            // Not working
+            actorService.deleteActorByName(actorTom.get().getName());
+            log.info(
+                    "deleted Actor: {}",
+                    actorService.findActorById(actorTom.get().getId()).isEmpty());
+        }
+        actorService.deleteAll();
+        log.info("No of Entries Present in Cache : {}", actorService.findAll().size());
     }
 
     private String getFromControlledCache(String param) {

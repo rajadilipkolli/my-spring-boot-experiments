@@ -4,14 +4,20 @@ import com.example.ultimateredis.model.Actor;
 import com.example.ultimateredis.repository.ActorRepository;
 import java.util.List;
 import java.util.Optional;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
-@RequiredArgsConstructor
 public class ActorService {
 
     private final ActorRepository actorRepository;
+
+    public ActorService(ActorRepository actorRepository) {
+        this.actorRepository = actorRepository;
+    }
+
+    public List<Actor> findAll() {
+        return (List<Actor>) actorRepository.findAll();
+    }
 
     public Optional<Actor> findActorByName(String name) {
         return actorRepository.findByName(name);
@@ -39,5 +45,9 @@ public class ActorService {
 
     public void deleteActorByName(String name) {
         actorRepository.deleteByName(name);
+    }
+
+    public void deleteAll() {
+        actorRepository.deleteAll();
     }
 }
