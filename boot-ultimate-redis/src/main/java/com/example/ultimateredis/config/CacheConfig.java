@@ -1,7 +1,10 @@
 package com.example.ultimateredis.config;
 
+import com.example.ultimateredis.utils.AppConstants;
+import io.lettuce.core.ReadFrom;
 import java.time.Duration;
 import org.springframework.boot.autoconfigure.cache.RedisCacheManagerBuilderCustomizer;
+import org.springframework.boot.autoconfigure.data.redis.LettuceClientConfigurationBuilderCustomizer;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cache.Cache;
 import org.springframework.cache.annotation.CachingConfigurer;
@@ -9,6 +12,7 @@ import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.interceptor.CacheErrorHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.lang.Nullable;
@@ -37,6 +41,13 @@ public class CacheConfig implements CachingConfigurer {
                                             RedisCacheConfiguration.defaultCacheConfig()
                                                     .entryTtl(Duration.ofSeconds(timeout))));
         };
+    }
+
+    @Bean
+    @Profile(AppConstants.PROFILE_SENTINEL)
+    LettuceClientConfigurationBuilderCustomizer lettuceClientConfigurationBuilderCustomizer() {
+        return clientConfigurationBuilder ->
+                clientConfigurationBuilder.readFrom(ReadFrom.REPLICA_PREFERRED);
     }
 
     @Override
