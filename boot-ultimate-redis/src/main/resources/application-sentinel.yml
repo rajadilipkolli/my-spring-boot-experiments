@@ -1,0 +1,11 @@
+spring:
+  application:
+    name: spring-redis-sentinel
+  data:
+    redis:
+      lettuce:
+        shutdown-timeout: 200ms
+      password: redispassword
+      sentinel:
+        master: mymaster
+        nodes: 127.0.0.1:26379,127.0.0.1:26380,127.0.0.1:26381
