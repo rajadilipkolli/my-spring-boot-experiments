@@ -1,0 +1,12 @@
+{
+  "generator-springboot": {
+    "appName": "boot-reactive-cache",
+    "packageName": "com.example.cache",
+    "databaseType": "postgresql",
+    "dbMigrationTool": "flywaydb",
+    "features": [],
+    "buildTool": "maven",
+    "packageFolder": "com/example/cache",
+    "flywayMigrationCounter": 2
+  }
+}
