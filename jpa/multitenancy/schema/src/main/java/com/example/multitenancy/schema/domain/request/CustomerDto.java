@@ -1,5 +1,5 @@
 package com.example.multitenancy.schema.domain.request;
 
-import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotBlank;
 
-public record CustomerDto(@NotEmpty(message = "Name cannot be empty") String name) {}
+public record CustomerDto(@NotBlank(message = "Name cannot be Blank") String name) {}

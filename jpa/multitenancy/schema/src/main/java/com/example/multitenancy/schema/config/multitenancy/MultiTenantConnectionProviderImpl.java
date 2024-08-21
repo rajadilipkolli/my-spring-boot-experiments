@@ -4,7 +4,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Map;
 import javax.sql.DataSource;
-import lombok.RequiredArgsConstructor;
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.engine.jdbc.connections.spi.MultiTenantConnectionProvider;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernatePropertiesCustomizer;
@@ -13,11 +12,14 @@ import org.springframework.stereotype.Component;
 
 @Component
 @DependsOnDatabaseInitialization
-@RequiredArgsConstructor
 public class MultiTenantConnectionProviderImpl
         implements MultiTenantConnectionProvider<String>, HibernatePropertiesCustomizer {
 
     private final DataSource dataSource;
+
+    public MultiTenantConnectionProviderImpl(DataSource dataSource) {
+        this.dataSource = dataSource;
+    }
 
     @Override
     public Connection getAnyConnection() throws SQLException {
