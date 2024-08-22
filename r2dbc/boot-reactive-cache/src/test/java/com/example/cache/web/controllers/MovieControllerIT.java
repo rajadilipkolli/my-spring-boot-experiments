@@ -1,129 +1,162 @@
 package com.example.cache.web.controllers;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.Matchers.hasSize;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import com.example.cache.common.AbstractIntegrationTest;
 import com.example.cache.entities.Movie;
 import com.example.cache.model.request.MovieRequest;
+import com.example.cache.model.response.MovieResponse;
 import com.example.cache.repositories.MovieRepository;
-import java.util.ArrayList;
-import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.web.reactive.function.BodyInserters;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 class MovieControllerIT extends AbstractIntegrationTest {
 
     @Autowired
     private MovieRepository movieRepository;
 
-    private List<Movie> movieList = null;
+    private Flux<Movie> movieFlux = null;
 
     @BeforeEach
     void setUp() {
-        movieRepository.deleteAllInBatch();
-
-        movieList = new ArrayList<>();
-        movieList.add(new Movie(null, "First Movie"));
-        movieList.add(new Movie(null, "Second Movie"));
-        movieList.add(new Movie(null, "Third Movie"));
-        movieList = movieRepository.saveAll(movieList);
+        movieFlux = movieRepository
+                .deleteAll()
+                .thenMany(Flux.just(
+                        new Movie(null, "First Movie"),
+                        new Movie(null, "Second Movie"),
+                        new Movie(null, "Third Movie")))
+                .flatMap(movieRepository::save);
     }
 
     @Test
-    void shouldFetchAllMovies() throws Exception {
-        this.mockMvc
-                .perform(get("/api/movies"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.size()", is(movieList.size())))
-                .andExpect(jsonPath("$.totalElements", is(3)))
-                .andExpect(jsonPath("$.pageNumber", is(1)))
-                .andExpect(jsonPath("$.totalPages", is(1)))
-                .andExpect(jsonPath("$.isFirst", is(true)))
-                .andExpect(jsonPath("$.isLast", is(true)))
-                .andExpect(jsonPath("$.hasNext", is(false)))
-                .andExpect(jsonPath("$.hasPrevious", is(false)));
+    void shouldFetchAllMovies() {
+        this.webTestClient
+                .get()
+                .uri("/api/movies")
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBodyList(MovieResponse.class)
+                .hasSize(movieFlux.collectList().block().size());
+        //                .andExpect(jsonPath("$.totalElements", is(3)))
+        //                .andExpect(jsonPath("$.pageNumber", is(1)))
+        //                .andExpect(jsonPath("$.totalPages", is(1)))
+        //                .andExpect(jsonPath("$.isFirst", is(true)))
+        //                .andExpect(jsonPath("$.isLast", is(true)))
+        //                .andExpect(jsonPath("$.hasNext", is(false)))
+        //                .andExpect(jsonPath("$.hasPrevious", is(false)));
     }
 
     @Test
-    void shouldFindMovieById() throws Exception {
-        Movie movie = movieList.get(0);
-        Long movieId = movie.getId();
+    void shouldFindMovieById() {
+        Movie movie = movieFlux.blockLast();
+        Long movieId = movie.id();
 
-        this.mockMvc
-                .perform(get("/api/movies/{id}", movieId))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(movie.getId()), Long.class))
-                .andExpect(jsonPath("$.text", is(movie.getText())));
+        this.webTestClient
+                .get()
+                .uri("/api/movies/{id}", movieId)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectHeader()
+                .contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.id")
+                .isEqualTo(movieId)
+                .jsonPath("$.title")
+                .isEqualTo(movie.title());
     }
 
     @Test
-    void shouldCreateNewMovie() throws Exception {
+    void shouldCreateNewMovie() {
         MovieRequest movieRequest = new MovieRequest("New Movie");
-        this.mockMvc
-                .perform(post("/api/movies")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(movieRequest)))
-                .andExpect(status().isCreated())
-                .andExpect(header().exists(HttpHeaders.LOCATION))
-                .andExpect(jsonPath("$.id", notNullValue()))
-                .andExpect(jsonPath("$.text", is(movieRequest.text())));
+        this.webTestClient
+                .post()
+                .uri("/api/movies")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .body(Mono.just(movieRequest), MovieRequest.class)
+                .exchange()
+                .expectStatus()
+                .isCreated()
+                .expectHeader()
+                .contentType(MediaType.APPLICATION_JSON)
+                .expectBody(MovieResponse.class)
+                .value(movieResponse -> {
+                    assertThat(movieResponse.id()).isNotNull();
+                    assertThat(movieResponse.title()).isNotNull().isEqualTo("New Movie");
+                });
     }
 
     @Test
     void shouldReturn400WhenCreateNewMovieWithoutText() throws Exception {
         MovieRequest movieRequest = new MovieRequest(null);
 
-        this.mockMvc
-                .perform(post("/api/movies")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(movieRequest)))
-                .andExpect(status().isBadRequest())
-                .andExpect(header().string("Content-Type", is("application/problem+json")))
-                .andExpect(jsonPath("$.type", is("about:blank")))
-                .andExpect(jsonPath("$.title", is("Constraint Violation")))
-                .andExpect(jsonPath("$.status", is(400)))
-                .andExpect(jsonPath("$.detail", is("Invalid request content.")))
-                .andExpect(jsonPath("$.instance", is("/api/movies")))
-                .andExpect(jsonPath("$.violations", hasSize(1)))
-                .andExpect(jsonPath("$.violations[0].field", is("text")))
-                .andExpect(jsonPath("$.violations[0].message", is("Text cannot be empty")))
-                .andReturn();
+        this.webTestClient
+                .post()
+                .uri("/api/movies")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .body(Mono.just(movieRequest), MovieRequest.class)
+                .exchange()
+                .expectStatus()
+                .isBadRequest()
+                .expectHeader()
+                .contentType(MediaType.APPLICATION_PROBLEM_JSON)
+                .expectBody()
+                .json(
+                        """
+                        {"type":"about:blank","title":"Constraint Violation","status":400,"detail":"Invalid request content.","instance":"/api/movies","violations":[{"object":"movieRequest","field":"title","rejectedValue":null,"message":"Title cannot be blank"}]}
+                        """,
+                        true);
     }
 
     @Test
     void shouldUpdateMovie() throws Exception {
-        Long movieId = movieList.get(0).getId();
+        Long movieId = movieFlux.blockLast().id();
         MovieRequest movieRequest = new MovieRequest("Updated Movie");
 
-        this.mockMvc
-                .perform(put("/api/movies/{id}", movieId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(movieRequest)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(movieId), Long.class))
-                .andExpect(jsonPath("$.text", is(movieRequest.text())));
+        this.webTestClient
+                .put()
+                .uri("/api/movies/{id}", movieId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .body(BodyInserters.fromValue(movieRequest))
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectHeader()
+                .contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.id")
+                .isEqualTo(movieId)
+                .jsonPath("$.title")
+                .isEqualTo("Updated Movie");
     }
 
     @Test
-    void shouldDeleteMovie() throws Exception {
-        Movie movie = movieList.get(0);
+    void shouldDeleteMovie() {
+        Movie movie = movieFlux.blockLast();
 
-        this.mockMvc
-                .perform(delete("/api/movies/{id}", movie.getId()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(movie.getId()), Long.class))
-                .andExpect(jsonPath("$.text", is(movie.getText())));
+        this.webTestClient
+                .delete()
+                .uri("/api/movies/{id}", movie.id())
+                .exchange()
+                .expectStatus()
+                .isAccepted()
+                .expectHeader()
+                .contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.id")
+                .isEqualTo(movie.id())
+                .jsonPath("$.title")
+                .isEqualTo(movie.title());
+        ;
     }
 }

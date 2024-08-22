@@ -1,17 +1,13 @@
 package com.example.cache.entities;
 
+import com.example.cache.model.request.MovieRequest;
+import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Table;
-import java.util.Objects;
 
-@Entity
-@Table(name = "movies")
-public class Movie {
+@Table("movies")
+public record Movie(@Id Long id, String title) {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
-    private Long id;
-
-    @Column(nullable = false)
-    private String text;
-
+    public Movie withRequest(MovieRequest movieRequest) {
+        return new Movie(id(), movieRequest.title());
+    }
 }

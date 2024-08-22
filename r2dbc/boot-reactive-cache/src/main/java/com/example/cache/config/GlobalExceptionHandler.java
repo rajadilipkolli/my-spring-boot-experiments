@@ -12,22 +12,22 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
 import org.springframework.validation.FieldError;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.support.WebExchangeBindException;
 
 @ControllerAdvice
 @Order(Ordered.HIGHEST_PRECEDENCE)
-class GlobalExceptionHandler {
+public class GlobalExceptionHandler {
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
+    @ExceptionHandler(WebExchangeBindException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    ProblemDetail onException(MethodArgumentNotValidException methodArgumentNotValidException) {
+    ProblemDetail onException(WebExchangeBindException webExchangeBindException) {
         ProblemDetail problemDetail =
                 ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(400), "Invalid request content.");
         problemDetail.setTitle("Constraint Violation");
-        List<ApiValidationError> validationErrorsList = methodArgumentNotValidException.getAllErrors().stream()
+        List<ApiValidationError> validationErrorsList = webExchangeBindException.getAllErrors().stream()
                 .map(objectError -> {
                     FieldError fieldError = (FieldError) objectError;
                     return new ApiValidationError(
@@ -48,7 +48,7 @@ class GlobalExceptionHandler {
             ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
                     resourceNotFoundException.getHttpStatus(), resourceNotFoundException.getMessage());
             problemDetail.setTitle("Not Found");
-            problemDetail.setType(URI.create("http://api.boot-reactive-cache.com/errors/not-found"));
+            problemDetail.setType(URI.create("https://api.boot-reactive-cache.com/errors/not-found"));
             problemDetail.setProperty("errorCategory", "Generic");
             problemDetail.setProperty("timestamp", Instant.now());
             return problemDetail;
@@ -57,5 +57,5 @@ class GlobalExceptionHandler {
         }
     }
 
-    record ApiValidationError(String object, String field, Object rejectedValue, String message) {}
+    public record ApiValidationError(String object, String field, Object rejectedValue, String message) {}
 }

@@ -1,5 +1,5 @@
 package com.example.cache.model.request;
 
-import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotBlank;
 
-public record MovieRequest(@NotEmpty(message = "Text cannot be empty") String text) {}
+public record MovieRequest(@NotBlank(message = "Title cannot be blank") String title) {}

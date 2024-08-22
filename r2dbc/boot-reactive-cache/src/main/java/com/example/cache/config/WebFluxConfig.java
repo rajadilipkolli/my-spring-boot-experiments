@@ -1,14 +1,16 @@
 package com.example.cache.config;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.servlet.config.annotation.CorsRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.reactive.config.CorsRegistry;
+import org.springframework.web.reactive.config.WebFluxConfigurer;
 
 @Configuration
-@RequiredArgsConstructor
-class WebMvcConfig implements WebMvcConfigurer {
+class WebFluxConfig implements WebFluxConfigurer {
     private final ApplicationProperties properties;
+
+    WebFluxConfig(ApplicationProperties properties) {
+        this.properties = properties;
+    }
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
