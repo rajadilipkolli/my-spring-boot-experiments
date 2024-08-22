@@ -1,18 +1,18 @@
 services:
   postgres:
-    container_name: postgres_local_db
-    image: postgres
+    container_name: postgres_movie_db
+    image: postgres:16.4-alpine
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: moviesDB
+      POSTGRES_USER: appuser
+      POSTGRES_PASSWORD: secret
+      POSTGRES_DB: appdb
     ports:
       - "5432:5432"
     volumes:
       - local_dev:/var/lib/postgresql/data
   redis:
-    container_name: redis_local_db
-    image: "redis/redis-stack:latest"
+    container_name: redis_movie_db
+    image: redis/redis-stack:latest
     ports:
       - "6379:6379"
       - "8001:8001"
