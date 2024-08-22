@@ -31,3 +31,4 @@ You can also run the application using Maven as follows:
 ### Useful Links
 * Swagger UI: http://localhost:8080/swagger-ui.html
 * Actuator Endpoint: http://localhost:8080/actuator
+* Redis Insights: http://localhost:8001

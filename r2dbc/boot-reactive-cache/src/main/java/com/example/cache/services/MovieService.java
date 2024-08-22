@@ -44,10 +44,11 @@ public class MovieService {
                 .switchIfEmpty(movieRepository
                         .findAll()
                         // Persisting the fetched movies in the cache.
-                        .flatMap(
-                                movie -> stringMovieReactiveValueOperations
-                                        .set(AppConstants.MOVIE_KEY + movie.id(), movie)
-                                        .thenReturn(movie) // Chain the cache update
+                        .doOnNext(
+                                movie -> Mono.defer(() -> stringMovieReactiveValueOperations.set(
+                                                AppConstants.MOVIE_KEY + movie.id(), movie))
+                                        .subscribeOn(Schedulers.boundedElastic())
+                                        .subscribe() // Asynchronously update the cache
                                 ))
                 .map(movieMapper::toResponse);
     }
@@ -55,9 +56,14 @@ public class MovieService {
     public Mono<MovieResponse> findMovieById(Long id) {
         return stringMovieReactiveValueOperations
                 .get(AppConstants.MOVIE_KEY + id)
-                .switchIfEmpty(movieRepository.findById(id).flatMap(movie -> stringMovieReactiveValueOperations
-                        .set(AppConstants.MOVIE_KEY + movie.id(), movie)
-                        .thenReturn(movie)))
+                .switchIfEmpty(movieRepository
+                        .findById(id)
+                        .doOnNext(
+                                movie -> Mono.defer(() -> stringMovieReactiveValueOperations.set(
+                                                AppConstants.MOVIE_KEY + movie.id(), movie))
+                                        .subscribeOn(Schedulers.boundedElastic())
+                                        .subscribe() // Asynchronously update the cache
+                                ))
                 .map(movieMapper::toResponse);
     }
 
@@ -65,10 +71,10 @@ public class MovieService {
     public Flux<Movie> saveAllMovies(Flux<Movie> movieFlux) {
         return movieRepository
                 .saveAll(movieFlux)
-                .publishOn(Schedulers.boundedElastic())
                 .doOnNext(
                         movie -> Mono.defer(() -> stringMovieReactiveValueOperations.set(
                                         AppConstants.MOVIE_KEY + movie.id(), movie))
+                                .subscribeOn(Schedulers.boundedElastic())
                                 .subscribe() // Asynchronously update the cache
                         );
     }
@@ -77,10 +83,10 @@ public class MovieService {
     public Mono<MovieResponse> saveMovie(MovieRequest movieRequest) {
         return Mono.just(movieMapper.toEntity(movieRequest))
                 .flatMap(movieRepository::save)
-                .publishOn(Schedulers.boundedElastic())
                 .doOnNext(
                         movie -> Mono.defer(() -> stringMovieReactiveValueOperations.set(
                                         AppConstants.MOVIE_KEY + movie.id(), movie))
+                                .subscribeOn(Schedulers.boundedElastic())
                                 .subscribe() // Asynchronously update the cache
                         )
                 .map(movieMapper::toResponse);
