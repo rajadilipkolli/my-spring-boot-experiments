@@ -41,6 +41,7 @@
 * [r2dbc](r2dbc/README.md)
   * [r2dbc-jooq](r2dbc/boot-jooq-r2dbc-sample/README.md)
   * [r2dbc-boot](r2dbc/boot-r2dbc-sample/README.md)
+  * [reactive-cache](r2dbc/boot-reactive-cache/README.md)
 * [scheduler](scheduler/README.md)
   * [Scheduling using JobRunr](scheduler/boot-jobrunr-sample/README.md)
   * [Scheduling using Quartz](scheduler/boot-scheduler-quartz/README.md)
