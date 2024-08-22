@@ -113,7 +113,14 @@ public class MovieService {
     }
 
     @Transactional
-    public Mono<Long> deleteAll() {
-        return movieRepository.deleteAll().then(reactiveRedisTemplate.delete(AppConstants.MOVIE_KEY + "*"));
+    public Mono<String> deleteAll() {
+        return movieRepository
+                .deleteAll()
+                .then(reactiveRedisTemplate
+                        .getConnectionFactory()
+                        .getReactiveConnection()
+                        .serverCommands()
+                        .flushDb()
+                        .single());
     }
 }
