@@ -1,5 +1,5 @@
 FROM eclipse-temurin:21.0.4_7-jre-alpine as builder
-WORKDIR application
+WORKDIR /application
 ARG JAR_FILE=target/boot-reactive-cache-0.0.1-SNAPSHOT.jar
 COPY ${JAR_FILE} application.jar
 RUN java -Djarmode=layertools -jar application.jar extract
