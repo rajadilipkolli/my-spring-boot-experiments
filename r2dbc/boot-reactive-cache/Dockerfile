@@ -6,7 +6,7 @@ RUN java -Djarmode=layertools -jar application.jar extract
 
 # the second stage of our build will copy the extracted layers
 FROM eclipse-temurin:21.0.4_7-jre-alpine
-WORKDIR application
+WORKDIR /application
 COPY --from=builder application/dependencies/ ./
 COPY --from=builder application/spring-boot-loader/ ./
 COPY --from=builder application/snapshot-dependencies/ ./
