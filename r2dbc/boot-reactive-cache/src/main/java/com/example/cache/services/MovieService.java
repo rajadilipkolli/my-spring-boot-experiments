@@ -5,6 +5,7 @@ import com.example.cache.mapper.MovieMapper;
 import com.example.cache.model.request.MovieRequest;
 import com.example.cache.model.response.MovieResponse;
 import com.example.cache.repositories.MovieRepository;
+import com.example.cache.utils.AppConstants;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,22 +38,25 @@ public class MovieService {
                 .switchIfEmpty(movieRepository
                         .findAll()
                         // Persisting the fetched movies in the cache.
-                        .flatMap(movie -> reactiveRedisTemplate.opsForValue().set("movie:" + movie.id(), movie))
+                        .flatMap(movie ->
+                                reactiveRedisTemplate.opsForValue().set(AppConstants.MOVIE_KEY + movie.id(), movie))
                         // Fetching the movies from the updated cache.
-                        .thenMany(reactiveRedisTemplate.keys("movie:*").flatMap(key -> reactiveRedisTemplate
-                                .opsForValue()
-                                .get(key))))
+                        .thenMany(reactiveRedisTemplate
+                                .keys(AppConstants.MOVIE_KEY + "*")
+                                .flatMap(key ->
+                                        reactiveRedisTemplate.opsForValue().get(key))))
                 .map(movieMapper::toResponse);
     }
 
     public Mono<MovieResponse> findMovieById(Long id) {
         return reactiveRedisTemplate
                 .opsForValue()
-                .get("movie:" + id)
+                .get(AppConstants.MOVIE_KEY + id)
                 .switchIfEmpty(movieRepository
                         .findById(id)
-                        .flatMap(movie -> reactiveRedisTemplate.opsForValue().set("movie:" + movie.id(), movie))
-                        .then(reactiveRedisTemplate.opsForValue().get("movie:" + id)))
+                        .flatMap(movie ->
+                                reactiveRedisTemplate.opsForValue().set(AppConstants.MOVIE_KEY + movie.id(), movie))
+                        .then(reactiveRedisTemplate.opsForValue().get(AppConstants.MOVIE_KEY + id)))
                 .map(movieMapper::toResponse);
     }
 
@@ -62,8 +66,8 @@ public class MovieService {
                 .flatMap(movieRepository::save)
                 .flatMap(movie -> reactiveRedisTemplate
                         .opsForValue()
-                        .set("movie:" + movie.id(), movie)
-                        .then(reactiveRedisTemplate.opsForValue().get("movie:" + movie.id())))
+                        .set(AppConstants.MOVIE_KEY + movie.id(), movie)
+                        .then(reactiveRedisTemplate.opsForValue().get(AppConstants.MOVIE_KEY + movie.id())))
                 .map(movieMapper::toResponse);
     }
 
@@ -75,13 +79,13 @@ public class MovieService {
                 .flatMap(movieRepository::save)
                 .flatMap(movie -> reactiveRedisTemplate
                         .opsForValue()
-                        .set("movie:" + movie.id(), movie)
-                        .then(reactiveRedisTemplate.opsForValue().get("movie:" + movie.id())))
+                        .set(AppConstants.MOVIE_KEY + movie.id(), movie)
+                        .then(reactiveRedisTemplate.opsForValue().get(AppConstants.MOVIE_KEY + movie.id())))
                 .map(movieMapper::toResponse);
     }
 
     @Transactional
     public Mono<Long> deleteMovieById(Long id) {
-        return movieRepository.deleteById(id).then(reactiveRedisTemplate.delete("movie:" + id));
+        return movieRepository.deleteById(id).then(reactiveRedisTemplate.delete(AppConstants.MOVIE_KEY + id));
     }
 }
