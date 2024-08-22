@@ -43,13 +43,6 @@ class MovieControllerIT extends AbstractIntegrationTest {
                 .isOk()
                 .expectBodyList(MovieResponse.class)
                 .hasSize(movieFlux.collectList().block().size());
-        //                .andExpect(jsonPath("$.totalElements", is(3)))
-        //                .andExpect(jsonPath("$.pageNumber", is(1)))
-        //                .andExpect(jsonPath("$.totalPages", is(1)))
-        //                .andExpect(jsonPath("$.isFirst", is(true)))
-        //                .andExpect(jsonPath("$.isLast", is(true)))
-        //                .andExpect(jsonPath("$.hasNext", is(false)))
-        //                .andExpect(jsonPath("$.hasPrevious", is(false)));
     }
 
     @Test
@@ -74,6 +67,24 @@ class MovieControllerIT extends AbstractIntegrationTest {
     }
 
     @Test
+    void shouldReturn404WhenFetchingNonExistingMovie() {
+        this.webTestClient
+                .get()
+                .uri("/api/movies/{id}", 10000)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isNotFound()
+                .expectHeader()
+                .contentType(MediaType.APPLICATION_PROBLEM_JSON)
+                .expectBody()
+                .json(
+                        """
+                        {"type":"https://api.boot-reactive-cache.com/errors/not-found","title":"Not Found","status":404,"detail":"Movie with Id '10000' not found","instance":"/api/movies/10000","errorCategory":"Generic"}
+                        """);
+    }
+
+    @Test
     void shouldCreateNewMovie() {
         MovieRequest movieRequest = new MovieRequest("New Movie");
         this.webTestClient
@@ -87,6 +98,10 @@ class MovieControllerIT extends AbstractIntegrationTest {
                 .isCreated()
                 .expectHeader()
                 .contentType(MediaType.APPLICATION_JSON)
+                .expectHeader()
+                .contentLength(29)
+                .expectHeader()
+                .exists("Location")
                 .expectBody(MovieResponse.class)
                 .value(movieResponse -> {
                     assertThat(movieResponse.id()).isNotNull();
@@ -95,7 +110,7 @@ class MovieControllerIT extends AbstractIntegrationTest {
     }
 
     @Test
-    void shouldReturn400WhenCreateNewMovieWithoutText() throws Exception {
+    void shouldReturn400WhenCreateNewMovieWithoutTitle() {
         MovieRequest movieRequest = new MovieRequest(null);
 
         this.webTestClient
@@ -118,7 +133,7 @@ class MovieControllerIT extends AbstractIntegrationTest {
     }
 
     @Test
-    void shouldUpdateMovie() throws Exception {
+    void shouldUpdateMovie() {
         Long movieId = movieFlux.blockLast().id();
         MovieRequest movieRequest = new MovieRequest("Updated Movie");
 
@@ -157,6 +172,23 @@ class MovieControllerIT extends AbstractIntegrationTest {
                 .isEqualTo(movie.id())
                 .jsonPath("$.title")
                 .isEqualTo(movie.title());
-        ;
+    }
+
+    @Test
+    void shouldReturn404WhenDeletingNonExistingMovie() {
+        this.webTestClient
+                .delete()
+                .uri("/api/movies/{id}", 10000)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isNotFound()
+                .expectHeader()
+                .contentType(MediaType.APPLICATION_PROBLEM_JSON)
+                .expectBody()
+                .json(
+                        """
+                        {"type":"https://api.boot-reactive-cache.com/errors/not-found","title":"Not Found","status":404,"detail":"Movie with Id '10000' not found","instance":"/api/movies/10000","errorCategory":"Generic"}
+                        """);
     }
 }
