@@ -6,6 +6,16 @@
     "configurations": [
         {
             "type": "java",
+            "name": "Spring Boot-Application<boot-reactive-cache>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.example.cache.Application",
+            "projectName": "boot-reactive-cache",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
             "name": "Spring Boot-Application<boot-graphql-webmvc>",
             "request": "launch",
             "cwd": "${workspaceFolder}",
