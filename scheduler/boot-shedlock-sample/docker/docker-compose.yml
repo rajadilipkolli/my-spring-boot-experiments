@@ -6,7 +6,7 @@ services:
     environment:
       - POSTGRES_USER=appuser
       - POSTGRES_PASSWORD=secret
-      - POSTGRES_DB=appdb
+      - POSTGRES_DB=shedlockdb
     ports:
       - "5432:5432"
 
