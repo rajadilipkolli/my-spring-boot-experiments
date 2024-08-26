@@ -10,7 +10,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
-@ActiveProfiles({AppConstants.PROFILE_CLUSTER})
+@ActiveProfiles({AppConstants.PROFILE_NOT_CLUSTER})
 @SpringBootTest(
         webEnvironment = RANDOM_PORT,
         classes = {TestcontainersConfiguration.class})
