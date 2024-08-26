@@ -7,7 +7,7 @@
             "Username": "appuser",
             "Host": "postgresqldb",
             "SSLMode": "prefer",
-            "MaintenanceDB": "appdb",
+            "MaintenanceDB": "quartzdb",
             "PassFile": "/tmp/pgpassfile"
         }
     }
