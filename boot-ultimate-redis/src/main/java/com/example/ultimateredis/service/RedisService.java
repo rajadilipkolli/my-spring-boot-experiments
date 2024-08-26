@@ -1,6 +1,6 @@
 package com.example.ultimateredis.service;
 
-import com.example.ultimateredis.config.RedisUtil;
+import com.example.ultimateredis.config.RedisValueOperationsUtil;
 import com.example.ultimateredis.model.AddRedisRequest;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
@@ -12,10 +12,10 @@ public class RedisService {
 
     private static final Logger log = LoggerFactory.getLogger(RedisService.class);
 
-    private final RedisUtil<String> redisStringUtil;
+    private final RedisValueOperationsUtil<String> redisStringUtil;
 
-    public RedisService(RedisUtil<String> redisStringUtil) {
-        this.redisStringUtil = redisStringUtil;
+    public RedisService(RedisValueOperationsUtil<String> redisValueOpsUtil) {
+        this.redisStringUtil = redisValueOpsUtil;
     }
 
     public void addRedis(AddRedisRequest request) {

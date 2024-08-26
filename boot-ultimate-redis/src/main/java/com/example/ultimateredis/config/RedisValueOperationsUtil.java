@@ -7,13 +7,13 @@ import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Component;
 
 @Component
-public class RedisUtil<T> {
+public class RedisValueOperationsUtil<T> {
 
     private final RedisTemplate<String, T> redisTemplate;
     private final ValueOperations<String, T> valueOperations;
 
     @Autowired
-    public RedisUtil(RedisTemplate<String, T> redisTemplate) {
+    public RedisValueOperationsUtil(RedisTemplate<String, T> redisTemplate) {
         this.redisTemplate = redisTemplate;
         this.valueOperations = redisTemplate.opsForValue();
     }

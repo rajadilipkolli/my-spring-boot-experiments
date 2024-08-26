@@ -36,7 +36,7 @@ Redis Sentinel is the high-availability solution for open-source Redis server. I
 * **_Notification_**: This is when the sentinel notifies other programs or other system administrators via an API when there is something wrong with the monitoring instances.
 * **_Automatic Failover_**: On a master failure, the sentinel promotes one of the slaves to become the new master and then makes the other additional slaves use the new master.
 
-![](.\sentinel-architecture.png "Sentinel Architecture")
+![](sentinel-architecture.png "Sentinel Architecture")
 
 ### **_Configuration_**
 
