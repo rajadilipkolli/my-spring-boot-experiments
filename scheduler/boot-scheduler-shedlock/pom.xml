@@ -11,10 +11,10 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.learning.shedlock</groupId>
-    <artifactId>boot-shedlock-sample</artifactId>
+    <artifactId>boot-scheduler-shedlock</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>boot-shedlock-sample</name>
-    <description>boot-shedlock-sample</description>
+    <name>boot-scheduler-shedlock</name>
+    <description>boot-scheduler-shedlock</description>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

@@ -49,7 +49,7 @@
         <module>r2dbc/boot-reactive-cache</module>
         <module>scheduler/boot-jobrunr-sample</module>
         <module>scheduler/boot-scheduler-quartz</module>
-        <module>scheduler/boot-shedlock-sample</module>
+        <module>scheduler/boot-scheduler-shedlock</module>
         <module>open-api-spring-boot</module>
         <module>jmh-benchmark</module>
     </modules>

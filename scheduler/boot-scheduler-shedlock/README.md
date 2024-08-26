@@ -1,4 +1,4 @@
-# boot-shedlock-sample
+# boot-scheduler-shedlock
 
 ### Format code
 
