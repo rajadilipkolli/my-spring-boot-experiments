@@ -46,8 +46,8 @@
         <module>jpa/multitenancy/schema</module>
         <module>r2dbc/boot-jooq-r2dbc-sample</module>
         <module>r2dbc/boot-r2dbc-sample</module>
-        <module>r2dbc/boot-reactive-cache</module>
-        <module>scheduler/boot-jobrunr-sample</module>
+        <module>r2dbc/boot-r2dbc-reactive-cache</module>
+        <module>scheduler/boot-scheduler-jobrunr</module>
         <module>scheduler/boot-scheduler-quartz</module>
         <module>scheduler/boot-scheduler-shedlock</module>
         <module>open-api-spring-boot</module>

@@ -1,13 +1,13 @@
-name: boot-reactive-cache
+name: boot-r2dbc-reactive-cache
 
 on:
   push:
     paths:
-      - "r2dbc/boot-reactive-cache/**"
+      - "r2dbc/boot-r2dbc-reactive-cache/**"
     branches: [main]
   pull_request:
     paths:
-      - "r2dbc/boot-reactive-cache/**"
+      - "r2dbc/boot-r2dbc-reactive-cache/**"
     types:
       - opened
       - synchronize
@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: "r2dbc/boot-reactive-cache"
+        working-directory: "r2dbc/boot-r2dbc-reactive-cache"
     steps:
       - uses: actions/checkout@v4
         with:
