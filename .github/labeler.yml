@@ -103,7 +103,7 @@
 "component: jobrunr":
   - changed-files:
       - any-glob-to-any-file:
-          - scheduler/boot-jobrunr-sample/**/*
+          - scheduler/boot-scheduler-jobrunr/**/*
 "component: quartz":
   - changed-files:
       - any-glob-to-any-file:
@@ -152,6 +152,6 @@
           - r2dbc/boot-jooq-r2dbc-sample/pom.xml
           - r2dbc/boot-r2dbc-sample/pom.xml
           - r2dbc/boot-reactive-cache/pom.xml
-          - scheduler/boot-jobrunr-sample/pom.xml
+          - scheduler/boot-scheduler-jobrunr/pom.xml
           - scheduler/boot-scheduler-quartz/pom.xml
           - scheduler/boot-scheduler-shedlock/pom.xml

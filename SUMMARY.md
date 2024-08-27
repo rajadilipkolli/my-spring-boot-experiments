@@ -43,7 +43,7 @@
   * [r2dbc-boot](r2dbc/boot-r2dbc-sample/README.md)
   * [reactive-cache](r2dbc/boot-reactive-cache/README.md)
 * [scheduler](scheduler/README.md)
-  * [Scheduling using JobRunr](scheduler/boot-jobrunr-sample/README.md)
+  * [Scheduling using JobRunr](scheduler/boot-scheduler-jobrunr/README.md)
   * [Scheduling using Quartz](scheduler/boot-scheduler-quartz/README.md)
   * [Scheduling using Shedlock distribution](scheduler/boot-scheduler-shedlock/README.md)
 * [Code Of Conduct](Code-of-conduct.md)

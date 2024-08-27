@@ -1,13 +1,10 @@
 {
   "generator-springboot": {
-    "appName": "spring-boot-jobrunr-sample",
+    "appName": "boot-scheduler-jobrunr",
     "packageName": "com.example.jobrunr",
     "databaseType": "postgresql",
     "dbMigrationTool": "liquibase",
-    "features": [
-      "elk",
-      "monitoring"
-    ],
+    "features": [],
     "buildTool": "maven",
     "packageFolder": "com/example/jobrunr",
     "liquibaseMigrationCounter": 1

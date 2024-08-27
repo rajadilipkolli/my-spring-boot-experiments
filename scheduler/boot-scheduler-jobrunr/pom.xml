@@ -8,9 +8,9 @@
         <relativePath /> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.example.jobrunr</groupId>
-    <artifactId>boot-jobrunr-sample</artifactId>
+    <artifactId>boot-scheduler-jobrunr</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>boot-jobrunr-sample</name>
+    <name>boot-scheduler-jobrunr</name>
     <description>Implementation sample of JobRunr in a spring boot Application</description>
 
     <properties>
