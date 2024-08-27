@@ -18,7 +18,7 @@ public class TestGrafanaLGTMApplication {
     }
 
     @Bean
-    @ServiceConnection("otel/opentelemetry-collector-contrib")
+    @ServiceConnection
     LgtmStackContainer lgtmContainer() {
         return new LgtmStackContainer(DockerImageName.parse("grafana/otel-lgtm:0.7.1"))
                 .withStartupTimeout(Duration.ofMinutes(2));
