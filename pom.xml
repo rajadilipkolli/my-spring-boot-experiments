@@ -9,6 +9,7 @@
     <packaging>pom</packaging>
 
     <properties>
+        <maven.compiler.release>21</maven.compiler.release>
         <sonar.organization>rajadilipkolli</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
     </properties>

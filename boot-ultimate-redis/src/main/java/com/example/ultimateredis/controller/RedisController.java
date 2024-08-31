@@ -31,8 +31,7 @@ public class RedisController {
     }
 
     @GetMapping
-    public ResponseEntity<GenericResponse<String>> getFromCache(
-            @RequestParam(value = "key") String key) {
+    public ResponseEntity<GenericResponse<String>> getFromCache(@RequestParam String key) {
 
         String value = redisService.getValue(key);
         return ResponseEntity.ok(new GenericResponse<>(value));

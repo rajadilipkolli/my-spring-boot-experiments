@@ -1,7 +1,6 @@
 package com.example.ultimateredis.config;
 
 import java.util.concurrent.TimeUnit;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Component;
@@ -12,7 +11,6 @@ public class RedisValueOperationsUtil<T> {
     private final RedisTemplate<String, T> redisTemplate;
     private final ValueOperations<String, T> valueOperations;
 
-    @Autowired
     public RedisValueOperationsUtil(RedisTemplate<String, T> redisTemplate) {
         this.redisTemplate = redisTemplate;
         this.valueOperations = redisTemplate.opsForValue();

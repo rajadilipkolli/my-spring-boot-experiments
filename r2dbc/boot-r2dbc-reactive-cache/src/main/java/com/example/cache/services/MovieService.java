@@ -6,7 +6,6 @@ import com.example.cache.model.request.MovieRequest;
 import com.example.cache.model.response.MovieResponse;
 import com.example.cache.repositories.MovieRepository;
 import com.example.cache.utils.AppConstants;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
 import org.springframework.data.redis.core.ReactiveValueOperations;
 import org.springframework.stereotype.Service;
@@ -24,7 +23,6 @@ public class MovieService {
     private final ReactiveRedisTemplate<String, Movie> reactiveRedisTemplate;
     private final ReactiveValueOperations<String, Movie> stringMovieReactiveValueOperations;
 
-    @Autowired
     public MovieService(
             MovieRepository movieRepository,
             MovieMapper movieMapper,

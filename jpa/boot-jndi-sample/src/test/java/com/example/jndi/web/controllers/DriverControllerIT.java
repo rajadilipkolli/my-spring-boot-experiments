@@ -58,7 +58,7 @@ class DriverControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldFindDriverById() throws Exception {
-        Driver driver = driverList.get(0);
+        Driver driver = driverList.getFirst();
         Long driverId = driver.getId();
 
         this.mockMvc
@@ -104,7 +104,7 @@ class DriverControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldUpdateDriver() throws Exception {
-        Long driverId = driverList.get(0).getId();
+        Long driverId = driverList.getFirst().getId();
         DriverRequest driverRequest = new DriverRequest("Updated Driver");
 
         this.mockMvc
@@ -118,7 +118,7 @@ class DriverControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldDeleteDriver() throws Exception {
-        Driver driver = driverList.get(0);
+        Driver driver = driverList.getFirst();
 
         this.mockMvc
                 .perform(delete("/api/drivers/{id}", driver.getId()))
