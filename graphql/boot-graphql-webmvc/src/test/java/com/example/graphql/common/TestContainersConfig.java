@@ -8,5 +8,5 @@ public interface TestContainersConfig {
 
     @ServiceConnection
     PostgreSQLContainer<?> postgreSQLContainer =
-            new PostgreSQLContainer<>(DockerImageName.parse("postgres:16.3-alpine"));
+            new PostgreSQLContainer<>(DockerImageName.parse("postgres").withTag("16.4-alpine"));
 }
