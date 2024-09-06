@@ -1,24 +1,19 @@
 package com.example.opensearch.common;
 
+import java.time.Duration;
 import org.opensearch.testcontainers.OpensearchContainer;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.utility.DockerImageName;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.springframework.context.annotation.Bean;
 
+@TestConfiguration(proxyBeanMethods = false)
 public class ContainersConfig {
 
-    @Container
-    public static final OpensearchContainer<?> openSearchContainer =
-            new OpensearchContainer<>(DockerImageName.parse("opensearchproject/opensearch:2.16.0"))
-                    .withEnv("OPENSEARCH_INITIAL_ADMIN_PASSWORD", "admin");
-
-    static {
-        openSearchContainer.start();
-    }
-
-    @DynamicPropertySource
-    static void setApplicationProperties(DynamicPropertyRegistry dynamicPropertyRegistry) {
-        dynamicPropertyRegistry.add("opensearch.uris", openSearchContainer::getHttpHostAddress);
+    @Bean
+    @ServiceConnection
+    OpensearchContainer<?> opensearchContainer() {
+        return new OpensearchContainer<>("opensearchproject/opensearch:2.16.0")
+                .withStartupAttempts(5)
+                .withStartupTimeout(Duration.ofMinutes(10));
     }
 }

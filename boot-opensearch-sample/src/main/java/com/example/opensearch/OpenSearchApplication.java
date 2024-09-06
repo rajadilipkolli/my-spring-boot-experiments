@@ -8,9 +8,9 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 
 @SpringBootApplication(exclude = {ElasticsearchDataAutoConfiguration.class})
 @EnableConfigurationProperties({ApplicationProperties.class})
-public class Application {
+public class OpenSearchApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(Application.class, args);
+        SpringApplication.run(OpenSearchApplication.class, args);
     }
 }
