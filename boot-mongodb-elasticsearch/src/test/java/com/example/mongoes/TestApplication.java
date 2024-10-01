@@ -25,8 +25,7 @@ public class TestApplication {
     @Bean
     @RestartScope
     MongoDBContainer mongoDBContainer() {
-        return new MongoDBContainer(DockerImageName.parse("mongo").withTag("8.0.0"))
-                .withSharding();
+        return new MongoDBContainer(DockerImageName.parse("mongo").withTag("8.0.0")).withSharding();
     }
 
     public static void main(String[] args) {
