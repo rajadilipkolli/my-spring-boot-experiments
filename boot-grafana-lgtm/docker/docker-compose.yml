@@ -2,7 +2,7 @@ version: '3.8'
 services:
 
   grafanalgtm:
-    image: grafana/otel-lgtm:0.7.4
+    image: grafana/otel-lgtm:0.7.5
     extra_hosts: ['host.docker.internal:host-gateway']
     container_name: grafanalgtm
     environment:
