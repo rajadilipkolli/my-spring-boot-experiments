@@ -3,7 +3,7 @@ version: "3.9"
 services:
   mongodb:
     hostname: mongodb
-    image: mongo:8.0.0
+    image: mongo:8.0.1
     volumes:
       - mongodb:/data/db
     ports:
