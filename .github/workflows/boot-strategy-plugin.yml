@@ -61,7 +61,7 @@ jobs:
         run: ./gradlew bootBuildImage --imageName ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/boot-strategy-plugin:${{ env.VERSION }}
       - if: ${{ github.ref == 'refs/heads/main' }}
         name: OCI image vulnerability scanning
-        uses: anchore/scan-action@v4
+        uses: anchore/scan-action@v5
         id: scan
         with:
           image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/boot-strategy-plugin:${{ env.VERSION }}
