@@ -11,10 +11,10 @@ import org.testcontainers.utility.DockerImageName;
 public class TestMultipleDataSourcesApplication {
 
     private static final MySQLContainer<?> MY_SQL_CONTAINER =
-            new MySQLContainer<>(DockerImageName.parse("mysql").withTag("9.0"));
+            new MySQLContainer<>(DockerImageName.parse("mysql").withTag("9.1"));
 
     private static final PostgreSQLContainer<?> POSTGRE_SQL_CONTAINER =
-            new PostgreSQLContainer<>(DockerImageName.parse("postgres").withTag("16.3-alpine"));
+            new PostgreSQLContainer<>(DockerImageName.parse("postgres").withTag("17.0-alpine"));
 
     static {
         Startables.deepStart(MY_SQL_CONTAINER, POSTGRE_SQL_CONTAINER).join();
