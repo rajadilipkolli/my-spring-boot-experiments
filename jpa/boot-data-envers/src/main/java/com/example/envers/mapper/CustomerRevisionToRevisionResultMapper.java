@@ -11,7 +11,7 @@ public class CustomerRevisionToRevisionResultMapper {
     public RevisionResult convert(Revision<Integer, Customer> customerRevision) {
         return new RevisionResult(
                 customerRevision.getEntity(),
-                customerRevision.getMetadata().getRevisionNumber(),
+                customerRevision.getRevisionNumber(),
                 customerRevision.getMetadata().getRevisionType().name(),
                 customerRevision.getMetadata().getRevisionInstant());
     }
