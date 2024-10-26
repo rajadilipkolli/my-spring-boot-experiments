@@ -7,7 +7,9 @@ import net.ttddyy.dsproxy.listener.ChainListener;
 import net.ttddyy.dsproxy.listener.DataSourceQueryCountListener;
 import net.ttddyy.dsproxy.listener.logging.SLF4JQueryLoggingListener;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
-import org.springframework.beans.BeansException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.autoconfigure.jdbc.JdbcConnectionDetails;
@@ -18,10 +20,18 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.datasource.LazyConnectionDataSourceProxy;
 import org.springframework.util.StringUtils;
 
+/**
+ * Configuration class that sets up a lazy-loading data source proxy to improve performance by
+ * deferring physical database connections until they are actually needed. This optimization is
+ * particularly useful in scenarios where database operations don't always occur during request
+ * processing.
+ */
 @Configuration(proxyBeanMethods = false)
 class LazyConnectionDataSourceProxyConfig {
 
     private static final String DATA_SOURCE_PROXY_NAME = "customSeqDsProxy";
+    private static final Logger log =
+            LoggerFactory.getLogger(LazyConnectionDataSourceProxyConfig.class);
 
     private final DataSourceProperties dataSourceProperties;
 
@@ -40,8 +50,9 @@ class LazyConnectionDataSourceProxyConfig {
             dataSourceProperties.setUrl(connectionDetails.getJdbcUrl());
             dataSourceProperties.setUsername(connectionDetails.getUsername());
             dataSourceProperties.setPassword(connectionDetails.getPassword());
-        } catch (BeansException e) {
-            // ignore as it is not needed when stated from main program.
+        } catch (NoSuchBeanDefinitionException e) {
+            // Ignore as JdbcConnectionDetails might not be available in non-test environments
+            log.debug("JdbcConnectionDetails bean not found, falling back to properties", e);
         }
 
         // Create and configure HikariDataSource with properties
