@@ -48,14 +48,7 @@ public class EntitySpecification<T> {
 
         return (root, criteriaQuery, criteriaBuilder) -> {
             try {
-                Path<?> path;
-                try {
-                    path = getPath(root, searchCriteria.getField());
-                } catch (IllegalArgumentException ex) {
-                    throw new IllegalArgumentException(
-                            "Invalid field path: " + searchCriteria.getField(), ex);
-                }
-
+                Path<?> path = getPath(root, searchCriteria.getField());
                 Object parsedValue =
                         format.parse(
                                 searchCriteria.getValue(),

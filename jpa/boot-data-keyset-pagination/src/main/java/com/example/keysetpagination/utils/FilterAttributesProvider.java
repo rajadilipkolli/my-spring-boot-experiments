@@ -8,9 +8,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import lombok.Getter;
 
-@Getter
 public class FilterAttributesProvider {
 
     // Cache for already constructed filter attributes for specific entity classes
