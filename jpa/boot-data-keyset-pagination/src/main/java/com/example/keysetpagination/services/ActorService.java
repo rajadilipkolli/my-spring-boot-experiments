@@ -14,10 +14,10 @@ import com.example.keysetpagination.model.request.ActorRequest;
 import com.example.keysetpagination.model.response.ActorResponse;
 import com.example.keysetpagination.model.response.PagedResult;
 import com.example.keysetpagination.repositories.ActorRepository;
+import com.example.keysetpagination.utils.EntitySpecification;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Optional;
-import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
@@ -26,17 +26,21 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Transactional(readOnly = true)
-@RequiredArgsConstructor
 public class ActorService {
 
     private final ActorRepository actorRepository;
     private final ActorMapper actorMapper;
-    private final EntitySpecification<Actor> actorEntitySpecification;
+    private final EntitySpecification<Actor> actorEntitySpecification = new EntitySpecification<>();
+
+    public ActorService(ActorRepository actorRepository, ActorMapper actorMapper) {
+        this.actorRepository = actorRepository;
+        this.actorMapper = actorMapper;
+    }
 
     public PagedResult<ActorResponse> findAll(
             SearchCriteria[] searchCriteria, FindActorsQuery findActorsQuery) {
         Specification<Actor> specification =
-                actorEntitySpecification.specificationBuilder(searchCriteria);
+                actorEntitySpecification.specificationBuilder(searchCriteria, Actor.class);
         KeysetPageable keysetPageable = createPageable(findActorsQuery);
         return getActorResponsePagedResult(actorRepository.findAll(specification, keysetPageable));
     }
