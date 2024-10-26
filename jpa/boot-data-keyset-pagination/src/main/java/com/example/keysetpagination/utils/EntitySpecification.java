@@ -28,13 +28,17 @@ public class EntitySpecification<T> {
                             .toList();
             return Specification.allOf(specifications);
         }
-        return null;
+        return Specification.where(null);
     }
 
     private Specification<T> createSpecification(
             SearchCriteria searchCriteria, Class<T> entityType) {
         Map<String, SerializableFormat<? extends Serializable>> filterAttributes =
                 filterAttributesProvider.getFilterAttributes(entityType);
+        if (filterAttributes == null) {
+            throw new IllegalArgumentException(
+                    "No filter attributes found for entity type: " + entityType.getName());
+        }
 
         SerializableFormat<?> format = filterAttributes.get(searchCriteria.getField());
         if (format == null) {
@@ -44,7 +48,14 @@ public class EntitySpecification<T> {
 
         return (root, criteriaQuery, criteriaBuilder) -> {
             try {
-                Path<?> path = getPath(root, searchCriteria.getField());
+                Path<?> path;
+                try {
+                    path = getPath(root, searchCriteria.getField());
+                } catch (IllegalArgumentException ex) {
+                    throw new IllegalArgumentException(
+                            "Invalid field path: " + searchCriteria.getField(), ex);
+                }
+
                 Object parsedValue =
                         format.parse(
                                 searchCriteria.getValue(),
@@ -62,14 +73,19 @@ public class EntitySpecification<T> {
     private Path<?> getPath(Root<?> root, String fieldName) {
         String[] fieldParts = fieldName.split("\\.");
         Path<?> path = root.get(fieldParts[0]);
+        if (path == null) {
+            throw new IllegalArgumentException("Invalid field: " + fieldParts[0]);
+        }
         for (int i = 1; i < fieldParts.length; i++) {
             path = path.get(fieldParts[i]);
+            if (path == null) {
+                throw new IllegalArgumentException("Invalid field: " + fieldParts[i]);
+            }
         }
         return path;
     }
 
-    private record MyParserContextImpl(
-            Map<String, SerializableFormat<? extends Serializable>> contextMap)
+    record MyParserContextImpl(Map<String, SerializableFormat<? extends Serializable>> contextMap)
             implements ParserContext {
 
         public Object getAttribute(String name) {

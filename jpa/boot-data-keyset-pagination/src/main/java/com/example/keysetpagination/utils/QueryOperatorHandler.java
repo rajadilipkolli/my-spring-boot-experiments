@@ -15,7 +15,14 @@ public class QueryOperatorHandler {
                     QueryOperator, TriFunction<Path<?>, Object, CriteriaBuilder, Predicate>>
             operatorPredicates =
                     Map.ofEntries(
-                            Map.entry(QueryOperator.EQ, (path, value, cb) -> cb.equal(path, value)),
+                            Map.entry(
+                                    QueryOperator.EQ,
+                                    (path, value, cb) -> {
+                                        if (value == null) {
+                                            return cb.isNull(path);
+                                        }
+                                        return cb.equal(path, value);
+                                    }),
                             Map.entry(
                                     QueryOperator.NE,
                                     (path, value, cb) -> cb.notEqual(path, value)),
@@ -69,6 +76,11 @@ public class QueryOperatorHandler {
                                         if (rangeValues.size() != 2) {
                                             throw new IllegalArgumentException(
                                                     "BETWEEN operator requires exactly 2 values");
+                                        }
+                                        if (!(rangeValues.get(0) instanceof Comparable)
+                                                || !(rangeValues.get(1) instanceof Comparable)) {
+                                            throw new IllegalArgumentException(
+                                                    "Values for BETWEEN operator must be Comparable");
                                         }
                                         // Casting to Comparable<Object> for type safety
                                         Comparable<Object> lowerBound =
