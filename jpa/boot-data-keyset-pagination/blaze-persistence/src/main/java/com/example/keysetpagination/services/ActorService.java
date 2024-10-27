@@ -30,11 +30,12 @@ public class ActorService {
 
     private final ActorRepository actorRepository;
     private final ActorMapper actorMapper;
-    private final EntitySpecification<Actor> actorEntitySpecification = new EntitySpecification<>();
+    private final EntitySpecification<Actor> actorEntitySpecification;
 
     public ActorService(ActorRepository actorRepository, ActorMapper actorMapper) {
         this.actorRepository = actorRepository;
         this.actorMapper = actorMapper;
+        actorEntitySpecification = new EntitySpecification<>();
     }
 
     public PagedResult<ActorResponse> findAll(

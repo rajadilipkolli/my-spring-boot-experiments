@@ -97,23 +97,23 @@ class ActorControllerIT extends AbstractIntegrationTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(
                                         """
-                                [
-                                  {
-                                    "queryOperator": "EQ",
-                                    "field": "createdOn",
-                                    "values": [
-                                      "%s"
-                                    ]
-                                  },
-                                  {
-                                    "queryOperator": "ENDS_WITH",
-                                    "field": "name",
-                                    "values": [
-                                      "Actor"
-                                    ]
-                                  }
-                                ]
-                                """
+                                        [
+                                          {
+                                            "queryOperator": "EQ",
+                                            "field": "createdOn",
+                                            "values": [
+                                              "%s"
+                                            ]
+                                          },
+                                          {
+                                            "queryOperator": "ENDS_WITH",
+                                            "field": "name",
+                                            "values": [
+                                              "Actor"
+                                            ]
+                                          }
+                                        ]
+                                        """
                                                 .formatted(LocalDate.now())))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.size()", is(2)))

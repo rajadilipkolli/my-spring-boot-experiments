@@ -1,5 +1,8 @@
 # boot-data-keyset-pagination
 
+Implementing efficient keyset pagination using Blaze Persistence, It enhances the application's performance when dealing with large datasets by fetching only the necessary data. Implements dynamic query capabilities and filters.
+
+
 ### Format code
 
 ```shell
