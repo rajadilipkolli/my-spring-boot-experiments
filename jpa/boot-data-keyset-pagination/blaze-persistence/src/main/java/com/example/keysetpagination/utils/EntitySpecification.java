@@ -15,8 +15,11 @@ import org.springframework.data.jpa.domain.Specification;
 
 public class EntitySpecification<T> {
 
-    private final FilterAttributesProvider filterAttributesProvider =
-            new FilterAttributesProvider();
+    private final FilterAttributesProvider filterAttributesProvider;
+
+    public EntitySpecification() {
+        this.filterAttributesProvider = new FilterAttributesProvider();
+    }
 
     public Specification<T> specificationBuilder(
             SearchCriteria[] searchCriteria, Class<T> entityType) {

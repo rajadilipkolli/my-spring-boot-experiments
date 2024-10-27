@@ -35,7 +35,7 @@
         <module>httpClients/boot-web-client-webflux</module>
         <module>jpa/boot-data-customsequence</module>
         <module>jpa/boot-data-envers</module>
-        <module>jpa/boot-data-keyset-pagination</module>
+        <module>jpa/boot-data-keyset-pagination/blaze-persistence</module>
         <module>jpa/boot-data-multipledatasources</module>
         <module>jpa/boot-hibernate2ndlevelcache-sample</module>
         <module>jpa/boot-jndi-sample</module>
