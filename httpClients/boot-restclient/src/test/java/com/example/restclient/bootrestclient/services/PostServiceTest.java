@@ -1,9 +1,12 @@
 package com.example.restclient.bootrestclient.services;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.header;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
+import com.example.restclient.bootrestclient.config.ClientLoggerRequestInterceptor;
 import com.example.restclient.bootrestclient.config.RestClientConfiguration;
 import com.example.restclient.bootrestclient.model.response.PostDto;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -18,7 +21,12 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.client.MockRestServiceServer;
 
 @RestClientTest(
-        components = {PostService.class, HttpClientService.class, RestClientConfiguration.class})
+        components = {
+            PostService.class,
+            HttpClientService.class,
+            RestClientConfiguration.class,
+            ClientLoggerRequestInterceptor.class
+        })
 class PostServiceTest {
 
     @Autowired private MockRestServiceServer mockRestServiceServer;
