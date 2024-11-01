@@ -1,13 +1,13 @@
-name: boot-data-keyset-pagination-blaze
+name: boot-data-keyset-pagination
 
 on:
   push:
     paths:
-      - "jpa/keyset-pagination/blaze-persistence/**"
+      - "jpa/keyset-pagination/boot-data-window-paginiation/**"
     branches: [main]
   pull_request:
     paths:
-      - "jpa/keyset-pagination/blaze-persistence/**"
+      - "jpa/keyset-pagination/boot-data-window-paginiation/**"
     types:
       - opened
       - synchronize
@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: "jpa/keyset-pagination/blaze-persistence"
+        working-directory: "jpa/keyset-pagination/boot-data-window-paginiation"
     steps:
       - uses: actions/checkout@v4
         with:
