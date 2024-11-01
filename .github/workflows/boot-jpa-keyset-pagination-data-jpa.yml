@@ -1,13 +1,13 @@
-name: boot-data-keyset-pagination
+name: boot-jpa-keyset-pagination-data-jpa
 
 on:
   push:
     paths:
-      - "jpa/keyset-pagination/boot-data-window-paginiation/**"
+      - "jpa/keyset-pagination/boot-data-window-pagination/**"
     branches: [main]
   pull_request:
     paths:
-      - "jpa/keyset-pagination/boot-data-window-paginiation/**"
+      - "jpa/keyset-pagination/boot-data-window-pagination/**"
     types:
       - opened
       - synchronize
@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: "jpa/keyset-pagination/boot-data-window-paginiation"
+        working-directory: "jpa/keyset-pagination/boot-data-window-pagination"
     steps:
       - uses: actions/checkout@v4
         with:
