@@ -1,6 +1,6 @@
 package com.example.multipledatasources.configuration;
 
-import com.example.multipledatasources.model.member.Member;
+import com.example.multipledatasources.entities.member.Member;
 import com.example.multipledatasources.repository.member.MemberRepository;
 import com.zaxxer.hikari.HikariDataSource;
 import jakarta.persistence.EntityManagerFactory;

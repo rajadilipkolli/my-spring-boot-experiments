@@ -1,7 +1,7 @@
 package com.example.multipledatasources.bootstrap;
 
-import com.example.multipledatasources.model.cardholder.CardHolder;
-import com.example.multipledatasources.model.member.Member;
+import com.example.multipledatasources.entities.cardholder.CardHolder;
+import com.example.multipledatasources.entities.member.Member;
 import com.example.multipledatasources.repository.cardholder.CardHolderRepository;
 import com.example.multipledatasources.repository.member.MemberRepository;
 import lombok.RequiredArgsConstructor;
