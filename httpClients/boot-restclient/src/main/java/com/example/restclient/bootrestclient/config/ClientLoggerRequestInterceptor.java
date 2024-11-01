@@ -3,6 +3,7 @@ package com.example.restclient.bootrestclient.config;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +14,7 @@ import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StreamUtils;
 
 @Component
 public class ClientLoggerRequestInterceptor implements ClientHttpRequestInterceptor {
@@ -35,10 +37,10 @@ public class ClientLoggerRequestInterceptor implements ClientHttpRequestIntercep
         log.info("Status code  : {}", response.getStatusCode());
         log.info("Status text  : {}", response.getStatusText());
         logHeaders(response.getHeaders());
-        byte[] responseBody = response.getBody().readAllBytes();
-        if (responseBody.length > 0) {
-            log.info("Response body: {}", new String(responseBody, StandardCharsets.UTF_8));
-        }
+
+        String responseBody =
+                StreamUtils.copyToString(response.getBody(), Charset.defaultCharset());
+        log.info("Response body: {}", responseBody);
         log.info(
                 "=======================response end=================================================");
         return new BufferingClientHttpResponseWrapper(response, responseBody);
@@ -65,16 +67,16 @@ public class ClientLoggerRequestInterceptor implements ClientHttpRequestIntercep
 
     private static class BufferingClientHttpResponseWrapper implements ClientHttpResponse {
         private final ClientHttpResponse response;
-        private final byte[] body;
+        private final String body;
 
-        public BufferingClientHttpResponseWrapper(ClientHttpResponse response, byte[] body) {
+        public BufferingClientHttpResponseWrapper(ClientHttpResponse response, String body) {
             this.response = response;
             this.body = body;
         }
 
         @Override
-        public InputStream getBody() throws IOException {
-            return new ByteArrayInputStream(body);
+        public InputStream getBody() {
+            return new ByteArrayInputStream(body.getBytes());
         }
 
         @Override
