@@ -69,7 +69,7 @@
 "component: keyset-pagination-blaze":
   - changed-files:
       - any-glob-to-any-file:
-          - jpa/boot-data-keyset-pagination/blaze-persistence/**/*
+          - jpa/keyset-pagination/blaze-persistence/**/*
 "component: multiple-datasources":
   - changed-files:
       - any-glob-to-any-file:
@@ -139,11 +139,11 @@
           - jmh-benchmark/pom.xml
           - jpa/boot-data-customsequence/pom.xml
           - jpa/boot-data-envers/pom.xml
-          - jpa/boot-data-keyset-pagination/blaze-persistence/pom.xml
           - jpa/boot-data-multipledatasources/pom.xml
           - jpa/boot-hibernate2ndlevelcache-sample/pom.xml
           - jpa/boot-data-jpa-locks/pom.xml
           - jpa/boot-read-replica-postgresql/pom.xml
+          - jpa/keyset-pagination/blaze-persistence/pom.xml
           - jpa/multitenancy/multitenancy-db/pom.xml
           - jpa/multitenancy/multidatasource-multitenancy/pom.xml
           - jpa/multitenancy/partition/pom.xml

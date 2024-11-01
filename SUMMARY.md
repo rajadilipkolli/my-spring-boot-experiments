@@ -26,7 +26,7 @@
 * [jpa](jpa/README.md)
   * [Custom Sequence](jpa/boot-data-customsequence/README.md)
   * [Hibernate Envers Implementation](jpa/boot-data-envers/README.md)
-  * [KeySet Pagination Using Blaze](jpa/boot-data-keyset-pagination/blaze-persistence/README.md)
+  * [KeySet Pagination Using Blaze](jpa/keyset-pagination/blaze-persistence/README.md)
   * [multiple datasources using Spring Boot](jpa/boot-data-multipledatasources/README.md),
   * [spring-boot-hibernate2ndlevelcache-sample](jpa/boot-hibernate2ndlevelcache-sample/README.md)
   * [JNDI in embedded Tomcat](jpa/boot-jndi-sample/README.md)

@@ -11,9 +11,9 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.example.keysetpagination</groupId>
-    <artifactId>boot-data-keyset-pagination</artifactId>
+    <artifactId>boot-data-keyset-pagination-blaze</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>boot-data-keyset-pagination</name>
+    <name>boot-data-keyset-pagination-blaze</name>
     <description>boot-data-keyset-pagination</description>
 
     <properties>
