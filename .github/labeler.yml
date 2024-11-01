@@ -89,7 +89,7 @@
 "component: keyset-pagination-data-jpa":
   - changed-files:
       - any-glob-to-any-file:
-          - jpa/keyset-pagination/boot-data-window-paginiation/**/*
+          - jpa/keyset-pagination/boot-data-window-pagination/**/*
 "component: jpa-multitenancy":
   - changed-files:
       - any-glob-to-any-file:
@@ -148,7 +148,7 @@
           - jpa/boot-data-jpa-locks/pom.xml
           - jpa/boot-read-replica-postgresql/pom.xml
           - jpa/keyset-pagination/blaze-persistence/pom.xml
-          - jpa/keyset-pagination/boot-data-window-paginiation/pom.xml
+          - jpa/keyset-pagination/boot-data-window-pagination/pom.xml
           - jpa/multitenancy/multitenancy-db/pom.xml
           - jpa/multitenancy/multidatasource-multitenancy/pom.xml
           - jpa/multitenancy/partition/pom.xml
