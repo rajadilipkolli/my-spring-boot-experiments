@@ -1,6 +1,6 @@
 package com.example.multipledatasources.repository.cardholder;
 
-import com.example.multipledatasources.model.cardholder.CardHolder;
+import com.example.multipledatasources.entities.cardholder.CardHolder;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 

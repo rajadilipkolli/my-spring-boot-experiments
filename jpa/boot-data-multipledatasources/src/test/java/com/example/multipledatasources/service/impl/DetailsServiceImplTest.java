@@ -4,8 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 
 import com.example.multipledatasources.dto.ResponseDto;
-import com.example.multipledatasources.model.cardholder.CardHolder;
-import com.example.multipledatasources.model.member.Member;
+import com.example.multipledatasources.entities.cardholder.CardHolder;
+import com.example.multipledatasources.entities.member.Member;
 import com.example.multipledatasources.repository.cardholder.CardHolderRepository;
 import com.example.multipledatasources.repository.member.MemberRepository;
 import java.util.Optional;

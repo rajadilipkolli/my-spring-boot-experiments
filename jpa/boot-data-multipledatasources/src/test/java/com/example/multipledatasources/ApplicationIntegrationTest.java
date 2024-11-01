@@ -5,41 +5,19 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.example.multipledatasources.common.ContainersConfiguration;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
-import org.testcontainers.containers.MySQLContainer;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.utility.DockerImageName;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(
+        webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+        classes = {ContainersConfiguration.class, MultipleDataSourcesApplication.class})
 @AutoConfigureMockMvc
-@Testcontainers(disabledWithoutDocker = true, parallel = true)
 class ApplicationIntegrationTest {
-
-    @Container
-    private static final MySQLContainer<?> MY_SQL_CONTAINER = new MySQLContainer<>("mysql:9.0");
-
-    @Container
-    private static final PostgreSQLContainer<?> POSTGRE_SQL_CONTAINER =
-            new PostgreSQLContainer<>(DockerImageName.parse("postgres:16.3-alpine"));
-
-    @DynamicPropertySource
-    static void registerDynamicProperties(DynamicPropertyRegistry registry) {
-        registry.add("app.datasource.cardholder.url", MY_SQL_CONTAINER::getJdbcUrl);
-        registry.add("app.datasource.cardholder.username", MY_SQL_CONTAINER::getUsername);
-        registry.add("app.datasource.cardholder.password", MY_SQL_CONTAINER::getPassword);
-        registry.add("app.datasource.member.url", POSTGRE_SQL_CONTAINER::getJdbcUrl);
-        registry.add("app.datasource.member.username", POSTGRE_SQL_CONTAINER::getUsername);
-        registry.add("app.datasource.member.password", POSTGRE_SQL_CONTAINER::getPassword);
-    }
 
     @Autowired
     private MockMvc mockMvc;
