@@ -1,7 +1,7 @@
 version: '3.8'
 services:
 
-  boot-data-window-paginiation:
+  boot-data-window-pagination:
     build: ..
     ports:
       - "18080:8080"

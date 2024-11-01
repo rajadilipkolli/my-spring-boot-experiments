@@ -6,7 +6,7 @@ pipeline {
     }
 
     environment {
-        APPLICATION_NAME = 'boot-data-window-paginiation'
+        APPLICATION_NAME = 'boot-data-window-pagination'
     }
 
     stages {
