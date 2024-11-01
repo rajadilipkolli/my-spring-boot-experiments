@@ -1,0 +1,9 @@
+{
+    "properties": [
+        {
+            "name": "application.external-call-url",
+            "type": "java.lang.String",
+            "description": "URL to which call should be made."
+        }
+    ]
+}
