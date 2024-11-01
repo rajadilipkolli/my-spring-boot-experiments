@@ -1,17 +1,21 @@
 package com.example.keysetpagination.entities;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 import java.util.Objects;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import org.hibernate.Hibernate;
 
 @Entity
 @Table(name = "animals", schema = "public")
 @Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class Animal {
@@ -31,8 +35,8 @@ public class Animal {
         return this;
     }
 
-    public Animal setName(String text) {
-        this.name = text;
+    public Animal setName(String name) {
+        this.name = name;
         return this;
     }
 

@@ -11,12 +11,12 @@ public class AnimalMapper {
 
     public Animal toEntity(AnimalRequest animalRequest) {
         Animal animal = new Animal();
-        animal.setName(animalRequest.text());
+        animal.setName(animalRequest.name());
         return animal;
     }
 
     public void mapAnimalWithRequest(Animal animal, AnimalRequest animalRequest) {
-        animal.setName(animalRequest.text());
+        animal.setName(animalRequest.name());
     }
 
     public AnimalResponse toResponse(Animal animal) {

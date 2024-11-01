@@ -40,6 +40,7 @@ class SchemaValidationTest {
                 columns.stream().collect(Collectors.toMap(row -> (String) row[0], row -> (String) row[1]));
 
         assertEquals("bigint", columnTypes.get("id"), "ID column should be bigint");
-        // Add more column validations as needed
+        assertEquals("text", columnTypes.get("name"), "name column should be character varying");
+        assertEquals("smallint", columnTypes.get("version"), "version column should be bigint");
     }
 }

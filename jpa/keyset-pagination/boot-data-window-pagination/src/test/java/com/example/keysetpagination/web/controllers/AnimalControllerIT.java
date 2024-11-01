@@ -87,7 +87,7 @@ class AnimalControllerIT extends AbstractIntegrationTest {
                 .andExpect(status().isCreated())
                 .andExpect(header().exists(HttpHeaders.LOCATION))
                 .andExpect(jsonPath("$.id", notNullValue()))
-                .andExpect(jsonPath("$.text", is(animalRequest.text())));
+                .andExpect(jsonPath("$.text", is(animalRequest.name())));
     }
 
     @Test
@@ -106,8 +106,8 @@ class AnimalControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.detail", is("Invalid request content.")))
                 .andExpect(jsonPath("$.instance", is("/api/animals")))
                 .andExpect(jsonPath("$.violations", hasSize(1)))
-                .andExpect(jsonPath("$.violations[0].field", is("text")))
-                .andExpect(jsonPath("$.violations[0].message", is("Text cannot be empty")))
+                .andExpect(jsonPath("$.violations[0].field", is("name")))
+                .andExpect(jsonPath("$.violations[0].message", is("Name cannot be blank")))
                 .andReturn();
     }
 
@@ -122,7 +122,7 @@ class AnimalControllerIT extends AbstractIntegrationTest {
                         .content(objectMapper.writeValueAsString(animalRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(animalId), Long.class))
-                .andExpect(jsonPath("$.text", is(animalRequest.text())));
+                .andExpect(jsonPath("$.text", is(animalRequest.name())));
     }
 
     @Test
