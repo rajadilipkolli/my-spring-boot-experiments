@@ -66,10 +66,6 @@
   - changed-files:
       - any-glob-to-any-file:
           - jpa/boot-data-envers/**/*
-"component: keyset-pagination-blaze":
-  - changed-files:
-      - any-glob-to-any-file:
-          - jpa/keyset-pagination/blaze-persistence/**/*
 "component: multiple-datasources":
   - changed-files:
       - any-glob-to-any-file:
@@ -86,6 +82,14 @@
   - changed-files:
       - any-glob-to-any-file:
           - jpa/boot-read-replica-postgresql/**/*
+"component: keyset-pagination-blaze":
+  - changed-files:
+      - any-glob-to-any-file:
+          - jpa/keyset-pagination/blaze-persistence/**/*
+"component: keyset-pagination-data-jpa":
+  - changed-files:
+      - any-glob-to-any-file:
+          - jpa/keyset-pagination/boot-data-window-paginiation/**/*
 "component: jpa-multitenancy":
   - changed-files:
       - any-glob-to-any-file:
@@ -144,6 +148,7 @@
           - jpa/boot-data-jpa-locks/pom.xml
           - jpa/boot-read-replica-postgresql/pom.xml
           - jpa/keyset-pagination/blaze-persistence/pom.xml
+          - jpa/keyset-pagination/boot-data-window-paginiation/pom.xml
           - jpa/multitenancy/multitenancy-db/pom.xml
           - jpa/multitenancy/multidatasource-multitenancy/pom.xml
           - jpa/multitenancy/partition/pom.xml

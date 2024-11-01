@@ -1,0 +1,39 @@
+name: boot-data-keyset-pagination
+
+on:
+  push:
+    paths:
+      - "jpa/keyset-pagination/boot-data-window-paginiation/**"
+    branches: [main]
+  pull_request:
+    paths:
+      - "jpa/keyset-pagination/boot-data-window-paginiation/**"
+    types:
+      - opened
+      - synchronize
+      - reopened
+
+jobs:
+  build:
+    name: Run Unit & Integration Tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: "jpa/keyset-pagination/boot-data-window-paginiation"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4.5.0
+        with:
+          java-version: 21
+          distribution: "temurin"
+          cache: "maven"
+
+      - name: Grant execute permission for mvnw
+        run: chmod +x mvnw
+
+      - name: Build and analyze
+        run: ./mvnw clean verify
