@@ -1,6 +1,6 @@
 package com.example.multipledatasources.configuration;
 
-import com.example.multipledatasources.model.cardholder.CardHolder;
+import com.example.multipledatasources.entities.cardholder.CardHolder;
 import com.example.multipledatasources.repository.cardholder.CardHolderRepository;
 import com.zaxxer.hikari.HikariDataSource;
 import jakarta.persistence.EntityManagerFactory;

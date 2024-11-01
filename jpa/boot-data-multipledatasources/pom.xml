@@ -5,13 +5,13 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.3.5</version>
+        <version>3.4.0-RC1</version>
         <relativePath /> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.example</groupId>
     <artifactId>boot-data-multipledatasources</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>multipledatasources</name>
+    <name>boot-data-multipledatasources</name>
     <description>Demo project for using multiple datasource's in a Spring Boot Application</description>
 
     <properties>
@@ -220,7 +220,7 @@
                 <configuration>
                     <java>
                         <palantirJavaFormat>
-                            <version>2.47.0</version>
+                            <version>2.50.0</version>
                         </palantirJavaFormat>
                         <importOrder />
                         <removeUnusedImports />

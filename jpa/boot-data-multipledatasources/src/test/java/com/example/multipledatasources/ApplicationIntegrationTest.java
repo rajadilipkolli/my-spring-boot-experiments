@@ -25,11 +25,11 @@ import org.testcontainers.utility.DockerImageName;
 class ApplicationIntegrationTest {
 
     @Container
-    private static final MySQLContainer<?> MY_SQL_CONTAINER = new MySQLContainer<>("mysql:9.0");
+    private static final MySQLContainer<?> MY_SQL_CONTAINER = new MySQLContainer<>("mysql:9.1");
 
     @Container
     private static final PostgreSQLContainer<?> POSTGRE_SQL_CONTAINER =
-            new PostgreSQLContainer<>(DockerImageName.parse("postgres:16.3-alpine"));
+            new PostgreSQLContainer<>(DockerImageName.parse("postgres:17.0-alpine"));
 
     @DynamicPropertySource
     static void registerDynamicProperties(DynamicPropertyRegistry registry) {
