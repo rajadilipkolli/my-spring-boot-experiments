@@ -1,15 +1,13 @@
 package com.example.demo.readreplica.config;
 
-import com.example.demo.readreplica.config.routing.RoutingDataSource;
 import com.zaxxer.hikari.HikariDataSource;
-import java.util.HashMap;
-import java.util.Map;
 import javax.sql.DataSource;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.jdbc.datasource.LazyConnectionDataSourceProxy;
 
 @Configuration(proxyBeanMethods = false)
 class DatabaseConfig {
@@ -39,7 +37,7 @@ class DatabaseConfig {
     }
 
     @Bean
-    @ConfigurationProperties(REPLICA_DATABASE_PROPERTY_KEY_PREFIX + ".configuration")
+    @ConfigurationProperties(REPLICA_DATABASE_PROPERTY_KEY_PREFIX + ".hikari")
     DataSource replicaDataSource(final DataSourceProperties replicaDataSourceProperties) {
         return replicaDataSourceProperties
                 .initializeDataSourceBuilder()
@@ -50,15 +48,9 @@ class DatabaseConfig {
     @Bean
     @Primary
     DataSource dataSource(final DataSource primaryDataSource, final DataSource replicaDataSource) {
-        final RoutingDataSource routingDataSource = new RoutingDataSource();
-
-        final Map<Object, Object> targetDataSources = new HashMap<>();
-        targetDataSources.put(RoutingDataSource.Route.PRIMARY, primaryDataSource);
-        targetDataSources.put(RoutingDataSource.Route.REPLICA, replicaDataSource);
-
-        routingDataSource.setTargetDataSources(targetDataSources);
-        routingDataSource.setDefaultTargetDataSource(primaryDataSource);
-
-        return routingDataSource;
+        LazyConnectionDataSourceProxy lazyConnectionDataSourceProxy =
+                new LazyConnectionDataSourceProxy(primaryDataSource);
+        lazyConnectionDataSourceProxy.setReadOnlyDataSource(replicaDataSource);
+        return lazyConnectionDataSourceProxy;
     }
 }

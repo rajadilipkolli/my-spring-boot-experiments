@@ -4,17 +4,19 @@ spring:
     datasource:
       password: postgres_write
       username: postgres_write
-      driver: org.postgresql.Driver
+      driverClassName: org.postgresql.Driver
       url: jdbc:postgresql://localhost:5432/my_database
       configuration:
+        auto-commit: false
         poolName: primaryHikariPool
   replica:
     datasource:
       password: repl_password
       username: repl_user
-      driver: org.postgresql.Driver
+      driverClassName: org.postgresql.Driver
       url: jdbc:postgresql://localhost:15432/my_database
-      configuration:
+      hikari:
+        auto-commit: false
         poolName: replicaHikariPool
 
   jpa:
@@ -24,3 +26,18 @@ spring:
   threads:
     virtual:
       enabled: true
+
+# spring boot log level property
+logging:
+  level:
+    read-replica-logger : DEBUG
+jdbc:
+  excludedDataSourceBeanNames: dataSource
+  datasource-proxy:
+    multiline: false
+    logging: slf4j
+    query:
+      logger-name: read-replica-logger
+      log-level: DEBUG
+      enable-logging: true
+    enabled: true

@@ -4,11 +4,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.awaitility.Awaitility.await;
 
-import com.example.demo.readreplica.config.routing.RoutingDataSource;
 import java.time.LocalDateTime;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import javax.sql.DataSource;
+import net.ttddyy.dsproxy.support.ProxyDataSource;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
@@ -19,13 +18,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.UncategorizedSQLException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.datasource.LazyConnectionDataSourceProxy;
+import org.springframework.test.util.ReflectionTestUtils;
 
 @SpringBootTest
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ReadReplicaApplicationTests {
 
-    @Autowired private RoutingDataSource routingDataSource;
+    @Autowired private DataSource dataSource;
 
     private JdbcTemplate primaryJdbcTemplate;
 
@@ -38,13 +39,18 @@ class ReadReplicaApplicationTests {
 
     @BeforeAll
     void setUp() {
-        assertThat(routingDataSource).isNotNull();
-        Map<Object, DataSource> resolvedDataSources = routingDataSource.getResolvedDataSources();
-        assertThat(resolvedDataSources).isNotEmpty().hasSize(2);
-        primaryJdbcTemplate =
-                new JdbcTemplate(resolvedDataSources.get(RoutingDataSource.Route.PRIMARY));
-        replicaJdbcTemplate =
-                new JdbcTemplate(resolvedDataSources.get(RoutingDataSource.Route.REPLICA));
+        assertThat(dataSource).isNotNull().isInstanceOf(LazyConnectionDataSourceProxy.class);
+        LazyConnectionDataSourceProxy lazyConnectionDataSourceProxy =
+                (LazyConnectionDataSourceProxy) dataSource;
+        DataSource targetDataSource = lazyConnectionDataSourceProxy.getTargetDataSource();
+        assertThat(targetDataSource).isNotNull().isInstanceOf(ProxyDataSource.class);
+        ProxyDataSource proxyDataSource = (ProxyDataSource) targetDataSource;
+        primaryJdbcTemplate = new JdbcTemplate(proxyDataSource.getDataSource());
+        Object readOnlyDataSource =
+                ReflectionTestUtils.getField(lazyConnectionDataSourceProxy, "readOnlyDataSource");
+        assertThat(readOnlyDataSource).isNotNull().isInstanceOf(ProxyDataSource.class);
+        proxyDataSource = (ProxyDataSource) readOnlyDataSource;
+        replicaJdbcTemplate = new JdbcTemplate(proxyDataSource.getDataSource());
     }
 
     @Test
