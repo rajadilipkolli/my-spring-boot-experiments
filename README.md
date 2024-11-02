@@ -5,9 +5,9 @@
 
 <!-- TOC -->
 * [spring boot integration experiments](#spring-boot-integration-experiments)
-  * [Tech Stack](#tech-stack)
-  * [Useful Docker Commands](#useful-docker-commands)
-  * [Useful git Commands](#useful-git-commands)
+    * [Tech Stack](#tech-stack)
+    * [Useful Docker Commands](#useful-docker-commands)
+    * [Useful git Commands](#useful-git-commands)
 <!-- TOC -->
 
 # spring boot integration experiments
@@ -23,7 +23,7 @@ The following table list all sample codes related to the spring boot integration
 | [Hibernate Envers Implementation using spring data JPA](./jpa/boot-data-envers)                                         | The application, demonstrates how to apply hibernate envers to the spring boot project, monitor the system and alert when CPU usage is high or when system is down                                             | Completed |
 | [Graph QL implementation using webflux](./graphql/boot-graphql-webflux)                                                 | The application, demonstrates the way to connect to database using graph ql using webflux                                                                                                                      | Completed |
 | [Hibernate 2nd Level Cache Using Redis](./jpa/boot-hibernate2ndlevelcache-sample)                                       | The application, demonstrates how to apply Hibernate 2nd level cache using redis in a spring boot project , testing using QueryCounting, implemented hypersistence Repository instead of default JPARepository | Completed |
-| [Read Replica Postgres with connection optimization](./jpa/boot-read-replica-postgresql)                                                             | The application, demonstrates saving the data in Postgresql and then read from replica instance with optimized connection handling via LazyConnectionDataSourceProxy                                                                                                               | Completed |
+| [Read Replica Postgres with connection optimization](./jpa/boot-read-replica-postgresql)                                | The application, demonstrates saving the data in Postgresql and then read from replica instance with optimized connection handling via LazyConnectionDataSourceProxy                                           | Completed |
 | [BackgroundJobs and Scheduling using Jobrunr](./scheduler/boot-scheduler-jobrunr)                                       | The application, demonstrates running background jobs and scheduling the tasks using [Jobrunr](https://www.jobrunr.io/en/)                                                                                     | Completed |
 | [MultiTenancy DB Based](./jpa/multitenancy/multitenancy-db)                                                             | The application, demonstrates running multi tenancy in JPA using different databases but same DDLs and DMLs                                                                                                    | Completed |
 | [MultiTenancy Partition Based](./jpa/multitenancy/partition)                                                            | The application, demonstrates running multi tenancy in JPA using partition based i.e Shared Database with Shared table                                                                                         | Completed |
@@ -38,7 +38,7 @@ The following table list all sample codes related to the spring boot integration
 | [Spring Batch Implementation](./batch-boot-jpa-sample)                                                                  | The application, demonstrates implementing Spring Batch 5 using simple config and creating batch tables using liquibase                                                                                        | Completed |
 | [Rest API Documentation with examples](./boot-rest-docs-sample)                                                         | This application, demonstrates ability to generate pdf API documentation using spring rest docs                                                                                                                | Completed |  
 | [Custom SequenceNumber and LazyConnectionDataSourceProxy for db connection improvement](./jpa/boot-data-customsequence) | This application, demonstrated ability to create custom sequences, using datasource-proxy and LazyConnectionDataSourceProxy for db connection improvement using mariadb                                        | Completed |
-| [KeySet pagination and dynamic search](./jpa/keyset-pagination/blaze-persistence/)                                               | Implements KeySet Pagination using Blaze Persistence and enable dynamic search using specifications                                                                                                             | Completed |
+| [KeySet pagination and dynamic search](./jpa/keyset-pagination/blaze-persistence)                                       | Implements KeySet Pagination using Blaze Persistence and enable dynamic search using specifications                                                                                                            | Completed |
 
 For More info about this repository, Please visit [here](https://rajadilipkolli.github.io/my-spring-boot-experiments/)
 
