@@ -103,19 +103,25 @@ class AnimalControllerTest {
                         .param("sortDir", "desc"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.size()", is(1)))
-                .andExpect(jsonPath("$.isFirst", is(false)));
+                .andExpect(jsonPath("$.totalElements", is(3)))
+                .andExpect(jsonPath("$.pageNumber", is(2)))
+                .andExpect(jsonPath("$.totalPages", is(2)))
+                .andExpect(jsonPath("$.isFirst", is(false)))
+                .andExpect(jsonPath("$.isLast", is(true)))
+                .andExpect(jsonPath("$.hasNext", is(false)))
+                .andExpect(jsonPath("$.hasPrevious", is(true)));
     }
 
     @Test
     void shouldFindAnimalById() throws Exception {
         Long animalId = 1L;
-        AnimalResponse animal = new AnimalResponse(animalId, "text 1");
+        AnimalResponse animal = new AnimalResponse(animalId, "name 1");
         given(animalService.findAnimalById(animalId)).willReturn(Optional.of(animal));
 
         this.mockMvc
                 .perform(get("/api/animals/{id}", animalId))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.text", is(animal.text())));
+                .andExpect(jsonPath("$.name", is(animal.name())));
     }
 
     @Test
@@ -147,7 +153,7 @@ class AnimalControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(header().exists(HttpHeaders.LOCATION))
                 .andExpect(jsonPath("$.id", notNullValue()))
-                .andExpect(jsonPath("$.text", is(animal.text())));
+                .andExpect(jsonPath("$.name", is(animal.name())));
     }
 
     @Test
@@ -174,8 +180,8 @@ class AnimalControllerTest {
     @Test
     void shouldUpdateAnimal() throws Exception {
         Long animalId = 1L;
-        AnimalResponse animal = new AnimalResponse(animalId, "Updated text");
-        AnimalRequest animalRequest = new AnimalRequest("Updated text");
+        AnimalResponse animal = new AnimalResponse(animalId, "Updated name");
+        AnimalRequest animalRequest = new AnimalRequest("Updated name");
         given(animalService.updateAnimal(eq(animalId), any(AnimalRequest.class)))
                 .willReturn(animal);
 
@@ -185,13 +191,13 @@ class AnimalControllerTest {
                         .content(objectMapper.writeValueAsString(animalRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(animalId), Long.class))
-                .andExpect(jsonPath("$.text", is(animal.text())));
+                .andExpect(jsonPath("$.name", is(animal.name())));
     }
 
     @Test
     void shouldReturn404WhenUpdatingNonExistingAnimal() throws Exception {
         Long animalId = 1L;
-        AnimalRequest animalRequest = new AnimalRequest("Updated text");
+        AnimalRequest animalRequest = new AnimalRequest("Updated name");
         given(animalService.updateAnimal(eq(animalId), any(AnimalRequest.class)))
                 .willThrow(new AnimalNotFoundException(animalId));
 
@@ -210,14 +216,14 @@ class AnimalControllerTest {
     @Test
     void shouldDeleteAnimal() throws Exception {
         Long animalId = 1L;
-        AnimalResponse animal = new AnimalResponse(animalId, "Some text");
+        AnimalResponse animal = new AnimalResponse(animalId, "Some name");
         given(animalService.findAnimalById(animalId)).willReturn(Optional.of(animal));
         doNothing().when(animalService).deleteAnimalById(animalId);
 
         this.mockMvc
                 .perform(delete("/api/animals/{id}", animalId))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.text", is(animal.text())));
+                .andExpect(jsonPath("$.name", is(animal.name())));
     }
 
     @Test

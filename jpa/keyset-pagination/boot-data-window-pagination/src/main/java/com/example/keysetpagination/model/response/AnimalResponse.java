@@ -1,3 +1,3 @@
 package com.example.keysetpagination.model.response;
 
-public record AnimalResponse(Long id, String text) {}
+public record AnimalResponse(Long id, String name) {}

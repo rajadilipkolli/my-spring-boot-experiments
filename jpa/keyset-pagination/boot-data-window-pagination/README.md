@@ -1,4 +1,4 @@
-# boot-data-window-paginiation
+# boot-data-window-pagination
 
 ### Format code
 
