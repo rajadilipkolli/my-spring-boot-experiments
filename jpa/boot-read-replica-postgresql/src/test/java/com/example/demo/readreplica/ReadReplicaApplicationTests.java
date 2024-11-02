@@ -41,18 +41,36 @@ class ReadReplicaApplicationTests {
 
     @BeforeAll
     void setUp() {
-        assertThat(dataSource).isNotNull().isInstanceOf(LazyConnectionDataSourceProxy.class);
-        LazyConnectionDataSourceProxy lazyConnectionDataSourceProxy =
-                (LazyConnectionDataSourceProxy) dataSource;
-        DataSource targetDataSource = lazyConnectionDataSourceProxy.getTargetDataSource();
-        assertThat(targetDataSource).isNotNull().isInstanceOf(ProxyDataSource.class);
-        ProxyDataSource proxyDataSource = (ProxyDataSource) targetDataSource;
-        primaryJdbcTemplate = new JdbcTemplate(proxyDataSource.getDataSource());
-        Object readOnlyDataSource =
-                ReflectionTestUtils.getField(lazyConnectionDataSourceProxy, "readOnlyDataSource");
-        assertThat(readOnlyDataSource).isNotNull().isInstanceOf(ProxyDataSource.class);
-        proxyDataSource = (ProxyDataSource) readOnlyDataSource;
-        replicaJdbcTemplate = new JdbcTemplate(proxyDataSource.getDataSource());
+        setupJdbcTemplates(dataSource);
+    }
+
+    private void setupJdbcTemplates(DataSource dataSource) {
+        assertThat(dataSource)
+                .isNotNull()
+                .withFailMessage("DataSource must not be null")
+                .isInstanceOf(LazyConnectionDataSourceProxy.class);
+
+        LazyConnectionDataSourceProxy lazyProxy = (LazyConnectionDataSourceProxy) dataSource;
+
+        // Setup primary template
+        DataSource targetDataSource = lazyProxy.getTargetDataSource();
+        assertThat(targetDataSource)
+                .isNotNull()
+                .withFailMessage("Target DataSource must not be null")
+                .isInstanceOf(ProxyDataSource.class);
+
+        primaryJdbcTemplate =
+                new JdbcTemplate(((ProxyDataSource) targetDataSource).getDataSource());
+
+        // Setup replica template
+        Object readOnlyDataSource = ReflectionTestUtils.getField(lazyProxy, "readOnlyDataSource");
+        assertThat(readOnlyDataSource)
+                .isNotNull()
+                .withFailMessage("Read-only DataSource must not be null")
+                .isInstanceOf(ProxyDataSource.class);
+
+        replicaJdbcTemplate =
+                new JdbcTemplate(((ProxyDataSource) readOnlyDataSource).getDataSource());
     }
 
     @Test

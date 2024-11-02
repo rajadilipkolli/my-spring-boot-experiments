@@ -4,6 +4,7 @@ This project is an example to show how we can separate read and write operations
 A read replica in Postgres is a database instance that receives data from a primary database instance and serves it to clients. Read replicas are useful for scaling database workloads, as they can offload read operations from the primary instance, allowing it to focus on more resource-intensive tasks such as writing data. This can improve the performance of the overall database system. Read replicas can also be useful for providing high availability, as they can take over read operations if the primary instance becomes unavailable for any reason.
 
  - All reads will go to reader instance and writes will go to writer instance
+ - Swithching between master and replica can be observed at docker compose logs or in application/logs when datasourceproxy is enabled.
 
  ![](../../images/replica.png)
 
