@@ -6,9 +6,11 @@ spring:
       username: postgres_write
       driverClassName: org.postgresql.Driver
       url: jdbc:postgresql://localhost:5432/my_database
-      configuration:
+      hikari:
         auto-commit: false
-        poolName: primaryHikariPool
+        pool-name: primaryHikariPool
+        data-source-properties:
+          ApplicationName: ${spring.application.name}
   replica:
     datasource:
       password: repl_password
@@ -18,11 +20,31 @@ spring:
       hikari:
         auto-commit: false
         poolName: replicaHikariPool
-
+################ Database #####################
+  data:
+    jpa:
+      repositories:
+        bootstrap-mode: deferred
   jpa:
     open-in-view: false
+    show-sql: false
     hibernate:
       ddl-auto: validate
+    properties:
+      hibernate:
+        connection:
+          provider_disables_autocommit: true
+        jdbc:
+          time_zone: UTC
+          batch_size: 25
+          lob.non_contextual_creation : true
+        generate_statistics: false
+        order_inserts: true
+        order_updates: true
+        query:
+          fail_on_pagination_over_collection_fetch: true
+          in_clause_parameter_padding: true
+          plan_cache_max_size: 4096
   threads:
     virtual:
       enabled: true
@@ -30,14 +52,14 @@ spring:
 # spring boot log level property
 logging:
   level:
-    read-replica-logger : DEBUG
+    read-replica-logger: DEBUG
 jdbc:
-  excludedDataSourceBeanNames: dataSource
   datasource-proxy:
+    enabled: true
     multiline: false
     logging: slf4j
     query:
       logger-name: read-replica-logger
       log-level: DEBUG
       enable-logging: true
-    enabled: true
+  excluded-data-source-bean-names: dataSource

@@ -22,7 +22,7 @@ class DatabaseConfig {
     }
 
     @Bean
-    @ConfigurationProperties(PRIMARY_DATABASE_PROPERTY_KEY_PREFIX + ".configuration")
+    @ConfigurationProperties(PRIMARY_DATABASE_PROPERTY_KEY_PREFIX + ".hikari")
     DataSource primaryDataSource(final DataSourceProperties primaryDataSourceProperties) {
         return primaryDataSourceProperties
                 .initializeDataSourceBuilder()
