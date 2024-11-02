@@ -40,7 +40,7 @@ class AnimalServiceTest {
         // then
         assertThat(optionalAnimal).isPresent().hasValueSatisfying(animalResponse -> {
             assertThat(animalResponse.id()).isEqualTo(1L);
-            assertThat(animalResponse.text()).isEqualTo("junitTest");
+            assertThat(animalResponse.name()).isEqualTo("junitTest");
         });
     }
 

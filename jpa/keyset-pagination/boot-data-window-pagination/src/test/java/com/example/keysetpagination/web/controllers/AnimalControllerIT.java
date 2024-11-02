@@ -74,7 +74,7 @@ class AnimalControllerIT extends AbstractIntegrationTest {
                 .perform(get("/api/animals/{id}", animalId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(animal.getId()), Long.class))
-                .andExpect(jsonPath("$.text", is(animal.getName())));
+                .andExpect(jsonPath("$.name", is(animal.getName())));
     }
 
     @Test
@@ -87,7 +87,7 @@ class AnimalControllerIT extends AbstractIntegrationTest {
                 .andExpect(status().isCreated())
                 .andExpect(header().exists(HttpHeaders.LOCATION))
                 .andExpect(jsonPath("$.id", notNullValue()))
-                .andExpect(jsonPath("$.text", is(animalRequest.name())));
+                .andExpect(jsonPath("$.name", is(animalRequest.name())));
     }
 
     @Test
@@ -122,7 +122,7 @@ class AnimalControllerIT extends AbstractIntegrationTest {
                         .content(objectMapper.writeValueAsString(animalRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(animalId), Long.class))
-                .andExpect(jsonPath("$.text", is(animalRequest.name())));
+                .andExpect(jsonPath("$.name", is(animalRequest.name())));
     }
 
     @Test
@@ -166,7 +166,7 @@ class AnimalControllerIT extends AbstractIntegrationTest {
                 .perform(delete("/api/animals/{id}", animalId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(animal.getId()), Long.class))
-                .andExpect(jsonPath("$.text", is(animal.getName())));
+                .andExpect(jsonPath("$.name", is(animal.getName())));
 
         // Verify animal is deleted
         this.mockMvc.perform(get("/api/animals/{id}", animalId)).andExpect(status().isNotFound());
