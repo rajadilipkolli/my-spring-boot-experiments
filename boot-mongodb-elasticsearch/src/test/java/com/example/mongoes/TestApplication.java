@@ -25,10 +25,10 @@ public class TestApplication {
     @Bean
     @RestartScope
     MongoDBContainer mongoDBContainer() {
-        return new MongoDBContainer(DockerImageName.parse("mongo").withTag("8.0.1")).withSharding();
+        return new MongoDBContainer(DockerImageName.parse("mongo").withTag("8.0.3")).withSharding();
     }
 
     public static void main(String[] args) {
-        SpringApplication.from(Application::main).with(TestApplication.class).run(args);
+        SpringApplication.from(MongoESApplication::main).with(TestApplication.class).run(args);
     }
 }

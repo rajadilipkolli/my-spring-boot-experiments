@@ -49,9 +49,9 @@
             "name": "Spring Boot-Application<boot-mongodb-elasticsearch>",
             "request": "launch",
             "cwd": "${workspaceFolder}",
-            "mainClass": "com.example.mongoes.Application",
+            "mainClass": "com.example.mongoes.MongoESApplication",
             "projectName": "boot-mongodb-elasticsearch",
-            "args": "",
+            "args": "--spring.profiles.active=local",
             "envFile": "${workspaceFolder}/.env"
         },
         {
