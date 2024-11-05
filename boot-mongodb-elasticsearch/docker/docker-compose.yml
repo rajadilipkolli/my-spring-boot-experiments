@@ -1,7 +1,7 @@
 services:
   mongodb:
     hostname: mongodb
-    image: mongo:8.0.1
+    image: mongo:8.0.3
     volumes:
       - mongodb:/data/db
     ports:
