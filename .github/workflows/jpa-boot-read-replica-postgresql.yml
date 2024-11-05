@@ -31,10 +31,5 @@ jobs:
           java-version: 21
           distribution: "temurin"
           cache: "maven"
-      - name: Start up databases via docker compose
-        run: |
-          docker compose up -d postgresql-master postgresql-slave
-          sleep 5
-          docker ps -a
       - name: Build and analyze
         run: ./mvnw clean verify

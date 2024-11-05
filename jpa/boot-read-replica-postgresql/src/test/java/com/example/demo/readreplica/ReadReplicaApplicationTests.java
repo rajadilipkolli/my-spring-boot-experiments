@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.awaitility.Awaitility.await;
 
+import com.example.demo.readreplica.common.ContainersConfiguration;
 import java.time.LocalDateTime;
 import java.util.concurrent.TimeUnit;
 import javax.sql.DataSource;
@@ -23,7 +24,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.util.ReflectionTestUtils;
 
 @ActiveProfiles("test")
-@SpringBootTest
+@SpringBootTest(classes = ContainersConfiguration.class)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ReadReplicaApplicationTests {
@@ -45,15 +46,20 @@ class ReadReplicaApplicationTests {
     }
 
     private void setupJdbcTemplates(DataSource dataSource) {
+        validateDataSourceHierarchy(dataSource);
+        LazyConnectionDataSourceProxy lazyProxy = (LazyConnectionDataSourceProxy) dataSource;
+        setupPrimaryTemplate(lazyProxy.getTargetDataSource());
+        setupReplicaTemplate(lazyProxy);
+    }
+
+    private void validateDataSourceHierarchy(DataSource dataSource) {
         assertThat(dataSource)
                 .isNotNull()
                 .withFailMessage("DataSource must not be null")
                 .isInstanceOf(LazyConnectionDataSourceProxy.class);
+    }
 
-        LazyConnectionDataSourceProxy lazyProxy = (LazyConnectionDataSourceProxy) dataSource;
-
-        // Setup primary template
-        DataSource targetDataSource = lazyProxy.getTargetDataSource();
+    private void setupPrimaryTemplate(DataSource targetDataSource) {
         assertThat(targetDataSource)
                 .isNotNull()
                 .withFailMessage("Target DataSource must not be null")
@@ -61,8 +67,9 @@ class ReadReplicaApplicationTests {
 
         primaryJdbcTemplate =
                 new JdbcTemplate(((ProxyDataSource) targetDataSource).getDataSource());
+    }
 
-        // Setup replica template
+    private void setupReplicaTemplate(LazyConnectionDataSourceProxy lazyProxy) {
         Object readOnlyDataSource = ReflectionTestUtils.getField(lazyProxy, "readOnlyDataSource");
         assertThat(readOnlyDataSource)
                 .isNotNull()
