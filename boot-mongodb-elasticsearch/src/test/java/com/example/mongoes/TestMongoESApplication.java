@@ -11,7 +11,7 @@ import org.testcontainers.elasticsearch.ElasticsearchContainer;
 import org.testcontainers.utility.DockerImageName;
 
 @TestConfiguration(proxyBeanMethods = false)
-public class TestApplication {
+public class TestMongoESApplication {
 
     @ServiceConnection
     @Bean
@@ -29,6 +29,8 @@ public class TestApplication {
     }
 
     public static void main(String[] args) {
-        SpringApplication.from(MongoESApplication::main).with(TestApplication.class).run(args);
+        SpringApplication.from(MongoESApplication::main)
+                .with(TestMongoESApplication.class)
+                .run(args);
     }
 }

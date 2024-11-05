@@ -51,7 +51,7 @@
             "cwd": "${workspaceFolder}",
             "mainClass": "com.example.mongoes.MongoESApplication",
             "projectName": "boot-mongodb-elasticsearch",
-            "args": "--spring.profiles.active=local",
+            "args": "--spring.profiles.active=cluster",
             "envFile": "${workspaceFolder}/.env"
         },
         {

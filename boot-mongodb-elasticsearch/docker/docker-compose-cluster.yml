@@ -59,8 +59,11 @@ services:
     container_name: elasticsearch
     environment:
       - discovery.type=single-node
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - http.host=0.0.0.0
+      - transport.host=0.0.0.0
       - xpack.security.enabled=false
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xmx2048m -Xms2048m"
     networks:
       - mongoCluster
     ports:
@@ -68,19 +71,19 @@ services:
       - "9300:9300"
     volumes:
       - esdata:/usr/share/elasticsearch/data
+      - ./elk/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
 
   kibana:
     image: docker.elastic.co/kibana/kibana:8.15.3
-    container_name: kibana
     restart: always
     ports:
       - "5601:5601"
     networks:
       - mongoCluster
     environment:
-      ELASTICSEARCH_URL: http://elasticsearch:9200
-      ELASTICSEARCH_HOSTS: '["http://elasticsearch:9200"]'
-    depends_on:
+      - ELASTICSEARCH_URL=http://elasticsearch:9200
+      - ./elk/kibana.yml:/usr/share/kibana/config/kibana.yml
+    links:
       - elasticsearch
 
 networks:
