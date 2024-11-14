@@ -31,22 +31,15 @@ public class PostCommentService {
     private final PostCommentRequestToEntityMapper postCommentRequestToEntityMapper;
 
     public List<PostCommentResponse> findAllPostComments() {
-        List<CompletableFuture<PostCommentResponse>> completableFutureList =
-                postCommentRepository.findAll().stream()
-                        .map(
-                                postCommentEntity ->
-                                        CompletableFuture.supplyAsync(
-                                                () ->
-                                                        postCommentEntityToResponseMapper.convert(
-                                                                postCommentEntity)))
-                        .toList();
+        List<CompletableFuture<PostCommentResponse>> completableFutureList = postCommentRepository.findAll().stream()
+                .map(postCommentEntity -> CompletableFuture.supplyAsync(
+                        () -> postCommentEntityToResponseMapper.convert(postCommentEntity)))
+                .toList();
         return completableFutureList.stream().map(CompletableFuture::join).toList();
     }
 
     public Optional<PostCommentResponse> findPostCommentById(Long id) {
-        return this.postCommentRepository
-                .findById(id)
-                .map(postCommentEntityToResponseMapper::convert);
+        return this.postCommentRepository.findById(id).map(postCommentEntityToResponseMapper::convert);
     }
 
     public Optional<PostCommentEntity> findCommentById(Long commentId) {
@@ -75,8 +68,7 @@ public class PostCommentService {
     @Transactional
     public PostCommentResponse updatePostComment(
             PostCommentEntity postCommentEntity, PostCommentRequest postCommentRequest) {
-        postCommentEntityToResponseMapper.updatePostCommentEntity(
-                postCommentRequest, postCommentEntity);
+        postCommentEntityToResponseMapper.updatePostCommentEntity(postCommentRequest, postCommentEntity);
         // if published is changed to true then publishedAt should be set
         if (postCommentEntity.isPublished() && postCommentEntity.getPublishedAt() == null) {
             postCommentEntity.setPublishedAt(OffsetDateTime.now());

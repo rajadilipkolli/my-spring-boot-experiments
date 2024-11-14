@@ -40,10 +40,7 @@ public class PostDetailsController {
             @PathVariable Long id, @RequestBody PostDetailsRequest postDetailsEntity) {
         return postDetailsService
                 .findDetailsById(id)
-                .flatMap(
-                        postDetailsObj ->
-                                postDetailsService.updatePostDetails(
-                                        postDetailsObj, postDetailsEntity))
+                .flatMap(postDetailsObj -> postDetailsService.updatePostDetails(postDetailsObj, postDetailsEntity))
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }

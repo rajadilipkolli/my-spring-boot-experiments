@@ -42,9 +42,7 @@ public class PostService {
     }
 
     public Optional<PostResponse> findPostById(Long id) {
-        return postRepository
-                .findById(id)
-                .map(post -> myConversionService.convert(post, PostResponse.class));
+        return postRepository.findById(id).map(post -> myConversionService.convert(post, PostResponse.class));
     }
 
     public PostResponse savePost(NewPostRequest newPostRequest) {
@@ -58,29 +56,23 @@ public class PostService {
 
     public Map<Long, List<PostInfo>> getPostByAuthorIdIn(List<Long> authorIds) {
         return this.postRepository.findByAuthorEntity_IdIn(authorIds).stream()
-                .collect(Collectors.groupingBy(postInfo -> postInfo.getAuthorEntity().getId()));
+                .collect(Collectors.groupingBy(
+                        postInfo -> postInfo.getAuthorEntity().getId()));
     }
 
     @Transactional
     public PostEntity createPost(NewPostRequest newPostRequest) {
-        PostEntity postEntity =
-                this.mapNewPostRequestToPostEntityMapper.convert(newPostRequest, tagRepository);
-        postEntity.setAuthorEntity(
-                this.authorRepository.getReferenceByEmail(newPostRequest.email()));
+        PostEntity postEntity = this.mapNewPostRequestToPostEntityMapper.convert(newPostRequest, tagRepository);
+        postEntity.setAuthorEntity(this.authorRepository.getReferenceByEmail(newPostRequest.email()));
         return this.postRepository.save(postEntity);
     }
 
     @Transactional
     public Optional<PostResponse> updatePost(Long id, NewPostRequest newPostRequest) {
-        return postRepository
-                .findById(id)
-                .map(
-                        postEntity -> {
-                            mapNewPostRequestToPostEntityMapper.updatePostEntity(
-                                    newPostRequest, postEntity, tagRepository);
-                            PostEntity updatedPostEntity = postRepository.save(postEntity);
-                            return myConversionService.convert(
-                                    updatedPostEntity, PostResponse.class);
-                        });
+        return postRepository.findById(id).map(postEntity -> {
+            mapNewPostRequestToPostEntityMapper.updatePostEntity(newPostRequest, postEntity, tagRepository);
+            PostEntity updatedPostEntity = postRepository.save(postEntity);
+            return myConversionService.convert(updatedPostEntity, PostResponse.class);
+        });
     }
 }

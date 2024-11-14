@@ -30,11 +30,14 @@ import org.springframework.test.web.servlet.MockMvc;
 @ActiveProfiles(PROFILE_TEST)
 class PostDetailsEntityControllerTest {
 
-    @Autowired private MockMvc mockMvc;
+    @Autowired
+    private MockMvc mockMvc;
 
-    @MockBean private PostDetailsService postDetailsService;
+    @MockBean
+    private PostDetailsService postDetailsService;
 
-    @Autowired private ObjectMapper objectMapper;
+    @Autowired
+    private ObjectMapper objectMapper;
 
     private List<PostDetailsEntity> postDetailsList;
 
@@ -58,8 +61,7 @@ class PostDetailsEntityControllerTest {
     void shouldFindPostDetailsById() throws Exception {
         Long postDetailsId = 10L;
 
-        given(postDetailsService.findPostDetailsById(postDetailsId))
-                .willReturn(Optional.of(getPostDetails()));
+        given(postDetailsService.findPostDetailsById(postDetailsId)).willReturn(Optional.of(getPostDetails()));
 
         this.mockMvc
                 .perform(get("/api/postdetails/{id}", postDetailsId))
@@ -72,9 +74,7 @@ class PostDetailsEntityControllerTest {
         Long postDetailsId = 1L;
         given(postDetailsService.findPostDetailsById(postDetailsId)).willReturn(Optional.empty());
 
-        this.mockMvc
-                .perform(get("/api/postdetails/{id}", postDetailsId))
-                .andExpect(status().isNotFound());
+        this.mockMvc.perform(get("/api/postdetails/{id}", postDetailsId)).andExpect(status().isNotFound());
     }
 
     @Test
@@ -82,18 +82,15 @@ class PostDetailsEntityControllerTest {
         Long postDetailsId = 1L;
         PostDetailsEntity postDetails =
                 new PostDetailsEntity().setId(postDetailsId).setCreatedBy("updated");
-        PostDetailsRequest postDetailsRequest =
-                new PostDetailsRequest("junitDetailsKey", "junitCreatedBy");
-        given(postDetailsService.findDetailsById(postDetailsId))
-                .willReturn(Optional.of(postDetails));
+        PostDetailsRequest postDetailsRequest = new PostDetailsRequest("junitDetailsKey", "junitCreatedBy");
+        given(postDetailsService.findDetailsById(postDetailsId)).willReturn(Optional.of(postDetails));
         given(postDetailsService.updatePostDetails(postDetails, postDetailsRequest))
                 .willReturn(Optional.of(getPostDetails()));
 
         this.mockMvc
-                .perform(
-                        put("/api/postdetails/{id}", postDetails.getId())
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(postDetailsRequest)))
+                .perform(put("/api/postdetails/{id}", postDetails.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(postDetailsRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.detailsKey", is("junitDetailsKey")));
     }
@@ -106,10 +103,9 @@ class PostDetailsEntityControllerTest {
                 new PostDetailsEntity().setId(postDetailsId).setCreatedBy("Junit1");
 
         this.mockMvc
-                .perform(
-                        put("/api/postdetails/{id}", postDetailsId)
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(postDetails)))
+                .perform(put("/api/postdetails/{id}", postDetailsId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(postDetails)))
                 .andExpect(status().isNotFound());
     }
 

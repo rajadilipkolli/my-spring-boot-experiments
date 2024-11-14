@@ -29,15 +29,12 @@ public class TagGraphQLController {
 
     @QueryMapping
     public TagEntity findTagByName(@Argument("tagName") String tagName) {
-        return this.tagService
-                .findTagByName(tagName)
-                .orElseThrow(() -> new TagNotFoundException(tagName));
+        return this.tagService.findTagByName(tagName).orElseThrow(() -> new TagNotFoundException(tagName));
     }
 
     @MutationMapping
     public TagEntity createTag(
-            @NotBlank @Argument("tagName") String tagName,
-            @Argument("tagDescription") String tagDescription) {
+            @NotBlank @Argument("tagName") String tagName, @Argument("tagDescription") String tagDescription) {
         return this.tagService.saveTag(tagName, tagDescription);
     }
 

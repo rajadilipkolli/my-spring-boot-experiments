@@ -37,22 +37,21 @@ import org.springframework.test.web.servlet.MockMvc;
 @ActiveProfiles(PROFILE_TEST)
 class PostEntityControllerTest {
 
-    @Autowired private MockMvc mockMvc;
+    @Autowired
+    private MockMvc mockMvc;
 
-    @MockBean private PostService postService;
+    @MockBean
+    private PostService postService;
 
-    @Autowired private ObjectMapper objectMapper;
+    @Autowired
+    private ObjectMapper objectMapper;
 
     private List<PostEntity> postEntityList;
 
-    private final List<PostResponse> postResponseList =
-            List.of(
-                    new PostResponse(
-                            null, "First Post", false, null, null, null, null, new ArrayList<>()),
-                    new PostResponse(
-                            null, "Second Post", false, null, null, null, null, new ArrayList<>()),
-                    new PostResponse(
-                            null, "Third Post", false, null, null, null, null, new ArrayList<>()));
+    private final List<PostResponse> postResponseList = List.of(
+            new PostResponse(null, "First Post", false, null, null, null, null, new ArrayList<>()),
+            new PostResponse(null, "Second Post", false, null, null, null, null, new ArrayList<>()),
+            new PostResponse(null, "Third Post", false, null, null, null, null, new ArrayList<>()));
 
     @BeforeEach
     void setUp() {
@@ -76,8 +75,7 @@ class PostEntityControllerTest {
     @Test
     void shouldFindPostById() throws Exception {
         Long postId = 1L;
-        given(postService.findPostById(postId))
-                .willReturn(Optional.of(postResponseList.getFirst()));
+        given(postService.findPostById(postId)).willReturn(Optional.of(postResponseList.getFirst()));
 
         this.mockMvc
                 .perform(get("/api/posts/{id}", postId))
@@ -93,10 +91,7 @@ class PostEntityControllerTest {
         this.mockMvc
                 .perform(get("/api/posts/{id}", postId))
                 .andExpect(status().isNotFound())
-                .andExpect(
-                        header().string(
-                                        HttpHeaders.CONTENT_TYPE,
-                                        is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                 .andExpect(jsonPath("$.type", is("about:blank")))
                 .andExpect(jsonPath("$.title", is("Not Found")))
                 .andExpect(jsonPath("$.status", is(404)))
@@ -106,22 +101,19 @@ class PostEntityControllerTest {
 
     @Test
     void shouldCreateNewPost() throws Exception {
-        given(postService.savePost(any(NewPostRequest.class)))
-                .willReturn(postResponseList.getFirst());
+        given(postService.savePost(any(NewPostRequest.class))).willReturn(postResponseList.getFirst());
 
-        NewPostRequest postEntity =
-                new NewPostRequest(
-                        "First Title",
-                        "First Post",
-                        "junit1@email.com",
-                        false,
-                        new PostDetailsRequest("detailsKey", "JunitCreatedBy"),
-                        null);
+        NewPostRequest postEntity = new NewPostRequest(
+                "First Title",
+                "First Post",
+                "junit1@email.com",
+                false,
+                new PostDetailsRequest("detailsKey", "JunitCreatedBy"),
+                null);
         this.mockMvc
-                .perform(
-                        post("/api/posts")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(postEntity)))
+                .perform(post("/api/posts")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(postEntity)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.content", is(postEntity.content())));
     }
@@ -131,10 +123,9 @@ class PostEntityControllerTest {
         NewPostRequest post = new NewPostRequest(null, null, null, false, null, null);
 
         this.mockMvc
-                .perform(
-                        post("/api/posts")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(post)))
+                .perform(post("/api/posts")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(post)))
                 .andExpect(status().isBadRequest())
                 .andExpect(header().string("Content-Type", is("application/problem+json")))
                 .andExpect(jsonPath("$.type", is("about:blank")))
@@ -153,24 +144,21 @@ class PostEntityControllerTest {
     @Test
     void shouldUpdatePost() throws Exception {
         Long postId = 1L;
-        NewPostRequest postEntity =
-                new NewPostRequest(
-                        "First Title",
-                        "Updated Content",
-                        "junit1@email.com",
-                        false,
-                        new PostDetailsRequest("detailsKey", "JunitCreatedBy"),
-                        null);
+        NewPostRequest postEntity = new NewPostRequest(
+                "First Title",
+                "Updated Content",
+                "junit1@email.com",
+                false,
+                new PostDetailsRequest("detailsKey", "JunitCreatedBy"),
+                null);
         PostResponse value =
-                new PostResponse(
-                        null, "Updated Content", false, null, null, null, null, new ArrayList<>());
+                new PostResponse(null, "Updated Content", false, null, null, null, null, new ArrayList<>());
         given(postService.updatePost(postId, postEntity)).willReturn(Optional.of(value));
 
         this.mockMvc
-                .perform(
-                        put("/api/posts/{id}", postId)
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(postEntity)))
+                .perform(put("/api/posts/{id}", postId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(postEntity)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", is(postEntity.content())));
     }
@@ -182,15 +170,11 @@ class PostEntityControllerTest {
         PostEntity postEntity = new PostEntity().setId(postId).setContent("Updated Post");
 
         this.mockMvc
-                .perform(
-                        put("/api/posts/{id}", postId)
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(postEntity)))
+                .perform(put("/api/posts/{id}", postId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(postEntity)))
                 .andExpect(status().isNotFound())
-                .andExpect(
-                        header().string(
-                                        HttpHeaders.CONTENT_TYPE,
-                                        is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                 .andExpect(jsonPath("$.type", is("about:blank")))
                 .andExpect(jsonPath("$.title", is("Not Found")))
                 .andExpect(jsonPath("$.status", is(404)))
@@ -202,13 +186,10 @@ class PostEntityControllerTest {
     void shouldDeletePost() throws Exception {
         Long postId = 1L;
         PostEntity postEntity = new PostEntity().setId(postId).setContent("First Post");
-        given(postService.findPostById(postId))
-                .willReturn(Optional.of(postResponseList.getFirst()));
+        given(postService.findPostById(postId)).willReturn(Optional.of(postResponseList.getFirst()));
         doNothing().when(postService).deletePostById(postEntity.getId());
 
-        this.mockMvc
-                .perform(delete("/api/posts/{id}", postEntity.getId()))
-                .andExpect(status().isAccepted());
+        this.mockMvc.perform(delete("/api/posts/{id}", postEntity.getId())).andExpect(status().isAccepted());
     }
 
     @Test
@@ -219,10 +200,7 @@ class PostEntityControllerTest {
         this.mockMvc
                 .perform(delete("/api/posts/{id}", postId))
                 .andExpect(status().isNotFound())
-                .andExpect(
-                        header().string(
-                                        HttpHeaders.CONTENT_TYPE,
-                                        is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                 .andExpect(jsonPath("$.type", is("about:blank")))
                 .andExpect(jsonPath("$.title", is("Not Found")))
                 .andExpect(jsonPath("$.status", is(404)))

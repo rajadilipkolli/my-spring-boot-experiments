@@ -45,7 +45,8 @@ public class AuthorEntity implements Serializable {
 
     private LocalDateTime registeredAt;
 
-    @Version private Short version;
+    @Version
+    private Short version;
 
     @OneToMany(mappedBy = "authorEntity", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PostEntity> postEntities = new ArrayList<>();

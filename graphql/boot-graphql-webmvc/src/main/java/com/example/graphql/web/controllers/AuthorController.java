@@ -60,11 +60,10 @@ public class AuthorController {
     public ResponseEntity<AuthorResponse> deleteAuthor(@PathVariable Long id) {
         return authorService
                 .findAuthorById(id)
-                .map(
-                        author -> {
-                            authorService.deleteAuthorById(id);
-                            return ResponseEntity.ok(author);
-                        })
+                .map(author -> {
+                    authorService.deleteAuthorById(id);
+                    return ResponseEntity.ok(author);
+                })
                 .orElseThrow(() -> new AuthorNotFoundException(id));
     }
 }

@@ -47,12 +47,8 @@ public class AuthorGraphQlController {
         var authorPostsMap = this.postService.getPostByAuthorIdIn(authorIds);
 
         return authorResponses.stream()
-                .collect(
-                        Collectors.toMap(
-                                Function.identity(),
-                                author ->
-                                        authorPostsMap.getOrDefault(
-                                                author.id(), new ArrayList<>())));
+                .collect(Collectors.toMap(
+                        Function.identity(), author -> authorPostsMap.getOrDefault(author.id(), new ArrayList<>())));
     }
 
     @BatchMapping(typeName = "Post")
@@ -63,12 +59,8 @@ public class AuthorGraphQlController {
         var postCommentsMap = this.postCommentService.getCommentsByPostIdIn(postIds);
 
         return posts.stream()
-                .collect(
-                        Collectors.toMap(
-                                Function.identity(),
-                                post ->
-                                        postCommentsMap.getOrDefault(
-                                                post.getId(), new ArrayList<>())));
+                .collect(Collectors.toMap(
+                        Function.identity(), post -> postCommentsMap.getOrDefault(post.getId(), new ArrayList<>())));
     }
 
     @BatchMapping(typeName = "Post")
@@ -79,12 +71,8 @@ public class AuthorGraphQlController {
         var postCommentsMap = this.tagService.getTagsByPostIdIn(postIds);
 
         return posts.stream()
-                .collect(
-                        Collectors.toMap(
-                                Function.identity(),
-                                post ->
-                                        postCommentsMap.getOrDefault(
-                                                post.getId(), new ArrayList<>())));
+                .collect(Collectors.toMap(
+                        Function.identity(), post -> postCommentsMap.getOrDefault(post.getId(), new ArrayList<>())));
     }
 
     @QueryMapping
@@ -94,14 +82,11 @@ public class AuthorGraphQlController {
 
     @QueryMapping
     public AuthorResponse findAuthorByEmailId(@Argument("email") String email) {
-        return this.authorService
-                .findAuthorByEmailId(email)
-                .orElseThrow(() -> new AuthorNotFoundException(email));
+        return this.authorService.findAuthorByEmailId(email).orElseThrow(() -> new AuthorNotFoundException(email));
     }
 
     @MutationMapping
-    public AuthorResponse createAuthor(
-            @Valid @Argument("authorInput") AuthorRequest authorRequest) {
+    public AuthorResponse createAuthor(@Valid @Argument("authorInput") AuthorRequest authorRequest) {
         return this.authorService.saveAuthor(authorRequest);
     }
 }

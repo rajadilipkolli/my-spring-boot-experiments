@@ -26,39 +26,31 @@ public interface NewPostRequestToPostEntityMapper {
 
     @Mapping(target = "tags", ignore = true)
     void updatePostEntity(
-            NewPostRequest newPostRequest,
-            @MappingTarget PostEntity postEntity,
-            @Context TagRepository tagRepository);
+            NewPostRequest newPostRequest, @MappingTarget PostEntity postEntity, @Context TagRepository tagRepository);
 
     @AfterMapping
     default void afterMapping(
-            NewPostRequest newPostRequest,
-            @MappingTarget PostEntity postEntity,
-            @Context TagRepository tagRepository) {
+            NewPostRequest newPostRequest, @MappingTarget PostEntity postEntity, @Context TagRepository tagRepository) {
         if (!CollectionUtils.isEmpty(newPostRequest.tags())) {
 
-            List<TagEntity> tagEntitiesFromDb =
-                    postEntity.getTags().stream().map(PostTagEntity::getTagEntity).toList();
+            List<TagEntity> tagEntitiesFromDb = postEntity.getTags().stream()
+                    .map(PostTagEntity::getTagEntity)
+                    .toList();
 
             // Tag Entities To remove
             tagEntitiesFromDb.stream()
-                    .filter(
-                            tagEntity ->
-                                    !newPostRequest.tags().stream()
-                                            .map(TagsRequest::tagName)
-                                            .toList()
-                                            .contains(tagEntity.getTagName()))
+                    .filter(tagEntity -> !newPostRequest.tags().stream()
+                            .map(TagsRequest::tagName)
+                            .toList()
+                            .contains(tagEntity.getTagName()))
                     .forEach(postEntity::removeTag);
 
-            List<TagEntity> tagEntitiesToUpdate =
-                    tagEntitiesFromDb.stream()
-                            .filter(
-                                    tagEntity ->
-                                            newPostRequest.tags().stream()
-                                                    .map(TagsRequest::tagName)
-                                                    .toList()
-                                                    .contains(tagEntity.getTagName()))
-                            .toList();
+            List<TagEntity> tagEntitiesToUpdate = tagEntitiesFromDb.stream()
+                    .filter(tagEntity -> newPostRequest.tags().stream()
+                            .map(TagsRequest::tagName)
+                            .toList()
+                            .contains(tagEntity.getTagName()))
+                    .toList();
 
             for (TagEntity tagEntity : tagEntitiesToUpdate) {
                 for (TagsRequest tagsRequest : newPostRequest.tags()) {
@@ -71,26 +63,19 @@ public interface NewPostRequestToPostEntityMapper {
 
             // new TagEntites to Insert
             newPostRequest.tags().stream()
-                    .filter(
-                            tagsRequest ->
-                                    !tagEntitiesToUpdate.stream()
-                                            .map(TagEntity::getTagName)
-                                            .toList()
-                                            .contains(tagsRequest.tagName()))
-                    .forEach(
-                            tagsRequest ->
-                                    postEntity.addTag(getTagEntity(tagRepository, tagsRequest)));
+                    .filter(tagsRequest -> !tagEntitiesToUpdate.stream()
+                            .map(TagEntity::getTagName)
+                            .toList()
+                            .contains(tagsRequest.tagName()))
+                    .forEach(tagsRequest -> postEntity.addTag(getTagEntity(tagRepository, tagsRequest)));
         }
     }
 
     default TagEntity getTagEntity(TagRepository tagRepository, TagsRequest tagsRequest) {
         return tagRepository
                 .findByTagNameIgnoreCase(tagsRequest.tagName())
-                .orElseGet(
-                        () ->
-                                tagRepository.save(
-                                        new TagEntity()
-                                                .setTagName(tagsRequest.tagName())
-                                                .setTagDescription(tagsRequest.tagDescription())));
+                .orElseGet(() -> tagRepository.save(new TagEntity()
+                        .setTagName(tagsRequest.tagName())
+                        .setTagDescription(tagsRequest.tagDescription())));
     }
 }

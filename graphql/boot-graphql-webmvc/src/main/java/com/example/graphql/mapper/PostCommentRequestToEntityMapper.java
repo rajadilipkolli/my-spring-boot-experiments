@@ -11,10 +11,8 @@ public interface PostCommentRequestToEntityMapper {
 
     @Mapping(
             target = "publishedAt",
-            expression =
-                    "java(postCommentRequest.published() ? java.time.OffsetDateTime.now() : null)")
-    PostCommentEntity covert(
-            PostCommentRequest postCommentRequest, @Context PostRepository postRepository);
+            expression = "java(postCommentRequest.published() ? java.time.OffsetDateTime.now() : null)")
+    PostCommentEntity covert(PostCommentRequest postCommentRequest, @Context PostRepository postRepository);
 
     @AfterMapping
     default void afterMapping(
@@ -22,7 +20,6 @@ public interface PostCommentRequestToEntityMapper {
             @MappingTarget PostCommentEntity postCommentEntity,
             @Context PostRepository postRepository) {
         // Set the PostEntity reference using the postId from the request
-        postCommentEntity.setPostEntity(
-                postRepository.getReferenceById(Long.valueOf(postCommentRequest.postId())));
+        postCommentEntity.setPostEntity(postRepository.getReferenceById(Long.valueOf(postCommentRequest.postId())));
     }
 }

@@ -20,7 +20,8 @@ import lombok.Setter;
 @Getter
 public class PostTagEntity implements Serializable {
 
-    @EmbeddedId private PostTagId id;
+    @EmbeddedId
+    private PostTagId id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("postId")
@@ -55,8 +56,7 @@ public class PostTagEntity implements Serializable {
             return false;
         }
         PostTagEntity that = (PostTagEntity) o;
-        return Objects.equals(this.postEntity, that.postEntity)
-                && Objects.equals(this.tagEntity, that.tagEntity);
+        return Objects.equals(this.postEntity, that.postEntity) && Objects.equals(this.tagEntity, that.tagEntity);
     }
 
     @Override

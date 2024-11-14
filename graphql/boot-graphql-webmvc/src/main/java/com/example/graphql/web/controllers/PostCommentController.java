@@ -42,8 +42,7 @@ public class PostCommentController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public PostCommentResponse createPostComment(
-            @RequestBody @Validated PostCommentRequest postCommentRequest) {
+    public PostCommentResponse createPostComment(@RequestBody @Validated PostCommentRequest postCommentRequest) {
         return postCommentService.addCommentToPost(postCommentRequest);
     }
 
@@ -52,11 +51,8 @@ public class PostCommentController {
             @PathVariable Long id, @RequestBody PostCommentRequest postCommentRequest) {
         return postCommentService
                 .findCommentById(id)
-                .map(
-                        postCommentObj ->
-                                ResponseEntity.ok(
-                                        postCommentService.updatePostComment(
-                                                postCommentObj, postCommentRequest)))
+                .map(postCommentObj ->
+                        ResponseEntity.ok(postCommentService.updatePostComment(postCommentObj, postCommentRequest)))
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
@@ -64,11 +60,10 @@ public class PostCommentController {
     public ResponseEntity<Object> deletePostComment(@PathVariable Long id) {
         return postCommentService
                 .findPostCommentById(id)
-                .map(
-                        postComment -> {
-                            postCommentService.deletePostCommentById(id);
-                            return ResponseEntity.accepted().build();
-                        })
+                .map(postComment -> {
+                    postCommentService.deletePostCommentById(id);
+                    return ResponseEntity.accepted().build();
+                })
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 }

@@ -20,5 +20,6 @@ public abstract class Auditable {
     @Column(nullable = false, updatable = false)
     protected LocalDateTime createdAt;
 
-    @LastModifiedDate protected LocalDateTime modifiedAt;
+    @LastModifiedDate
+    protected LocalDateTime modifiedAt;
 }

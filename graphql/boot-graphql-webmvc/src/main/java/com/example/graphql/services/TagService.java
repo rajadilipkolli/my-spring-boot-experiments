@@ -38,11 +38,9 @@ public class TagService {
 
     public Map<Long, List<TagEntity>> getTagsByPostIdIn(List<Long> postIds) {
         return postTagRepository.findByPostEntity_IdIn(postIds).stream()
-                .collect(
-                        Collectors.groupingBy(
-                                postTagEntity -> postTagEntity.getPostEntity().getId(),
-                                Collectors.mapping(
-                                        PostTagEntity::getTagEntity, Collectors.toList())));
+                .collect(Collectors.groupingBy(
+                        postTagEntity -> postTagEntity.getPostEntity().getId(),
+                        Collectors.mapping(PostTagEntity::getTagEntity, Collectors.toList())));
     }
 
     public TagEntity saveTag(String tagName, String tagDescription) {
@@ -56,17 +54,15 @@ public class TagService {
     }
 
     public Optional<TagEntity> updateTag(String tagName, String tagDescription) {
-        return this.tagRepository
-                .findByTagNameIgnoreCase(tagName)
-                .map(
-                        tagEntity -> {
-                            tagEntity.setTagDescription(tagDescription);
-                            return saveTag(tagEntity);
-                        });
+        return this.tagRepository.findByTagNameIgnoreCase(tagName).map(tagEntity -> {
+            tagEntity.setTagDescription(tagDescription);
+            return saveTag(tagEntity);
+        });
     }
 
     public void deleteTagByName(String tagName) {
-        TagEntity tagEntity = this.tagRepository.findByTagNameIgnoreCase(tagName).orElseThrow();
+        TagEntity tagEntity =
+                this.tagRepository.findByTagNameIgnoreCase(tagName).orElseThrow();
         this.tagRepository.delete(tagEntity);
     }
 }

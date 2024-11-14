@@ -21,7 +21,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class PostDetailsEntity extends Auditable implements Serializable {
 
-    @Id private Long id;
+    @Id
+    private Long id;
 
     private String detailsKey;
 

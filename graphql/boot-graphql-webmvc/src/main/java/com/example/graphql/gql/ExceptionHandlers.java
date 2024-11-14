@@ -13,23 +13,16 @@ import reactor.core.publisher.Mono;
 @Component
 public class ExceptionHandlers implements DataFetcherExceptionResolver {
     @Override
-    public Mono<List<GraphQLError>> resolveException(
-            Throwable exception, DataFetchingEnvironment environment) {
+    public Mono<List<GraphQLError>> resolveException(Throwable exception, DataFetchingEnvironment environment) {
         if (exception instanceof RestControllerException restControllerException) {
-            return Mono.fromCallable(
-                    () ->
-                            List.of(
-                                    GraphqlErrorBuilder.newError(environment)
-                                            .errorType(ErrorType.NOT_FOUND)
-                                            .message(restControllerException.getMessage())
-                                            .build()));
+            return Mono.fromCallable(() -> List.of(GraphqlErrorBuilder.newError(environment)
+                    .errorType(ErrorType.NOT_FOUND)
+                    .message(restControllerException.getMessage())
+                    .build()));
         }
-        return Mono.fromCallable(
-                () ->
-                        List.of(
-                                GraphqlErrorBuilder.newError(environment)
-                                        .errorType(ErrorType.INTERNAL_ERROR)
-                                        .message(exception.getMessage())
-                                        .build()));
+        return Mono.fromCallable(() -> List.of(GraphqlErrorBuilder.newError(environment)
+                .errorType(ErrorType.INTERNAL_ERROR)
+                .message(exception.getMessage())
+                .build()));
     }
 }

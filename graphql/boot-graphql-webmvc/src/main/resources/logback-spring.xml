@@ -9,6 +9,7 @@
             <appender-ref ref="CONSOLE" />
         </root>
     </springProfile>
+
     <springProfile name="!default">
         <property name="LOG_FILE" value="logs/${appName}.log"/>
         <include resource="org/springframework/boot/logging/logback/file-appender.xml" />
@@ -20,7 +21,6 @@
 
     <logger name="com.example.graphql" level="DEBUG"/>
     <logger name="web" level="INFO" />
-    <logger name="sql" level="INFO" />
-    <logger name="liquibase" level="DEBUG" />
+    <logger name="query-logger" level="DEBUG" />
 
 </configuration>

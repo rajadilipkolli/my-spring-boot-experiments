@@ -35,10 +35,7 @@ public class TagController {
 
     @GetMapping("/{id}")
     public ResponseEntity<TagEntity> getTagById(@PathVariable Long id) {
-        return tagService
-                .findTagById(id)
-                .map(ResponseEntity::ok)
-                .orElseThrow(() -> new TagNotFoundException(id));
+        return tagService.findTagById(id).map(ResponseEntity::ok).orElseThrow(() -> new TagNotFoundException(id));
     }
 
     @PostMapping
@@ -48,15 +45,13 @@ public class TagController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<TagEntity> updateTag(
-            @PathVariable Long id, @RequestBody TagEntity tagEntity) {
+    public ResponseEntity<TagEntity> updateTag(@PathVariable Long id, @RequestBody TagEntity tagEntity) {
         return tagService
                 .findTagById(id)
-                .map(
-                        tagObj -> {
-                            tagEntity.setId(id);
-                            return ResponseEntity.ok(tagService.saveTag(tagEntity));
-                        })
+                .map(tagObj -> {
+                    tagEntity.setId(id);
+                    return ResponseEntity.ok(tagService.saveTag(tagEntity));
+                })
                 .orElseThrow(() -> new TagNotFoundException(id));
     }
 
@@ -64,11 +59,10 @@ public class TagController {
     public ResponseEntity<TagEntity> deleteTag(@PathVariable Long id) {
         return tagService
                 .findTagById(id)
-                .map(
-                        tag -> {
-                            tagService.deleteTagById(id);
-                            return ResponseEntity.ok(tag);
-                        })
+                .map(tag -> {
+                    tagService.deleteTagById(id);
+                    return ResponseEntity.ok(tag);
+                })
                 .orElseThrow(() -> new TagNotFoundException(id));
     }
 }

@@ -18,7 +18,8 @@ import org.springframework.http.MediaType;
 
 class PostDetailsEntityControllerIT extends AbstractIntegrationTest {
 
-    @Autowired private PostRepository postRepository;
+    @Autowired
+    private PostRepository postRepository;
 
     private PostEntity post;
 
@@ -36,10 +37,7 @@ class PostDetailsEntityControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldFetchAllPostDetails() throws Exception {
-        this.mockMvc
-                .perform(get("/api/postdetails"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.size()", is(1)));
+        this.mockMvc.perform(get("/api/postdetails")).andExpect(status().isOk()).andExpect(jsonPath("$.size()", is(1)));
     }
 
     @Test
@@ -55,15 +53,13 @@ class PostDetailsEntityControllerIT extends AbstractIntegrationTest {
     @Test
     void shouldUpdatePostDetails() throws Exception {
 
-        PostDetailsRequest postDetailsRequest =
-                new PostDetailsRequest("Updated PostDetails", "Junit");
+        PostDetailsRequest postDetailsRequest = new PostDetailsRequest("Updated PostDetails", "Junit");
 
         Long postDetailsId = post.getId();
         this.mockMvc
-                .perform(
-                        put("/api/postdetails/{id}", postDetailsId)
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(postDetailsRequest)))
+                .perform(put("/api/postdetails/{id}", postDetailsId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(postDetailsRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.detailsKey", is("Updated PostDetails")));
     }

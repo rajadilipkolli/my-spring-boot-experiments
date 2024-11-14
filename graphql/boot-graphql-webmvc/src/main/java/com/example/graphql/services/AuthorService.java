@@ -27,9 +27,7 @@ public class AuthorService {
     @Transactional(readOnly = true)
     public List<AuthorResponse> findAllAuthors() {
         return authorRepository.findAll().stream()
-                .map(
-                        authorEntity ->
-                                appConversionService.convert(authorEntity, AuthorResponse.class))
+                .map(authorEntity -> appConversionService.convert(authorEntity, AuthorResponse.class))
                 .toList();
     }
 
@@ -37,29 +35,21 @@ public class AuthorService {
     public Optional<AuthorResponse> findAuthorById(Long id) {
         return authorRepository
                 .findById(id)
-                .map(
-                        authorEntity ->
-                                appConversionService.convert(authorEntity, AuthorResponse.class));
+                .map(authorEntity -> appConversionService.convert(authorEntity, AuthorResponse.class));
     }
 
     public AuthorResponse saveAuthor(AuthorRequest authorRequest) {
-        AuthorEntity authorEntity =
-                this.appConversionService.convert(authorRequest, AuthorEntity.class);
+        AuthorEntity authorEntity = this.appConversionService.convert(authorRequest, AuthorEntity.class);
         return this.appConversionService.convert(
                 authorRepository.save(Objects.requireNonNull(authorEntity)), AuthorResponse.class);
     }
 
     public Optional<AuthorResponse> updateAuthor(AuthorRequest authorRequest, Long id) {
 
-        return authorRepository
-                .findById(id)
-                .map(
-                        authorEntity -> {
-                            authorRequestToEntityMapper.upDateAuthorEntity(
-                                    authorRequest, authorEntity);
-                            return appConversionService.convert(
-                                    authorRepository.save(authorEntity), AuthorResponse.class);
-                        });
+        return authorRepository.findById(id).map(authorEntity -> {
+            authorRequestToEntityMapper.upDateAuthorEntity(authorRequest, authorEntity);
+            return appConversionService.convert(authorRepository.save(authorEntity), AuthorResponse.class);
+        });
     }
 
     public void deleteAuthorById(Long id) {
@@ -70,8 +60,6 @@ public class AuthorService {
     public Optional<AuthorResponse> findAuthorByEmailId(String email) {
         return this.authorRepository
                 .findByEmailAllIgnoreCase(email)
-                .map(
-                        authorEntity ->
-                                appConversionService.convert(authorEntity, AuthorResponse.class));
+                .map(authorEntity -> appConversionService.convert(authorEntity, AuthorResponse.class));
     }
 }

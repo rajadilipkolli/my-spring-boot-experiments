@@ -21,7 +21,8 @@ import org.springframework.http.MediaType;
 
 class TagEntityControllerIT extends AbstractIntegrationTest {
 
-    @Autowired private TagRepository tagRepository;
+    @Autowired
+    private TagRepository tagRepository;
 
     private List<TagEntity> tagEntityList = null;
 
@@ -59,10 +60,9 @@ class TagEntityControllerIT extends AbstractIntegrationTest {
     void shouldCreateNewTag() throws Exception {
         TagsRequest tagEntity = new TagsRequest("New Tag", null);
         this.mockMvc
-                .perform(
-                        post("/api/tags")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(tagEntity)))
+                .perform(post("/api/tags")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(tagEntity)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.tagName", is(tagEntity.tagName())))
                 .andExpect(jsonPath("$.tagDescription", is(tagEntity.tagDescription())));
@@ -74,10 +74,9 @@ class TagEntityControllerIT extends AbstractIntegrationTest {
         tagEntity.setTagName("Updated Tag");
 
         this.mockMvc
-                .perform(
-                        put("/api/tags/{id}", tagEntity.getId())
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(tagEntity)))
+                .perform(put("/api/tags/{id}", tagEntity.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(tagEntity)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.tagName", is(tagEntity.getTagName())));
     }

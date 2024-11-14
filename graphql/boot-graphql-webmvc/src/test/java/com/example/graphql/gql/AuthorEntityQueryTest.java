@@ -27,34 +27,41 @@ import org.springframework.graphql.test.tester.GraphQlTester;
 @Import(GraphQlConfiguration.class)
 class AuthorEntityQueryTest {
 
-    @Autowired private GraphQlTester graphQlTester;
+    @Autowired
+    private GraphQlTester graphQlTester;
 
-    @MockBean AuthorService authorService;
-    @MockBean PostService postService;
-    @MockBean PostCommentService postCommentService;
-    @MockBean TagService tagService;
+    @MockBean
+    AuthorService authorService;
+
+    @MockBean
+    PostService postService;
+
+    @MockBean
+    PostCommentService postCommentService;
+
+    @MockBean
+    TagService tagService;
 
     @Test
     void allAuthors() {
         given(authorService.findAllAuthors())
-                .willReturn(
-                        List.of(
-                                new AuthorResponse(
-                                        1L,
-                                        "firstName",
-                                        "middleName",
-                                        "lastName",
-                                        9848022338L,
-                                        "junit1@email.com",
-                                        LocalDateTime.now()),
-                                new AuthorResponse(
-                                        2L,
-                                        "secondName",
-                                        "middleName",
-                                        "lastName",
-                                        9848022338L,
-                                        "junit2@email.com",
-                                        LocalDateTime.now())));
+                .willReturn(List.of(
+                        new AuthorResponse(
+                                1L,
+                                "firstName",
+                                "middleName",
+                                "lastName",
+                                9848022338L,
+                                "junit1@email.com",
+                                LocalDateTime.now()),
+                        new AuthorResponse(
+                                2L,
+                                "secondName",
+                                "middleName",
+                                "lastName",
+                                9848022338L,
+                                "junit2@email.com",
+                                LocalDateTime.now())));
 
         var allAuthors =
                 """
@@ -70,13 +77,10 @@ class AuthorEntityQueryTest {
                 .execute()
                 .path("allAuthors[*].email")
                 .entityList(String.class)
-                .satisfies(
-                        emails ->
-                                assertThat(emails).contains("junit1@email.com", "junit2@email.com"))
+                .satisfies(emails -> assertThat(emails).contains("junit1@email.com", "junit2@email.com"))
                 .path("allAuthors[*].firstName")
                 .entityList(String.class)
-                .satisfies(
-                        names -> assertThat(names).containsAll(List.of("firstName", "secondName")));
+                .satisfies(names -> assertThat(names).containsAll(List.of("firstName", "secondName")));
 
         verify(authorService, times(1)).findAllAuthors();
         verifyNoMoreInteractions(authorService);
@@ -90,16 +94,13 @@ class AuthorEntityQueryTest {
                 .variable("emailId", "junit@email.com")
                 .execute()
                 .errors()
-                .satisfy(
-                        responseErrors -> {
-                            assertThat(responseErrors).hasSize(1);
-                            assertThat(responseErrors.getFirst().getPath())
-                                    .isEqualTo("findAuthorByEmailId");
-                            assertThat(responseErrors.getFirst().getErrorType())
-                                    .isEqualTo(NOT_FOUND);
-                            assertThat(responseErrors.getFirst().getMessage())
-                                    .isEqualTo("Author: junit@email.com was not found.");
-                        });
+                .satisfy(responseErrors -> {
+                    assertThat(responseErrors).hasSize(1);
+                    assertThat(responseErrors.getFirst().getPath()).isEqualTo("findAuthorByEmailId");
+                    assertThat(responseErrors.getFirst().getErrorType()).isEqualTo(NOT_FOUND);
+                    assertThat(responseErrors.getFirst().getMessage())
+                            .isEqualTo("Author: junit@email.com was not found.");
+                });
 
         verify(authorService, times(1)).findAuthorByEmailId("junit@email.com");
         verifyNoMoreInteractions(authorService);

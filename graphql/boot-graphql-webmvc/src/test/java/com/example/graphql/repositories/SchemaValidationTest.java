@@ -12,11 +12,12 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.testcontainers.context.ImportTestcontainers;
 
 @DataJpaTest(properties = {"spring.jpa.hibernate.ddl-auto=validate"})
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@AutoConfigureTestDatabase
 @ImportTestcontainers(TestContainersConfig.class)
 class SchemaValidationTest {
 
-    @Autowired private DataSource dataSource;
+    @Autowired
+    private DataSource dataSource;
 
     @Test
     void contextLoads() {

@@ -26,7 +26,8 @@ import org.springframework.http.MediaType;
 
 class PostCommentEntityControllerIT extends AbstractIntegrationTest {
 
-    @Autowired private PostRepository postRepository;
+    @Autowired
+    private PostRepository postRepository;
 
     private PostEntity postEntity;
 
@@ -35,8 +36,7 @@ class PostCommentEntityControllerIT extends AbstractIntegrationTest {
         postRepository.deleteAll();
 
         postEntity = new PostEntity().setContent("First Post").setTitle("First Title");
-        PostDetailsEntity postDetailsEntity =
-                new PostDetailsEntity().setDetailsKey("First Details");
+        PostDetailsEntity postDetailsEntity = new PostDetailsEntity().setDetailsKey("First Details");
         postEntity.setDetails(postDetailsEntity);
 
         List<PostCommentEntity> postCommentEntityList = new ArrayList<>();
@@ -45,8 +45,7 @@ class PostCommentEntityControllerIT extends AbstractIntegrationTest {
         postCommentEntityList.add(
                 new PostCommentEntity().setTitle("Second PostComment").setPublished(false));
         postCommentEntityList.add(new PostCommentEntity().setTitle("Third PostComment"));
-        postCommentEntityList.forEach(
-                postCommentEntity -> postEntity.addComment(postCommentEntity));
+        postCommentEntityList.forEach(postCommentEntity -> postEntity.addComment(postCommentEntity));
         postRepository.save(postEntity);
     }
 
@@ -74,17 +73,12 @@ class PostCommentEntityControllerIT extends AbstractIntegrationTest {
     @Test
     void shouldCreateNewPostComment() throws Exception {
         PostCommentRequest postCommentRequest =
-                new PostCommentRequest(
-                        "First PostComment",
-                        "First Content",
-                        String.valueOf(postEntity.getId()),
-                        true);
+                new PostCommentRequest("First PostComment", "First Content", String.valueOf(postEntity.getId()), true);
 
         this.mockMvc
-                .perform(
-                        post("/api/postcomments")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(postCommentRequest)))
+                .perform(post("/api/postcomments")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(postCommentRequest)))
                 .andExpect(status().isCreated())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.postId", is(postEntity.getId()), Long.class))
@@ -99,17 +93,15 @@ class PostCommentEntityControllerIT extends AbstractIntegrationTest {
     void shouldUpdatePostComment() throws Exception {
         PostCommentEntity postCommentEntity = postEntity.getComments().getFirst();
 
-        PostCommentRequest postCommentRequest =
-                new PostCommentRequest(
-                        "Updated PostComment",
-                        postCommentEntity.getContent(),
-                        String.valueOf(postEntity.getId()),
-                        postCommentEntity.isPublished());
+        PostCommentRequest postCommentRequest = new PostCommentRequest(
+                "Updated PostComment",
+                postCommentEntity.getContent(),
+                String.valueOf(postEntity.getId()),
+                postCommentEntity.isPublished());
         this.mockMvc
-                .perform(
-                        put("/api/postcomments/{id}", postCommentEntity.getId())
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(postCommentRequest)))
+                .perform(put("/api/postcomments/{id}", postCommentEntity.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(postCommentRequest)))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.title", is("Updated PostComment")));

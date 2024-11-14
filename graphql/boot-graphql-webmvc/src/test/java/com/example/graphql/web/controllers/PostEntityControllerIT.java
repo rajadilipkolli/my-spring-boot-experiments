@@ -29,9 +29,14 @@ import org.springframework.http.MediaType;
 
 class PostEntityControllerIT extends AbstractIntegrationTest {
 
-    @Autowired private PostRepository postRepository;
-    @Autowired private PostTagRepository postTagRepository;
-    @Autowired private TagRepository tagRepository;
+    @Autowired
+    private PostRepository postRepository;
+
+    @Autowired
+    private PostTagRepository postTagRepository;
+
+    @Autowired
+    private TagRepository tagRepository;
 
     private List<PostEntity> postEntityList = null;
 
@@ -81,20 +86,18 @@ class PostEntityControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldCreateNewPost() throws Exception {
-        NewPostRequest newPostRequest =
-                new NewPostRequest(
-                        "First Title",
-                        "New Post",
-                        "junit1@email.com",
-                        false,
-                        new PostDetailsRequest("detailsKey", "JunitCreatedBy"),
-                        null);
+        NewPostRequest newPostRequest = new NewPostRequest(
+                "First Title",
+                "New Post",
+                "junit1@email.com",
+                false,
+                new PostDetailsRequest("detailsKey", "JunitCreatedBy"),
+                null);
 
         this.mockMvc
-                .perform(
-                        post("/api/posts")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(newPostRequest)))
+                .perform(post("/api/posts")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(newPostRequest)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.content", is(newPostRequest.content())))
                 .andExpect(jsonPath("$.createdAt", notNullValue()))
@@ -105,24 +108,22 @@ class PostEntityControllerIT extends AbstractIntegrationTest {
     void shouldUpdatePost() throws Exception {
 
         PostEntity postEntityListFirst = postEntityList.getFirst();
-        NewPostRequest newPostRequest =
-                new NewPostRequest(
-                        "First Title",
-                        "Updated Post",
-                        "junit1@email.com",
-                        false,
-                        new PostDetailsRequest(
-                                postEntityListFirst.getDetails().getDetailsKey(),
-                                postEntityListFirst.getDetails().getCreatedBy()),
-                        List.of(
-                                new TagsRequest("java", "Programming Language"),
-                                new TagsRequest("spring", "Architecture Language")));
+        NewPostRequest newPostRequest = new NewPostRequest(
+                "First Title",
+                "Updated Post",
+                "junit1@email.com",
+                false,
+                new PostDetailsRequest(
+                        postEntityListFirst.getDetails().getDetailsKey(),
+                        postEntityListFirst.getDetails().getCreatedBy()),
+                List.of(
+                        new TagsRequest("java", "Programming Language"),
+                        new TagsRequest("spring", "Architecture Language")));
 
         this.mockMvc
-                .perform(
-                        put("/api/posts/{id}", postEntityListFirst.getId())
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(newPostRequest)))
+                .perform(put("/api/posts/{id}", postEntityListFirst.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(newPostRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.title", is(newPostRequest.title())))
                 .andExpect(jsonPath("$.content", is(newPostRequest.content())))
@@ -134,8 +135,6 @@ class PostEntityControllerIT extends AbstractIntegrationTest {
     void shouldDeletePost() throws Exception {
         PostEntity postEntity = postEntityList.getFirst();
 
-        this.mockMvc
-                .perform(delete("/api/posts/{id}", postEntity.getId()))
-                .andExpect(status().isAccepted());
+        this.mockMvc.perform(delete("/api/posts/{id}", postEntity.getId())).andExpect(status().isAccepted());
     }
 }

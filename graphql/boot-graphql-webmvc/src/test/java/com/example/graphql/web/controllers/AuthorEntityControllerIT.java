@@ -24,7 +24,8 @@ import org.springframework.http.MediaType;
 
 class AuthorEntityControllerIT extends AbstractIntegrationTest {
 
-    @Autowired private AuthorRepository authorRepository;
+    @Autowired
+    private AuthorRepository authorRepository;
 
     private List<AuthorEntity> authorEntityList = null;
 
@@ -33,24 +34,21 @@ class AuthorEntityControllerIT extends AbstractIntegrationTest {
         authorRepository.deleteAll();
 
         authorEntityList = new ArrayList<>();
-        authorEntityList.add(
-                new AuthorEntity()
-                        .setFirstName("First Author")
-                        .setLastName("lastName")
-                        .setEmail("junit1@email.com")
-                        .setMobile(9848022338L));
-        authorEntityList.add(
-                new AuthorEntity()
-                        .setFirstName("Second Author")
-                        .setLastName("lastName")
-                        .setEmail("junit2@email.com")
-                        .setMobile(9848022339L));
-        authorEntityList.add(
-                new AuthorEntity()
-                        .setFirstName("Third Author")
-                        .setLastName("lastName")
-                        .setEmail("junit3@email.com")
-                        .setMobile(9848022340L));
+        authorEntityList.add(new AuthorEntity()
+                .setFirstName("First Author")
+                .setLastName("lastName")
+                .setEmail("junit1@email.com")
+                .setMobile(9848022338L));
+        authorEntityList.add(new AuthorEntity()
+                .setFirstName("Second Author")
+                .setLastName("lastName")
+                .setEmail("junit2@email.com")
+                .setMobile(9848022339L));
+        authorEntityList.add(new AuthorEntity()
+                .setFirstName("Third Author")
+                .setLastName("lastName")
+                .setEmail("junit3@email.com")
+                .setMobile(9848022340L));
         authorEntityList = authorRepository.saveAll(authorEntityList);
     }
 
@@ -76,14 +74,12 @@ class AuthorEntityControllerIT extends AbstractIntegrationTest {
     @Test
     void shouldCreateNewAuthor() throws Exception {
         AuthorRequest authorRequest =
-                new AuthorRequest(
-                        "New Author", "middleName", "lastName", 9848022338L, "junit4@email.com");
+                new AuthorRequest("New Author", "middleName", "lastName", 9848022338L, "junit4@email.com");
 
         this.mockMvc
-                .perform(
-                        post("/api/authors")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(authorRequest)))
+                .perform(post("/api/authors")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(authorRequest)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.firstName", is(authorRequest.firstName())))
                 .andExpect(jsonPath("$.registeredAt", notNullValue()));
@@ -94,10 +90,9 @@ class AuthorEntityControllerIT extends AbstractIntegrationTest {
         AuthorRequest authorRequest = new AuthorRequest(null, null, null, null, null);
 
         this.mockMvc
-                .perform(
-                        post("/api/authors")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(authorRequest)))
+                .perform(post("/api/authors")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(authorRequest)))
                 .andExpect(status().isBadRequest())
                 .andExpect(header().string("Content-Type", is("application/problem+json")))
                 .andExpect(jsonPath("$.type", is("about:blank")))
@@ -121,10 +116,9 @@ class AuthorEntityControllerIT extends AbstractIntegrationTest {
         authorEntity.setFirstName("Updated Author");
 
         this.mockMvc
-                .perform(
-                        put("/api/authors/{id}", authorEntity.getId())
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(authorEntity)))
+                .perform(put("/api/authors/{id}", authorEntity.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(authorEntity)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.firstName", is(authorEntity.getFirstName())));
     }

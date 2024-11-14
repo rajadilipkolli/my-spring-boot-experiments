@@ -36,11 +36,14 @@ import org.springframework.test.web.servlet.MockMvc;
 @ActiveProfiles(PROFILE_TEST)
 class TagEntityControllerTest {
 
-    @Autowired private MockMvc mockMvc;
+    @Autowired
+    private MockMvc mockMvc;
 
-    @MockBean private TagService tagService;
+    @MockBean
+    private TagService tagService;
 
-    @Autowired private ObjectMapper objectMapper;
+    @Autowired
+    private ObjectMapper objectMapper;
 
     private List<TagEntity> tagEntityList;
 
@@ -82,10 +85,7 @@ class TagEntityControllerTest {
         this.mockMvc
                 .perform(get("/api/tags/{id}", tagId))
                 .andExpect(status().isNotFound())
-                .andExpect(
-                        header().string(
-                                        HttpHeaders.CONTENT_TYPE,
-                                        is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                 .andExpect(jsonPath("$.type", is("about:blank")))
                 .andExpect(jsonPath("$.title", is("Not Found")))
                 .andExpect(jsonPath("$.status", is(404)))
@@ -101,10 +101,9 @@ class TagEntityControllerTest {
         given(tagService.saveTag("some text", null)).willReturn(tagEntity);
 
         this.mockMvc
-                .perform(
-                        post("/api/tags")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(tagsRequest)))
+                .perform(post("/api/tags")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(tagsRequest)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id", notNullValue()))
                 .andExpect(jsonPath("$.tagName", is(tagEntity.getTagName())));
@@ -115,10 +114,9 @@ class TagEntityControllerTest {
         TagsRequest tag = new TagsRequest(null, null);
 
         this.mockMvc
-                .perform(
-                        post("/api/tags")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(tag)))
+                .perform(post("/api/tags")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(tag)))
                 .andExpect(status().isBadRequest())
                 .andExpect(header().string("Content-Type", is("application/problem+json")))
                 .andExpect(jsonPath("$.type", is("about:blank")))
@@ -135,14 +133,12 @@ class TagEntityControllerTest {
         Long tagId = 1L;
         TagEntity tagEntity = new TagEntity(tagId, "Updated text", null);
         given(tagService.findTagById(tagId)).willReturn(Optional.of(tagEntity));
-        given(tagService.saveTag(any(TagEntity.class)))
-                .willAnswer((invocation) -> invocation.getArgument(0));
+        given(tagService.saveTag(any(TagEntity.class))).willAnswer((invocation) -> invocation.getArgument(0));
 
         this.mockMvc
-                .perform(
-                        put("/api/tags/{id}", tagEntity.getId())
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(tagEntity)))
+                .perform(put("/api/tags/{id}", tagEntity.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(tagEntity)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.tagName", is(tagEntity.getTagName())));
     }
@@ -154,15 +150,11 @@ class TagEntityControllerTest {
         TagEntity tagEntity = new TagEntity(tagId, "Updated text", null);
 
         this.mockMvc
-                .perform(
-                        put("/api/tags/{id}", tagId)
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(tagEntity)))
+                .perform(put("/api/tags/{id}", tagId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(tagEntity)))
                 .andExpect(status().isNotFound())
-                .andExpect(
-                        header().string(
-                                        HttpHeaders.CONTENT_TYPE,
-                                        is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                 .andExpect(jsonPath("$.type", is("about:blank")))
                 .andExpect(jsonPath("$.title", is("Not Found")))
                 .andExpect(jsonPath("$.status", is(404)))
@@ -191,10 +183,7 @@ class TagEntityControllerTest {
         this.mockMvc
                 .perform(delete("/api/tags/{id}", tagId))
                 .andExpect(status().isNotFound())
-                .andExpect(
-                        header().string(
-                                        HttpHeaders.CONTENT_TYPE,
-                                        is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                 .andExpect(jsonPath("$.type", is("about:blank")))
                 .andExpect(jsonPath("$.title", is("Not Found")))
                 .andExpect(jsonPath("$.status", is(404)))

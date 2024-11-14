@@ -7,9 +7,11 @@ import org.springframework.boot.testcontainers.context.ImportTestcontainers;
 
 @TestConfiguration(proxyBeanMethods = false)
 @ImportTestcontainers(TestContainersConfig.class)
-public class TestApplication {
+public class TestGraphQlWebMvcApplication {
 
     public static void main(String[] args) {
-        SpringApplication.from(Application::main).with(TestApplication.class).run(args);
+        SpringApplication.from(GraphQlWebMvcApplication::main)
+                .with(TestGraphQlWebMvcApplication.class)
+                .run(args);
     }
 }

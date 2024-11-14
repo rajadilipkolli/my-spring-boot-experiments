@@ -37,44 +37,26 @@ import org.springframework.test.web.servlet.MockMvc;
 @ActiveProfiles(PROFILE_TEST)
 class AuthorEntityControllerTest {
 
-    @Autowired private MockMvc mockMvc;
+    @Autowired
+    private MockMvc mockMvc;
 
-    @MockBean private AuthorService authorService;
+    @MockBean
+    private AuthorService authorService;
 
-    @Autowired private ObjectMapper objectMapper;
+    @Autowired
+    private ObjectMapper objectMapper;
 
     private List<AuthorResponse> authorEntityList;
 
     @BeforeEach
     void setUp() {
         this.authorEntityList = new ArrayList<>();
-        this.authorEntityList.add(
-                new AuthorResponse(
-                        1L,
-                        "First Author",
-                        "middleName",
-                        "lastName",
-                        9848022338L,
-                        "junit1@email.com",
-                        LocalDateTime.now()));
-        this.authorEntityList.add(
-                new AuthorResponse(
-                        2L,
-                        "Second Author",
-                        "middleName",
-                        "lastName",
-                        9848022338L,
-                        "junit2@email.com",
-                        LocalDateTime.now()));
-        this.authorEntityList.add(
-                new AuthorResponse(
-                        3L,
-                        "Third Author",
-                        "middleName",
-                        "lastName",
-                        9848022338L,
-                        "junit3@email.com",
-                        LocalDateTime.now()));
+        this.authorEntityList.add(new AuthorResponse(
+                1L, "First Author", "middleName", "lastName", 9848022338L, "junit1@email.com", LocalDateTime.now()));
+        this.authorEntityList.add(new AuthorResponse(
+                2L, "Second Author", "middleName", "lastName", 9848022338L, "junit2@email.com", LocalDateTime.now()));
+        this.authorEntityList.add(new AuthorResponse(
+                3L, "Third Author", "middleName", "lastName", 9848022338L, "junit3@email.com", LocalDateTime.now()));
     }
 
     @Test
@@ -91,21 +73,13 @@ class AuthorEntityControllerTest {
     @Test
     void shouldFindAuthorById() throws Exception {
         Long authorId = 1L;
-        AuthorEntity authorEntity =
-                new AuthorEntity()
-                        .setId(authorId)
-                        .setFirstName("First Author")
-                        .setLastName("lastName")
-                        .setEmail("junit1@email.com");
-        AuthorResponse authorResponse =
-                new AuthorResponse(
-                        1L,
-                        "First Author",
-                        "middleName",
-                        "lastName",
-                        9848022338L,
-                        "junit1@email.com",
-                        LocalDateTime.now());
+        AuthorEntity authorEntity = new AuthorEntity()
+                .setId(authorId)
+                .setFirstName("First Author")
+                .setLastName("lastName")
+                .setEmail("junit1@email.com");
+        AuthorResponse authorResponse = new AuthorResponse(
+                1L, "First Author", "middleName", "lastName", 9848022338L, "junit1@email.com", LocalDateTime.now());
         given(authorService.findAuthorById(authorId)).willReturn(Optional.of(authorResponse));
 
         this.mockMvc
@@ -122,10 +96,7 @@ class AuthorEntityControllerTest {
         this.mockMvc
                 .perform(get("/api/authors/{id}", authorId))
                 .andExpect(status().isNotFound())
-                .andExpect(
-                        header().string(
-                                        HttpHeaders.CONTENT_TYPE,
-                                        is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                 .andExpect(jsonPath("$.type", is("about:blank")))
                 .andExpect(jsonPath("$.title", is("Not Found")))
                 .andExpect(jsonPath("$.status", is(404)))
@@ -137,26 +108,17 @@ class AuthorEntityControllerTest {
     void shouldCreateNewAuthor() throws Exception {
 
         AuthorRequest authorRequest =
-                new AuthorRequest(
-                        "First Author", "middleName", "lastName", 9848022338L, "junit1@email.com");
+                new AuthorRequest("First Author", "middleName", "lastName", 9848022338L, "junit1@email.com");
 
-        AuthorResponse authorResponse =
-                new AuthorResponse(
-                        1L,
-                        "First Author",
-                        "middleName",
-                        "lastName",
-                        9848022338L,
-                        "junit1@email.com",
-                        LocalDateTime.now());
+        AuthorResponse authorResponse = new AuthorResponse(
+                1L, "First Author", "middleName", "lastName", 9848022338L, "junit1@email.com", LocalDateTime.now());
 
         given(authorService.saveAuthor(authorRequest)).willReturn(authorResponse);
 
         this.mockMvc
-                .perform(
-                        post("/api/authors")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(authorRequest)))
+                .perform(post("/api/authors")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(authorRequest)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.registeredAt", notNullValue()))
                 .andExpect(jsonPath("$.firstName", is(authorRequest.firstName())));
@@ -167,10 +129,9 @@ class AuthorEntityControllerTest {
         AuthorRequest authorRequest = new AuthorRequest(null, null, null, null, null);
 
         this.mockMvc
-                .perform(
-                        post("/api/authors")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(authorRequest)))
+                .perform(post("/api/authors")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(authorRequest)))
                 .andExpect(status().isBadRequest())
                 .andExpect(header().string("Content-Type", is("application/problem+json")))
                 .andExpect(jsonPath("$.type", is("about:blank")))
@@ -191,38 +152,23 @@ class AuthorEntityControllerTest {
     @Test
     void shouldUpdateAuthor() throws Exception {
         Long authorId = 1L;
-        AuthorEntity authorEntity =
-                new AuthorEntity()
-                        .setId(authorId)
-                        .setFirstName("First Author")
-                        .setLastName("lastName")
-                        .setEmail("junit1@email.com");
+        AuthorEntity authorEntity = new AuthorEntity()
+                .setId(authorId)
+                .setFirstName("First Author")
+                .setLastName("lastName")
+                .setEmail("junit1@email.com");
 
         AuthorRequest authorRequest =
-                new AuthorRequest(
-                        "Updated Author",
-                        "middleName",
-                        "lastName",
-                        9848022338L,
-                        "junit1@email.com");
+                new AuthorRequest("Updated Author", "middleName", "lastName", 9848022338L, "junit1@email.com");
 
-        AuthorResponse authorResponse =
-                new AuthorResponse(
-                        1L,
-                        "Updated Author",
-                        "middleName",
-                        "lastName",
-                        9848022338L,
-                        "junit1@email.com",
-                        LocalDateTime.now());
-        given(authorService.updateAuthor(authorRequest, authorEntity.getId()))
-                .willReturn(Optional.of(authorResponse));
+        AuthorResponse authorResponse = new AuthorResponse(
+                1L, "Updated Author", "middleName", "lastName", 9848022338L, "junit1@email.com", LocalDateTime.now());
+        given(authorService.updateAuthor(authorRequest, authorEntity.getId())).willReturn(Optional.of(authorResponse));
 
         this.mockMvc
-                .perform(
-                        put("/api/authors/{id}", authorEntity.getId())
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(authorRequest)))
+                .perform(put("/api/authors/{id}", authorEntity.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(authorRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.firstName", is(authorRequest.firstName())));
     }
@@ -231,20 +177,15 @@ class AuthorEntityControllerTest {
     void shouldReturn404WhenUpdatingNonExistingAuthor() throws Exception {
         Long authorId = 100L;
         AuthorRequest authorRequest =
-                new AuthorRequest(
-                        "First Author", "middleName", "lastName", 9848022338L, "junit4@email.com");
+                new AuthorRequest("First Author", "middleName", "lastName", 9848022338L, "junit4@email.com");
 
         given(authorService.updateAuthor(authorRequest, authorId)).willReturn(Optional.empty());
         this.mockMvc
-                .perform(
-                        put("/api/authors/{id}", authorId)
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(authorRequest)))
+                .perform(put("/api/authors/{id}", authorId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(authorRequest)))
                 .andExpect(status().isNotFound())
-                .andExpect(
-                        header().string(
-                                        HttpHeaders.CONTENT_TYPE,
-                                        is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                 .andExpect(jsonPath("$.type", is("about:blank")))
                 .andExpect(jsonPath("$.title", is("Not Found")))
                 .andExpect(jsonPath("$.status", is(404)))
@@ -255,15 +196,8 @@ class AuthorEntityControllerTest {
     @Test
     void shouldDeleteAuthor() throws Exception {
         Long authorId = 1L;
-        AuthorResponse authorResponse =
-                new AuthorResponse(
-                        1L,
-                        "First Author",
-                        "middleName",
-                        "lastName",
-                        9848022338L,
-                        "junit1@email.com",
-                        LocalDateTime.now());
+        AuthorResponse authorResponse = new AuthorResponse(
+                1L, "First Author", "middleName", "lastName", 9848022338L, "junit1@email.com", LocalDateTime.now());
         given(authorService.findAuthorById(authorId)).willReturn(Optional.of(authorResponse));
         doNothing().when(authorService).deleteAuthorById(authorId);
 
@@ -281,10 +215,7 @@ class AuthorEntityControllerTest {
         this.mockMvc
                 .perform(delete("/api/authors/{id}", authorId))
                 .andExpect(status().isNotFound())
-                .andExpect(
-                        header().string(
-                                        HttpHeaders.CONTENT_TYPE,
-                                        is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                 .andExpect(jsonPath("$.type", is("about:blank")))
                 .andExpect(jsonPath("$.title", is("Not Found")))
                 .andExpect(jsonPath("$.status", is(404)))

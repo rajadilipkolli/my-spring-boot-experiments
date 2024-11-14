@@ -35,10 +35,7 @@ public class PostController {
 
     @GetMapping("/{id}")
     public ResponseEntity<PostResponse> getPostById(@PathVariable Long id) {
-        return postService
-                .findPostById(id)
-                .map(ResponseEntity::ok)
-                .orElseThrow(() -> new PostNotFoundException(id));
+        return postService.findPostById(id).map(ResponseEntity::ok).orElseThrow(() -> new PostNotFoundException(id));
     }
 
     @PostMapping
@@ -48,8 +45,7 @@ public class PostController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<PostResponse> updatePost(
-            @PathVariable Long id, @RequestBody NewPostRequest newPostRequest) {
+    public ResponseEntity<PostResponse> updatePost(@PathVariable Long id, @RequestBody NewPostRequest newPostRequest) {
         return postService
                 .updatePost(id, newPostRequest)
                 .map(ResponseEntity::ok)
@@ -60,11 +56,10 @@ public class PostController {
     public ResponseEntity<Object> deletePost(@PathVariable Long id) {
         return postService
                 .findPostById(id)
-                .map(
-                        post -> {
-                            postService.deletePostById(id);
-                            return ResponseEntity.accepted().build();
-                        })
+                .map(post -> {
+                    postService.deletePostById(id);
+                    return ResponseEntity.accepted().build();
+                })
                 .orElseThrow(() -> new PostNotFoundException(id));
     }
 }
