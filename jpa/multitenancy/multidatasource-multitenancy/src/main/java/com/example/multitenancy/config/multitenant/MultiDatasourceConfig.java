@@ -5,6 +5,7 @@ import javax.sql.DataSource;
 import liquibase.UpdateSummaryEnum;
 import liquibase.UpdateSummaryOutputEnum;
 import liquibase.integration.spring.SpringLiquibase;
+import liquibase.ui.UIServiceEnum;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseProperties;
@@ -12,6 +13,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 @Configuration(proxyBeanMethods = false)
 public class MultiDatasourceConfig {
@@ -58,7 +61,10 @@ public class MultiDatasourceConfig {
     DataSource secondaryDataSource(
             @Qualifier("secondaryDataSourceProperties")
                     DataSourceProperties secondaryDataSourceProperties) {
-        return secondaryDataSourceProperties.initializeDataSourceBuilder().build();
+        return secondaryDataSourceProperties
+                .initializeDataSourceBuilder()
+                .type(HikariDataSource.class)
+                .build();
     }
 
     @Bean
@@ -81,7 +87,10 @@ public class MultiDatasourceConfig {
         liquibase.setDataSource(dataSource);
         liquibase.setChangeLog(properties.getChangeLog());
         liquibase.setClearCheckSums(properties.isClearChecksums());
-        liquibase.setContexts(properties.getContexts());
+        if (!CollectionUtils.isEmpty(properties.getContexts())) {
+            liquibase.setContexts(
+                    StringUtils.collectionToCommaDelimitedString(properties.getContexts()));
+        }
         liquibase.setDefaultSchema(properties.getDefaultSchema());
         liquibase.setLiquibaseSchema(properties.getLiquibaseSchema());
         liquibase.setLiquibaseTablespace(properties.getLiquibaseTablespace());
@@ -89,7 +98,10 @@ public class MultiDatasourceConfig {
         liquibase.setDatabaseChangeLogLockTable(properties.getDatabaseChangeLogLockTable());
         liquibase.setDropFirst(properties.isDropFirst());
         liquibase.setShouldRun(properties.isEnabled());
-        liquibase.setLabelFilter(properties.getLabelFilter());
+        if (!CollectionUtils.isEmpty(properties.getLabelFilter())) {
+            liquibase.setLabelFilter(
+                    StringUtils.collectionToCommaDelimitedString(properties.getLabelFilter()));
+        }
         liquibase.setChangeLogParameters(properties.getParameters());
         liquibase.setRollbackFile(properties.getRollbackFile());
         liquibase.setTestRollbackOnUpdate(properties.isTestRollbackOnUpdate());
@@ -100,6 +112,9 @@ public class MultiDatasourceConfig {
         if (properties.getShowSummaryOutput() != null) {
             liquibase.setShowSummaryOutput(
                     UpdateSummaryOutputEnum.valueOf(properties.getShowSummaryOutput().name()));
+        }
+        if (properties.getUiService() != null) {
+            liquibase.setUiService(UIServiceEnum.valueOf(properties.getUiService().name()));
         }
         return liquibase;
     }

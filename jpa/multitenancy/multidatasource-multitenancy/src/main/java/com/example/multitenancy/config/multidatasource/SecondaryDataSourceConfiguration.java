@@ -2,16 +2,17 @@ package com.example.multitenancy.config.multidatasource;
 
 import com.example.multitenancy.config.multitenant.TenantIdentifierResolver;
 import com.example.multitenancy.secondary.entities.SecondaryCustomer;
+import com.example.multitenancy.secondary.repositories.SecondaryCustomerRepository;
 import com.example.multitenancy.utils.DatabaseType;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import javax.sql.DataSource;
-import lombok.RequiredArgsConstructor;
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.context.spi.CurrentTenantIdentifierResolver;
 import org.hibernate.engine.jdbc.connections.spi.MultiTenantConnectionProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
 import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
 import org.springframework.context.annotation.Bean;
@@ -21,16 +22,22 @@ import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.transaction.PlatformTransactionManager;
 
-@Configuration
+@Configuration(proxyBeanMethods = false)
+@EntityScan(basePackageClasses = SecondaryCustomer.class)
 @EnableJpaRepositories(
-        basePackages = "com.example.multitenancy.secondary.repositories",
+        basePackageClasses = SecondaryCustomerRepository.class,
         entityManagerFactoryRef = "secondaryEntityManagerFactory",
         transactionManagerRef = "secondaryTransactionManager")
-@RequiredArgsConstructor
 public class SecondaryDataSourceConfiguration {
 
     private final JpaProperties jpaProperties;
     private final TenantIdentifierResolver tenantIdentifierResolver;
+
+    public SecondaryDataSourceConfiguration(
+            JpaProperties jpaProperties, TenantIdentifierResolver tenantIdentifierResolver) {
+        this.jpaProperties = jpaProperties;
+        this.tenantIdentifierResolver = tenantIdentifierResolver;
+    }
 
     @Bean(name = "secondaryEntityManagerFactory")
     LocalContainerEntityManagerFactoryBean secondaryEntityManagerFactory(

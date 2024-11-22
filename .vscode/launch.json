@@ -6,6 +6,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "MultiDataSourceMultiTenancyApplicationTest",
+            "request": "launch",
+            "mainClass": "com.example.multitenancy.MultiDataSourceMultiTenancyApplicationTest",
+            "projectName": "multidatasource-multitenancy"
+        },
+        {
+            "type": "java",
             "name": "Spring Boot-Application<boot-reactive-cache>",
             "request": "launch",
             "cwd": "${workspaceFolder}",
@@ -152,6 +159,16 @@
             "mainClass": "com.example.jndi.Application",
             "projectName": "boot-jndi-sample",
             "args": "--spring.profiles.active=local",
+            "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-Application<multidatasource-multitenancy>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.example.multitenancy.MultiDataSourceMultiTenancyApplication",
+            "projectName": "multidatasource-multitenancy",
+            "args": "",
             "envFile": "${workspaceFolder}/.env"
         }
     ]
