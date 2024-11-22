@@ -2,12 +2,12 @@ package com.example.multitenancy.config.multidatasource;
 
 import com.example.multitenancy.config.multitenant.TenantIdentifierResolver;
 import com.example.multitenancy.primary.entities.PrimaryCustomer;
+import com.example.multitenancy.primary.repositories.PrimaryCustomerRepository;
 import com.example.multitenancy.utils.DatabaseType;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import javax.sql.DataSource;
-import lombok.RequiredArgsConstructor;
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.context.spi.CurrentTenantIdentifierResolver;
 import org.hibernate.engine.jdbc.connections.spi.MultiTenantConnectionProvider;
@@ -21,16 +21,21 @@ import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.transaction.PlatformTransactionManager;
 
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @EnableJpaRepositories(
-        basePackages = "com.example.multitenancy.primary.repositories",
+        basePackageClasses = PrimaryCustomerRepository.class,
         entityManagerFactoryRef = "primaryEntityManagerFactory",
         transactionManagerRef = "primaryTransactionManager")
-@RequiredArgsConstructor
 public class PrimaryDataSourceConfiguration {
 
     private final JpaProperties jpaProperties;
     private final TenantIdentifierResolver tenantIdentifierResolver;
+
+    public PrimaryDataSourceConfiguration(
+            JpaProperties jpaProperties, TenantIdentifierResolver tenantIdentifierResolver) {
+        this.jpaProperties = jpaProperties;
+        this.tenantIdentifierResolver = tenantIdentifierResolver;
+    }
 
     @Bean(name = "primaryEntityManagerFactory")
     LocalContainerEntityManagerFactoryBean primaryEntityManagerFactory(

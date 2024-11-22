@@ -1,25 +1,30 @@
 package com.example.multitenancy.config;
 
 import com.example.multitenancy.config.multitenant.MultiTenantInterceptor;
-import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.lang.NonNull;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-@Configuration
-@RequiredArgsConstructor
-public class WebMvcConfig implements WebMvcConfigurer {
+@Configuration(proxyBeanMethods = false)
+class WebMvcConfig implements WebMvcConfigurer {
+
     private final ApplicationProperties properties;
     private final MultiTenantInterceptor multiTenantInterceptor;
 
+    WebMvcConfig(ApplicationProperties properties, MultiTenantInterceptor multiTenantInterceptor) {
+        this.properties = properties;
+        this.multiTenantInterceptor = multiTenantInterceptor;
+    }
+
     @Override
-    public void addInterceptors(InterceptorRegistry registry) {
+    public void addInterceptors(@NonNull InterceptorRegistry registry) {
         registry.addInterceptor(multiTenantInterceptor);
     }
 
     @Override
-    public void addCorsMappings(CorsRegistry registry) {
+    public void addCorsMappings(@NonNull CorsRegistry registry) {
         registry.addMapping(properties.getCors().getPathPattern())
                 .allowedMethods(properties.getCors().getAllowedMethods())
                 .allowedHeaders(properties.getCors().getAllowedHeaders())
