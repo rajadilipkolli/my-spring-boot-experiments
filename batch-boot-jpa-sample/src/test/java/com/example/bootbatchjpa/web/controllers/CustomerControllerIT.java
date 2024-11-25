@@ -39,7 +39,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                                 field(Customer.class, "gender"), gen -> gen.oneOf("male", "female"))
                         .create();
 
-        customerList = customerRepository.saveAll(customerList);
+        customerList = customerRepository.saveAllAndFlush(customerList);
     }
 
     @Test
