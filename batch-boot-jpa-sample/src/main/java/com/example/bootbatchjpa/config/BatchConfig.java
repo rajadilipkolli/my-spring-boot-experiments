@@ -23,6 +23,7 @@ import org.springframework.batch.item.database.builder.JpaPagingItemReaderBuilde
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.lang.NonNull;
 import org.springframework.transaction.PlatformTransactionManager;
 
 @Configuration(proxyBeanMethods = false)
@@ -94,7 +95,7 @@ class BatchConfig implements JobExecutionListener {
     }
 
     @Override
-    public void afterJob(JobExecution jobExecution) {
+    public void afterJob(@NonNull JobExecution jobExecution) {
         if (jobExecution.getStatus() == BatchStatus.COMPLETED) {
             log.info("BATCH JOB COMPLETED SUCCESSFULLY");
         }
