@@ -17,7 +17,7 @@
     <properties>
         <java.version>21</java.version>
         <spotless.version>2.43.0</spotless.version>
-        <springdoc-openapi.version>2.6.0</springdoc-openapi.version>
+        <springdoc-openapi.version>2.7.0</springdoc-openapi.version>
     </properties>
 
     <dependencies>
