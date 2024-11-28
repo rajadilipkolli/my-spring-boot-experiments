@@ -20,7 +20,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <spring-cloud.version>2023.0.4</spring-cloud.version>
         <openapi-generator.version>7.10.0</openapi-generator.version>
-        <springdoc-openapi.version>2.6.0</springdoc-openapi.version>
+        <springdoc-openapi.version>2.7.0</springdoc-openapi.version>
     </properties>
 
     <dependencies>
