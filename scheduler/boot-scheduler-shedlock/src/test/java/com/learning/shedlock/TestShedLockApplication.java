@@ -6,9 +6,9 @@ import org.springframework.boot.SpringApplication;
 public class TestShedLockApplication {
 
     public static void main(String[] args) {
-        System.setProperty("spring.profiles.active", "local");
         SpringApplication.from(ShedLockApplication::main)
                 .with(ContainersConfig.class)
+                .withAdditionalProfiles("local")
                 .run(args);
     }
 }
