@@ -14,6 +14,7 @@ import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.ScrollPosition;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Window;
 import org.springframework.data.jpa.domain.Specification;
@@ -27,9 +28,7 @@ public class AnimalService {
     private final AnimalRepository animalRepository;
     private final AnimalMapper animalMapper;
 
-    public AnimalService(
-            com.example.keysetpagination.services.AnimalRepository animalRepository,
-            com.example.keysetpagination.services.AnimalMapper animalMapper) {
+    public AnimalService(AnimalRepository animalRepository, AnimalMapper animalMapper) {
         this.animalRepository = animalRepository;
         this.animalMapper = animalMapper;
     }
