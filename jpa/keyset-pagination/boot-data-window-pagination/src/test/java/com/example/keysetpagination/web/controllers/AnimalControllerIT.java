@@ -77,7 +77,21 @@ class AnimalControllerIT extends AbstractIntegrationTest {
     @Test
     void shouldSearchAnimals() throws Exception {
         String contentAsString = this.mockMvc
-                .perform(get("/api/animals/search").param("pageSize", "2").param("type", "Bird"))
+                .perform(post("/api/animals/search")
+                        .param("pageSize", "2")
+                        .content(
+                                """
+                                [
+                                  {
+                                    "queryOperator": "EQ",
+                                    "field": "type",
+                                    "values": [
+                                      "Bird"
+                                    ]
+                                  }
+                                ]
+                                """)
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content.size()", is(2)))
                 .andExpect(jsonPath("$.content[0].type", is("Bird")))
@@ -89,12 +103,25 @@ class AnimalControllerIT extends AbstractIntegrationTest {
 
         CustomWindow<Map<String, String>> window = objectMapper.readValue(contentAsString, CustomWindow.class);
         List<Map<String, String>> animalResponses = window.getContent();
+        boolean windowLast = window.isLast();
         Map<String, String> animalResponsesLast = animalResponses.getLast();
         this.mockMvc
-                .perform(get("/api/animals/search")
+                .perform(post("/api/animals/search")
                         .param("pageSize", "2")
-                        .param("type", "Bird")
-                        .param("scrollId", String.valueOf(animalResponsesLast.get("id"))))
+                        .param("scrollId", String.valueOf(animalResponsesLast.get("id")))
+                        .content(
+                                """
+                                [
+                                  {
+                                    "queryOperator": "EQ",
+                                    "field": "type",
+                                    "values": [
+                                      "Bird"
+                                    ]
+                                  }
+                                ]
+                                """)
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content.size()", is(1)))
                 .andExpect(jsonPath("$.content[0].type", is("Bird")))
@@ -102,9 +129,47 @@ class AnimalControllerIT extends AbstractIntegrationTest {
     }
 
     @Test
+    void shouldReturnResultForNotEqualType() throws Exception {
+        this.mockMvc
+                .perform(
+                        post("/api/animals/search")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(
+                                        """
+                                        [
+                                          {
+                                            "queryOperator": "NE",
+                                            "field": "type",
+                                            "values": [
+                                              "Mammal",
+                                              "Bird"
+                                            ]
+                                          }
+                                        ]
+                                        """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(4)))
+                .andExpect(jsonPath("$.last", is(true)));
+    }
+
+    @Test
     void shouldReturnEmptyResultForNonExistentType() throws Exception {
         this.mockMvc
-                .perform(get("/api/animals/search").param("type", "NonExistentType"))
+                .perform(
+                        post("/api/animals/search")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(
+                                        """
+                                        [
+                                          {
+                                            "queryOperator": "EQ",
+                                            "field": "name",
+                                            "values": [
+                                              "NonExistent"
+                                            ]
+                                          }
+                                        ]
+                                        """))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(0)))
                 .andExpect(jsonPath("$.last", is(true)));

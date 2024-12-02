@@ -1,23 +1,24 @@
 package com.example.keysetpagination.repositories;
 
-import com.example.keysetpagination.entities.Animal;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.ScrollPosition;
 import org.springframework.data.domain.Window;
 import org.springframework.data.jpa.domain.Specification;
 
 /**
- * Custom repository interface for efficient keyset pagination of Animal entities.
+ * Custom repository interface for efficient keyset pagination for any entities.
  */
-public interface CustomAnimalRepository {
+public interface CustomRepository<T> {
 
     /**
-     * Finds all animals matching the given specification using keyset pagination.
+     * Finds all entities matching the given specification using keyset pagination.
      *
-     * @param spec The specification to filter animals
+     * @param spec The specification to filter entites
      * @param pageRequest The pagination information
      * @param scrollPosition The current position in the result set
+     * @param entityClass The entity class on which operation should occur
      * @return A window containing the paginated results
      */
-    Window<Animal> findAll(Specification<Animal> spec, PageRequest pageRequest, ScrollPosition scrollPosition);
+    Window<T> findAll(
+            Specification<T> spec, PageRequest pageRequest, ScrollPosition scrollPosition, Class<T> entityClass);
 }
