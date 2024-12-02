@@ -6,14 +6,14 @@ import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.Predicate;
 import java.util.List;
 import java.util.Map;
-import jdk.jfr.Registered;
 import org.springframework.data.domain.KeysetScrollPosition;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.ScrollPosition;
 import org.springframework.data.domain.Window;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.stereotype.Repository;
 
-@Registered
+@Repository
 public class CustomAnimalRepositoryImpl implements CustomAnimalRepository {
 
     private final EntityManager entityManager;

@@ -102,6 +102,15 @@ class AnimalControllerIT extends AbstractIntegrationTest {
     }
 
     @Test
+    void shouldReturnEmptyResultForNonExistentType() throws Exception {
+        this.mockMvc
+                .perform(get("/api/animals/search").param("type", "NonExistentType"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(0)))
+                .andExpect(jsonPath("$.last", is(true)));
+    }
+
+    @Test
     void shouldFindAnimalById() throws Exception {
         Animal animal = animalList.getFirst();
         Long animalId = animal.getId();
@@ -123,7 +132,9 @@ class AnimalControllerIT extends AbstractIntegrationTest {
                 .andExpect(status().isCreated())
                 .andExpect(header().exists(HttpHeaders.LOCATION))
                 .andExpect(jsonPath("$.id", notNullValue()))
-                .andExpect(jsonPath("$.name", is(animalRequest.name())));
+                .andExpect(jsonPath("$.name", is(animalRequest.name())))
+                .andExpect(jsonPath("$.type", is(animalRequest.type())))
+                .andExpect(jsonPath("$.habitat", is(animalRequest.habitat())));
     }
 
     @Test

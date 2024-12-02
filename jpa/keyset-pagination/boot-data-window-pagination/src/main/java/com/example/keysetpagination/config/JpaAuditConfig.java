@@ -3,7 +3,14 @@ package com.example.keysetpagination.config;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
-// As JpaAuditing works based on Proxy we shouldn't create configuration as proxyBeans as false
+/**
+ * Enables JPA auditing for automatic management of entity timestamps.
+ * Note: JPA Auditing works based on Proxy, so proxy beans must remain enabled.
+ *
+ * This configuration supports:
+ * - Automatic population of @CreatedDate in Auditable entities
+ * - Primarily used by Animal entity for tracking creation timestamps
+ */
 @Configuration
 @EnableJpaAuditing
 public class JpaAuditConfig {}

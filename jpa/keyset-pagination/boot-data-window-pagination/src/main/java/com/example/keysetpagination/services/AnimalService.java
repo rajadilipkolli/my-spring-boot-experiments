@@ -55,15 +55,14 @@ public class AnimalService {
     }
 
     public Window<AnimalResponse> searchAnimals(String name, String type, int pageSize, Long scrollId) {
-        Specification<Animal> specification = null;
+        Specification<Animal> specification = Specification.where(null);
+
         if (name != null && !name.isEmpty()) {
-            specification = Specification.where(AnimalSpecifications.hasName(name));
-        } else if (type != null && !type.isEmpty()) {
-            if (specification != null) {
-                specification = specification.and(AnimalSpecifications.hasType(type));
-            } else {
-                specification = Specification.where(AnimalSpecifications.hasType(type));
-            }
+            specification = specification.and(AnimalSpecifications.hasName(name));
+        }
+
+        if (type != null && !type.isEmpty()) {
+            specification = specification.and(AnimalSpecifications.hasType(type));
         }
 
         // Create initial ScrollPosition or continue from the given scrollId
