@@ -4,7 +4,7 @@
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
-         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+         https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.29.xsd">
 
     <property  name="string.type"  value="varchar(255)"  dbms="!postgresql"/>
     <property  name="string.type"  value="text"  dbms="postgresql"/>
@@ -20,6 +20,13 @@
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="name" type="${string.type}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="type" type="${string.type}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="habitat" type="${string.type}"/>
+            <column name="created" type="datetime">
                 <constraints nullable="false"/>
             </column>
             <column name="version" type="smallint" defaultValueNumeric="0">

@@ -10,6 +10,7 @@ import com.example.keysetpagination.utils.AppConstants;
 import jakarta.validation.Valid;
 import java.net.URI;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Window;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -43,6 +44,16 @@ class AnimalController {
                     String sortDir) {
         FindAnimalsQuery findAnimalsQuery = new FindAnimalsQuery(pageNo, pageSize, sortBy, sortDir);
         return animalService.findAllAnimals(findAnimalsQuery);
+    }
+
+    @GetMapping("/search")
+    public Window<AnimalResponse> searchAnimals(
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String type,
+            @RequestParam(defaultValue = "10") int pageSize,
+            @RequestParam(required = false) Long scrollId) {
+
+        return animalService.searchAnimals(name, type, pageSize, scrollId);
     }
 
     @GetMapping("/{id}")

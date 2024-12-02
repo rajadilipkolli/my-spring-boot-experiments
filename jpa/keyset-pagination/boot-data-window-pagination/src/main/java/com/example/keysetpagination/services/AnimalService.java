@@ -8,13 +8,12 @@ import com.example.keysetpagination.model.request.AnimalRequest;
 import com.example.keysetpagination.model.response.AnimalResponse;
 import com.example.keysetpagination.model.response.PagedResult;
 import com.example.keysetpagination.repositories.AnimalRepository;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -45,6 +44,31 @@ public class AnimalService {
                         ? Sort.Order.asc(findAnimalsQuery.sortBy())
                         : Sort.Order.desc(findAnimalsQuery.sortBy()));
         return PageRequest.of(pageNo, findAnimalsQuery.pageSize(), sort);
+    }
+
+    public Window<AnimalResponse> searchAnimals(String name, String type, int pageSize, Long scrollId) {
+        Specification<Animal> specification = null;
+        if (name != null && !name.isEmpty()) {
+            specification = Specification.where(AnimalSpecifications.hasName(name));
+        } else if (type != null && !type.isEmpty()) {
+            if (specification != null) {
+                specification = specification.and(AnimalSpecifications.hasType(type));
+            } else {
+                specification = Specification.where(AnimalSpecifications.hasType(type));
+            }
+        }
+
+        // Create initial ScrollPosition or continue from the given scrollId
+        ScrollPosition position = scrollId == null
+                ? ScrollPosition.keyset()
+                : ScrollPosition.of(Collections.singletonMap("id", scrollId), ScrollPosition.Direction.FORWARD);
+
+        // Create WindowIterator
+        Specification<Animal> finalSpecification = specification;
+
+        return animalRepository
+                .findAll(finalSpecification, PageRequest.of(0, pageSize, Sort.by(Sort.Order.asc("id"))), position)
+                .map(animalMapper::toResponse);
     }
 
     public Optional<AnimalResponse> findAnimalById(Long id) {

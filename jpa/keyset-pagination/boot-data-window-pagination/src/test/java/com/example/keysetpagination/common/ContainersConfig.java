@@ -12,7 +12,6 @@ public class ContainersConfig {
     @Bean
     @ServiceConnection
     PostgreSQLContainer<?> postgreSQLContainer() {
-        return new PostgreSQLContainer<>(DockerImageName.parse("postgres").withTag("17.0-alpine"))
-                .withCommand("postgres", "-c", "fsync=off", "-c", "max_connections=200");
+        return new PostgreSQLContainer<>(DockerImageName.parse("postgres").withTag("17.2-alpine"));
     }
 }

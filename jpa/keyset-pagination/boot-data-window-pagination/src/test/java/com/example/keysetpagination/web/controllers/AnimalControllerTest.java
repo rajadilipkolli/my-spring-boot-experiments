@@ -24,6 +24,7 @@ import com.example.keysetpagination.model.response.AnimalResponse;
 import com.example.keysetpagination.model.response.PagedResult;
 import com.example.keysetpagination.services.AnimalService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -115,7 +116,7 @@ class AnimalControllerTest {
     @Test
     void shouldFindAnimalById() throws Exception {
         Long animalId = 1L;
-        AnimalResponse animal = new AnimalResponse(animalId, "name 1");
+        AnimalResponse animal = new AnimalResponse(animalId, "name 1", "junitType", "junitHabitat", LocalDateTime.MAX);
         given(animalService.findAnimalById(animalId)).willReturn(Optional.of(animal));
 
         this.mockMvc
@@ -142,9 +143,9 @@ class AnimalControllerTest {
     @Test
     void shouldCreateNewAnimal() throws Exception {
 
-        AnimalResponse animal = new AnimalResponse(1L, "Tiger");
-        AnimalRequest animalRequest = new AnimalRequest("Tiger");
-        given(animalService.saveAnimal(any(AnimalRequest.class))).willReturn(animal);
+        AnimalResponse animalResponse = new AnimalResponse(1L, "Tiger", "junitType", "junitHabitat", LocalDateTime.MAX);
+        AnimalRequest animalRequest = new AnimalRequest("Tiger", "junitType", "junitHabitat");
+        given(animalService.saveAnimal(any(AnimalRequest.class))).willReturn(animalResponse);
 
         this.mockMvc
                 .perform(post("/api/animals")
@@ -153,12 +154,12 @@ class AnimalControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(header().exists(HttpHeaders.LOCATION))
                 .andExpect(jsonPath("$.id", notNullValue()))
-                .andExpect(jsonPath("$.name", is(animal.name())));
+                .andExpect(jsonPath("$.name", is(animalResponse.name())));
     }
 
     @Test
-    void shouldReturn400WhenCreateNewAnimalWithoutText() throws Exception {
-        AnimalRequest animalRequest = new AnimalRequest(null);
+    void shouldReturn400WhenCreateNewAnimalWithoutNameAndType() throws Exception {
+        AnimalRequest animalRequest = new AnimalRequest(null, null, null);
 
         this.mockMvc
                 .perform(post("/api/animals")
@@ -171,19 +172,22 @@ class AnimalControllerTest {
                 .andExpect(jsonPath("$.status", is(400)))
                 .andExpect(jsonPath("$.detail", is("Invalid request content.")))
                 .andExpect(jsonPath("$.instance", is("/api/animals")))
-                .andExpect(jsonPath("$.violations", hasSize(1)))
+                .andExpect(jsonPath("$.violations", hasSize(2)))
                 .andExpect(jsonPath("$.violations[0].field", is("name")))
                 .andExpect(jsonPath("$.violations[0].message", is("Name cannot be blank")))
+                .andExpect(jsonPath("$.violations[1].field", is("type")))
+                .andExpect(jsonPath("$.violations[1].message", is("Type cannot be blank")))
                 .andReturn();
     }
 
     @Test
     void shouldUpdateAnimal() throws Exception {
         Long animalId = 1L;
-        AnimalResponse animal = new AnimalResponse(animalId, "Updated name");
-        AnimalRequest animalRequest = new AnimalRequest("Updated name");
+        AnimalResponse animalResponse =
+                new AnimalResponse(animalId, "Updated name", "junitType", "junitHabitat", LocalDateTime.MAX);
+        AnimalRequest animalRequest = new AnimalRequest("Updated name", "junitType", "junitHabitat");
         given(animalService.updateAnimal(eq(animalId), any(AnimalRequest.class)))
-                .willReturn(animal);
+                .willReturn(animalResponse);
 
         this.mockMvc
                 .perform(put("/api/animals/{id}", animalId)
@@ -191,13 +195,13 @@ class AnimalControllerTest {
                         .content(objectMapper.writeValueAsString(animalRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(animalId), Long.class))
-                .andExpect(jsonPath("$.name", is(animal.name())));
+                .andExpect(jsonPath("$.name", is(animalResponse.name())));
     }
 
     @Test
     void shouldReturn404WhenUpdatingNonExistingAnimal() throws Exception {
         Long animalId = 1L;
-        AnimalRequest animalRequest = new AnimalRequest("Updated name");
+        AnimalRequest animalRequest = new AnimalRequest("Updated name", "junitType", "junitHabitat");
         given(animalService.updateAnimal(eq(animalId), any(AnimalRequest.class)))
                 .willThrow(new AnimalNotFoundException(animalId));
 
@@ -216,7 +220,8 @@ class AnimalControllerTest {
     @Test
     void shouldDeleteAnimal() throws Exception {
         Long animalId = 1L;
-        AnimalResponse animal = new AnimalResponse(animalId, "Some name");
+        AnimalResponse animal =
+                new AnimalResponse(animalId, "Some name", "junitType", "junitHabitat", LocalDateTime.MAX);
         given(animalService.findAnimalById(animalId)).willReturn(Optional.of(animal));
         doNothing().when(animalService).deleteAnimalById(animalId);
 
@@ -242,7 +247,8 @@ class AnimalControllerTest {
 
     List<AnimalResponse> getAnimalResponseList() {
         return animalList.stream()
-                .map(animal -> new AnimalResponse(animal.getId(), animal.getName()))
+                .map(animal -> new AnimalResponse(
+                        animal.getId(), animal.getName(), animal.getType(), animal.getHabitat(), animal.getCreated()))
                 .toList();
     }
 }
