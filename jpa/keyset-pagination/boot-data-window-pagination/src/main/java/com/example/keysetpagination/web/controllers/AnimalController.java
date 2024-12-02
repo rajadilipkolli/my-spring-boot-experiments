@@ -7,9 +7,16 @@ import com.example.keysetpagination.model.response.AnimalResponse;
 import com.example.keysetpagination.model.response.PagedResult;
 import com.example.keysetpagination.services.AnimalService;
 import com.example.keysetpagination.utils.AppConstants;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import java.net.URI;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Window;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -43,6 +50,26 @@ class AnimalController {
                     String sortDir) {
         FindAnimalsQuery findAnimalsQuery = new FindAnimalsQuery(pageNo, pageSize, sortBy, sortDir);
         return animalService.findAllAnimals(findAnimalsQuery);
+    }
+
+    @Operation(summary = "Search animals with keyset pagination support")
+    @ApiResponses(
+            value = {
+                @ApiResponse(responseCode = "200", description = "Successfully retrieved animals"),
+                @ApiResponse(responseCode = "400", description = "Invalid parameters supplied")
+            })
+    @GetMapping("/search")
+    public Window<AnimalResponse> searchAnimals(
+            @Parameter(description = "Animal name to search for") @RequestParam(required = false) String name,
+            @Parameter(description = "Animal type to filter by") @RequestParam(required = false) String type,
+            @Parameter(description = "Number of items per page (max 100)")
+                    @RequestParam(defaultValue = "10")
+                    @Min(1)
+                    @Max(100)
+                    int pageSize,
+            @Parameter(description = "Scroll ID for pagination") @RequestParam(required = false) Long scrollId) {
+
+        return animalService.searchAnimals(name, type, pageSize, scrollId);
     }
 
     @GetMapping("/{id}")

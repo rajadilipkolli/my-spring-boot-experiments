@@ -11,6 +11,7 @@ import com.example.keysetpagination.entities.Animal;
 import com.example.keysetpagination.mapper.AnimalMapper;
 import com.example.keysetpagination.model.response.AnimalResponse;
 import com.example.keysetpagination.repositories.AnimalRepository;
+import java.time.LocalDateTime;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -40,7 +41,9 @@ class AnimalServiceTest {
         // then
         assertThat(optionalAnimal).isPresent().hasValueSatisfying(animalResponse -> {
             assertThat(animalResponse.id()).isEqualTo(1L);
-            assertThat(animalResponse.name()).isEqualTo("junitTest");
+            assertThat(animalResponse.name()).isEqualTo("junitName");
+            assertThat(animalResponse.type()).isEqualTo("junitType");
+            assertThat(animalResponse.habitat()).isEqualTo("junitHabitat");
         });
     }
 
@@ -55,10 +58,10 @@ class AnimalServiceTest {
     }
 
     private Animal getAnimal() {
-        return new Animal().setId(1L).setName("junitTest");
+        return new Animal().setId(1L).setName("junitName").setType("junitType").setHabitat("junitHabitat");
     }
 
     private AnimalResponse getAnimalResponse() {
-        return new AnimalResponse(1L, "junitTest");
+        return new AnimalResponse(1L, "junitName", "junitType", "junitHabitat", LocalDateTime.MAX);
     }
 }
