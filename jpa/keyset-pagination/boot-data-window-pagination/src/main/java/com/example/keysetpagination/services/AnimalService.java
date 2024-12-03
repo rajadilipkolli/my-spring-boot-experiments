@@ -4,6 +4,7 @@ import com.example.keysetpagination.entities.Animal;
 import com.example.keysetpagination.exception.AnimalNotFoundException;
 import com.example.keysetpagination.mapper.AnimalMapper;
 import com.example.keysetpagination.model.query.FindAnimalsQuery;
+import com.example.keysetpagination.model.query.SearchCriteria;
 import com.example.keysetpagination.model.request.AnimalRequest;
 import com.example.keysetpagination.model.response.AnimalResponse;
 import com.example.keysetpagination.model.response.PagedResult;
@@ -27,10 +28,15 @@ public class AnimalService {
 
     private final AnimalRepository animalRepository;
     private final AnimalMapper animalMapper;
+    private final EntitySpecification<Animal> animalEntitySpecification;
 
-    public AnimalService(AnimalRepository animalRepository, AnimalMapper animalMapper) {
+    public AnimalService(
+            AnimalRepository animalRepository,
+            AnimalMapper animalMapper,
+            EntitySpecification<Animal> animalEntitySpecification) {
         this.animalRepository = animalRepository;
         this.animalMapper = animalMapper;
+        this.animalEntitySpecification = animalEntitySpecification;
     }
 
     public PagedResult<AnimalResponse> findAllAnimals(FindAnimalsQuery findAnimalsQuery) {
@@ -54,27 +60,22 @@ public class AnimalService {
         return PageRequest.of(pageNo, findAnimalsQuery.pageSize(), sort);
     }
 
-    public Window<AnimalResponse> searchAnimals(String name, String type, int pageSize, Long scrollId) {
-        Specification<Animal> specification = Specification.where(null);
+    public Window<AnimalResponse> searchAnimals(List<SearchCriteria> searchCriteriaList, int pageSize, Long scrollId) {
 
-        if (name != null && !name.isEmpty()) {
-            specification = specification.and(AnimalSpecifications.hasName(name));
-        }
-
-        if (type != null && !type.isEmpty()) {
-            specification = specification.and(AnimalSpecifications.hasType(type));
-        }
+        Specification<Animal> specification =
+                animalEntitySpecification.specificationBuilder(searchCriteriaList, Animal.class);
 
         // Create initial ScrollPosition or continue from the given scrollId
         ScrollPosition position = scrollId == null
                 ? ScrollPosition.keyset()
                 : ScrollPosition.of(Collections.singletonMap("id", scrollId), ScrollPosition.Direction.FORWARD);
 
-        // Create WindowIterator
-        Specification<Animal> finalSpecification = specification;
-
         return animalRepository
-                .findAll(finalSpecification, PageRequest.of(0, pageSize, Sort.by(Sort.Order.asc("id"))), position)
+                .findAll(
+                        specification,
+                        PageRequest.of(0, pageSize, Sort.by(Sort.Order.asc("id"))),
+                        position,
+                        Animal.class)
                 .map(animalMapper::toResponse);
     }
 
