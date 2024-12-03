@@ -16,6 +16,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import java.net.URI;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Window;
 import org.springframework.http.ResponseEntity;
@@ -68,7 +69,7 @@ class AnimalController {
                     @Max(100)
                     int pageSize,
             @Parameter(description = "Scroll ID for pagination") @RequestParam(required = false) Long scrollId,
-            @RequestBody SearchCriteria[] searchCriteria) {
+            @RequestBody @Valid List<SearchCriteria> searchCriteria) {
 
         return animalService.searchAnimals(searchCriteria, pageSize, scrollId);
     }

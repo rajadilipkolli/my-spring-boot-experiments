@@ -18,7 +18,6 @@ import com.example.keysetpagination.repositories.AnimalRepository;
 import com.example.keysetpagination.repositories.CustomWindow;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -101,14 +100,16 @@ class AnimalControllerIT extends AbstractIntegrationTest {
                 .getResponse()
                 .getContentAsString();
 
-        CustomWindow<Map<String, String>> window = objectMapper.readValue(contentAsString, CustomWindow.class);
-        List<Map<String, String>> animalResponses = window.getContent();
-        boolean windowLast = window.isLast();
-        Map<String, String> animalResponsesLast = animalResponses.getLast();
+        CustomWindow<Animal> window = objectMapper.readValue(
+                contentAsString,
+                objectMapper.getTypeFactory().constructParametricType(CustomWindow.class, Animal.class));
+        List<Animal> animalResponses = window.getContent();
         this.mockMvc
                 .perform(post("/api/animals/search")
                         .param("pageSize", "2")
-                        .param("scrollId", String.valueOf(animalResponsesLast.get("id")))
+                        .param(
+                                "scrollId",
+                                String.valueOf(animalResponses.getLast().getId()))
                         .content(
                                 """
                                 [
@@ -287,5 +288,259 @@ class AnimalControllerIT extends AbstractIntegrationTest {
 
         // Verify animal is deleted
         this.mockMvc.perform(get("/api/animals/{id}", animalId)).andExpect(status().isNotFound());
+    }
+
+    @Test
+    void shouldReturnResultForEqualOperator() throws Exception {
+        // Test for EQ operator
+        this.mockMvc
+                .perform(
+                        post("/api/animals/search")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(
+                                        """
+            [
+              {
+                "queryOperator": "EQ",
+                "field": "name",
+                "values": ["Lion"]
+              }
+            ]
+            """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content.size()", is(1)))
+                .andExpect(jsonPath("$.content[0].name", is("Lion")))
+                .andExpect(jsonPath("$.last", is(true)));
+    }
+
+    @Test
+    void shouldReturnResultForNotEqualOperator() throws Exception {
+        // Test for NE operator
+        this.mockMvc
+                .perform(
+                        post("/api/animals/search")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(
+                                        """
+                                        [
+                                          {
+                                            "queryOperator": "NE",
+                                            "field": "type",
+                                            "values": ["Mammal"]
+                                          }
+                                        ]
+                                        """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content.size()", is(7))) // Total 10 animals - 3 mammals
+                .andExpect(jsonPath("$.last", is(true)));
+    }
+
+    @Test
+    void shouldReturnResultForInOperator() throws Exception {
+        // Test for IN operator
+        this.mockMvc
+                .perform(
+                        post("/api/animals/search")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(
+                                        """
+                                [
+                                  {
+                                    "queryOperator": "IN",
+                                    "field": "type",
+                                    "values": ["Bird", "Fish"]
+                                  }
+                                ]
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content.size()", is(4))) // "Parrot", "Penguin", "Shark", "Eagle"
+                .andExpect(jsonPath("$.last", is(true)));
+    }
+
+    @Test
+    void shouldReturnResultForNotInOperator() throws Exception {
+        // Test for NOTIN operator
+        this.mockMvc
+                .perform(
+                        post("/api/animals/search")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(
+                                        """
+                                        [
+                                          {
+                                            "queryOperator": "NOT_IN",
+                                            "field": "type",
+                                            "values": ["Bird", "Fish"]
+                                          }
+                                        ]
+                                        """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content.size()", is(6)))
+                .andExpect(jsonPath("$.last", is(true)));
+    }
+
+    @Test
+    void shouldReturnResultForLikeOperator() throws Exception {
+        // Test for LIKE operator
+        this.mockMvc
+                .perform(
+                        post("/api/animals/search")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(
+                                        """
+                                        [
+                                          {
+                                            "queryOperator": "LIKE",
+                                            "field": "name",
+                                            "values": ["%e%"]
+                                          }
+                                        ]
+                                        """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath(
+                        "$.content.size()", is(6))) // "Elephant", "Penguin", "Crocodile", ""Eagle"", "Whale", "Snake"
+                .andExpect(jsonPath("$.last", is(true)));
+    }
+
+    @Test
+    void shouldReturnResultForContainsOperator() throws Exception {
+        // Test for CONTAINS operator
+        this.mockMvc
+                .perform(
+                        post("/api/animals/search")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(
+                                        """
+            [
+              {
+                "queryOperator": "CONTAINS",
+                "field": "name",
+                "values": ["ar"]
+              }
+            ]
+            """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content.size()", is(2))) // "Parrot", "Shark"
+                .andExpect(jsonPath("$.last", is(true)));
+    }
+
+    @Test
+    void shouldReturnResultForStartsWithOperator() throws Exception {
+        // Test for STARTS_WITH operator
+        this.mockMvc
+                .perform(
+                        post("/api/animals/search")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(
+                                        """
+            [
+              {
+                "queryOperator": "STARTS_WITH",
+                "field": "name",
+                "values": ["P"]
+              }
+            ]
+            """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content.size()", is(2))) // "Parrot", "Penguin"
+                .andExpect(jsonPath("$.last", is(true)));
+    }
+
+    @Test
+    void shouldReturnResultForEndsWithOperator() throws Exception {
+        // Test for ENDS_WITH operator
+        this.mockMvc
+                .perform(
+                        post("/api/animals/search")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(
+                                        """
+            [
+              {
+                "queryOperator": "ENDS_WITH",
+                "field": "name",
+                "values": ["g"]
+              }
+            ]
+            """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content.size()", is(1))) // "Frog"
+                .andExpect(jsonPath("$.content[0].name", is("Frog")))
+                .andExpect(jsonPath("$.last", is(true)));
+    }
+
+    @Test
+    void shouldReturnResultForBetweenOperator() throws Exception {
+        // Since 'Animal' doesn't have a numeric field, we'll use 'id' for BETWEEN operator
+        Long minId = animalList.get(0).getId();
+        Long maxId = animalList.get(4).getId();
+
+        this.mockMvc
+                .perform(post("/api/animals/search")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(String.format(
+                                """
+            [
+              {
+                "queryOperator": "BETWEEN",
+                "field": "id",
+                "values": ["%d", "%d"]
+              }
+            ]
+            """,
+                                minId, maxId)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content.size()", is(5))) // Animals with IDs between minId and maxId
+                .andExpect(jsonPath("$.last", is(true)));
+    }
+
+    @Test
+    void shouldReturnResultForAndOperator() throws Exception {
+        // Test for AND operator
+        this.mockMvc
+                .perform(
+                        post("/api/animals/search")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(
+                                        """
+                                        [
+                                          {
+                                            "queryOperator": "EQ",
+                                            "field": "type",
+                                            "values": ["Bird"]
+                                          },
+                                          {
+                                            "queryOperator": "EQ",
+                                            "field": "habitat",
+                                            "values": ["Rainforest"]
+                                          }
+                                        ]
+                                        """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content.size()", is(1))) // "Parrot"
+                .andExpect(jsonPath("$.content[0].name", is("Parrot")))
+                .andExpect(jsonPath("$.last", is(true)));
+    }
+
+    @Test
+    void shouldReturnResultForOrOperator() throws Exception {
+        // Test for OR operator
+        this.mockMvc
+                .perform(
+                        post("/api/animals/search")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(
+                                        """
+                                [
+                                  {
+                                    "queryOperator": "OR",
+                                    "field": "name",
+                                    "values": ["Shark", "Eagle"]
+                                  }
+                                ]
+            """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content.size()", is(2))) // "Shark" and "Eagle"
+                .andExpect(jsonPath("$.last", is(true)));
     }
 }

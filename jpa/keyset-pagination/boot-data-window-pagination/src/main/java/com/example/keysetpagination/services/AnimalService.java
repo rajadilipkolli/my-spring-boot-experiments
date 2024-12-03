@@ -60,10 +60,10 @@ public class AnimalService {
         return PageRequest.of(pageNo, findAnimalsQuery.pageSize(), sort);
     }
 
-    public Window<AnimalResponse> searchAnimals(SearchCriteria[] searchCriteriaArray, int pageSize, Long scrollId) {
+    public Window<AnimalResponse> searchAnimals(List<SearchCriteria> searchCriteriaList, int pageSize, Long scrollId) {
 
         Specification<Animal> specification =
-                animalEntitySpecification.specificationBuilder(searchCriteriaArray, Animal.class);
+                animalEntitySpecification.specificationBuilder(searchCriteriaList, Animal.class);
 
         // Create initial ScrollPosition or continue from the given scrollId
         ScrollPosition position = scrollId == null

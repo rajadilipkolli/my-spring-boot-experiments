@@ -6,7 +6,10 @@ import org.springframework.data.domain.Window;
 import org.springframework.data.jpa.domain.Specification;
 
 /**
- * Custom repository interface for efficient keyset pagination for any entities.
+ * Custom repository interface for efficient keyset pagination.
+ *
+ * @param <T> the domain type the repository manages
+ * @see org.springframework.data.domain.Window
  */
 public interface CustomRepository<T> {
 

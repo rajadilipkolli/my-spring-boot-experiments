@@ -1,7 +1,6 @@
 package com.example.keysetpagination.repositories;
 
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.*;
 import java.util.ArrayList;
@@ -17,7 +16,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class CustomRepositoryImpl<T> implements CustomRepository<T> {
 
-    @PersistenceContext
     private final EntityManager entityManager;
 
     public CustomRepositoryImpl(EntityManager entityManager) {
