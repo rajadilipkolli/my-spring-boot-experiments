@@ -8,9 +8,9 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 
 @SpringBootApplication(exclude = {JooqAutoConfiguration.class})
 @EnableConfigurationProperties({ApplicationProperties.class})
-public class Application {
+public class JooqR2dbcApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(Application.class, args);
+        SpringApplication.run(JooqR2dbcApplication.class, args);
     }
 }
