@@ -1,6 +1,5 @@
 package com.example.mongoes.document;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -29,7 +28,6 @@ public class Address {
      * </code>
      * </pre>
      */
-    @JsonDeserialize(as = Point.class)
     @GeoSpatialIndexed(type = GeoSpatialIndexType.GEO_2DSPHERE)
     @GeoPointField
     @org.springframework.data.elasticsearch.annotations.Field("coord")
