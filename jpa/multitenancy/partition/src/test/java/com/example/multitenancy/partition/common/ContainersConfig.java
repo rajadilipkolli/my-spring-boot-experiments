@@ -1,4 +1,4 @@
-package com.example.keysetpagination.common;
+package com.example.multitenancy.partition.common;
 
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;

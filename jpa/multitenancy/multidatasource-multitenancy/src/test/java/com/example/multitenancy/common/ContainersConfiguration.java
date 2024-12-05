@@ -12,7 +12,7 @@ public class ContainersConfiguration {
 
     @Bean
     PostgreSQLContainer<?> postgreSQLContainer() {
-        return new PostgreSQLContainer<>(DockerImageName.parse("postgres").withTag("17.1-alpine"));
+        return new PostgreSQLContainer<>(DockerImageName.parse("postgres").withTag("17.2-alpine"));
     }
 
     @Bean
