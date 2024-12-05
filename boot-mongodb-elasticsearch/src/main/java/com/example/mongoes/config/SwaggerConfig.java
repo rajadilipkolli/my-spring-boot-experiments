@@ -7,9 +7,9 @@ import io.swagger.v3.oas.models.servers.Server;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @OpenAPIDefinition(info = @Info(title = "spring-boot-mongodb-elasticsearch", version = "v1"))
-public class SwaggerConfig {
+class SwaggerConfig {
 
     @Bean
     OpenAPI openAPI() {

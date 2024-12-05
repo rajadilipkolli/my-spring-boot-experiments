@@ -1,18 +1,12 @@
 package com.example.mongoes.document;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import java.util.StringJoiner;
 import org.springframework.data.elasticsearch.annotations.GeoPointField;
 import org.springframework.data.geo.Point;
 import org.springframework.data.mongodb.core.index.GeoSpatialIndexType;
 import org.springframework.data.mongodb.core.index.GeoSpatialIndexed;
 import org.springframework.data.mongodb.core.mapping.Field;
 
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
 public class Address {
 
     private String building;
@@ -29,7 +23,6 @@ public class Address {
      * </code>
      * </pre>
      */
-    @JsonDeserialize(as = Point.class)
     @GeoSpatialIndexed(type = GeoSpatialIndexType.GEO_2DSPHERE)
     @GeoPointField
     @org.springframework.data.elasticsearch.annotations.Field("coord")
@@ -39,4 +32,46 @@ public class Address {
     private String street;
 
     private Integer zipcode;
+
+    public String getBuilding() {
+        return building;
+    }
+
+    public void setBuilding(String building) {
+        this.building = building;
+    }
+
+    public Point getLocation() {
+        return location;
+    }
+
+    public void setLocation(Point location) {
+        this.location = location;
+    }
+
+    public String getStreet() {
+        return street;
+    }
+
+    public void setStreet(String street) {
+        this.street = street;
+    }
+
+    public Integer getZipcode() {
+        return zipcode;
+    }
+
+    public void setZipcode(Integer zipcode) {
+        this.zipcode = zipcode;
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", Address.class.getSimpleName() + "[", "]")
+                .add("building='" + building + "'")
+                .add("location=" + location)
+                .add("street='" + street + "'")
+                .add("zipcode=" + zipcode)
+                .toString();
+    }
 }

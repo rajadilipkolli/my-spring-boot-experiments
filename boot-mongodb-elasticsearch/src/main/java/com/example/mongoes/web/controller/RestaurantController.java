@@ -9,7 +9,6 @@ import io.micrometer.core.annotation.Timed;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Size;
 import java.net.URI;
-import lombok.RequiredArgsConstructor;
 import org.springframework.data.elasticsearch.core.SearchPage;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,12 +22,15 @@ import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
 
 @RestController
-@RequiredArgsConstructor
 @Timed
 @RequestMapping("/api/restaurant")
 public class RestaurantController {
 
     private final RestaurantService restaurantService;
+
+    public RestaurantController(RestaurantService restaurantService) {
+        this.restaurantService = restaurantService;
+    }
 
     @GetMapping
     public Mono<ResponseEntity<SearchPage<Restaurant>>> findAllRestaurants(
