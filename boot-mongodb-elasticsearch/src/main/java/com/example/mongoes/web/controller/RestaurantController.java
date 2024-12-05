@@ -9,6 +9,8 @@ import io.micrometer.core.annotation.Timed;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Size;
 import java.net.URI;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import org.springframework.data.elasticsearch.core.SearchPage;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -87,7 +89,9 @@ public class RestaurantController {
                                                 URI.create(
                                                         String.format(
                                                                 "/api/restaurant/name/%s",
-                                                                restaurantRequest.name())))
+                                                                URLEncoder.encode(
+                                                                        restaurantRequest.name(),
+                                                                        StandardCharsets.UTF_8))))
                                         .body(
                                                 new GenericMessage(
                                                         "restaurant with name %s created"

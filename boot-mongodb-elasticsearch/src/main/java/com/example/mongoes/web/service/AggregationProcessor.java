@@ -3,15 +3,22 @@ package com.example.mongoes.web.service;
 import co.elastic.clients.elasticsearch._types.aggregations.Aggregate;
 import java.util.HashMap;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.elasticsearch.client.elc.ElasticsearchAggregation;
 import org.springframework.stereotype.Service;
 
 /**
  * Processes Elasticsearch aggregations and transforms them into a structured map format. Supports
  * 'terms' and 'dateRange' aggregation types.
+ *
+ * <p>Example output format: { "termAggregation": {"term1": 10, "term2": 20},
+ * "dateRangeAggregation": {"2023-01-01 - 2023-12-31": 100} }
  */
 @Service
 class AggregationProcessor {
+
+    private static final Logger log = LoggerFactory.getLogger(AggregationProcessor.class);
 
     /**
      * Processes Elasticsearch aggregations and returns a structured map of results.
@@ -42,6 +49,10 @@ class AggregationProcessor {
             processTermsAggregate(aggregate, countMap);
         } else if (aggregate.isDateRange()) {
             processDateRangeAggregate(aggregate, countMap);
+        } else {
+            log.debug(
+                    "Unsupported aggregation type encountered: {}",
+                    aggregate.getClass().getSimpleName());
         }
     }
 
