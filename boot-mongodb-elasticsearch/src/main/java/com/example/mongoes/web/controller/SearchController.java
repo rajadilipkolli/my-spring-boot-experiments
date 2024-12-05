@@ -6,7 +6,6 @@ import com.example.mongoes.response.ResultData;
 import com.example.mongoes.web.service.SearchService;
 import io.micrometer.core.annotation.Timed;
 import java.util.List;
-import lombok.RequiredArgsConstructor;
 import org.springframework.data.elasticsearch.core.SearchPage;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,10 +16,13 @@ import reactor.core.publisher.Mono;
 
 @RestController
 @Timed
-@RequiredArgsConstructor
 public class SearchController {
 
     private final SearchService searchService;
+
+    public SearchController(SearchService searchService) {
+        this.searchService = searchService;
+    }
 
     @GetMapping("/search/borough")
     public Mono<ResponseEntity<Flux<Restaurant>>> searchPhrase(

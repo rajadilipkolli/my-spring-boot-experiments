@@ -272,14 +272,14 @@ public class CustomRestaurantESRepositoryImpl implements CustomRestaurantESRepos
      * below is the console query
      *
      * {@snippet :
-     *
-     * """     POST /restaurant/_search?size=15&pretty
+     * """
+     * POST /restaurant/_search?size=15&pretty
      * {
      * "query": {
      * "multi_match": {
      * "query": "Pizza",
      * "fields": [
-     * "restautant_name",
+     * "restaurant_name",
      * "borough",
      * "cuisine"
      * ],
@@ -289,14 +289,17 @@ public class CustomRestaurantESRepositoryImpl implements CustomRestaurantESRepos
      * "aggs": {
      * "MyCuisine": {
      * "terms": {
-     * "field": "cuisine", "size": 1000, "order": {
+     * "field": "cuisine",
+     * "size": 1000,
+     * "order": {
      * "_count": "desc"
      * }
      * }
      * },
      * "MyBorough": {
      * "terms": {
-     * "field": "borough" , "size": 1000
+     * "field": "borough",
+     * "size": 1000
      * }
      * },
      * "MyDateRange": {

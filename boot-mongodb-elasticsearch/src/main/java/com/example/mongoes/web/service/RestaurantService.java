@@ -20,10 +20,10 @@ import java.time.Instant;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.bson.BsonTimestamp;
 import org.bson.Document;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.PageRequest;
@@ -40,15 +40,24 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Service
-@Slf4j
-@RequiredArgsConstructor
 public class RestaurantService {
 
+    private static final Logger log = LoggerFactory.getLogger(RestaurantService.class);
     private final RestaurantRepository restaurantRepository;
     private final RestaurantESRepository restaurantESRepository;
     private final ChangeStreamResumeRepository changeStreamResumeRepository;
-
     private final ReactiveMongoTemplate reactiveMongoTemplate;
+
+    public RestaurantService(
+            RestaurantRepository restaurantRepository,
+            RestaurantESRepository restaurantESRepository,
+            ChangeStreamResumeRepository changeStreamResumeRepository,
+            ReactiveMongoTemplate reactiveMongoTemplate) {
+        this.restaurantRepository = restaurantRepository;
+        this.restaurantESRepository = restaurantESRepository;
+        this.changeStreamResumeRepository = changeStreamResumeRepository;
+        this.reactiveMongoTemplate = reactiveMongoTemplate;
+    }
 
     public Flux<Restaurant> loadData() throws IOException {
         Resource input = new ClassPathResource("restaurants.json");
