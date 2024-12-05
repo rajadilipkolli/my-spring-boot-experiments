@@ -5,6 +5,8 @@ import com.example.mongoes.response.AggregationSearchResponse;
 import com.example.mongoes.response.ResultData;
 import com.example.mongoes.web.service.SearchService;
 import io.micrometer.core.annotation.Timed;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import java.util.List;
 import org.springframework.data.elasticsearch.core.SearchPage;
 import org.springframework.http.ResponseEntity;
@@ -145,12 +147,17 @@ public class SearchController {
                 .map(ResponseEntity::ok);
     }
 
+    @Operation(
+            summary = "Search restaurants within range",
+            description = "Find restaurants within specified distance from given coordinates")
     @GetMapping("/search/restaurant/withInRange")
     public Flux<ResultData> searchRestaurantsWithInRange(
-            @RequestParam Double lat,
-            @RequestParam Double lon,
-            @RequestParam Double distance,
-            @RequestParam(defaultValue = "km", required = false) String unit) {
+            @Parameter(description = "Latitude coordinate") @RequestParam Double lat,
+            @Parameter(description = "Longitude coordinate") @RequestParam Double lon,
+            @Parameter(description = "Distance from coordinates") @RequestParam Double distance,
+            @Parameter(description = "Unit of distance (km/mi)", example = "km")
+                    @RequestParam(defaultValue = "km", required = false)
+                    String unit) {
         return this.searchService.searchRestaurantsWithInRange(lat, lon, distance, unit);
     }
 }

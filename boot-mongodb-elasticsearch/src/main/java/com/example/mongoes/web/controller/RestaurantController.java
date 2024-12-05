@@ -77,18 +77,19 @@ public class RestaurantController {
     }
 
     @PostMapping
-    public ResponseEntity<GenericMessage> createRestaurant(
-            @RequestBody RestaurantRequest restaurantRequest) {
-        return ResponseEntity.created(
-                        URI.create(
-                                String.format(
-                                        "/restaurant/%s",
-                                        this.restaurantService
-                                                .createRestaurant(restaurantRequest)
-                                                .map(Restaurant::getName))))
-                .body(
-                        new GenericMessage(
-                                "restaurant with name %s created"
-                                        .formatted(restaurantRequest.name())));
+    public Mono<ResponseEntity<GenericMessage>> createRestaurant(
+            @RequestBody @Valid RestaurantRequest restaurantRequest) {
+        return this.restaurantService
+                .createRestaurant(restaurantRequest)
+                .map(
+                        restaurant ->
+                                ResponseEntity.created(
+                                                URI.create("/restaurant/" + restaurant.getName()))
+                                        .body(
+                                                new GenericMessage(
+                                                        "restaurant with name %s created"
+                                                                .formatted(
+                                                                        restaurantRequest
+                                                                                .name()))));
     }
 }
