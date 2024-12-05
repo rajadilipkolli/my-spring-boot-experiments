@@ -152,12 +152,16 @@ public class SearchController {
             description = "Find restaurants within specified distance from given coordinates")
     @GetMapping("/search/restaurant/withInRange")
     public Flux<ResultData> searchRestaurantsWithInRange(
-            @Parameter(description = "Latitude coordinate") @RequestParam Double lat,
-            @Parameter(description = "Longitude coordinate") @RequestParam Double lon,
-            @Parameter(description = "Distance from coordinates") @RequestParam Double distance,
-            @Parameter(description = "Unit of distance (km/mi)", example = "km")
-                    @RequestParam(defaultValue = "km", required = false)
-                    String unit) {
+            @Parameter(description = "Latitude coordinate (between -90 and 90)", example = "40.7128")
+            @RequestParam @Min(-90) @Max(90) Double lat,
+            @Parameter(description = "Longitude coordinate (between -180 and 180)", example = "-74.0060")
+            @RequestParam @Min(-180) @Max(180) Double lon,
+            @Parameter(description = "Distance from coordinates (must be positive)")
+            @RequestParam @Positive Double distance,
+            @Parameter(description = "Unit of distance", example = "km", schema = @Schema(allowableValues = {"km", "mi"}))
+            @RequestParam(defaultValue = "km", required = false)
+            @Pattern(regexp = "^(km|mi)$", message = "Unit must be either 'km' or 'mi'")
+            String unit) {
         return this.searchService.searchRestaurantsWithInRange(lat, lon, distance, unit);
     }
 }
