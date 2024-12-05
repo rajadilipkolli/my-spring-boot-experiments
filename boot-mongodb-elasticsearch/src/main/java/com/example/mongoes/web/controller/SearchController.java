@@ -5,6 +5,15 @@ import com.example.mongoes.response.AggregationSearchResponse;
 import com.example.mongoes.response.ResultData;
 import com.example.mongoes.web.service.SearchService;
 import io.micrometer.core.annotation.Timed;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Positive;
 import java.util.List;
 import org.springframework.data.elasticsearch.core.SearchPage;
 import org.springframework.http.ResponseEntity;
@@ -145,12 +154,43 @@ public class SearchController {
                 .map(ResponseEntity::ok);
     }
 
+    @Operation(
+            summary = "Search restaurants within range",
+            description = "Find restaurants within specified distance from given coordinates",
+            responses = {
+                @ApiResponse(
+                        responseCode = "200",
+                        description = "Successfully retrieved restaurants",
+                        content = @Content(schema = @Schema(implementation = ResultData.class))),
+                @ApiResponse(responseCode = "400", description = "Invalid parameters provided")
+            })
     @GetMapping("/search/restaurant/withInRange")
     public Flux<ResultData> searchRestaurantsWithInRange(
-            @RequestParam Double lat,
-            @RequestParam Double lon,
-            @RequestParam Double distance,
-            @RequestParam(defaultValue = "km", required = false) String unit) {
+            @Parameter(
+                            description = "Latitude coordinate (between -90 and 90)",
+                            example = "40.7128")
+                    @RequestParam
+                    @Min(-90)
+                    @Max(90)
+                    Double lat,
+            @Parameter(
+                            description = "Longitude coordinate (between -180 and 180)",
+                            example = "-74.0060")
+                    @RequestParam
+                    @Min(-180)
+                    @Max(180)
+                    Double lon,
+            @Parameter(description = "Distance from coordinates (must be positive)")
+                    @RequestParam
+                    @Positive
+                    Double distance,
+            @Parameter(
+                            description = "Unit of distance",
+                            example = "km",
+                            schema = @Schema(allowableValues = {"km", "mi"}))
+                    @RequestParam(defaultValue = "km", required = false)
+                    @Pattern(regexp = "^(km|mi)$", message = "Unit must be either 'km' or 'mi'")
+                    String unit) {
         return this.searchService.searchRestaurantsWithInRange(lat, lon, distance, unit);
     }
 }
