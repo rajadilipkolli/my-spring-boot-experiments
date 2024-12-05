@@ -85,8 +85,9 @@ public class RestaurantController {
                         restaurant ->
                                 ResponseEntity.created(
                                                 URI.create(
-                                                        "/api/restaurant/name/"
-                                                                + restaurant.getName()))
+                                                        String.format(
+                                                                "/api/restaurant/name/%s",
+                                                                restaurantRequest.name())))
                                         .body(
                                                 new GenericMessage(
                                                         "restaurant with name %s created"

@@ -9,14 +9,14 @@ import com.example.mongoes.mongodb.repository.ChangeStreamResumeRepository;
 import com.example.mongoes.mongodb.repository.RestaurantRepository;
 import com.example.mongoes.utils.AppConstants;
 import com.example.mongoes.utils.DateUtility;
+import com.example.mongoes.web.exception.DuplicateRestaurantException;
 import com.example.mongoes.web.model.RestaurantRequest;
 import com.mongodb.client.model.changestream.ChangeStreamDocument;
 import com.mongodb.client.model.changestream.OperationType;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -25,7 +25,8 @@ import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
+import org.springframework.core.io.buffer.DataBufferUtils;
+import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -38,6 +39,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 @Service
 public class RestaurantService {
@@ -59,11 +61,23 @@ public class RestaurantService {
         this.reactiveMongoTemplate = reactiveMongoTemplate;
     }
 
-    public Flux<Restaurant> loadData() throws IOException {
-        Resource input = new ClassPathResource("restaurants.json");
-        Path path = input.getFile().toPath();
-        var restaurantArray = Files.readAllLines(path);
-        return this.saveAll(restaurantArray);
+    public Flux<Restaurant> loadData() {
+        return DataBufferUtils.read(
+                        new ClassPathResource("restaurants.json"),
+                        new DefaultDataBufferFactory(),
+                        4096)
+                .map(
+                        dataBuffer -> {
+                            byte[] bytes = new byte[dataBuffer.readableByteCount()];
+                            dataBuffer.read(bytes);
+                            DataBufferUtils.release(dataBuffer);
+                            return new String(bytes, StandardCharsets.UTF_8);
+                        })
+                .flatMap(
+                        fileContent -> {
+                            List<String> restaurantArray = Arrays.asList(fileContent.split("\n"));
+                            return this.saveAll(restaurantArray);
+                        });
     }
 
     private Flux<Restaurant> saveAll(List<String> restaurantStringList) {
@@ -145,6 +159,7 @@ public class RestaurantService {
                 .resumeAt(getChangeStreamOption())
                 .listen()
                 .delayElements(Duration.ofMillis(5))
+                .publishOn(Schedulers.boundedElastic())
                 .doOnNext(
                         restaurantChangeStreamEvent -> {
                             log.info(
@@ -213,9 +228,17 @@ public class RestaurantService {
         return this.restaurantESRepository.findAll(pageable);
     }
 
-    public Mono<Restaurant> createRestaurant(RestaurantRequest restaurantRequest) {
-
-        return save(restaurantRequest.toRestaurant());
+    public Mono<Object> createRestaurant(RestaurantRequest restaurantRequest) {
+        return restaurantESRepository
+                .findByName(restaurantRequest.name())
+                .flatMap(
+                        existingRestaurant ->
+                                Mono.error(
+                                        new DuplicateRestaurantException(
+                                                "Restaurant with name "
+                                                        + restaurantRequest.name()
+                                                        + " already exists")))
+                .switchIfEmpty(restaurantRepository.save(restaurantRequest.toRestaurant()));
     }
 
     public Mono<Void> deleteAll() {
