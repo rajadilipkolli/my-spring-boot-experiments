@@ -1,4 +1,4 @@
-package com.example.graphql.querydsl.common;
+package com.example.graphql.common;
 
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
@@ -7,11 +7,11 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.utility.DockerImageName;
 
 @TestConfiguration(proxyBeanMethods = false)
-public class ContainersConfig {
+public class ContainerConfig {
 
     @Bean
     @ServiceConnection
     PostgreSQLContainer<?> postgreSQLContainer() {
-        return new PostgreSQLContainer<>(DockerImageName.parse("postgres").withTag("17.2-alpine")).withReuse(true);
+        return new PostgreSQLContainer<>(DockerImageName.parse("postgres").withTag("17.2-alpine"));
     }
 }
