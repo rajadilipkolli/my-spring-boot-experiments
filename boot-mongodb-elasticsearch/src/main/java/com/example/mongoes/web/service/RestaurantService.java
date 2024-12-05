@@ -67,38 +67,33 @@ public class RestaurantService {
     }
 
     private Flux<Restaurant> saveAll(List<String> restaurantStringList) {
-        List<Restaurant> restaurantList =
-                restaurantStringList.stream()
-                        .map(Document::parse)
-                        .map(
-                                document -> {
-                                    Restaurant restaurant = new Restaurant();
-                                    restaurant.setRestaurantId(
-                                            Long.valueOf(
-                                                    document.get("restaurant_id", String.class)));
-                                    restaurant.setName(document.get("name", String.class));
-                                    restaurant.setCuisine(document.get("cuisine", String.class));
-                                    restaurant.setBorough(document.get("borough", String.class));
-                                    Address address = new Address();
-                                    Document addressDoc = (Document) document.get("address");
-                                    address.setBuilding(addressDoc.get("building", String.class));
-                                    address.setStreet(addressDoc.get("street", String.class));
-                                    address.setZipcode(
-                                            Integer.valueOf(
-                                                    addressDoc.get("zipcode", String.class)));
-                                    List<Double> obj = addressDoc.getList("coord", Double.class);
-                                    Point geoJsonPoint = new Point(obj.getFirst(), obj.get(1));
-                                    address.setLocation(geoJsonPoint);
-                                    restaurant.setAddress(address);
-                                    List<Grades> gradesList =
-                                            getGradesList(
-                                                    document.getList("grades", Document.class));
-                                    restaurant.setGrades(gradesList);
+        return Flux.fromIterable(restaurantStringList)
+                .map(Document::parse)
+                .map(this::documentToRestaurant)
+                .flatMap(restaurantRepository::save);
+    }
 
-                                    return restaurant;
-                                })
-                        .toList();
-        return restaurantRepository.saveAll(restaurantList);
+    private Restaurant documentToRestaurant(Document document) {
+        Restaurant restaurant = new Restaurant();
+        restaurant.setRestaurantId(Long.valueOf(document.get("restaurant_id", String.class)));
+        restaurant.setName(document.get("name", String.class));
+        restaurant.setCuisine(document.get("cuisine", String.class));
+        restaurant.setBorough(document.get("borough", String.class));
+
+        Address address = new Address();
+        Document addressDoc = document.get("address", Document.class);
+        address.setBuilding(addressDoc.get("building", String.class));
+        address.setStreet(addressDoc.get("street", String.class));
+        address.setZipcode(Integer.valueOf(addressDoc.get("zipcode", String.class)));
+        List<Double> coord = addressDoc.getList("coord", Double.class);
+        Point geoJsonPoint = new Point(coord.get(0), coord.get(1));
+        address.setLocation(geoJsonPoint);
+        restaurant.setAddress(address);
+
+        List<Grades> gradesList = getGradesList(document.getList("grades", Document.class));
+        restaurant.setGrades(gradesList);
+
+        return restaurant;
     }
 
     private List<Grades> getGradesList(List<Document> gradeDocumentList) {
