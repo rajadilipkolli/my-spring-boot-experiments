@@ -4,7 +4,6 @@ import com.example.multipledatasources.entities.cardholder.CardHolder;
 import com.example.multipledatasources.entities.member.Member;
 import com.example.multipledatasources.repository.cardholder.CardHolderRepository;
 import com.example.multipledatasources.repository.member.MemberRepository;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
@@ -12,11 +11,15 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Slf4j
-@RequiredArgsConstructor
-public class DataInitilizer {
+class DataInitializer {
 
     private final CardHolderRepository cardHolderRepository;
     private final MemberRepository memberRepository;
+
+    DataInitializer(CardHolderRepository cardHolderRepository, MemberRepository memberRepository) {
+        this.cardHolderRepository = cardHolderRepository;
+        this.memberRepository = memberRepository;
+    }
 
     @EventListener(ApplicationReadyEvent.class)
     void loadInitialData() {
