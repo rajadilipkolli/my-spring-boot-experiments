@@ -62,10 +62,11 @@ public class RestaurantService {
     }
 
     public Flux<Restaurant> loadData() {
-        return DataBufferUtils.read(
-                        new ClassPathResource("restaurants.json"),
-                        new DefaultDataBufferFactory(),
-                        4096)
+        return DataBufferUtils.join(
+                        DataBufferUtils.read(
+                                new ClassPathResource("restaurants.json"),
+                                new DefaultDataBufferFactory(),
+                                4096))
                 .map(
                         dataBuffer -> {
                             byte[] bytes = new byte[dataBuffer.readableByteCount()];
@@ -73,7 +74,7 @@ public class RestaurantService {
                             DataBufferUtils.release(dataBuffer);
                             return new String(bytes, StandardCharsets.UTF_8);
                         })
-                .flatMap(
+                .flatMapMany(
                         fileContent -> {
                             List<String> restaurantArray = Arrays.asList(fileContent.split("\n"));
                             return this.saveAll(restaurantArray);
