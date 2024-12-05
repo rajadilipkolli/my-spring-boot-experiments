@@ -1,13 +1,15 @@
 package com.example.mongoes.web.service;
 
 import co.elastic.clients.elasticsearch._types.aggregations.Aggregate;
-import co.elastic.clients.elasticsearch._types.aggregations.RangeBucket;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import org.springframework.data.elasticsearch.client.elc.ElasticsearchAggregation;
 import org.springframework.stereotype.Service;
 
+/**
+ * Processes Elasticsearch aggregations and transforms them into a structured map format. Supports
+ * 'terms' and 'dateRange' aggregation types.
+ */
 @Service
 class AggregationProcessor {
 
@@ -15,7 +17,8 @@ class AggregationProcessor {
      * Processes Elasticsearch aggregations and returns a structured map of results.
      *
      * @param aggregationMap Map of aggregation key to ElasticsearchAggregation
-     * @return Map of aggregation key to counts, where counts is a map of bucket key to document count
+     * @return Map of aggregation key to counts, where counts is a map of bucket key to document
+     *     count
      * @throws IllegalArgumentException if aggregationMap is null
      */
     public Map<String, Map<String, Long>> processAggregations(
@@ -43,19 +46,20 @@ class AggregationProcessor {
     }
 
     private void processTermsAggregate(Aggregate aggregate, Map<String, Long> countMap) {
-        aggregate.sterms().buckets().array().forEach(bucket ->
-            countMap.put(bucket.key().stringValue(), bucket.docCount())
-        );
+        aggregate
+                .sterms()
+                .buckets()
+                .array()
+                .forEach(bucket -> countMap.put(bucket.key().stringValue(), bucket.docCount()));
     }
 
     private void processDateRangeAggregate(Aggregate aggregate, Map<String, Long> countMap) {
         aggregate.dateRange().buckets().array().stream()
-            .filter(bucket -> bucket.docCount() != 0)
-            .forEach(bucket ->
-                countMap.put(
-                    bucket.fromAsString() + " - " + bucket.toAsString(),
-                    bucket.docCount()
-                )
-            );
+                .filter(bucket -> bucket.docCount() != 0)
+                .forEach(
+                        bucket ->
+                                countMap.put(
+                                        bucket.fromAsString() + " - " + bucket.toAsString(),
+                                        bucket.docCount()));
     }
 }
