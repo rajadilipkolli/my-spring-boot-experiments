@@ -16,7 +16,7 @@ public interface CustomRepository<T> {
     /**
      * Finds all entities matching the given specification using keyset pagination.
      *
-     * @param spec The specification to filter entites
+     * @param spec The specification to filter entities
      * @param pageRequest The pagination information
      * @param scrollPosition The current position in the result set
      * @param entityClass The entity class on which operation should occur

@@ -149,6 +149,7 @@ class AnimalControllerIT extends AbstractIntegrationTest {
                                         ]
                                         """))
                 .andExpect(status().isOk())
+                // Total animals (10) - Mammals (3) - Birds (3) = 4 animals
                 .andExpect(jsonPath("$.content", hasSize(4)))
                 .andExpect(jsonPath("$.last", is(true)));
     }
@@ -173,6 +174,7 @@ class AnimalControllerIT extends AbstractIntegrationTest {
                                         """))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(0)))
+                .andExpect(jsonPath("$.content").isArray())
                 .andExpect(jsonPath("$.last", is(true)));
     }
 

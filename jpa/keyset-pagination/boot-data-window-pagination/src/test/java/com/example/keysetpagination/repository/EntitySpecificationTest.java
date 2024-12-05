@@ -1,29 +1,48 @@
-package com.example.keysetpagination.services;
+package com.example.keysetpagination.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import com.example.keysetpagination.common.AbstractIntegrationTest;
+import com.example.keysetpagination.common.ContainersConfig;
+import com.example.keysetpagination.config.JpaAuditConfig;
 import com.example.keysetpagination.entities.Animal;
 import com.example.keysetpagination.model.query.QueryOperator;
 import com.example.keysetpagination.model.query.SearchCriteria;
+import com.example.keysetpagination.repositories.AnimalRepository;
+import com.example.keysetpagination.services.EntitySpecification;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import java.util.List;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.jpa.domain.Specification;
 
-class EntitySpecificationIntTest extends AbstractIntegrationTest {
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@DataJpaTest
+@Import({ContainersConfig.class, JpaAuditConfig.class})
+class EntitySpecificationTest {
 
     private EntitySpecification<Animal> entitySpecification;
 
     @PersistenceContext
     private EntityManager entityManager;
 
-    @BeforeEach
+    @Autowired
+    private AnimalRepository animalRepository;
+
+    @BeforeAll
     void setUp() {
         entitySpecification = new EntitySpecification<>(entityManager);
+        // Add test data
+        Animal mammal = new Animal().setName("Lion").setType("Mammal").setHabitat("Savanna");
+        Animal bird = new Animal().setName("Eagle").setType("Bird").setHabitat("Forest");
+        Animal fish = new Animal().setName("Shark").setType("Fish").setHabitat("Ocean");
+        animalRepository.saveAll(List.of(mammal, bird, fish));
     }
 
     @Test
@@ -31,6 +50,8 @@ class EntitySpecificationIntTest extends AbstractIntegrationTest {
         SearchCriteria criteria = new SearchCriteria(QueryOperator.EQ, "type", List.of("Mammal"));
         Specification<Animal> spec = entitySpecification.specificationBuilder(List.of(criteria), Animal.class);
         assertThat(spec).isNotNull();
+        List<Animal> results = animalRepository.findAll(spec);
+        assertThat(results).isNotEmpty().extracting("type").containsOnly("Mammal");
     }
 
     @Test
@@ -38,6 +59,8 @@ class EntitySpecificationIntTest extends AbstractIntegrationTest {
         SearchCriteria criteria = new SearchCriteria(QueryOperator.NE, "type", List.of("Reptile"));
         Specification<Animal> spec = entitySpecification.specificationBuilder(List.of(criteria), Animal.class);
         assertThat(spec).isNotNull();
+        List<Animal> results = animalRepository.findAll(spec);
+        assertThat(results).isNotEmpty().extracting("type").containsOnly("Mammal", "Bird", "Fish");
     }
 
     @Test
@@ -45,6 +68,8 @@ class EntitySpecificationIntTest extends AbstractIntegrationTest {
         SearchCriteria criteria = new SearchCriteria(QueryOperator.LT, "id", List.of("5"));
         Specification<Animal> spec = entitySpecification.specificationBuilder(List.of(criteria), Animal.class);
         assertThat(spec).isNotNull();
+        List<Animal> results = animalRepository.findAll(spec);
+        assertThat(results).isNotEmpty().extracting("type").containsOnly("Mammal", "Bird", "Fish");
     }
 
     @Test
@@ -52,6 +77,8 @@ class EntitySpecificationIntTest extends AbstractIntegrationTest {
         SearchCriteria criteria = new SearchCriteria(QueryOperator.GT, "id", List.of("2"));
         Specification<Animal> spec = entitySpecification.specificationBuilder(List.of(criteria), Animal.class);
         assertThat(spec).isNotNull();
+        List<Animal> results = animalRepository.findAll(spec);
+        assertThat(results).isNotEmpty().extracting("type").containsOnly("Fish");
     }
 
     @Test
@@ -59,6 +86,8 @@ class EntitySpecificationIntTest extends AbstractIntegrationTest {
         SearchCriteria criteria = new SearchCriteria(QueryOperator.GTE, "id", List.of("3"));
         Specification<Animal> spec = entitySpecification.specificationBuilder(List.of(criteria), Animal.class);
         assertThat(spec).isNotNull();
+        List<Animal> results = animalRepository.findAll(spec);
+        assertThat(results).isNotEmpty().extracting("type").containsOnly("Fish");
     }
 
     @Test
@@ -66,6 +95,8 @@ class EntitySpecificationIntTest extends AbstractIntegrationTest {
         SearchCriteria criteria = new SearchCriteria(QueryOperator.LTE, "id", List.of("7"));
         Specification<Animal> spec = entitySpecification.specificationBuilder(List.of(criteria), Animal.class);
         assertThat(spec).isNotNull();
+        List<Animal> results = animalRepository.findAll(spec);
+        assertThat(results).isNotEmpty().extracting("type").containsOnly("Mammal", "Bird", "Fish");
     }
 
     @Test
@@ -73,6 +104,8 @@ class EntitySpecificationIntTest extends AbstractIntegrationTest {
         SearchCriteria criteria = new SearchCriteria(QueryOperator.BETWEEN, "id", List.of("1", "5"));
         Specification<Animal> spec = entitySpecification.specificationBuilder(List.of(criteria), Animal.class);
         assertThat(spec).isNotNull();
+        List<Animal> results = animalRepository.findAll(spec);
+        assertThat(results).isNotEmpty().extracting("type").containsOnly("Mammal", "Bird", "Fish");
     }
 
     @Test
@@ -80,6 +113,8 @@ class EntitySpecificationIntTest extends AbstractIntegrationTest {
         SearchCriteria criteria = new SearchCriteria(QueryOperator.IN, "type", List.of("Mammal", "Bird"));
         Specification<Animal> spec = entitySpecification.specificationBuilder(List.of(criteria), Animal.class);
         assertThat(spec).isNotNull();
+        List<Animal> results = animalRepository.findAll(spec);
+        assertThat(results).isNotEmpty().extracting("type").containsOnly("Mammal", "Bird");
     }
 
     @Test
@@ -87,6 +122,8 @@ class EntitySpecificationIntTest extends AbstractIntegrationTest {
         SearchCriteria criteria = new SearchCriteria(QueryOperator.NOT_IN, "type", List.of("Fish", "Reptile"));
         Specification<Animal> spec = entitySpecification.specificationBuilder(List.of(criteria), Animal.class);
         assertThat(spec).isNotNull();
+        List<Animal> results = animalRepository.findAll(spec);
+        assertThat(results).isNotEmpty().extracting("type").containsOnly("Mammal", "Bird");
     }
 
     @Test
@@ -94,6 +131,8 @@ class EntitySpecificationIntTest extends AbstractIntegrationTest {
         SearchCriteria criteria = new SearchCriteria(QueryOperator.LIKE, "name", List.of("%Lion%"));
         Specification<Animal> spec = entitySpecification.specificationBuilder(List.of(criteria), Animal.class);
         assertThat(spec).isNotNull();
+        List<Animal> results = animalRepository.findAll(spec);
+        assertThat(results).isNotEmpty().extracting("type").containsOnly("Mammal");
     }
 
     @Test
@@ -101,6 +140,8 @@ class EntitySpecificationIntTest extends AbstractIntegrationTest {
         SearchCriteria criteria = new SearchCriteria(QueryOperator.CONTAINS, "name", List.of("ar"));
         Specification<Animal> spec = entitySpecification.specificationBuilder(List.of(criteria), Animal.class);
         assertThat(spec).isNotNull();
+        List<Animal> results = animalRepository.findAll(spec);
+        assertThat(results).isNotEmpty().extracting("type").containsOnly("Fish");
     }
 
     @Test
@@ -108,6 +149,8 @@ class EntitySpecificationIntTest extends AbstractIntegrationTest {
         SearchCriteria criteria = new SearchCriteria(QueryOperator.STARTS_WITH, "name", List.of("E"));
         Specification<Animal> spec = entitySpecification.specificationBuilder(List.of(criteria), Animal.class);
         assertThat(spec).isNotNull();
+        List<Animal> results = animalRepository.findAll(spec);
+        assertThat(results).isNotEmpty().extracting("type").containsOnly("Bird");
     }
 
     @Test
@@ -115,6 +158,8 @@ class EntitySpecificationIntTest extends AbstractIntegrationTest {
         SearchCriteria criteria = new SearchCriteria(QueryOperator.ENDS_WITH, "name", List.of("e"));
         Specification<Animal> spec = entitySpecification.specificationBuilder(List.of(criteria), Animal.class);
         assertThat(spec).isNotNull();
+        List<Animal> results = animalRepository.findAll(spec);
+        assertThat(results).isNotEmpty().extracting("type").containsOnly("Bird");
     }
 
     @Test
@@ -126,6 +171,8 @@ class EntitySpecificationIntTest extends AbstractIntegrationTest {
         Specification<Animal> spec =
                 entitySpecification.specificationBuilder(List.of(criteria1, criteriaAnd, criteria2), Animal.class);
         assertThat(spec).isNotNull();
+        List<Animal> results = animalRepository.findAll(spec);
+        assertThat(results).isNotEmpty().extracting("type").containsOnly("Mammal");
     }
 
     @Test
@@ -133,5 +180,16 @@ class EntitySpecificationIntTest extends AbstractIntegrationTest {
         SearchCriteria criteriaOr = new SearchCriteria(QueryOperator.OR, "type", List.of("Amphibian", "Fish"));
         Specification<Animal> spec = entitySpecification.specificationBuilder(List.of(criteriaOr), Animal.class);
         assertThat(spec).isNotNull();
+        List<Animal> results = animalRepository.findAll(spec);
+        assertThat(results).isNotEmpty().extracting("type").containsOnly("Fish");
+    }
+
+    @Test
+    void shouldThrowExceptionForInvalidFieldName() {
+        SearchCriteria criteria = new SearchCriteria(QueryOperator.EQ, "invalidField", List.of("value"));
+        assertThatThrownBy(() -> entitySpecification.specificationBuilder(List.of(criteria), Animal.class))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining(
+                        "Unable to locate Attribute with the given name [invalidField] on this ManagedType [com.example.keysetpagination.entities.Animal]");
     }
 }

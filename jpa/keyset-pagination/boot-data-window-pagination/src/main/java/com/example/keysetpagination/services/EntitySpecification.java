@@ -8,9 +8,12 @@ import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import jakarta.persistence.metamodel.ManagedType;
 import jakarta.persistence.metamodel.Metamodel;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.UUID;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import org.springframework.data.jpa.domain.Specification;
@@ -77,7 +80,9 @@ public class EntitySpecification<T> {
                     criteriaBuilder::and);
             case LIKE, CONTAINS -> combinePredicates(
                     typedValues,
-                    value -> criteriaBuilder.like(root.get(fieldName), "%" + value + "%"),
+                    value -> criteriaBuilder.like(
+                            criteriaBuilder.lower(root.get(fieldName)),
+                            "%" + value.toString().toLowerCase() + "%"),
                     criteriaBuilder::or);
             case STARTS_WITH -> combinePredicates(
                     typedValues, value -> criteriaBuilder.like(root.get(fieldName), value + "%"), criteriaBuilder::and);
@@ -102,6 +107,10 @@ public class EntitySpecification<T> {
         try {
             if (fieldType.equals(String.class)) {
                 return value;
+            } else if (fieldType.equals(BigDecimal.class)) {
+                return new BigDecimal(value);
+            } else if (fieldType.equals(UUID.class)) {
+                return UUID.fromString(value);
             } else if (fieldType.equals(Integer.class) || fieldType.equals(int.class)) {
                 return Integer.valueOf(value);
             } else if (fieldType.equals(Long.class) || fieldType.equals(long.class)) {
@@ -111,9 +120,9 @@ public class EntitySpecification<T> {
             } else if (fieldType.equals(Boolean.class) || fieldType.equals(boolean.class)) {
                 return Boolean.valueOf(value);
             } else if (fieldType.equals(LocalDate.class)) {
-                return LocalDate.parse(value);
+                return LocalDate.parse(value, DateTimeFormatter.ISO_DATE);
             } else if (fieldType.equals(LocalDateTime.class)) {
-                return LocalDateTime.parse(value);
+                return LocalDateTime.parse(value, DateTimeFormatter.ISO_DATE_TIME);
             } else if (Enum.class.isAssignableFrom(fieldType)) {
                 return Enum.valueOf((Class<Enum>) fieldType, value);
             } else {
@@ -129,10 +138,14 @@ public class EntitySpecification<T> {
             List<Object> values,
             Function<Object, Predicate> predicateFunction,
             BiFunction<Predicate, Predicate, Predicate> combiner) {
+        if (values.size() == 1) {
+            return predicateFunction.apply(values.getFirst());
+        }
         return values.stream()
                 .map(predicateFunction)
                 .reduce(combiner::apply)
-                .orElseThrow(() -> new IllegalArgumentException("No predicates could be generated from values"));
+                .orElseThrow(() -> new IllegalArgumentException(
+                        String.format("No predicates could be generated from values: %s", values)));
     }
 
     private void validateMetadata(List<SearchCriteria> searchCriteriaList, Class<T> entityClass) {
