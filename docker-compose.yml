@@ -24,7 +24,7 @@ services:
       - MYSQL_DATABASE=mydatabase
 
   postgres:
-    image: postgres:16.6-alpine
+    image: postgres:17.2-alpine
     ports:
       - "5432:5432"
     volumes:
