@@ -22,7 +22,7 @@ class ApplicationIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     void shouldFindCustomerByIdWithEmptyData() throws Exception {
-        Customer customer = new Customer(101L, "New Customer", "name 1", 1);
+        Customer customer = new Customer(null, "New Customer", "name 1", 1);
         this.mockMvc
                 .perform(
                         post("/api/customers")
