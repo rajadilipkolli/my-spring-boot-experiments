@@ -1,9 +1,9 @@
-package com.example.rest.proxy;
+package com.example.bootbatchjpa;
 
-import com.example.rest.proxy.common.ContainersConfig;
+import com.example.bootbatchjpa.common.ContainersConfig;
 import org.springframework.boot.SpringApplication;
 
-class TestApplication {
+public class TestBatchApplication {
 
     public static void main(String[] args) {
         SpringApplication.from(BatchApplication::main).with(ContainersConfig.class).run(args);

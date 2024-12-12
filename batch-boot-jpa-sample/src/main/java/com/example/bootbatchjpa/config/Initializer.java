@@ -27,11 +27,12 @@ class Initializer implements CommandLineRunner {
         List<Customer> customerList =
                 Instancio.ofList(Customer.class)
                         .size(1000)
+                        .ignore(field(Customer.class, "id"))
                         .generate(
                                 field(Customer.class, "gender"), gen -> gen.oneOf("male", "female"))
                         .create();
         log.info("Saving Customers of size :{}", customerList.size());
-        customerList = customerRepository.saveAllAndFlush(customerList);
+        customerList = customerRepository.saveAll(customerList);
         log.info("Inserted customers of size :{}", customerList.size());
     }
 }
