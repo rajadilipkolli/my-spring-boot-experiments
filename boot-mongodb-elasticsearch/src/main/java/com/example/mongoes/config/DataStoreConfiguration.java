@@ -25,7 +25,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
                 @ComponentScan.Filter(
                         type = FilterType.ASSIGNABLE_TYPE,
                         value = ReactiveElasticsearchRepository.class))
-public class DataStoreConfiguration {
+class DataStoreConfiguration {
 
     @Bean
     ReactiveMongoTransactionManager transactionManager(ReactiveMongoDatabaseFactory factory) {

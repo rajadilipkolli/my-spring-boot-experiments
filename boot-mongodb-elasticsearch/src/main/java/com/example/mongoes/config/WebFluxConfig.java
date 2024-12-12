@@ -1,15 +1,20 @@
 package com.example.mongoes.config;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
+import org.springframework.data.web.config.SpringDataJacksonConfiguration;
 import org.springframework.web.reactive.config.CorsRegistry;
 import org.springframework.web.reactive.config.WebFluxConfigurer;
 
-@Configuration
-@RequiredArgsConstructor
+@Configuration(proxyBeanMethods = false)
+@Import(SpringDataJacksonConfiguration.class)
 public class WebFluxConfig implements WebFluxConfigurer {
 
     private final ApplicationProperties properties;
+
+    public WebFluxConfig(ApplicationProperties properties) {
+        this.properties = properties;
+    }
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {

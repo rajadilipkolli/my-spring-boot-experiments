@@ -2,7 +2,7 @@ version: '3.8'
 services:
 
   grafanalgtm:
-    image: grafana/otel-lgtm:0.8.0
+    image: grafana/otel-lgtm:0.8.1
     extra_hosts: ['host.docker.internal:host-gateway']
     container_name: grafanalgtm
     environment:
@@ -13,7 +13,7 @@ services:
       - "4318:4318"
 
   prometheus:
-    image: prom/prometheus:v3.0.0
+    image: prom/prometheus:v3.0.1
     extra_hosts: ['host.docker.internal:host-gateway']
     container_name: prometheus
     command:

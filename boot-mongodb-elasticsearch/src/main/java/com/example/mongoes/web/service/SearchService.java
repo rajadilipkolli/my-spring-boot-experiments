@@ -1,7 +1,5 @@
 package com.example.mongoes.web.service;
 
-import co.elastic.clients.elasticsearch._types.aggregations.Aggregate;
-import co.elastic.clients.elasticsearch._types.aggregations.RangeBucket;
 import com.example.mongoes.document.Restaurant;
 import com.example.mongoes.elasticsearch.repository.RestaurantESRepository;
 import com.example.mongoes.response.AggregationSearchResponse;
@@ -9,25 +7,29 @@ import com.example.mongoes.response.ResultData;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
-import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.elasticsearch.client.elc.ElasticsearchAggregation;
 import org.springframework.data.elasticsearch.client.elc.ElasticsearchAggregations;
 import org.springframework.data.elasticsearch.core.SearchPage;
 import org.springframework.data.elasticsearch.core.geo.GeoPoint;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Service
-@RequiredArgsConstructor
 public class SearchService {
 
     private final RestaurantESRepository restaurantESRepository;
+    private final AggregationProcessor aggregationProcessor;
+
+    public SearchService(
+            RestaurantESRepository restaurantESRepository,
+            AggregationProcessor aggregationProcessor) {
+        this.restaurantESRepository = restaurantESRepository;
+        this.aggregationProcessor = aggregationProcessor;
+    }
 
     public Mono<Flux<Restaurant>> searchMatchBorough(String query, Integer offset, Integer limit) {
         Pageable pageable = PageRequest.of(offset, limit);
@@ -121,7 +123,7 @@ public class SearchService {
                             Map<String, Map<String, Long>> map = new HashMap<>();
                             if (elasticsearchAggregations != null) {
                                 map =
-                                        aggregationFunction.apply(
+                                        aggregationProcessor.processAggregations(
                                                 elasticsearchAggregations.aggregationsAsMap());
                             }
                             return new AggregationSearchResponse(
@@ -132,47 +134,6 @@ public class SearchService {
                                     searchPage.getTotalElements());
                         });
     }
-
-    final Function<Map<String, ElasticsearchAggregation>, Map<String, Map<String, Long>>>
-            aggregationFunction =
-                    aggregationMap -> {
-                        Map<String, Map<String, Long>> resultMap = new HashMap<>();
-                        aggregationMap.forEach(
-                                (String aggregateKey, ElasticsearchAggregation aggregation) -> {
-                                    Map<String, Long> countMap = new HashMap<>();
-                                    Aggregate aggregate = aggregation.aggregation().getAggregate();
-                                    if (aggregate.isSterms()) {
-                                        aggregate
-                                                .sterms()
-                                                .buckets()
-                                                .array()
-                                                .forEach(
-                                                        stringTermsBucket ->
-                                                                countMap.put(
-                                                                        stringTermsBucket
-                                                                                .key()
-                                                                                .stringValue(),
-                                                                        stringTermsBucket
-                                                                                .docCount()));
-                                    } else if (aggregate.isDateRange()) {
-                                        List<RangeBucket> bucketList =
-                                                aggregate.dateRange().buckets().array();
-                                        bucketList.forEach(
-                                                rangeBucket -> {
-                                                    if (rangeBucket.docCount() != 0) {
-                                                        countMap.put(
-                                                                rangeBucket.fromAsString()
-                                                                        + " - "
-                                                                        + rangeBucket.toAsString(),
-                                                                rangeBucket.docCount());
-                                                    }
-                                                });
-                                    }
-                                    resultMap.put(aggregateKey, countMap);
-                                });
-
-                        return resultMap;
-                    };
 
     public Flux<ResultData> searchRestaurantsWithInRange(
             Double lat, Double lon, Double distance, String unit) {

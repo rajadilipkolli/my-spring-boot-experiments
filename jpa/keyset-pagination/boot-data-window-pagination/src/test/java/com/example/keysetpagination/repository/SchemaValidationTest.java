@@ -1,4 +1,4 @@
-package com.example.keysetpagination;
+package com.example.keysetpagination.repository;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;

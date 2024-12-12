@@ -1,15 +1,15 @@
-package com.example.keysetpagination;
+package com.example.archunit;
 
-import com.example.keysetpagination.config.ApplicationProperties;
+import com.example.archunit.config.ApplicationProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 
 @SpringBootApplication
 @EnableConfigurationProperties({ApplicationProperties.class})
-public class Application {
+public class ArchUnitApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(Application.class, args);
+        SpringApplication.run(ArchUnitApplication.class, args);
     }
 }

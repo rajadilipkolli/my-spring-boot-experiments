@@ -7,11 +7,9 @@ import co.elastic.clients.elasticsearch._types.aggregations.DateRangeExpression;
 import co.elastic.clients.elasticsearch._types.query_dsl.Operator;
 import co.elastic.clients.elasticsearch._types.query_dsl.QueryBuilders;
 import co.elastic.clients.elasticsearch._types.query_dsl.TextQueryType;
-import co.elastic.clients.json.JsonData;
 import com.example.mongoes.document.Restaurant;
 import java.util.ArrayList;
 import java.util.List;
-import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -27,13 +25,17 @@ import org.springframework.data.elasticsearch.core.query.Query;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-@RequiredArgsConstructor
 public class CustomRestaurantESRepositoryImpl implements CustomRestaurantESRepository {
 
     private static final String BOROUGH = "borough";
     private static final String CUISINE = "cuisine";
     private static final int PAGE_SIZE = 1_000;
     private final ReactiveElasticsearchOperations reactiveElasticsearchOperations;
+
+    public CustomRestaurantESRepositoryImpl(
+            ReactiveElasticsearchOperations reactiveElasticsearchOperations) {
+        this.reactiveElasticsearchOperations = reactiveElasticsearchOperations;
+    }
 
     @Override
     public Flux<SearchHit<Restaurant>> searchWithin(
@@ -232,10 +234,15 @@ public class CustomRestaurantESRepositoryImpl implements CustomRestaurantESRepos
                         .withQuery(
                                 QueryBuilders.range(
                                         rangeBuilder ->
-                                                rangeBuilder
-                                                        .field("restaurant_id")
-                                                        .lte(JsonData.of(upperLimit))
-                                                        .gte(JsonData.of(lowerLimit))))
+                                                rangeBuilder.term(
+                                                        builder ->
+                                                                builder.field("restaurant_id")
+                                                                        .lte(
+                                                                                String.valueOf(
+                                                                                        upperLimit))
+                                                                        .gte(
+                                                                                String.valueOf(
+                                                                                        lowerLimit)))))
                         .build();
         query.setPageable(pageable);
 
@@ -250,102 +257,104 @@ public class CustomRestaurantESRepositoryImpl implements CustomRestaurantESRepos
                         .withQuery(
                                 QueryBuilders.range(
                                         rangeBuilder ->
-                                                rangeBuilder
-                                                        .field("grades.date")
-                                                        .lte(JsonData.of(toDate))
-                                                        .gte(JsonData.of(fromDate))))
+                                                rangeBuilder.date(
+                                                        builder ->
+                                                                builder.field("grades.date")
+                                                                        .lte(toDate)
+                                                                        .gte(fromDate))))
                         .build();
         query.setPageable(pageable);
 
         return reactiveElasticsearchOperations.searchForPage(query, Restaurant.class);
     }
 
-    
     /**
+     * below is the console query
      *
-     * below is the console query {@snippet :
-
-            """     POST /restaurant/_search?size=15&pretty
-            {
-                "query": {
-                    "multi_match": {
-                        "query": "Pizza",
-                        "fields": [
-                                "restautant_name",
-                                "borough",
-                                "cuisine"
-                        ],
-                        "operator": "or"
-                    }
-                },
-                "aggs": {
-                    "MyCuisine": {
-                        "terms": {
-                            "field": "cuisine", "size": 1000, "order": {
-                            "_count": "desc"
-                        }
-                        }
-                    },
-                    "MyBorough": {
-                        "terms": {
-                                "field": "borough" , "size": 1000
-                        }
-                    },
-                    "MyDateRange": {
-                        "date_range": {
-                        "field": "grades.date",
-                        "format": "dd-MM-yyy'T'hh:mm:ss",
-                        "ranges": [
-                            {
-                                "key": "Older",
-                                "to": "now-12y-1d/y"
-                            },
-                            {
-                                "from": "now-12y/y",
-                                "to": "now-11y/y"
-                            },
-                            {
-                                "from": "now-11y/y",
-                                "to": "now-10y/y"
-                            },
-                            {
-                                "from": "now-10y/y",
-                                "to": "now-9y/y"
-                            },
-                            {
-                                "from": "now-9y/y",
-                                "to": "now-8y/y"
-                            },
-                            {
-                                "from": "now-8y/y",
-                                "to": "now-7y/y"
-                            },
-                            {
-                                "from": "now-7y/y",
-                                "to": "now-6y/y"
-                            },
-                            {
-                                "from": "now-6y/y",
-                                "to": "now-5y/y"
-                            },
-                            {
-                                "from": "now-5y/y",
-                                "to": "now-4y/y"
-                            },
-                            {
-                                "key": "Newer",
-                                "from": "now-0y/y",
-                                "to": "now/d"
-                            }
-                        ]
-                        }
-                    }
-                }
-            }
-            """;
-            }
-     *
-     *
+     * {@snippet :
+     * """
+     * POST /restaurant/_search?size=15&pretty
+     * {
+     * "query": {
+     * "multi_match": {
+     * "query": "Pizza",
+     * "fields": [
+     * "restaurant_name",
+     * "borough",
+     * "cuisine"
+     * ],
+     * "operator": "or"
+     * }
+     * },
+     * "aggs": {
+     * "MyCuisine": {
+     * "terms": {
+     * "field": "cuisine",
+     * "size": 1000,
+     * "order": {
+     * "_count": "desc"
+     * }
+     * }
+     * },
+     * "MyBorough": {
+     * "terms": {
+     * "field": "borough",
+     * "size": 1000
+     * }
+     * },
+     * "MyDateRange": {
+     * "date_range": {
+     * "field": "grades.date",
+     * "format": "dd-MM-yyy'T'hh:mm:ss",
+     * "ranges": [
+     * {
+     * "key": "Older",
+     * "to": "now-12y-1d/y"
+     * },
+     * {
+     * "from": "now-12y/y",
+     * "to": "now-11y/y"
+     * },
+     * {
+     * "from": "now-11y/y",
+     * "to": "now-10y/y"
+     * },
+     * {
+     * "from": "now-10y/y",
+     * "to": "now-9y/y"
+     * },
+     * {
+     * "from": "now-9y/y",
+     * "to": "now-8y/y"
+     * },
+     * {
+     * "from": "now-8y/y",
+     * "to": "now-7y/y"
+     * },
+     * {
+     * "from": "now-7y/y",
+     * "to": "now-6y/y"
+     * },
+     * {
+     * "from": "now-6y/y",
+     * "to": "now-5y/y"
+     * },
+     * {
+     * "from": "now-5y/y",
+     * "to": "now-4y/y"
+     * },
+     * {
+     * "key": "Newer",
+     * "from": "now-0y/y",
+     * "to": "now/d"
+     * }
+     * ]
+     * }
+     * }
+     * }
+     * }
+     * """;
+     * }
      */
     @Override
     public Mono<SearchPage<Restaurant>> aggregateSearch(

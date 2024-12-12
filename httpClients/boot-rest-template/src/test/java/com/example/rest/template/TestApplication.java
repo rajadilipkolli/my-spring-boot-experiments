@@ -1,21 +1,11 @@
 package com.example.rest.template;
 
+import com.example.rest.template.common.ContainersConfig;
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
-import org.springframework.context.annotation.Bean;
-import org.testcontainers.containers.PostgreSQLContainer;
 
-@TestConfiguration(proxyBeanMethods = false)
-public class TestApplication {
-
-    @ServiceConnection
-    @Bean
-    PostgreSQLContainer<?> postgreSQLContainer() {
-        return new PostgreSQLContainer<>("postgres:16.3-alpine");
-    }
+class TestApplication {
 
     public static void main(String[] args) {
-        SpringApplication.from(Application::main).with(TestApplication.class).run(args);
+        SpringApplication.from(Application::main).with(ContainersConfig.class).run(args);
     }
 }

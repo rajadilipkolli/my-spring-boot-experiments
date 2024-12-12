@@ -19,12 +19,12 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
         <java.version>21</java.version>
-        <springdoc-openapi.version>2.6.0</springdoc-openapi.version>
+        <springdoc-openapi.version>2.7.0</springdoc-openapi.version>
         <testcontainers-jooq-codegen-maven-plugin.version>0.0.4</testcontainers-jooq-codegen-maven-plugin.version>
 
         <project.testresult.directory>${project.build.directory}/test-results</project.testresult.directory>
         <spotless.version>2.43.0</spotless.version>
-        <dependency-check-maven.version>11.1.0</dependency-check-maven.version>
+        <dependency-check-maven.version>11.1.1</dependency-check-maven.version>
         <properties-maven-plugin.version>1.2.1</properties-maven-plugin.version>
         <sonar-maven-plugin.version>5.0.0.4389</sonar-maven-plugin.version>
         <jacoco-maven-plugin.version>0.8.12</jacoco-maven-plugin.version>
@@ -214,7 +214,7 @@
                                     MYSQL: mysql:8.0.33
                                     MARIADB: mariadb:10.11
                                 -->
-                                <containerImage>postgres:16.3-alpine</containerImage>
+                                <containerImage>postgres:17.2-alpine</containerImage>
                             </database>
                             <flyway>
                                 <!--
@@ -332,7 +332,7 @@
                 <configuration>
                     <java>
                         <googleJavaFormat>
-                            <version>1.22.0</version>
+                            <version>1.25.0</version>
                             <style>AOSP</style>
                         </googleJavaFormat>
                     </java>

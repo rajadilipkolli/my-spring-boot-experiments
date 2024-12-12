@@ -4,10 +4,7 @@ import com.example.mongoes.utils.AppConstants;
 import jakarta.validation.constraints.NotBlank;
 import java.util.ArrayList;
 import java.util.List;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import java.util.StringJoiner;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.annotation.Version;
@@ -17,14 +14,10 @@ import org.springframework.data.elasticsearch.annotations.Setting;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-@Getter
-@Setter
 @org.springframework.data.elasticsearch.annotations.Document(
         indexName = AppConstants.RESTAURANT_COLLECTION)
 @Document(collection = AppConstants.RESTAURANT_COLLECTION)
-@NoArgsConstructor
 @TypeAlias(AppConstants.RESTAURANT_COLLECTION)
-@ToString
 @Setting(shards = 3)
 public class Restaurant {
 
@@ -53,4 +46,84 @@ public class Restaurant {
     private List<Grades> grades = new ArrayList<>();
 
     @Version private Long version;
+
+    public Restaurant() {}
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public Long getRestaurantId() {
+        return restaurantId;
+    }
+
+    public void setRestaurantId(Long restaurantId) {
+        this.restaurantId = restaurantId;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Address getAddress() {
+        return address;
+    }
+
+    public void setAddress(Address address) {
+        this.address = address;
+    }
+
+    public String getBorough() {
+        return borough;
+    }
+
+    public void setBorough(String borough) {
+        this.borough = borough;
+    }
+
+    public String getCuisine() {
+        return cuisine;
+    }
+
+    public void setCuisine(String cuisine) {
+        this.cuisine = cuisine;
+    }
+
+    public List<Grades> getGrades() {
+        return grades;
+    }
+
+    public void setGrades(List<Grades> grades) {
+        this.grades = grades;
+    }
+
+    public Long getVersion() {
+        return version;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", Restaurant.class.getSimpleName() + "[", "]")
+                .add("id='" + id + "'")
+                .add("restaurantId=" + restaurantId)
+                .add("name='" + name + "'")
+                .add("address=" + address)
+                .add("borough='" + borough + "'")
+                .add("cuisine='" + cuisine + "'")
+                .add("grades=" + grades)
+                .add("version=" + version)
+                .toString();
+    }
 }
