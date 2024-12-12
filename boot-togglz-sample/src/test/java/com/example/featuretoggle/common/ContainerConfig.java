@@ -1,6 +1,5 @@
-package com.example.featuretoggle;
+package com.example.featuretoggle.common;
 
-import org.springframework.boot.SpringApplication;
 import org.springframework.boot.devtools.restart.RestartScope;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
@@ -9,16 +8,12 @@ import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.utility.DockerImageName;
 
 @TestConfiguration(proxyBeanMethods = false)
-public class TestApplication {
+public class ContainerConfig {
 
     @Bean
     @ServiceConnection
     @RestartScope
     MySQLContainer<?> sqlContainer() {
-        return new MySQLContainer<>(DockerImageName.parse("mysql:9.0"));
-    }
-
-    public static void main(String[] args) {
-        SpringApplication.from(Application::main).with(TestApplication.class).run(args);
+        return new MySQLContainer<>(DockerImageName.parse("mysql:9.1"));
     }
 }
