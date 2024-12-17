@@ -534,8 +534,8 @@ class AnimalControllerIT extends AbstractIntegrationTest {
                                             "queryOperator": "BETWEEN",
                                             "field": "id",
                                             "values": [
-                                                "%d",
-                                                "%d"
+                                                %d,
+                                                %d
                                             ]
                                         }
                                     ]

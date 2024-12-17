@@ -89,7 +89,10 @@ public class AnimalService {
                         })
                         .toList();
 
-        log.debug("Executing search with specification: {} and sort orders: {}", specification, orders);
+        log.debug(
+                "Executing search with criteria: {} and sort orders: {}",
+                searchRequest.getSearchCriteriaList(),
+                orders);
         return animalRepository
                 .findAll(specification, PageRequest.of(0, pageSize, Sort.by(orders)), position, Animal.class)
                 .map(animalMapper::toResponse);

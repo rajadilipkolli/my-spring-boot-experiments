@@ -12,9 +12,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import com.example.keysetpagination.entities.Animal;
 import com.example.keysetpagination.exception.AnimalNotFoundException;
@@ -121,7 +119,15 @@ class AnimalControllerTest {
                         .param("pageSize", "0") // Less than minimum value of 1
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(searchRequest)))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
+                .andExpect(jsonPath("$.type", is("https://api.boot-data-window-pagination.com/errors/validation")))
+                .andExpect(jsonPath("$.title", is("Constraint Violation")))
+                .andExpect(jsonPath("$.status", is(400)))
+                .andExpect(jsonPath("$.detail").value("searchAnimals.pageSize: must be greater than or equal to 1"))
+                .andExpect(jsonPath("$.instance", is("/api/animals/search")))
+                .andExpect(jsonPath("$.errorCategory", is("Validation")))
+                .andExpect(jsonPath("$.timestamp", notNullValue()));
     }
 
     @Test
@@ -131,7 +137,15 @@ class AnimalControllerTest {
                         .param("pageSize", "101") // Exceeds maximum value of 100
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(searchRequest)))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
+                .andExpect(jsonPath("$.type", is("https://api.boot-data-window-pagination.com/errors/validation")))
+                .andExpect(jsonPath("$.title", is("Constraint Violation")))
+                .andExpect(jsonPath("$.status", is(400)))
+                .andExpect(jsonPath("$.detail").value("searchAnimals.pageSize: must be less than or equal to 100"))
+                .andExpect(jsonPath("$.instance", is("/api/animals/search")))
+                .andExpect(jsonPath("$.errorCategory", is("Validation")))
+                .andExpect(jsonPath("$.timestamp", notNullValue()));
     }
 
     @Test

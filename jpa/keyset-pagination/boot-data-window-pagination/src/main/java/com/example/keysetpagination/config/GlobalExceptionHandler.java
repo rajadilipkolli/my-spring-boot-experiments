@@ -45,7 +45,7 @@ class GlobalExceptionHandler {
     ProblemDetail onException(ConstraintViolationException constraintViolationException) {
         List<ApiValidationError> apiValidationErrors = constraintViolationException.getConstraintViolations().stream()
                 .map(constraintViolation -> new ApiValidationError(
-                        null,
+                        constraintViolation.getRootBeanClass().getSimpleName(),
                         constraintViolation.getPropertyPath().toString(),
                         constraintViolation.getInvalidValue(),
                         constraintViolation.getMessage()))
@@ -54,6 +54,9 @@ class GlobalExceptionHandler {
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
                 HttpStatusCode.valueOf(400), constraintViolationException.getMessage());
         problemDetail.setTitle("Constraint Violation");
+        problemDetail.setType(URI.create("https://api.boot-data-window-pagination.com/errors/validation"));
+        problemDetail.setProperty("errorCategory", "Validation");
+        problemDetail.setProperty("timestamp", Instant.now());
         problemDetail.setProperty("violations", apiValidationErrors);
         return problemDetail;
     }
