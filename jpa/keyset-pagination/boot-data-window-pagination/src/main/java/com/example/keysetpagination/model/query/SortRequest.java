@@ -5,19 +5,39 @@ public class SortRequest {
     private String field;
     private String direction;
 
-    public String getField() {
-        return field;
-    }
+    /**
+ * Gets the field value.
+ *
+ * @return the field value as a String
+ */
+public String getField() {
+    return field;
+}
 
-    public void setField(String field) {
-        this.field = field;
-    }
+    /**
+ * Sets the field value.
+ *
+ * @param field the value to set
+ */
+public void setField(String field) {
+    this.field = field;
+}
 
-    public String getDirection() {
-        return direction;
-    }
+    /**
+ * Gets the current direction.
+ *
+ * @return the direction as a String
+ */
+public String getDirection() {
+    return direction;
+}
 
-    public void setDirection(String direction) {
-        this.direction = direction;
-    }
+    /**
+ * Sets the direction of movement.
+ *
+ * @param direction the direction to set
+ */
+public void setDirection(String direction) {
+    this.direction = direction;
+}
 }

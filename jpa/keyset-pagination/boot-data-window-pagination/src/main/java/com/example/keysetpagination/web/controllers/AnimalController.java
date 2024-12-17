@@ -38,53 +38,89 @@ class AnimalController {
 
     private final AnimalService animalService;
 
-    AnimalController(AnimalService animalService) {
+    /**
+ * Constructs an AnimalController with the specified animal service.
+ *
+ * @param animalService the service layer component handling animal business logic
+ * @throws IllegalArgumentException if animalService is null
+ */
+AnimalController(AnimalService animalService) {
         this.animalService = animalService;
     }
 
-    @GetMapping
-    PagedResult<AnimalResponse> getAllAnimals(
-            @RequestParam(value = "pageNo", defaultValue = AppConstants.DEFAULT_PAGE_NUMBER, required = false)
-                    int pageNo,
-            @RequestParam(value = "pageSize", defaultValue = AppConstants.DEFAULT_PAGE_SIZE, required = false)
-                    int pageSize,
-            @RequestParam(value = "sortBy", defaultValue = AppConstants.DEFAULT_SORT_BY, required = false)
-                    String sortBy,
-            @RequestParam(value = "sortDir", defaultValue = AppConstants.DEFAULT_SORT_DIRECTION, required = false)
-                    String sortDir) {
-        FindAnimalsQuery findAnimalsQuery = new FindAnimalsQuery(pageNo, pageSize, sortBy, sortDir);
-        return animalService.findAllAnimals(findAnimalsQuery);
-    }
+    /**
+ * Retrieves a paginated list of animals with sorting capabilities.
+ *
+ * @param pageNo   the page number for pagination (zero-based), defaults to {@link AppConstants#DEFAULT_PAGE_NUMBER}
+ * @param pageSize the number of items per page, defaults to {@link AppConstants#DEFAULT_PAGE_SIZE}
+ * @param sortBy   the field name to sort by, defaults to {@link AppConstants#DEFAULT_SORT_BY}
+ * @param sortDir  the sort direction ("asc" or "desc"), defaults to {@link AppConstants#DEFAULT_SORT_DIRECTION}
+ * @return a {@link PagedResult} containing the list of {@link AnimalResponse} objects
+ */
+@GetMapping
+PagedResult<AnimalResponse> getAllAnimals(
+        @RequestParam(value = "pageNo", defaultValue = AppConstants.DEFAULT_PAGE_NUMBER, required = false)
+                int pageNo,
+        @RequestParam(value = "pageSize", defaultValue = AppConstants.DEFAULT_PAGE_SIZE, required = false)
+                int pageSize,
+        @RequestParam(value = "sortBy", defaultValue = AppConstants.DEFAULT_SORT_BY, required = false)
+                String sortBy,
+        @RequestParam(value = "sortDir", defaultValue = AppConstants.DEFAULT_SORT_DIRECTION, required = false)
+                String sortDir) {
+    FindAnimalsQuery findAnimalsQuery = new FindAnimalsQuery(pageNo, pageSize, sortBy, sortDir);
+    return animalService.findAllAnimals(findAnimalsQuery);
+}
 
-    @Operation(summary = "Search animals with keyset pagination support")
-    @ApiResponses(
-            value = {
-                @ApiResponse(responseCode = "200", description = "Successfully retrieved animals"),
-                @ApiResponse(responseCode = "400", description = "Invalid parameters supplied"),
-                @ApiResponse(responseCode = "404", description = "No animals found matching criteria")
-            })
-    @PostMapping("/search")
-    public Window<AnimalResponse> searchAnimals(
-            @Parameter(description = "Number of items per page (max 100)", in = ParameterIn.QUERY)
-                    @RequestParam(defaultValue = "10")
-                    @Min(1)
-                    @Max(100)
-                    int pageSize,
-            @Parameter(description = "Scroll ID for pagination", in = ParameterIn.QUERY) @RequestParam(required = false)
-                    Long scrollId,
-            @io.swagger.v3.oas.annotations.parameters.RequestBody(required = true) @RequestBody @Valid
-                    SearchRequest searchRequest) {
+    /**
+ * Searches for animals based on provided criteria with keyset pagination support.
+ * This endpoint implements cursor-based pagination using a scroll ID for efficient
+ * data retrieval of large result sets.
+ *
+ * @param pageSize the number of items to return per page, must be between 1 and 100
+ * @param scrollId the cursor position for pagination, null for first page
+ * @param searchRequest the search criteria containing filters and sorting preferences
+ * @return a Window containing AnimalResponse objects and pagination metadata
+ * @throws ConstraintViolationException if pageSize is outside the valid range (1-100)
+ * @throws ValidationException if searchRequest contains invalid search criteria
+ * @throws ResourceNotFoundException if no animals match the search criteria
+ * @throws BadRequestException if the scrollId is invalid or expired
+ */
+@Operation(summary = "Search animals with keyset pagination support")
+@ApiResponses(
+        value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved animals"),
+            @ApiResponse(responseCode = "400", description = "Invalid parameters supplied"),
+            @ApiResponse(responseCode = "404", description = "No animals found matching criteria")
+        })
+@PostMapping("/search")
+public Window<AnimalResponse> searchAnimals(
+        @Parameter(description = "Number of items per page (max 100)", in = ParameterIn.QUERY)
+                @RequestParam(defaultValue = "10")
+                @Min(1)
+                @Max(100)
+                int pageSize,
+        @Parameter(description = "Scroll ID for pagination", in = ParameterIn.QUERY) @RequestParam(required = false)
+                Long scrollId,
+        @io.swagger.v3.oas.annotations.parameters.RequestBody(required = true) @RequestBody @Valid
+                SearchRequest searchRequest) {
 
-        return animalService.searchAnimals(searchRequest, pageSize, scrollId);
-    }
+    return animalService.searchAnimals(searchRequest, pageSize, scrollId);
+}
 
-    @GetMapping("/{id}")
-    ResponseEntity<AnimalResponse> getAnimalById(@PathVariable Long id) {
-        return animalService
-                .findAnimalById(id)
-                .map(ResponseEntity::ok)
-                .orElseThrow(() -> new AnimalNotFoundException(id));
-    }
+    /**
+ * Retrieves an animal by its unique identifier.
+ *
+ * @param id the unique identifier of the animal to retrieve
+ * @return ResponseEntity containing the animal details if found
+ * @throws AnimalNotFoundException if no animal exists with the given id
+ */
+@GetMapping("/{id}")
+ResponseEntity<AnimalResponse> getAnimalById(@PathVariable Long id) {
+    return animalService
+            .findAnimalById(id)
+            .map(ResponseEntity::ok)
+            .orElseThrow(() -> new AnimalNotFoundException(id));
+}
 
     @PostMapping
     ResponseEntity<AnimalResponse> createAnimal(@RequestBody @Valid AnimalRequest animalRequest) {

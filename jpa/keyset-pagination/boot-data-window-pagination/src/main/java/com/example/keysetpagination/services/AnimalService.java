@@ -54,16 +54,41 @@ public class AnimalService {
         return new PagedResult<>(animalsPage, animalResponseList);
     }
 
-    private Pageable createPageable(FindAnimalsQuery findAnimalsQuery) {
-        int pageNo = Math.max(findAnimalsQuery.pageNo() - 1, 0);
-        Sort sort = Sort.by(
-                findAnimalsQuery.sortDir().equalsIgnoreCase(Sort.Direction.ASC.name())
-                        ? Sort.Order.asc(findAnimalsQuery.sortBy())
-                        : Sort.Order.desc(findAnimalsQuery.sortBy()));
-        return PageRequest.of(pageNo, findAnimalsQuery.pageSize(), sort);
-    }
+    /**
+ * Creates a Pageable object for pagination and sorting based on the query parameters.
+ *
+ * @param findAnimalsQuery the query object containing pagination and sorting parameters:
+ *                        pageNo (1-based page number),
+ *                        pageSize (number of items per page),
+ *                        sortBy (field name to sort by),
+ *                        sortDir (sort direction: "ASC" or "DESC")
+ * @return a Pageable object configured with zero-based page number, page size, and sort criteria
+ * @see org.springframework.data.domain.Pageable
+ * @see org.springframework.data.domain.PageRequest
+ * @see org.springframework.data.domain.Sort
+ */
+private Pageable createPageable(FindAnimalsQuery findAnimalsQuery) {
+    int pageNo = Math.max(findAnimalsQuery.pageNo() - 1, 0);
+    Sort sort = Sort.by(
+            findAnimalsQuery.sortDir().equalsIgnoreCase(Sort.Direction.ASC.name())
+                    ? Sort.Order.asc(findAnimalsQuery.sortBy())
+                    : Sort.Order.desc(findAnimalsQuery.sortBy()));
+    return PageRequest.of(pageNo, findAnimalsQuery.pageSize(), sort);
+}
 
-    public Window<AnimalResponse> searchAnimals(SearchRequest searchRequest, int pageSize, Long scrollId) {
+    /**
+ * Searches for animals based on specified criteria with pagination and scrolling support.
+ *
+ * @param searchRequest the search criteria and filters to apply
+ * @param pageSize the maximum number of results to return per page
+ * @param scrollId the ID to continue scrolling from a previous search result, null for first page
+ * @return a Window containing AnimalResponse objects matching the search criteria
+ * @throws IllegalArgumentException if pageSize is less than 1
+ * @see SearchRequest
+ * @see AnimalResponse
+ * @see Window
+ */
+public Window<AnimalResponse> searchAnimals(SearchRequest searchRequest, int pageSize, Long scrollId) {
 
         Specification<Animal> specification =
                 animalEntitySpecification.specificationBuilder(searchRequest.getSearchCriteriaList(), Animal.class);
@@ -94,9 +119,16 @@ public class AnimalService {
                 .map(animalMapper::toResponse);
     }
 
-    public Optional<AnimalResponse> findAnimalById(Long id) {
-        return animalRepository.findById(id).map(animalMapper::toResponse);
-    }
+    /**
+ * Retrieves an animal by its unique identifier.
+ *
+ * @param id the unique identifier of the animal to find
+ * @return an Optional containing the mapped AnimalResponse if found, or empty Optional if not found
+ * @throws IllegalArgumentException if id is null
+ */
+public Optional<AnimalResponse> findAnimalById(Long id) {
+    return animalRepository.findById(id).map(animalMapper::toResponse);
+}
 
     @Transactional
     public AnimalResponse saveAnimal(AnimalRequest animalRequest) {
