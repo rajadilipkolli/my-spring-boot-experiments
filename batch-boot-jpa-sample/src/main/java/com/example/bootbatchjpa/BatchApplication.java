@@ -1,15 +1,15 @@
-package com.example.featuretoggle;
+package com.example.bootbatchjpa;
 
-import com.example.featuretoggle.config.ApplicationProperties;
+import com.example.bootbatchjpa.config.ApplicationProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 
 @SpringBootApplication
 @EnableConfigurationProperties({ApplicationProperties.class})
-public class Application {
+public class BatchApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(Application.class, args);
+        SpringApplication.run(BatchApplication.class, args);
     }
 }

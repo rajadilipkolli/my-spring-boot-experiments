@@ -35,6 +35,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
         customerList =
                 Instancio.ofList(Customer.class)
                         .size(3)
+                        .ignore(field(Customer.class, "id"))
                         .generate(
                                 field(Customer.class, "gender"), gen -> gen.oneOf("male", "female"))
                         .create();
@@ -72,6 +73,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
     @Test
     void shouldCreateNewCustomer() throws Exception {
         Customer customer = Instancio.create(Customer.class);
+        customer.setId(null);
         this.mockMvc
                 .perform(
                         post("/api/customers")

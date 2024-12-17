@@ -170,6 +170,16 @@
             "projectName": "multidatasource-multitenancy",
             "args": "",
             "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-TestMongoESApplication<boot-mongodb-elasticsearch>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.example.mongoes.TestMongoESApplication",
+            "projectName": "boot-mongodb-elasticsearch",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
         }
     ]
 }

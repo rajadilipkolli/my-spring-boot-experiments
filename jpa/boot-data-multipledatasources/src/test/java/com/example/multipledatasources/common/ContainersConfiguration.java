@@ -29,7 +29,7 @@ public class ContainersConfiguration {
     @Bean
     PostgreSQLContainer<?> postgreSQLContainer() {
         postgreSQLContainer =
-                new PostgreSQLContainer<>(DockerImageName.parse("postgres").withTag("17.0-alpine"));
+                new PostgreSQLContainer<>(DockerImageName.parse("postgres").withTag("17.2-alpine"));
         postgreSQLContainer.start();
         return postgreSQLContainer;
     }
@@ -42,9 +42,9 @@ public class ContainersConfiguration {
             properties.add("app.datasource.cardholder.url", mySQLContainer::getJdbcUrl);
             properties.add("app.datasource.cardholder.username", mySQLContainer::getUsername);
             properties.add("app.datasource.cardholder.password", mySQLContainer::getPassword);
-            properties.add("app.datasource.member.url", postgreSQLContainer::getJdbcUrl);
-            properties.add("app.datasource.member.username", postgreSQLContainer::getUsername);
-            properties.add("app.datasource.member.password", postgreSQLContainer::getPassword);
+            properties.add("spring.datasource.url", postgreSQLContainer::getJdbcUrl);
+            properties.add("spring.datasource.username", postgreSQLContainer::getUsername);
+            properties.add("spring.datasource.password", postgreSQLContainer::getPassword);
         };
     }
 

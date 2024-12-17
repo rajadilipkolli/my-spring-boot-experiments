@@ -5,55 +5,51 @@ import com.example.multipledatasources.repository.cardholder.CardHolderRepositor
 import com.zaxxer.hikari.HikariDataSource;
 import jakarta.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
-import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
-import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
-import org.springframework.orm.jpa.persistenceunit.PersistenceUnitManager;
 import org.springframework.transaction.PlatformTransactionManager;
 
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @EnableJpaRepositories(
         basePackageClasses = CardHolderRepository.class,
         entityManagerFactoryRef = "cardHolderEntityManagerFactory",
         transactionManagerRef = "cardHolderTransactionManager")
-public class CardHolderDataSourceConfiguration extends BaseDataSourceConfiguration {
+class CardHolderDataSourceConfiguration {
 
-    public CardHolderDataSourceConfiguration(
-            ObjectProvider<PersistenceUnitManager> persistenceUnitManager, JpaProperties jpaProperties) {
-        super(persistenceUnitManager, jpaProperties);
-    }
-
-    @Bean
+    @Qualifier("mysql") @Bean(defaultCandidate = false)
     @ConfigurationProperties("app.datasource.cardholder")
     DataSourceProperties cardHolderDataSourceProperties() {
         return new DataSourceProperties();
     }
 
-    @Bean
+    @Qualifier("mysql") @Bean(defaultCandidate = false)
     @ConfigurationProperties("app.datasource.cardholder.hikari")
-    DataSource cardholderDataSource() {
-        return cardHolderDataSourceProperties()
+    DataSource cardholderDataSource(@Qualifier("mysql") DataSourceProperties dataSourceProperties) {
+        return dataSourceProperties
                 .initializeDataSourceBuilder()
                 .type(HikariDataSource.class)
                 .build();
     }
 
-    @Bean
-    LocalContainerEntityManagerFactoryBean cardHolderEntityManagerFactory(DataSource cardholderDataSource) {
-        EntityManagerFactoryBuilder builder = createEntityManagerFactoryBuilder();
-        return builder.dataSource(cardholderDataSource)
+    @Qualifier("mysql") @Bean(defaultCandidate = false)
+    LocalContainerEntityManagerFactoryBean cardHolderEntityManagerFactory(
+            @Qualifier("mysql") DataSource dataSource, EntityManagerFactoryBuilder builder) {
+        return builder.dataSource(dataSource)
                 .packages(CardHolder.class)
+                .persistenceUnit("cardholder")
                 .build();
     }
 
-    @Bean
-    PlatformTransactionManager cardHolderTransactionManager(EntityManagerFactory cardHolderEntityManagerFactory) {
-        return createTransactionManager(cardHolderEntityManagerFactory);
+    @Qualifier("mysql") @Bean(defaultCandidate = false)
+    PlatformTransactionManager cardHolderTransactionManager(
+            @Qualifier("mysql") EntityManagerFactory entityManagerFactory) {
+        return new JpaTransactionManager(entityManagerFactory);
     }
 }

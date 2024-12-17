@@ -9,7 +9,12 @@ import java.util.HashMap;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.batch.core.*;
+import org.springframework.batch.core.BatchStatus;
+import org.springframework.batch.core.Job;
+import org.springframework.batch.core.JobExecution;
+import org.springframework.batch.core.JobExecutionListener;
+import org.springframework.batch.core.JobParameters;
+import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.job.builder.JobBuilder;
@@ -23,6 +28,7 @@ import org.springframework.batch.item.database.builder.JpaPagingItemReaderBuilde
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.lang.NonNull;
 import org.springframework.transaction.PlatformTransactionManager;
 
 @Configuration(proxyBeanMethods = false)
@@ -59,7 +65,6 @@ class BatchConfig implements JobExecutionListener {
                 .start(step)
                 .incrementer(new RunIdIncrementer())
                 .listener(this)
-                .start(step)
                 .build();
     }
 
@@ -94,7 +99,7 @@ class BatchConfig implements JobExecutionListener {
     }
 
     @Override
-    public void afterJob(JobExecution jobExecution) {
+    public void afterJob(@NonNull JobExecution jobExecution) {
         if (jobExecution.getStatus() == BatchStatus.COMPLETED) {
             log.info("BATCH JOB COMPLETED SUCCESSFULLY");
         }

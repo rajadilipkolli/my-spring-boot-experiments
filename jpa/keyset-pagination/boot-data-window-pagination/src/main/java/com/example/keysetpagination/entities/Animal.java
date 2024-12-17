@@ -7,6 +7,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
+import java.time.LocalDateTime;
 import java.util.Objects;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -18,7 +19,7 @@ import org.hibernate.Hibernate;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Animal {
+public class Animal extends Auditable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
@@ -26,6 +27,11 @@ public class Animal {
 
     @Column(nullable = false)
     private String name;
+
+    @Column(nullable = false)
+    private String type;
+
+    private String habitat;
 
     @Version
     private Short version;
@@ -38,6 +44,20 @@ public class Animal {
     public Animal setName(String name) {
         this.name = name;
         return this;
+    }
+
+    public Animal setType(String type) {
+        this.type = type;
+        return this;
+    }
+
+    public Animal setHabitat(String habitat) {
+        this.habitat = habitat;
+        return this;
+    }
+
+    public void setCreated(LocalDateTime created) {
+        this.created = created;
     }
 
     public Animal setVersion(Short version) {

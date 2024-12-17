@@ -1,15 +1,15 @@
-package com.example.archunit;
+package com.example.featuretoggle;
 
-import com.example.archunit.config.ApplicationProperties;
+import com.example.featuretoggle.config.ApplicationProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 
 @SpringBootApplication
 @EnableConfigurationProperties({ApplicationProperties.class})
-public class Application {
+public class TogglzApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(Application.class, args);
+        SpringApplication.run(TogglzApplication.class, args);
     }
 }

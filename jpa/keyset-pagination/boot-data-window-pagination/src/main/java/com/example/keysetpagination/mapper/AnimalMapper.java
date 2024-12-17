@@ -12,15 +12,20 @@ public class AnimalMapper {
     public Animal toEntity(AnimalRequest animalRequest) {
         Animal animal = new Animal();
         animal.setName(animalRequest.name());
+        animal.setType(animalRequest.type());
+        animal.setHabitat(animalRequest.habitat());
         return animal;
     }
 
     public void mapAnimalWithRequest(Animal animal, AnimalRequest animalRequest) {
         animal.setName(animalRequest.name());
+        animal.setType(animalRequest.type());
+        animal.setHabitat(animalRequest.habitat());
     }
 
     public AnimalResponse toResponse(Animal animal) {
-        return new AnimalResponse(animal.getId(), animal.getName());
+        return new AnimalResponse(
+                animal.getId(), animal.getName(), animal.getType(), animal.getHabitat(), animal.getCreated());
     }
 
     public List<AnimalResponse> toResponseList(List<Animal> animalList) {

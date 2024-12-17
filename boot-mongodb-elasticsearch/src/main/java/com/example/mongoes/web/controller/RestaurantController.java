@@ -9,7 +9,8 @@ import io.micrometer.core.annotation.Timed;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Size;
 import java.net.URI;
-import lombok.RequiredArgsConstructor;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import org.springframework.data.elasticsearch.core.SearchPage;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,12 +24,15 @@ import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
 
 @RestController
-@RequiredArgsConstructor
 @Timed
 @RequestMapping("/api/restaurant")
 public class RestaurantController {
 
     private final RestaurantService restaurantService;
+
+    public RestaurantController(RestaurantService restaurantService) {
+        this.restaurantService = restaurantService;
+    }
 
     @GetMapping
     public Mono<ResponseEntity<SearchPage<Restaurant>>> findAllRestaurants(
@@ -75,18 +79,24 @@ public class RestaurantController {
     }
 
     @PostMapping
-    public ResponseEntity<GenericMessage> createRestaurant(
-            @RequestBody RestaurantRequest restaurantRequest) {
-        return ResponseEntity.created(
-                        URI.create(
-                                String.format(
-                                        "/restaurant/%s",
-                                        this.restaurantService
-                                                .createRestaurant(restaurantRequest)
-                                                .map(Restaurant::getName))))
-                .body(
-                        new GenericMessage(
-                                "restaurant with name %s created"
-                                        .formatted(restaurantRequest.name())));
+    public Mono<ResponseEntity<GenericMessage>> createRestaurant(
+            @RequestBody @Valid RestaurantRequest restaurantRequest) {
+        return this.restaurantService
+                .createRestaurant(restaurantRequest)
+                .map(
+                        restaurant ->
+                                ResponseEntity.created(
+                                                URI.create(
+                                                        String.format(
+                                                                "/api/restaurant/name/%s",
+                                                                URLEncoder.encode(
+                                                                        restaurantRequest.name(),
+                                                                        StandardCharsets.UTF_8))))
+                                        .body(
+                                                new GenericMessage(
+                                                        "restaurant with name %s created"
+                                                                .formatted(
+                                                                        restaurantRequest
+                                                                                .name()))));
     }
 }

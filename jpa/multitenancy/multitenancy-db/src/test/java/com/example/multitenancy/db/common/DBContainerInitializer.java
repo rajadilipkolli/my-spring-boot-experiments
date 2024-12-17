@@ -12,10 +12,10 @@ public class DBContainerInitializer
         implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
     private static final PostgreSQLContainer<?> POSTGRE_SQL_CONTAINER =
-            new PostgreSQLContainer<>(DockerImageName.parse("postgres").withTag("17.1-alpine"));
+            new PostgreSQLContainer<>(DockerImageName.parse("postgres").withTag("17.2-alpine"));
 
     private static final MariaDBContainer<?> MARIA_DB_CONTAINER =
-            new MariaDBContainer<>(DockerImageName.parse("mariadb").withTag("11.4"));
+            new MariaDBContainer<>(DockerImageName.parse("mariadb").withTag("11.6"));
 
     static {
         Startables.deepStart(POSTGRE_SQL_CONTAINER, MARIA_DB_CONTAINER).join();

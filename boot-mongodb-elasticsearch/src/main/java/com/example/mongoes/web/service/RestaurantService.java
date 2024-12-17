@@ -9,23 +9,24 @@ import com.example.mongoes.mongodb.repository.ChangeStreamResumeRepository;
 import com.example.mongoes.mongodb.repository.RestaurantRepository;
 import com.example.mongoes.utils.AppConstants;
 import com.example.mongoes.utils.DateUtility;
+import com.example.mongoes.web.exception.DuplicateRestaurantException;
 import com.example.mongoes.web.model.RestaurantRequest;
 import com.mongodb.client.model.changestream.ChangeStreamDocument;
 import com.mongodb.client.model.changestream.OperationType;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.bson.BsonTimestamp;
 import org.bson.Document;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
+import org.springframework.core.io.buffer.DataBufferUtils;
+import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -38,58 +39,76 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 @Service
-@Slf4j
-@RequiredArgsConstructor
 public class RestaurantService {
 
+    private static final Logger log = LoggerFactory.getLogger(RestaurantService.class);
     private final RestaurantRepository restaurantRepository;
     private final RestaurantESRepository restaurantESRepository;
     private final ChangeStreamResumeRepository changeStreamResumeRepository;
-
     private final ReactiveMongoTemplate reactiveMongoTemplate;
 
-    public Flux<Restaurant> loadData() throws IOException {
-        Resource input = new ClassPathResource("restaurants.json");
-        Path path = input.getFile().toPath();
-        var restaurantArray = Files.readAllLines(path);
-        return this.saveAll(restaurantArray);
+    public RestaurantService(
+            RestaurantRepository restaurantRepository,
+            RestaurantESRepository restaurantESRepository,
+            ChangeStreamResumeRepository changeStreamResumeRepository,
+            ReactiveMongoTemplate reactiveMongoTemplate) {
+        this.restaurantRepository = restaurantRepository;
+        this.restaurantESRepository = restaurantESRepository;
+        this.changeStreamResumeRepository = changeStreamResumeRepository;
+        this.reactiveMongoTemplate = reactiveMongoTemplate;
+    }
+
+    public Flux<Restaurant> loadData() {
+        return DataBufferUtils.join(
+                        DataBufferUtils.read(
+                                new ClassPathResource("restaurants.json"),
+                                new DefaultDataBufferFactory(),
+                                4096))
+                .map(
+                        dataBuffer -> {
+                            byte[] bytes = new byte[dataBuffer.readableByteCount()];
+                            dataBuffer.read(bytes);
+                            DataBufferUtils.release(dataBuffer);
+                            return new String(bytes, StandardCharsets.UTF_8);
+                        })
+                .flatMapMany(
+                        fileContent -> {
+                            List<String> restaurantArray = Arrays.asList(fileContent.split("\n"));
+                            return this.saveAll(restaurantArray);
+                        });
     }
 
     private Flux<Restaurant> saveAll(List<String> restaurantStringList) {
-        List<Restaurant> restaurantList =
-                restaurantStringList.stream()
-                        .map(Document::parse)
-                        .map(
-                                document -> {
-                                    Restaurant restaurant = new Restaurant();
-                                    restaurant.setRestaurantId(
-                                            Long.valueOf(
-                                                    document.get("restaurant_id", String.class)));
-                                    restaurant.setName(document.get("name", String.class));
-                                    restaurant.setCuisine(document.get("cuisine", String.class));
-                                    restaurant.setBorough(document.get("borough", String.class));
-                                    Address address = new Address();
-                                    Document addressDoc = (Document) document.get("address");
-                                    address.setBuilding(addressDoc.get("building", String.class));
-                                    address.setStreet(addressDoc.get("street", String.class));
-                                    address.setZipcode(
-                                            Integer.valueOf(
-                                                    addressDoc.get("zipcode", String.class)));
-                                    List<Double> obj = addressDoc.getList("coord", Double.class);
-                                    Point geoJsonPoint = new Point(obj.getFirst(), obj.get(1));
-                                    address.setLocation(geoJsonPoint);
-                                    restaurant.setAddress(address);
-                                    List<Grades> gradesList =
-                                            getGradesList(
-                                                    document.getList("grades", Document.class));
-                                    restaurant.setGrades(gradesList);
+        return Flux.fromIterable(restaurantStringList)
+                .map(Document::parse)
+                .map(this::documentToRestaurant)
+                .flatMap(restaurantRepository::save);
+    }
 
-                                    return restaurant;
-                                })
-                        .toList();
-        return restaurantRepository.saveAll(restaurantList);
+    private Restaurant documentToRestaurant(Document document) {
+        Restaurant restaurant = new Restaurant();
+        restaurant.setRestaurantId(Long.valueOf(document.get("restaurant_id", String.class)));
+        restaurant.setName(document.get("name", String.class));
+        restaurant.setCuisine(document.get("cuisine", String.class));
+        restaurant.setBorough(document.get("borough", String.class));
+
+        Address address = new Address();
+        Document addressDoc = document.get("address", Document.class);
+        address.setBuilding(addressDoc.get("building", String.class));
+        address.setStreet(addressDoc.get("street", String.class));
+        address.setZipcode(Integer.valueOf(addressDoc.get("zipcode", String.class)));
+        List<Double> coord = addressDoc.getList("coord", Double.class);
+        Point geoJsonPoint = new Point(coord.get(0), coord.get(1));
+        address.setLocation(geoJsonPoint);
+        restaurant.setAddress(address);
+
+        List<Grades> gradesList = getGradesList(document.getList("grades", Document.class));
+        restaurant.setGrades(gradesList);
+
+        return restaurant;
     }
 
     private List<Grades> getGradesList(List<Document> gradeDocumentList) {
@@ -141,6 +160,7 @@ public class RestaurantService {
                 .resumeAt(getChangeStreamOption())
                 .listen()
                 .delayElements(Duration.ofMillis(5))
+                .publishOn(Schedulers.boundedElastic())
                 .doOnNext(
                         restaurantChangeStreamEvent -> {
                             log.info(
@@ -209,9 +229,17 @@ public class RestaurantService {
         return this.restaurantESRepository.findAll(pageable);
     }
 
-    public Mono<Restaurant> createRestaurant(RestaurantRequest restaurantRequest) {
-
-        return save(restaurantRequest.toRestaurant());
+    public Mono<Object> createRestaurant(RestaurantRequest restaurantRequest) {
+        return restaurantESRepository
+                .findByName(restaurantRequest.name())
+                .flatMap(
+                        existingRestaurant ->
+                                Mono.error(
+                                        new DuplicateRestaurantException(
+                                                "Restaurant with name "
+                                                        + restaurantRequest.name()
+                                                        + " already exists")))
+                .switchIfEmpty(restaurantRepository.save(restaurantRequest.toRestaurant()));
     }
 
     public Mono<Void> deleteAll() {

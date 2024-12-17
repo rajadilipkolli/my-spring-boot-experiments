@@ -27,6 +27,7 @@ class Initializer implements CommandLineRunner {
         List<Customer> customerList =
                 Instancio.ofList(Customer.class)
                         .size(1000)
+                        .ignore(field(Customer.class, "id"))
                         .generate(
                                 field(Customer.class, "gender"), gen -> gen.oneOf("male", "female"))
                         .create();
