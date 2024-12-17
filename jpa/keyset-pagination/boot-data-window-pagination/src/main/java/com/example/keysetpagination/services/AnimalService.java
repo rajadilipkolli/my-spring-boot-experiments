@@ -4,21 +4,16 @@ import com.example.keysetpagination.entities.Animal;
 import com.example.keysetpagination.exception.AnimalNotFoundException;
 import com.example.keysetpagination.mapper.AnimalMapper;
 import com.example.keysetpagination.model.query.FindAnimalsQuery;
-import com.example.keysetpagination.model.query.SearchCriteria;
-import com.example.keysetpagination.model.query.SortDto;
+import com.example.keysetpagination.model.query.SearchRequest;
+import com.example.keysetpagination.model.query.SortRequest;
 import com.example.keysetpagination.model.request.AnimalRequest;
 import com.example.keysetpagination.model.response.AnimalResponse;
 import com.example.keysetpagination.model.response.PagedResult;
 import com.example.keysetpagination.repositories.AnimalRepository;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -28,27 +23,23 @@ import org.springframework.data.domain.Window;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 @Service
 @Transactional(readOnly = true)
 public class AnimalService {
 
-    private static final Logger log = LoggerFactory.getLogger(AnimalService.class);
-
     private final AnimalRepository animalRepository;
     private final AnimalMapper animalMapper;
     private final EntitySpecification<Animal> animalEntitySpecification;
-    private final ObjectMapper objectMapper;
 
     public AnimalService(
             AnimalRepository animalRepository,
             AnimalMapper animalMapper,
-            EntitySpecification<Animal> animalEntitySpecification,
-            ObjectMapper objectMapper) {
+            EntitySpecification<Animal> animalEntitySpecification) {
         this.animalRepository = animalRepository;
         this.animalMapper = animalMapper;
         this.animalEntitySpecification = animalEntitySpecification;
-        this.objectMapper = objectMapper;
     }
 
     public PagedResult<AnimalResponse> findAllAnimals(FindAnimalsQuery findAnimalsQuery) {
@@ -72,11 +63,10 @@ public class AnimalService {
         return PageRequest.of(pageNo, findAnimalsQuery.pageSize(), sort);
     }
 
-    public Window<AnimalResponse> searchAnimals(
-            List<SearchCriteria> searchCriteriaList, int pageSize, Long scrollId, String sort) {
+    public Window<AnimalResponse> searchAnimals(SearchRequest searchRequest, int pageSize, Long scrollId) {
 
         Specification<Animal> specification =
-                animalEntitySpecification.specificationBuilder(searchCriteriaList, Animal.class);
+                animalEntitySpecification.specificationBuilder(searchRequest.getSearchCriteriaList(), Animal.class);
 
         // Create initial ScrollPosition or continue from the given scrollId
         ScrollPosition position = scrollId == null
@@ -84,15 +74,19 @@ public class AnimalService {
                 : ScrollPosition.of(Collections.singletonMap("id", scrollId), ScrollPosition.Direction.FORWARD);
 
         // Parse and create sort orders
-        List<SortDto> sortDtos = jsonStringToSortDto(sort);
         List<Sort.Order> orders = new ArrayList<>();
 
-        if (sortDtos != null) {
-            for (SortDto sortDto : sortDtos) {
-                Sort.Direction direction =
-                        Objects.equals(sortDto.getDirection(), "desc") ? Sort.Direction.DESC : Sort.Direction.ASC;
-                orders.add(new Sort.Order(direction, sortDto.getField()));
+        if (!CollectionUtils.isEmpty(searchRequest.getSortDtos())) {
+            for (SortRequest sortRequest : searchRequest.getSortDtos()) {
+                Sort.Direction direction = "desc"
+                                .equalsIgnoreCase(Optional.ofNullable(sortRequest.getDirection())
+                                        .orElse("asc"))
+                        ? Sort.Direction.DESC
+                        : Sort.Direction.ASC;
+                orders.add(new Sort.Order(direction, sortRequest.getField()));
             }
+        } else {
+            orders.add(new Sort.Order(Sort.Direction.ASC, "id"));
         }
 
         return animalRepository
@@ -127,14 +121,5 @@ public class AnimalService {
     @Transactional
     public void deleteAnimalById(Long id) {
         animalRepository.deleteById(id);
-    }
-
-    private List<SortDto> jsonStringToSortDto(String jsonString) {
-        try {
-            return objectMapper.readValue(jsonString, new TypeReference<>() {});
-        } catch (Exception e) {
-            log.info("Exception: ", e);
-            return null;
-        }
     }
 }

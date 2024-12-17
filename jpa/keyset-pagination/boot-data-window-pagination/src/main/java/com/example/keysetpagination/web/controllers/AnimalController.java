@@ -2,7 +2,7 @@ package com.example.keysetpagination.web.controllers;
 
 import com.example.keysetpagination.exception.AnimalNotFoundException;
 import com.example.keysetpagination.model.query.FindAnimalsQuery;
-import com.example.keysetpagination.model.query.SearchCriteria;
+import com.example.keysetpagination.model.query.SearchRequest;
 import com.example.keysetpagination.model.request.AnimalRequest;
 import com.example.keysetpagination.model.response.AnimalResponse;
 import com.example.keysetpagination.model.response.PagedResult;
@@ -17,7 +17,6 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import java.net.URI;
-import java.util.List;
 import org.springframework.data.domain.Window;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -73,13 +72,10 @@ class AnimalController {
                     int pageSize,
             @Parameter(description = "Scroll ID for pagination", in = ParameterIn.QUERY) @RequestParam(required = false)
                     Long scrollId,
-            @Parameter(description = "Sort fields", in = ParameterIn.QUERY)
-                    @RequestParam(name = "sort", defaultValue = "[{\"field\":\"id\",\"direction\":\"asc\"}]")
-                    String sort,
             @io.swagger.v3.oas.annotations.parameters.RequestBody(required = true) @RequestBody @Valid
-                    List<SearchCriteria> searchCriteria) {
+                    SearchRequest searchRequest) {
 
-        return animalService.searchAnimals(searchCriteria, pageSize, scrollId, sort);
+        return animalService.searchAnimals(searchRequest, pageSize, scrollId);
     }
 
     @GetMapping("/{id}")

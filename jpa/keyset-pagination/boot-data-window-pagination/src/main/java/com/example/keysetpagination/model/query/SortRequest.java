@@ -1,6 +1,6 @@
 package com.example.keysetpagination.model.query;
 
-public class SortDto {
+public class SortRequest {
 
     private String field;
     private String direction;
