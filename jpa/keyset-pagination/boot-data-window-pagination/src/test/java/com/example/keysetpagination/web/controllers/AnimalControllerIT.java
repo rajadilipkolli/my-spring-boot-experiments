@@ -434,7 +434,7 @@ class AnimalControllerIT extends AbstractIntegrationTest {
                                         """))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath(
-                        "$.content.size()", is(6))) // "Elephant", "Penguin", "Crocodile", ""Eagle"", "Whale", "Snake"
+                        "$.content.size()", is(6))) // "Elephant", "Penguin", "Crocodile", "Eagle", "Whale", "Snake"
                 .andExpect(jsonPath("$.last", is(true)));
     }
 
@@ -535,7 +535,7 @@ class AnimalControllerIT extends AbstractIntegrationTest {
                                             "field": "id",
                                             "values": [
                                                 "%d",
-                                                "%s"
+                                                "%d"
                                             ]
                                         }
                                     ]

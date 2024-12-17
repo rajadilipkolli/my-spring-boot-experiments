@@ -19,6 +19,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.example.keysetpagination.entities.Animal;
 import com.example.keysetpagination.exception.AnimalNotFoundException;
 import com.example.keysetpagination.model.query.FindAnimalsQuery;
+import com.example.keysetpagination.model.query.SearchRequest;
 import com.example.keysetpagination.model.request.AnimalRequest;
 import com.example.keysetpagination.model.response.AnimalResponse;
 import com.example.keysetpagination.model.response.PagedResult;
@@ -111,6 +112,36 @@ class AnimalControllerTest {
                 .andExpect(jsonPath("$.isLast", is(true)))
                 .andExpect(jsonPath("$.hasNext", is(false)))
                 .andExpect(jsonPath("$.hasPrevious", is(true)));
+    }
+
+    @Test
+    void shouldReturnBadRequestWhenPageSizeIsLessThanMin() throws Exception {
+        SearchRequest searchRequest = new SearchRequest();
+        mockMvc.perform(post("/api/animals/search")
+                        .param("pageSize", "0") // Less than minimum value of 1
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(searchRequest)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void shouldReturnBadRequestWhenPageSizeExceedsMax() throws Exception {
+        SearchRequest searchRequest = new SearchRequest();
+        mockMvc.perform(post("/api/animals/search")
+                        .param("pageSize", "101") // Exceeds maximum value of 100
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(searchRequest)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void shouldReturnOkWhenPageSizeIsWithinValidRange() throws Exception {
+        SearchRequest searchRequest = new SearchRequest();
+        mockMvc.perform(post("/api/animals/search")
+                        .param("pageSize", "50") // Within valid range (1-100)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(searchRequest)))
+                .andExpect(status().isOk());
     }
 
     @Test
