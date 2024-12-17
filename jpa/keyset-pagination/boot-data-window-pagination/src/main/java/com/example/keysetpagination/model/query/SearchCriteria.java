@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.util.List;
+import java.util.StringJoiner;
 
 public class SearchCriteria {
 
@@ -47,5 +48,14 @@ public class SearchCriteria {
 
     public void setValues(List<String> values) {
         this.values = values;
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", SearchCriteria.class.getSimpleName() + "[", "]")
+                .add("queryOperator=" + queryOperator)
+                .add("field='" + field + "'")
+                .add("values=" + values)
+                .toString();
     }
 }

@@ -80,15 +80,17 @@ class AnimalControllerIT extends AbstractIntegrationTest {
                         .param("pageSize", "2")
                         .content(
                                 """
-                                [
-                                  {
-                                    "queryOperator": "EQ",
-                                    "field": "type",
-                                    "values": [
-                                      "Bird"
+                                {
+                                    "searchCriteriaList": [
+                                        {
+                                            "queryOperator": "EQ",
+                                            "field": "type",
+                                            "values": [
+                                                "Bird"
+                                            ]
+                                        }
                                     ]
-                                  }
-                                ]
+                                }
                                 """)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -112,15 +114,22 @@ class AnimalControllerIT extends AbstractIntegrationTest {
                                 String.valueOf(animalResponses.getLast().getId()))
                         .content(
                                 """
-                                [
-                                  {
-                                    "queryOperator": "EQ",
-                                    "field": "type",
-                                    "values": [
-                                      "Bird"
+                                {
+                                    "searchCriteriaList": [
+                                        {
+                                            "queryOperator": "EQ",
+                                            "field": "type",
+                                            "values": [
+                                                "Bird"
+                                            ]
+                                        }
+                                    ],
+                                    "sortRequests": [
+                                        {
+                                            "field": "type"
+                                        }
                                     ]
-                                  }
-                                ]
+                                }
                                 """)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -137,16 +146,19 @@ class AnimalControllerIT extends AbstractIntegrationTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(
                                         """
-                                        [
-                                          {
-                                            "queryOperator": "NE",
-                                            "field": "type",
-                                            "values": [
-                                              "Mammal",
-                                              "Bird"
-                                            ]
-                                          }
-                                        ]
+                                        {
+                                        	"searchCriteriaList": [
+                                        		{
+                                        			"queryOperator": "NE",
+                                        			"field": "type",
+                                        			"values": [
+                                        				"Mammal",
+                                        				"Bird"
+                                        			]
+                                        		}
+                                        	],
+                                        	"sortRequests": []
+                                        }
                                         """))
                 .andExpect(status().isOk())
                 // Total animals (10) - Mammals (3) - Birds (3) = 4 animals
@@ -162,15 +174,17 @@ class AnimalControllerIT extends AbstractIntegrationTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(
                                         """
-                                        [
-                                          {
-                                            "queryOperator": "EQ",
-                                            "field": "name",
-                                            "values": [
-                                              "NonExistent"
-                                            ]
-                                          }
-                                        ]
+                                         {
+                                        	"searchCriteriaList": [
+                                        		{
+                                        			"queryOperator": "EQ",
+                                        			"field": "name",
+                                        			"values": [
+                                        				"NonExistent"
+                                        			]
+                                        		}
+                                        	]
+                                        }
                                         """))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(0)))
@@ -301,14 +315,18 @@ class AnimalControllerIT extends AbstractIntegrationTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(
                                         """
-            [
-              {
-                "queryOperator": "EQ",
-                "field": "name",
-                "values": ["Lion"]
-              }
-            ]
-            """))
+                                        {
+                                        	"searchCriteriaList": [
+                                        		{
+                                        			"queryOperator": "EQ",
+                                        			"field": "name",
+                                        			"values": [
+                                        				"Lion"
+                                        			]
+                                        		}
+                                        	]
+                                        }
+                                        """))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content.size()", is(1)))
                 .andExpect(jsonPath("$.content[0].name", is("Lion")))
@@ -324,13 +342,17 @@ class AnimalControllerIT extends AbstractIntegrationTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(
                                         """
-                                        [
-                                          {
-                                            "queryOperator": "NE",
-                                            "field": "type",
-                                            "values": ["Mammal"]
-                                          }
-                                        ]
+                                        {
+                                        	"searchCriteriaList": [
+                                        		{
+                                        			"queryOperator": "NE",
+                                        			"field": "type",
+                                        			"values": [
+                                        				"Mammal"
+                                        			]
+                                        		}
+                                        	]
+                                        }
                                         """))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content.size()", is(7))) // Total 10 animals - 3 mammals
@@ -346,14 +368,19 @@ class AnimalControllerIT extends AbstractIntegrationTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(
                                         """
-                                [
-                                  {
-                                    "queryOperator": "IN",
-                                    "field": "type",
-                                    "values": ["Bird", "Fish"]
-                                  }
-                                ]
-                                """))
+                                        {
+                                        	"searchCriteriaList": [
+                                        		{
+                                        			"queryOperator": "IN",
+                                        			"field": "type",
+                                        			"values": [
+                                        				"Bird",
+                                        				"Fish"
+                                        			]
+                                        		}
+                                        	]
+                                        }
+                                        """))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content.size()", is(4))) // "Parrot", "Penguin", "Shark", "Eagle"
                 .andExpect(jsonPath("$.last", is(true)));
@@ -368,13 +395,18 @@ class AnimalControllerIT extends AbstractIntegrationTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(
                                         """
-                                        [
-                                          {
-                                            "queryOperator": "NOT_IN",
-                                            "field": "type",
-                                            "values": ["Bird", "Fish"]
-                                          }
-                                        ]
+                                        {
+                                        	"searchCriteriaList": [
+                                        		{
+                                        			"queryOperator": "NOT_IN",
+                                        			"field": "type",
+                                        			"values": [
+                                        				"Bird",
+                                        				"Fish"
+                                        			]
+                                        		}
+                                        	]
+                                        }
                                         """))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content.size()", is(6)))
@@ -390,17 +422,19 @@ class AnimalControllerIT extends AbstractIntegrationTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(
                                         """
-                                        [
-                                          {
-                                            "queryOperator": "LIKE",
-                                            "field": "name",
-                                            "values": ["%e%"]
-                                          }
-                                        ]
+                                        {
+                                        	"searchCriteriaList": [
+                                              {
+                                                "queryOperator": "LIKE",
+                                                "field": "name",
+                                                "values": ["%e%"]
+                                              }
+                                            ]
+                                        }
                                         """))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath(
-                        "$.content.size()", is(6))) // "Elephant", "Penguin", "Crocodile", ""Eagle"", "Whale", "Snake"
+                        "$.content.size()", is(6))) // "Elephant", "Penguin", "Crocodile", "Eagle", "Whale", "Snake"
                 .andExpect(jsonPath("$.last", is(true)));
     }
 
@@ -413,14 +447,16 @@ class AnimalControllerIT extends AbstractIntegrationTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(
                                         """
-            [
-              {
-                "queryOperator": "CONTAINS",
-                "field": "name",
-                "values": ["ar"]
-              }
-            ]
-            """))
+                                        {
+                                           "searchCriteriaList": [
+                                              {
+                                                "queryOperator": "CONTAINS",
+                                                "field": "name",
+                                                "values": ["ar"]
+                                              }
+                                            ]
+                                        }
+                                        """))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content.size()", is(2))) // "Parrot", "Shark"
                 .andExpect(jsonPath("$.last", is(true)));
@@ -435,14 +471,22 @@ class AnimalControllerIT extends AbstractIntegrationTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(
                                         """
-            [
-              {
-                "queryOperator": "STARTS_WITH",
-                "field": "name",
-                "values": ["P"]
-              }
-            ]
-            """))
+                                        {
+                                          "searchCriteriaList": [
+                                              {
+                                                "queryOperator": "STARTS_WITH",
+                                                "field": "name",
+                                                "values": ["P"]
+                                              }
+                                            ],
+                                            "sortRequests" : [
+                                               {
+                                                   "field": "name",
+                                                   "direction" : "desc"
+                                               }
+                                            ]
+                                        }
+                                        """))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content.size()", is(2))) // "Parrot", "Penguin"
                 .andExpect(jsonPath("$.last", is(true)));
@@ -457,14 +501,16 @@ class AnimalControllerIT extends AbstractIntegrationTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(
                                         """
-            [
-              {
-                "queryOperator": "ENDS_WITH",
-                "field": "name",
-                "values": ["g"]
-              }
-            ]
-            """))
+                                        {
+                                        	"searchCriteriaList": [
+                                              {
+                                                "queryOperator": "ENDS_WITH",
+                                                "field": "name",
+                                                "values": ["g"]
+                                              }
+                                            ]
+                                        }
+                                        """))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content.size()", is(1))) // "Frog"
                 .andExpect(jsonPath("$.content[0].name", is("Frog")))
@@ -482,14 +528,19 @@ class AnimalControllerIT extends AbstractIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(String.format(
                                 """
-            [
-              {
-                "queryOperator": "BETWEEN",
-                "field": "id",
-                "values": ["%d", "%d"]
-              }
-            ]
-            """,
+                                {
+                                    "searchCriteriaList": [
+                                        {
+                                            "queryOperator": "BETWEEN",
+                                            "field": "id",
+                                            "values": [
+                                                %d,
+                                                %d
+                                            ]
+                                        }
+                                    ]
+                                }
+                                """,
                                 minId, maxId)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content.size()", is(5))) // Animals with IDs between minId and maxId
@@ -505,18 +556,24 @@ class AnimalControllerIT extends AbstractIntegrationTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(
                                         """
-                                        [
-                                          {
-                                            "queryOperator": "EQ",
-                                            "field": "type",
-                                            "values": ["Bird"]
-                                          },
-                                          {
-                                            "queryOperator": "EQ",
-                                            "field": "habitat",
-                                            "values": ["Rainforest"]
-                                          }
-                                        ]
+                                        {
+                                        	"searchCriteriaList": [
+                                        		{
+                                        			"queryOperator": "EQ",
+                                        			"field": "type",
+                                        			"values": [
+                                        				"Bird"
+                                        			]
+                                        		},
+                                        		{
+                                        			"queryOperator": "EQ",
+                                        			"field": "habitat",
+                                        			"values": [
+                                        				"Rainforest"
+                                        			]
+                                        		}
+                                        	]
+                                        }
                                         """))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content.size()", is(1))) // "Parrot"
@@ -533,14 +590,16 @@ class AnimalControllerIT extends AbstractIntegrationTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(
                                         """
-                                [
-                                  {
-                                    "queryOperator": "OR",
-                                    "field": "name",
-                                    "values": ["Shark", "Eagle"]
-                                  }
-                                ]
-            """))
+                                        {
+                                           "searchCriteriaList": [
+                                              {
+                                                "queryOperator": "OR",
+                                                "field": "name",
+                                                "values": ["Shark", "Eagle"]
+                                              }
+                                            ]
+                                        }
+                                        """))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content.size()", is(2))) // "Shark" and "Eagle"
                 .andExpect(jsonPath("$.last", is(true)));

@@ -1,6 +1,7 @@
 package com.example.keysetpagination.config;
 
 import com.example.keysetpagination.exception.ResourceNotFoundException;
+import jakarta.validation.ConstraintViolationException;
 import java.net.URI;
 import java.time.Instant;
 import java.util.Comparator;
@@ -37,6 +38,26 @@ class GlobalExceptionHandler {
                 .sorted(Comparator.comparing(ApiValidationError::field))
                 .toList();
         problemDetail.setProperty("violations", validationErrorsList);
+        return problemDetail;
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    ProblemDetail onException(ConstraintViolationException constraintViolationException) {
+        List<ApiValidationError> apiValidationErrors = constraintViolationException.getConstraintViolations().stream()
+                .map(constraintViolation -> new ApiValidationError(
+                        constraintViolation.getRootBeanClass().getSimpleName(),
+                        constraintViolation.getPropertyPath().toString(),
+                        constraintViolation.getInvalidValue(),
+                        constraintViolation.getMessage()))
+                .sorted(Comparator.comparing(ApiValidationError::field))
+                .toList();
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+                HttpStatusCode.valueOf(400), constraintViolationException.getMessage());
+        problemDetail.setTitle("Constraint Violation");
+        problemDetail.setType(URI.create("https://api.boot-data-window-pagination.com/errors/validation"));
+        problemDetail.setProperty("errorCategory", "Validation");
+        problemDetail.setProperty("timestamp", Instant.now());
+        problemDetail.setProperty("violations", apiValidationErrors);
         return problemDetail;
     }
 

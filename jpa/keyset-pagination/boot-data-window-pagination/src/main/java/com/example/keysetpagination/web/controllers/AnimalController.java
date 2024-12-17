@@ -2,7 +2,7 @@ package com.example.keysetpagination.web.controllers;
 
 import com.example.keysetpagination.exception.AnimalNotFoundException;
 import com.example.keysetpagination.model.query.FindAnimalsQuery;
-import com.example.keysetpagination.model.query.SearchCriteria;
+import com.example.keysetpagination.model.query.SearchRequest;
 import com.example.keysetpagination.model.request.AnimalRequest;
 import com.example.keysetpagination.model.response.AnimalResponse;
 import com.example.keysetpagination.model.response.PagedResult;
@@ -10,13 +10,13 @@ import com.example.keysetpagination.services.AnimalService;
 import com.example.keysetpagination.utils.AppConstants;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import java.net.URI;
-import java.util.List;
 import org.springframework.data.domain.Window;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -38,7 +38,7 @@ class AnimalController {
 
     private final AnimalService animalService;
 
-    public AnimalController(AnimalService animalService) {
+    AnimalController(AnimalService animalService) {
         this.animalService = animalService;
     }
 
@@ -65,15 +65,17 @@ class AnimalController {
             })
     @PostMapping("/search")
     public Window<AnimalResponse> searchAnimals(
-            @Parameter(description = "Number of items per page (max 100)")
+            @Parameter(description = "Number of items per page (max 100)", in = ParameterIn.QUERY)
                     @RequestParam(defaultValue = "10")
                     @Min(1)
                     @Max(100)
                     int pageSize,
-            @Parameter(description = "Scroll ID for pagination") @RequestParam(required = false) Long scrollId,
-            @RequestBody @Valid List<SearchCriteria> searchCriteria) {
+            @Parameter(description = "Scroll ID for pagination", in = ParameterIn.QUERY) @RequestParam(required = false)
+                    Long scrollId,
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(required = true) @RequestBody @Valid
+                    SearchRequest searchRequest) {
 
-        return animalService.searchAnimals(searchCriteria, pageSize, scrollId);
+        return animalService.searchAnimals(searchRequest, pageSize, scrollId);
     }
 
     @GetMapping("/{id}")

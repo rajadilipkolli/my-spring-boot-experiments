@@ -4,7 +4,7 @@ import com.example.keysetpagination.entities.Animal;
 import com.example.keysetpagination.exception.AnimalNotFoundException;
 import com.example.keysetpagination.mapper.AnimalMapper;
 import com.example.keysetpagination.model.query.FindAnimalsQuery;
-import com.example.keysetpagination.model.query.SearchCriteria;
+import com.example.keysetpagination.model.query.SearchRequest;
 import com.example.keysetpagination.model.request.AnimalRequest;
 import com.example.keysetpagination.model.response.AnimalResponse;
 import com.example.keysetpagination.model.response.PagedResult;
@@ -12,6 +12,8 @@ import com.example.keysetpagination.repositories.AnimalRepository;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -21,10 +23,13 @@ import org.springframework.data.domain.Window;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 @Service
 @Transactional(readOnly = true)
 public class AnimalService {
+
+    private static final Logger log = LoggerFactory.getLogger(AnimalService.class);
 
     private final AnimalRepository animalRepository;
     private final AnimalMapper animalMapper;
@@ -60,22 +65,36 @@ public class AnimalService {
         return PageRequest.of(pageNo, findAnimalsQuery.pageSize(), sort);
     }
 
-    public Window<AnimalResponse> searchAnimals(List<SearchCriteria> searchCriteriaList, int pageSize, Long scrollId) {
+    public Window<AnimalResponse> searchAnimals(SearchRequest searchRequest, int pageSize, Long scrollId) {
 
         Specification<Animal> specification =
-                animalEntitySpecification.specificationBuilder(searchCriteriaList, Animal.class);
+                animalEntitySpecification.specificationBuilder(searchRequest.getSearchCriteriaList(), Animal.class);
 
         // Create initial ScrollPosition or continue from the given scrollId
         ScrollPosition position = scrollId == null
                 ? ScrollPosition.keyset()
                 : ScrollPosition.of(Collections.singletonMap("id", scrollId), ScrollPosition.Direction.FORWARD);
 
+        // Parse and create sort orders
+        List<Sort.Order> orders = CollectionUtils.isEmpty(searchRequest.getSortRequests())
+                ? Collections.singletonList(new Sort.Order(Sort.Direction.ASC, "id"))
+                : searchRequest.getSortRequests().stream()
+                        .map(sortRequest -> {
+                            Sort.Direction direction = "desc"
+                                            .equalsIgnoreCase(Optional.ofNullable(sortRequest.getDirection())
+                                                    .orElse("asc"))
+                                    ? Sort.Direction.DESC
+                                    : Sort.Direction.ASC;
+                            return new Sort.Order(direction, sortRequest.getField());
+                        })
+                        .toList();
+
+        log.debug(
+                "Executing search with criteria: {} and sort orders: {}",
+                searchRequest.getSearchCriteriaList(),
+                orders);
         return animalRepository
-                .findAll(
-                        specification,
-                        PageRequest.of(0, pageSize, Sort.by(Sort.Order.asc("id"))),
-                        position,
-                        Animal.class)
+                .findAll(specification, PageRequest.of(0, pageSize, Sort.by(orders)), position, Animal.class)
                 .map(animalMapper::toResponse);
     }
 
