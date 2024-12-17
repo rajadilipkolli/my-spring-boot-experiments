@@ -7,18 +7,11 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
-import java.time.LocalDateTime;
 import java.util.Objects;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
 import org.hibernate.Hibernate;
 
 @Entity
 @Table(name = "animals", schema = "public")
-@Getter
-@NoArgsConstructor
-@AllArgsConstructor
 public class Animal extends Auditable {
 
     @Id
@@ -36,9 +29,27 @@ public class Animal extends Auditable {
     @Version
     private Short version;
 
+    public Animal() {}
+
+    public Animal(Long id, String name, String type, String habitat, Short version) {
+        this.id = id;
+        this.name = name;
+        this.type = type;
+        this.habitat = habitat;
+        this.version = version;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
     public Animal setId(Long id) {
         this.id = id;
         return this;
+    }
+
+    public String getName() {
+        return name;
     }
 
     public Animal setName(String name) {
@@ -46,9 +57,17 @@ public class Animal extends Auditable {
         return this;
     }
 
+    public String getType() {
+        return type;
+    }
+
     public Animal setType(String type) {
         this.type = type;
         return this;
+    }
+
+    public String getHabitat() {
+        return habitat;
     }
 
     public Animal setHabitat(String habitat) {
@@ -56,8 +75,8 @@ public class Animal extends Auditable {
         return this;
     }
 
-    public void setCreated(LocalDateTime created) {
-        this.created = created;
+    public Short getVersion() {
+        return version;
     }
 
     public Animal setVersion(Short version) {

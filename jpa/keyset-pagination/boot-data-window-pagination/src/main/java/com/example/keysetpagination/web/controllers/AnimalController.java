@@ -17,7 +17,6 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import java.net.URI;
 import java.util.List;
-import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Window;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -34,11 +33,14 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @RestController
 @RequestMapping("/api/animals")
-@RequiredArgsConstructor
 @Validated
 class AnimalController {
 
     private final AnimalService animalService;
+
+    public AnimalController(AnimalService animalService) {
+        this.animalService = animalService;
+    }
 
     @GetMapping
     PagedResult<AnimalResponse> getAllAnimals(
