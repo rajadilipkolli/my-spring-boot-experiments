@@ -10,6 +10,7 @@ import com.example.keysetpagination.services.AnimalService;
 import com.example.keysetpagination.utils.AppConstants;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
@@ -38,7 +39,7 @@ class AnimalController {
 
     private final AnimalService animalService;
 
-    public AnimalController(AnimalService animalService) {
+    AnimalController(AnimalService animalService) {
         this.animalService = animalService;
     }
 
@@ -65,15 +66,20 @@ class AnimalController {
             })
     @PostMapping("/search")
     public Window<AnimalResponse> searchAnimals(
-            @Parameter(description = "Number of items per page (max 100)")
+            @Parameter(description = "Number of items per page (max 100)", in = ParameterIn.QUERY)
                     @RequestParam(defaultValue = "10")
                     @Min(1)
                     @Max(100)
                     int pageSize,
-            @Parameter(description = "Scroll ID for pagination") @RequestParam(required = false) Long scrollId,
-            @RequestBody @Valid List<SearchCriteria> searchCriteria) {
+            @Parameter(description = "Scroll ID for pagination", in = ParameterIn.QUERY) @RequestParam(required = false)
+                    Long scrollId,
+            @Parameter(description = "Sort fields", in = ParameterIn.QUERY)
+                    @RequestParam(name = "sort", defaultValue = "[{\"field\":\"id\",\"direction\":\"asc\"}]")
+                    String sort,
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(required = true) @RequestBody @Valid
+                    List<SearchCriteria> searchCriteria) {
 
-        return animalService.searchAnimals(searchCriteria, pageSize, scrollId);
+        return animalService.searchAnimals(searchCriteria, pageSize, scrollId, sort);
     }
 
     @GetMapping("/{id}")
