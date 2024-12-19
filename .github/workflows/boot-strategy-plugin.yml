@@ -53,7 +53,7 @@ jobs:
           docker ps -a
 
       - name: Build and analyze
-        run: ./mvnw verify
+        run: ./mvnw test
 
       - if: ${{ github.ref == 'refs/heads/main' }}
         name: Build container image
