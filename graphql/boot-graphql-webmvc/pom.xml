@@ -7,7 +7,7 @@
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>3.4.1</version>
-        <relativePath /> <!-- lookup parent from repository -->
+        <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.example.graphql</groupId>
     <artifactId>boot-graphql-webmvc</artifactId>
@@ -59,7 +59,7 @@
         <dependency>
             <groupId>com.graphql-java</groupId>
             <artifactId>graphql-java-extended-scalars</artifactId>
-            <version>21.0</version>
+            <version>22.0</version>
         </dependency>
         <!-- Mapstruct -->
         <dependency>
@@ -312,9 +312,9 @@
                         <palantirJavaFormat>
                             <version>2.50.0</version>
                         </palantirJavaFormat>
-                        <importOrder />
-                        <removeUnusedImports />
-                        <formatAnnotations />
+                        <importOrder/>
+                        <removeUnusedImports/>
+                        <formatAnnotations/>
                     </java>
                 </configuration>
                 <executions>
