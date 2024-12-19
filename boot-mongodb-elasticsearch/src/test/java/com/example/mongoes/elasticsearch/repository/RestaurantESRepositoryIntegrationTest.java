@@ -479,5 +479,10 @@ class RestaurantESRepositoryIntegrationTest extends AbstractIntegrationTest {
         assertThat(restaurant.getBorough()).isEqualTo(BOROUGH_NAME);
         assertThat(restaurant.getCuisine()).isEqualTo(CUISINE_NAME);
         assertThat(restaurant.getGrades()).isNotEmpty().hasSize(2);
+        assertThat(restaurant.getAddress()).isNotNull();
+        assertThat(restaurant.getAddress().getLocation())
+                .isNotNull()
+                .extracting(Point::getX, Point::getY)
+                .containsExactly(-73.9, 40.8);
     }
 }
