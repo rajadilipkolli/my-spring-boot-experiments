@@ -85,7 +85,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
     }
 
     @Test
-    void shouldReturn400WhenCreateNewCustomerWithoutText() throws Exception {
+    void shouldReturn400WhenCreateNewCustomerWithoutName() throws Exception {
         Customer customer = new Customer(null, null, null, null);
 
         this.mockMvc
