@@ -54,11 +54,11 @@ jobs:
           sleep 5
           docker ps -a
       - name: Build and analyze
-        run: ./gradlew clean build --info
+        run: ./mvnw verify
 
       - if: ${{ github.ref == 'refs/heads/main' }}
         name: Build container image
-        run: ./gradlew bootBuildImage --imageName ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/boot-strategy-plugin:${{ env.VERSION }}
+        run: ./mvnw spring-boot:build-image --imageName ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/boot-strategy-plugin:${{ env.VERSION }}
       - if: ${{ github.ref == 'refs/heads/main' }}
         name: OCI image vulnerability scanning
         uses: anchore/scan-action@v6
