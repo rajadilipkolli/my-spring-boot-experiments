@@ -36,11 +36,9 @@ jobs:
       - uses: graalvm/setup-graalvm@v1
         with:
           distribution: 'graalvm'
-          java-version: '21'
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          cache: 'gradle'
-          native-image-job-reports: 'true'
-      
+          java-version: 21
+          cache: "maven"
+  
       - name: Printing versions
         run: |
           echo "GRAALVM_HOME: $GRAALVM_HOME"
@@ -53,6 +51,7 @@ jobs:
           docker compose up -d
           sleep 5
           docker ps -a
+
       - name: Build and analyze
         run: ./mvnw verify
 
