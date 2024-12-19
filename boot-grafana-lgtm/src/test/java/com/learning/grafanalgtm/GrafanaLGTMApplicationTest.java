@@ -4,7 +4,9 @@ import static io.restassured.RestAssured.given;
 import static io.restassured.RestAssured.when;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
 
+import com.learning.grafanalgtm.common.ContainerConfig;
 import io.restassured.RestAssured;
 import io.restassured.authentication.PreemptiveBasicAuthScheme;
 import io.restassured.http.ContentType;
@@ -19,7 +21,7 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.testcontainers.grafana.LgtmStackContainer;
 
 @SpringBootTest(
-        classes = {TestGrafanaLGTMApplication.class},
+        classes = {ContainerConfig.class},
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class GrafanaLGTMApplicationTest {
@@ -58,7 +60,30 @@ class GrafanaLGTMApplicationTest {
                 .contentType(ContentType.JSON)
                 .body("status", is("success"))
                 .body("data.resultType", is("vector"))
-                .body("data.result", empty());
+                .body("data.result", empty())
+                .log()
+                .all();
+    }
+
+    @Test
+    void queryPrometheus() {
+        // calling endpoint to load metrics
+        when().get("/greetings").then().statusCode(HttpStatus.SC_OK);
+
+        RestAssured.port = lgtmContainer.getMappedPort(9090);
+        given().contentType(ContentType.URLENC)
+                .body("query=up")
+                .when()
+                .post("/api/v1/query")
+                .then()
+                .statusCode(HttpStatus.SC_OK)
+                .contentType(ContentType.JSON)
+                .body("status", is("success"))
+                .body("data.resultType", is("vector"))
+                .body("data.result", not(empty()))
+                .body("data.result[0].value[1]", is("1")) // Verify service is up
+                .log()
+                .all();
     }
 
     @Test
