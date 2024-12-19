@@ -4,6 +4,7 @@ import static io.restassured.RestAssured.given;
 import static io.restassured.RestAssured.when;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
 
 import com.learning.grafanalgtm.common.ContainerConfig;
 import io.restassured.RestAssured;
@@ -59,7 +60,9 @@ class GrafanaLGTMApplicationTest {
                 .contentType(ContentType.JSON)
                 .body("status", is("success"))
                 .body("data.resultType", is("vector"))
-                .body("data.result", empty());
+                .body("data.result", empty())
+                .log()
+                .all();
     }
 
     @Test
@@ -75,7 +78,12 @@ class GrafanaLGTMApplicationTest {
                 .then()
                 .statusCode(HttpStatus.SC_OK)
                 .contentType(ContentType.JSON)
-                .body("status", is("success"));
+                .body("status", is("success"))
+                .body("data.resultType", is("vector"))
+                .body("data.result", not(empty()))
+                .body("data.result[0].value[1]", is("1")) // Verify service is up
+                .log()
+                .all();
     }
 
     @Test
