@@ -34,27 +34,14 @@ class RestaurantESRepositoryIntegrationTest extends AbstractIntegrationTest {
     public static final String RESTAURANT_NAME = "Lb Spumoni Gardens";
     private static final String BOROUGH_NAME = "Brooklyn";
     private static final String CUISINE_NAME = "Pizza/Italian";
+
     @Autowired private RestaurantESRepository restaurantESRepository;
 
     @BeforeAll
     void setUpData() {
-        Restaurant restaurant = new Restaurant();
-        restaurant.setRestaurantId(2L);
-        restaurant.setName(RESTAURANT_NAME);
-        restaurant.setBorough(BOROUGH_NAME);
-        restaurant.setCuisine(CUISINE_NAME);
-        Address address = new Address();
-        address.setLocation(new Point(-73.9, 40.8));
-        restaurant.setAddress(address);
-        Grades grade = new Grades("A", LocalDateTime.of(2022, 1, 1, 1, 1, 1), 15);
-        Grades grade1 = new Grades("B", LocalDateTime.of(2022, 3, 31, 23, 59, 59), 15);
-        restaurant.setGrades(List.of(grade, grade1));
-        Restaurant restaurant1 = new Restaurant();
-        restaurant1.setRestaurantId(40363920L);
-        restaurant1.setBorough("Brooklyn");
-        restaurant1.setCuisine("Chinese");
-        restaurant1.setName("Yono gardens");
-        restaurant1.setGrades(List.of(grade, grade1));
+        Restaurant restaurant = createRestaurant(2L, RESTAURANT_NAME, BOROUGH_NAME, CUISINE_NAME);
+        Restaurant restaurant1 = createRestaurant(40363920L, "Yono gardens", "Brooklyn", "Chinese");
+
         this.restaurantESRepository
                 .deleteAll()
                 .log()
@@ -68,6 +55,21 @@ class RestaurantESRepositoryIntegrationTest extends AbstractIntegrationTest {
                         () -> assertThat(this.restaurantESRepository.count().block()).isEqualTo(2));
     }
 
+    private Restaurant createRestaurant(long id, String name, String borough, String cuisine) {
+        Restaurant restaurant = new Restaurant();
+        restaurant.setRestaurantId(id);
+        restaurant.setName(name);
+        restaurant.setBorough(borough);
+        restaurant.setCuisine(cuisine);
+        Address address = new Address();
+        address.setLocation(new Point(-73.9, 40.8));
+        restaurant.setAddress(address);
+        Grades grade = new Grades("A", LocalDateTime.of(2022, 1, 1, 1, 1, 1), 15);
+        Grades grade1 = new Grades("B", LocalDateTime.of(2022, 3, 31, 23, 59, 59), 15);
+        restaurant.setGrades(List.of(grade, grade1));
+        return restaurant;
+    }
+
     @Test
     void findByRestaurantId() {
         var findByRestaurantId = this.restaurantESRepository.findByRestaurantId(1L);
@@ -77,14 +79,7 @@ class RestaurantESRepositoryIntegrationTest extends AbstractIntegrationTest {
         var findByRestaurantIdMono = this.restaurantESRepository.findByRestaurantId(2L);
 
         StepVerifier.create(findByRestaurantIdMono)
-                .consumeNextWith(
-                        restaurant1 -> {
-                            assertThat(restaurant1.getRestaurantId()).isEqualTo(2L);
-                            assertThat(restaurant1.getName()).isEqualTo(RESTAURANT_NAME);
-                            assertThat(restaurant1.getBorough()).isEqualTo(BOROUGH_NAME);
-                            assertThat(restaurant1.getCuisine()).isEqualTo(CUISINE_NAME);
-                            assertThat(restaurant1.getGrades()).isNotEmpty().hasSize(2);
-                        })
+                .consumeNextWith(this::assertRestaurant)
                 .verifyComplete();
     }
 
@@ -92,16 +87,7 @@ class RestaurantESRepositoryIntegrationTest extends AbstractIntegrationTest {
     void findByName() {
         var findNameMono = this.restaurantESRepository.findByName(RESTAURANT_NAME);
 
-        StepVerifier.create(findNameMono)
-                .consumeNextWith(
-                        restaurant1 -> {
-                            assertThat(restaurant1.getRestaurantId()).isEqualTo(2L);
-                            assertThat(restaurant1.getName()).isEqualTo(RESTAURANT_NAME);
-                            assertThat(restaurant1.getBorough()).isEqualTo(BOROUGH_NAME);
-                            assertThat(restaurant1.getCuisine()).isEqualTo(CUISINE_NAME);
-                            assertThat(restaurant1.getGrades()).isNotEmpty().hasSize(2);
-                        })
-                .verifyComplete();
+        StepVerifier.create(findNameMono).consumeNextWith(this::assertRestaurant).verifyComplete();
     }
 
     @Test
@@ -112,14 +98,7 @@ class RestaurantESRepositoryIntegrationTest extends AbstractIntegrationTest {
                         PageRequest.of(0, 10, Sort.by(Sort.Direction.ASC, "restaurant_id")));
 
         StepVerifier.create(findByBoroughMono)
-                .consumeNextWith(
-                        restaurant1 -> {
-                            assertThat(restaurant1.getRestaurantId()).isEqualTo(2L);
-                            assertThat(restaurant1.getName()).isEqualTo(RESTAURANT_NAME);
-                            assertThat(restaurant1.getBorough()).isEqualTo(BOROUGH_NAME);
-                            assertThat(restaurant1.getCuisine()).isEqualTo(CUISINE_NAME);
-                            assertThat(restaurant1.getGrades()).isNotEmpty().hasSize(2);
-                        })
+                .consumeNextWith(this::assertRestaurant)
                 .expectNextCount(1)
                 .verifyComplete();
     }
@@ -131,14 +110,7 @@ class RestaurantESRepositoryIntegrationTest extends AbstractIntegrationTest {
                         BOROUGH_NAME, CUISINE_NAME, RESTAURANT_NAME, PageRequest.of(0, 10));
 
         StepVerifier.create(findByBoroughAndCuisineAndNameMono)
-                .consumeNextWith(
-                        restaurant1 -> {
-                            assertThat(restaurant1.getRestaurantId()).isEqualTo(2L);
-                            assertThat(restaurant1.getName()).isEqualTo(RESTAURANT_NAME);
-                            assertThat(restaurant1.getBorough()).isEqualTo(BOROUGH_NAME);
-                            assertThat(restaurant1.getCuisine()).isEqualTo(CUISINE_NAME);
-                            assertThat(restaurant1.getGrades()).isNotEmpty().hasSize(2);
-                        })
+                .consumeNextWith(this::assertRestaurant)
                 .verifyComplete();
     }
 
@@ -499,5 +471,13 @@ class RestaurantESRepositoryIntegrationTest extends AbstractIntegrationTest {
                                     .containsOnlyKeys("MyCuisine", "MyBorough", "MyDateRange");
                         })
                 .verifyComplete();
+    }
+
+    private void assertRestaurant(Restaurant restaurant) {
+        assertThat(restaurant.getRestaurantId()).isEqualTo(2);
+        assertThat(restaurant.getName()).isEqualTo(RESTAURANT_NAME);
+        assertThat(restaurant.getBorough()).isEqualTo(BOROUGH_NAME);
+        assertThat(restaurant.getCuisine()).isEqualTo(CUISINE_NAME);
+        assertThat(restaurant.getGrades()).isNotEmpty().hasSize(2);
     }
 }
