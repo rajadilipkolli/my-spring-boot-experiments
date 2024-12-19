@@ -36,11 +36,9 @@ jobs:
       - uses: graalvm/setup-graalvm@v1
         with:
           distribution: 'graalvm'
-          java-version: '21'
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          cache: 'gradle'
-          native-image-job-reports: 'true'
-      
+          java-version: 21
+          cache: "maven"
+  
       - name: Printing versions
         run: |
           echo "GRAALVM_HOME: $GRAALVM_HOME"
@@ -53,12 +51,13 @@ jobs:
           docker compose up -d
           sleep 5
           docker ps -a
+
       - name: Build and analyze
-        run: ./gradlew clean build --info
+        run: ./mvnw verify
 
       - if: ${{ github.ref == 'refs/heads/main' }}
         name: Build container image
-        run: ./gradlew bootBuildImage --imageName ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/boot-strategy-plugin:${{ env.VERSION }}
+        run: ./mvnw spring-boot:build-image --imageName ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/boot-strategy-plugin:${{ env.VERSION }}
       - if: ${{ github.ref == 'refs/heads/main' }}
         name: OCI image vulnerability scanning
         uses: anchore/scan-action@v6
