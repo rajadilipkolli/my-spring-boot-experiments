@@ -2,6 +2,7 @@ package com.example.plugin.strategyplugin.plugin;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
 import com.example.plugin.strategyplugin.domain.GenericDTO;
@@ -18,7 +19,7 @@ class CSVWriter implements WriterPlugin {
     }
 
     @Override
-    public boolean supports(String delimiter) {
+    public boolean supports(@NonNull String delimiter) {
         return delimiter.equalsIgnoreCase("csv");
     }
 }

@@ -129,7 +129,7 @@
           - boot-opensearch-sample/pom.xml
           - boot-rabbitmq-thymeleaf/pom.xml
           - boot-rest-docs-sample/pom.xml
-          - boot-strategy-plugin/build.gradle
+          - boot-strategy-plugin/pom.xml
           - boot-togglz-sample/pom.xml
           - boot-ultimate-redis/pom.xml
           - graphql/boot-graphql-querydsl/pom.xml

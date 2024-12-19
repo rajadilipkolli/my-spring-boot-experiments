@@ -23,6 +23,7 @@
         <module>boot-opensearch-sample</module>
         <module>boot-rabbitmq-thymeleaf</module>
         <module>boot-rest-docs-sample</module>
+        <module>boot-strategy-plugin</module>
         <module>boot-togglz-sample</module>
         <module>boot-ultimate-redis</module>
         <module>graphql/boot-graphql-querydsl</module>
