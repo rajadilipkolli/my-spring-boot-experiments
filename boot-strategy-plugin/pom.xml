@@ -15,7 +15,6 @@
     <properties>
         <java.version>21</java.version>
         <spring.plugin.version>3.0.0</spring.plugin.version>
-        <graalvm.buildtools.version>0.10.4</graalvm.buildtools.version>
     </properties>
 
     <dependencies>
@@ -93,7 +92,6 @@
             <plugin>
                 <groupId>org.graalvm.buildtools</groupId>
                 <artifactId>native-maven-plugin</artifactId>
-                <version>${graalvm.buildtools.version}</version>
             </plugin>
         </plugins>
     </build>
