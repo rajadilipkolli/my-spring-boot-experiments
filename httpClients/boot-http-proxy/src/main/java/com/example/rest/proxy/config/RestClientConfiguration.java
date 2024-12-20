@@ -48,20 +48,12 @@ class RestClientConfiguration {
         SSLContext sslContext;
         try {
             // Configure SSLContext with a permissive TrustStrategy
-            sslContext =
-                    SSLContextBuilder.create()
-                            .loadTrustMaterial(
-                                    (chain, authType) -> {
-                                        // For dev/test environments only
-                                        if (!isProdEnvironment()) {
-                                            log.warn(
-                                                    "Using permissive certificate validation - NOT FOR PRODUCTION USE");
-                                            return true;
-                                        }
-                                        // Use default certificate validation for production
-                                        return false;
-                                    }) // Trust all certificates
-                            .build();
+            SSLContextBuilder sslContextBuilder = SSLContextBuilder.create();
+            if (!isProdEnvironment()) {
+                log.warn("Using permissive certificate validation - NOT FOR PRODUCTION USE");
+                sslContextBuilder.loadTrustMaterial((chain, authType) -> true);
+            }
+            sslContext = sslContextBuilder.build();
         } catch (KeyManagementException | NoSuchAlgorithmException | KeyStoreException e) {
             throw new RuntimeException("Failed to initialize SSL context", e);
         }
@@ -79,7 +71,9 @@ class RestClientConfiguration {
                                     new DefaultClientTlsStrategy(
                                             sslContext,
                                             HostnameVerificationPolicy.CLIENT,
-                                            NoopHostnameVerifier.INSTANCE));
+                                            isProdEnvironment()
+                                                    ? null
+                                                    : NoopHostnameVerifier.INSTANCE));
                         })
                 .withDefaultRequestConfigCustomizer(
                         (builder) -> {
