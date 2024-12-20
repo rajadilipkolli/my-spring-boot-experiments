@@ -100,17 +100,29 @@ public class PostService {
     @Transactional
     public PostResponse savePost(Post post) {
         Post fetchedPost = jsonPlaceholderService.createPost(post);
-        Post savedPost = postRepository.save(fetchedPost);
+        // To fix optimisticLock Exception
+        // Create a new local entity from the external post
+        Post localPost = new Post();
+        localPost.setUserId(fetchedPost.getUserId());
+        localPost.setTitle(fetchedPost.getTitle());
+        localPost.setBody(fetchedPost.getBody());
+        Post savedPost = postRepository.save(localPost);
         return postMapper.mapToPostResponse(savedPost);
     }
 
     @Transactional
     public Post save(Post postEntity) {
-        return postRepository.save(postEntity);
+        // Create a new local entity from the external post
+        Post localPost = new Post();
+        localPost.setUserId(postEntity.getUserId());
+        localPost.setTitle(postEntity.getTitle());
+        localPost.setBody(postEntity.getBody());
+        return postRepository.save(localPost);
     }
 
+    @Transactional
     public PostResponse saveAndConvertToResponse(Post post) {
-        Post savedPost = save(post);
+        Post savedPost = postRepository.save(post);
         return postMapper.mapToPostResponse(savedPost);
     }
 

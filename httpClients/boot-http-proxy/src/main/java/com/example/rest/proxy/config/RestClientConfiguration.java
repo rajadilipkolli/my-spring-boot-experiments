@@ -2,26 +2,27 @@ package com.example.rest.proxy.config;
 
 import com.example.rest.proxy.client.JsonPlaceholderService;
 import io.micrometer.observation.ObservationRegistry;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
-import org.apache.hc.client5.http.config.ConnectionConfig;
-import org.apache.hc.client5.http.config.RequestConfig;
+import javax.net.ssl.SSLContext;
 import org.apache.hc.client5.http.impl.DefaultConnectionKeepAliveStrategy;
-import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
-import org.apache.hc.client5.http.impl.classic.HttpClients;
-import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
-import org.apache.hc.client5.http.socket.ConnectionSocketFactory;
-import org.apache.hc.client5.http.socket.PlainConnectionSocketFactory;
-import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
-import org.apache.hc.core5.http.config.Registry;
-import org.apache.hc.core5.http.config.RegistryBuilder;
-import org.apache.hc.core5.http.io.SocketConfig;
+import org.apache.hc.client5.http.ssl.DefaultClientTlsStrategy;
+import org.apache.hc.client5.http.ssl.HostnameVerificationPolicy;
+import org.apache.hc.client5.http.ssl.NoopHostnameVerifier;
+import org.apache.hc.core5.ssl.SSLContextBuilder;
 import org.apache.hc.core5.util.TimeValue;
 import org.apache.hc.core5.util.Timeout;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.boot.http.client.ClientHttpRequestFactoryBuilder;
+import org.springframework.boot.http.client.HttpComponentsClientHttpRequestFactoryBuilder;
 import org.springframework.boot.web.client.RestClientCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 import org.springframework.http.MediaType;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.support.RestClientAdapter;
 import org.springframework.web.service.invoker.HttpServiceProxyFactory;
@@ -30,50 +31,65 @@ import org.zalando.logbook.spring.LogbookClientHttpRequestInterceptor;
 @Configuration(proxyBeanMethods = false)
 class RestClientConfiguration {
 
-    private final ApplicationProperties applicationProperties;
+    private static final Logger log = LoggerFactory.getLogger(RestClientConfiguration.class);
 
-    RestClientConfiguration(ApplicationProperties applicationProperties) {
+    private final ApplicationProperties applicationProperties;
+    private final Environment environment;
+
+    RestClientConfiguration(ApplicationProperties applicationProperties, Environment environment) {
         this.applicationProperties = applicationProperties;
+        this.environment = environment;
     }
 
     @Bean
-    public CloseableHttpClient httpClient() {
-        Registry<ConnectionSocketFactory> registry =
-                RegistryBuilder.<ConnectionSocketFactory>create()
-                        .register("http", PlainConnectionSocketFactory.getSocketFactory())
-                        .register("https", SSLConnectionSocketFactory.getSocketFactory())
-                        .build();
-        PoolingHttpClientConnectionManager poolingConnectionManager =
-                new PoolingHttpClientConnectionManager(registry);
+    public HttpComponentsClientHttpRequestFactoryBuilder
+            httpComponentsClientHttpRequestFactoryBuilder() {
 
-        poolingConnectionManager.setDefaultSocketConfig(
-                SocketConfig.custom().setSoTimeout(Timeout.ofSeconds(2)).build());
-        poolingConnectionManager.setDefaultConnectionConfig(
-                ConnectionConfig.custom().setConnectTimeout(Timeout.ofSeconds(2)).build());
+        SSLContext sslContext;
+        try {
+            // Configure SSLContext with a permissive TrustStrategy
+            SSLContextBuilder sslContextBuilder = SSLContextBuilder.create();
+            if (!isProdEnvironment()) {
+                log.warn("Using permissive certificate validation - NOT FOR PRODUCTION USE");
+                sslContextBuilder.loadTrustMaterial((chain, authType) -> true);
+            }
+            sslContext = sslContextBuilder.build();
+        } catch (KeyManagementException | NoSuchAlgorithmException | KeyStoreException e) {
+            throw new RuntimeException("Failed to initialize SSL context", e);
+        }
 
-        // set total amount of connections across all HTTP routes
-        poolingConnectionManager.setMaxTotal(200);
-        // set maximum amount of connections for each http route in pool
-        poolingConnectionManager.setDefaultMaxPerRoute(100);
+        return ClientHttpRequestFactoryBuilder.httpComponents()
+                .withHttpClientCustomizer(
+                        httpClientBuilder ->
+                                httpClientBuilder.setKeepAliveStrategy(
+                                        DefaultConnectionKeepAliveStrategy.INSTANCE))
+                .withConnectionManagerCustomizer(
+                        poolingHttpClientConnectionManagerBuilder -> {
+                            poolingHttpClientConnectionManagerBuilder.setMaxConnTotal(200);
+                            poolingHttpClientConnectionManagerBuilder.setMaxConnPerRoute(100);
+                            poolingHttpClientConnectionManagerBuilder.setTlsSocketStrategy(
+                                    new DefaultClientTlsStrategy(
+                                            sslContext,
+                                            HostnameVerificationPolicy.CLIENT,
+                                            isProdEnvironment()
+                                                    ? null
+                                                    : NoopHostnameVerifier.INSTANCE));
+                        })
+                .withDefaultRequestConfigCustomizer(
+                        (builder) -> {
+                            builder.setConnectionKeepAlive(TimeValue.ofSeconds(10));
+                            builder.setConnectionRequestTimeout(Timeout.ofSeconds(30));
+                            builder.setResponseTimeout(Timeout.ofSeconds(60));
+                        });
+    }
 
-        RequestConfig requestConfig =
-                RequestConfig.custom()
-                        .setConnectionKeepAlive(TimeValue.ofSeconds(10))
-                        .setConnectionRequestTimeout(Timeout.ofSeconds(2))
-                        .setResponseTimeout(Timeout.ofSeconds(2))
-                        .build();
-
-        return HttpClients.custom()
-                .setDefaultRequestConfig(requestConfig)
-                .setConnectionManager(poolingConnectionManager)
-                .setKeepAliveStrategy(new DefaultConnectionKeepAliveStrategy())
-                .build();
+    private boolean isProdEnvironment() {
+        return List.of(environment.getActiveProfiles()).contains("prod");
     }
 
     @Bean
     RestClientCustomizer restClientCustomizer(
             ObservationRegistry observationRegistry,
-            CloseableHttpClient httpClient,
             LogbookClientHttpRequestInterceptor interceptor) {
         return restClientBuilder ->
                 restClientBuilder
@@ -83,7 +99,6 @@ class RestClientConfiguration {
                                     httpHeaders.setAccept(List.of(MediaType.APPLICATION_JSON));
                                 })
                         .baseUrl(applicationProperties.getPostServiceUrl())
-                        .requestFactory(new HttpComponentsClientHttpRequestFactory(httpClient))
                         .observationRegistry(observationRegistry)
                         .requestInterceptor(interceptor);
     }
