@@ -77,7 +77,6 @@ class RestClientConfiguration {
                         })
                 .withDefaultRequestConfigCustomizer(
                         (builder) -> {
-                            builder.setProtocolUpgradeEnabled(false);
                             builder.setConnectionKeepAlive(TimeValue.ofSeconds(10));
                             builder.setConnectionRequestTimeout(Timeout.ofSeconds(30));
                             builder.setResponseTimeout(Timeout.ofSeconds(60));
