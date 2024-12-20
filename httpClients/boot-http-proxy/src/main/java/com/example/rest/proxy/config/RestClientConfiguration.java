@@ -14,11 +14,14 @@ import org.apache.hc.client5.http.ssl.NoopHostnameVerifier;
 import org.apache.hc.core5.ssl.SSLContextBuilder;
 import org.apache.hc.core5.util.TimeValue;
 import org.apache.hc.core5.util.Timeout;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.http.client.ClientHttpRequestFactoryBuilder;
 import org.springframework.boot.http.client.HttpComponentsClientHttpRequestFactoryBuilder;
 import org.springframework.boot.web.client.RestClientCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 import org.springframework.http.MediaType;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.support.RestClientAdapter;
@@ -28,10 +31,14 @@ import org.zalando.logbook.spring.LogbookClientHttpRequestInterceptor;
 @Configuration(proxyBeanMethods = false)
 class RestClientConfiguration {
 
-    private final ApplicationProperties applicationProperties;
+    private static final Logger log = LoggerFactory.getLogger(RestClientConfiguration.class);
 
-    RestClientConfiguration(ApplicationProperties applicationProperties) {
+    private final ApplicationProperties applicationProperties;
+    private final Environment environment;
+
+    RestClientConfiguration(ApplicationProperties applicationProperties, Environment environment) {
         this.applicationProperties = applicationProperties;
+        this.environment = environment;
     }
 
     @Bean
@@ -43,7 +50,17 @@ class RestClientConfiguration {
             // Configure SSLContext with a permissive TrustStrategy
             sslContext =
                     SSLContextBuilder.create()
-                            .loadTrustMaterial((chain, authType) -> true) // Trust all certificates
+                            .loadTrustMaterial(
+                                    (chain, authType) -> {
+                                        // For dev/test environments only
+                                        if (!isProdEnvironment()) {
+                                            log.warn(
+                                                    "Using permissive certificate validation - NOT FOR PRODUCTION USE");
+                                            return true;
+                                        }
+                                        // Use default certificate validation for production
+                                        return false;
+                                    }) // Trust all certificates
                             .build();
         } catch (KeyManagementException | NoSuchAlgorithmException | KeyStoreException e) {
             throw new RuntimeException("Failed to initialize SSL context", e);
@@ -66,10 +83,15 @@ class RestClientConfiguration {
                         })
                 .withDefaultRequestConfigCustomizer(
                         (builder) -> {
+                            builder.setProtocolUpgradeEnabled(false);
                             builder.setConnectionKeepAlive(TimeValue.ofSeconds(10));
                             builder.setConnectionRequestTimeout(Timeout.ofSeconds(30));
                             builder.setResponseTimeout(Timeout.ofSeconds(60));
                         });
+    }
+
+    private boolean isProdEnvironment() {
+        return List.of(environment.getActiveProfiles()).contains("prod");
     }
 
     @Bean
