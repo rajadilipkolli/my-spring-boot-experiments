@@ -65,14 +65,8 @@ public class ClientLoggerRequestInterceptor implements ClientHttpRequestIntercep
         headers.forEach((name, values) -> values.forEach(value -> log.info("{}={}", name, value)));
     }
 
-    private static class BufferingClientHttpResponseWrapper implements ClientHttpResponse {
-        private final ClientHttpResponse response;
-        private final String body;
-
-        public BufferingClientHttpResponseWrapper(ClientHttpResponse response, String body) {
-            this.response = response;
-            this.body = body;
-        }
+    private record BufferingClientHttpResponseWrapper(ClientHttpResponse response, String body)
+            implements ClientHttpResponse {
 
         @Override
         public InputStream getBody() {
@@ -87,11 +81,6 @@ public class ClientLoggerRequestInterceptor implements ClientHttpRequestIntercep
         @Override
         public HttpStatusCode getStatusCode() throws IOException {
             return response.getStatusCode();
-        }
-
-        @Override
-        public int getRawStatusCode() throws IOException {
-            return response.getRawStatusCode();
         }
 
         @Override
