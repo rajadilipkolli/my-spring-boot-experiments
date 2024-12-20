@@ -100,6 +100,8 @@ public class PostService {
     @Transactional
     public PostResponse savePost(Post post) {
         Post fetchedPost = jsonPlaceholderService.createPost(post);
+        // To fix optimisticLock Exception
+        fetchedPost.setId(null);
         Post savedPost = postRepository.save(fetchedPost);
         return postMapper.mapToPostResponse(savedPost);
     }
