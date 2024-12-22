@@ -10,6 +10,7 @@ import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.CronTrigger;
@@ -119,13 +120,13 @@ public class JobsService {
         }
 
         // simulate job info db persist operation
-        ScheduleJob withJobId = scheduleJob.withJobId(String.valueOf(SampleJob.JOB_LIST.size() + 1));
-        SampleJob.JOB_LIST.add(withJobId);
+        ScheduleJob withJobId = scheduleJob.withJobId(UUID.randomUUID().toString());
 
         // Build the JobDetail with recovery and durability
         JobDetail jobDetail = JobBuilder.newJob(SampleJob.class)
                 .withIdentity(withJobId.jobName(), GROUP_NAME)
-                .withDescription(scheduleJob.desc())
+                .withDescription(
+                        StringUtils.hasText(scheduleJob.desc()) ? scheduleJob.desc() : "No description provided")
                 .storeDurably()
                 .requestRecovery()
                 .build();
@@ -135,7 +136,8 @@ public class JobsService {
         CronScheduleBuilder cronScheduleBuilder = CronScheduleBuilder.cronSchedule(withJobId.cronExpression());
         trigger = TriggerBuilder.newTrigger()
                 .withIdentity(withJobId.jobName() + "-trigger", GROUP_NAME)
-                .withDescription(scheduleJob.desc())
+                .withDescription(
+                        StringUtils.hasText(scheduleJob.desc()) ? scheduleJob.desc() : "No description provided")
                 .withSchedule(cronScheduleBuilder.withMisfireHandlingInstructionIgnoreMisfires())
                 .build();
 
@@ -149,11 +151,17 @@ public class JobsService {
 
     public void resumeJob(ScheduleJob scheduleJob) throws SchedulerException {
         JobKey jobKey = JobKey.jobKey(scheduleJob.jobName(), scheduleJob.jobGroup());
+        if (!scheduler.checkExists(jobKey)) {
+            throw new SchedulerException("Job does not exist");
+        }
         scheduler.resumeJob(jobKey);
     }
 
     public void runJob(ScheduleJob job) throws SchedulerException {
         JobKey jobKey = JobKey.jobKey(job.jobName(), job.jobGroup());
+        if (!scheduler.checkExists(jobKey)) {
+            throw new SchedulerException("Job does not exist");
+        }
         scheduler.triggerJob(jobKey);
     }
 

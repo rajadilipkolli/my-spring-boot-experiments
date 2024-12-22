@@ -6,6 +6,7 @@ import static org.quartz.SimpleScheduleBuilder.simpleSchedule;
 import static org.quartz.TriggerBuilder.newTrigger;
 
 import com.scheduler.quartz.model.response.ScheduleJob;
+import java.util.UUID;
 import org.quartz.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,10 +23,9 @@ public class SchedulerRegistrationService {
                 .storeDurably()
                 .requestRecovery()
                 .build();
-        String jobId = String.valueOf(SampleJob.JOB_LIST.size() + 1);
+        String jobId = UUID.randomUUID().toString();
         ScheduleJob scheduleJob = new ScheduleJob(jobId, "oddEvenJob", GROUP_NAME, null, null, "Sample OddEvenJob");
         jobDetail.getJobDataMap().put("scheduleJob", jobId);
-        SampleJob.JOB_LIST.add(scheduleJob);
         return jobDetail;
     }
 
