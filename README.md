@@ -37,7 +37,11 @@ The following table list all sample codes related to the spring boot integration
 | [Rabbit Mq Implementation](./boot-rabbitmq-thymeleaf)                                                                   | The application, demonstrates how rabbitmq works with producer side acknowledgement                                                                                                                            | Completed |
 | [Spring Batch Implementation](./batch-boot-jpa-sample)                                                                  | The application, demonstrates implementing Spring Batch 5 using simple config and creating batch tables using liquibase                                                                                        | Completed |
 | [Rest API Documentation with examples](./boot-rest-docs-sample)                                                         | This application, demonstrates ability to generate pdf API documentation using spring rest docs                                                                                                                | Completed |  
-| [Custom SequenceNumber and LazyConnectionDataSourceProxy for db connection improvement](./jpa/boot-data-customsequence) | This application, demonstrated ability to create custom sequences, using datasource-proxy, LazyConnectionDataSourceProxy for db connection improvement using mariadb, SQLStatementCountValidator for validating SQLCounts and ValidationGroups for dynamic Validation                                        | Completed |
++| [Custom SequenceNumber and LazyConnectionDataSourceProxy for db connection improvement](./jpa/boot-data-customsequence) | This application demonstrates:
++  - Custom sequence generation
++  - Database connection optimization using datasource-proxy and LazyConnectionDataSourceProxy with MariaDB
++  - SQL query validation using SQLStatementCountValidator
++  - Dynamic validation using ValidationGroups | Completed |
 | [KeySet pagination and dynamic search](./jpa/keyset-pagination/blaze-persistence)                                       | Implements KeySet Pagination using Blaze Persistence and enable dynamic search using specifications                                                                                                            | Completed |
 
 For More info about this repository, Please visit [here](https://rajadilipkolli.github.io/my-spring-boot-experiments/)

@@ -189,10 +189,11 @@ class OrderControllerIT extends AbstractIntegrationTest {
     @Test
     void shouldDeleteOrder() {
         Order order = orderList.getFirst();
+        var orderId = order.getId();
 
         this.mockMvcTester
                 .delete()
-                .uri("/api/orders/{id}", order.getId())
+                .uri("/api/orders/{id}", orderId)
                 .assertThat()
                 .hasStatusOk()
                 .hasContentType(MediaType.APPLICATION_JSON)
@@ -200,8 +201,11 @@ class OrderControllerIT extends AbstractIntegrationTest {
                 .convertTo(OrderResponse.class)
                 .satisfies(
                         orderResponse -> {
-                            assertThat(orderResponse.id()).isEqualTo(order.getId());
+                            assertThat(orderResponse.id()).isEqualTo(orderId);
                             assertThat(orderResponse.text()).isEqualTo(order.getText());
                         });
+
+        // Verify order is deleted from database
+        assertThat(orderRepository.findById(orderId)).isEmpty();
     }
 }

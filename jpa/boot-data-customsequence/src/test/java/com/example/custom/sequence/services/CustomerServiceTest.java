@@ -91,8 +91,11 @@ class CustomerServiceTest {
         given(customerRepository.findById("CUS_1")).willReturn(Optional.of(getCustomer()));
         given(customerMapper.mapToResponse(getCustomer())).willReturn(getCustomerResponse());
         // when
-        customerService.deleteCustomerById("CUS_1");
+        Optional<CustomerResponse> response = customerService.deleteCustomerById("CUS_1");
         // then
+        assertThat(response).isPresent();
+        assertThat(response.get().id()).isEqualTo("CUS_1");
+        assertThat(response.get().text()).isEqualTo("junitTest");
         verify(customerRepository, times(1)).deleteById("CUS_1");
     }
 

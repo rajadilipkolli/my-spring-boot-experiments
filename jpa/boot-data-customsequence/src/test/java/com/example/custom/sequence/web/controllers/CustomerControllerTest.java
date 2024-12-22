@@ -18,6 +18,7 @@ import com.example.custom.sequence.entities.Customer;
 import com.example.custom.sequence.model.request.CustomerRequest;
 import com.example.custom.sequence.model.request.OrderRequest;
 import com.example.custom.sequence.model.response.CustomerResponse;
+import com.example.custom.sequence.model.response.OrderResponseWithOutCustomer;
 import com.example.custom.sequence.model.response.PagedResult;
 import com.example.custom.sequence.services.CustomerService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -115,7 +116,7 @@ class CustomerControllerTest {
     }
 
     @Test
-    void shouldReturn400WhenCreateNewCustomerWithoutText() throws Exception {
+    void shouldReturn400WhenCreateNewCustomerWithInvalidData() throws Exception {
         CustomerRequest customerRequest =
                 new CustomerRequest(null, List.of(new OrderRequest("ORD_1", null)));
 
@@ -161,7 +162,10 @@ class CustomerControllerTest {
     void shouldUpdateCustomer() throws Exception {
         String customerId = "CUS_1";
         CustomerResponse customerResponse =
-                new CustomerResponse(customerId, "Updated text", List.of());
+                new CustomerResponse(
+                        customerId,
+                        "Updated text",
+                        List.of(new OrderResponseWithOutCustomer("ORD_1", "New Order")));
         CustomerRequest customerRequest =
                 new CustomerRequest("Updated text", List.of(new OrderRequest("ORD_1", customerId)));
         given(customerService.updateCustomerById(customerId, customerRequest))
@@ -173,7 +177,10 @@ class CustomerControllerTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(customerRequest)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.text", is(customerResponse.text())));
+                .andExpect(jsonPath("$.text", is(customerResponse.text())))
+                .andExpect(jsonPath("$.orderResponses", hasSize(1)))
+                .andExpect(jsonPath("$.orderResponses[0].id", is("ORD_1")))
+                .andExpect(jsonPath("$.orderResponses[0].orderDescription", is("New Order")));
     }
 
     @Test
