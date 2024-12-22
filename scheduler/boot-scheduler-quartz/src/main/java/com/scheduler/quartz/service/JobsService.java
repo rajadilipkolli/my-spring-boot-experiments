@@ -116,7 +116,8 @@ public class JobsService {
 
         // Throw exception if the job already exists
         if (trigger != null) {
-            throw new SchedulerException("job already exists!");
+            throw new SchedulerException(
+                    "Job already exists with name '" + scheduleJob.jobName() + "' in group '" + GROUP_NAME + "'");
         }
 
         // simulate job info db persist operation
@@ -142,31 +143,41 @@ public class JobsService {
                 .build();
 
         scheduler.scheduleJob(jobDetail, trigger);
+        JobKey jobKey = JobKey.jobKey(scheduleJob.jobName(), scheduleJob.jobGroup());
+        log.info("Scheduled job with key: {}", jobKey);
     }
 
     public void pauseJob(ScheduleJob scheduleJob) throws SchedulerException {
         JobKey jobKey = JobKey.jobKey(scheduleJob.jobName(), scheduleJob.jobGroup());
+        validateJobExists(jobKey);
         scheduler.pauseJob(jobKey);
+        log.info("Paused job with key: {}", jobKey);
     }
 
     public void resumeJob(ScheduleJob scheduleJob) throws SchedulerException {
         JobKey jobKey = JobKey.jobKey(scheduleJob.jobName(), scheduleJob.jobGroup());
-        if (!scheduler.checkExists(jobKey)) {
-            throw new SchedulerException("Job does not exist");
-        }
+        validateJobExists(jobKey);
         scheduler.resumeJob(jobKey);
+        log.info("Resumed job with key: {}", jobKey);
     }
 
     public void runJob(ScheduleJob job) throws SchedulerException {
         JobKey jobKey = JobKey.jobKey(job.jobName(), job.jobGroup());
-        if (!scheduler.checkExists(jobKey)) {
-            throw new SchedulerException("Job does not exist");
-        }
+        validateJobExists(jobKey);
         scheduler.triggerJob(jobKey);
+        log.info("Triggered job with key: {}", jobKey);
     }
 
     public void deleteJob(ScheduleJob scheduleJob) throws SchedulerException {
         JobKey jobKey = JobKey.jobKey(scheduleJob.jobName(), scheduleJob.jobGroup());
+        validateJobExists(jobKey);
         scheduler.deleteJob(jobKey);
+        log.info("Deleted job with key: {}", jobKey);
+    }
+
+    private void validateJobExists(JobKey jobKey) throws SchedulerException {
+        if (!scheduler.checkExists(jobKey)) {
+            throw new SchedulerException("Job does not exist with key: " + jobKey);
+        }
     }
 }
