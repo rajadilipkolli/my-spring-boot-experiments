@@ -53,7 +53,7 @@ class StrategyPluginApplicationTests {
                 assertThat(problemDetail.getDetail()).isEqualTo("Plugin not found for type: xls");
                 assertThat(problemDetail.getTitle()).isEqualTo("Product Not Found");
                 assertThat(problemDetail.getStatus()).isEqualTo(400);
-                assertThat(problemDetail.getType()).isEqualTo("https://api.service.com/errors/bad-request");
+                assertThat(problemDetail.getType().toString()).isEqualTo("https://api.service.com/errors/bad-request");
                 assertThat(problemDetail.getInstance()).isEqualTo("/fetch");
             });
   }
