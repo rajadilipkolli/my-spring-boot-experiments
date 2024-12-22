@@ -137,6 +137,26 @@ class CustomerControllerTest {
     }
 
     @Test
+    void shouldReturn400WhenCreateNewCustomerWithEmptyText() throws Exception {
+        CustomerRequest customerRequest = new CustomerRequest("", new ArrayList<>());
+        this.mockMvc
+                .perform(
+                        post("/api/customers")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(customerRequest)))
+                .andExpect(status().isBadRequest())
+                .andExpect(header().string("Content-Type", is("application/problem+json")))
+                .andExpect(jsonPath("$.type", is("about:blank")))
+                .andExpect(jsonPath("$.title", is("Constraint Violation")))
+                .andExpect(jsonPath("$.status", is(400)))
+                .andExpect(jsonPath("$.detail", is("Invalid request content.")))
+                .andExpect(jsonPath("$.instance", is("/api/customers")))
+                .andExpect(jsonPath("$.violations", hasSize(1)))
+                .andExpect(jsonPath("$.violations[0].field", is("text")))
+                .andExpect(jsonPath("$.violations[0].message", is("Text cannot be empty")));
+    }
+
+    @Test
     void shouldUpdateCustomer() throws Exception {
         String customerId = "CUS_1";
         CustomerResponse customerResponse =
