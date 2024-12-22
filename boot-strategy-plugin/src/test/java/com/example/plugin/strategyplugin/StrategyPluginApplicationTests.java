@@ -54,7 +54,7 @@ class StrategyPluginApplicationTests {
                 assertThat(problemDetail.getTitle()).isEqualTo("Product Not Found");
                 assertThat(problemDetail.getStatus()).isEqualTo(400);
                 assertThat(problemDetail.getType().toString()).isEqualTo("https://api.service.com/errors/bad-request");
-                assertThat(problemDetail.getInstance()).isEqualTo("/fetch");
+                assertThat(problemDetail.getInstance().toString()).isEqualTo("/fetch");
             });
   }
 }
