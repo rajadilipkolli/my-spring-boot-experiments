@@ -187,6 +187,19 @@ class OrderControllerIT extends AbstractIntegrationTest {
     }
 
     @Test
+    void shouldReturn404WhenUpdatingNonExistentOrder() throws Exception {
+        OrderRequest orderRequest = new OrderRequest("Updated Order", customer.getId());
+
+        this.mockMvcTester
+                .put()
+                .uri("/api/orders/{id}", "NON_EXISTENT_ID")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(orderRequest))
+                .assertThat()
+                .hasStatus(HttpStatus.NOT_FOUND);
+    }
+
+    @Test
     void shouldDeleteOrder() {
         Order order = orderList.getFirst();
         var orderId = order.getId();
