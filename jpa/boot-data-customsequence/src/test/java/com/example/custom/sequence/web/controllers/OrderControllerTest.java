@@ -4,7 +4,6 @@ import static com.example.custom.sequence.utils.AppConstants.PROFILE_TEST;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.Matchers.hasSize;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -17,7 +16,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.example.custom.sequence.entities.Customer;
 import com.example.custom.sequence.entities.Order;
-import com.example.custom.sequence.model.response.CustomerResponse;
+import com.example.custom.sequence.model.request.OrderRequest;
+import com.example.custom.sequence.model.response.CustomerResponseWithOutOrder;
 import com.example.custom.sequence.model.response.OrderResponse;
 import com.example.custom.sequence.model.response.PagedResult;
 import com.example.custom.sequence.services.OrderService;
@@ -30,11 +30,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(controllers = OrderController.class)
@@ -43,7 +43,7 @@ class OrderControllerTest {
 
     @Autowired private MockMvc mockMvc;
 
-    @MockBean private OrderService orderService;
+    @MockitoBean private OrderService orderService;
 
     @Autowired private ObjectMapper objectMapper;
 
@@ -52,7 +52,7 @@ class OrderControllerTest {
 
     @BeforeEach
     void setUp() {
-        customer = new Customer(null, "customer1", new ArrayList<>());
+        customer = new Customer("CUST_01", "customer1", new ArrayList<>());
         this.orderList = new ArrayList<>();
         this.orderList.add(new Order("1", "text 1", customer));
         this.orderList.add(new Order("2", "text 2", customer));
@@ -80,11 +80,14 @@ class OrderControllerTest {
     private static @NotNull PagedResult<OrderResponse> getOrderResponsePagedResult() {
         List<OrderResponse> orderResponseList = new ArrayList<>();
         orderResponseList.add(
-                new OrderResponse("1", "text 1", new CustomerResponse("1", "customer1")));
+                new OrderResponse(
+                        "1", "text 1", new CustomerResponseWithOutOrder("1", "customer1")));
         orderResponseList.add(
-                new OrderResponse("2", "text 2", new CustomerResponse("1", "customer1")));
+                new OrderResponse(
+                        "2", "text 2", new CustomerResponseWithOutOrder("1", "customer1")));
         orderResponseList.add(
-                new OrderResponse("3", "text 3", new CustomerResponse("1", "customer1")));
+                new OrderResponse(
+                        "3", "text 3", new CustomerResponseWithOutOrder("1", "customer1")));
         Page<OrderResponse> page = new PageImpl<>(orderResponseList);
         return new PagedResult<>(page);
     }
@@ -96,7 +99,7 @@ class OrderControllerTest {
                 new OrderResponse(
                         orderId,
                         "text 1",
-                        new CustomerResponse(customer.getId(), customer.getText()));
+                        new CustomerResponseWithOutOrder(customer.getId(), customer.getText()));
         given(orderService.findOrderById(orderId)).willReturn(Optional.of(order));
 
         this.mockMvc
@@ -115,23 +118,23 @@ class OrderControllerTest {
 
     @Test
     void shouldCreateNewOrder() throws Exception {
-        given(orderService.saveOrder(any(Order.class)))
-                .willReturn(new OrderResponse("1", "some text", null));
 
-        Order order = new Order("1", "some text", customer);
+        OrderRequest orderRequest = new OrderRequest("some text", customer.getId());
+        given(orderService.saveOrder(orderRequest))
+                .willReturn(Optional.of(new OrderResponse("1", "some text", null)));
         this.mockMvc
                 .perform(
                         post("/api/orders")
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(order)))
+                                .content(objectMapper.writeValueAsString(orderRequest)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id", notNullValue()))
-                .andExpect(jsonPath("$.text", is(order.getText())));
+                .andExpect(jsonPath("$.text", is(orderRequest.text())));
     }
 
     @Test
     void shouldReturn400WhenCreateNewOrderWithoutText() throws Exception {
-        Order order = new Order(null, null, null);
+        OrderRequest order = new OrderRequest(null, null);
 
         this.mockMvc
                 .perform(
@@ -145,9 +148,11 @@ class OrderControllerTest {
                 .andExpect(jsonPath("$.status", is(400)))
                 .andExpect(jsonPath("$.detail", is("Invalid request content.")))
                 .andExpect(jsonPath("$.instance", is("/api/orders")))
-                .andExpect(jsonPath("$.violations", hasSize(1)))
-                .andExpect(jsonPath("$.violations[0].field", is("text")))
-                .andExpect(jsonPath("$.violations[0].message", is("Text cannot be empty")))
+                .andExpect(jsonPath("$.violations", hasSize(2)))
+                .andExpect(jsonPath("$.violations[0].field", is("customerId")))
+                .andExpect(jsonPath("$.violations[0].message", is("CustomerId cannot be blank")))
+                .andExpect(jsonPath("$.violations[1].field", is("text")))
+                .andExpect(jsonPath("$.violations[1].message", is("Text cannot be empty")))
                 .andReturn();
     }
 
@@ -158,16 +163,16 @@ class OrderControllerTest {
                 new OrderResponse(
                         orderId,
                         "Updated text",
-                        new CustomerResponse(customer.getId(), customer.getText()));
-        given(orderService.findOrderById(orderId)).willReturn(Optional.of(orderResponse));
-        given(orderService.saveOrder(any(Order.class)))
-                .willReturn(new OrderResponse("1", "Updated text", null));
+                        new CustomerResponseWithOutOrder(customer.getId(), customer.getText()));
+        OrderRequest orderRequest = new OrderRequest("Updated text", customer.getId());
+        given(orderService.updateOrderById(orderId, orderRequest))
+                .willReturn(Optional.of(orderResponse));
 
         this.mockMvc
                 .perform(
                         put("/api/orders/{id}", orderResponse.id())
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(orderResponse)))
+                                .content(objectMapper.writeValueAsString(orderRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.text", is(orderResponse.text())));
     }
@@ -193,7 +198,7 @@ class OrderControllerTest {
                 new OrderResponse(
                         orderId,
                         "Some text",
-                        new CustomerResponse(customer.getId(), customer.getText()));
+                        new CustomerResponseWithOutOrder(customer.getId(), customer.getText()));
         given(orderService.findOrderById(orderId)).willReturn(Optional.of(order));
         doNothing().when(orderService).deleteOrderById(order.id());
 

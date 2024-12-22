@@ -2,12 +2,12 @@ package com.example.custom.sequence.services;
 
 import com.example.custom.sequence.entities.Order;
 import com.example.custom.sequence.mapper.OrderMapper;
+import com.example.custom.sequence.model.request.OrderRequest;
 import com.example.custom.sequence.model.response.OrderResponse;
 import com.example.custom.sequence.model.response.PagedResult;
 import com.example.custom.sequence.repositories.OrderRepository;
 import java.util.List;
 import java.util.Optional;
-import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -16,12 +16,21 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@Transactional
-@RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class OrderService {
 
     private final OrderRepository orderRepository;
+    private final CustomerService customerService;
     private final OrderMapper orderMapper;
+
+    public OrderService(
+            OrderRepository orderRepository,
+            CustomerService customerService,
+            OrderMapper orderMapper) {
+        this.orderRepository = orderRepository;
+        this.customerService = customerService;
+        this.orderMapper = orderMapper;
+    }
 
     public PagedResult<OrderResponse> findAllOrders(
             int pageNo, int pageSize, String sortBy, String sortDir) {
@@ -52,10 +61,32 @@ public class OrderService {
         return orderRepository.findById(id).map(orderMapper::getOrderResponse);
     }
 
-    public OrderResponse saveOrder(Order order) {
-        return orderMapper.getOrderResponse(orderRepository.save(order));
+    @Transactional
+    public Optional<OrderResponse> saveOrder(OrderRequest orderRequest) {
+        return customerService
+                .findById(orderRequest.customerId())
+                .map(
+                        customer -> {
+                            Order order = new Order();
+                            order.setText(orderRequest.text());
+                            order.setCustomer(customer);
+                            return orderMapper.getOrderResponse(orderRepository.persist(order));
+                        });
     }
 
+    @Transactional
+    public Optional<OrderResponse> updateOrderById(String id, OrderRequest orderRequest) {
+        return orderRepository
+                .findByIdAndCustomer_Id(id, orderRequest.customerId())
+                .map(
+                        order -> {
+                            order.setText(orderRequest.text());
+                            return orderMapper.getOrderResponse(
+                                    orderRepository.mergeAndFlush(order));
+                        });
+    }
+
+    @Transactional
     public void deleteOrderById(String id) {
         orderRepository.deleteById(id);
     }

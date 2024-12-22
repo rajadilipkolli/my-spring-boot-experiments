@@ -1,6 +1,7 @@
 package com.example.custom.sequence.web.controllers;
 
 import com.example.custom.sequence.entities.Customer;
+import com.example.custom.sequence.model.request.CustomerRequest;
 import com.example.custom.sequence.model.response.CustomerResponse;
 import com.example.custom.sequence.model.response.PagedResult;
 import com.example.custom.sequence.services.CustomerService;
@@ -58,20 +59,17 @@ public class CustomerController implements CustomerAPI {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @Override
-    public CustomerResponse createCustomer(@RequestBody @Validated Customer customer) {
-        return customerService.saveCustomer(customer);
+    public CustomerResponse createCustomer(
+            @RequestBody @Validated CustomerRequest customerRequest) {
+        return customerService.saveCustomer(customerRequest);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<CustomerResponse> updateCustomer(
-            @PathVariable String id, @RequestBody Customer customer) {
+            @PathVariable String id, @RequestBody CustomerRequest customerRequest) {
         return customerService
-                .findCustomerById(id)
-                .map(
-                        customerObj -> {
-                            customer.setId(id);
-                            return ResponseEntity.ok(customerService.saveCustomer(customer));
-                        })
+                .updateCustomerById(id, customerRequest)
+                .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 

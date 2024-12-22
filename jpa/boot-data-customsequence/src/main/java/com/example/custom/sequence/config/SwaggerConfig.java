@@ -9,4 +9,4 @@ import org.springframework.context.annotation.Configuration;
 @OpenAPIDefinition(
         info = @Info(title = "boot-jpa-customsequence", version = "v1"),
         servers = @Server(url = "/"))
-public class SwaggerConfig {}
+class SwaggerConfig {}

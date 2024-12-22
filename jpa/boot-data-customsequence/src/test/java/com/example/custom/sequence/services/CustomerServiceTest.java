@@ -8,6 +8,7 @@ import static org.mockito.BDDMockito.willDoNothing;
 
 import com.example.custom.sequence.entities.Customer;
 import com.example.custom.sequence.mapper.CustomerMapper;
+import com.example.custom.sequence.model.request.CustomerRequest;
 import com.example.custom.sequence.model.response.CustomerResponse;
 import com.example.custom.sequence.model.response.PagedResult;
 import com.example.custom.sequence.repositories.CustomerRepository;
@@ -72,10 +73,11 @@ class CustomerServiceTest {
     @Test
     void saveCustomer() {
         // given
-        given(customerRepository.save(getCustomer())).willReturn(getCustomer());
+        given(customerMapper.mapToEntity(getCustomerRequest())).willReturn(getCustomer());
+        given(customerRepository.persist(getCustomer())).willReturn(getCustomer());
         given(customerMapper.mapToResponse(getCustomer())).willReturn(getCustomerResponse());
         // when
-        CustomerResponse persistedCustomer = customerService.saveCustomer(getCustomer());
+        CustomerResponse persistedCustomer = customerService.saveCustomer(getCustomerRequest());
         // then
         assertThat(persistedCustomer).isNotNull();
         assertThat(persistedCustomer.id()).isEqualTo("CUS_1");
@@ -99,7 +101,11 @@ class CustomerServiceTest {
         return customer;
     }
 
+    private CustomerRequest getCustomerRequest() {
+        return new CustomerRequest("junitTest", List.of());
+    }
+
     private CustomerResponse getCustomerResponse() {
-        return new CustomerResponse("CUS_1", "junitTest");
+        return new CustomerResponse("CUS_1", "junitTest", List.of());
     }
 }
