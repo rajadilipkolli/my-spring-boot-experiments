@@ -3,7 +3,7 @@ package com.example.custom.sequence;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.example.custom.sequence.common.ContainersConfig;
-import com.example.custom.sequence.config.JpaConfig;
+import com.example.custom.sequence.config.db.JpaConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import javax.sql.DataSource;
 import org.junit.jupiter.api.Test;

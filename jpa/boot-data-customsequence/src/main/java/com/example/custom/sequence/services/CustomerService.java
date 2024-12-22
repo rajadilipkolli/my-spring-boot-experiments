@@ -77,8 +77,11 @@ public class CustomerService {
     }
 
     @Transactional
-    public void deleteCustomerById(String id) {
-        customerRepository.deleteById(id);
+    public Optional<CustomerResponse> deleteCustomerById(String id) {
+        Optional<CustomerResponse> optionalCustomer = findCustomerById(id);
+        optionalCustomer.ifPresent(
+                customerResponse -> customerRepository.deleteById(customerResponse.id()));
+        return optionalCustomer;
     }
 
     public Optional<Customer> findById(String customerId) {

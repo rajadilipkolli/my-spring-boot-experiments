@@ -181,13 +181,13 @@ class OrderControllerTest {
     void shouldReturn404WhenUpdatingNonExistingOrder() throws Exception {
         String orderId = "1";
         given(orderService.findOrderById(orderId)).willReturn(Optional.empty());
-        Order order = new Order(orderId, "Updated text", customer);
+        OrderRequest orderRequest = new OrderRequest("Updated text", customer.getId());
 
         this.mockMvc
                 .perform(
                         put("/api/orders/{id}", orderId)
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(order)))
+                                .content(objectMapper.writeValueAsString(orderRequest)))
                 .andExpect(status().isNotFound());
     }
 

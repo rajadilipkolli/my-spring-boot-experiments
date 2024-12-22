@@ -1,29 +1,24 @@
 package com.example.custom.sequence.web.controllers;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.Matchers.hasLength;
-import static org.hamcrest.Matchers.hasSize;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import com.example.custom.sequence.common.AbstractIntegrationTest;
 import com.example.custom.sequence.entities.Customer;
 import com.example.custom.sequence.entities.Order;
 import com.example.custom.sequence.model.request.OrderRequest;
+import com.example.custom.sequence.model.response.OrderResponse;
+import com.example.custom.sequence.model.response.PagedResult;
 import com.example.custom.sequence.repositories.CustomerRepository;
 import com.example.custom.sequence.repositories.OrderRepository;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Objects;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ProblemDetail;
 
 class OrderControllerIT extends AbstractIntegrationTest {
 
@@ -55,44 +50,126 @@ class OrderControllerIT extends AbstractIntegrationTest {
     }
 
     @Test
-    void shouldFetchAllOrders() throws Exception {
-        this.mockMvc
-                .perform(get("/api/orders"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.size()", is(orderList.size())))
-                .andExpect(jsonPath("$.totalElements", is(3)))
-                .andExpect(jsonPath("$.pageNumber", is(1)))
-                .andExpect(jsonPath("$.totalPages", is(1)))
-                .andExpect(jsonPath("$.isFirst", is(true)))
-                .andExpect(jsonPath("$.isLast", is(true)))
-                .andExpect(jsonPath("$.hasNext", is(false)))
-                .andExpect(jsonPath("$.hasPrevious", is(false)));
+    void shouldFetchAllOrders() {
+
+        this.mockMvcTester
+                .get()
+                .uri("/api/orders")
+                .assertThat()
+                .hasStatusOk()
+                .hasContentType(MediaType.APPLICATION_JSON)
+                .bodyJson()
+                .convertTo(PagedResult.class)
+                .satisfies(
+                        pagedResult -> {
+                            assertThat(pagedResult.data()).hasSize(3);
+                            assertThat(pagedResult.totalElements()).isEqualTo(3);
+                            assertThat(pagedResult.pageNumber()).isEqualTo(1);
+                            assertThat(pagedResult.totalPages()).isEqualTo(1);
+                            assertThat(pagedResult.isFirst()).isTrue();
+                            assertThat(pagedResult.isLast()).isTrue();
+                            assertThat(pagedResult.hasNext()).isFalse();
+                            assertThat(pagedResult.hasPrevious()).isFalse();
+                        });
     }
 
     @Test
-    void shouldFindOrderById() throws Exception {
+    void shouldFindOrderById() {
         Order order = orderList.getFirst();
         String orderId = order.getId();
 
-        this.mockMvc
-                .perform(get("/api/orders/{id}", orderId))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(order.getId()), String.class))
-                .andExpect(jsonPath("$.text", is(order.getText())));
+        this.mockMvcTester
+                .get()
+                .uri("/api/orders/{id}", orderId)
+                .assertThat()
+                .hasStatusOk()
+                .hasContentType(MediaType.APPLICATION_JSON)
+                .bodyJson()
+                .convertTo(OrderResponse.class)
+                .satisfies(
+                        orderResponse -> {
+                            assertThat(orderResponse.id()).isEqualTo(orderId);
+                            assertThat(orderResponse.text()).isEqualTo(order.getText());
+                        });
     }
 
     @Test
     void shouldCreateNewOrder() throws Exception {
-        OrderRequest order = new OrderRequest("New Order", customer.getId());
-        this.mockMvc
-                .perform(
-                        post("/api/orders")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(order)))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id", notNullValue(), String.class))
-                .andExpect(jsonPath("$.id", hasLength(9)))
-                .andExpect(jsonPath("$.text", is(order.text())));
+        OrderRequest orderRequest = new OrderRequest("New Order", customer.getId());
+
+        this.mockMvcTester
+                .post()
+                .uri("/api/orders")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(orderRequest))
+                .assertThat()
+                .hasStatus(HttpStatus.CREATED)
+                .hasContentType(MediaType.APPLICATION_JSON)
+                .bodyJson()
+                .convertTo(OrderResponse.class)
+                .satisfies(
+                        orderResponse -> {
+                            assertThat(orderResponse.id()).isNotNull().hasSize(9);
+                            assertThat(orderResponse.text()).isEqualTo(orderRequest.text());
+                        });
+    }
+
+    @Test
+    void shouldReturn400WhenCreateNewOrderWithoutText() throws Exception {
+        OrderRequest orderRequest = new OrderRequest(null, "CUS_1");
+
+        this.mockMvcTester
+                .post()
+                .uri("/api/orders")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(orderRequest))
+                .assertThat()
+                .hasStatus(HttpStatus.BAD_REQUEST)
+                .hasContentType(MediaType.APPLICATION_PROBLEM_JSON)
+                .bodyJson()
+                .convertTo(ProblemDetail.class)
+                .satisfies(
+                        problem -> {
+                            assertThat(problem.getType().toString()).isEqualTo("about:blank");
+                            assertThat(problem.getTitle()).isEqualTo("Constraint Violation");
+                            assertThat(problem.getStatus()).isEqualTo(400);
+                            assertThat(problem.getDetail()).isEqualTo("Invalid request content.");
+                            assertThat(Objects.requireNonNull(problem.getInstance()).toString())
+                                    .isEqualTo("/api/orders");
+                            assertThat(problem.getProperties()).hasSize(1);
+                            Object violations = problem.getProperties().get("violations");
+                            assertThat(violations).isNotNull();
+                            assertThat(violations).isInstanceOf(List.class);
+                            assertThat((List<?>) violations).hasSize(1);
+                            assertThat(((List<?>) violations).getFirst())
+                                    .isInstanceOf(LinkedHashMap.class);
+                            LinkedHashMap<?, ?> violation =
+                                    (LinkedHashMap<?, ?>) ((List<?>) violations).getFirst();
+                            assertThat(violation.get("field")).isEqualTo("text");
+                            assertThat(violation.get("message")).isEqualTo("Text cannot be empty");
+                        });
+    }
+
+    @Test
+    void shouldUpdateOrder() throws Exception {
+        OrderRequest orderRequest = new OrderRequest("Updated Order", customer.getId());
+        Order order = orderList.getFirst();
+
+        this.mockMvcTester
+                .put()
+                .uri("/api/orders/{id}", order.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(orderRequest))
+                .assertThat()
+                .hasStatus(HttpStatus.OK)
+                .hasContentType(MediaType.APPLICATION_JSON)
+                .bodyJson()
+                .convertTo(OrderResponse.class)
+                .satisfies(
+                        orderResponse -> {
+                            assertThat(orderResponse.id()).isEqualTo(order.getId());
+                            assertThat(orderResponse.text()).isEqualTo(orderRequest.text());
+                        });
     }
 
     @Test
@@ -100,62 +177,31 @@ class OrderControllerIT extends AbstractIntegrationTest {
         OrderRequest orderRequest = new OrderRequest("Updated Order", "INVALID_ID");
         Order order = orderList.getFirst();
 
-        this.mockMvc
-                .perform(
-                        put("/api/orders/{id}", order.getId())
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(orderRequest)))
-                .andExpect(status().isNotFound());
+        this.mockMvcTester
+                .put()
+                .uri("/api/orders/{id}", order.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(orderRequest))
+                .assertThat()
+                .hasStatus(HttpStatus.NOT_FOUND);
     }
 
     @Test
-    void shouldReturn400WhenCreateNewOrderWithoutText() throws Exception {
-        OrderRequest order = new OrderRequest(null, "CUS_1");
-
-        this.mockMvc
-                .perform(
-                        post("/api/orders")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(order)))
-                .andExpect(status().isBadRequest())
-                .andExpect(
-                        header().string(
-                                        HttpHeaders.CONTENT_TYPE,
-                                        is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
-                .andExpect(jsonPath("$.type", is("about:blank")))
-                .andExpect(jsonPath("$.title", is("Constraint Violation")))
-                .andExpect(jsonPath("$.status", is(400)))
-                .andExpect(jsonPath("$.detail", is("Invalid request content.")))
-                .andExpect(jsonPath("$.instance", is("/api/orders")))
-                .andExpect(jsonPath("$.violations", hasSize(1)))
-                .andExpect(jsonPath("$.violations[0].field", is("text")))
-                .andExpect(jsonPath("$.violations[0].message", is("Text cannot be empty")))
-                .andReturn();
-    }
-
-    @Test
-    void shouldUpdateOrder() throws Exception {
-        OrderRequest orderRequest = new OrderRequest("Updated Order", customer.getId());
-
-        Order order = orderList.getFirst();
-        this.mockMvc
-                .perform(
-                        put("/api/orders/{id}", order.getId())
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(orderRequest)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(order.getId()), String.class))
-                .andExpect(jsonPath("$.text", is(orderRequest.text())));
-    }
-
-    @Test
-    void shouldDeleteOrder() throws Exception {
+    void shouldDeleteOrder() {
         Order order = orderList.getFirst();
 
-        this.mockMvc
-                .perform(delete("/api/orders/{id}", order.getId()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(order.getId()), String.class))
-                .andExpect(jsonPath("$.text", is(order.getText())));
+        this.mockMvcTester
+                .delete()
+                .uri("/api/orders/{id}", order.getId())
+                .assertThat()
+                .hasStatusOk()
+                .hasContentType(MediaType.APPLICATION_JSON)
+                .bodyJson()
+                .convertTo(OrderResponse.class)
+                .satisfies(
+                        orderResponse -> {
+                            assertThat(orderResponse.id()).isEqualTo(order.getId());
+                            assertThat(orderResponse.text()).isEqualTo(order.getText());
+                        });
     }
 }

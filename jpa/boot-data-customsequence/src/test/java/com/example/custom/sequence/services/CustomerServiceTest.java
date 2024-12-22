@@ -9,8 +9,8 @@ import static org.mockito.BDDMockito.willDoNothing;
 import com.example.custom.sequence.entities.Customer;
 import com.example.custom.sequence.mapper.CustomerMapper;
 import com.example.custom.sequence.model.request.CustomerRequest;
-import com.example.custom.sequence.model.response.CustomerResponse;
-import com.example.custom.sequence.model.response.PagedResult;
+import com.example.custom.sequence.model.request.OrderRequest;
+import com.example.custom.sequence.model.response.*;
 import com.example.custom.sequence.repositories.CustomerRepository;
 import java.util.List;
 import java.util.Optional;
@@ -88,6 +88,8 @@ class CustomerServiceTest {
     void deleteCustomerById() {
         // given
         willDoNothing().given(customerRepository).deleteById("CUS_1");
+        given(customerRepository.findById("CUS_1")).willReturn(Optional.of(getCustomer()));
+        given(customerMapper.mapToResponse(getCustomer())).willReturn(getCustomerResponse());
         // when
         customerService.deleteCustomerById("CUS_1");
         // then
@@ -102,10 +104,13 @@ class CustomerServiceTest {
     }
 
     private CustomerRequest getCustomerRequest() {
-        return new CustomerRequest("junitTest", List.of());
+        return new CustomerRequest("junitTest", List.of(new OrderRequest("ORD_1", "junitTest")));
     }
 
     private CustomerResponse getCustomerResponse() {
-        return new CustomerResponse("CUS_1", "junitTest", List.of());
+        return new CustomerResponse(
+                "CUS_1",
+                "junitTest",
+                List.of(new OrderResponseWithOutCustomer("ORD_1", "junitTest")));
     }
 }

@@ -1,4 +1,4 @@
-package com.example.custom.sequence.config;
+package com.example.custom.sequence.config.db;
 
 import io.hypersistence.utils.logging.InlineQueryLogEntryCreator;
 import javax.sql.DataSource;

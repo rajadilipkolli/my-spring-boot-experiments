@@ -1,6 +1,6 @@
 package com.example.custom.sequence.entities;
 
-import com.example.custom.sequence.config.StringPrefixedSequence;
+import com.example.custom.sequence.config.db.StringPrefixedSequence;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;

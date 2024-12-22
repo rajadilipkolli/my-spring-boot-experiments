@@ -1,4 +1,4 @@
-package com.example.custom.sequence.config;
+package com.example.custom.sequence.config.db;
 
 import java.io.Serializable;
 import java.lang.reflect.Member;
