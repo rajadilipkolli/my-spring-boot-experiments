@@ -57,7 +57,7 @@ jobs:
 
       - if: ${{ github.ref == 'refs/heads/main' }}
         name: Build container image
-        run: ./mvnw spring-boot:build-image -Dspring-boot.build-image.imageName=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/boot-strategy-plugin:${{ env.VERSION }}
+        run: ./mvnw -Pnative spring-boot:build-image -Dspring-boot.build-image.imageName=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/boot-strategy-plugin:${{ env.VERSION }}
 
       - if: ${{ github.ref == 'refs/heads/main' }}
         name: OCI image vulnerability scanning

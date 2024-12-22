@@ -8,6 +8,7 @@ import java.net.URI;
 import java.time.Instant;
 
 public class PluginNotFoundException extends ErrorResponseException {
+    
     public PluginNotFoundException(String message) {
         super(
                 HttpStatus.BAD_REQUEST,

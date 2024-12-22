@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
+import java.net.URI;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -26,19 +27,23 @@ class GlobalExceptionHandler {
         ProblemDetail problemDetail =
                 ProblemDetail.forStatusAndDetail(
                         HttpStatusCode.valueOf(400), "Invalid request content.");
+        problemDetail.setType(URI.create("https://api.example.com/errors/validation"));
         problemDetail.setTitle("Constraint Violation");
         List<ApiValidationError> validationErrorsList =
                 methodArgumentNotValidException.getAllErrors().stream()
                         .map(
                                 objectError -> {
-                                    FieldError fieldError = (FieldError) objectError;
-                                    return new ApiValidationError(
-                                            fieldError.getObjectName(),
-                                            fieldError.getField(),
-                                            fieldError.getRejectedValue(),
-                                            Objects.requireNonNull(
-                                                    fieldError.getDefaultMessage(), ""));
+                                    if (objectError instanceof FieldError fieldError) {
+                                        return new ApiValidationError(
+                                                fieldError.getObjectName(),
+                                                fieldError.getField(),
+                                                fieldError.getRejectedValue(),
+                                                Objects.requireNonNull(
+                                                        fieldError.getDefaultMessage(), ""));
+                                    }
+                                    return null;
                                 })
+                        .filter(Objects::nonNull)
                         .sorted(Comparator.comparing(ApiValidationError::field))
                         .toList();
         problemDetail.setProperty("violations", validationErrorsList);
