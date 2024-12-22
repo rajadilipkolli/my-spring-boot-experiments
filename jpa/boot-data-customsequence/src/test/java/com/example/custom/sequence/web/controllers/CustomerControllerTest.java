@@ -98,18 +98,20 @@ class CustomerControllerTest {
 
     @Test
     void shouldCreateNewCustomer() throws Exception {
+
+        CustomerRequest customerRequest = new CustomerRequest("some text", new ArrayList<>());
+
         given(customerService.saveCustomer(any(CustomerRequest.class)))
                 .willReturn(new CustomerResponse("CUS_1", "some text", List.of()));
 
-        Customer customer = new Customer("CUS_1", "some text", new ArrayList<>());
         this.mockMvc
                 .perform(
                         post("/api/customers")
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(customer)))
+                                .content(objectMapper.writeValueAsString(customerRequest)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id", notNullValue()))
-                .andExpect(jsonPath("$.text", is(customer.getText())));
+                .andExpect(jsonPath("$.text", is(customerRequest.text())));
     }
 
     @Test

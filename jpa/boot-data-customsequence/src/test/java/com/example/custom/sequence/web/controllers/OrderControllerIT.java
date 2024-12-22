@@ -18,7 +18,6 @@ import com.example.custom.sequence.entities.Order;
 import com.example.custom.sequence.model.request.OrderRequest;
 import com.example.custom.sequence.repositories.CustomerRepository;
 import com.example.custom.sequence.repositories.OrderRepository;
-import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -38,14 +37,21 @@ class OrderControllerIT extends AbstractIntegrationTest {
     void setUp() {
         orderRepository.deleteAllInBatch();
         customerRepository.deleteAllInBatch();
-        Customer cust = new Customer("customer1");
-        customer = customerRepository.persist(cust);
+        customer = createTestCustomer();
+        orderList = createTestOrders(customer);
+    }
 
-        orderList = new ArrayList<>();
-        orderList.add(new Order(null, "First Order", customer));
-        orderList.add(new Order(null, "Second Order", customer));
-        orderList.add(new Order(null, "Third Order", customer));
-        orderList = orderRepository.persistAll(orderList);
+    private Customer createTestCustomer() {
+        return customerRepository.persist(new Customer("customer1"));
+    }
+
+    private List<Order> createTestOrders(Customer customer) {
+        List<Order> orders =
+                List.of(
+                        new Order(null, "First Order", customer),
+                        new Order(null, "Second Order", customer),
+                        new Order(null, "Third Order", customer));
+        return orderRepository.persistAll(orders);
     }
 
     @Test
@@ -87,6 +93,19 @@ class OrderControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.id", notNullValue(), String.class))
                 .andExpect(jsonPath("$.id", hasLength(9)))
                 .andExpect(jsonPath("$.text", is(order.text())));
+    }
+
+    @Test
+    void shouldReturn400WhenUpdatingOrderWithInvalidCustomerId() throws Exception {
+        OrderRequest orderRequest = new OrderRequest("Updated Order", "INVALID_ID");
+        Order order = orderList.getFirst();
+
+        this.mockMvc
+                .perform(
+                        put("/api/orders/{id}", order.getId())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(orderRequest)))
+                .andExpect(status().isNotFound());
     }
 
     @Test

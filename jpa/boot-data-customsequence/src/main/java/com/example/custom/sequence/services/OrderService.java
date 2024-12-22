@@ -75,19 +75,19 @@ public class OrderService {
     }
 
     @Transactional
-    public void deleteOrderById(String id) {
-        orderRepository.deleteById(id);
-    }
-
-    @Transactional
     public Optional<OrderResponse> updateOrderById(String id, OrderRequest orderRequest) {
         return orderRepository
-                .findById(id)
+                .findByIdAndCustomer_Id(id, orderRequest.customerId())
                 .map(
                         order -> {
                             order.setText(orderRequest.text());
                             return orderMapper.getOrderResponse(
                                     orderRepository.mergeAndFlush(order));
                         });
+    }
+
+    @Transactional
+    public void deleteOrderById(String id) {
+        orderRepository.deleteById(id);
     }
 }

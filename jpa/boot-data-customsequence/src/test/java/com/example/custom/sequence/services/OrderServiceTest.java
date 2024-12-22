@@ -1,10 +1,12 @@
 package com.example.custom.sequence.services;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.times;
 import static org.mockito.BDDMockito.verify;
 import static org.mockito.BDDMockito.willDoNothing;
+import static org.mockito.Mockito.never;
 
 import com.example.custom.sequence.entities.Customer;
 import com.example.custom.sequence.entities.Order;
@@ -85,6 +87,19 @@ class OrderServiceTest {
         assertThat(persistedOrder.isPresent()).isNotNull();
         assertThat(persistedOrder.get().id()).isEqualTo("1");
         assertThat(persistedOrder.get().text()).isEqualTo("junitText");
+    }
+
+    @Test
+    void saveOrderWhenCustomerNotFound() {
+        // given
+        given(customerService.findById("1")).willReturn(Optional.empty());
+
+        // when
+        Optional<OrderResponse> persistedOrder = orderService.saveOrder(getOrderReq());
+
+        // then
+        assertThat(persistedOrder).isEmpty();
+        verify(orderRepository, never()).persist(any());
     }
 
     @Test
