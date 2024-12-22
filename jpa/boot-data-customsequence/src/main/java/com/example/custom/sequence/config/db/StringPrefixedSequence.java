@@ -1,4 +1,4 @@
-package com.example.custom.sequence.config;
+package com.example.custom.sequence.config.db;
 
 import static java.lang.annotation.ElementType.FIELD;
 import static java.lang.annotation.ElementType.METHOD;

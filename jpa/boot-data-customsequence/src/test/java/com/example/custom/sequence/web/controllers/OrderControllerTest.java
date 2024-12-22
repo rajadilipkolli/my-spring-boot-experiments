@@ -6,6 +6,8 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -52,7 +54,7 @@ class OrderControllerTest {
 
     @BeforeEach
     void setUp() {
-        customer = new Customer("CUST_01", "customer1", new ArrayList<>());
+        customer = new Customer("CUST_01", "customer1", List.of());
         this.orderList = new ArrayList<>();
         this.orderList.add(new Order("1", "text 1", customer));
         this.orderList.add(new Order("2", "text 2", customer));
@@ -180,15 +182,17 @@ class OrderControllerTest {
     @Test
     void shouldReturn404WhenUpdatingNonExistingOrder() throws Exception {
         String orderId = "1";
-        given(orderService.findOrderById(orderId)).willReturn(Optional.empty());
-        Order order = new Order(orderId, "Updated text", customer);
+        OrderRequest orderRequest = new OrderRequest("Updated text", customer.getId());
+        given(orderService.updateOrderById(orderId, orderRequest)).willReturn(Optional.empty());
 
         this.mockMvc
                 .perform(
                         put("/api/orders/{id}", orderId)
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(order)))
+                                .content(objectMapper.writeValueAsString(orderRequest)))
                 .andExpect(status().isNotFound());
+
+        verify(orderService, times(1)).updateOrderById(orderId, orderRequest);
     }
 
     @Test

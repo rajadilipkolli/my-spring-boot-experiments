@@ -1,11 +1,12 @@
 package com.example.custom.sequence.web.controllers;
 
 import com.example.custom.sequence.model.request.OrderRequest;
+import com.example.custom.sequence.model.request.ValidationGroups;
 import com.example.custom.sequence.model.response.OrderResponse;
 import com.example.custom.sequence.model.response.PagedResult;
 import com.example.custom.sequence.services.OrderService;
 import com.example.custom.sequence.utils.AppConstants;
-import lombok.extern.slf4j.Slf4j;
+import jakarta.validation.groups.Default;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -21,7 +22,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/orders")
-@Slf4j
 public class OrderController {
 
     private final OrderService orderService;
@@ -53,7 +53,8 @@ public class OrderController {
 
     @PostMapping
     public ResponseEntity<OrderResponse> createOrder(
-            @RequestBody @Validated OrderRequest orderRequest) {
+            @RequestBody @Validated(value = {Default.class, ValidationGroups.GroupCheck.class})
+                    OrderRequest orderRequest) {
         return orderService
                 .saveOrder(orderRequest)
                 .map(order -> ResponseEntity.status(HttpStatus.CREATED).body(order))
@@ -62,7 +63,9 @@ public class OrderController {
 
     @PutMapping("/{id}")
     public ResponseEntity<OrderResponse> updateOrder(
-            @PathVariable String id, @RequestBody OrderRequest orderRequest) {
+            @PathVariable String id,
+            @RequestBody @Validated(value = {Default.class, ValidationGroups.GroupCheck.class})
+                    OrderRequest orderRequest) {
         return orderService
                 .updateOrderById(id, orderRequest)
                 .map(ResponseEntity::ok)

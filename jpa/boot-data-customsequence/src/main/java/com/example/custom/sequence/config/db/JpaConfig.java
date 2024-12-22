@@ -1,4 +1,4 @@
-package com.example.custom.sequence.config;
+package com.example.custom.sequence.config.db;
 
 import io.hypersistence.utils.spring.repository.BaseJpaRepositoryImpl;
 import org.springframework.context.annotation.Configuration;

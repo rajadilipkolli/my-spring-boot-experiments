@@ -30,6 +30,9 @@ public class CustomerMapper {
 
     public Customer mapToEntity(CustomerRequest customerRequest) {
         Customer customer = new Customer(customerRequest.text());
+        if (customerRequest.orders() == null) {
+            return customer;
+        }
         customerRequest
                 .orders()
                 .forEach(orderRequest -> customer.addOrder(orderMapper.mapToEntity(orderRequest)));
@@ -38,6 +41,9 @@ public class CustomerMapper {
 
     public void updateCustomerFromRequest(CustomerRequest customerRequest, Customer foundCustomer) {
         foundCustomer.setText(customerRequest.text());
+        if (customerRequest.orders() == null) {
+            return;
+        }
         List<Order> removedOrders = new ArrayList<>(foundCustomer.getOrders());
         List<Order> ordersFromRequest =
                 customerRequest.orders().stream()
