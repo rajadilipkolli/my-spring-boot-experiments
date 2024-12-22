@@ -4,14 +4,13 @@ import com.scheduler.quartz.model.common.Message;
 import com.scheduler.quartz.model.response.JobStatus;
 import com.scheduler.quartz.model.response.ScheduleJob;
 import com.scheduler.quartz.service.JobsService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import jakarta.validation.Valid;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.SchedulerException;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api")
@@ -35,7 +34,7 @@ public class JobsController {
     }
 
     @PostMapping(value = "/saveOrUpdate")
-    public Message saveOrUpdate(ScheduleJob job) {
+    public Message saveOrUpdate(@RequestBody @Valid ScheduleJob job) {
         log.info("saveOrUpdateJob  params : {}", job);
         Message message = Message.failure();
         try {
@@ -49,7 +48,7 @@ public class JobsController {
     }
 
     @PostMapping(value = "/pauseJob")
-    public Message pauseJob(ScheduleJob job) {
+    public Message pauseJob(@RequestBody @Valid ScheduleJob job) {
         log.info("pauseJob params = {}", job);
         Message message = Message.failure();
         try {
@@ -62,8 +61,12 @@ public class JobsController {
         return message;
     }
 
+    @Operation(summary = "Resume a scheduled job")
+    @ApiResponse(responseCode = "200", description = "Job resumed successfully")
+    @ApiResponse(responseCode = "400", description = "Invalid job parameters")
+    @ApiResponse(responseCode = "500", description = "Internal server error")
     @PostMapping(value = "/resumeJob")
-    public Message resumeJob(ScheduleJob job) {
+    public Message resumeJob(@RequestBody @Valid ScheduleJob job) {
         log.info("resumeJob params = {}", job);
         Message message = Message.failure();
         try {
@@ -76,8 +79,12 @@ public class JobsController {
         return message;
     }
 
+    @Operation(summary = "Trigger immediate execution of a job")
+    @ApiResponse(responseCode = "200", description = "Job triggered successfully")
+    @ApiResponse(responseCode = "400", description = "Invalid job parameters")
+    @ApiResponse(responseCode = "500", description = "Internal server error")
     @PostMapping(value = "/runJob")
-    public Message runJob(ScheduleJob job) {
+    public Message runJob(@RequestBody @Valid ScheduleJob job) {
         log.info("runJob params = {}", job);
         Message message = Message.failure();
         try {
@@ -91,7 +98,7 @@ public class JobsController {
     }
 
     @DeleteMapping(value = "/deleteJob")
-    public Message deleteJob(ScheduleJob job) {
+    public Message deleteJob(@RequestBody @Valid ScheduleJob job) {
         log.info("deleteJob params : {}", job);
         Message message = Message.failure();
         try {

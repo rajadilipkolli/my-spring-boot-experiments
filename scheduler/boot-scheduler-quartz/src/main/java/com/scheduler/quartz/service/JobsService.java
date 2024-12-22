@@ -22,6 +22,7 @@ import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
 import org.quartz.TriggerKey;
 import org.quartz.impl.matchers.GroupMatcher;
+import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -32,8 +33,8 @@ public class JobsService {
     private final Scheduler scheduler;
     public static final String GROUP_NAME = "sample-group";
 
-    public JobsService(Scheduler scheduler) {
-        this.scheduler = scheduler;
+    public JobsService(SchedulerFactoryBean schedulerFactoryBean) {
+        this.scheduler = schedulerFactoryBean.getScheduler();
     }
 
     public List<ScheduleJob> getJobs() {
@@ -134,7 +135,8 @@ public class JobsService {
         CronScheduleBuilder cronScheduleBuilder = CronScheduleBuilder.cronSchedule(withJobId.cronExpression());
         trigger = TriggerBuilder.newTrigger()
                 .withIdentity(withJobId.jobName() + "-trigger", GROUP_NAME)
-                .withSchedule(cronScheduleBuilder)
+                .withDescription(scheduleJob.desc())
+                .withSchedule(cronScheduleBuilder.withMisfireHandlingInstructionIgnoreMisfires())
                 .build();
 
         scheduler.scheduleJob(jobDetail, trigger);
