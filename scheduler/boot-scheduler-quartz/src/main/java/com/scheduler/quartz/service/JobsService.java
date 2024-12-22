@@ -36,11 +36,6 @@ public class JobsService {
         this.scheduler = scheduler;
     }
 
-    public void deleteJob(ScheduleJob scheduleJob) throws SchedulerException {
-        JobKey jobKey = JobKey.jobKey(scheduleJob.jobName(), scheduleJob.jobGroup());
-        scheduler.deleteJob(jobKey);
-    }
-
     public List<ScheduleJob> getJobs() {
         List<ScheduleJob> jobList = new ArrayList<>();
         try {
@@ -113,8 +108,11 @@ public class JobsService {
     }
 
     private void addJob(ScheduleJob scheduleJob) throws SchedulerException {
+        // Create TriggerKey for the job
         TriggerKey triggerKey = TriggerKey.triggerKey(scheduleJob.jobName(), GROUP_NAME);
         CronTrigger trigger = (CronTrigger) scheduler.getTrigger(triggerKey);
+
+        // Throw exception if the job already exists
         if (trigger != null) {
             throw new SchedulerException("job already exists!");
         }
@@ -123,13 +121,16 @@ public class JobsService {
         ScheduleJob withJobId = scheduleJob.withJobId(String.valueOf(SampleJob.JOB_LIST.size() + 1));
         SampleJob.JOB_LIST.add(withJobId);
 
+        // Build the JobDetail with recovery and durability
         JobDetail jobDetail = JobBuilder.newJob(SampleJob.class)
                 .withIdentity(withJobId.jobName(), GROUP_NAME)
+                .withDescription(scheduleJob.desc())
                 .storeDurably()
                 .requestRecovery()
                 .build();
         jobDetail.getJobDataMap().put("scheduleJob", withJobId.jobId());
 
+        // Build the Trigger with Cron expression and associate it with the job
         CronScheduleBuilder cronScheduleBuilder = CronScheduleBuilder.cronSchedule(withJobId.cronExpression());
         trigger = TriggerBuilder.newTrigger()
                 .withIdentity(withJobId.jobName() + "-trigger", GROUP_NAME)
@@ -142,5 +143,20 @@ public class JobsService {
     public void pauseJob(ScheduleJob scheduleJob) throws SchedulerException {
         JobKey jobKey = JobKey.jobKey(scheduleJob.jobName(), scheduleJob.jobGroup());
         scheduler.pauseJob(jobKey);
+    }
+
+    public void resumeJob(ScheduleJob scheduleJob) throws SchedulerException {
+        JobKey jobKey = JobKey.jobKey(scheduleJob.jobName(), scheduleJob.jobGroup());
+        scheduler.resumeJob(jobKey);
+    }
+
+    public void runJob(ScheduleJob job) throws SchedulerException {
+        JobKey jobKey = JobKey.jobKey(job.jobName(), job.jobGroup());
+        scheduler.triggerJob(jobKey);
+    }
+
+    public void deleteJob(ScheduleJob scheduleJob) throws SchedulerException {
+        JobKey jobKey = JobKey.jobKey(scheduleJob.jobName(), scheduleJob.jobGroup());
+        scheduler.deleteJob(jobKey);
     }
 }

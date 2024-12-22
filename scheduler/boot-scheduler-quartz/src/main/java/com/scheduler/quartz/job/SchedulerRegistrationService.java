@@ -36,7 +36,7 @@ public class SchedulerRegistrationService {
                 .forJob(registerOddJob.getKey())
                 .startAt(futureDate(10, DateBuilder.IntervalUnit.SECOND))
                 .withSchedule(simpleSchedule()
-                        .withIntervalInSeconds(60) // Run every 2 seconds
+                        .withIntervalInSeconds(120) // Run every 120 seconds
                         .repeatForever()
                         .withMisfireHandlingInstructionFireNow())
                 .build();

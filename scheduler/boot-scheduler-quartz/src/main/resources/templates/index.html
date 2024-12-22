@@ -10,7 +10,9 @@
         .input-group {margin-bottom: 5px;}
         .title {text-align:center; font-size:30px; margin-top:15px;}
         .btnCreate {text-align:right; margin:5px 15px;}
-        .head {border:solid; border-color:#8080805c; border-width:1px;}
+        .head {
+            border: 1px solid #8080805c;
+        }
         .line {
             border: 0;
             height: 1px;
@@ -78,21 +80,25 @@
                             <input type="hidden" class="form-control" id="jobId" name="jobId"/>
                             <div class="input-group">
                                 <span class="input-group-addon">job name</span>
+                                <label for="edit_name"></label>
                                 <input type="text" alias="no-edit" name="jobName" class="form-control" id="edit_name"/>
                             </div>
                             <div class="input-group">
                                 <span class="input-group-addon">job group</span>
+                                <label for="edit_group"></label>
                                 <input type="text" alias="no-edit" name="jobGroup" class="form-control" id="edit_group"/>
                             </div>
                             <div class="input-group">
                                 <span class="input-group-addon">cron expression</span>
+                                <label for="edit_cron"></label>
                                 <input type="text" alias="no-edit" name="cronExpression" class="form-control"
-                                       id="edit_cron"/>
+                                                                      id="edit_cron"/>
                             </div>
                             <div class="input-group">
                                 <span class="input-group-addon">job status</span>
-                                <select id="edit_status" disabled="disabled" name="jobStatus" class="form-control"
-                                        data-size="10">
+                                <label for="edit_status"></label>
+                                <select id="edit_status" name="jobStatus" class="form-control"
+                                                                         data-size="10">
                                     <option value=""></option>
                                     <option value="NORMAL">NORMAL</option>
                                     <option value="PAUSED">PAUSED</option>
@@ -100,6 +106,7 @@
                             </div>
                             <div class="input-group">
                                 <span class="input-group-addon">job description</span>
+                                <label for="edit_desc"></label>
                                 <input type="text" alias="no-edit" name="desc" class="form-control" id="edit_desc"/>
                             </div>
                         </div>

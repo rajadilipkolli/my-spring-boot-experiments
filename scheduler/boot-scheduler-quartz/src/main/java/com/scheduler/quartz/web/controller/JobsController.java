@@ -62,6 +62,34 @@ public class JobsController {
         return message;
     }
 
+    @PostMapping(value = "/resumeJob")
+    public Message resumeJob(ScheduleJob job) {
+        log.info("resumeJob params = {}", job);
+        Message message = Message.failure();
+        try {
+            jobsService.resumeJob(job);
+            message = Message.success();
+        } catch (Exception e) {
+            message.setMsg(e.getMessage());
+            log.error("resumeJob ex:", e);
+        }
+        return message;
+    }
+
+    @PostMapping(value = "/runJob")
+    public Message runJob(ScheduleJob job) {
+        log.info("runJob params = {}", job);
+        Message message = Message.failure();
+        try {
+            jobsService.runJob(job);
+            message = Message.success();
+        } catch (Exception e) {
+            message.setMsg(e.getMessage());
+            log.error("runJob ex:", e);
+        }
+        return message;
+    }
+
     @DeleteMapping(value = "/deleteJob")
     public Message deleteJob(ScheduleJob job) {
         log.info("deleteJob params : {}", job);

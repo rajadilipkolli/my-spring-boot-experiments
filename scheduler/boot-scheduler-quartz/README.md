@@ -32,4 +32,4 @@ You can also run the application using Maven as follows:
 * Swagger UI: http://localhost:8080/swagger-ui.html
 * Actuator Endpoint: http://localhost:8080/actuator
 * PGAdmin : http://localhost:5050
-
+* UI : http://localhost:8080/index
