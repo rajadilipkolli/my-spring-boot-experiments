@@ -9,4 +9,4 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @OpenAPIDefinition(info = @Info(title = "spring-boot-strategy-plugin", version = "v1"), 
     servers = @Server(url = "/"))
-public class SwaggerConfig {}
+class SwaggerConfig {}
