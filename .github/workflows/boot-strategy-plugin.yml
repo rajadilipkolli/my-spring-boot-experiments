@@ -57,13 +57,14 @@ jobs:
 
       - if: ${{ github.ref == 'refs/heads/main' }}
         name: Build container image
-        run: ./mvnw spring-boot:build-image
+        run: ./mvnw spring-boot:build-image -Dspring-boot.build-image.imageName=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/boot-strategy-plugin:${{ env.VERSION }}
+
       - if: ${{ github.ref == 'refs/heads/main' }}
         name: OCI image vulnerability scanning
         uses: anchore/scan-action@v6
         id: scan
         with:
-          image: ${{ env.REGISTRY }}/boot-strategy-plugin:${{ env.VERSION }}
+          image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/boot-strategy-plugin:${{ env.VERSION }}
           fail-build: false
           severity-cutoff: high
       - if: ${{ github.ref == 'refs/heads/main' }}
@@ -75,4 +76,4 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       - if: ${{ github.ref == 'refs/heads/main' }}
         name: Publish container image
-        run: docker push ${{ env.REGISTRY }}/boot-strategy-plugin:${{ env.VERSION }}
+        run: docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/boot-strategy-plugin:${{ env.VERSION }}

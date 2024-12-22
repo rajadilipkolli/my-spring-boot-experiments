@@ -9,18 +9,18 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-public class StrategyController {
+class StrategyController {
 
     private static final Logger logger = LoggerFactory.getLogger(StrategyController.class);
 
     private final StrategyService strategyService;
 
-    public StrategyController(StrategyService strategyService) {
+    StrategyController(StrategyService strategyService) {
         this.strategyService = strategyService;
     }
 
     @GetMapping("/fetch")
-    public GenericDTO fetchData(@RequestParam("type") String type) {
+    GenericDTO fetchData(@RequestParam("type") String type) {
         logger.info("Requested to fetch of type :{}", type);
         return this.strategyService.fetchData(type);
     }
