@@ -1,6 +1,7 @@
 package com.example.custom.sequence.web.api;
 
 import com.example.custom.sequence.entities.Customer;
+import com.example.custom.sequence.model.request.CustomerRequest;
 import com.example.custom.sequence.model.response.CustomerResponse;
 import com.example.custom.sequence.model.response.PagedResult;
 import io.swagger.v3.oas.annotations.Operation;
@@ -104,5 +105,5 @@ public interface CustomerAPI {
                                     schema = @Schema(implementation = ProblemDetail.class))
                         })
             })
-    CustomerResponse createCustomer(@Valid @RequestBody(required = true) Customer customer);
+    CustomerResponse createCustomer(@Valid @RequestBody(required = true) CustomerRequest customer);
 }

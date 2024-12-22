@@ -10,7 +10,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotEmpty;
 import java.util.Objects;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -32,7 +31,6 @@ public class Order {
     private String id;
 
     @Column(nullable = false)
-    @NotEmpty(message = "Text cannot be empty")
     private String text;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -44,7 +42,8 @@ public class Order {
         if (this == o) return true;
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
         Order order = (Order) o;
-        return id != null && Objects.equals(id, order.id);
+        return Objects.equals(text, order.text)
+                && Objects.equals(customer.getId(), order.customer.getId());
     }
 
     @Override

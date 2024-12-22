@@ -15,6 +15,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.example.custom.sequence.common.AbstractIntegrationTest;
 import com.example.custom.sequence.entities.Customer;
 import com.example.custom.sequence.entities.Order;
+import com.example.custom.sequence.model.request.OrderRequest;
 import com.example.custom.sequence.repositories.CustomerRepository;
 import com.example.custom.sequence.repositories.OrderRepository;
 import java.util.ArrayList;
@@ -36,15 +37,15 @@ class OrderControllerIT extends AbstractIntegrationTest {
     @BeforeEach
     void setUp() {
         orderRepository.deleteAllInBatch();
-        customerRepository.deleteAll();
+        customerRepository.deleteAllInBatch();
         Customer cust = new Customer("customer1");
-        customer = customerRepository.save(cust);
+        customer = customerRepository.persist(cust);
 
         orderList = new ArrayList<>();
         orderList.add(new Order(null, "First Order", customer));
         orderList.add(new Order(null, "Second Order", customer));
         orderList.add(new Order(null, "Third Order", customer));
-        orderList = orderRepository.saveAll(orderList);
+        orderList = orderRepository.persistAll(orderList);
     }
 
     @Test
@@ -76,7 +77,7 @@ class OrderControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldCreateNewOrder() throws Exception {
-        Order order = new Order(null, "New Order", customer);
+        OrderRequest order = new OrderRequest("New Order", customer.getId());
         this.mockMvc
                 .perform(
                         post("/api/orders")
@@ -85,12 +86,12 @@ class OrderControllerIT extends AbstractIntegrationTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id", notNullValue(), String.class))
                 .andExpect(jsonPath("$.id", hasLength(9)))
-                .andExpect(jsonPath("$.text", is(order.getText())));
+                .andExpect(jsonPath("$.text", is(order.text())));
     }
 
     @Test
     void shouldReturn400WhenCreateNewOrderWithoutText() throws Exception {
-        Order order = new Order(null, null, null);
+        OrderRequest order = new OrderRequest(null, "CUS_1");
 
         this.mockMvc
                 .perform(
@@ -115,17 +116,17 @@ class OrderControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldUpdateOrder() throws Exception {
-        Order order = orderList.getFirst();
-        order.setText("Updated Order");
+        OrderRequest orderRequest = new OrderRequest("Updated Order", customer.getId());
 
+        Order order = orderList.getFirst();
         this.mockMvc
                 .perform(
                         put("/api/orders/{id}", order.getId())
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(order)))
+                                .content(objectMapper.writeValueAsString(orderRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(order.getId()), String.class))
-                .andExpect(jsonPath("$.text", is(order.getText())));
+                .andExpect(jsonPath("$.text", is(orderRequest.text())));
     }
 
     @Test

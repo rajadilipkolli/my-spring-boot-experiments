@@ -9,7 +9,8 @@ import static org.mockito.BDDMockito.willDoNothing;
 import com.example.custom.sequence.entities.Customer;
 import com.example.custom.sequence.entities.Order;
 import com.example.custom.sequence.mapper.OrderMapper;
-import com.example.custom.sequence.model.response.CustomerResponse;
+import com.example.custom.sequence.model.request.OrderRequest;
+import com.example.custom.sequence.model.response.CustomerResponseWithOutOrder;
 import com.example.custom.sequence.model.response.OrderResponse;
 import com.example.custom.sequence.model.response.PagedResult;
 import com.example.custom.sequence.repositories.OrderRepository;
@@ -30,6 +31,7 @@ import org.springframework.data.domain.Sort;
 class OrderServiceTest {
 
     @Mock private OrderRepository orderRepository;
+    @Mock private CustomerService customerService;
     @Mock private OrderMapper orderMapper;
 
     @InjectMocks private OrderService orderService;
@@ -73,14 +75,16 @@ class OrderServiceTest {
     @Test
     void saveOrder() {
         // given
-        given(orderRepository.save(getOrder())).willReturn(getOrder());
+        given(customerService.findById("1"))
+                .willReturn(Optional.of(new Customer("1", "custText", List.of())));
+        given(orderRepository.persist(getOrder())).willReturn(getOrder());
         given(orderMapper.getOrderResponse(getOrder())).willReturn(getOrderResponse());
         // when
-        OrderResponse persistedOrder = orderService.saveOrder(getOrder());
+        Optional<OrderResponse> persistedOrder = orderService.saveOrder(getOrderReq());
         // then
-        assertThat(persistedOrder).isNotNull();
-        assertThat(persistedOrder.id()).isEqualTo("1");
-        assertThat(persistedOrder.text()).isEqualTo("junitText");
+        assertThat(persistedOrder.isPresent()).isNotNull();
+        assertThat(persistedOrder.get().id()).isEqualTo("1");
+        assertThat(persistedOrder.get().text()).isEqualTo("junitText");
     }
 
     @Test
@@ -105,6 +109,11 @@ class OrderServiceTest {
     }
 
     private OrderResponse getOrderResponse() {
-        return new OrderResponse("1", "junitText", new CustomerResponse("1", "custText"));
+        return new OrderResponse(
+                "1", "junitText", new CustomerResponseWithOutOrder("1", "custText"));
+    }
+
+    private OrderRequest getOrderReq() {
+        return new OrderRequest("junitText", "1");
     }
 }

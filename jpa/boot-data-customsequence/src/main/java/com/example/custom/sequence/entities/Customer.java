@@ -9,7 +9,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotEmpty;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -33,7 +32,6 @@ public class Customer {
     private String id;
 
     @Column(nullable = false)
-    @NotEmpty(message = "Text cannot be empty")
     private String text;
 
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -41,6 +39,16 @@ public class Customer {
 
     public Customer(String text) {
         this.text = text;
+    }
+
+    public void addOrder(Order order) {
+        orders.add(order);
+        order.setCustomer(this);
+    }
+
+    public void removeOrder(Order removedOrder) {
+        orders.remove(removedOrder);
+        removedOrder.setCustomer(null);
     }
 
     @Override

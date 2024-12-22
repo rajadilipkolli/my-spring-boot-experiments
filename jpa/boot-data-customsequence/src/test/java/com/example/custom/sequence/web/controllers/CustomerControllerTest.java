@@ -16,6 +16,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.example.custom.sequence.entities.Customer;
+import com.example.custom.sequence.model.request.CustomerRequest;
 import com.example.custom.sequence.model.response.CustomerResponse;
 import com.example.custom.sequence.model.response.PagedResult;
 import com.example.custom.sequence.services.CustomerService;
@@ -27,11 +28,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(controllers = CustomerController.class)
@@ -40,7 +41,7 @@ class CustomerControllerTest {
 
     @Autowired private MockMvc mockMvc;
 
-    @MockBean private CustomerService customerService;
+    @MockitoBean private CustomerService customerService;
 
     @Autowired private ObjectMapper objectMapper;
 
@@ -76,7 +77,7 @@ class CustomerControllerTest {
     @Test
     void shouldFindCustomerById() throws Exception {
         String customerId = "CUS_1";
-        CustomerResponse customer = new CustomerResponse(customerId, "text 1");
+        CustomerResponse customer = new CustomerResponse(customerId, "text 1", List.of());
         given(customerService.findCustomerById(customerId)).willReturn(Optional.of(customer));
 
         this.mockMvc
@@ -97,8 +98,8 @@ class CustomerControllerTest {
 
     @Test
     void shouldCreateNewCustomer() throws Exception {
-        given(customerService.saveCustomer(any(Customer.class)))
-                .willReturn(new CustomerResponse("CUS_1", "some text"));
+        given(customerService.saveCustomer(any(CustomerRequest.class)))
+                .willReturn(new CustomerResponse("CUS_1", "some text", List.of()));
 
         Customer customer = new Customer("CUS_1", "some text", new ArrayList<>());
         this.mockMvc
@@ -113,13 +114,13 @@ class CustomerControllerTest {
 
     @Test
     void shouldReturn400WhenCreateNewCustomerWithoutText() throws Exception {
-        Customer customer = new Customer(null, null, new ArrayList<>());
+        CustomerRequest customerRequest = new CustomerRequest(null, new ArrayList<>());
 
         this.mockMvc
                 .perform(
                         post("/api/customers")
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(customer)))
+                                .content(objectMapper.writeValueAsString(customerRequest)))
                 .andExpect(status().isBadRequest())
                 .andExpect(header().string("Content-Type", is("application/problem+json")))
                 .andExpect(jsonPath("$.type", is("about:blank")))
@@ -136,18 +137,19 @@ class CustomerControllerTest {
     @Test
     void shouldUpdateCustomer() throws Exception {
         String customerId = "CUS_1";
-        CustomerResponse customer = new CustomerResponse(customerId, "Updated text");
-        given(customerService.findCustomerById(customerId)).willReturn(Optional.of(customer));
-        given(customerService.saveCustomer(any(Customer.class)))
-                .willReturn(new CustomerResponse("CUS_1", "Updated text"));
+        CustomerResponse customerResponse =
+                new CustomerResponse(customerId, "Updated text", List.of());
+        CustomerRequest customerRequest = new CustomerRequest("Updated text", List.of());
+        given(customerService.updateCustomerById(customerId, customerRequest))
+                .willReturn(Optional.of(customerResponse));
 
         this.mockMvc
                 .perform(
                         put("/api/customers/{id}", customerId)
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(customer)))
+                                .content(objectMapper.writeValueAsString(customerRequest)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.text", is(customer.text())));
+                .andExpect(jsonPath("$.text", is(customerResponse.text())));
     }
 
     @Test
@@ -167,7 +169,7 @@ class CustomerControllerTest {
     @Test
     void shouldDeleteCustomer() throws Exception {
         String customerId = "CUS_1";
-        CustomerResponse customer = new CustomerResponse(customerId, "Some text");
+        CustomerResponse customer = new CustomerResponse(customerId, "Some text", List.of());
         given(customerService.findCustomerById(customerId)).willReturn(Optional.of(customer));
         doNothing().when(customerService).deleteCustomerById(customerId);
 

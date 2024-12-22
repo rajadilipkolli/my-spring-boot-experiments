@@ -1,6 +1,6 @@
 package com.example.custom.sequence.web.controllers;
 
-import com.example.custom.sequence.entities.Order;
+import com.example.custom.sequence.model.request.OrderRequest;
 import com.example.custom.sequence.model.response.OrderResponse;
 import com.example.custom.sequence.model.response.PagedResult;
 import com.example.custom.sequence.services.OrderService;
@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -53,21 +52,20 @@ public class OrderController {
     }
 
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public OrderResponse createOrder(@RequestBody @Validated Order order) {
-        return orderService.saveOrder(order);
+    public ResponseEntity<OrderResponse> createOrder(
+            @RequestBody @Validated OrderRequest orderRequest) {
+        return orderService
+                .saveOrder(orderRequest)
+                .map(order -> ResponseEntity.status(HttpStatus.CREATED).body(order))
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<OrderResponse> updateOrder(
-            @PathVariable String id, @RequestBody Order order) {
+            @PathVariable String id, @RequestBody OrderRequest orderRequest) {
         return orderService
-                .findOrderById(id)
-                .map(
-                        orderObj -> {
-                            order.setId(id);
-                            return ResponseEntity.ok(orderService.saveOrder(order));
-                        })
+                .updateOrderById(id, orderRequest)
+                .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
