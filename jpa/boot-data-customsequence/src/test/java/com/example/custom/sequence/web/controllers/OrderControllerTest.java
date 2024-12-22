@@ -52,7 +52,7 @@ class OrderControllerTest {
 
     @BeforeEach
     void setUp() {
-        customer = new Customer("CUST_01", "customer1", new ArrayList<>());
+        customer = new Customer("CUST_01", "customer1", List.of());
         this.orderList = new ArrayList<>();
         this.orderList.add(new Order("1", "text 1", customer));
         this.orderList.add(new Order("2", "text 2", customer));

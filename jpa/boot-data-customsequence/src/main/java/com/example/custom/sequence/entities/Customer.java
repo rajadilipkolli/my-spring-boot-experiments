@@ -12,18 +12,10 @@ import jakarta.persistence.Table;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 import org.hibernate.Hibernate;
 
 @Entity
 @Table(name = "customers")
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
 public class Customer {
 
     @Id
@@ -37,18 +29,55 @@ public class Customer {
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Order> orders = new ArrayList<>();
 
+    public Customer() {}
+
+    public Customer(String id, String text, List<Order> orders) {
+        this.id = id;
+        this.text = text;
+        this.orders = orders;
+    }
+
     public Customer(String text) {
         this.text = text;
     }
 
-    public void addOrder(Order order) {
-        orders.add(order);
-        order.setCustomer(this);
+    public String getId() {
+        return id;
     }
 
-    public void removeOrder(Order removedOrder) {
+    public Customer setId(String id) {
+        this.id = id;
+        return this;
+    }
+
+    public String getText() {
+        return text;
+    }
+
+    public Customer setText(String text) {
+        this.text = text;
+        return this;
+    }
+
+    public List<Order> getOrders() {
+        return orders;
+    }
+
+    public Customer setOrders(List<Order> orders) {
+        this.orders = orders;
+        return this;
+    }
+
+    public Customer addOrder(Order order) {
+        orders.add(order);
+        order.setCustomer(this);
+        return this;
+    }
+
+    public Customer removeOrder(Order removedOrder) {
         orders.remove(removedOrder);
         removedOrder.setCustomer(null);
+        return this;
     }
 
     @Override

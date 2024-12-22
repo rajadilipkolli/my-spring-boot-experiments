@@ -9,7 +9,6 @@ import com.example.custom.sequence.services.CustomerService;
 import com.example.custom.sequence.utils.AppConstants;
 import com.example.custom.sequence.web.api.CustomerAPI;
 import jakarta.validation.groups.Default;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -26,7 +25,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/customers")
-@Slf4j
 public class CustomerController implements CustomerAPI {
 
     private final CustomerService customerService;
