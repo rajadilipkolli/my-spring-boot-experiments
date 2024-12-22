@@ -31,6 +31,10 @@ public class Message implements Serializable {
         return new Message(true, msg);
     }
 
+    public Message() {
+        super();
+    }
+
     public Message(boolean valid, String msg) {
         super();
         this.valid = valid;

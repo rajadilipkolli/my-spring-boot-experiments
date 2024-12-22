@@ -10,6 +10,7 @@ import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.CronTrigger;
@@ -22,6 +23,7 @@ import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
 import org.quartz.TriggerKey;
 import org.quartz.impl.matchers.GroupMatcher;
+import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -32,13 +34,8 @@ public class JobsService {
     private final Scheduler scheduler;
     public static final String GROUP_NAME = "sample-group";
 
-    public JobsService(Scheduler scheduler) {
-        this.scheduler = scheduler;
-    }
-
-    public void deleteJob(ScheduleJob scheduleJob) throws SchedulerException {
-        JobKey jobKey = JobKey.jobKey(scheduleJob.jobName(), scheduleJob.jobGroup());
-        scheduler.deleteJob(jobKey);
+    public JobsService(SchedulerFactoryBean schedulerFactoryBean) {
+        this.scheduler = schedulerFactoryBean.getScheduler();
     }
 
     public List<ScheduleJob> getJobs() {
@@ -113,34 +110,74 @@ public class JobsService {
     }
 
     private void addJob(ScheduleJob scheduleJob) throws SchedulerException {
+        // Create TriggerKey for the job
         TriggerKey triggerKey = TriggerKey.triggerKey(scheduleJob.jobName(), GROUP_NAME);
         CronTrigger trigger = (CronTrigger) scheduler.getTrigger(triggerKey);
+
+        // Throw exception if the job already exists
         if (trigger != null) {
-            throw new SchedulerException("job already exists!");
+            throw new SchedulerException(
+                    "Job already exists with name '" + scheduleJob.jobName() + "' in group '" + GROUP_NAME + "'");
         }
 
         // simulate job info db persist operation
-        ScheduleJob withJobId = scheduleJob.withJobId(String.valueOf(SampleJob.JOB_LIST.size() + 1));
-        SampleJob.JOB_LIST.add(withJobId);
+        ScheduleJob withJobId = scheduleJob.withJobId(UUID.randomUUID().toString());
 
+        // Build the JobDetail with recovery and durability
         JobDetail jobDetail = JobBuilder.newJob(SampleJob.class)
                 .withIdentity(withJobId.jobName(), GROUP_NAME)
+                .withDescription(
+                        StringUtils.hasText(scheduleJob.desc()) ? scheduleJob.desc() : "No description provided")
                 .storeDurably()
                 .requestRecovery()
                 .build();
         jobDetail.getJobDataMap().put("scheduleJob", withJobId.jobId());
 
+        // Build the Trigger with Cron expression and associate it with the job
         CronScheduleBuilder cronScheduleBuilder = CronScheduleBuilder.cronSchedule(withJobId.cronExpression());
         trigger = TriggerBuilder.newTrigger()
                 .withIdentity(withJobId.jobName() + "-trigger", GROUP_NAME)
-                .withSchedule(cronScheduleBuilder)
+                .withDescription(
+                        StringUtils.hasText(scheduleJob.desc()) ? scheduleJob.desc() : "No description provided")
+                .withSchedule(cronScheduleBuilder.withMisfireHandlingInstructionIgnoreMisfires())
                 .build();
 
         scheduler.scheduleJob(jobDetail, trigger);
+        JobKey jobKey = JobKey.jobKey(scheduleJob.jobName(), scheduleJob.jobGroup());
+        log.info("Scheduled job with key: {}", jobKey);
     }
 
     public void pauseJob(ScheduleJob scheduleJob) throws SchedulerException {
         JobKey jobKey = JobKey.jobKey(scheduleJob.jobName(), scheduleJob.jobGroup());
+        validateJobExists(jobKey);
         scheduler.pauseJob(jobKey);
+        log.info("Paused job with key: {}", jobKey);
+    }
+
+    public void resumeJob(ScheduleJob scheduleJob) throws SchedulerException {
+        JobKey jobKey = JobKey.jobKey(scheduleJob.jobName(), scheduleJob.jobGroup());
+        validateJobExists(jobKey);
+        scheduler.resumeJob(jobKey);
+        log.info("Resumed job with key: {}", jobKey);
+    }
+
+    public void runJob(ScheduleJob job) throws SchedulerException {
+        JobKey jobKey = JobKey.jobKey(job.jobName(), job.jobGroup());
+        validateJobExists(jobKey);
+        scheduler.triggerJob(jobKey);
+        log.info("Triggered job with key: {}", jobKey);
+    }
+
+    public void deleteJob(ScheduleJob scheduleJob) throws SchedulerException {
+        JobKey jobKey = JobKey.jobKey(scheduleJob.jobName(), scheduleJob.jobGroup());
+        validateJobExists(jobKey);
+        scheduler.deleteJob(jobKey);
+        log.info("Deleted job with key: {}", jobKey);
+    }
+
+    private void validateJobExists(JobKey jobKey) throws SchedulerException {
+        if (!scheduler.checkExists(jobKey)) {
+            throw new SchedulerException("Job does not exist with key: " + jobKey);
+        }
     }
 }

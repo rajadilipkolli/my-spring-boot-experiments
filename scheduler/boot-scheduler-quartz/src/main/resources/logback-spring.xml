@@ -20,5 +20,6 @@
 
     <logger name="com.scheduler.quartz" level="DEBUG"/>
     <logger name="org.springframework" level="INFO"/>
+    <logger name="org.quartz" level="INFO" />
 
 </configuration>
