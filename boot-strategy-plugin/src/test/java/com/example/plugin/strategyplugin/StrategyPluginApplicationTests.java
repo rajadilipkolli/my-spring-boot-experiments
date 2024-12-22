@@ -51,7 +51,7 @@ class StrategyPluginApplicationTests {
             .bodyJson().convertTo(ProblemDetail.class)
             .satisfies(problemDetail -> {
                 assertThat(problemDetail.getDetail()).isEqualTo("Plugin not found for type: xls");
-                assertThat(problemDetail.getTitle()).isEqualTo("Product not found");
+                assertThat(problemDetail.getTitle()).isEqualTo("Product Not found");
                 assertThat(problemDetail.getStatus()).isEqualTo(400);
                 assertThat(problemDetail.getType()).isEqualTo("https://api.service.com/errors/bad-request");
                 assertThat(problemDetail.getInstance()).isEqualTo("/fetch");
