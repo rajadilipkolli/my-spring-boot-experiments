@@ -10,7 +10,7 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Profile;
-import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertyRegistrar;
 import org.testcontainers.utility.DockerImageName;
 
 @TestConfiguration(proxyBeanMethods = false)
@@ -18,25 +18,29 @@ public class TestcontainersConfiguration {
 
     @Bean
     @Profile(AppConstants.PROFILE_CLUSTER)
-    RedisClusterContainer redisClusterContainer(DynamicPropertyRegistry dynamicPropertyRegistry) {
-        RedisClusterContainer redisClusterContainer =
-                new RedisClusterContainer(RedisClusterContainer.DEFAULT_IMAGE_NAME)
-                        .withKeyspaceNotifications()
-                        .withStartupAttempts(5)
-                        .withStartupTimeout(Duration.ofMinutes(4));
-        redisClusterContainer.start();
+    RedisClusterContainer redisClusterContainer() {
+        return new RedisClusterContainer(RedisClusterContainer.DEFAULT_IMAGE_NAME)
+                .withKeyspaceNotifications()
+                .withStartupAttempts(5)
+                .withStartupTimeout(Duration.ofMinutes(4));
+    }
+
+    @Bean
+    @Profile(AppConstants.PROFILE_CLUSTER)
+    DynamicPropertyRegistrar dynamicPropertyRegistrar(RedisClusterContainer redisClusterContainer) {
         List<String> list =
                 Arrays.stream(redisClusterContainer.getRedisURIs())
                         .map(s -> s.substring(8))
                         .toList();
-        dynamicPropertyRegistry.add("spring.data.redis.cluster.nodes", () -> list);
-        return redisClusterContainer;
+        return registry -> {
+            registry.add("spring.data.redis.cluster.nodes", () -> list);
+        };
     }
 
     @Bean
     @ServiceConnection("redis")
     @Profile(AppConstants.PROFILE_NOT_CLUSTER)
     RedisContainer redisContainer() {
-        return new RedisContainer(DockerImageName.parse("redis").withTag("7.4.0-alpine"));
+        return new RedisContainer(DockerImageName.parse("redis").withTag("7.4.1-alpine"));
     }
 }
