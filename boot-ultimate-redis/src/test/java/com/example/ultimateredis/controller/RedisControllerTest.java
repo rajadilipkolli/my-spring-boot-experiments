@@ -1,20 +1,17 @@
 package com.example.ultimateredis.controller;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.nullValue;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.example.ultimateredis.common.AbstractIntegrationTest;
 import com.example.ultimateredis.model.AddRedisRequest;
+import com.example.ultimateredis.model.GenericResponse;
 import java.time.Duration;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -24,22 +21,30 @@ class RedisControllerTest extends AbstractIntegrationTest {
     @Order(1)
     void addRedisKeyValue() throws Exception {
         AddRedisRequest addRedisRequest = new AddRedisRequest("junit", "JunitValue", 1);
-        this.mockMvc
-                .perform(
-                        post("/v1/redis/add")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(addRedisRequest)))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.response", is(Boolean.TRUE)));
+        this.mockMvcTester
+                .post()
+                .uri("/v1/redis/add")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(addRedisRequest))
+                .assertThat()
+                .hasStatus(HttpStatus.CREATED)
+                .bodyJson()
+                .convertTo(GenericResponse.class)
+                .satisfies(response -> assertThat(response.response()).isEqualTo(true));
     }
 
     @Test
     @Order(2)
-    void getFromCache() throws Exception {
-        this.mockMvc
-                .perform(get("/v1/redis").param("key", "junit"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.response", is("JunitValue")));
+    void getFromCache() {
+        this.mockMvcTester
+                .get()
+                .uri("/v1/redis")
+                .param("key", "junit")
+                .assertThat()
+                .hasStatusOk()
+                .bodyJson()
+                .convertTo(GenericResponse.class)
+                .satisfies(response -> assertThat(response.response()).isEqualTo("JunitValue"));
     }
 
     @Test
@@ -50,9 +55,16 @@ class RedisControllerTest extends AbstractIntegrationTest {
                 .atMost(Duration.ofSeconds(70))
                 .untilAsserted(
                         () ->
-                                this.mockMvc
-                                        .perform(get("/v1/redis").param("key", "junit"))
-                                        .andExpect(status().isOk())
-                                        .andExpect(jsonPath("$.response", nullValue())));
+                                this.mockMvcTester
+                                        .get()
+                                        .uri("/v1/redis")
+                                        .param("key", "junit")
+                                        .assertThat()
+                                        .hasStatusOk()
+                                        .bodyJson()
+                                        .convertTo(GenericResponse.class)
+                                        .satisfies(
+                                                response ->
+                                                        assertThat(response.response()).isNull()));
     }
 }
