@@ -20,5 +20,7 @@
 
     <logger name="com.example.hibernatecache" level="DEBUG"/>
     <logger name="org.springframework" level="INFO"/>
+    <logger name="query-logger" level="DEBUG" />
+    <logger name="slow-query-logger" level="WARN" />
 
 </configuration>

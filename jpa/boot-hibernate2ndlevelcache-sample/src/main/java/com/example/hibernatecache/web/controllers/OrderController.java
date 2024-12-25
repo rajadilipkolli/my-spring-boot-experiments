@@ -51,7 +51,7 @@ class OrderController {
     ResponseEntity<OrderResponse> createOrder(@RequestBody @Validated OrderRequest orderRequest) {
         OrderResponse response = orderService.saveOrder(orderRequest);
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
-                .path("/api/orders/{id}")
+                .path("/{id}")
                 .buildAndExpand(response.orderId())
                 .toUri();
         return ResponseEntity.created(location).body(response);
