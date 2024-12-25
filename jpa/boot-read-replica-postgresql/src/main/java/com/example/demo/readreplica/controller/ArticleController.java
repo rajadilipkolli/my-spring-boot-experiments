@@ -4,6 +4,7 @@ import com.example.demo.readreplica.domain.ArticleDTO;
 import com.example.demo.readreplica.service.ArticleService;
 import java.net.URI;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -33,5 +34,17 @@ class ArticleController {
     ResponseEntity<Object> saveArticle(@RequestBody ArticleDTO articleDTO) {
         Long articleId = this.articleService.saveArticle(articleDTO);
         return ResponseEntity.created(URI.create("/articles/" + articleId)).build();
+    }
+
+    @DeleteMapping("/{id}")
+    ResponseEntity<Object> deleteArticle(@PathVariable Long id) {
+        return this.articleService
+                .findById(id)
+                .map(
+                        article -> {
+                            articleService.deleteById(article.getId());
+                            return ResponseEntity.accepted().build();
+                        })
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 }

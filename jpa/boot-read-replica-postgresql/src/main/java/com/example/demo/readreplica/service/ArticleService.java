@@ -29,6 +29,15 @@ public class ArticleService {
         return savedArticle.getId();
     }
 
+    public Optional<Article> findById(Long id) {
+        return articleRepository.findById(id);
+    }
+
+    @Transactional
+    public void deleteById(Long id) {
+        articleRepository.deleteById(id);
+    }
+
     private ArticleDTO convertToArticleDTO(Article articleEntity) {
         return new ArticleDTO(
                 articleEntity.getTitle(),
