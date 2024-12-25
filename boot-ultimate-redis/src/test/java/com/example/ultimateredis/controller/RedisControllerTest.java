@@ -28,6 +28,7 @@ class RedisControllerTest extends AbstractIntegrationTest {
                 .content(objectMapper.writeValueAsString(addRedisRequest))
                 .assertThat()
                 .hasStatus(HttpStatus.CREATED)
+                .hasContentType(MediaType.APPLICATION_JSON)
                 .bodyJson()
                 .convertTo(GenericResponse.class)
                 .satisfies(response -> assertThat(response.response()).isEqualTo(true));
@@ -42,6 +43,7 @@ class RedisControllerTest extends AbstractIntegrationTest {
                 .param("key", "junit")
                 .assertThat()
                 .hasStatusOk()
+                .hasContentType(MediaType.APPLICATION_JSON)
                 .bodyJson()
                 .convertTo(GenericResponse.class)
                 .satisfies(response -> assertThat(response.response()).isEqualTo("JunitValue"));
@@ -61,6 +63,7 @@ class RedisControllerTest extends AbstractIntegrationTest {
                                         .param("key", "junit")
                                         .assertThat()
                                         .hasStatusOk()
+                                        .hasContentType(MediaType.APPLICATION_JSON)
                                         .bodyJson()
                                         .convertTo(GenericResponse.class)
                                         .satisfies(
