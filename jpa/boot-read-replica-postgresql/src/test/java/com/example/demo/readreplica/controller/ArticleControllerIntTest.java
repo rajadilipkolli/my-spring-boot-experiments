@@ -116,5 +116,4 @@ class ArticleControllerIntTest {
     void cantDeleteArticleWhenArticleNotFound() {
         mvcTester.delete().uri("/articles/99999").assertThat().hasStatus(HttpStatus.NOT_FOUND);
     }
-
 }
