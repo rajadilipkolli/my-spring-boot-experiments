@@ -11,5 +11,5 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
 
     @Transactional(readOnly = true)
     @Query("select a from Article a left join fetch a.comments where a.id = :articleId  ")
-    Optional<Article> findByArticleId(@Param("articleId") Integer articleId);
+    Optional<Article> findByArticleId(@Param("articleId") Long articleId);
 }

@@ -18,7 +18,7 @@ public class ArticleService {
         this.articleRepository = articleRepository;
     }
 
-    public Optional<ArticleDTO> findArticleById(Integer id) {
+    public Optional<ArticleDTO> findArticleById(Long id) {
         return this.articleRepository.findByArticleId(id).map(this::convertToArticleDTO);
     }
 
