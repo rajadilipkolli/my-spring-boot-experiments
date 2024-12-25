@@ -55,7 +55,7 @@ class ArticleControllerIntTest {
     }
 
     @Test
-    void saveArticle() throws JsonProcessingException {
+    void saveArticleRetriveAndDelete() throws JsonProcessingException {
         ArticleDTO articleDTO =
                 new ArticleDTO(
                         "junitTitle",
