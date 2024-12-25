@@ -43,14 +43,13 @@ class ArticleController {
     }
 
     @DeleteMapping("/{id}")
-    ResponseEntity<Object> deleteArticle(@PathVariable Long id) {
-        return this.articleService
-                .findById(id)
-                .map(
-                        article -> {
-                            articleService.deleteById(article.getId());
-                            return ResponseEntity.accepted().build();
-                        })
-                .orElseGet(() -> ResponseEntity.notFound().build());
+    ResponseEntity<Void> deleteArticle(@PathVariable Long id) {
+        boolean exists = this.articleService.existsById(id);
+        if (exists) {
+            this.articleService.deleteById(id);
+            return ResponseEntity.accepted().build();
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 }

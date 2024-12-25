@@ -22,15 +22,15 @@ public class ArticleService {
         return this.articleRepository.findByArticleId(id).map(this::convertToArticleDTO);
     }
 
+    public boolean existsById(Long id) {
+        return articleRepository.existsById(id);
+    }
+
     @Transactional
     public Long saveArticle(ArticleDTO articleDTO) {
         Article article = articleDTO.convertToArticle();
         Article savedArticle = this.articleRepository.save(article);
         return savedArticle.getId();
-    }
-
-    public Optional<Article> findById(Long id) {
-        return articleRepository.findById(id);
     }
 
     @Transactional

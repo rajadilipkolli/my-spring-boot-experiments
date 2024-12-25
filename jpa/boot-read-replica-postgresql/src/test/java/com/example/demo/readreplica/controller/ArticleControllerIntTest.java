@@ -6,6 +6,7 @@ import com.example.demo.readreplica.domain.ArticleDTO;
 import com.example.demo.readreplica.domain.CommentDTO;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -55,7 +56,12 @@ class ArticleControllerIntTest {
     }
 
     @Test
-    void saveArticleRetriveAndDelete() throws JsonProcessingException {
+    void shouldReturn404WhenFetchingNonExistingArticle() {
+        mvcTester.get().uri("/articles/99999").assertThat().hasStatus(HttpStatus.NOT_FOUND);
+    }
+
+    @Test
+    void saveRetrieveAndDeleteArticle() throws JsonProcessingException {
         ArticleDTO articleDTO =
                 new ArticleDTO(
                         "junitTitle",
@@ -90,9 +96,13 @@ class ArticleControllerIntTest {
                             assertThat(response.authored())
                                     .isNotNull()
                                     .isInstanceOf(LocalDateTime.class);
+                            assertThat(response.authored().toLocalDate())
+                                    .isEqualTo(LocalDate.now().minusDays(1));
                             assertThat(response.published())
                                     .isNotNull()
                                     .isInstanceOf(LocalDateTime.class);
+                            assertThat(response.published().toLocalDate())
+                                    .isEqualTo(LocalDate.now());
                             assertThat(response.commentDTOs())
                                     .isNotNull()
                                     .hasSize(1)
@@ -100,5 +110,10 @@ class ArticleControllerIntTest {
                         });
 
         mvcTester.delete().uri(location.get()).assertThat().hasStatus(HttpStatus.ACCEPTED);
+    }
+
+    @Test
+    void cantDeleteArticleWhenArticleNotFound() {
+        mvcTester.delete().uri("/articles/99999").assertThat().hasStatus(HttpStatus.NOT_FOUND);
     }
 }

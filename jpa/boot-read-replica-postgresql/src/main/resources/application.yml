@@ -45,6 +45,9 @@ spring:
           fail_on_pagination_over_collection_fetch: true
           in_clause_parameter_padding: true
           plan_cache_max_size: 4096
+  mvc:
+    problemdetails:
+      enabled: true
   threads:
     virtual:
       enabled: true
