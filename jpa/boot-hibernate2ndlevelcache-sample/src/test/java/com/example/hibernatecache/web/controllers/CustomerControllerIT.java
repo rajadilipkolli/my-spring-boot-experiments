@@ -1,7 +1,5 @@
 package com.example.hibernatecache.web.controllers;
 
-import static io.hypersistence.utils.jdbc.validator.SQLStatementCountValidator.assertInsertCount;
-import static io.hypersistence.utils.jdbc.validator.SQLStatementCountValidator.assertSelectCount;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.Matchers.empty;
@@ -104,9 +102,10 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.phone", is(customer.getPhone())))
                 .andExpect(jsonPath("$.orders.size()", is(1)));
 
-        assertInsertCount(0);
+        SQLStatementCountValidator.assertInsertCount(0);
         // For selecting customer and order
-        assertSelectCount(2);
+        SQLStatementCountValidator.assertSelectCount(2);
+        SQLStatementCountValidator.assertTotalCount(2);
     }
 
     @Test
@@ -126,9 +125,10 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.phone", is(customer.getPhone())))
                 .andExpect(jsonPath("$.orders.size()", is(1)));
 
-        assertInsertCount(0);
+        SQLStatementCountValidator.assertInsertCount(0);
         // For selecting customer and then orderItems
-        assertSelectCount(2);
+        SQLStatementCountValidator.assertSelectCount(2);
+        SQLStatementCountValidator.assertTotalCount(2);
     }
 
     @Test

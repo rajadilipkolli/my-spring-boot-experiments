@@ -1,7 +1,5 @@
 package com.example.hibernatecache;
 
-import static io.hypersistence.utils.jdbc.validator.SQLStatementCountValidator.assertInsertCount;
-import static io.hypersistence.utils.jdbc.validator.SQLStatementCountValidator.assertSelectCount;
 import static org.hamcrest.CoreMatchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -32,9 +30,10 @@ class ApplicationIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.lastName", is(customerRequest.lastName())))
                 .andExpect(jsonPath("$.email", is(customerRequest.email())))
                 .andExpect(jsonPath("$.phone", is(customerRequest.phone())));
-        assertInsertCount(1);
+        SQLStatementCountValidator.assertInsertCount(1);
         // For selecting next sequence value
-        assertSelectCount(1);
+        SQLStatementCountValidator.assertSelectCount(1);
+        SQLStatementCountValidator.assertTotalCount(2);
         SQLStatementCountValidator.reset();
         for (int i = 0; i < 10; i++) {
             this.mockMvc
@@ -46,6 +45,7 @@ class ApplicationIntegrationTest extends AbstractIntegrationTest {
                     .andExpect(jsonPath("$.email", is(customerRequest.email())))
                     .andExpect(jsonPath("$.phone", is(customerRequest.phone())));
         }
-        assertSelectCount(1);
+        SQLStatementCountValidator.assertSelectCount(1);
+        SQLStatementCountValidator.assertTotalCount(1);
     }
 }
