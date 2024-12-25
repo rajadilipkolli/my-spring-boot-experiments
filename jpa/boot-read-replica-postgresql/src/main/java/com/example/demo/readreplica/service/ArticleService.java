@@ -3,14 +3,13 @@ package com.example.demo.readreplica.service;
 import com.example.demo.readreplica.domain.ArticleDTO;
 import com.example.demo.readreplica.domain.CommentDTO;
 import com.example.demo.readreplica.entities.Article;
-import com.example.demo.readreplica.entities.Comment;
 import com.example.demo.readreplica.repository.ArticleRepository;
-import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Transactional(readOnly = true)
 public class ArticleService {
 
     private final ArticleRepository articleRepository;
@@ -25,7 +24,7 @@ public class ArticleService {
 
     @Transactional
     public Long saveArticle(ArticleDTO articleDTO) {
-        Article article = convertToArticle(articleDTO);
+        Article article = articleDTO.convertToArticle();
         Article savedArticle = this.articleRepository.save(article);
         return savedArticle.getId();
     }
@@ -38,25 +37,5 @@ public class ArticleService {
                 articleEntity.getComments().stream()
                         .map(comment -> new CommentDTO(comment.getComment()))
                         .toList());
-    }
-
-    private Article convertToArticle(ArticleDTO articleDTO) {
-        Article article = new Article();
-        article.setAuthored(articleDTO.authored());
-        article.setTitle(articleDTO.title());
-        article.setPublished(articleDTO.published());
-        convertToComment(articleDTO.commentDTOs()).forEach(article::addComment);
-        return article;
-    }
-
-    private List<Comment> convertToComment(List<CommentDTO> commentDTOs) {
-        return commentDTOs.stream()
-                .map(
-                        commentDTO -> {
-                            Comment comment = new Comment();
-                            comment.setComment(commentDTO.comment());
-                            return comment;
-                        })
-                .toList();
     }
 }
