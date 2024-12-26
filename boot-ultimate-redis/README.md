@@ -1,7 +1,19 @@
-# boot-ultimate-redis
-This is an example repository to discover ways of interacting with Redis (from a Spring Boot 3 Application).
+# Ultimate Redis Implementation
 
 ![Spring Boot Redis](https://github.com/programmerfriend/programmerfriend.github.io/blob/master/img/content/robust-boot_title.png?raw=true "Spring Boot Redis")
+
+A comprehensive sample showcasing various Redis usage patterns, including sentinel architecture, advanced TTL management, and cluster connections.
+
+## Redis Sentinel & High Availability
+
+- Runs 1 master, 1 replica, and 3 sentinel instances via Docker Compose.
+- **Quorum** Setting (defaults to 2) for failover decisions.
+
+## ReadFrom Settings
+
+- Configurable with Lettuce: e.g., MASTER, REPLICA_PREFERRED, etc.
+
+---
 
 ## View Keys using cli
 
@@ -69,3 +81,4 @@ We are using _REPLICA_PREFERRED_ in here but this configuration can be important
 ### Reference
  - [medium](https://medium.com/@htyesilyurt/spring-boot-3-redis-sentinel-lettuce-client-and-docker-compose-for-high-availability-1f1e3c372a5a)
  - [programmerfriend](https://programmerfriend.com/ultimate-guide-to-redis-cache-with-spring-boot-2-and-spring-data-redis/)
+ 

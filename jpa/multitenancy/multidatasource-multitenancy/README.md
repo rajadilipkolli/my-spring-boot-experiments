@@ -1,8 +1,8 @@
-# multidatasource-multitenancy
+# Multi DataSource & MultiTenancy
 
-Multi-tenancy is a software architecture in which a single instance of a software application is used to serve multiple tenants. Each tenant is a separate entity that has its own unique data, configuration, and user base. This architecture allows for efficient resource utilization, as the software application only needs to be installed and maintained once, but can be used by multiple tenants.
+Demonstrates a scenario where a single Spring Boot application connects to multiple databases and also implements multi-tenant logic (schema-based or DB-based).
 
-Multidatabases is a similar concept, but applies to databases rather than software applications. In this architecture, multiple databases are used to store and manage data for different tenants. This allows for efficient resource utilization, as the same database server can be used to host multiple databases. It also allows for greater flexibility, as different tenants can have different database configurations and access controls.
+---
 
 ### Application Flow
 
@@ -21,15 +21,21 @@ flowchart TD
     G --> I(((END)))
     H --> I
 ```
+---
 
+### How It Works
+1. **Multiple DataSources**: Oracle for certain domain objects, Postgres for others.
+2. **MultiTenancy**: Switches which schema or DB to use based on an incoming tenant identifier.
+3. **TenantInterceptor**: Captures request-scope tenant info and sets it in the `TenantIdentifierResolver`.
 
+---
 ### Run tests
-`$ ./mvnw clean verify`
+`./mvnw clean verify`
 
 ### Run locally
 ```shell
-$ docker-compose -f docker/docker-compose.yml up -d
-$ ./mvnw spring-boot:run -Dspring-boot.run.profiles=local
+docker-compose -f docker/docker-compose.yml up -d
+./mvnw spring-boot:run -Dspring-boot.run.profiles=local
 ```
 
 

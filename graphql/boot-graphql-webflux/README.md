@@ -1,24 +1,33 @@
-# boot-graphql-webflux [SourceCode](https://www.youtube.com/watch?v=kVSYVhmvNCI&t=876s)
+# GraphQL with WebFlux [SourceCode](https://www.youtube.com/watch?v=kVSYVhmvNCI&t=876s)
+
+Implements a reactive GraphQL server using Spring WebFlux, enabling highly scalable endpoint queries.
+
+## Key Points
+
+- **Reactive Execution**: Non-blocking data fetchers.
+- **Scalable**: Ideal for high-concurrency scenarios.
+
+---
 
 The spring-boot-starter-graphql is a starter dependency for Spring Boot applications that allows them to integrate with GraphQL APIs. It provides a set of tools and libraries that enable developers to easily build GraphQL-based applications and expose them through a GraphQL endpoint. The starter includes support for GraphQL queries, mutations, subscriptions, and schema definitions, as well as integration with Spring Boot's autoconfiguration and dependency injection features. 
 
 ### Format code
 
 ```shell
-$ ./mvnw spotless:apply
+./mvnw spotless:apply
 ```
 
 ### Run tests
 
 ```shell
-$ ./mvnw clean verify
+./mvnw clean verify
 ```
 
 ### Run locally
 
 ```shell
-$ docker-compose -f docker/docker-compose.yml up -d
-$ ./mvnw spring-boot:run -Dspring-boot.run.profiles=local
+docker-compose -f docker/docker-compose.yml up -d
+./mvnw spring-boot:run -Dspring-boot.run.profiles=local
 ```
 
 ### Using Testcontainers at Development Time
@@ -80,4 +89,3 @@ Fetching data based on name
     }
 }
 ```
-

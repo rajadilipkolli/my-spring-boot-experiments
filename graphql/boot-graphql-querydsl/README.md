@@ -1,4 +1,13 @@
-# boot-graphql-querydsl
+# GraphQL with QueryDSL
+
+Combines GraphQL’s flexible schema definition and QueryDSL’s type-safe query generation in a Spring Boot environment.
+
+## Why Use QueryDSL with GraphQL?
+
+- **Rich Filtering**: Type-safe queries that can evolve with your schema.
+- **Reduced Boilerplate**: QueryDSL auto-generates domain-based classes.
+
+---
 
 GraphQL is a query language for APIs that allows for more flexible and efficient data querying and manipulation. QueryDSL is a Java-based library that allows for the creation of type-safe queries in a variety of query languages, including GraphQL.
 
@@ -7,20 +16,20 @@ Together, GraphQL and QueryDSL can provide developers with a powerful toolset fo
 ### Format code
 
 ```shell
-$ ./mvnw spotless:apply
+./mvnw spotless:apply
 ```
 
 ### Run tests
 
 ```shell
-$ ./mvnw clean verify
+./mvnw clean verify
 ```
 
 ### Run locally
 
 ```shell
-$ docker-compose -f docker/docker-compose.yml up -d
-$ ./mvnw spring-boot:run -Dspring-boot.run.profiles=local
+docker-compose -f docker/docker-compose.yml up -d
+./mvnw spring-boot:run -Dspring-boot.run.profiles=local
 ```
 
 ### Using Testcontainers at Development Time

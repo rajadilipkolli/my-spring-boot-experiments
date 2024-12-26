@@ -1,14 +1,23 @@
-# spring-boot-chaos-monkey
+# Spring Boot Chaos Monkey
 
 [Choas Monkey](https://netflix.github.io/chaosmonkey/)
+
+This module explores Chaos Engineering principles by intentionally injecting failures into a Spring Boot application to test its resilience. It demonstrates how to set up and integrate `chaos-monkey-spring-boot` for your microservices, as well as performance testing with Gatling to measure any degradation under chaos scenarios.
 
 
 ![](../images/chaos-monkey.png)
 
-The idea behind this API is to show some of the possible ways to introduce Chaos Engineering principles in a project. It adds Gatling performance tests to demonstrate how adding assaults will cause delays in response time and verify that chaos monkey is working as expected.
+---
 
-Using Springframework 6.0 `ProblemDetails` and spring boot micrometer Observability in controller
+## Key Features
 
+1. **Chaos Injection**: Simulate random latencies, exceptions, or resources unavailability.
+2. **Performance Testing** (Gatling): Benchmark throughput and latency under chaotic conditions.
+3. **Monitoring**: Validate that chaos is functioning by observing logs, metrics, or custom dashboards.
+
+---
+
+ 
 ### Run tests
 
 ```shell
@@ -30,6 +39,11 @@ docker-compose -f docker/docker-compose.yml up -d
 ./mvnw spring-boot:run -Dspring-boot.run.profiles=local -Dspring-boot.run.arguments="--chaos.monkey.enabled=true"
 ./mvnw gatling:test
 ```
+
+**Verification**:
+
+* Check logs to confirm chaos injection events.
+* Use Gatling or other load testing tools to verify how the application behaves under stress.
 
 By default, Chaos Monkey is enabled. Let's disable it and run the tests again. It should improve the response times.
 

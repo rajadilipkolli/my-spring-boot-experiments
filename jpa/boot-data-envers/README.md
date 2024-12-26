@@ -1,25 +1,40 @@
-# boot-data-envers
+# Spring Data Envers
+
+Extends Spring Data JPA with [Hibernate Envers](https://docs.jboss.org/hibernate/orm/current/userguide/html_single/Hibernate_User_Guide.html#envers) to audit all changes to your entities automatically.
+
+## Why Use Envers?
+
+- **Compliance & Audit**: Track who changed what and when.
+- **Version History**: Revert or compare entity versions over time.
+
 
 Spring Data Envers is a tool for auditing changes made to persistent entities in a Spring-based application. It allows developers to track and log changes made to entities over time, providing a historical view of the data. This can be useful for compliance and regulatory purposes, as well as for debugging and performance analysis. Spring Data Envers integrates with the Hibernate Envers library and offers a convenient and declarative way to enable auditing in a Spring application.
 
+---
+
+## Additional Notes
+* By default, Envers creates dedicated audit tables with _AUD suffix.
+* If you need custom revision listeners, see the RevisionListener interface.
+
+---
 
 ### Format code
 
 ```shell
-$ ./mvnw spotless:apply
+./mvnw spotless:apply
 ```
 
 ### Run tests
 
 ```shell
-$ ./mvnw clean verify
+./mvnw clean verify
 ```
 
 ### Run locally
 
 ```shell
-$ docker-compose -f docker/docker-compose.yml up -d
-$ ./mvnw spring-boot:run -Dspring-boot.run.profiles=local
+docker-compose -f docker/docker-compose.yml up -d
+./mvnw spring-boot:run -Dspring-boot.run.profiles=local
 ```
 
 ### Using Testcontainers at Development Time

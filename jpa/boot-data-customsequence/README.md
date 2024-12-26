@@ -1,14 +1,14 @@
-# boot-data-customsequence
+# Custom Sequence Generation
 
 Custom sequence in Hibernate refers to the ability to specify a custom sequence generator for generating unique values for the primary keys of entities. This allows users to define their own sequence generation strategy, rather than relying on the default strategy provided by Hibernate. Custom sequence generators can be useful for ensuring that primary keys are generated in a specific format or based on specific criteria.
 
 ### Run tests
-`$ ./mvnw clean verify`
+`./mvnw clean verify`
 
 ### Run locally
 ```shell
-$ docker-compose -f docker/docker-compose.yml up -d
-$ ./mvnw spring-boot:run -Dspring-boot.run.profiles=local
+docker-compose -f docker/docker-compose.yml up -d
+./mvnw spring-boot:run -Dspring-boot.run.profiles=local
 ```
 
 

@@ -1,4 +1,16 @@
-# boot-mongodb-elasticsearch
+# MongoDB and Elasticsearch Reactive Integration
+
+Integrates a reactive MongoDB backend with a reactive Elasticsearch instance for enhanced real-time searching capabilities, including geospatial queries.
+
+---
+
+## Highlights
+
+- **Reactive Streams Approach**: Uses Spring Data’s reactive driver for both MongoDB and Elasticsearch.
+- **Advanced Queries**: Demonstrates geospatial searches, text-indexed searches, and filtering in near real-time.
+- **Scalable Architecture**: Docker-compose-based environment for local testing.
+
+---
 
 ### Run tests
 
@@ -12,7 +24,6 @@ docker-compose -f docker/docker-compose.yml up -d
 ./mvnw spring-boot:run -Dspring-boot.run.profiles=local
 ```
 
-
 ### Useful Links
 * Swagger UI: http://localhost:8080/swagger-ui.html
 * Actuator Endpoint: http://localhost:8080/actuator
@@ -21,6 +32,8 @@ docker-compose -f docker/docker-compose.yml up -d
 * Kibana: http://localhost:5601/app/kibana#/dev_tools/console?_g=()
 * Elasticsearch : http://localhost:9200/
 * MongoExpress : http://localhost:8081
+
+---
 
 ## Mongodb Notes
 
@@ -44,8 +57,9 @@ public class DataStoreConfiguration extends AbstractReactiveMongoConfiguration {
     }
 }
 ```
+---
 
-## Elastic Search Notes
+## Elasticsearch Notes
 
 ### UseFull ElasticSearch Commands
 - Count http://localhost:9200/restaurant/_count
