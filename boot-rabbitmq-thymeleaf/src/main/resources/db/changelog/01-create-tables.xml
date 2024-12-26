@@ -1,8 +1,11 @@
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
-                                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+                                       https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
 
+
+    <property name="stringType" dbms="postgres" value="text"/>
+    <property name="stringType" dbms="!postgres" value="varchar(50)"/>
 
     <changeSet id="1689581050846-1" author="rajakolli">
         <preConditions>
@@ -23,10 +26,10 @@
             <column name="id" type="bigint" defaultValueSequenceNext="tracking_state_seq">
                 <constraints primaryKey="true" primaryKeyName="tracking_state_id"/>
             </column>
-            <column name="correlation_id" type="varchar2(50)">
+            <column name="correlation_id" type="${stringType}">
                 <constraints nullable="false"/>
             </column>
-            <column name="status" type="varchar2(50)">
+            <column name="status" type="${stringType}">
                 <constraints nullable="false"/>
             </column>
         </createTable>

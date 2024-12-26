@@ -1,4 +1,3 @@
-version: "3.2"
 services:
   rabbitmq:
     container_name: rabbitmq
@@ -20,6 +19,25 @@ services:
       retries: 10
     networks:
       - rabbitmq_go_net
+
+  postgresqldb:
+    image: postgres:17.2-alpine
+    hostname: postgresqldb
+    extra_hosts: [ 'host.docker.internal:host-gateway' ]
+    environment:
+      - POSTGRES_USER=appuser
+      - POSTGRES_PASSWORD=secret
+      - POSTGRES_DB=appdb
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U appuser -d appdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    ports:
+      - "5432:5432"
+    networks:
+      - rabbitmq_go_net
+    
 networks:
   rabbitmq_go_net:
     driver: bridge

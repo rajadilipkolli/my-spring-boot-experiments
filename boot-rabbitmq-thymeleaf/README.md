@@ -12,7 +12,16 @@ Demonstrates a message producer and consumer setup with RabbitMQ, plus a simple 
 
 ---
 
-Source Code : https://sivalabs.in/2018/02/springboot-messaging-rabbitmq/
+[Source Code](https://sivalabs.in/2018/02/springboot-messaging-rabbitmq/)
+
+---
+
+## Important links
+
+* Home Page : http://localhost:8080
+* RabbitMq  : http://localhost:15672 (guest/guest default)
+
+---
 
 ## Installing Rabbit MQ
 
@@ -22,8 +31,3 @@ Windows
     https://www.rabbitmq.com/which-erlang.html
     http://www.erlang.org/downloads
     Video - https://www.youtube.com/watch?v=gKzKUmtOwR4
-
-# Important links
-
-Home Page : http://localhost:8080
-RabbitMq  : http://localhost:15672 (guest/guest default)

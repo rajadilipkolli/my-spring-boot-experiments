@@ -1,6 +1,5 @@
 package com.poc.boot.rabbitmq.config;
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
 import org.springframework.amqp.core.DirectExchange;
@@ -8,11 +7,8 @@ import org.springframework.amqp.core.ExchangeBuilder;
 import org.springframework.amqp.core.FanoutExchange;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.core.QueueBuilder;
-import org.springframework.amqp.rabbit.annotation.EnableRabbit;
-import org.springframework.amqp.rabbit.annotation.RabbitListenerConfigurer;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.amqp.rabbit.listener.RabbitListenerEndpointRegistrar;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,10 +18,8 @@ import org.springframework.messaging.handler.annotation.support.MessageHandlerMe
 import org.springframework.retry.backoff.ExponentialBackOffPolicy;
 import org.springframework.retry.support.RetryTemplate;
 
-@EnableRabbit
-@Configuration
-@Slf4j
-public class RabbitMQConfig implements RabbitListenerConfigurer {
+@Configuration(proxyBeanMethods = false)
+public class RabbitMQConfig {
 
     public static final String DLX_ORDERS_EXCHANGE = "DLX.ORDERS.EXCHANGE";
 
@@ -39,7 +33,7 @@ public class RabbitMQConfig implements RabbitListenerConfigurer {
 
     private final RabbitTemplateConfirmCallback rabbitTemplateConfirmCallback;
 
-    public RabbitMQConfig(RabbitTemplateConfirmCallback rabbitTemplateConfirmCallback) {
+    RabbitMQConfig(RabbitTemplateConfirmCallback rabbitTemplateConfirmCallback) {
         this.rabbitTemplateConfirmCallback = rabbitTemplateConfirmCallback;
     }
 
@@ -57,10 +51,8 @@ public class RabbitMQConfig implements RabbitListenerConfigurer {
 
     /* Binding between Exchange and Queue using routing key */
     @Bean
-    Binding bindingMessages() {
-        return BindingBuilder.bind(ordersQueue())
-                .to(ordersExchange())
-                .with(ROUTING_KEY_ORDERS_QUEUE);
+    Binding bindingMessages(DirectExchange ordersExchange, Queue ordersQueue) {
+        return BindingBuilder.bind(ordersQueue).to(ordersExchange).with(ROUTING_KEY_ORDERS_QUEUE);
     }
 
     @Bean
@@ -83,8 +75,8 @@ public class RabbitMQConfig implements RabbitListenerConfigurer {
 
     /* Binding between Exchange and Queue for Dead Letter */
     @Bean
-    Binding deadLetterBinding() {
-        return BindingBuilder.bind(deadLetterQueue()).to(deadLetterExchange());
+    Binding deadLetterBinding(Queue deadLetterQueue, FanoutExchange deadLetterExchange) {
+        return BindingBuilder.bind(deadLetterQueue).to(deadLetterExchange);
     }
 
     /* Bean for rabbitTemplate */
@@ -116,15 +108,11 @@ public class RabbitMQConfig implements RabbitListenerConfigurer {
     }
 
     @Bean
-    MessageHandlerMethodFactory messageHandlerMethodFactory() {
+    MessageHandlerMethodFactory messageHandlerMethodFactory(
+            MappingJackson2MessageConverter consumerJackson2MessageConverter) {
         DefaultMessageHandlerMethodFactory messageHandlerMethodFactory =
                 new DefaultMessageHandlerMethodFactory();
-        messageHandlerMethodFactory.setMessageConverter(consumerJackson2MessageConverter());
+        messageHandlerMethodFactory.setMessageConverter(consumerJackson2MessageConverter);
         return messageHandlerMethodFactory;
-    }
-
-    @Override
-    public void configureRabbitListeners(RabbitListenerEndpointRegistrar registrar) {
-        registrar.setMessageHandlerMethodFactory(messageHandlerMethodFactory());
     }
 }
