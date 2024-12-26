@@ -1,15 +1,15 @@
-package com.example.restdocs;
+package com.example.locks;
 
-import com.example.restdocs.config.ApplicationProperties;
+import com.example.locks.config.ApplicationProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 
 @SpringBootApplication
 @EnableConfigurationProperties({ApplicationProperties.class})
-public class Application {
+public class JpaLocksApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(Application.class, args);
+        SpringApplication.run(JpaLocksApplication.class, args);
     }
 }

@@ -4,10 +4,10 @@ import com.example.locks.common.ContainersConfig;
 import com.example.locks.utils.AppConstants;
 import org.springframework.boot.SpringApplication;
 
-public class TestApplication {
+public class TestJpaLocksApplication {
 
     public static void main(String[] args) {
-        SpringApplication.from(Application::main)
+        SpringApplication.from(JpaLocksApplication::main)
                 .with(ContainersConfig.class)
                 .withAdditionalProfiles(AppConstants.PROFILE_LOCAL)
                 .run(args);

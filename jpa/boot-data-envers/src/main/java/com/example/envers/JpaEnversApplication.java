@@ -1,15 +1,15 @@
-package com.example.jndi;
+package com.example.envers;
 
-import com.example.jndi.config.ApplicationProperties;
+import com.example.envers.config.ApplicationProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 
 @SpringBootApplication
 @EnableConfigurationProperties({ApplicationProperties.class})
-public class Application {
+public class JpaEnversApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(Application.class, args);
+        SpringApplication.run(JpaEnversApplication.class, args);
     }
 }
