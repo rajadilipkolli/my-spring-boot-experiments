@@ -11,7 +11,18 @@ A comprehensive sample showcasing various Redis usage patterns, including sentin
 
 ## ReadFrom Settings
 
-- Configurable with Lettuce: e.g., MASTER, REPLICA_PREFERRED, etc.
+## ReadFrom Settings
+
+ Configurable with Lettuce through application properties:
+
+ ```yaml
+ spring:
+   redis:
+     lettuce:
+       read-from: REPLICA_PREFERRED
+ ```
+
+Available options: MASTER, REPLICA_PREFERRED, MASTER_PREFERRED, etc.
 
 ---
 

@@ -1,4 +1,6 @@
-# GraphQL with WebFlux [SourceCode](https://www.youtube.com/watch?v=kVSYVhmvNCI&t=876s)
+# GraphQL with WebFlux
+
+[Watch the implementation video](https://www.youtube.com/watch?v=kVSYVhmvNCI&t=876s)
 
 Implements a reactive GraphQL server using Spring WebFlux, enabling highly scalable endpoint queries.
 
@@ -44,10 +46,10 @@ You can also run the application using Maven as follows:
 * GraphIQL: http://localhost:8080/graphiql
 
 ### About Graph QL
-It contains 3 concepts
-* Queries - Read data from the Server
-* Mutations - Update data on the Server
-* Subscriptions - Read data over a period of time(Stock market updates, inflight recorder)
+GraphQL provides three main concepts:
+1. **Queries**: Read data from the server
+2. **Mutations**: Update data on the server
+3. **Subscriptions**: Read data over a period of time (e.g., stock market updates, inflight recorder)
 
 ### How to fetch data using URL
 

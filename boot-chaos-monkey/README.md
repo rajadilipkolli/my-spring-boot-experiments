@@ -11,7 +11,7 @@ This module explores Chaos Engineering principles by intentionally injecting fai
 
 ## Key Features
 
-1. **Chaos Injection**: Simulate random latencies, exceptions, or resources unavailability.
+1. **Chaos Injection**: Simulate random latencies, exceptions, or resource unavailability.
 2. **Performance Testing** (Gatling): Benchmark throughput and latency under chaotic conditions.
 3. **Monitoring**: Validate that chaos is functioning by observing logs, metrics, or custom dashboards.
 
@@ -42,8 +42,11 @@ docker-compose -f docker/docker-compose.yml up -d
 
 **Verification**:
 
-* Check logs to confirm chaos injection events.
-* Use Gatling or other load testing tools to verify how the application behaves under stress.
+* Check application logs for entries containing "Chaos Monkey" to confirm injection events
+* Use Gatling or other load testing tools to measure:
+  * Response time degradation
+  * Error rate changes
+  * System resource utilization
 
 By default, Chaos Monkey is enabled. Let's disable it and run the tests again. It should improve the response times.
 
