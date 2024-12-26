@@ -9,10 +9,10 @@
         <relativePath /> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.example.multitenancy.partition</groupId>
-    <artifactId>partition</artifactId>
+    <artifactId>multitenancy-partition</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>partition</name>
-    <description>partition</description>
+    <name>multitenancy-partition</name>
+    <description>multitenancy-partition</description>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -234,7 +234,7 @@
                 <configuration>
                     <java>
                         <googleJavaFormat>
-                            <version>1.25.0</version>
+                            <version>1.25.2</version>
                             <style>AOSP</style>
                         </googleJavaFormat>
                     </java>
