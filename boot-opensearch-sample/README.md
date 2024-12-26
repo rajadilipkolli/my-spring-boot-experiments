@@ -1,15 +1,36 @@
-# boot-opensearch-sample
+# OpenSearch Integration
+
+Showcases saving data and performing swift geospatial or text-based searches in OpenSearch as an alternative to Elasticsearch.
+
+---
+## Key Features
+
+- **OpenSearch Client**: Illustrates setting up a Spring Boot app to send documents to an OpenSearch cluster.
+- **Geospatial Queries**: Provides examples of storing and querying location-based data.
+- **High Throughput**: Demonstrates efficient indexing and search operations.
+
+---
+
+### **Querying**
+
+You can use either:
+
+* Swagger UI for built-in endpoints.
+* OpenSearch Dashboards for manual searching.
+
+---
+
 
 ### Format code
 
 ```shell
-$ ./mvnw spotless:apply
+./mvnw spotless:apply
 ```
 
 ### Run tests
 
 ```shell
-$ ./mvnw clean verify
+./mvnw clean verify
 ```
 
 ### Run locally

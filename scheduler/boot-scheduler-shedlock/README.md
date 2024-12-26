@@ -1,22 +1,33 @@
-# boot-scheduler-shedlock
+# Boot Scheduler with ShedLock
+
+Ensures only one instance of a scheduled job runs in a clustered environment, preventing overlapping tasks across multiple nodes.
+
+---
+
+## Main Benefits
+
+1. **Fail-safe**: If one node fails mid-job, another node can acquire the lock after lease expiry.
+2. **Database Agnostic**: Works with multiple DB types.
+
+---
 
 ### Format code
 
 ```shell
-$ ./mvnw spotless:apply
+./mvnw spotless:apply
 ```
 
 ### Run tests
 
 ```shell
-$ ./mvnw clean verify
+./mvnw clean verify
 ```
 
 ### Run locally
 
 ```shell
-$ docker-compose -f docker/docker-compose.yml up -d
-$ ./mvnw spring-boot:run -Dspring-boot.run.profiles=local
+ docker-compose -f docker/docker-compose.yml up -d
+ ./mvnw spring-boot:run -Dspring-boot.run.profiles=local
 ```
 
 ### Using Testcontainers at Development Time

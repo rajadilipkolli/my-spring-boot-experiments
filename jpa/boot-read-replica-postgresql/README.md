@@ -1,4 +1,4 @@
-# boot-read-replica-with
+# Boot Read-Replica with PostgreSQL
 This project is an example to show how we can separate read and write operations to primary and replica databases using spring boot and postgresql database.
 
 A read replica in Postgres is a database instance that receives data from a primary database instance and serves it to clients. Read replicas are useful for scaling database workloads, as they can offload read operations from the primary instance, allowing it to focus on more resource-intensive tasks such as writing data. This can improve the performance of the overall database system. Read replicas can also be useful for providing high availability, as they can take over read operations if the primary instance becomes unavailable for any reason.
@@ -9,6 +9,16 @@ A read replica in Postgres is a database instance that receives data from a prim
  ![](../../images/replica.png)
 
  Architecture Image Credit : [Vlad](https://twitter.com/vlad_mihalcea)
+
+---
+
+## Key Concepts
+
+1. **Primary-Replica Setup**: Writes go to the primary database, while reads occur on the replica.
+2. **Performance Optimization**: Minimizes load on the primary, improving overall throughput.
+3. **LazyConnectionDataSourceProxy**: Ensures a single `DataSource` bean but dynamically determines read vs. write at runtime.
+
+---
 
 ## Liquibase
 Use below script for generating the difference in the database

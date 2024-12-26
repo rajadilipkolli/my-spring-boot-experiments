@@ -1,14 +1,20 @@
-# restclient
+# Spring 6 RestClient
 
-New springs rest client as an alternative to webclient from 6.2 
+Introduces the new RestClient in Spring 6.2 as an alternative to WebClient or RestTemplate for synchronous usage (depending on the environment).
+
+## Why RestClient?
+
+- **Unified API**: Replaces older RestTemplate approach, offering a modern, extensible framework.
+
+---
 
 ### Run tests
-`$ ./mvnw clean verify`
+`./mvnw clean verify`
 
 ### Run locally
 ```shell
-$ docker-compose -f docker/docker-compose.yml up -d
-$ ./mvnw spring-boot:run -Dspring-boot.run.profiles=local
+docker-compose -f docker/docker-compose.yml up -d
+./mvnw spring-boot:run -Dspring-boot.run.profiles=local
 ```
 
 
