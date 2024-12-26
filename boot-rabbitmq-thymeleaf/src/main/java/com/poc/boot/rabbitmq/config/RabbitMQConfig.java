@@ -7,16 +7,13 @@ import org.springframework.amqp.core.ExchangeBuilder;
 import org.springframework.amqp.core.FanoutExchange;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.core.QueueBuilder;
-import org.springframework.amqp.rabbit.connection.ConnectionFactory;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
+import org.springframework.boot.autoconfigure.amqp.RabbitTemplateCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.messaging.handler.annotation.support.DefaultMessageHandlerMethodFactory;
 import org.springframework.messaging.handler.annotation.support.MessageHandlerMethodFactory;
-import org.springframework.retry.backoff.ExponentialBackOffPolicy;
-import org.springframework.retry.support.RetryTemplate;
 
 @Configuration(proxyBeanMethods = false)
 public class RabbitMQConfig {
@@ -79,22 +76,13 @@ public class RabbitMQConfig {
         return BindingBuilder.bind(deadLetterQueue).to(deadLetterExchange);
     }
 
-    /* Bean for rabbitTemplate */
     @Bean
-    RabbitTemplate templateWithConfirmsEnabled(
-            final ConnectionFactory connectionFactory,
-            final Jackson2JsonMessageConverter producerJackson2MessageConverter) {
-        final RabbitTemplate templateWithConfirmsEnabled = new RabbitTemplate(connectionFactory);
-        RetryTemplate retryTemplate = new RetryTemplate();
-        ExponentialBackOffPolicy backOffPolicy = new ExponentialBackOffPolicy();
-        backOffPolicy.setInitialInterval(500);
-        backOffPolicy.setMultiplier(10.0);
-        backOffPolicy.setMaxInterval(10_000);
-        retryTemplate.setBackOffPolicy(backOffPolicy);
-        templateWithConfirmsEnabled.setRetryTemplate(retryTemplate);
-        templateWithConfirmsEnabled.setMessageConverter(producerJackson2MessageConverter);
-        templateWithConfirmsEnabled.setConfirmCallback(rabbitTemplateConfirmCallback);
-        return templateWithConfirmsEnabled;
+    RabbitTemplateCustomizer rabbitTemplateCustomizer(
+            Jackson2JsonMessageConverter producerJackson2MessageConverter) {
+        return rabbitTemplate -> {
+            rabbitTemplate.setMessageConverter(producerJackson2MessageConverter);
+            rabbitTemplate.setConfirmCallback(rabbitTemplateConfirmCallback);
+        };
     }
 
     @Bean

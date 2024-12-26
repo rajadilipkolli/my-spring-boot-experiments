@@ -16,13 +16,12 @@ import org.springframework.stereotype.Service;
 @Service
 public class OrderMessageSenderImpl implements OrderMessageSender {
 
-    private final RabbitTemplate templateWithConfirmsEnabled;
+    private final RabbitTemplate rabbitTemplate;
 
     private final ObjectMapper objectMapper;
 
-    public OrderMessageSenderImpl(
-            RabbitTemplate templateWithConfirmsEnabled, ObjectMapper objectMapper) {
-        this.templateWithConfirmsEnabled = templateWithConfirmsEnabled;
+    public OrderMessageSenderImpl(RabbitTemplate rabbitTemplate, ObjectMapper objectMapper) {
+        this.rabbitTemplate = rabbitTemplate;
         this.objectMapper = objectMapper;
     }
 
@@ -32,7 +31,7 @@ public class OrderMessageSenderImpl implements OrderMessageSender {
 
         String orderJson = this.objectMapper.writeValueAsString(order);
         String correlationId = UUID.randomUUID().toString();
-        this.templateWithConfirmsEnabled.convertAndSend(
+        this.rabbitTemplate.convertAndSend(
                 RabbitMQConfig.ORDERS_QUEUE,
                 getRabbitMQMessage(orderJson),
                 new CorrelationData(correlationId));
