@@ -5,7 +5,7 @@
 
 ![](../images/chaos-monkey.png)
 
-The idea behind this API is to show some of all possibles ways that you can introduce Chaos Engineering principles in a project. Adds Gatling performance tests to demonstrate how adding assaults will cause delay in response and chaos monkey is working as expected .
+The idea behind this API is to show some of the possible ways to introduce Chaos Engineering principles in a project. It adds Gatling performance tests to demonstrate how adding assaults will cause delays in response time and verify that chaos monkey is working as expected.
 
 Using Springframework 6.0 `ProblemDetails` and spring boot micrometer Observability in controller
 
@@ -31,7 +31,7 @@ docker-compose -f docker/docker-compose.yml up -d
 ./mvnw gatling:test
 ```
 
-By Default, chaos Monkey is enabled, lets disabled and run the tests again. It should improve the response times
+By default, Chaos Monkey is enabled. Let's disable it and run the tests again. It should improve the response times.
 
 ```shell
 ./mvnw spring-boot:run -Dspring-boot.run.profiles=local -Dspring-boot.run.arguments="--chaos.monkey.enabled=false"
@@ -55,9 +55,9 @@ Results of gatling are stored in target folder for each run
 
 #### Sample Test Results
 
-we can observe that mean requests/sec is more when chaos monkey is enabled
+We can observe that mean requests/sec is more when Chaos Monkey is enabled.
 
-**With Chaos Monkey enabled**
+### With Chaos Monkey Enabled
 
 \================================================================================ ---- Global Information --------------------------------------------------------
 
