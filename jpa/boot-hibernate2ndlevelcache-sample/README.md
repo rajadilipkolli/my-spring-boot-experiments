@@ -8,22 +8,37 @@
 
 Leverages Redis to cache frequently accessed entities and associations for faster read performance, reducing round-trips to the database.
 
+> **Compatibility Note**: This implementation has been tested with Redis version 7.4.1 and above.
+
+---
+## Table of Contents
+<!-- TOC -->
+* [Hibernate 2nd Level Cache with Redis](#hibernate-2nd-level-cache-with-redis)
+  * [Run tests](#run-tests)
+  * [Run locally](#run-locally)
+  * [Using Testcontainers at Development Time](#using-testcontainers-at-development-time)
+  * [Useful Links](#useful-links)
+  * [Notes](#notes)
+  * [**Caching Collections (One-Many & Many-Many Relations)**](#caching-collections-one-many--many-many-relations)
+    * [Example Configuration](#example-configuration)
+<!-- TOC -->
+
 ---
 
-### Run tests
+## Run tests
 
 ```shell
 ./mvnw clean verify
 ```
 
-### Run locally
+## Run locally
 
 ```shell
 docker-compose -f docker/docker-compose.yml up -d
 ./mvnw spring-boot:run -Dspring-boot.run.profiles=local
 ```
 
-### Using Testcontainers at Development Time
+## Using Testcontainers at Development Time
 You can run `TestApplication.java` from your IDE directly.
 You can also run the application using Maven as follows:
 
@@ -32,18 +47,18 @@ You can also run the application using Maven as follows:
 ```
 
 
-### Useful Links
+## Useful Links
 * Swagger UI: http://localhost:8080/swagger-ui.html
 * Actuator Endpoint: http://localhost:8080/actuator
 
+---
 
-### Notes
+## Notes
 
 * We need to explicitly set the querycacheHint to customerqueries for enabling 2nd level cache
 * This is enabled only for SessionFactory(i.e as soon as application is closed it will be deleted)
 
-### **Caching Collections (One-Many & Many-Many Relations)**
-
+## **Caching Collections (One-Many & Many-Many Relations)**
 
 Collection caching allows you to cache entire collections of associated entities. These collections can be part of your domain model, such as one-to-many or many-to-many relationships between entities.
 
@@ -53,3 +68,14 @@ When Hibernate caches a collection, it doesn’t cache the entire collection of 
 
 * Caching only the IDs reduces memory usage compared to caching the entire collection of entities.
 * When a collection is updated, only the relevant IDs need to be invalidated in the cache, rather than the entire collection. This minimizes cache invalidation overhead.
+
+### Example Configuration
+
+```java
+@Entity
+public class Department {
+    @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+    @OneToMany(mappedBy = "department")
+    private List<Employee> employees;
+}
+```

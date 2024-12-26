@@ -8,6 +8,8 @@ Implements a reactive GraphQL server using Spring WebFlux, enabling highly scala
 
 - **Reactive Execution**: Non-blocking data fetchers.
 - **Scalable**: Ideal for high-concurrency scenarios.
+- **Performance**: Handles thousands of concurrent requests with minimal overhead.
+- **Memory Efficient**: Reduces memory footprint through backpressure handling.
 
 ---
 

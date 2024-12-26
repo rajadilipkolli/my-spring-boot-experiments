@@ -11,8 +11,6 @@ A comprehensive sample showcasing various Redis usage patterns, including sentin
 
 ## ReadFrom Settings
 
-## ReadFrom Settings
-
  Configurable with Lettuce through application properties:
 
  ```yaml
@@ -90,6 +88,7 @@ We will run 1 master,1 slave and 3 sentinel instance.
 We are using _REPLICA_PREFERRED_ in here but this configuration can be important in production!
 
 ### Reference
- - [medium](https://medium.com/@htyesilyurt/spring-boot-3-redis-sentinel-lettuce-client-and-docker-compose-for-high-availability-1f1e3c372a5a)
- - [programmerfriend](https://programmerfriend.com/ultimate-guide-to-redis-cache-with-spring-boot-2-and-spring-data-redis/)
+ ### Reference
+ - [Spring Boot 3 Redis Sentinel Guide](https://medium.com/@htyesilyurt/spring-boot-3-redis-sentinel-lettuce-client-and-docker-compose-for-high-availability-1f1e3c372a5a)
+ - [Ultimate Guide to Redis Cache](https://programmerfriend.com/ultimate-guide-to-redis-cache-with-spring-boot-2-and-spring-data-redis/)
  
