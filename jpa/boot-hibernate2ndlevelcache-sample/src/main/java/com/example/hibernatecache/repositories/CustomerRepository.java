@@ -16,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 public interface CustomerRepository
         extends BaseJpaRepository<Customer, Long>, PagingAndSortingRepository<Customer, Long> {
 
-    @Transactional(readOnly = true)
     @QueryHints(@QueryHint(name = HINT_CACHEABLE, value = "true"))
     @EntityGraph(attributePaths = {"orders"})
     Optional<Customer> findByFirstName(String firstName);

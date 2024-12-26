@@ -4,9 +4,9 @@
 "component : archunit":
   - changed-files:
       - any-glob-to-any-file: 'boot-api-archunit-sample/**/*'
-"component : choas-monkey":
+"component : chaos-monkey":
   - changed-files:
-      - any-glob-to-any-file: 'boot-choas-monkey/**/*'
+      - any-glob-to-any-file: 'boot-chaos-monkey/**/*'
 "component : grafana-lgtm":
   - changed-files:
       - any-glob-to-any-file: 'boot-grafana-lgtm/**/*'
@@ -124,7 +124,7 @@
       - any-glob-to-any-file:
           - batch-boot-jpa-sample/pom.xml
           - boot-api-archunit-sample/pom.xml
-          - boot-choas-monkey/pom.xml
+          - boot-chaos-monkey/pom.xml
           - boot-mongodb-elasticsearch/pom.xml
           - boot-opensearch-sample/pom.xml
           - boot-rabbitmq-thymeleaf/pom.xml

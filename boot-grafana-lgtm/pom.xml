@@ -61,7 +61,6 @@
             <artifactId>junit-jupiter</artifactId>
             <scope>test</scope>
         </dependency>
-        <!-- Remove version when spring boot supports-->
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>grafana</artifactId>

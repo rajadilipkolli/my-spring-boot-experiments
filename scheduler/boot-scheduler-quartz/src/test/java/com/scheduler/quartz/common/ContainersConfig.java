@@ -20,13 +20,11 @@ public class ContainersConfig {
     DynamicPropertyRegistrar dynamicPropertyRegistrar(PostgreSQLContainer<?> postgreSQLContainer) {
         return (registrar) -> {
             registrar.add(
-                    "spring.quartz.properties.org.quartz.dataSource.quartzDataSource.URL",
-                    postgreSQLContainer::getJdbcUrl);
+                    "spring.quartz.properties.org.quartz.dataSource.quartzDS.URL", postgreSQLContainer::getJdbcUrl);
             registrar.add(
-                    "spring.quartz.properties.org.quartz.dataSource.quartzDataSource.user",
-                    postgreSQLContainer::getUsername);
+                    "spring.quartz.properties.org.quartz.dataSource.quartzDS.user", postgreSQLContainer::getUsername);
             registrar.add(
-                    "spring.quartz.properties.org.quartz.dataSource.quartzDataSource.password",
+                    "spring.quartz.properties.org.quartz.dataSource.quartzDS.password",
                     postgreSQLContainer::getPassword);
         };
     }

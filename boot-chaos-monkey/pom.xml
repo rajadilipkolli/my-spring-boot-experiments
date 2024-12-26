@@ -8,11 +8,11 @@
         <version>3.4.1</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>com.example.jooq.r2dbc</groupId>
-    <artifactId>boot-jooq-r2dbc-sample</artifactId>
+    <groupId>com.example.chaosmonkey</groupId>
+    <artifactId>boot-chaos-monkey</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>boot-jooq-r2dbc-sample</name>
-    <description>Spring boot jooq integration in reactive mode</description>
+    <name>boot-chaos-monkey</name>
+    <description>chaos Engineering Principles implementation using spring boot</description>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -20,7 +20,9 @@
 
         <java.version>21</java.version>
         <springdoc-openapi.version>2.7.0</springdoc-openapi.version>
-        <testcontainers-jooq-codegen-maven-plugin.version>0.0.4</testcontainers-jooq-codegen-maven-plugin.version>
+
+        <gatling.version>3.13.1</gatling.version>
+        <gatling-maven-plugin.version>4.12.2</gatling-maven-plugin.version>
 
         <project.testresult.directory>${project.build.directory}/test-results</project.testresult.directory>
         <spotless.version>2.43.0</spotless.version>
@@ -35,9 +37,6 @@
         <jacoco.itReportFile>${jacoco.itReportFolder}/integrationTest.exec</jacoco.itReportFile>
         <junit.utReportFolder>${project.testresult.directory}/test</junit.utReportFolder>
         <junit.itReportFolder>${project.testresult.directory}/integrationTest</junit.itReportFolder>
-
-        <db.username>local</db.username>
-        <db.password>local</db.password>
     </properties>
 
     <dependencies>
@@ -51,21 +50,17 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-webflux</artifactId>
+            <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-aop</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-jooq</artifactId>
+            <groupId>de.codecentric</groupId>
+            <artifactId>chaos-monkey-spring-boot</artifactId>
+            <version>3.1.0</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-devtools</artifactId>
             <scope>runtime</scope>
-            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -79,11 +74,11 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-r2dbc</artifactId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.postgresql</groupId>
-            <artifactId>r2dbc-postgresql</artifactId>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
             <scope>runtime</scope>
         </dependency>
         <dependency>
@@ -91,22 +86,13 @@
             <artifactId>postgresql</artifactId>
             <scope>runtime</scope>
         </dependency>
-        <!-- Needed for running Flyway -->
         <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-jdbc</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.flywaydb</groupId>
-            <artifactId>flyway-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.flywaydb</groupId>
-            <artifactId>flyway-database-postgresql</artifactId>
+            <groupId>org.liquibase</groupId>
+            <artifactId>liquibase-core</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springdoc</groupId>
-            <artifactId>springdoc-openapi-starter-webflux-ui</artifactId>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
             <version>${springdoc-openapi.version}</version>
         </dependency>
 
@@ -121,11 +107,6 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>io.projectreactor</groupId>
-            <artifactId>reactor-test</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>junit-jupiter</artifactId>
             <scope>test</scope>
@@ -135,9 +116,12 @@
             <artifactId>postgresql</artifactId>
             <scope>test</scope>
         </dependency>
+
+        <!-- Performance Testing -->
         <dependency>
-            <groupId>org.testcontainers</groupId>
-            <artifactId>r2dbc</artifactId>
+            <groupId>io.gatling.highcharts</groupId>
+            <artifactId>gatling-charts-highcharts</artifactId>
+            <version>${gatling.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -177,93 +161,6 @@
                     </includeOnlyProperties>
                 </configuration>
             </plugin>
-
-            <plugin>
-                <groupId>org.testcontainers</groupId>
-                <artifactId>testcontainers-jooq-codegen-maven-plugin</artifactId>
-                <version>${testcontainers-jooq-codegen-maven-plugin.version}</version>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.testcontainers</groupId>
-                        <artifactId>postgresql</artifactId>
-                        <version>${testcontainers.version}</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>org.postgresql</groupId>
-                        <artifactId>postgresql</artifactId>
-                        <version>${postgresql.version}</version>
-                    </dependency>
-                </dependencies>
-                <executions>
-                    <execution>
-                        <id>generate-jooq-sources</id>
-                        <goals>
-                            <goal>generate</goal>
-                        </goals>
-                        <phase>generate-sources</phase>
-                        <configuration>
-                            <database>
-                                <!--
-                                "type" can be: POSTGRES, MYSQL, MARIADB
-                                -->
-                                <type>POSTGRES</type>
-                                <!--
-                                "containerImage" is optional.
-                                The defaults are 
-                                    POSTGRES: postgres:15.2-alpine
-                                    MYSQL: mysql:8.0.33
-                                    MARIADB: mariadb:10.11
-                                -->
-                                <containerImage>postgres:17.2-alpine</containerImage>
-                            </database>
-                            <flyway>
-                                <!--
-                                You can configure any supporting flyway config here.
-                                see https://flywaydb.org/documentation/configuration/parameters/ 
-                                -->
-                                <locations> <!-- optional -->
-                                    filesystem:src/main/resources/db/migration/postgresql
-                                </locations>
-                            </flyway>
-                            <!-- 
-                                You can configure any supporting jooq config here. 
-                                see https://www.jooq.org/doc/latest/manual/code-generation/codegen-configuration/
-                            -->
-                            <jooq>
-                                <generator>
-                                    <database>
-                                        <includes>.*</includes>
-                                        <excludes>flyway_schema_history</excludes>
-                                        <inputSchema>public</inputSchema>
-                                    </database>
-                                    <target>
-                                        <packageName>com.example.jooq.r2dbc.testcontainersflyway.db</packageName>
-                                        <directory>target/generated-sources/jooq</directory>
-                                    </target>
-                                </generator>
-                            </jooq>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <!-- <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>build-helper-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>add-source</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>add-source</goal>
-                        </goals>
-                        <configuration>
-                            <sources>
-                                <source>${project.basedir}/target/generated-sources/jooq</source>
-                            </sources>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin> -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
@@ -439,6 +336,11 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>io.gatling</groupId>
+                <artifactId>gatling-maven-plugin</artifactId>
+                <version>${gatling-maven-plugin.version}</version>
             </plugin>
         </plugins>
     </build>
