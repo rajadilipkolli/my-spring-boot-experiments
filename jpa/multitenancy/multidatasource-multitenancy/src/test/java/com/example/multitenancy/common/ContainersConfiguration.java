@@ -25,8 +25,6 @@ public class ContainersConfiguration {
     @Bean
     DynamicPropertyRegistrar databaseProperties(
             OracleContainer oracleContainer, PostgreSQLContainer<?> postgreSQLContainer) {
-        oracleContainer.start();
-        postgreSQLContainer.start();
         return (propertyRegistry) -> {
             // Connect our Spring application to our Testcontainers instances
             propertyRegistry.add("datasource.primary.url", oracleContainer::getJdbcUrl);

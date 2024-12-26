@@ -4,7 +4,7 @@ import com.example.multitenancy.common.ContainersConfiguration;
 import com.example.multitenancy.utils.AppConstants;
 import org.springframework.boot.SpringApplication;
 
-class MultiDataSourceMultiTenancyApplicationTest {
+class TestMultiDataSourceMultiTenancyApplication {
 
     public static void main(String[] args) {
         SpringApplication.from(MultiDataSourceMultiTenancyApplication::main)
