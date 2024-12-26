@@ -20,6 +20,7 @@ import org.mapstruct.NullValueCheckStrategy;
         suppressTimestampInGenerated = true)
 public interface OrderMapper {
 
+    @Mapping(target = "removeOrderItem", ignore = true)
     @Mapping(target = "orderItems", ignore = true)
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "customer.id", source = "customerId")
@@ -32,6 +33,7 @@ public interface OrderMapper {
     @IterableMapping(elementTargetType = OrderResponse.class)
     List<OrderResponse> mapToOrderResponseList(List<Order> orderList);
 
+    @Mapping(target = "removeOrderItem", ignore = true)
     @Mapping(target = "orderItems", ignore = true)
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "customer", ignore = true)

@@ -20,6 +20,7 @@ import org.mapstruct.NullValueCheckStrategy;
         suppressTimestampInGenerated = true)
 public interface CustomerMapper {
 
+    @Mapping(target = "id", ignore = true)
     Customer toEntity(CustomerRequest customerRequest);
 
     @IterableMapping(elementTargetType = CustomerResponse.class)
