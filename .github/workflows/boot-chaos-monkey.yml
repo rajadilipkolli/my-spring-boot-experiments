@@ -1,13 +1,13 @@
-name: boot-choas-monkey
+name: boot-chaos-monkey
 
 on:
   push:
     paths:
-      - "boot-choas-monkey/**"
+      - "boot-chaos-monkey/**"
     branches: [main]
   pull_request:
     paths:
-      - "boot-choas-monkey/**"
+      - "boot-chaos-monkey/**"
     types:
       - opened
       - synchronize
@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: boot-choas-monkey
+        working-directory: boot-chaos-monkey
     steps:
       - uses: actions/checkout@v4
         with:

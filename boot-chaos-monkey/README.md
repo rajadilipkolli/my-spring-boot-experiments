@@ -1,4 +1,4 @@
-# spring-boot-choas-monkey
+# spring-boot-chaos-monkey
 
 [Choas Monkey](https://netflix.github.io/chaosmonkey/)
 

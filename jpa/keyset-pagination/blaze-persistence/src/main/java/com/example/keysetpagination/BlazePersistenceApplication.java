@@ -1,15 +1,15 @@
-package com.example.rest.proxy;
+package com.example.keysetpagination;
 
-import com.example.rest.proxy.config.ApplicationProperties;
+import com.example.keysetpagination.config.ApplicationProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 
 @SpringBootApplication
 @EnableConfigurationProperties({ApplicationProperties.class})
-public class Application {
+public class BlazePersistenceApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(Application.class, args);
+        SpringApplication.run(BlazePersistenceApplication.class, args);
     }
 }

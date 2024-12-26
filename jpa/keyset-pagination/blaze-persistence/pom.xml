@@ -14,7 +14,7 @@
     <artifactId>boot-data-keyset-pagination-blaze</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>boot-data-keyset-pagination-blaze</name>
-    <description>boot-data-keyset-pagination</description>
+    <description>boot-data-keyset-pagination-blaze</description>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -229,7 +229,7 @@
                 <configuration>
                     <java>
                         <googleJavaFormat>
-                            <version>1.22.0</version>
+                            <version>1.25.2</version>
                             <style>AOSP</style>
                         </googleJavaFormat>
                         <importOrder />

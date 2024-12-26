@@ -3,7 +3,7 @@
 * [README](README.md)
 * [Spring Batch implementation](batch-boot-jpa-sample/README.md)
 * [API Example for Archunit](boot-api-archunit-sample/README.md)
-* [spring-boot-choas-monkey](boot-choas-monkey/README.md)
+* [spring-boot-chaos-monkey](boot-chaos-monkey/README.md)
 * [Grafana LGTM Implementation](boot-grafana-lgtm/ReadMe.md)
 * [MongoDb for insertion and search using elastic search](boot-mongodb-elasticsearch/README.md)
 * [OpenSearch Implementation](boot-opensearch-sample/README.md)
