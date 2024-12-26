@@ -9,10 +9,10 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.example.multitenancy.schema</groupId>
-    <artifactId>schema</artifactId>
+    <artifactId>multitenancy-schema</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>schema</name>
-    <description>schema</description>
+    <name>multitenancy-schema</name>
+    <description>multitenancy-schema</description>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -171,7 +171,6 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
                     <!-- depending on your project -->
-                    <!-- depending on your project -->
                     <annotationProcessorPaths>
                         <path>
                             <groupId>org.mapstruct</groupId>
@@ -248,7 +247,7 @@
                 <configuration>
                     <java>
                         <googleJavaFormat>
-                            <version>1.22.0</version>
+                            <version>1.25.2</version>
                             <style>AOSP</style>
                         </googleJavaFormat>
                     </java>
