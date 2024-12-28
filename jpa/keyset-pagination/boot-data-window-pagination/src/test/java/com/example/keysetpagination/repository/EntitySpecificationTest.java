@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import com.example.keysetpagination.common.ContainersConfig;
 import com.example.keysetpagination.config.JpaAuditConfig;
 import com.example.keysetpagination.entities.Animal;
+import com.example.keysetpagination.model.query.CriteriaGroup;
 import com.example.keysetpagination.model.query.QueryOperator;
 import com.example.keysetpagination.model.query.SearchCriteria;
 import com.example.keysetpagination.repositories.AnimalRepository;
@@ -14,7 +15,6 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import java.util.List;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -163,16 +163,17 @@ class EntitySpecificationTest {
     }
 
     @Test
-    @Disabled("Not Implemented yet")
     void shouldBuildSpecificationForANDOperator() {
         SearchCriteria criteria1 = new SearchCriteria(QueryOperator.EQ, "type", List.of("Bird"));
         SearchCriteria criteria2 = new SearchCriteria(QueryOperator.EQ, "habitat", List.of("Forest"));
-        SearchCriteria criteriaAnd = new SearchCriteria(QueryOperator.AND, null, null);
-        Specification<Animal> spec =
-                entitySpecification.specificationBuilder(List.of(criteria1, criteriaAnd, criteria2), Animal.class);
+        CriteriaGroup criteriaGroup = new CriteriaGroup(QueryOperator.AND, List.of(criteria1, criteria2));
+        Specification<Animal> spec = entitySpecification.specificationBuilder(List.of(criteriaGroup), Animal.class);
         assertThat(spec).isNotNull();
         List<Animal> results = animalRepository.findAll(spec);
-        assertThat(results).isNotEmpty().extracting("type").containsOnly("Mammal");
+        assertThat(results).isNotEmpty().hasSize(1);
+        Animal animal = results.getFirst();
+        assertThat(animal.getType()).isEqualTo("Bird");
+        assertThat(animal.getHabitat()).isEqualTo("Forest");
     }
 
     @Test

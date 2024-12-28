@@ -5,8 +5,7 @@ import java.util.List;
 
 public class SearchRequest {
 
-    private List<SearchCriteria> searchCriteriaList;
-
+    private List<ISearchCriteria> searchCriteriaList;
     private List<SortRequest> sortRequests;
 
     public SearchRequest() {
@@ -14,16 +13,16 @@ public class SearchRequest {
         this.sortRequests = new ArrayList<>();
     }
 
-    public SearchRequest(List<SearchCriteria> searchCriteriaList, List<SortRequest> sortRequests) {
+    public SearchRequest(List<ISearchCriteria> searchCriteriaList, List<SortRequest> sortRequests) {
         this.searchCriteriaList = searchCriteriaList != null ? searchCriteriaList : new ArrayList<>();
         this.sortRequests = sortRequests != null ? sortRequests : new ArrayList<>();
     }
 
-    public List<SearchCriteria> getSearchCriteriaList() {
+    public List<ISearchCriteria> getSearchCriteriaList() {
         return searchCriteriaList;
     }
 
-    public SearchRequest setSearchCriteriaList(List<SearchCriteria> searchCriteriaList) {
+    public SearchRequest setSearchCriteriaList(List<ISearchCriteria> searchCriteriaList) {
         this.searchCriteriaList = searchCriteriaList;
         return this;
     }
