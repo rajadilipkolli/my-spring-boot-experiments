@@ -5,6 +5,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import java.util.StringJoiner;
 
 @Entity
 public class TrackingState {
@@ -45,5 +46,14 @@ public class TrackingState {
     public TrackingState setStatus(String status) {
         this.status = status;
         return this;
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", TrackingState.class.getSimpleName() + "[", "]")
+                .add("id=" + id)
+                .add("correlationId='" + correlationId + "'")
+                .add("status='" + status + "'")
+                .toString();
     }
 }

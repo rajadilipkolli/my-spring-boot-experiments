@@ -8,6 +8,7 @@ import org.springframework.amqp.core.FanoutExchange;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.core.QueueBuilder;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
+import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.boot.autoconfigure.amqp.RabbitTemplateCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -77,16 +78,12 @@ public class RabbitMQConfig {
     }
 
     @Bean
-    RabbitTemplateCustomizer rabbitTemplateCustomizer(
-            Jackson2JsonMessageConverter producerJackson2MessageConverter) {
-        return rabbitTemplate -> {
-            rabbitTemplate.setMessageConverter(producerJackson2MessageConverter);
-            rabbitTemplate.setConfirmCallback(rabbitTemplateConfirmCallback);
-        };
+    RabbitTemplateCustomizer rabbitTemplateCustomizer() {
+        return rabbitTemplate -> rabbitTemplate.setConfirmCallback(rabbitTemplateConfirmCallback);
     }
 
     @Bean
-    Jackson2JsonMessageConverter producerJackson2MessageConverter() {
+    MessageConverter producerJackson2MessageConverter() {
         return new Jackson2JsonMessageConverter();
     }
 
