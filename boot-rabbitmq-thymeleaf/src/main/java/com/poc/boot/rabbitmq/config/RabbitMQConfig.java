@@ -25,13 +25,10 @@ import org.springframework.util.Assert;
 public class RabbitMQConfig {
 
     public static final String DLX_ORDERS_EXCHANGE = "DLX.ORDERS.EXCHANGE";
-
     public static final String DLQ_ORDERS_QUEUE = "DLQ.ORDERS.QUEUE";
 
     public static final String ORDERS_QUEUE = "ORDERS.QUEUE";
-
     private static final String ORDERS_EXCHANGE = "ORDERS.EXCHANGE";
-
     private static final String ROUTING_KEY_ORDERS_QUEUE = "ROUTING_KEY_ORDERS_QUEUE";
 
     private static final Logger log = LoggerFactory.getLogger(RabbitMQConfig.class);
@@ -100,6 +97,8 @@ public class RabbitMQConfig {
                                 trackingStateRepository.save(
                                         new TrackingState()
                                                 .setCorrelationId(correlationData.getId())
+                                                .setAck(ack)
+                                                .setCause(cause)
                                                 .setStatus("processed")));
                     });
             rabbitTemplate.setReturnsCallback(

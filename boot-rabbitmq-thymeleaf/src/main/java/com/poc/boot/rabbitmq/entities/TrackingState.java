@@ -15,9 +15,12 @@ public class TrackingState {
     @Column(name = "id", nullable = false)
     private Long id;
 
+    @Column(unique = true, nullable = false)
     private String correlationId;
 
+    private boolean ack;
     private String status = "processed";
+    private String cause;
 
     public TrackingState() {}
 
@@ -39,6 +42,15 @@ public class TrackingState {
         return this;
     }
 
+    public boolean isAck() {
+        return ack;
+    }
+
+    public TrackingState setAck(boolean ack) {
+        this.ack = ack;
+        return this;
+    }
+
     public String getStatus() {
         return status;
     }
@@ -48,12 +60,23 @@ public class TrackingState {
         return this;
     }
 
+    public String getCause() {
+        return cause;
+    }
+
+    public TrackingState setCause(String cause) {
+        this.cause = cause;
+        return this;
+    }
+
     @Override
     public String toString() {
         return new StringJoiner(", ", TrackingState.class.getSimpleName() + "[", "]")
                 .add("id=" + id)
                 .add("correlationId='" + correlationId + "'")
+                .add("ack=" + ack)
                 .add("status='" + status + "'")
+                .add("cause='" + cause + "'")
                 .toString();
     }
 }

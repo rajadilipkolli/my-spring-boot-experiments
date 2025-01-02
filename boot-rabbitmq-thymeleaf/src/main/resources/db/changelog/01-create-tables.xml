@@ -27,16 +27,18 @@
                 <constraints primaryKey="true" primaryKeyName="tracking_state_id"/>
             </column>
             <column name="correlation_id" type="${stringType}">
-                <constraints nullable="false"/>
+                <constraints nullable="false" unique="true"/>
             </column>
+            <column name="ack" type="boolean" />
             <column name="status" type="${stringType}">
                 <constraints nullable="false"/>
             </column>
+            <column name="cause" type="${stringType}" />
         </createTable>
     </changeSet>
 
     <changeSet id="1689580674038-1" author="rajakolli">
-        <createIndex tableName="tracking_state" indexName="tracking_state_correlationId_uc">
+        <createIndex tableName="tracking_state" indexName="tracking_state_correlationId_uc" unique="true">
             <column name="correlation_id"/>
         </createIndex>
     </changeSet>
