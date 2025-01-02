@@ -8,7 +8,7 @@
         <createSequence
                         sequenceName="posts_seq"
                         incrementBy="50"
-                        startValue="1"
+                        startValue="1001"
                         />
         <createTable tableName="posts">
             <column name="id" type="bigint" defaultValueSequenceNext="posts_seq">

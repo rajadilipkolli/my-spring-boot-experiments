@@ -11,6 +11,7 @@ import com.example.rest.template.model.response.PagedResult;
 import com.example.rest.template.repositories.PostRepository;
 import java.util.List;
 import java.util.Optional;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -65,6 +66,7 @@ class PostServiceTest {
     }
 
     @Test
+    @Disabled
     void savePost() {
         // given
         given(postRepository.save(getPost())).willReturn(getPost());

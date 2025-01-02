@@ -137,7 +137,7 @@ class PostControllerTest {
         Long postId = 1L;
         Post post = new Post(postId, "Updated text", 1L, "First Body");
         given(postService.findPostById(postId)).willReturn(Optional.of(post));
-        given(postService.savePost(any(Post.class)))
+        given(postService.updatePost(any(Post.class)))
                 .willAnswer((invocation) -> invocation.getArgument(0));
 
         this.mockMvc

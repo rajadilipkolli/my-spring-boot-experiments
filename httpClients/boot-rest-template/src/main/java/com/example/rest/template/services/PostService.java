@@ -38,11 +38,17 @@ public class PostService {
 
     @Transactional
     public Post savePost(Post post) {
+        post.setId(null);
         return postRepository.save(post);
     }
 
     @Transactional
     public void deletePostById(Long id) {
         postRepository.deleteById(id);
+    }
+
+    @Transactional
+    public Post updatePost(Post post) {
+        return postRepository.save(post);
     }
 }
