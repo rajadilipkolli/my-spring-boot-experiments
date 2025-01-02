@@ -37,10 +37,4 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="1689580674038-1" author="rajakolli">
-        <createIndex tableName="tracking_state" indexName="tracking_state_correlationId_uc" unique="true">
-            <column name="correlation_id"/>
-        </createIndex>
-    </changeSet>
-
 </databaseChangeLog>

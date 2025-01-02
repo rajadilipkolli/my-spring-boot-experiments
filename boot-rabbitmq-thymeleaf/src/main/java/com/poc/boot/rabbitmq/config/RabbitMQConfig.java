@@ -101,11 +101,12 @@ public class RabbitMQConfig {
                                                 .setCause(cause)
                                                 .setStatus("processed")));
                     });
+            // This block ensures that returned, un-routable messages are logged.
             rabbitTemplate.setReturnsCallback(
                     returnedMessage ->
                             log.info(
                                     "Returned: {}\nreplyCode: {}\nreplyText: {}\nexchange/rk: {}/{}",
-                                    returnedMessage.getMessage(),
+                                    returnedMessage.getMessage().toString(),
                                     returnedMessage.getReplyCode(),
                                     returnedMessage.getReplyText(),
                                     returnedMessage.getExchange(),
