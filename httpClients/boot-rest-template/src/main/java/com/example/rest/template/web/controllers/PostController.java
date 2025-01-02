@@ -62,7 +62,7 @@ public class PostController {
                 .map(
                         postObj -> {
                             post.setId(id);
-                            return ResponseEntity.ok(postService.savePost(post));
+                            return ResponseEntity.ok(postService.updatePost(post));
                         })
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }

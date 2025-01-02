@@ -34,7 +34,9 @@ public class Initializer implements CommandLineRunner {
                                 .build(),
                         Post.class);
 
-        this.postRepository.save(postApplicationRestResponse.body());
+        Post entity = postApplicationRestResponse.body();
+        entity.setId(null);
+        this.postRepository.save(entity);
 
         List<Post> response =
                 restHandler.getBody(
@@ -42,7 +44,7 @@ public class Initializer implements CommandLineRunner {
                                 .httpBaseUrl("https://jsonplaceholder.typicode.com/posts")
                                 .build(),
                         new ParameterizedTypeReference<List<Post>>() {});
-
-        this.postRepository.saveAll(response);
+        List<Post> modifiedPostList = response.stream().peek(post -> post.setId(null)).toList();
+        this.postRepository.saveAll(modifiedPostList);
     }
 }
