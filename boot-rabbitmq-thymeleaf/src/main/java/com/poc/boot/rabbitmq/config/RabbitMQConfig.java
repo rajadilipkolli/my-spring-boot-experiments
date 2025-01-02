@@ -1,5 +1,9 @@
 package com.poc.boot.rabbitmq.config;
 
+import com.poc.boot.rabbitmq.entities.TrackingState;
+import com.poc.boot.rabbitmq.repository.TrackingStateRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
 import org.springframework.amqp.core.DirectExchange;
@@ -15,6 +19,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.messaging.handler.annotation.support.DefaultMessageHandlerMethodFactory;
 import org.springframework.messaging.handler.annotation.support.MessageHandlerMethodFactory;
+import org.springframework.util.Assert;
 
 @Configuration(proxyBeanMethods = false)
 public class RabbitMQConfig {
@@ -29,10 +34,12 @@ public class RabbitMQConfig {
 
     private static final String ROUTING_KEY_ORDERS_QUEUE = "ROUTING_KEY_ORDERS_QUEUE";
 
-    private final RabbitTemplateConfirmCallback rabbitTemplateConfirmCallback;
+    private static final Logger log = LoggerFactory.getLogger(RabbitMQConfig.class);
 
-    RabbitMQConfig(RabbitTemplateConfirmCallback rabbitTemplateConfirmCallback) {
-        this.rabbitTemplateConfirmCallback = rabbitTemplateConfirmCallback;
+    private final TrackingStateRepository trackingStateRepository;
+
+    public RabbitMQConfig(TrackingStateRepository trackingStateRepository) {
+        this.trackingStateRepository = trackingStateRepository;
     }
 
     @Bean
@@ -79,7 +86,32 @@ public class RabbitMQConfig {
 
     @Bean
     RabbitTemplateCustomizer rabbitTemplateCustomizer() {
-        return rabbitTemplate -> rabbitTemplate.setConfirmCallback(rabbitTemplateConfirmCallback);
+        return rabbitTemplate -> {
+            rabbitTemplate.setConfirmCallback(
+                    (correlationData, ack, cause) -> {
+                        Assert.notNull(correlationData, () -> "correlationData can't be null");
+                        log.info(
+                                "correlation id : {} , acknowledgement : {}, cause : {}",
+                                correlationData.getId(),
+                                ack,
+                                cause);
+                        log.debug(
+                                "persisted correlationId in db : {}",
+                                trackingStateRepository.save(
+                                        new TrackingState()
+                                                .setCorrelationId(correlationData.getId())
+                                                .setStatus("processed")));
+                    });
+            rabbitTemplate.setReturnsCallback(
+                    returnedMessage ->
+                            log.info(
+                                    "Returned: {}\nreplyCode: {}\nreplyText: {}\nexchange/rk: {}/{}",
+                                    returnedMessage.getMessage(),
+                                    returnedMessage.getReplyCode(),
+                                    returnedMessage.getReplyText(),
+                                    returnedMessage.getExchange(),
+                                    returnedMessage.getRoutingKey()));
+        };
     }
 
     @Bean
