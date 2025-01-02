@@ -1,4 +1,6 @@
-# boot-graphql-webmvc
+# GraphQL with Spring MVC
+
+Demonstrates a blocking GraphQL approach via Spring MVC for synchronous data fetching.
 
 ### Run tests
 ```shell

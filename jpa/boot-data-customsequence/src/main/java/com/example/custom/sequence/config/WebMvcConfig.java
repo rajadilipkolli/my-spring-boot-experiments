@@ -1,14 +1,17 @@
 package com.example.custom.sequence.config;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-@Configuration
-@RequiredArgsConstructor
+@Configuration(proxyBeanMethods = false)
 public class WebMvcConfig implements WebMvcConfigurer {
+
     private final ApplicationProperties properties;
+
+    public WebMvcConfig(ApplicationProperties properties) {
+        this.properties = properties;
+    }
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {

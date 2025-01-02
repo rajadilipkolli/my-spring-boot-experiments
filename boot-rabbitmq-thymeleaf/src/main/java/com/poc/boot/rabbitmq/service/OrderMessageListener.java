@@ -5,16 +5,17 @@ import static com.poc.boot.rabbitmq.config.RabbitMQConfig.ORDERS_QUEUE;
 
 import com.poc.boot.rabbitmq.model.Order;
 import com.poc.boot.rabbitmq.repository.TrackingStateRepository;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.Message;
 
-@Slf4j
 @Configuration(proxyBeanMethods = false)
 public class OrderMessageListener {
 
+    private static final Logger log = LoggerFactory.getLogger(OrderMessageListener.class);
     private final TrackingStateRepository trackingStateRepository;
 
     public OrderMessageListener(TrackingStateRepository trackingStateRepository) {

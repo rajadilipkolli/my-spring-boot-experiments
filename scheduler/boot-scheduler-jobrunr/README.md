@@ -1,4 +1,6 @@
-# boot-scheduler-jobrunr
+# Boot Scheduler with JobRunr
+
+Implements asynchronous background job scheduling using [JobRunr](https://www.jobrunr.io/en/) in a Spring Boot environment.
 
 JobRunr is a job scheduling and execution platform that enables businesses to automate and manage background tasks and processes. It allows users to schedule jobs to run at a specific time, on a recurring schedule, or in response to a trigger event, and provides tools for monitoring and managing the execution of these jobs. JobRunr can be integrated with a variety of systems and technologies, including databases, message brokers, and cloud services
 

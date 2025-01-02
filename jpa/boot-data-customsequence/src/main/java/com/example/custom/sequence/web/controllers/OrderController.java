@@ -1,11 +1,12 @@
 package com.example.custom.sequence.web.controllers;
 
-import com.example.custom.sequence.entities.Order;
+import com.example.custom.sequence.model.request.OrderRequest;
+import com.example.custom.sequence.model.request.ValidationGroups;
 import com.example.custom.sequence.model.response.OrderResponse;
 import com.example.custom.sequence.model.response.PagedResult;
 import com.example.custom.sequence.services.OrderService;
 import com.example.custom.sequence.utils.AppConstants;
-import lombok.extern.slf4j.Slf4j;
+import jakarta.validation.groups.Default;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -17,12 +18,10 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/orders")
-@Slf4j
 public class OrderController {
 
     private final OrderService orderService;
@@ -53,21 +52,23 @@ public class OrderController {
     }
 
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public OrderResponse createOrder(@RequestBody @Validated Order order) {
-        return orderService.saveOrder(order);
+    public ResponseEntity<OrderResponse> createOrder(
+            @RequestBody @Validated(value = {Default.class, ValidationGroups.GroupCheck.class})
+                    OrderRequest orderRequest) {
+        return orderService
+                .saveOrder(orderRequest)
+                .map(order -> ResponseEntity.status(HttpStatus.CREATED).body(order))
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<OrderResponse> updateOrder(
-            @PathVariable String id, @RequestBody Order order) {
+            @PathVariable String id,
+            @RequestBody @Validated(value = {Default.class, ValidationGroups.GroupCheck.class})
+                    OrderRequest orderRequest) {
         return orderService
-                .findOrderById(id)
-                .map(
-                        orderObj -> {
-                            order.setId(id);
-                            return ResponseEntity.ok(orderService.saveOrder(order));
-                        })
+                .updateOrderById(id, orderRequest)
+                .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 

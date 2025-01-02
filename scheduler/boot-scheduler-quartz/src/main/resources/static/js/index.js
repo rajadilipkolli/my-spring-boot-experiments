@@ -6,10 +6,11 @@ $(function() {
         $.ajax({
             url: "/api/runJob?t=" + new Date().getTime(),
             type: "POST",
-            data: {
-                "jobName": $("#name_"+jobId).text(),
-                "jobGroup": $("#group_"+jobId).text()
-            },
+            contentType: "application/json",
+            data: JSON.stringify({
+                jobName: $("#name_"+jobId).text(),
+                jobGroup: $("#group_"+jobId).text()
+            }),
             success: function(res) {
                 if (res.valid) {
                 	alert("run success!");  
@@ -26,10 +27,11 @@ $(function() {
         $.ajax({
             url: "/api/pauseJob?t=" + new Date().getTime(),
             type: "POST",
-            data: {
-                "jobName": $("#name_"+jobId).text(),
-                "jobGroup": $("#group_"+jobId).text()
-            },
+            contentType: "application/json",
+            data: JSON.stringify({
+                jobName: $("#name_"+jobId).text(),
+                jobGroup: $("#group_"+jobId).text()
+            }),
             success: function(res) {
                 if (res.valid) {
                 	alert("pause success!");
@@ -43,14 +45,15 @@ $(function() {
     
     //resume job
     $(".btnResume").click(function() {
-    	var jobId = $(this).parent().data("id");
+        const jobId = $(this).parent().data("id");
         $.ajax({
             url: "/api/resumeJob?t=" + new Date().getTime(),
             type: "POST",
-            data: {
-                "jobName": $("#name_"+jobId).text(),
-                "jobGroup": $("#group_"+jobId).text()
-            },
+            contentType: "application/json",
+            data: JSON.stringify({
+                jobName: $("#name_"+jobId).text(),
+                jobGroup: $("#group_"+jobId).text()
+            }),
             success: function(res) {
                 if (res.valid) {
                 	alert("resume success!");
@@ -68,10 +71,11 @@ $(function() {
         $.ajax({
             url: "/api/deleteJob?t=" + new Date().getTime(),
             type: "DELETE",
-            data: {
-                "jobName": $("#name_"+jobId).text(),
-                "jobGroup": $("#group_"+jobId).text()
-            },
+            contentType: "application/json",
+            data: JSON.stringify({
+                jobName: $("#name_"+jobId).text(),
+                jobGroup: $("#group_"+jobId).text()
+            }),
             success: function(res) {
                 if (res.valid) {
                 	alert("delete success!");
@@ -107,7 +111,15 @@ $(function() {
 	    	$.ajax({
 	            url: "/api/saveOrUpdate?t=" + new Date().getTime(),
 	            type: "POST",
-	            data:  $('#mainForm').serialize(),
+                contentType: "application/json",
+                data: JSON.stringify({
+                    jobId: $("#jobId").val(),
+                    jobName: $("#edit_name").val(),
+                    jobGroup: $("#edit_group").val(),
+                    cronExpression: $("#edit_cron").val(),
+                    jobStatus: $("#edit_status").val(),
+                    desc: $("#edit_desc").val()
+                }),
 	            success: function(res) {
 	            	if (res.valid) {
 	                	alert("success!");
@@ -138,6 +150,5 @@ $(function() {
     			
     			$("#myModal").modal("show");
     });
-    
-    
+        
 });

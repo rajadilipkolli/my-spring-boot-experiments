@@ -7,6 +7,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.testcontainers.shaded.org.awaitility.Awaitility.await;
 
+import com.poc.boot.rabbitmq.common.ContainerConfiguration;
 import com.poc.boot.rabbitmq.model.Order;
 import com.poc.boot.rabbitmq.repository.TrackingStateRepository;
 import java.util.concurrent.TimeUnit;
@@ -20,7 +21,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 @SpringBootTest(
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-        classes = TestRabbitMQApplication.class)
+        classes = ContainerConfiguration.class)
 @AutoConfigureMockMvc
 class RabbitMQIntegrationTest {
 

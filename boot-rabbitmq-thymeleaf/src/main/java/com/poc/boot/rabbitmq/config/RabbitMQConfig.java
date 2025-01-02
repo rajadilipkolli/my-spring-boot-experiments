@@ -1,6 +1,9 @@
 package com.poc.boot.rabbitmq.config;
 
-import lombok.extern.slf4j.Slf4j;
+import com.poc.boot.rabbitmq.entities.TrackingState;
+import com.poc.boot.rabbitmq.repository.TrackingStateRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
 import org.springframework.amqp.core.DirectExchange;
@@ -8,39 +11,32 @@ import org.springframework.amqp.core.ExchangeBuilder;
 import org.springframework.amqp.core.FanoutExchange;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.core.QueueBuilder;
-import org.springframework.amqp.rabbit.annotation.EnableRabbit;
-import org.springframework.amqp.rabbit.annotation.RabbitListenerConfigurer;
-import org.springframework.amqp.rabbit.connection.ConnectionFactory;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.amqp.rabbit.listener.RabbitListenerEndpointRegistrar;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
+import org.springframework.amqp.support.converter.MessageConverter;
+import org.springframework.boot.autoconfigure.amqp.RabbitTemplateCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.messaging.handler.annotation.support.DefaultMessageHandlerMethodFactory;
 import org.springframework.messaging.handler.annotation.support.MessageHandlerMethodFactory;
-import org.springframework.retry.backoff.ExponentialBackOffPolicy;
-import org.springframework.retry.support.RetryTemplate;
+import org.springframework.util.Assert;
 
-@EnableRabbit
-@Configuration
-@Slf4j
-public class RabbitMQConfig implements RabbitListenerConfigurer {
+@Configuration(proxyBeanMethods = false)
+public class RabbitMQConfig {
 
     public static final String DLX_ORDERS_EXCHANGE = "DLX.ORDERS.EXCHANGE";
-
     public static final String DLQ_ORDERS_QUEUE = "DLQ.ORDERS.QUEUE";
 
     public static final String ORDERS_QUEUE = "ORDERS.QUEUE";
-
     private static final String ORDERS_EXCHANGE = "ORDERS.EXCHANGE";
-
     private static final String ROUTING_KEY_ORDERS_QUEUE = "ROUTING_KEY_ORDERS_QUEUE";
 
-    private final RabbitTemplateConfirmCallback rabbitTemplateConfirmCallback;
+    private static final Logger log = LoggerFactory.getLogger(RabbitMQConfig.class);
 
-    public RabbitMQConfig(RabbitTemplateConfirmCallback rabbitTemplateConfirmCallback) {
-        this.rabbitTemplateConfirmCallback = rabbitTemplateConfirmCallback;
+    private final TrackingStateRepository trackingStateRepository;
+
+    public RabbitMQConfig(TrackingStateRepository trackingStateRepository) {
+        this.trackingStateRepository = trackingStateRepository;
     }
 
     @Bean
@@ -57,10 +53,8 @@ public class RabbitMQConfig implements RabbitListenerConfigurer {
 
     /* Binding between Exchange and Queue using routing key */
     @Bean
-    Binding bindingMessages() {
-        return BindingBuilder.bind(ordersQueue())
-                .to(ordersExchange())
-                .with(ROUTING_KEY_ORDERS_QUEUE);
+    Binding bindingMessages(DirectExchange ordersExchange, Queue ordersQueue) {
+        return BindingBuilder.bind(ordersQueue).to(ordersExchange).with(ROUTING_KEY_ORDERS_QUEUE);
     }
 
     @Bean
@@ -83,30 +77,45 @@ public class RabbitMQConfig implements RabbitListenerConfigurer {
 
     /* Binding between Exchange and Queue for Dead Letter */
     @Bean
-    Binding deadLetterBinding() {
-        return BindingBuilder.bind(deadLetterQueue()).to(deadLetterExchange());
-    }
-
-    /* Bean for rabbitTemplate */
-    @Bean
-    RabbitTemplate templateWithConfirmsEnabled(
-            final ConnectionFactory connectionFactory,
-            final Jackson2JsonMessageConverter producerJackson2MessageConverter) {
-        final RabbitTemplate templateWithConfirmsEnabled = new RabbitTemplate(connectionFactory);
-        RetryTemplate retryTemplate = new RetryTemplate();
-        ExponentialBackOffPolicy backOffPolicy = new ExponentialBackOffPolicy();
-        backOffPolicy.setInitialInterval(500);
-        backOffPolicy.setMultiplier(10.0);
-        backOffPolicy.setMaxInterval(10_000);
-        retryTemplate.setBackOffPolicy(backOffPolicy);
-        templateWithConfirmsEnabled.setRetryTemplate(retryTemplate);
-        templateWithConfirmsEnabled.setMessageConverter(producerJackson2MessageConverter);
-        templateWithConfirmsEnabled.setConfirmCallback(rabbitTemplateConfirmCallback);
-        return templateWithConfirmsEnabled;
+    Binding deadLetterBinding(Queue deadLetterQueue, FanoutExchange deadLetterExchange) {
+        return BindingBuilder.bind(deadLetterQueue).to(deadLetterExchange);
     }
 
     @Bean
-    Jackson2JsonMessageConverter producerJackson2MessageConverter() {
+    RabbitTemplateCustomizer rabbitTemplateCustomizer() {
+        return rabbitTemplate -> {
+            rabbitTemplate.setConfirmCallback(
+                    (correlationData, ack, cause) -> {
+                        Assert.notNull(correlationData, () -> "correlationData can't be null");
+                        log.info(
+                                "correlation id : {} , acknowledgement : {}, cause : {}",
+                                correlationData.getId(),
+                                ack,
+                                cause);
+                        log.debug(
+                                "persisted correlationId in db : {}",
+                                trackingStateRepository.save(
+                                        new TrackingState()
+                                                .setCorrelationId(correlationData.getId())
+                                                .setAck(ack)
+                                                .setCause(cause)
+                                                .setStatus("processed")));
+                    });
+            // This block ensures that returned, un-routable messages are logged.
+            rabbitTemplate.setReturnsCallback(
+                    returnedMessage ->
+                            log.info(
+                                    "Returned: {}\nreplyCode: {}\nreplyText: {}\nexchange/rk: {}/{}",
+                                    returnedMessage.getMessage().toString(),
+                                    returnedMessage.getReplyCode(),
+                                    returnedMessage.getReplyText(),
+                                    returnedMessage.getExchange(),
+                                    returnedMessage.getRoutingKey()));
+        };
+    }
+
+    @Bean
+    MessageConverter producerJackson2MessageConverter() {
         return new Jackson2JsonMessageConverter();
     }
 
@@ -116,15 +125,11 @@ public class RabbitMQConfig implements RabbitListenerConfigurer {
     }
 
     @Bean
-    MessageHandlerMethodFactory messageHandlerMethodFactory() {
+    MessageHandlerMethodFactory messageHandlerMethodFactory(
+            MappingJackson2MessageConverter consumerJackson2MessageConverter) {
         DefaultMessageHandlerMethodFactory messageHandlerMethodFactory =
                 new DefaultMessageHandlerMethodFactory();
-        messageHandlerMethodFactory.setMessageConverter(consumerJackson2MessageConverter());
+        messageHandlerMethodFactory.setMessageConverter(consumerJackson2MessageConverter);
         return messageHandlerMethodFactory;
-    }
-
-    @Override
-    public void configureRabbitListeners(RabbitListenerEndpointRegistrar registrar) {
-        registrar.setMessageHandlerMethodFactory(messageHandlerMethodFactory());
     }
 }

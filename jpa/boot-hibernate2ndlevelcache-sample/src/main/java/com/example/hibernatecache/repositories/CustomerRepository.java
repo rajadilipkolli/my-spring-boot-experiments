@@ -4,7 +4,6 @@ import static org.hibernate.jpa.AvailableHints.HINT_CACHEABLE;
 
 import com.example.hibernatecache.entities.Customer;
 import io.hypersistence.utils.spring.repository.BaseJpaRepository;
-import io.hypersistence.utils.spring.repository.HibernateRepository;
 import jakarta.persistence.QueryHint;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -15,11 +14,8 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.transaction.annotation.Transactional;
 
 public interface CustomerRepository
-        extends BaseJpaRepository<Customer, Long>,
-                HibernateRepository<Customer>,
-                PagingAndSortingRepository<Customer, Long> {
+        extends BaseJpaRepository<Customer, Long>, PagingAndSortingRepository<Customer, Long> {
 
-    @Transactional(readOnly = true)
     @QueryHints(@QueryHint(name = HINT_CACHEABLE, value = "true"))
     @EntityGraph(attributePaths = {"orders"})
     Optional<Customer> findByFirstName(String firstName);

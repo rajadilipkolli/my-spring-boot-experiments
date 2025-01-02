@@ -474,6 +474,7 @@ class AnimalControllerIT extends AbstractIntegrationTest {
                                         {
                                           "searchCriteriaList": [
                                               {
+                                                "type": "criteria",
                                                 "queryOperator": "STARTS_WITH",
                                                 "field": "name",
                                                 "values": ["P"]
@@ -577,6 +578,57 @@ class AnimalControllerIT extends AbstractIntegrationTest {
                                         """))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content.size()", is(1))) // "Parrot"
+                .andExpect(jsonPath("$.content[0].name", is("Parrot")))
+                .andExpect(jsonPath("$.last", is(true)));
+    }
+
+    @Test
+    void shouldReturnResultForAndOperatorCriteriaGroup() throws Exception {
+        // Test for AND operator
+        this.mockMvc
+                .perform(
+                        post("/api/animals/search")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(
+                                        """
+
+                                                {
+                                          "searchCriteriaList": [
+                                            {
+                                              "type": "group",
+                                              "operator": "AND",
+                                              "criteriaList": [
+                                                {
+                                                  "type": "criteria",
+                                                  "queryOperator": "EQ",
+                                                  "field": "type",
+                                                  "values": ["Bird"]
+                                                },
+                                                {
+                                                  "type": "group",
+                                                  "operator": "OR",
+                                                  "criteriaList": [
+                                                    {
+                                                      "type": "criteria",
+                                                      "queryOperator": "EQ",
+                                                      "field": "habitat",
+                                                      "values": ["Rainforest"]
+                                                    },
+                                                    {
+                                                      "type": "criteria",
+                                                      "queryOperator": "EQ",
+                                                      "field": "habitat",
+                                                      "values": ["Mountains"]
+                                                    }
+                                                  ]
+                                                }
+                                              ]
+                                            }
+                                          ]
+                                        }
+                                        """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content.size()", is(2))) // "Parrot", "Eagle"
                 .andExpect(jsonPath("$.content[0].name", is("Parrot")))
                 .andExpect(jsonPath("$.last", is(true)));
     }

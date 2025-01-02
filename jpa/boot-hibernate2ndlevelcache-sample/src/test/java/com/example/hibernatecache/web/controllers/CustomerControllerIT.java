@@ -1,7 +1,5 @@
 package com.example.hibernatecache.web.controllers;
 
-import static io.hypersistence.utils.jdbc.validator.SQLStatementCountValidator.assertInsertCount;
-import static io.hypersistence.utils.jdbc.validator.SQLStatementCountValidator.assertSelectCount;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.Matchers.empty;
@@ -69,6 +67,8 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                 .setEmail("email3@junit.com")
                 .setPhone("9876543213"));
         customerList = customerRepository.persistAllAndFlush(customerList);
+
+        SQLStatementCountValidator.reset();
     }
 
     @Test
@@ -85,6 +85,9 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.isLast", is(true)))
                 .andExpect(jsonPath("$.hasNext", is(false)))
                 .andExpect(jsonPath("$.hasPrevious", is(false)));
+
+        SQLStatementCountValidator.assertSelectCount(5);
+        SQLStatementCountValidator.assertTotalCount(5);
     }
 
     @Test
@@ -92,7 +95,6 @@ class CustomerControllerIT extends AbstractIntegrationTest {
         Customer customer = customerList.getFirst();
         Long customerId = customer.getId();
 
-        SQLStatementCountValidator.reset();
         this.mockMvc
                 .perform(get("/api/customers/{id}", customerId))
                 .andExpect(status().isOk())
@@ -104,9 +106,10 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.phone", is(customer.getPhone())))
                 .andExpect(jsonPath("$.orders.size()", is(1)));
 
-        assertInsertCount(0);
+        SQLStatementCountValidator.assertInsertCount(0);
         // For selecting customer and order
-        assertSelectCount(2);
+        SQLStatementCountValidator.assertSelectCount(2);
+        SQLStatementCountValidator.assertTotalCount(2);
     }
 
     @Test
@@ -114,7 +117,6 @@ class CustomerControllerIT extends AbstractIntegrationTest {
         Customer customer = customerList.getFirst();
         String customerFirstName = customer.getFirstName();
 
-        SQLStatementCountValidator.reset();
         this.mockMvc
                 .perform(get("/api/customers/search?firstName=" + customerFirstName))
                 .andExpect(status().isOk())
@@ -126,9 +128,10 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.phone", is(customer.getPhone())))
                 .andExpect(jsonPath("$.orders.size()", is(1)));
 
-        assertInsertCount(0);
+        SQLStatementCountValidator.assertInsertCount(0);
         // For selecting customer and then orderItems
-        assertSelectCount(2);
+        SQLStatementCountValidator.assertSelectCount(2);
+        SQLStatementCountValidator.assertTotalCount(2);
     }
 
     @Test
@@ -148,6 +151,9 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.email", is(customerRequest.email())))
                 .andExpect(jsonPath("$.phone", is(customerRequest.phone())))
                 .andExpect(jsonPath("$.orders", empty()));
+
+        SQLStatementCountValidator.assertInsertCount(1);
+        SQLStatementCountValidator.assertTotalCount(1);
     }
 
     @Test
@@ -191,6 +197,10 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.email", is(customerRequest.email())))
                 .andExpect(jsonPath("$.phone", is(customerRequest.phone())))
                 .andExpect(jsonPath("$.orders.size()", is(1)));
+
+        SQLStatementCountValidator.assertUpdateCount(1);
+        SQLStatementCountValidator.assertSelectCount(2);
+        SQLStatementCountValidator.assertTotalCount(3);
     }
 
     @Test
@@ -207,5 +217,10 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.email", is(customer.getEmail())))
                 .andExpect(jsonPath("$.phone", is(customer.getPhone())))
                 .andExpect(jsonPath("$.orders.size()", is(1)));
+
+        // Customer, order and OrderItem
+        SQLStatementCountValidator.assertDeleteCount(3);
+        SQLStatementCountValidator.assertSelectCount(2);
+        SQLStatementCountValidator.assertTotalCount(5);
     }
 }

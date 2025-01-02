@@ -9,9 +9,9 @@
         <relativePath /> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.example.demo</groupId>
-    <artifactId>boot-jpa-read-replica-postgresql</artifactId>
+    <artifactId>boot-read-replica-postgresql</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>boot-jpa-read-replica-postgresql</name>
+    <name>boot-read-replica-postgresql</name>
     <description>Demo project for Spring Boot Read Replica</description>
 
     <properties>
@@ -109,7 +109,7 @@
                 <configuration>
                     <java>
                         <googleJavaFormat>
-                            <version>1.24.0</version>
+                            <version>1.25.2</version>
                             <style>AOSP</style>
                         </googleJavaFormat>
                     </java>

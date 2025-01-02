@@ -13,7 +13,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Service
-@Transactional
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class ReactiveCommentsService {
 
@@ -34,6 +34,7 @@ public class ReactiveCommentsService {
         return reactiveCommentsRepository.findById(id);
     }
 
+    @Transactional
     public Mono<ReactiveComments> saveReactiveCommentByPostId(
             ReactiveCommentRequest reactiveCommentRequest) {
         ReactiveComments reactiveComments =
@@ -41,6 +42,7 @@ public class ReactiveCommentsService {
         return reactiveCommentsRepository.save(reactiveComments);
     }
 
+    @Transactional
     public Mono<ReactiveComments> updateReactivePostComment(
             ReactiveCommentRequest reactiveCommentRequest, ReactiveComments reactiveComments) {
         reactivePostCommentMapper.updateReactiveCommentRequestFromReactiveComments(
@@ -48,6 +50,7 @@ public class ReactiveCommentsService {
         return reactiveCommentsRepository.save(reactiveComments);
     }
 
+    @Transactional
     public Mono<Void> deleteReactiveCommentById(UUID id) {
         return reactiveCommentsRepository.deleteById(id);
     }

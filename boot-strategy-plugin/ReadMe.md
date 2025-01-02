@@ -2,13 +2,23 @@
 
 The strategy design pattern is a behavioral design pattern that allows an object to change its behavior based on different strategies or algorithms. This pattern separates the actual behavior or algorithm from the object that uses it, so that the same object can use different strategies depending on the situation. This allows for more flexibility and reuse of code, as the object can easily switch between strategies without having to change its internal implementation.
 
+### Format code
+
+```shell
+./mvnw spotless:apply
+```
+
 ### Run tests
-`$ ./gradlew clean build`
+
+```shell
+./mvnw clean verify
+```
 
 ### Run locally
-```
-$ docker-compose -f docker-compose.yml up -d
-$ ./gradlew bootRun -Plocal
+
+```shell
+docker-compose -f docker/docker-compose.yml up -d
+./mvnw spring-boot:run -Dspring-boot.run.profiles=local
 ```
 
 ### Useful Links

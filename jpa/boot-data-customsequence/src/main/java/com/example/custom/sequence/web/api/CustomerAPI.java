@@ -1,12 +1,14 @@
 package com.example.custom.sequence.web.api;
 
 import com.example.custom.sequence.entities.Customer;
+import com.example.custom.sequence.model.request.CustomerRequest;
 import com.example.custom.sequence.model.response.CustomerResponse;
 import com.example.custom.sequence.model.response.PagedResult;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -86,6 +88,28 @@ public interface CustomerAPI {
     @Operation(
             operationId = "createCustomer",
             tags = {"customer-controller"},
+            requestBody =
+                    @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                            required = true,
+                            content =
+                                    @Content(
+                                            schema =
+                                                    @Schema(implementation = CustomerRequest.class),
+                                            examples = {
+                                                @ExampleObject(
+                                                        value =
+                                                                """
+                                            {
+                                              "text": "sample customer",
+                                              "orders": [
+                                                {
+                                                  // order fields
+                                                  "text": "sample order"
+                                                }
+                                              ]
+                                            }
+                                            """)
+                                            })),
             responses = {
                 @ApiResponse(
                         responseCode = "201",
@@ -104,5 +128,5 @@ public interface CustomerAPI {
                                     schema = @Schema(implementation = ProblemDetail.class))
                         })
             })
-    CustomerResponse createCustomer(@Valid @RequestBody(required = true) Customer customer);
+    CustomerResponse createCustomer(@Valid @RequestBody(required = true) CustomerRequest customer);
 }

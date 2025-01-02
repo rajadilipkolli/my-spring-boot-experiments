@@ -3,7 +3,6 @@ package com.poc.boot.rabbitmq.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.poc.boot.rabbitmq.model.Order;
 import com.poc.boot.rabbitmq.service.OrderMessageSender;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -12,14 +11,16 @@ import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
-@RequiredArgsConstructor
-public class MessageController {
+class MessageController {
 
     private final OrderMessageSender orderMessageSender;
 
+    MessageController(OrderMessageSender orderMessageSender) {
+        this.orderMessageSender = orderMessageSender;
+    }
+
     @PostMapping("/sendMsg")
-    public String handleMessage(
-            @ModelAttribute Order order, RedirectAttributes redirectAttributes) {
+    String handleMessage(@ModelAttribute Order order, RedirectAttributes redirectAttributes) {
         try {
             this.orderMessageSender.sendOrder(order);
             redirectAttributes.addFlashAttribute("message", "Order message sent successfully");

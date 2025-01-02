@@ -60,11 +60,6 @@
             <artifactId>spring-boot-configuration-processor</artifactId>
             <optional>true</optional>
         </dependency>
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <optional>true</optional>
-        </dependency>
 
         <!-- database related dependencies -->
         <dependency>
@@ -224,7 +219,7 @@
                 <configuration>
                     <java>
                         <googleJavaFormat>
-                            <version>1.24.0</version>
+                            <version>1.25.2</version>
                             <style>AOSP</style>
                         </googleJavaFormat>
                     </java>

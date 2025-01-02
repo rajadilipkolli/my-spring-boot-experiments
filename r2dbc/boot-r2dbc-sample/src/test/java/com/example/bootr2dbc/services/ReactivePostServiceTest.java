@@ -109,8 +109,9 @@ class ReactivePostServiceTest {
         // given
         given(reactivePostRepository.deleteById(1L)).willReturn(Mono.empty());
         // when
-        reactivePostService.deleteReactivePostById(1L);
+        Mono<Void> voidMono = reactivePostService.deleteReactivePostById(1L);
         // then
+        StepVerifier.create(voidMono).expectComplete().verify();
         verify(reactivePostRepository, times(1)).deleteById(1L);
     }
 
