@@ -4,8 +4,8 @@ services:
   postgresqldb:
     image: postgres:17.2-alpine
     environment:
-      - POSTGRES_USER=local
-      - POSTGRES_PASSWORD=local
-      - POSTGRES_DB=rest
+      - POSTGRES_USER=appuser
+      - POSTGRES_PASSWORD=secret
+      - POSTGRES_DB=appdb
     ports:
       - "5432:5432"

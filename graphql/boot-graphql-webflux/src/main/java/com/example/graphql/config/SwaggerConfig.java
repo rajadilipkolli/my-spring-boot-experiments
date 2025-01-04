@@ -5,8 +5,6 @@ import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.info.Info;
 import io.swagger.v3.oas.annotations.info.License;
 import io.swagger.v3.oas.annotations.servers.Server;
-import org.springdoc.core.models.GroupedOpenApi;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration(proxyBeanMethods = false)
@@ -23,13 +21,4 @@ import org.springframework.context.annotation.Configuration;
                         description = "SpringGraphQL Wiki Documentation",
                         url =
                                 "https://rajadilipkolli.gitbook.io/my-spring-boot-experiments/graphql/boot-graphql-webflux"))
-public class SwaggerConfig {
-
-    @Bean
-    GroupedOpenApi publicApi() {
-        return GroupedOpenApi.builder()
-                .group("spring-boot")
-                .packagesToScan("com.example.graphql.controller")
-                .build();
-    }
-}
+class SwaggerConfig {}

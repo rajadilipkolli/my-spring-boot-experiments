@@ -12,6 +12,173 @@
             "mainClass": "com.example.envers.JpaEnversApplication",
             "projectName": "boot-data-envers",
             "args": "--spring.profiles.active=local",
+            "envFile": "${workspaceFolder}/.env",
+            "vmArgs": " -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=45965 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dspring.jmx.enabled=true -Djava.rmi.server.hostname=localhost -Dspring.application.admin.enabled=true -Dspring.boot.project.name=boot-data-envers"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-CustomSeqApplication<boot-data-customsequence>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.example.custom.sequence.CustomSeqApplication",
+            "projectName": "boot-data-customsequence",
+            "args": "--spring.profiles.active=local",
+            "envFile": "${workspaceFolder}/.env",
+            "vmArgs": " -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=45339 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dspring.jmx.enabled=true -Djava.rmi.server.hostname=localhost -Dspring.application.admin.enabled=true -Dspring.boot.project.name=boot-data-customsequence"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-BlazePersistenceApplication<boot-data-keyset-pagination-blaze>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.example.keysetpagination.BlazePersistenceApplication",
+            "projectName": "boot-data-keyset-pagination-blaze",
+            "args": "--spring.profiles.active=local",
+            "envFile": "${workspaceFolder}/.env",
+            "vmArgs": " -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=46181 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dspring.jmx.enabled=true -Djava.rmi.server.hostname=localhost -Dspring.application.admin.enabled=true -Dspring.boot.project.name=boot-data-keyset-pagination-blaze"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-WindowPaginationApplication<boot-data-window-pagination>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.example.keysetpagination.WindowPaginationApplication",
+            "projectName": "boot-data-window-pagination",
+            "args": "--spring.profiles.active=local",
+            "envFile": "${workspaceFolder}/.env",
+            "vmArgs": " -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=44161 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dspring.jmx.enabled=true -Djava.rmi.server.hostname=localhost -Dspring.application.admin.enabled=true -Dspring.boot.project.name=boot-data-window-pagination"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-TestCustomSeqApplication<boot-data-customsequence>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.example.custom.sequence.TestCustomSeqApplication",
+            "projectName": "boot-data-customsequence",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-TestJpaEnversApplication<boot-data-envers>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.example.envers.TestJpaEnversApplication",
+            "projectName": "boot-data-envers",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-TestBlazePersistenceApplication<boot-data-keyset-pagination-blaze>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.example.keysetpagination.TestBlazePersistenceApplication",
+            "projectName": "boot-data-keyset-pagination-blaze",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-TestGraphQlWebMvcApplication<boot-graphql-webmvc>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.example.graphql.TestGraphQlWebMvcApplication",
+            "projectName": "boot-graphql-webmvc",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-TestGraphQLWebFluxApplication<boot-graphql-webflux>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.example.graphql.TestGraphQLWebFluxApplication",
+            "projectName": "boot-graphql-webflux",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-TestGraphQLQueryDSLApplication<boot-graphql-querydsl>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.example.graphql.querydsl.TestGraphQLQueryDSLApplication",
+            "projectName": "boot-graphql-querydsl",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-TestBatchApplication<batch-boot-jpa-sample>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.example.bootbatchjpa.TestBatchApplication",
+            "projectName": "batch-boot-jpa-sample",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-TestArchUnitApplication<boot-api-archunit-sample>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.example.archunit.TestArchUnitApplication",
+            "projectName": "boot-api-archunit-sample",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-TestChaosMonkeyApplication<boot-chaos-monkey>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.example.choasmonkey.TestChaosMonkeyApplication",
+            "projectName": "boot-chaos-monkey",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-ChaosMonkeyApplication<boot-chaos-monkey>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.example.choasmonkey.ChaosMonkeyApplication",
+            "projectName": "boot-chaos-monkey",
+            "args": "--spring.profiles.active=local",
+            "envFile": "${workspaceFolder}/.env",
+            "vmArgs": " -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=44649 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dspring.jmx.enabled=true -Djava.rmi.server.hostname=localhost -Dspring.application.admin.enabled=true -Dspring.boot.project.name=boot-chaos-monkey"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-BatchApplication<batch-boot-jpa-sample>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.example.bootbatchjpa.BatchApplication",
+            "projectName": "batch-boot-jpa-sample",
+            "args": "--spring.profiles.active=local",
+            "envFile": "${workspaceFolder}/.env",
+            "vmArgs": " -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=40299 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dspring.jmx.enabled=true -Djava.rmi.server.hostname=localhost -Dspring.application.admin.enabled=true -Dspring.boot.project.name=batch-boot-jpa-sample"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-GraphQlWebMvcApplication<boot-graphql-webmvc>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.example.graphql.GraphQlWebMvcApplication",
+            "projectName": "boot-graphql-webmvc",
+            "args": "--spring.profiles.active=local",
+            "envFile": "${workspaceFolder}/.env",
+            "vmArgs": " -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=42699 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dspring.jmx.enabled=true -Djava.rmi.server.hostname=localhost -Dspring.application.admin.enabled=true -Dspring.boot.project.name=boot-graphql-webmvc"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-GraphQLWebFluxApplication<boot-graphql-webflux>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.example.graphql.GraphQLWebFluxApplication",
+            "projectName": "boot-graphql-webflux",
+            "args": "--spring.profiles.active=local",
             "envFile": "${workspaceFolder}/.env"
         }
     ]
