@@ -3,13 +3,13 @@
     xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
-         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+         https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.26.xsd">
          
     <changeSet author="app" id="createTable-posts-comments">
         <createSequence
             sequenceName="post_comments_seq"
             incrementBy="50"
-            startValue="1"
+            startValue="501"
         />
         <createTable tableName="post_comments">
             <column name="id" type="bigint" defaultValueSequenceNext="post_comments_seq">
