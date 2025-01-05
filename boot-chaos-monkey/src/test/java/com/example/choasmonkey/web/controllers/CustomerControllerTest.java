@@ -27,9 +27,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(controllers = CustomerController.class)
@@ -38,8 +38,8 @@ class CustomerControllerTest {
 
     @Autowired private MockMvc mockMvc;
 
-    @MockBean private CustomerService customerService;
-    @MockBean private ObservationRegistry observationRegistry;
+    @MockitoBean private CustomerService customerService;
+    @MockitoBean private ObservationRegistry observationRegistry;
 
     @Autowired private ObjectMapper objectMapper;
 
