@@ -527,7 +527,8 @@ class AnimalControllerIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(post("/api/animals/search")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
+                        .content(
+                                """
                                 {
                                     "searchCriteriaList": [
                                         {
@@ -540,8 +541,8 @@ class AnimalControllerIT extends AbstractIntegrationTest {
                                         }
                                     ]
                                 }
-                                """.formatted(
-                        minId, maxId)))
+                                """
+                                        .formatted(minId, maxId)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content.size()", is(5))) // Animals with IDs between minId and maxId
                 .andExpect(jsonPath("$.last", is(true)));

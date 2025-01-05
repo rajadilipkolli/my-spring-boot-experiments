@@ -87,10 +87,13 @@ public class RestaurantController {
                         restaurant ->
                                 ResponseEntity.created(
                                                 URI.create(
-                                                        "/api/restaurant/name/%s".formatted(
-                                                                URLEncoder.encode(
-                                                                        restaurantRequest.name(),
-                                                                        StandardCharsets.UTF_8))))
+                                                        "/api/restaurant/name/%s"
+                                                                .formatted(
+                                                                        URLEncoder.encode(
+                                                                                restaurantRequest
+                                                                                        .name(),
+                                                                                StandardCharsets
+                                                                                        .UTF_8))))
                                         .body(
                                                 new GenericMessage(
                                                         "restaurant with name %s created"

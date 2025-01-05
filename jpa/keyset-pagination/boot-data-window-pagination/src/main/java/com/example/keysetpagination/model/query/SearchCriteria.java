@@ -177,7 +177,7 @@ public class SearchCriteria<T> implements ISearchCriteria<T> {
                 .map(predicateFunction)
                 .reduce(combiner::apply)
                 .orElseThrow(() -> new IllegalArgumentException(
-                "No predicates could be generated from values: %s".formatted(values)));
+                        "No predicates could be generated from values: %s".formatted(values)));
     }
 
     @Override

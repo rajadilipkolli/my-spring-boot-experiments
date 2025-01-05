@@ -1,4 +1,4 @@
-name: boot-jpa-keyset-pagination-data-jpa
+name: boot-keyset-pagination-window-jpa
 
 on:
   push:
