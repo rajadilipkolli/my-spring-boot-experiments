@@ -10,21 +10,26 @@
     <property name="now" value="sysdate" dbms="oracle"/>
     <property name="now" value="getdate()" dbms="mssql"/>
     <property name="string.type" dbms="postgresql" value="text"/>
-    <property name="string.type" dbms="!postgresql" value="varchar2(255)"/>
+    <property name="string.type" dbms="!postgresql" value="varchar(255)"/>
 
     <changeSet author="appUser" id="createTable-post-details">
 
+        <comment>One-to-one relationship with posts table, storing additional details for each post</comment>
+        
         <createTable tableName="post_details">
             <column name="id" type="bigint">
-                <constraints primaryKey="true" nullable="false"/>
+                <constraints primaryKey="true" nullable="false"
+                    foreignKeyName="FK_POST_DETAILS_ON_POST"
+                    references="posts(id)" deleteCascade="true"/>
             </column>
             <column name="details_key" type="${string.type}"/>
-            <column name="created_at" type="timestamptz" defaultValueDate="${now}"/>
-            <column name="created_by" type="${string.type}"/>
+            <column name="created_at" type="timestamptz" defaultValueDate="${now}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="${string.type}">
+                <constraints nullable="false"/>
+            </column>
             <column name="modified_at" type="timestamptz"/>
         </createTable>
-        <addForeignKeyConstraint baseColumnNames="id" baseTableName="post_details"
-                                 constraintName="FK_POST_DETAILS_ON_POST" referencedColumnNames="id"
-                                 referencedTableName="posts"/>
     </changeSet>
 </databaseChangeLog>

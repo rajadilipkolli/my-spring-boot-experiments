@@ -149,7 +149,7 @@
           - jpa/boot-data-envers/pom.xml
           - jpa/boot-data-multipledatasources/pom.xml
           - jpa/boot-hibernate2ndlevelcache-sample/pom.xml
-          - jpa/boot-data-jpa-jooq-sample/pom.xml
+          - jpa/boot-jpa-jooq-sample/pom.xml
           - jpa/boot-data-jpa-locks/pom.xml
           - jpa/boot-read-replica-postgresql/pom.xml
           - jpa/keyset-pagination/blaze-persistence/pom.xml

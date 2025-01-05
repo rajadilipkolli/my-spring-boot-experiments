@@ -6,7 +6,7 @@
          https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.29.xsd">
 
     <property name="string.type" dbms="postgresql" value="text"/>
-    <property name="string.type" dbms="!postgresql" value="varchar2(255)"/>
+    <property name="string.type" dbms="!postgresql" value="varchar(255)"/>
 
     <changeSet author="appUser" id="createTable-tags">
         <createSequence

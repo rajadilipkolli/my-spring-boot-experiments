@@ -6,7 +6,7 @@
          https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.29.xsd">
 
     <property name="string.type" dbms="postgresql" value="text"/>
-    <property name="string.type" dbms="!postgresql" value="varchar2(255)"/>
+    <property name="string.type" dbms="!postgresql" value="varchar(255)"/>
 
     <changeSet author="appUser" id="createTable-post-comments">
         <createSequence
@@ -25,7 +25,9 @@
             <column name="published" type="boolean"/>
             <column name="published_at" type="timestamptz"/>
             <column name="post_id" type="BIGINT"/>
-            <column name="created_at" type="timestamptz"/>
+            <column name="created_at" type="timestamptz">
+                <constraints nullable="false"/>
+             </column>
             <column name="modified_at" type="timestamptz"/>
         </createTable>
 

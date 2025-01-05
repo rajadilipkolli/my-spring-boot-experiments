@@ -8,6 +8,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MapsId;
 import jakarta.persistence.Table;
+import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -15,6 +16,9 @@ import java.util.Objects;
 @Entity(name = "PostTag")
 @Table(name = "post_tag")
 public class PostTag implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     @EmbeddedId
     private PostTagId id;

@@ -3,21 +3,23 @@
 
 ### Format code
 
+This project uses Spotless to maintain consistent code formatting. Run the following command to format all files:
+
 ```shell
-$ ./mvnw spotless:apply
+./mvnw spotless:apply
 ```
 
 ### Run tests
 
 ```shell
-$ ./mvnw clean verify
+./mvnw clean verify
 ```
 
 ### Run locally
 
 ```shell
-$ docker-compose -f docker/docker-compose.yml up -d
-$ ./mvnw spring-boot:run -Dspring-boot.run.profiles=local
+docker-compose -f docker/docker-compose.yml up -d
+./mvnw spring-boot:run -Dspring-boot.run.profiles=local
 ```
 
 ### Using Testcontainers at Development Time

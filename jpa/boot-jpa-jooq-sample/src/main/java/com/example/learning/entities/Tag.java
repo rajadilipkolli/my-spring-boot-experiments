@@ -7,6 +7,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Objects;
 
@@ -15,6 +16,9 @@ import java.util.Objects;
         name = "tags",
         uniqueConstraints = {@UniqueConstraint(columnNames = "tag_name", name = "uc_tag_name")})
 public class Tag implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
