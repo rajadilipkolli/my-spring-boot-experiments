@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.29.xsd">
+
+    <property name="string.type" dbms="postgresql" value="text"/>
+    <property name="string.type" dbms="!postgresql" value="varchar(255)"/>
+
+    <changeSet author="appUser" id="createTable-post-comments">
+        <createSequence
+            sequenceName="post_comments_seq"
+            incrementBy="50"
+            startValue="1"
+        />
+        <createTable tableName="post_comments">
+            <column name="id" type="bigint" defaultValueSequenceNext="post_comments_seq">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="title" type="${string.type}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="content" type="${string.type}"/>
+            <column name="published" type="boolean"/>
+            <column name="published_at" type="timestamptz"/>
+            <column name="post_id" type="BIGINT"/>
+            <column name="created_at" type="timestamptz">
+                <constraints nullable="false"/>
+             </column>
+            <column name="modified_at" type="timestamptz"/>
+        </createTable>
+
+        <addForeignKeyConstraint baseColumnNames="post_id" baseTableName="post_comments"
+                                 constraintName="FK_POST_COMMENT_ON_POST" referencedColumnNames="id"
+                                 referencedTableName="posts"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"/>
+    </changeSet>
+</databaseChangeLog>

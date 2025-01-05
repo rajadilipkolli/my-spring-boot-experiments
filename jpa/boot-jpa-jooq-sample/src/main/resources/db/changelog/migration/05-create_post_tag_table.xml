@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.29.xsd">
+
+    <changeSet author="appUser" id="createTable-post-tag">
+        <createTable tableName="post_tag">
+            <column name="created_on" type="TIMESTAMPTZ">
+                <constraints nullable="false"/>
+            </column>
+            <column name="post_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_post_tag"/>
+            </column>
+            <column name="tag_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_post_tag"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint baseColumnNames="post_id" baseTableName="post_tag" constraintName="FK_POST_TAG_ON_POST"
+                                 referencedColumnNames="id" referencedTableName="posts"/>
+        <addForeignKeyConstraint baseColumnNames="tag_id" baseTableName="post_tag" constraintName="FK_POST_TAG_ON_TAG"
+                                 referencedColumnNames="id" referencedTableName="tags"/>
+    </changeSet>
+</databaseChangeLog>

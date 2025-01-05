@@ -39,6 +39,7 @@
         <module>jpa/boot-data-multipledatasources</module>
         <module>jpa/boot-hibernate2ndlevelcache-sample</module>
         <module>jpa/boot-jndi-sample</module>
+        <module>jpa/boot-jpa-jooq-sample</module>
         <module>jpa/boot-jpa-locks</module>
         <module>jpa/boot-read-replica-postgresql</module>
         <module>jpa/keyset-pagination/blaze-persistence</module>
