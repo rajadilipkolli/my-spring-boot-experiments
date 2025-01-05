@@ -124,7 +124,7 @@ public class SearchCriteria<T> implements ISearchCriteria<T> {
                         throw new IllegalArgumentException("BETWEEN operator requires exactly two values");
                     }
                     yield criteriaBuilder.between(
-                            root.get(getField()), (Comparable) typedValues.get(0), (Comparable) typedValues.get(1));
+                            root.get(getField()), (Comparable) typedValues.getFirst(), (Comparable) typedValues.get(1));
                 }
                 case IN -> root.get(getField()).in(typedValues);
                 case NOT_IN -> criteriaBuilder.not(root.get(getField()).in(typedValues));
@@ -177,7 +177,7 @@ public class SearchCriteria<T> implements ISearchCriteria<T> {
                 .map(predicateFunction)
                 .reduce(combiner::apply)
                 .orElseThrow(() -> new IllegalArgumentException(
-                        String.format("No predicates could be generated from values: %s", values)));
+                "No predicates could be generated from values: %s".formatted(values)));
     }
 
     @Override

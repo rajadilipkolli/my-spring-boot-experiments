@@ -20,7 +20,7 @@ class StrategyController {
     }
 
     @GetMapping("/fetch")
-    GenericDTO fetchData(@RequestParam("type") String type) {
+    GenericDTO fetchData(@RequestParam String type) {
         logger.info("Requested to fetch of type :{}", type);
         return this.strategyService.fetchData(type);
     }

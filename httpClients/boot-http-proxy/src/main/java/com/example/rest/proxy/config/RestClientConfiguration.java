@@ -42,8 +42,7 @@ class RestClientConfiguration {
     }
 
     @Bean
-    public HttpComponentsClientHttpRequestFactoryBuilder
-            httpComponentsClientHttpRequestFactoryBuilder() {
+    HttpComponentsClientHttpRequestFactoryBuilder httpComponentsClientHttpRequestFactoryBuilder() {
 
         SSLContext sslContext;
         try {

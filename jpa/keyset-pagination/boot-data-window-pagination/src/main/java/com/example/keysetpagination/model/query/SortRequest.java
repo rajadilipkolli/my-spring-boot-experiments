@@ -25,7 +25,7 @@ public class SortRequest {
 
     @Override
     public String toString() {
-        return String.format("SortRequest{field='%s', direction='%s'}", field, direction);
+        return "SortRequest{field='%s', direction='%s'}".formatted(field, direction);
     }
 
     @Override

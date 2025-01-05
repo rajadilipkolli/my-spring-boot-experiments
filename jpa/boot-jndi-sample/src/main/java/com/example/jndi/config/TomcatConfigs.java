@@ -33,7 +33,7 @@ public class TomcatConfigs {
     }
 
     @Bean
-    public TomcatServletWebServerFactory tomcatFactory() {
+    TomcatServletWebServerFactory tomcatFactory() {
         return new TomcatServletWebServerFactory() {
             @Override
             protected TomcatWebServer getTomcatWebServer(Tomcat tomcat) {

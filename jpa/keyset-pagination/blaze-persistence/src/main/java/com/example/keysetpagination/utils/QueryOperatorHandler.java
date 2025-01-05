@@ -77,14 +77,14 @@ public class QueryOperatorHandler {
                                             throw new IllegalArgumentException(
                                                     "BETWEEN operator requires exactly 2 values");
                                         }
-                                        if (!(rangeValues.get(0) instanceof Comparable)
+                                        if (!(rangeValues.getFirst() instanceof Comparable)
                                                 || !(rangeValues.get(1) instanceof Comparable)) {
                                             throw new IllegalArgumentException(
                                                     "Values for BETWEEN operator must be Comparable");
                                         }
                                         // Casting to Comparable<Object> for type safety
                                         Comparable<Object> lowerBound =
-                                                (Comparable<Object>) rangeValues.get(0);
+                                                (Comparable<Object>) rangeValues.getFirst();
                                         Comparable<Object> upperBound =
                                                 (Comparable<Object>) rangeValues.get(1);
                                         return cb.between(

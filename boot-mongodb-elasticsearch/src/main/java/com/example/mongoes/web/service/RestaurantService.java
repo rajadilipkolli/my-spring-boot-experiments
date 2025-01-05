@@ -101,7 +101,7 @@ public class RestaurantService {
         address.setStreet(addressDoc.get("street", String.class));
         address.setZipcode(Integer.valueOf(addressDoc.get("zipcode", String.class)));
         List<Double> coord = addressDoc.getList("coord", Double.class);
-        Point geoJsonPoint = new Point(coord.get(0), coord.get(1));
+        Point geoJsonPoint = new Point(coord.getFirst(), coord.get(1));
         address.setLocation(geoJsonPoint);
         restaurant.setAddress(address);
 

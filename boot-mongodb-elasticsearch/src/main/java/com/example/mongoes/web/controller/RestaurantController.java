@@ -87,8 +87,7 @@ public class RestaurantController {
                         restaurant ->
                                 ResponseEntity.created(
                                                 URI.create(
-                                                        String.format(
-                                                                "/api/restaurant/name/%s",
+                                                        "/api/restaurant/name/%s".formatted(
                                                                 URLEncoder.encode(
                                                                         restaurantRequest.name(),
                                                                         StandardCharsets.UTF_8))))
