@@ -161,9 +161,6 @@ public class Post extends Auditable implements Serializable {
 
     public void addTag(Tag tag) {
         PostTag postTag = new PostTag(this, tag);
-        if (null == tags) {
-            tags = new ArrayList<>();
-        }
         this.tags.add(postTag);
     }
 
