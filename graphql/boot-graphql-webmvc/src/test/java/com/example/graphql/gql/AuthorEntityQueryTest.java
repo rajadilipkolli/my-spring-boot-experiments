@@ -19,9 +19,9 @@ import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.graphql.GraphQlTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.graphql.test.tester.GraphQlTester;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @GraphQlTest(AuthorGraphQlController.class)
 @Import(GraphQlConfiguration.class)
@@ -30,16 +30,16 @@ class AuthorEntityQueryTest {
     @Autowired
     private GraphQlTester graphQlTester;
 
-    @MockBean
+    @MockitoBean
     AuthorService authorService;
 
-    @MockBean
+    @MockitoBean
     PostService postService;
 
-    @MockBean
+    @MockitoBean
     PostCommentService postCommentService;
 
-    @MockBean
+    @MockitoBean
     TagService tagService;
 
     @Test

@@ -11,8 +11,8 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.graphql.GraphQlTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.graphql.test.tester.GraphQlTester;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -22,7 +22,7 @@ class CustomerGraphQLControllerTest {
     @Autowired
     private GraphQlTester graphQlTester;
 
-    @MockBean
+    @MockitoBean
     private CustomerGraphQLService customerGraphQLService;
 
     @Test
