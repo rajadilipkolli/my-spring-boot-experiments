@@ -521,13 +521,13 @@ class AnimalControllerIT extends AbstractIntegrationTest {
     @Test
     void shouldReturnResultForBetweenOperator() throws Exception {
         // Since 'Animal' doesn't have a numeric field, we'll use 'id' for BETWEEN operator
-        Long minId = animalList.get(0).getId();
+        Long minId = animalList.getFirst().getId();
         Long maxId = animalList.get(4).getId();
 
         this.mockMvc
                 .perform(post("/api/animals/search")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(String.format(
+                        .content(
                                 """
                                 {
                                     "searchCriteriaList": [
@@ -541,8 +541,8 @@ class AnimalControllerIT extends AbstractIntegrationTest {
                                         }
                                     ]
                                 }
-                                """,
-                                minId, maxId)))
+                                """
+                                        .formatted(minId, maxId)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content.size()", is(5))) // Animals with IDs between minId and maxId
                 .andExpect(jsonPath("$.last", is(true)));

@@ -26,7 +26,7 @@ public class ContainersConfiguration {
     }
 
     @Bean
-    public DynamicPropertyRegistrar databaseProperties(
+    DynamicPropertyRegistrar databaseProperties(
             MySQLContainer<?> mySQLContainer, PostgreSQLContainer<?> postgreSQLContainer) {
         return (properties) -> {
             // Connect our Spring application to our Testcontainers instances

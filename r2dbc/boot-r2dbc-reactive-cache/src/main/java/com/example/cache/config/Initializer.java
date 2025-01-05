@@ -18,7 +18,7 @@ class Initializer {
     private static final Logger log = LoggerFactory.getLogger(Initializer.class);
 
     @Bean
-    public ApplicationRunner saveMovies(MovieService movieService) {
+    ApplicationRunner saveMovies(MovieService movieService) {
         Flux<Movie> movies = Flux.just(
                 new Movie(null, "DJ Tillu"),
                 new Movie(null, "Tillu Square"),
