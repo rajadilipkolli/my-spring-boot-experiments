@@ -1,2 +1,3 @@
 *.xml text eol=lf
 *.yaml text eol=lf
+*.properties text eol=lf
