@@ -33,6 +33,8 @@
 
         <addForeignKeyConstraint baseColumnNames="post_id" baseTableName="post_comments"
                                  constraintName="FK_POST_COMMENT_ON_POST" referencedColumnNames="id"
-                                 referencedTableName="posts"/>
+                                 referencedTableName="posts"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"/>
     </changeSet>
 </databaseChangeLog>
