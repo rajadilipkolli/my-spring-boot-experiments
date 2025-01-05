@@ -1,7 +1,6 @@
 package com.example.learning.entities;
 
 import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -13,11 +12,15 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import org.hibernate.Hibernate;
+import org.hibernate.annotations.BatchSize;
 
+/**
+ * Represents a blog post entity with associated comments, tags, and details.
+ * This entity uses bidirectional relationships and implements proper relationship management.
+ */
 @Entity
 @Table(name = "posts")
 public class Post extends Auditable implements Serializable {
@@ -31,7 +34,6 @@ public class Post extends Auditable implements Serializable {
 
     private String title;
 
-    @Column(length = 4096)
     private String content;
 
     private boolean published;
@@ -39,12 +41,14 @@ public class Post extends Auditable implements Serializable {
     private LocalDateTime publishedAt;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "post", orphanRemoval = true)
+    @BatchSize(size = 20)
     private List<PostComment> comments = new ArrayList<>();
 
     @OneToOne(mappedBy = "post", cascade = CascadeType.ALL, optional = false)
     private PostDetails details;
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    @BatchSize(size = 20)
     private List<PostTag> tags = new ArrayList<>();
 
     public Post() {}
@@ -122,6 +126,18 @@ public class Post extends Auditable implements Serializable {
         return this;
     }
 
+    public Post publish() {
+        this.published = true;
+        this.publishedAt = LocalDateTime.now();
+        return this;
+    }
+
+    public Post unpublish() {
+        this.published = false;
+        this.publishedAt = null;
+        return this;
+    }
+
     public void addComment(PostComment comment) {
         this.comments.add(comment);
         comment.setPost(this);
@@ -152,15 +168,26 @@ public class Post extends Auditable implements Serializable {
     }
 
     public void removeTag(Tag tag) {
-        for (Iterator<PostTag> iterator = this.tags.iterator(); iterator.hasNext(); ) {
-            PostTag postTag = iterator.next();
-
+        if (tag == null) {
+            return;
+        }
+        this.tags.removeIf(postTag -> {
             if (postTag.getPost().equals(this) && postTag.getTag().equals(tag)) {
-                iterator.remove();
                 postTag.setPost(null);
                 postTag.setTag(null);
+                return true;
             }
-        }
+            return false;
+        });
+    }
+
+    @Override
+    public String toString() {
+        return "Post{" + "id="
+                + id + ", title='"
+                + title + '\'' + ", published="
+                + published + ", publishedAt="
+                + publishedAt + '}';
     }
 
     @Override
