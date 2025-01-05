@@ -74,6 +74,10 @@
   - changed-files:
       - any-glob-to-any-file:
           - jpa/boot-hibernate2ndlevelcache-sample/**/*
+"component: jpa-jooq":
+  - changed-files:
+      - any-glob-to-any-file:
+          - jpa/boot-jpa-jooq-sample/**/*
 "component: jpa-lock":
   - changed-files:
       - any-glob-to-any-file:
@@ -145,6 +149,7 @@
           - jpa/boot-data-envers/pom.xml
           - jpa/boot-data-multipledatasources/pom.xml
           - jpa/boot-hibernate2ndlevelcache-sample/pom.xml
+          - jpa/boot-data-jpa-jooq-sample/pom.xml
           - jpa/boot-data-jpa-locks/pom.xml
           - jpa/boot-read-replica-postgresql/pom.xml
           - jpa/keyset-pagination/blaze-persistence/pom.xml
