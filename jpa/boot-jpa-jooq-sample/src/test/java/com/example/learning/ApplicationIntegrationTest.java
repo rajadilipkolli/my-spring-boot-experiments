@@ -70,5 +70,6 @@ class ApplicationIntegrationTest extends AbstractIntegrationTest {
 
         // Assertions to validate the results
         assertThat(savedPostList).isNotEmpty().hasSize(postList.size());
+        assertThat(tagRepository.count()).isEqualTo(100);
     }
 }

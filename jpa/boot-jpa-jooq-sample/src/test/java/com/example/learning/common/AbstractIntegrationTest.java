@@ -4,6 +4,7 @@ import static com.example.learning.utils.AppConstants.PROFILE_TEST;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 import com.example.learning.repository.PostRepository;
+import com.example.learning.repository.TagRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.instancio.junit.InstancioExtension;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,4 +31,7 @@ public abstract class AbstractIntegrationTest {
 
     @Autowired
     protected PostRepository postRepository;
+
+    @Autowired
+    protected TagRepository tagRepository;
 }
