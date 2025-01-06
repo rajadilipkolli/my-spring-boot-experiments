@@ -25,7 +25,7 @@ import org.springframework.test.web.servlet.MockMvc;
 @SpringBootTest(
         webEnvironment = RANDOM_PORT,
         classes = {ContainersConfig.class},
-        properties = {"jdbc.datasource-proxy.enabled=false"}))
+        properties = {"jdbc.datasource-proxy.enabled=false"})
 @AutoConfigureMockMvc
 public abstract class AbstractIntegrationTest {
 
