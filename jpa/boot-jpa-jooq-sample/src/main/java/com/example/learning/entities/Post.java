@@ -114,6 +114,17 @@ public class Post extends Auditable implements Serializable {
         return details;
     }
 
+    public void setDetails(PostDetails details) {
+        if (details == null) {
+            if (this.details != null) {
+                this.details.setPost(null);
+            }
+        } else {
+            details.setPost(this);
+        }
+        this.details = details;
+    }
+
     public List<PostTag> getTags() {
         return tags;
     }
@@ -146,17 +157,6 @@ public class Post extends Auditable implements Serializable {
     public void removeComment(PostComment comment) {
         this.comments.remove(comment);
         comment.setPost(null);
-    }
-
-    public void setDetails(PostDetails details) {
-        if (details == null) {
-            if (this.details != null) {
-                this.details.setPost(null);
-            }
-        } else {
-            details.setPost(this);
-        }
-        this.details = details;
     }
 
     public void addTag(Tag tag) {
