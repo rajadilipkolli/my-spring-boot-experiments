@@ -10,6 +10,7 @@ import jakarta.persistence.UniqueConstraint;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.Objects;
+import java.util.StringJoiner;
 
 @Entity
 @Table(
@@ -56,6 +57,15 @@ public class Tag implements Serializable {
     public Tag setTagDescription(String tagDescription) {
         this.tagDescription = tagDescription;
         return this;
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", Tag.class.getSimpleName() + "[", "]")
+                .add("id=" + id)
+                .add("tagName='" + tagName + "'")
+                .add("tagDescription='" + tagDescription + "'")
+                .toString();
     }
 
     @Override
