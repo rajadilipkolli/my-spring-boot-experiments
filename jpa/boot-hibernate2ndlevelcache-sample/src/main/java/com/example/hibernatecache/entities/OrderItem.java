@@ -23,8 +23,7 @@ public class OrderItem {
     private Long id;
 
     @Column(nullable = false)
-    @NotEmpty(message = "Text cannot be empty")
-    private String text;
+    @NotEmpty(message = "Text cannot be empty") private String text;
 
     @ManyToOne
     @JoinColumn(name = "order_id")

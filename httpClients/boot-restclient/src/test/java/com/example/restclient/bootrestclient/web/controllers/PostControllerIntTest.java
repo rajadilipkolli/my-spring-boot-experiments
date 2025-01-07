@@ -26,8 +26,11 @@ import org.springframework.test.web.servlet.MockMvc;
 @AutoConfigureMockMvc
 class PostControllerIntTest {
 
-    @Autowired private MockMvc mockMvc;
-    @Autowired private ObjectMapper objectMapper;
+    @Autowired
+    private MockMvc mockMvc;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @Test
     void shouldFindPostById() throws Exception {
@@ -36,11 +39,8 @@ class PostControllerIntTest {
                 .perform(get("/api/posts/{id}", 1))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(1)))
-                .andExpect(
-                        jsonPath(
-                                "$.title",
-                                is(
-                                        "sunt aut facere repellat provident occaecati excepturi optio reprehenderit")))
+                .andExpect(jsonPath(
+                        "$.title", is("sunt aut facere repellat provident occaecati excepturi optio reprehenderit")))
                 .andExpect(jsonPath("$.userId", is(1)))
                 .andExpect(
                         jsonPath(
@@ -53,10 +53,9 @@ class PostControllerIntTest {
     void shouldCreateNewPost() throws Exception {
         PostDto postDto = new PostDto(1L, null, "First Title", "First Body");
         this.mockMvc
-                .perform(
-                        post("/api/posts")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(postDto)))
+                .perform(post("/api/posts")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(postDto)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id", notNullValue()))
                 .andExpect(jsonPath("$.title", is(postDto.title())))
@@ -69,15 +68,11 @@ class PostControllerIntTest {
         PostDto post = new PostDto(1L, null, null, "First Body");
 
         this.mockMvc
-                .perform(
-                        post("/api/posts")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(post)))
+                .perform(post("/api/posts")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(post)))
                 .andExpect(status().isBadRequest())
-                .andExpect(
-                        header().string(
-                                        HttpHeaders.CONTENT_TYPE,
-                                        is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                 .andExpect(jsonPath("$.type", is("about:blank")))
                 .andExpect(jsonPath("$.title", is("Constraint Violation")))
                 .andExpect(jsonPath("$.status", is(400)))
@@ -94,10 +89,9 @@ class PostControllerIntTest {
         PostDto postDto = new PostDto(1L, 1L, "First Title", "First Body");
 
         this.mockMvc
-                .perform(
-                        put("/api/posts/{id}", postDto.id())
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(postDto)))
+                .perform(put("/api/posts/{id}", postDto.id())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(postDto)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(postDto.id()), Long.class))
                 .andExpect(jsonPath("$.title", is(postDto.title())))
@@ -108,13 +102,12 @@ class PostControllerIntTest {
     @Test
     void shouldDeletePost() throws Exception {
 
-        String response =
-                this.mockMvc
-                        .perform(delete("/api/posts/{id}", 50))
-                        .andExpect(status().isOk())
-                        .andReturn()
-                        .getResponse()
-                        .getContentAsString();
+        String response = this.mockMvc
+                .perform(delete("/api/posts/{id}", 50))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
         assertThat(response).isEqualTo("{}");
     }
 }

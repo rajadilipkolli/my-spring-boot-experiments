@@ -33,10 +33,8 @@ public class PostController {
 
     @GetMapping("/{id}")
     public ResponseEntity<PostDto> getPostById(@PathVariable Long id) {
-        return postService
-                .findPostById(id)
-                .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+        return postService.findPostById(id).map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound()
+                .build());
     }
 
     @PostMapping
@@ -47,10 +45,8 @@ public class PostController {
 
     @PutMapping("/{id}")
     public ResponseEntity<PostDto> updatePost(@PathVariable Long id, @RequestBody PostDto post) {
-        return postService
-                .updatePostById(id, post)
-                .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+        return postService.updatePostById(id, post).map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound()
+                .build());
     }
 
     @DeleteMapping("/{id}")

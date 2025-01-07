@@ -19,8 +19,7 @@ public class Customer {
     private Long id;
 
     @Column(nullable = false)
-    @NotEmpty(message = "Name cannot be empty")
-    private String name;
+    @NotEmpty(message = "Name cannot be empty") private String name;
 
     private String address;
 

@@ -24,7 +24,8 @@ import org.springframework.http.MediaType;
 
 class CustomerControllerIT extends AbstractIntegrationTest {
 
-    @Autowired private CustomerRepository customerRepository;
+    @Autowired
+    private CustomerRepository customerRepository;
 
     private List<Customer> customerList = null;
 
@@ -32,13 +33,11 @@ class CustomerControllerIT extends AbstractIntegrationTest {
     void setUp() {
         customerRepository.deleteAllInBatch();
 
-        customerList =
-                Instancio.ofList(Customer.class)
-                        .size(3)
-                        .ignore(field(Customer.class, "id"))
-                        .generate(
-                                field(Customer.class, "gender"), gen -> gen.oneOf("male", "female"))
-                        .create();
+        customerList = Instancio.ofList(Customer.class)
+                .size(3)
+                .ignore(field(Customer.class, "id"))
+                .generate(field(Customer.class, "gender"), gen -> gen.oneOf("male", "female"))
+                .create();
 
         customerList = customerRepository.saveAll(customerList);
     }
@@ -75,10 +74,9 @@ class CustomerControllerIT extends AbstractIntegrationTest {
         Customer customer = Instancio.create(Customer.class);
         customer.setId(null);
         this.mockMvc
-                .perform(
-                        post("/api/customers")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(customer)))
+                .perform(post("/api/customers")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(customer)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id", notNullValue()))
                 .andExpect(jsonPath("$.name", is(customer.getName())));
@@ -89,10 +87,9 @@ class CustomerControllerIT extends AbstractIntegrationTest {
         Customer customer = new Customer(null, null, null, null);
 
         this.mockMvc
-                .perform(
-                        post("/api/customers")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(customer)))
+                .perform(post("/api/customers")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(customer)))
                 .andExpect(status().isBadRequest())
                 .andExpect(header().string("Content-Type", is("application/problem+json")))
                 .andExpect(jsonPath("$.type", is("about:blank")))
@@ -112,10 +109,9 @@ class CustomerControllerIT extends AbstractIntegrationTest {
         customer.setName("Updated Customer");
 
         this.mockMvc
-                .perform(
-                        put("/api/customers/{id}", customer.getId())
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(customer)))
+                .perform(put("/api/customers/{id}", customer.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(customer)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(customer.getId()), Long.class))
                 .andExpect(jsonPath("$.name", is("Updated Customer")));

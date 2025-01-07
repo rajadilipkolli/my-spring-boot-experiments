@@ -16,7 +16,8 @@ import org.springframework.context.annotation.Import;
 @AutoConfigureTestDatabase
 class SchemaValidationTest {
 
-    @Autowired private DataSource dataSource;
+    @Autowired
+    private DataSource dataSource;
 
     @Test
     void contextLoads() {

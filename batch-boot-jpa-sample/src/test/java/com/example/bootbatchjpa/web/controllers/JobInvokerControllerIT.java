@@ -21,10 +21,6 @@ class JobInvokerControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldReturnBadRequestForMissingParameters() {
-        mockMvcTester
-                .get()
-                .uri("/api/job/customers")
-                .assertThat()
-                .hasStatus(HttpStatus.BAD_REQUEST);
+        mockMvcTester.get().uri("/api/job/customers").assertThat().hasStatus(HttpStatus.BAD_REQUEST);
     }
 }

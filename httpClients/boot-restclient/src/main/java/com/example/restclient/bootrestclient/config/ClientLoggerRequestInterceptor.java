@@ -22,42 +22,35 @@ public class ClientLoggerRequestInterceptor implements ClientHttpRequestIntercep
     private static final Logger log = LoggerFactory.getLogger(ClientLoggerRequestInterceptor.class);
 
     @Override
-    public ClientHttpResponse intercept(
-            HttpRequest request, byte[] body, ClientHttpRequestExecution execution)
+    public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution)
             throws IOException {
         logRequest(request, body);
         ClientHttpResponse response = execution.execute(request, body);
         return logResponse(response);
     }
 
-    private BufferingClientHttpResponseWrapper logResponse(ClientHttpResponse response)
-            throws IOException {
-        log.info(
-                "============================response begin==========================================");
+    private BufferingClientHttpResponseWrapper logResponse(ClientHttpResponse response) throws IOException {
+        log.info("============================response begin==========================================");
         log.info("Status code  : {}", response.getStatusCode());
         log.info("Status text  : {}", response.getStatusText());
         logHeaders(response.getHeaders());
 
-        String responseBody =
-                StreamUtils.copyToString(response.getBody(), Charset.defaultCharset());
+        String responseBody = StreamUtils.copyToString(response.getBody(), Charset.defaultCharset());
         log.info("Response body: {}", responseBody);
-        log.info(
-                "=======================response end=================================================");
+        log.info("=======================response end=================================================");
         return new BufferingClientHttpResponseWrapper(response, responseBody);
     }
 
     private void logRequest(HttpRequest request, byte[] body) {
 
-        log.info(
-                "===========================request begin================================================");
+        log.info("===========================request begin================================================");
         log.info("URI         : {}", request.getURI());
         log.info("Method      : {}", request.getMethod());
         logHeaders(request.getHeaders());
         if (body.length > 0) {
             log.info("Request body: {}", new String(body, StandardCharsets.UTF_8));
         }
-        log.info(
-                "==========================request end================================================");
+        log.info("==========================request end================================================");
     }
 
     private void logHeaders(HttpHeaders headers) {

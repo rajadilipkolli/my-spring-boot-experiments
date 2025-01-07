@@ -30,23 +30,17 @@ class CustomerController {
 
     @GetMapping
     PagedResult<Customer> getAllCustomers(
-            @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_NUMBER, required = false)
-                    int pageNo,
-            @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_SIZE, required = false)
-                    int pageSize,
-            @RequestParam(defaultValue = AppConstants.DEFAULT_SORT_BY, required = false)
-                    String sortBy,
-            @RequestParam(defaultValue = AppConstants.DEFAULT_SORT_DIRECTION, required = false)
-                    String sortDir) {
+            @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_NUMBER, required = false) int pageNo,
+            @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_SIZE, required = false) int pageSize,
+            @RequestParam(defaultValue = AppConstants.DEFAULT_SORT_BY, required = false) String sortBy,
+            @RequestParam(defaultValue = AppConstants.DEFAULT_SORT_DIRECTION, required = false) String sortDir) {
         return customerService.findAllCustomers(pageNo, pageSize, sortBy, sortDir);
     }
 
     @GetMapping("/{id}")
     ResponseEntity<Customer> getCustomerById(@PathVariable Long id) {
-        return customerService
-                .findCustomerById(id)
-                .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+        return customerService.findCustomerById(id).map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound()
+                .build());
     }
 
     @PostMapping
@@ -59,11 +53,10 @@ class CustomerController {
     ResponseEntity<Customer> updateCustomer(@PathVariable Long id, @RequestBody Customer customer) {
         return customerService
                 .findCustomerById(id)
-                .map(
-                        customerObj -> {
-                            customer.setId(id);
-                            return ResponseEntity.ok(customerService.saveCustomer(customer));
-                        })
+                .map(customerObj -> {
+                    customer.setId(id);
+                    return ResponseEntity.ok(customerService.saveCustomer(customer));
+                })
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
@@ -71,11 +64,10 @@ class CustomerController {
     ResponseEntity<Customer> deleteCustomer(@PathVariable Long id) {
         return customerService
                 .findCustomerById(id)
-                .map(
-                        customer -> {
-                            customerService.deleteCustomerById(id);
-                            return ResponseEntity.ok(customer);
-                        })
+                .map(customer -> {
+                    customerService.deleteCustomerById(id);
+                    return ResponseEntity.ok(customer);
+                })
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 }

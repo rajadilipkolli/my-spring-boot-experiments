@@ -29,11 +29,14 @@ import org.springframework.test.web.client.MockRestServiceServer;
         })
 class PostServiceTest {
 
-    @Autowired private MockRestServiceServer mockRestServiceServer;
+    @Autowired
+    private MockRestServiceServer mockRestServiceServer;
 
-    @Autowired private ObjectMapper objectMapper;
+    @Autowired
+    private ObjectMapper objectMapper;
 
-    @Autowired private PostService postService;
+    @Autowired
+    private PostService postService;
 
     @Test
     void findPostById() throws JsonProcessingException {
@@ -45,10 +48,7 @@ class PostServiceTest {
                 .andExpect(header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(header("apiKey", "123456"))
-                .andRespond(
-                        withSuccess(
-                                objectMapper.writeValueAsString(postDto),
-                                MediaType.APPLICATION_JSON));
+                .andRespond(withSuccess(objectMapper.writeValueAsString(postDto), MediaType.APPLICATION_JSON));
 
         Optional<PostDto> optionalPostDto = postService.findPostById(1L);
 
