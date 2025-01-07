@@ -63,13 +63,10 @@ class AnimalController {
     public Window<AnimalResponse> searchAnimals(
             @Parameter(description = "Number of items per page (max 100)", in = ParameterIn.QUERY)
                     @RequestParam(defaultValue = "10")
-                    @Min(1)
-                    @Max(100)
-                    int pageSize,
+                    @Min(1) @Max(100) int pageSize,
             @Parameter(description = "Scroll ID for pagination", in = ParameterIn.QUERY) @RequestParam(required = false)
                     Long scrollId,
-            @io.swagger.v3.oas.annotations.parameters.RequestBody(required = true) @RequestBody @Valid
-                    SearchRequest searchRequest) {
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(required = true) @RequestBody @Valid SearchRequest searchRequest) {
 
         return animalService.searchAnimals(searchRequest, pageSize, scrollId);
     }

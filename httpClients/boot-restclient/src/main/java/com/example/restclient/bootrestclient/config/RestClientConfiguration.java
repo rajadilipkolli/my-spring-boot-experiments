@@ -24,17 +24,14 @@ public class RestClientConfiguration {
     RestClientCustomizer restClientCustomizer(
             ApplicationProperties applicationProperties,
             ClientLoggerRequestInterceptor clientLoggerRequestInterceptor) {
-        DefaultUriBuilderFactory factory =
-                new DefaultUriBuilderFactory(applicationProperties.getExternalCallUrl());
+        DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory(applicationProperties.getExternalCallUrl());
         factory.setEncodingMode(DefaultUriBuilderFactory.EncodingMode.URI_COMPONENT);
-        return restClientBuilder ->
-                restClientBuilder
-                        .uriBuilderFactory(factory)
-                        .defaultHeaders(
-                                httpHeaders -> {
-                                    httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-                                    httpHeaders.setAccept(List.of(MediaType.APPLICATION_JSON));
-                                })
-                        .requestInterceptor(clientLoggerRequestInterceptor);
+        return restClientBuilder -> restClientBuilder
+                .uriBuilderFactory(factory)
+                .defaultHeaders(httpHeaders -> {
+                    httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+                    httpHeaders.setAccept(List.of(MediaType.APPLICATION_JSON));
+                })
+                .requestInterceptor(clientLoggerRequestInterceptor);
     }
 }

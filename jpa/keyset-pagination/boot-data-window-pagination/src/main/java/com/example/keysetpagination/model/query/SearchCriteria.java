@@ -21,12 +21,9 @@ public class SearchCriteria<T> implements ISearchCriteria<T> {
 
     @NotNull(message = "Operator cannot be null") private QueryOperator queryOperator;
 
-    @NotBlank(message = "Field name cannot be null or blank")
-    private String field;
+    @NotBlank(message = "Field name cannot be null or blank") private String field;
 
-    @NotNull(message = "Values list cannot be null") @Size(min = 1, message = "Values list cannot be empty")
-    @Valid
-    private List<String> values;
+    @NotNull(message = "Values list cannot be null") @Size(min = 1, message = "Values list cannot be empty") @Valid private List<String> values;
 
     public SearchCriteria() {}
 

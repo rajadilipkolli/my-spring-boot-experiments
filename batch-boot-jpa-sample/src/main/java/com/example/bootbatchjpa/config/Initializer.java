@@ -24,13 +24,11 @@ class Initializer implements CommandLineRunner {
     @Override
     public void run(String... args) {
         log.info("Running Initializer.....");
-        List<Customer> customerList =
-                Instancio.ofList(Customer.class)
-                        .size(1000)
-                        .ignore(field(Customer.class, "id"))
-                        .generate(
-                                field(Customer.class, "gender"), gen -> gen.oneOf("male", "female"))
-                        .create();
+        List<Customer> customerList = Instancio.ofList(Customer.class)
+                .size(1000)
+                .ignore(field(Customer.class, "id"))
+                .generate(field(Customer.class, "gender"), gen -> gen.oneOf("male", "female"))
+                .create();
         log.info("Saving Customers of size :{}", customerList.size());
         customerList = customerRepository.saveAll(customerList);
         log.info("Inserted customers of size :{}", customerList.size());

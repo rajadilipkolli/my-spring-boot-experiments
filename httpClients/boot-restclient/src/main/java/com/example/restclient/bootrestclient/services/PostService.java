@@ -18,16 +18,12 @@ public class PostService {
 
     public List<PostDto> findAllPosts() {
         return httpClientService.callAndFetchResponseForGetMethod(
-                uriBuilder -> uriBuilder.path("/posts").build(),
-                new ParameterizedTypeReference<List<PostDto>>() {});
+                uriBuilder -> uriBuilder.path("/posts").build(), new ParameterizedTypeReference<List<PostDto>>() {});
     }
 
     public Optional<PostDto> findPostById(Long id) {
-        PostDto response =
-                httpClientService.callAndFetchResponseForGetMethod(
-                        uriBuilder -> uriBuilder.path("/posts/{postId}").build(id),
-                        Map.of("apiKey", "123456"),
-                        PostDto.class);
+        PostDto response = httpClientService.callAndFetchResponseForGetMethod(
+                uriBuilder -> uriBuilder.path("/posts/{postId}").build(id), Map.of("apiKey", "123456"), PostDto.class);
         return Optional.ofNullable(response);
     }
 
@@ -37,11 +33,8 @@ public class PostService {
     }
 
     public Optional<PostDto> updatePostById(Long id, PostDto postDto) {
-        PostDto response =
-                httpClientService.callAndFetchResponseForPutMethod(
-                        uriBuilder -> uriBuilder.path("/posts/{postId}").build(id),
-                        postDto,
-                        PostDto.class);
+        PostDto response = httpClientService.callAndFetchResponseForPutMethod(
+                uriBuilder -> uriBuilder.path("/posts/{postId}").build(id), postDto, PostDto.class);
         return Optional.ofNullable(response);
     }
 

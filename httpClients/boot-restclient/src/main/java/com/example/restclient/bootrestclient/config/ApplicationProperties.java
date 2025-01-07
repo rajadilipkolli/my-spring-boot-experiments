@@ -13,10 +13,10 @@ import org.springframework.validation.annotation.Validated;
 @ConfigurationProperties("application")
 public class ApplicationProperties {
 
-    @NotBlank(message = "External Call URL cant be Blank")
-    private String externalCallUrl;
+    @NotBlank(message = "External Call URL cant be Blank") private String externalCallUrl;
 
-    @NestedConfigurationProperty private Cors cors = new Cors();
+    @NestedConfigurationProperty
+    private Cors cors = new Cors();
 
     @Getter
     @Setter

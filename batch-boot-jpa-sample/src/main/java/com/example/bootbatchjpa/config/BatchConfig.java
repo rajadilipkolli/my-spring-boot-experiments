@@ -48,18 +48,17 @@ class BatchConfig implements JobExecutionListener {
             JpaPagingItemReader<Customer> jpaPagingItemReader,
             JobRepository jobRepository,
             PlatformTransactionManager transactionManager) {
-        Step step =
-                new StepBuilder("all-customers-step", jobRepository)
-                        .allowStartIfComplete(true)
-                        .<Customer, CustomerDTO>chunk(10, transactionManager)
-                        .reader(jpaPagingItemReader)
-                        .processor(getCustomerCustomerDTOItemProcessor())
-                        .writer(getCustomerDTOItemWriter())
-                        .faultTolerant() // tell to spring batch that this step can face errors
-                        .skip(Exception.class) // skip all Exception
-                        .noSkip(ConstraintViolationException.class) // but do not skip this one
-                        .skipLimit(20) // the number of times you want to skip Exception.class
-                        .build();
+        Step step = new StepBuilder("all-customers-step", jobRepository)
+                .allowStartIfComplete(true)
+                .<Customer, CustomerDTO>chunk(10, transactionManager)
+                .reader(jpaPagingItemReader)
+                .processor(getCustomerCustomerDTOItemProcessor())
+                .writer(getCustomerDTOItemWriter())
+                .faultTolerant() // tell to spring batch that this step can face errors
+                .skip(Exception.class) // skip all Exception
+                .noSkip(ConstraintViolationException.class) // but do not skip this one
+                .skipLimit(20) // the number of times you want to skip Exception.class
+                .build();
 
         return new JobBuilder("all-customers-job", jobRepository)
                 .start(step)
@@ -76,8 +75,7 @@ class BatchConfig implements JobExecutionListener {
     }
 
     private ItemProcessor<Customer, CustomerDTO> getCustomerCustomerDTOItemProcessor() {
-        return customer ->
-                new CustomerDTO(customer.getName(), customer.getAddress(), customer.getGender());
+        return customer -> new CustomerDTO(customer.getName(), customer.getAddress(), customer.getGender());
     }
 
     @Bean
@@ -91,8 +89,7 @@ class BatchConfig implements JobExecutionListener {
         return new JpaPagingItemReaderBuilder<Customer>()
                 .name("jpaPagingItemReader")
                 .entityManagerFactory(entityManagerFactory)
-                .queryString(
-                        "SELECT c FROM Customer c WHERE c.id BETWEEN :minId AND :maxId ORDER BY c.id")
+                .queryString("SELECT c FROM Customer c WHERE c.id BETWEEN :minId AND :maxId ORDER BY c.id")
                 .parameterValues(parameterValuesMap)
                 .pageSize(10)
                 .build();
