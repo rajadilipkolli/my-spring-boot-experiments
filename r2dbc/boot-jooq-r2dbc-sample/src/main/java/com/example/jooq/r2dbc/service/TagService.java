@@ -5,16 +5,18 @@ import com.example.jooq.r2dbc.model.request.TagDto;
 import com.example.jooq.r2dbc.model.response.PaginatedResult;
 import com.example.jooq.r2dbc.repository.TagRepository;
 import java.util.UUID;
-import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
 @Service
-@RequiredArgsConstructor
 public class TagService {
 
     private final TagRepository tagRepository;
+
+    public TagService(TagRepository tagRepository) {
+        this.tagRepository = tagRepository;
+    }
 
     public Mono<PaginatedResult<Tags>> findAll(Pageable pageable) {
         return this.tagRepository.findAll(pageable).map(PaginatedResult::new);
@@ -25,6 +27,6 @@ public class TagService {
     }
 
     public Mono<Tags> create(TagDto tagDto) {
-        return this.tagRepository.save(new Tags(tagDto.name()));
+        return this.tagRepository.save(new Tags().setName(tagDto.name()));
     }
 }

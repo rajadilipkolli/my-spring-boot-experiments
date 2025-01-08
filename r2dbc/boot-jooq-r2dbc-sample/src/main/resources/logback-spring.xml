@@ -4,6 +4,7 @@
 
     <include resource="org/springframework/boot/logging/logback/defaults.xml" />
     <include resource="org/springframework/boot/logging/logback/console-appender.xml" />
+    <springProperty scope="context" name="appName" source="spring.application.name"/>
 
     <springProfile name="default">
         <root level="INFO">
@@ -11,6 +12,7 @@
         </root>
     </springProfile>
     <springProfile name="!default">
+        <property name="LOG_FILE" value="logs/${appName}.log"/>
         <include resource="org/springframework/boot/logging/logback/file-appender.xml" />
         <root level="INFO">
             <appender-ref ref="FILE" />
@@ -19,5 +21,8 @@
     </springProfile>
 
     <logger name="com.example.jooq.r2dbc" level="DEBUG"/>
+    <logger name="org.jooq.tools.LoggerListener" level="DEBUG"/>
+    <logger name="io.r2dbc.proxy" level="DEBUG"/>
+    <logger name="io.r2dbc.proxy.observation" level="INFO" />
 
 </configuration>

@@ -1,15 +1,15 @@
 package com.example.jooq.r2dbc.repository.custom.impl;
 
-import static com.example.jooq.r2dbc.testcontainersflyway.db.Tables.*;
 import static com.example.jooq.r2dbc.testcontainersflyway.db.Tables.POSTS;
+import static com.example.jooq.r2dbc.testcontainersflyway.db.Tables.POSTS_TAGS;
+import static com.example.jooq.r2dbc.testcontainersflyway.db.Tables.POST_COMMENTS;
+import static com.example.jooq.r2dbc.testcontainersflyway.db.Tables.TAGS;
 import static org.jooq.impl.DSL.multiset;
 import static org.jooq.impl.DSL.select;
 
 import com.example.jooq.r2dbc.model.response.PostCommentResponse;
 import com.example.jooq.r2dbc.model.response.PostResponse;
 import com.example.jooq.r2dbc.repository.custom.CustomPostRepository;
-import com.example.jooq.r2dbc.testcontainersflyway.db.tables.PostComments;
-import com.example.jooq.r2dbc.testcontainersflyway.db.tables.Posts;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Record1;
@@ -22,7 +22,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 public class CustomPostRepositoryImpl extends JooqSorting implements CustomPostRepository {
-
     private final DSLContext dslContext;
 
     public CustomPostRepositoryImpl(DSLContext dslContext) {
@@ -31,30 +30,31 @@ public class CustomPostRepositoryImpl extends JooqSorting implements CustomPostR
 
     @Override
     public Mono<Page<PostResponse>> findByKeyword(String keyword, Pageable pageable) {
-        Condition where = DSL.trueCondition();
+        // Build the where condition dynamically
+        Condition condition = DSL.trueCondition();
         if (StringUtils.hasText(keyword)) {
-            where = where.and(POSTS.TITLE.likeIgnoreCase("%" + keyword + "%"));
+            condition = condition.and(POSTS.TITLE.likeIgnoreCase("%" + keyword + "%"));
         }
-        var dataSql =
+
+        // Construct the main data SQL query
+        var dataQuery =
                 dslContext
-                        .select(
+                        .selectDistinct(
                                 POSTS.ID,
                                 POSTS.TITLE,
                                 POSTS.CONTENT,
+                                // Fetch comments as a multiset
                                 multiset(
                                                 select(
-                                                                PostComments.POST_COMMENTS.ID,
-                                                                PostComments.POST_COMMENTS.CONTENT,
-                                                                PostComments.POST_COMMENTS
-                                                                        .CREATED_AT)
-                                                        .from(PostComments.POST_COMMENTS)
-                                                        .where(
-                                                                PostComments.POST_COMMENTS.POST_ID
-                                                                        .eq(Posts.POSTS.ID)))
+                                                                POST_COMMENTS.ID,
+                                                                POST_COMMENTS.CONTENT,
+                                                                POST_COMMENTS.CREATED_AT)
+                                                        .from(POST_COMMENTS)
+                                                        .where(POST_COMMENTS.POST_ID.eq(POSTS.ID)))
                                         .as("comments")
                                         .convertFrom(
-                                                record3s ->
-                                                        record3s.into(PostCommentResponse.class)),
+                                                records -> records.into(PostCommentResponse.class)),
+                                // Fetch tags as a multiset
                                 multiset(
                                                 select(TAGS.NAME)
                                                         .from(TAGS)
@@ -62,28 +62,30 @@ public class CustomPostRepositoryImpl extends JooqSorting implements CustomPostR
                                                         .on(TAGS.ID.eq(POSTS_TAGS.TAG_ID))
                                                         .where(POSTS_TAGS.POST_ID.eq(POSTS.ID)))
                                         .as("tags")
-                                        .convertFrom(record -> record.map(Record1::value1)))
+                                        .convertFrom(records -> records.map(Record1::value1)))
                         .from(POSTS.leftJoin(POST_COMMENTS).on(POST_COMMENTS.POST_ID.eq(POSTS.ID)))
-                        .where(where)
-                        .groupBy(POSTS.ID)
+                        .where(condition)
                         .orderBy(getSortFields(pageable.getSort(), POSTS))
                         .limit(pageable.getPageSize())
                         .offset(pageable.getOffset());
 
-        var countSql = dslContext.selectCount().from(POSTS).where(where);
+        // Construct the count query
+        var countQuery = dslContext.selectCount().from(POSTS).where(condition);
 
+        // Execute queries reactively and build the result page
         return Mono.zip(
-                        Flux.from(dataSql)
+                        Flux.from(dataQuery)
                                 .map(
-                                        r ->
+                                        record ->
                                                 new PostResponse(
-                                                        r.value1(),
-                                                        r.value2(),
-                                                        r.value3(),
-                                                        r.value4(),
-                                                        r.value5()))
+                                                        record.value1(), // Post ID
+                                                        record.value2(), // Post Title
+                                                        record.value3(), // Post Content
+                                                        record.value4(), // Comments
+                                                        record.value5() // Tags
+                                                        ))
                                 .collectList(),
-                        Mono.from(countSql).map(Record1::value1))
-                .map(it -> new PageImpl<>(it.getT1(), pageable, it.getT2()));
+                        Mono.from(countQuery).map(Record1::value1))
+                .map(tuple -> new PageImpl<>(tuple.getT1(), pageable, tuple.getT2()));
     }
 }

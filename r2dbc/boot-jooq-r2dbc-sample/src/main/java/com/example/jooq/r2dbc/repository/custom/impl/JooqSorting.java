@@ -11,10 +11,11 @@ import org.springframework.data.domain.Sort;
 
 public class JooqSorting {
 
+    /** Converts Spring Data Sort to jOOQ SortField. */
     <T> List<SortField<?>> getSortFields(Sort sortSpecification, T tableType) {
         List<SortField<?>> querySortFields = new ArrayList<>();
 
-        if (sortSpecification == null) {
+        if (sortSpecification == null || !sortSpecification.iterator().hasNext()) {
             return querySortFields;
         }
 
@@ -22,33 +23,29 @@ public class JooqSorting {
             String sortFieldName = specifiedField.getProperty();
             Sort.Direction sortDirection = specifiedField.getDirection();
 
-            TableField tableField = getTableField(sortFieldName, tableType);
-            SortField<?> querySortField = convertTableFieldToSortField(tableField, sortDirection);
-            querySortFields.add(querySortField);
+            TableField<?, ?> tableField = getTableField(sortFieldName, tableType);
+            if (tableField != null) {
+                querySortFields.add(convertTableFieldToSortField(tableField, sortDirection));
+            }
         }
 
         return querySortFields;
     }
 
-    private <T> TableField getTableField(String sortFieldName, T tableType) {
-        TableField sortField;
+    /** Retrieves the table field dynamically based on the sort field name. */
+    private <T> TableField<?, ?> getTableField(String sortFieldName, T tableType) {
         try {
-            Field tableField =
-                    tableType.getClass().getField(sortFieldName.toUpperCase(Locale.ROOT));
-            sortField = (TableField) tableField.get(tableType);
+            Field field = tableType.getClass().getField(sortFieldName.toUpperCase(Locale.ROOT));
+            return (TableField<?, ?>) field.get(tableType);
         } catch (NoSuchFieldException | IllegalAccessException ex) {
-            String errorMessage = "Could not find table field: %s".formatted(sortFieldName);
-            throw new InvalidDataAccessApiUsageException(errorMessage, ex);
+            throw new InvalidDataAccessApiUsageException(
+                    "Could not find table field: %s".formatted(sortFieldName), ex);
         }
-        return sortField;
     }
 
+    /** Converts a TableField to a SortField based on the sorting direction. */
     private SortField<?> convertTableFieldToSortField(
-            TableField tableField, Sort.Direction sortDirection) {
-        if (sortDirection == Sort.Direction.ASC) {
-            return tableField.asc();
-        } else {
-            return tableField.desc();
-        }
+            TableField<?, ?> tableField, Sort.Direction sortDirection) {
+        return sortDirection == Sort.Direction.ASC ? tableField.asc() : tableField.desc();
     }
 }

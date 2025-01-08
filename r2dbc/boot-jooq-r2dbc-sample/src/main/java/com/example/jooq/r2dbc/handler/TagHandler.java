@@ -10,7 +10,6 @@ import com.example.jooq.r2dbc.model.response.PaginatedResult;
 import com.example.jooq.r2dbc.service.TagService;
 import com.example.jooq.r2dbc.utils.AppConstants;
 import java.net.URI;
-import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -20,32 +19,35 @@ import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Mono;
 
 @Component
-@RequiredArgsConstructor
 @Loggable
 public class TagHandler {
 
     // Service responsible for handling Tag-related business logic
     private final TagService tagService;
 
+    public TagHandler(TagService tagService) {
+        this.tagService = tagService;
+    }
+
     // Retrieve all tags based on query parameters for sorting and pagination
     public Mono<ServerResponse> getAll(ServerRequest req) {
         // Extracting and setting sort direction and field from query parameters
-        String sortDir = req.queryParam("sortDir").orElse(AppConstants.DEFAULT_SORT_DIRECTION);
         String sortBy = req.queryParam("sortBy").orElse(AppConstants.DEFAULT_SORT_BY);
+        String sortDir = req.queryParam("sortDir").orElse(AppConstants.DEFAULT_SORT_DIRECTION);
         Sort sort =
                 sortDir.equalsIgnoreCase(Sort.Direction.ASC.name())
                         ? Sort.by(sortBy).ascending()
                         : Sort.by(sortBy).descending();
 
         // Creating Pageable instance for pagination
-        int pageNo =
-                req.queryParam("pageNo")
-                        .map(Integer::parseInt)
-                        .orElse(AppConstants.DEFAULT_PAGE_NUMBER);
         int pageSize =
                 req.queryParam("pageSize")
                         .map(Integer::parseInt)
                         .orElse(AppConstants.DEFAULT_PAGE_SIZE);
+        int pageNo =
+                req.queryParam("pageNo")
+                        .map(Integer::parseInt)
+                        .orElse(AppConstants.DEFAULT_PAGE_NUMBER);
         Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
 
         // Returning paginated result of tags
