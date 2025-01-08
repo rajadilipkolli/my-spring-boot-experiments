@@ -13,7 +13,7 @@ public class ContainerConfig {
     @Bean
     @ServiceConnection
     PostgreSQLContainer<?> postgreSQLContainer() {
-        return new PostgreSQLContainer<>(DockerImageName.parse("postgres:17.2-alpine"))
+        return new PostgreSQLContainer<>(DockerImageName.parse("postgres").withTag("17.2-alpine"))
                 .withCopyFileToContainer(
                         MountableFile.forClasspathResource("init.sql"),
                         "/docker-entrypoint-initdb.d/init.sql");

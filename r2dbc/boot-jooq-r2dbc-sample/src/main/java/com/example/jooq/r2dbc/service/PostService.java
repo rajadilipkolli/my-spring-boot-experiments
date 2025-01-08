@@ -18,24 +18,30 @@ import com.example.jooq.r2dbc.testcontainersflyway.db.tables.records.PostComment
 import com.example.jooq.r2dbc.testcontainersflyway.db.tables.records.PostsTagsRecord;
 import java.util.List;
 import java.util.UUID;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.jooq.DSLContext;
 import org.jooq.Record1;
 import org.jooq.impl.DSL;
 import org.jooq.impl.SQLDataType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Service
-@RequiredArgsConstructor
-@Slf4j
 public class PostService {
+
+    private static final Logger log = LoggerFactory.getLogger(PostService.class);
 
     private final DSLContext dslContext;
     private final PostRepository postRepository;
+
+    public PostService(DSLContext dslContext, PostRepository postRepository) {
+        this.dslContext = dslContext;
+        this.postRepository = postRepository;
+    }
 
     public Flux<PostSummary> findAll() {
         var sql =
@@ -120,9 +126,11 @@ public class PostService {
     }
 
     public Mono<PaginatedResult<PostResponse>> findByKeyword(String keyword, Pageable pageable) {
+        String sanitizedKeyword =
+                StringUtils.hasText(keyword) ? keyword.replaceAll("[\n\r\t]", "_") : "";
         log.debug(
-                "findByKeyword with keyword :{} with offset :{} and limit :{}",
-                keyword,
+                "findByKeyword with sanitizedKeyword :{} with offset :{} and limit :{}",
+                sanitizedKeyword,
                 pageable.getOffset(),
                 pageable.getPageSize());
 

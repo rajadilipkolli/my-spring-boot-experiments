@@ -8,12 +8,19 @@ import org.springframework.boot.autoconfigure.jooq.ExceptionTranslatorExecuteLis
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
+import org.springframework.data.domain.ReactiveAuditorAware;
 import org.springframework.data.r2dbc.config.EnableR2dbcAuditing;
 import org.springframework.r2dbc.connection.TransactionAwareConnectionFactoryProxy;
+import reactor.core.publisher.Mono;
 
-@Configuration
-@EnableR2dbcAuditing
+@Configuration(proxyBeanMethods = false)
+@EnableR2dbcAuditing(auditorAwareRef = "myAuditorProvider", modifyOnCreate = false)
 public class JooqConfiguration {
+
+    @Bean
+    public ReactiveAuditorAware<String> myAuditorProvider() {
+        return () -> Mono.justOrEmpty("appUser");
+    }
 
     @Bean
     DSLContext dslContext(ConnectionFactory connectionFactory) {

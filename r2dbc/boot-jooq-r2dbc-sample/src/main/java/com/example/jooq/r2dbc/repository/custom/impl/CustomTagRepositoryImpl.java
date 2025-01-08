@@ -4,7 +4,8 @@ import static com.example.jooq.r2dbc.testcontainersflyway.db.Tables.TAGS;
 
 import com.example.jooq.r2dbc.entities.Tags;
 import com.example.jooq.r2dbc.repository.custom.CustomTagRepository;
-import org.jooq.*;
+import org.jooq.DSLContext;
+import org.jooq.Record1;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -30,8 +31,10 @@ public class CustomTagRepositoryImpl extends JooqSorting implements CustomTagRep
                         .offset(pageable.getOffset());
         var countSql = dslContext.selectCount().from(TAGS);
         return Mono.zip(
-                        Flux.from(dataSql).map(r -> new Tags(r.value1(), r.value2())).collectList(),
+                        Flux.from(dataSql)
+                                .map(r -> new Tags().setId(r.value1()).setName(r.value2()))
+                                .collectList(),
                         Mono.from(countSql).map(Record1::value1))
-                .map(it -> new PageImpl<>(it.getT1(), pageable, it.getT2()));
+                .map(tuple -> new PageImpl<>(tuple.getT1(), pageable, tuple.getT2()));
     }
 }

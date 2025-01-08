@@ -12,7 +12,6 @@ import com.example.jooq.r2dbc.model.response.PostSummary;
 import com.example.jooq.r2dbc.service.PostService;
 import com.example.jooq.r2dbc.utils.AppConstants;
 import java.net.URI;
-import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -22,9 +21,13 @@ import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Mono;
 
 @Component
-@RequiredArgsConstructor
 public class PostHandler {
+
     private final PostService postService;
+
+    public PostHandler(PostService postService) {
+        this.postService = postService;
+    }
 
     @Loggable
     public Mono<ServerResponse> getAll(ServerRequest req) {
