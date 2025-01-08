@@ -1,9 +1,6 @@
 package com.example.jooq.r2dbc.repository;
 
-import static com.example.jooq.r2dbc.testcontainersflyway.db.tables.PostComments.POST_COMMENTS;
-import static com.example.jooq.r2dbc.testcontainersflyway.db.tables.Posts.POSTS;
-import static com.example.jooq.r2dbc.testcontainersflyway.db.tables.PostsTags.POSTS_TAGS;
-import static com.example.jooq.r2dbc.testcontainersflyway.db.tables.Tags.TAGS;
+import static com.example.jooq.r2dbc.repository.custom.impl.CustomPostRepositoryImpl.retrievePostsWithCommentsAndTags;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.example.jooq.r2dbc.common.ContainerConfig;
@@ -14,10 +11,10 @@ import com.example.jooq.r2dbc.entities.PostTagRelation;
 import com.example.jooq.r2dbc.entities.Tags;
 import com.example.jooq.r2dbc.model.response.PostCommentResponse;
 import com.example.jooq.r2dbc.model.response.PostResponse;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.UUID;
 import org.jooq.DSLContext;
-import org.jooq.Record1;
-import org.jooq.impl.DSL;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,7 +46,9 @@ class PostRepositoryTest {
                                 .then(tagRepository.deleteAll())
                                 .then(postCommentRepository.deleteAll())
                                 .then(postRepository.deleteAll()))
-                .verifyComplete();
+                .expectSubscription()
+                .expectComplete()
+                .verify(Duration.ofSeconds(10));
     }
 
     @Test
@@ -82,72 +81,10 @@ class PostRepositoryTest {
                         // Step 4: Insert comments
                         .flatMapMany(
                                 postId ->
-                                        Flux.concat(
-                                                postCommentRepository.save(
-                                                        new Comment()
-                                                                .setPostId(postId)
-                                                                .setContent("test comments")),
-                                                postCommentRepository.save(
-                                                        new Comment()
-                                                                .setPostId(postId)
-                                                                .setContent("test comments 2"))))
+                                        createComments(postId, "test comments", "test comments 2"))
                         .thenMany(
                                 // Step 5: Retrieve data using jOOQ
-                                Flux.from(
-                                                dslContext
-                                                        .select(
-                                                                POSTS.ID,
-                                                                POSTS.TITLE,
-                                                                POSTS.CONTENT,
-                                                                POSTS.CREATED_BY,
-                                                                POSTS.STATUS,
-                                                                DSL.multiset(
-                                                                                DSL.select(
-                                                                                                POST_COMMENTS
-                                                                                                        .ID,
-                                                                                                POST_COMMENTS
-                                                                                                        .CONTENT,
-                                                                                                POST_COMMENTS
-                                                                                                        .CREATED_AT)
-                                                                                        .from(
-                                                                                                POST_COMMENTS)
-                                                                                        .where(
-                                                                                                POST_COMMENTS
-                                                                                                        .POST_ID
-                                                                                                        .eq(
-                                                                                                                POSTS.ID)))
-                                                                        .as("comments")
-                                                                        .convertFrom(
-                                                                                record ->
-                                                                                        record.into(
-                                                                                                PostCommentResponse
-                                                                                                        .class)),
-                                                                DSL.multiset(
-                                                                                DSL.select(
-                                                                                                TAGS.NAME)
-                                                                                        .from(TAGS)
-                                                                                        .join(
-                                                                                                POSTS_TAGS)
-                                                                                        .on(
-                                                                                                TAGS
-                                                                                                        .ID
-                                                                                                        .eq(
-                                                                                                                POSTS_TAGS
-                                                                                                                        .TAG_ID))
-                                                                                        .where(
-                                                                                                POSTS_TAGS
-                                                                                                        .POST_ID
-                                                                                                        .eq(
-                                                                                                                POSTS.ID)))
-                                                                        .as("tags")
-                                                                        .convertFrom(
-                                                                                record ->
-                                                                                        record.map(
-                                                                                                Record1
-                                                                                                        ::value1)))
-                                                        .from(POSTS)
-                                                        .orderBy(POSTS.CREATED_AT))
-                                        .map(record -> record.into(PostResponse.class)));
+                                Flux.from(retrievePostsWithCommentsAndTags(dslContext, null)));
 
         StepVerifier.create(postResponseFlux)
                 .expectNextMatches(
@@ -157,6 +94,7 @@ class PostRepositoryTest {
                             assertThat(postResponse.title()).isEqualTo("jooq test");
                             assertThat(postResponse.content()).isEqualTo("content of Jooq test");
                             assertThat(postResponse.createdBy()).isEqualTo("appUser");
+                            assertThat(postResponse.status()).isEqualTo("DRAFT");
                             assertThat(postResponse.comments()).isNotEmpty().hasSize(2);
                             assertThat(postResponse.tags()).isNotEmpty().hasSize(1);
 
@@ -164,7 +102,9 @@ class PostRepositoryTest {
                             PostCommentResponse postCommentResponse =
                                     postResponse.comments().getFirst();
                             assertThat(postCommentResponse.id()).isInstanceOf(UUID.class);
-                            assertThat(postCommentResponse.createdAt()).isNotNull();
+                            assertThat(postCommentResponse.createdAt())
+                                    .isNotNull()
+                                    .isInstanceOf(LocalDateTime.class);
                             assertThat(postCommentResponse.content()).isEqualTo("test comments");
                             PostCommentResponse last = postResponse.comments().getLast();
                             assertThat(last.id()).isInstanceOf(UUID.class);
@@ -189,61 +129,7 @@ class PostRepositoryTest {
                         .save(new Post().setTitle("jooq test").setContent("content of Jooq test"))
                         .thenMany(
                                 // Step 2: Retrieve data using jOOQ
-                                Flux.from(
-                                                dslContext
-                                                        .select(
-                                                                POSTS.ID,
-                                                                POSTS.TITLE,
-                                                                POSTS.CONTENT,
-                                                                POSTS.CREATED_BY,
-                                                                POSTS.STATUS,
-                                                                DSL.multiset(
-                                                                                DSL.select(
-                                                                                                POST_COMMENTS
-                                                                                                        .ID,
-                                                                                                POST_COMMENTS
-                                                                                                        .CONTENT,
-                                                                                                POST_COMMENTS
-                                                                                                        .CREATED_AT)
-                                                                                        .from(
-                                                                                                POST_COMMENTS)
-                                                                                        .where(
-                                                                                                POST_COMMENTS
-                                                                                                        .POST_ID
-                                                                                                        .eq(
-                                                                                                                POSTS.ID)))
-                                                                        .as("comments")
-                                                                        .convertFrom(
-                                                                                record ->
-                                                                                        record.into(
-                                                                                                PostCommentResponse
-                                                                                                        .class)),
-                                                                DSL.multiset(
-                                                                                DSL.select(
-                                                                                                TAGS.NAME)
-                                                                                        .from(TAGS)
-                                                                                        .join(
-                                                                                                POSTS_TAGS)
-                                                                                        .on(
-                                                                                                TAGS
-                                                                                                        .ID
-                                                                                                        .eq(
-                                                                                                                POSTS_TAGS
-                                                                                                                        .TAG_ID))
-                                                                                        .where(
-                                                                                                POSTS_TAGS
-                                                                                                        .POST_ID
-                                                                                                        .eq(
-                                                                                                                POSTS.ID)))
-                                                                        .as("tags")
-                                                                        .convertFrom(
-                                                                                record ->
-                                                                                        record.map(
-                                                                                                Record1
-                                                                                                        ::value1)))
-                                                        .from(POSTS)
-                                                        .orderBy(POSTS.CREATED_AT))
-                                        .map(record -> record.into(PostResponse.class)));
+                                retrievePostsWithCommentsAndTags(dslContext, null));
 
         StepVerifier.create(postResponseFlux)
                 .expectNextMatches(
@@ -253,6 +139,7 @@ class PostRepositoryTest {
                             assertThat(postResponse.title()).isEqualTo("jooq test");
                             assertThat(postResponse.content()).isEqualTo("content of Jooq test");
                             assertThat(postResponse.createdBy()).isEqualTo("appUser");
+                            assertThat(postResponse.status()).isEqualTo("DRAFT");
                             assertThat(postResponse.comments()).isEmpty();
                             assertThat(postResponse.tags()).isEmpty();
 
@@ -260,5 +147,13 @@ class PostRepositoryTest {
                         })
                 .expectComplete()
                 .verify();
+    }
+
+    private Flux<Comment> createComments(UUID postId, String... contents) {
+        return Flux.fromArray(contents)
+                .flatMap(
+                        content ->
+                                postCommentRepository.save(
+                                        new Comment().setPostId(postId).setContent(content)));
     }
 }
