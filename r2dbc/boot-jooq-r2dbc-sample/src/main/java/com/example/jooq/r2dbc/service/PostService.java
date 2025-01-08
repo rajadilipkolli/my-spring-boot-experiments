@@ -126,8 +126,13 @@ public class PostService {
     }
 
     public Mono<PaginatedResult<PostResponse>> findByKeyword(String keyword, Pageable pageable) {
-        String sanitizedKeyword =
-                StringUtils.hasText(keyword) ? keyword.replaceAll("[\n\r\t]", "_") : "";
+        // Check if the keyword has text
+        if (!StringUtils.hasText(keyword)) {
+            log.debug("findByKeyword called with empty or null keyword");
+            return Mono.empty();
+        }
+        // Sanitize the keyword to avoid injection-like issues
+        String sanitizedKeyword = keyword.replaceAll("[\n\r\t]", "_");
         log.debug(
                 "findByKeyword with sanitizedKeyword :{} with offset :{} and limit :{}",
                 sanitizedKeyword,

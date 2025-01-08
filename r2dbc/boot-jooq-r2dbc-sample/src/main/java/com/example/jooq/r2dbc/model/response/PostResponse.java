@@ -7,5 +7,6 @@ public record PostResponse(
         UUID id,
         String title,
         String content,
+        String createdBy,
         List<PostCommentResponse> comments,
         List<String> tags) {}
