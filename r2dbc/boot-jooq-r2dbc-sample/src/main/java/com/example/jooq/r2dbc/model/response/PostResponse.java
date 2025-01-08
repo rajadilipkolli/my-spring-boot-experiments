@@ -1,5 +1,6 @@
 package com.example.jooq.r2dbc.model.response;
 
+import com.example.jooq.r2dbc.entities.Status;
 import java.util.List;
 import java.util.UUID;
 
@@ -8,6 +9,6 @@ public record PostResponse(
         String title,
         String content,
         String createdBy,
-        String status,
+        Status status,
         List<PostCommentResponse> comments,
         List<String> tags) {}

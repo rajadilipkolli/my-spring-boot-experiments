@@ -45,7 +45,7 @@ public class CustomPostRepositoryImpl extends JooqSorting implements CustomPostR
         // Execute the data and count queries reactively and build the result page
         return Mono.zip(
                         // Fetch data query
-                        retrievePostsWithCommentsAndTags(dslContext, condition)
+                        retrievePostsWithCommentsAndTags(condition)
                                 .doOnError(
                                         e ->
                                                 log.error(
@@ -57,16 +57,12 @@ public class CustomPostRepositoryImpl extends JooqSorting implements CustomPostR
                         Mono.from(countQuery).map(Record1::value1) // Get the count value
                         )
                 .doOnError(e -> log.error("Error executing queries: {}", e.getMessage(), e))
-                .map(
-                        tuple ->
-                                new PageImpl<>(
-                                        tuple.getT1(),
-                                        pageable,
-                                        tuple.getT2())); // Map into PageImpl
+                // Map into PageImpl
+                .map(tuple -> new PageImpl<>(tuple.getT1(), pageable, tuple.getT2()));
     }
 
-    public static Flux<PostResponse> retrievePostsWithCommentsAndTags(
-            DSLContext dslContext, Condition condition) {
+    @Override
+    public Flux<PostResponse> retrievePostsWithCommentsAndTags(Condition condition) {
         // Start with a base condition
         Condition whereCondition = DSL.trueCondition();
 

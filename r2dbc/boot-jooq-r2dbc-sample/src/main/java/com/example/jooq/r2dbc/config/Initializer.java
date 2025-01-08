@@ -1,30 +1,35 @@
 package com.example.jooq.r2dbc.config;
 
-import static com.example.jooq.r2dbc.repository.custom.impl.CustomPostRepositoryImpl.retrievePostsWithCommentsAndTags;
 import static com.example.jooq.r2dbc.testcontainersflyway.db.Tables.POSTS_TAGS;
 import static com.example.jooq.r2dbc.testcontainersflyway.db.tables.PostComments.POST_COMMENTS;
 import static com.example.jooq.r2dbc.testcontainersflyway.db.tables.Posts.POSTS;
 import static com.example.jooq.r2dbc.testcontainersflyway.db.tables.Tags.TAGS;
 
 import com.example.jooq.r2dbc.config.logging.Loggable;
+import com.example.jooq.r2dbc.repository.PostRepository;
 import com.example.jooq.r2dbc.testcontainersflyway.db.tables.records.PostCommentsRecord;
 import com.example.jooq.r2dbc.testcontainersflyway.db.tables.records.PostsRecord;
 import com.example.jooq.r2dbc.testcontainersflyway.db.tables.records.PostsTagsRecord;
 import com.example.jooq.r2dbc.testcontainersflyway.db.tables.records.TagsRecord;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.jooq.DSLContext;
 import org.jooq.DeleteUsingStep;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
 @Component
-@RequiredArgsConstructor
-@Slf4j
 public class Initializer implements CommandLineRunner {
 
+    private static final Logger log = LoggerFactory.getLogger(Initializer.class);
     private final DSLContext dslContext;
+    private final PostRepository postRepository;
+
+    public Initializer(DSLContext dslContext, PostRepository postRepository) {
+        this.dslContext = dslContext;
+        this.postRepository = postRepository;
+    }
 
     @Override
     @Loggable
@@ -85,7 +90,7 @@ public class Initializer implements CommandLineRunner {
                                                                         "test comments 2")
                                                                 .returningResult(POST_COMMENTS.ID))
                                         .collectList())
-                .thenMany(retrievePostsWithCommentsAndTags(dslContext, null))
+                .thenMany(postRepository.retrievePostsWithCommentsAndTags(null))
                 .subscribe(
                         data -> log.debug("Retrieved data: {}", data),
                         error -> log.debug("error: ", error),

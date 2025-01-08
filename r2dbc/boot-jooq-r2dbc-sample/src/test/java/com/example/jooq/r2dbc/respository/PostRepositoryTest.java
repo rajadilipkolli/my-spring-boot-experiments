@@ -1,6 +1,5 @@
 package com.example.jooq.r2dbc.repository;
 
-import static com.example.jooq.r2dbc.repository.custom.impl.CustomPostRepositoryImpl.retrievePostsWithCommentsAndTags;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.example.jooq.r2dbc.common.ContainerConfig;
@@ -8,6 +7,7 @@ import com.example.jooq.r2dbc.config.JooqConfiguration;
 import com.example.jooq.r2dbc.entities.Comment;
 import com.example.jooq.r2dbc.entities.Post;
 import com.example.jooq.r2dbc.entities.PostTagRelation;
+import com.example.jooq.r2dbc.entities.Status;
 import com.example.jooq.r2dbc.entities.Tags;
 import com.example.jooq.r2dbc.model.response.PostCommentResponse;
 import com.example.jooq.r2dbc.model.response.PostResponse;
@@ -21,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.r2dbc.DataR2dbcTest;
 import org.springframework.context.annotation.Import;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 @DataR2dbcTest
@@ -56,8 +57,7 @@ class PostRepositoryTest {
 
         Flux<PostResponse> postResponseFlux =
                 // Step 1: Insert a new post
-                postRepository
-                        .save(new Post().setTitle("jooq test").setContent("content of Jooq test"))
+                createPost()
                         .flatMap(
                                 post -> {
                                     UUID postId = post.getId();
@@ -84,32 +84,18 @@ class PostRepositoryTest {
                                         createComments(postId, "test comments", "test comments 2"))
                         .thenMany(
                                 // Step 5: Retrieve data using jOOQ
-                                Flux.from(retrievePostsWithCommentsAndTags(dslContext, null)));
+                                Flux.from(postRepository.retrievePostsWithCommentsAndTags(null)));
 
         StepVerifier.create(postResponseFlux)
                 .expectNextMatches(
                         postResponse -> {
                             // Assertions for post data
-                            assertThat(postResponse.id()).isInstanceOf(UUID.class);
-                            assertThat(postResponse.title()).isEqualTo("jooq test");
-                            assertThat(postResponse.content()).isEqualTo("content of Jooq test");
-                            assertThat(postResponse.createdBy()).isEqualTo("appUser");
-                            assertThat(postResponse.status()).isEqualTo("DRAFT");
+                            verifyBasicPostResponse(postResponse);
                             assertThat(postResponse.comments()).isNotEmpty().hasSize(2);
                             assertThat(postResponse.tags()).isNotEmpty().hasSize(1);
 
                             // Assertions for
-                            PostCommentResponse postCommentResponse =
-                                    postResponse.comments().getFirst();
-                            assertThat(postCommentResponse.id()).isInstanceOf(UUID.class);
-                            assertThat(postCommentResponse.createdAt())
-                                    .isNotNull()
-                                    .isInstanceOf(LocalDateTime.class);
-                            assertThat(postCommentResponse.content()).isEqualTo("test comments");
-                            PostCommentResponse last = postResponse.comments().getLast();
-                            assertThat(last.id()).isInstanceOf(UUID.class);
-                            assertThat(last.createdAt()).isNotNull();
-                            assertThat(last.content()).isEqualTo("test comments 2");
+                            assertPostComments(postResponse);
 
                             // Assertions for tags
                             assertThat(postResponse.tags().getFirst()).isEqualTo("java");
@@ -125,21 +111,16 @@ class PostRepositoryTest {
 
         Flux<PostResponse> postResponseFlux =
                 // Step 1: Insert a new post
-                postRepository
-                        .save(new Post().setTitle("jooq test").setContent("content of Jooq test"))
+                createPost()
                         .thenMany(
                                 // Step 2: Retrieve data using jOOQ
-                                retrievePostsWithCommentsAndTags(dslContext, null));
+                                postRepository.retrievePostsWithCommentsAndTags(null));
 
         StepVerifier.create(postResponseFlux)
                 .expectNextMatches(
                         postResponse -> {
                             // Assertions for post data
-                            assertThat(postResponse.id()).isInstanceOf(UUID.class);
-                            assertThat(postResponse.title()).isEqualTo("jooq test");
-                            assertThat(postResponse.content()).isEqualTo("content of Jooq test");
-                            assertThat(postResponse.createdBy()).isEqualTo("appUser");
-                            assertThat(postResponse.status()).isEqualTo("DRAFT");
+                            verifyBasicPostResponse(postResponse);
                             assertThat(postResponse.comments()).isEmpty();
                             assertThat(postResponse.tags()).isEmpty();
 
@@ -147,6 +128,30 @@ class PostRepositoryTest {
                         })
                 .expectComplete()
                 .verify();
+    }
+
+    private Mono<Post> createPost() {
+        return postRepository.save(
+                new Post().setTitle("jooq test").setContent("content of Jooq test"));
+    }
+
+    private void verifyBasicPostResponse(PostResponse postResponse) {
+        assertThat(postResponse.id()).isInstanceOf(UUID.class);
+        assertThat(postResponse.title()).isEqualTo("jooq test");
+        assertThat(postResponse.content()).isEqualTo("content of Jooq test");
+        assertThat(postResponse.createdBy()).isEqualTo("appUser");
+        assertThat(postResponse.status()).isEqualTo(Status.DRAFT);
+    }
+
+    private void assertPostComments(PostResponse postResponse) {
+        PostCommentResponse postCommentResponse = postResponse.comments().getFirst();
+        assertThat(postCommentResponse.id()).isInstanceOf(UUID.class);
+        assertThat(postCommentResponse.createdAt()).isNotNull().isInstanceOf(LocalDateTime.class);
+        assertThat(postCommentResponse.content()).isEqualTo("test comments");
+        PostCommentResponse last = postResponse.comments().getLast();
+        assertThat(last.id()).isInstanceOf(UUID.class);
+        assertThat(last.createdAt()).isNotNull();
+        assertThat(last.content()).isEqualTo("test comments 2");
     }
 
     private Flux<Comment> createComments(UUID postId, String... contents) {
