@@ -8,5 +8,6 @@ public record PostResponse(
         String title,
         String content,
         String createdBy,
+        String status,
         List<PostCommentResponse> comments,
         List<String> tags) {}

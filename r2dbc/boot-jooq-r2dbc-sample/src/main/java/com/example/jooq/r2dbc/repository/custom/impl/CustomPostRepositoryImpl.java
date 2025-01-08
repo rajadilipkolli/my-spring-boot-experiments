@@ -48,6 +48,7 @@ public class CustomPostRepositoryImpl extends JooqSorting implements CustomPostR
                                 POSTS.TITLE, // Post Title
                                 POSTS.CONTENT, // Post Content
                                 POSTS.CREATED_BY, // Post Created By
+                                POSTS.STATUS, // Post status
                                 // Fetch comments as a multiset
                                 DSL.multiset(
                                                 DSL.select(

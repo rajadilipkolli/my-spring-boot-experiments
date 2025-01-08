@@ -100,6 +100,7 @@ class PostRepositoryTest {
                                                                 POSTS.TITLE,
                                                                 POSTS.CONTENT,
                                                                 POSTS.CREATED_BY,
+                                                                POSTS.STATUS,
                                                                 DSL.multiset(
                                                                                 DSL.select(
                                                                                                 POST_COMMENTS
@@ -152,6 +153,7 @@ class PostRepositoryTest {
                 .expectNextMatches(
                         postResponse -> {
                             // Assertions for post data
+                            assertThat(postResponse.id()).isInstanceOf(UUID.class);
                             assertThat(postResponse.title()).isEqualTo("jooq test");
                             assertThat(postResponse.content()).isEqualTo("content of Jooq test");
                             assertThat(postResponse.createdBy()).isEqualTo("appUser");
@@ -159,10 +161,15 @@ class PostRepositoryTest {
                             assertThat(postResponse.tags()).isNotEmpty().hasSize(1);
 
                             // Assertions for
-                            assertThat(postResponse.comments().getFirst().content())
-                                    .isEqualTo("test comments");
-                            assertThat(postResponse.comments().getLast().content())
-                                    .isEqualTo("test comments 2");
+                            PostCommentResponse postCommentResponse =
+                                    postResponse.comments().getFirst();
+                            assertThat(postCommentResponse.id()).isInstanceOf(UUID.class);
+                            assertThat(postCommentResponse.createdAt()).isNotNull();
+                            assertThat(postCommentResponse.content()).isEqualTo("test comments");
+                            PostCommentResponse last = postResponse.comments().getLast();
+                            assertThat(last.id()).isInstanceOf(UUID.class);
+                            assertThat(last.createdAt()).isNotNull();
+                            assertThat(last.content()).isEqualTo("test comments 2");
 
                             // Assertions for tags
                             assertThat(postResponse.tags().getFirst()).isEqualTo("java");
@@ -189,6 +196,7 @@ class PostRepositoryTest {
                                                                 POSTS.TITLE,
                                                                 POSTS.CONTENT,
                                                                 POSTS.CREATED_BY,
+                                                                POSTS.STATUS,
                                                                 DSL.multiset(
                                                                                 DSL.select(
                                                                                                 POST_COMMENTS
@@ -241,6 +249,7 @@ class PostRepositoryTest {
                 .expectNextMatches(
                         postResponse -> {
                             // Assertions for post data
+                            assertThat(postResponse.id()).isInstanceOf(UUID.class);
                             assertThat(postResponse.title()).isEqualTo("jooq test");
                             assertThat(postResponse.content()).isEqualTo("content of Jooq test");
                             assertThat(postResponse.createdBy()).isEqualTo("appUser");

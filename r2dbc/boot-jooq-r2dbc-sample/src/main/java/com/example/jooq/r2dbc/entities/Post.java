@@ -2,9 +2,6 @@ package com.example.jooq.r2dbc.entities;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
@@ -15,9 +12,6 @@ import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
 @ToString
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
 @Table(value = "posts")
 public class Post {
 
@@ -32,7 +26,6 @@ public class Post {
     private String content;
 
     @Column("status")
-    @Builder.Default
     private Status status = Status.DRAFT;
 
     @Column("created_at")
@@ -50,6 +43,8 @@ public class Post {
     @Column("version")
     @Version
     private Short version;
+
+    public Post() {}
 
     public UUID getId() {
         return id;
