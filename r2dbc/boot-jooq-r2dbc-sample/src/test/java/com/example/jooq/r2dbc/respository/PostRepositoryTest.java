@@ -156,7 +156,7 @@ class PostRepositoryTest {
                             assertThat(postResponse.content()).isEqualTo("content of Jooq test");
                             assertThat(postResponse.createdBy()).isEqualTo("appUser");
                             assertThat(postResponse.comments()).isNotEmpty().hasSize(2);
-                            assertThat(postResponse.tags().size()).isEqualTo(1);
+                            assertThat(postResponse.tags()).isNotEmpty().hasSize(1);
 
                             // Assertions for
                             assertThat(postResponse.comments().getFirst().content())
@@ -166,6 +166,86 @@ class PostRepositoryTest {
 
                             // Assertions for tags
                             assertThat(postResponse.tags().getFirst()).isEqualTo("java");
+
+                            return true;
+                        })
+                .expectComplete()
+                .verify();
+    }
+
+    @Test
+    void testInsertPostOnlyViaR2dbcAndRetrieveViaDSLContext() {
+
+        Flux<PostResponse> postResponseFlux =
+                // Step 1: Insert a new post
+                postRepository
+                        .save(new Post().setTitle("jooq test").setContent("content of Jooq test"))
+                        .thenMany(
+                                // Step 2: Retrieve data using jOOQ
+                                Flux.from(
+                                                dslContext
+                                                        .select(
+                                                                POSTS.ID,
+                                                                POSTS.TITLE,
+                                                                POSTS.CONTENT,
+                                                                POSTS.CREATED_BY,
+                                                                DSL.multiset(
+                                                                                DSL.select(
+                                                                                                POST_COMMENTS
+                                                                                                        .ID,
+                                                                                                POST_COMMENTS
+                                                                                                        .CONTENT,
+                                                                                                POST_COMMENTS
+                                                                                                        .CREATED_AT)
+                                                                                        .from(
+                                                                                                POST_COMMENTS)
+                                                                                        .where(
+                                                                                                POST_COMMENTS
+                                                                                                        .POST_ID
+                                                                                                        .eq(
+                                                                                                                POSTS.ID)))
+                                                                        .as("comments")
+                                                                        .convertFrom(
+                                                                                record ->
+                                                                                        record.into(
+                                                                                                PostCommentResponse
+                                                                                                        .class)),
+                                                                DSL.multiset(
+                                                                                DSL.select(
+                                                                                                TAGS.NAME)
+                                                                                        .from(TAGS)
+                                                                                        .join(
+                                                                                                POSTS_TAGS)
+                                                                                        .on(
+                                                                                                TAGS
+                                                                                                        .ID
+                                                                                                        .eq(
+                                                                                                                POSTS_TAGS
+                                                                                                                        .TAG_ID))
+                                                                                        .where(
+                                                                                                POSTS_TAGS
+                                                                                                        .POST_ID
+                                                                                                        .eq(
+                                                                                                                POSTS.ID)))
+                                                                        .as("tags")
+                                                                        .convertFrom(
+                                                                                record ->
+                                                                                        record.map(
+                                                                                                Record1
+                                                                                                        ::value1)))
+                                                        .from(POSTS)
+                                                        .orderBy(POSTS.CREATED_AT))
+                                        .map(record -> record.into(PostResponse.class)));
+
+        StepVerifier.create(postResponseFlux)
+                .expectNextMatches(
+                        postResponse -> {
+                            // Assertions for post data
+                            assertThat(postResponse.title()).isEqualTo("jooq test");
+                            assertThat(postResponse.content()).isEqualTo("content of Jooq test");
+                            assertThat(postResponse.createdBy()).isEqualTo("appUser");
+                            assertThat(postResponse.comments()).isEmpty();
+                            assertThat(postResponse.tags()).isEmpty();
 
                             return true;
                         })

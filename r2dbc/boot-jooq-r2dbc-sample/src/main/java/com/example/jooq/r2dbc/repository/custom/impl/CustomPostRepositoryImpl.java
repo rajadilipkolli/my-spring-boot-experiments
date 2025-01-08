@@ -8,7 +8,6 @@ import static com.example.jooq.r2dbc.testcontainersflyway.db.Tables.TAGS;
 import com.example.jooq.r2dbc.model.response.PostCommentResponse;
 import com.example.jooq.r2dbc.model.response.PostResponse;
 import com.example.jooq.r2dbc.repository.custom.CustomPostRepository;
-import java.util.List;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Field;
@@ -82,18 +81,7 @@ public class CustomPostRepositoryImpl extends JooqSorting implements CustomPostR
         return Mono.zip(
                         // Fetch data query
                         Flux.from(dataQuery)
-                                .map(
-                                        record -> {
-                                            // Map each record into PostResponse
-                                            return new PostResponse(
-                                                    record.get(POSTS.ID), // Post ID
-                                                    record.get(POSTS.TITLE), // Post Title
-                                                    record.get(POSTS.CONTENT), // Post Content
-                                                    record.get(POSTS.CREATED_BY), // Created By
-                                                    record.get("comments", List.class), // Comments
-                                                    record.get("tags", List.class) // Tags
-                                                    );
-                                        })
+                                .map(record -> record.into(PostResponse.class))
                                 .doOnError(
                                         e ->
                                                 log.error(

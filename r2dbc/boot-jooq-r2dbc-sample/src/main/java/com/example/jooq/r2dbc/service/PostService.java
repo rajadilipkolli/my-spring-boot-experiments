@@ -134,10 +134,12 @@ public class PostService {
         // Sanitize the keyword to avoid injection-like issues
         String sanitizedKeyword = keyword.replaceAll("[^a-zA-Z0-9\\s-]", "_");
         log.debug(
-                "findByKeyword with sanitizedKeyword :{} with offset :{} and limit :{}",
+                "findByKeyword [keyword: {}, sanitized: {}, page: {}, size: {}, sort: {}]",
+                keyword,
                 sanitizedKeyword,
-                pageable.getOffset(),
-                pageable.getPageSize());
+                pageable.getPageNumber(),
+                pageable.getPageSize(),
+                pageable.getSort());
 
         return this.postRepository.findByKeyword(keyword, pageable).map(PaginatedResult::new);
     }
