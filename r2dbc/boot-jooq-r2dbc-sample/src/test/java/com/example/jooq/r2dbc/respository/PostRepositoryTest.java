@@ -18,6 +18,7 @@ import java.util.UUID;
 import org.jooq.DSLContext;
 import org.jooq.Record1;
 import org.jooq.impl.DSL;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.r2dbc.DataR2dbcTest;
@@ -39,35 +40,37 @@ class PostRepositoryTest {
 
     @Autowired private DSLContext dslContext;
 
+    @BeforeEach
+    void cleanup() {
+        // Ensure existing data is deleted
+        StepVerifier.create(
+                        postTagRepository
+                                .deleteAll()
+                                .then(tagRepository.deleteAll())
+                                .then(postCommentRepository.deleteAll())
+                                .then(postRepository.deleteAll()))
+                .verifyComplete();
+    }
+
     @Test
     void testInsertPostViaR2dbcAndRetrieveViaDSLContext() {
 
         Flux<PostResponse> postResponseFlux =
-                // Step 1: Delete existing data
-                postTagRepository
-                        .deleteAll()
-                        .then(tagRepository.deleteAll())
-                        .then(postCommentRepository.deleteAll())
-                        .then(postRepository.deleteAll())
-
-                        // Step 2: Insert a new post
-                        .then(
-                                postRepository.save(
-                                        new Post()
-                                                .setTitle("jooq test")
-                                                .setContent("content of Jooq test")))
+                // Step 1: Insert a new post
+                postRepository
+                        .save(new Post().setTitle("jooq test").setContent("content of Jooq test"))
                         .flatMap(
                                 post -> {
                                     UUID postId = post.getId();
 
-                                    // Step 3: Insert a new tag
+                                    // Step 2: Insert a new tag
                                     return tagRepository
                                             .save(new Tags().setName("java"))
                                             .flatMap(
                                                     tag -> {
                                                         UUID tagId = tag.getId();
 
-                                                        // Step 4: Link post and tag
+                                                        // Step 3: Link post and tag
                                                         return postTagRepository
                                                                 .save(
                                                                         new PostTagRelation(
@@ -76,7 +79,7 @@ class PostRepositoryTest {
                                                     });
                                 })
 
-                        // Step 5: Insert comments
+                        // Step 4: Insert comments
                         .flatMapMany(
                                 postId ->
                                         Flux.concat(
@@ -89,7 +92,7 @@ class PostRepositoryTest {
                                                                 .setPostId(postId)
                                                                 .setContent("test comments 2"))))
                         .thenMany(
-                                // Step 6: Retrieve data using jOOQ
+                                // Step 5: Retrieve data using jOOQ
                                 Flux.from(
                                                 dslContext
                                                         .select(

@@ -132,7 +132,7 @@ public class PostService {
             return Mono.empty();
         }
         // Sanitize the keyword to avoid injection-like issues
-        String sanitizedKeyword = keyword.replaceAll("[\n\r\t]", "_");
+        String sanitizedKeyword = keyword.replaceAll("[^a-zA-Z0-9\\s-]", "_");
         log.debug(
                 "findByKeyword with sanitizedKeyword :{} with offset :{} and limit :{}",
                 sanitizedKeyword,
