@@ -4,36 +4,37 @@ import static com.example.jooq.r2dbc.testcontainersflyway.db.Tables.POSTS_TAGS;
 import static com.example.jooq.r2dbc.testcontainersflyway.db.tables.PostComments.POST_COMMENTS;
 import static com.example.jooq.r2dbc.testcontainersflyway.db.tables.Posts.POSTS;
 import static com.example.jooq.r2dbc.testcontainersflyway.db.tables.Tags.TAGS;
-import static org.jooq.impl.DSL.multiset;
-import static org.jooq.impl.DSL.select;
 
 import com.example.jooq.r2dbc.config.logging.Loggable;
-import com.example.jooq.r2dbc.model.response.PostCommentResponse;
-import com.example.jooq.r2dbc.model.response.PostResponse;
+import com.example.jooq.r2dbc.repository.PostRepository;
 import com.example.jooq.r2dbc.testcontainersflyway.db.tables.records.PostCommentsRecord;
 import com.example.jooq.r2dbc.testcontainersflyway.db.tables.records.PostsRecord;
 import com.example.jooq.r2dbc.testcontainersflyway.db.tables.records.PostsTagsRecord;
 import com.example.jooq.r2dbc.testcontainersflyway.db.tables.records.TagsRecord;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.jooq.DSLContext;
 import org.jooq.DeleteUsingStep;
-import org.jooq.Record1;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
 @Component
-@RequiredArgsConstructor
-@Slf4j
 public class Initializer implements CommandLineRunner {
 
+    private static final Logger log = LoggerFactory.getLogger(Initializer.class);
     private final DSLContext dslContext;
+    private final PostRepository postRepository;
+
+    public Initializer(DSLContext dslContext, PostRepository postRepository) {
+        this.dslContext = dslContext;
+        this.postRepository = postRepository;
+    }
 
     @Override
     @Loggable
     public void run(String... args) {
-        log.info("Running Initializer.....");
+        log.info("Running Initializer to use JOOQ only...");
         DeleteUsingStep<PostsTagsRecord> postsTagsRecordDeleteUsingStep =
                 dslContext.deleteFrom(POSTS_TAGS);
         DeleteUsingStep<TagsRecord> tagsRecordDeleteUsingStep = dslContext.deleteFrom(TAGS);
@@ -89,40 +90,9 @@ public class Initializer implements CommandLineRunner {
                                                                         "test comments 2")
                                                                 .returningResult(POST_COMMENTS.ID))
                                         .collectList())
-                .thenMany(
-                        dslContext
-                                .select(
-                                        POSTS.ID,
-                                        POSTS.TITLE,
-                                        POSTS.CONTENT,
-                                        multiset(
-                                                        select(
-                                                                        POST_COMMENTS.ID,
-                                                                        POST_COMMENTS.CONTENT,
-                                                                        POST_COMMENTS.CREATED_AT)
-                                                                .from(POST_COMMENTS)
-                                                                .where(
-                                                                        POST_COMMENTS.POST_ID.eq(
-                                                                                POSTS.ID)))
-                                                .as("comments")
-                                                .convertFrom(
-                                                        record3s ->
-                                                                record3s.into(
-                                                                        PostCommentResponse.class)),
-                                        multiset(
-                                                        select(TAGS.NAME)
-                                                                .from(TAGS)
-                                                                .join(POSTS_TAGS)
-                                                                .on(TAGS.ID.eq(POSTS_TAGS.TAG_ID))
-                                                                .where(
-                                                                        POSTS_TAGS.POST_ID.eq(
-                                                                                POSTS.ID)))
-                                                .as("tags")
-                                                .convertFrom(record -> record.map(Record1::value1)))
-                                .from(POSTS)
-                                .orderBy(POSTS.CREATED_AT))
+                .thenMany(postRepository.retrievePostsWithCommentsAndTags(null))
                 .subscribe(
-                        data -> log.debug("Retrieved data: {}", data.into(PostResponse.class)),
+                        data -> log.debug("Retrieved data: {}", data),
                         error -> log.debug("error: ", error),
                         () -> log.debug("done"));
     }

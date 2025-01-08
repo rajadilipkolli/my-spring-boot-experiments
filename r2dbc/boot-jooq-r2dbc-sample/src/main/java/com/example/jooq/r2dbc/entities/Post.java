@@ -1,12 +1,8 @@
 package com.example.jooq.r2dbc.entities;
 
+import com.example.jooq.r2dbc.model.Status;
 import java.time.LocalDateTime;
 import java.util.UUID;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 import lombok.ToString;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
@@ -16,12 +12,7 @@ import org.springframework.data.annotation.Version;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
-@Getter
-@Setter
 @ToString
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
 @Table(value = "posts")
 public class Post {
 
@@ -36,7 +27,6 @@ public class Post {
     private String content;
 
     @Column("status")
-    @Builder.Default
     private Status status = Status.DRAFT;
 
     @Column("created_at")
@@ -54,4 +44,78 @@ public class Post {
     @Column("version")
     @Version
     private Short version;
+
+    public Post() {}
+
+    public UUID getId() {
+        return id;
+    }
+
+    public Post setId(UUID id) {
+        this.id = id;
+        return this;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public Post setTitle(String title) {
+        this.title = title;
+        return this;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public Post setContent(String content) {
+        this.content = content;
+        return this;
+    }
+
+    public Status getStatus() {
+        return status;
+    }
+
+    public Post setStatus(Status status) {
+        this.status = status;
+        return this;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public Post setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+        return this;
+    }
+
+    public String getCreatedBy() {
+        return createdBy;
+    }
+
+    public Post setCreatedBy(String createdBy) {
+        this.createdBy = createdBy;
+        return this;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public Post setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+        return this;
+    }
+
+    public Short getVersion() {
+        return version;
+    }
+
+    public Post setVersion(Short version) {
+        this.version = version;
+        return this;
+    }
 }

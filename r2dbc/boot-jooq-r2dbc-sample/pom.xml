@@ -336,6 +336,12 @@
                             <style>AOSP</style>
                         </googleJavaFormat>
                     </java>
+                    <sql>
+                        <includes>
+                            <include>src/main/resources/**/*.sql</include>
+                        </includes>
+                        <dbeaver />
+                    </sql>
                 </configuration>
                 <executions>
                     <execution>

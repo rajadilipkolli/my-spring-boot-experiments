@@ -5,7 +5,6 @@ import org.springframework.boot.testcontainers.service.connection.ServiceConnect
 import org.springframework.context.annotation.Bean;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.utility.DockerImageName;
-import org.testcontainers.utility.MountableFile;
 
 @TestConfiguration(proxyBeanMethods = false)
 public class ContainerConfig {
@@ -13,9 +12,6 @@ public class ContainerConfig {
     @Bean
     @ServiceConnection
     PostgreSQLContainer<?> postgreSQLContainer() {
-        return new PostgreSQLContainer<>(DockerImageName.parse("postgres").withTag("17.2-alpine"))
-                .withCopyFileToContainer(
-                        MountableFile.forClasspathResource("init.sql"),
-                        "/docker-entrypoint-initdb.d/init.sql");
+        return new PostgreSQLContainer<>(DockerImageName.parse("postgres").withTag("17.2-alpine"));
     }
 }
