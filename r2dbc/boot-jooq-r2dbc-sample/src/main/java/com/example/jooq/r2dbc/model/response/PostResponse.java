@@ -1,6 +1,6 @@
 package com.example.jooq.r2dbc.model.response;
 
-import com.example.jooq.r2dbc.entities.Status;
+import com.example.jooq.r2dbc.model.Status;
 import java.util.List;
 import java.util.UUID;
 

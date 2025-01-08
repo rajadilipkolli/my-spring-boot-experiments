@@ -1,18 +1,20 @@
 package com.example.jooq.r2dbc.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
 
 import com.example.jooq.r2dbc.common.ContainerConfig;
 import com.example.jooq.r2dbc.config.JooqConfiguration;
 import com.example.jooq.r2dbc.entities.Comment;
 import com.example.jooq.r2dbc.entities.Post;
 import com.example.jooq.r2dbc.entities.PostTagRelation;
-import com.example.jooq.r2dbc.entities.Status;
 import com.example.jooq.r2dbc.entities.Tags;
+import com.example.jooq.r2dbc.model.Status;
 import com.example.jooq.r2dbc.model.response.PostCommentResponse;
 import com.example.jooq.r2dbc.model.response.PostResponse;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 import org.jooq.DSLContext;
 import org.junit.jupiter.api.BeforeEach;
@@ -49,7 +51,7 @@ class PostRepositoryTest {
                                 .then(postRepository.deleteAll()))
                 .expectSubscription()
                 .expectComplete()
-                .verify(Duration.ofSeconds(10));
+                .verify(Duration.ofSeconds(30));
     }
 
     @Test
@@ -146,10 +148,18 @@ class PostRepositoryTest {
     private void assertPostComments(PostResponse postResponse) {
         PostCommentResponse postCommentResponse = postResponse.comments().getFirst();
         assertThat(postCommentResponse.id()).isInstanceOf(UUID.class);
-        assertThat(postCommentResponse.createdAt()).isNotNull().isInstanceOf(LocalDateTime.class);
+        assertThat(postCommentResponse.createdAt())
+                .isNotNull()
+                .isInstanceOf(LocalDateTime.class)
+                .isCloseTo(LocalDateTime.now(), within(1, ChronoUnit.MINUTES));
         assertThat(postCommentResponse.content()).isEqualTo("test comments");
+
         PostCommentResponse last = postResponse.comments().getLast();
         assertThat(last.id()).isInstanceOf(UUID.class);
+        assertThat(last.createdAt())
+                .isNotNull()
+                .isInstanceOf(LocalDateTime.class)
+                .isCloseTo(LocalDateTime.now(), within(1, ChronoUnit.MINUTES));
         assertThat(last.createdAt()).isNotNull();
         assertThat(last.content()).isEqualTo("test comments 2");
     }

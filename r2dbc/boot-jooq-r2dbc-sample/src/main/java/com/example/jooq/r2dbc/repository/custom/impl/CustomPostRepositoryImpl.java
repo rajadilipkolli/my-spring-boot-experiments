@@ -8,6 +8,7 @@ import static com.example.jooq.r2dbc.testcontainersflyway.db.Tables.TAGS;
 import com.example.jooq.r2dbc.model.response.PostCommentResponse;
 import com.example.jooq.r2dbc.model.response.PostResponse;
 import com.example.jooq.r2dbc.repository.custom.CustomPostRepository;
+import java.util.List;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Field;
@@ -81,34 +82,35 @@ public class CustomPostRepositoryImpl extends JooqSorting implements CustomPostR
                                         POSTS.CREATED_BY, // Post Created By
                                         POSTS.STATUS, // Post status
                                         // Fetch comments as a multiset
-                                        DSL.multiset(
-                                                        DSL.select(
-                                                                        POST_COMMENTS.ID,
-                                                                        POST_COMMENTS.CONTENT,
-                                                                        POST_COMMENTS.CREATED_AT)
-                                                                .from(POST_COMMENTS)
-                                                                .where(
-                                                                        POST_COMMENTS.POST_ID.eq(
-                                                                                POSTS.ID)))
-                                                .as("comments")
-                                                .convertFrom(
-                                                        record ->
-                                                                record.into(
-                                                                        PostCommentResponse.class)),
+                                        getCommentsMultiSet(),
                                         // Fetch tags as a multiset
-                                        DSL.multiset(
-                                                        DSL.select(TAGS.NAME)
-                                                                .from(TAGS)
-                                                                .join(POSTS_TAGS)
-                                                                .on(TAGS.ID.eq(POSTS_TAGS.TAG_ID))
-                                                                .where(
-                                                                        POSTS_TAGS.POST_ID.eq(
-                                                                                POSTS.ID)))
-                                                .as("tags")
-                                                .convertFrom(record -> record.map(Record1::value1)))
+                                        getTagsMultiSet())
                                 .from(POSTS)
                                 .where(whereCondition) // Apply the dynamic where condition
                                 .orderBy(POSTS.CREATED_AT))
                 .map(record -> record.into(PostResponse.class));
+    }
+
+    private Field<List<PostCommentResponse>> getCommentsMultiSet() {
+        return DSL.multiset(
+                        DSL.select(
+                                        POST_COMMENTS.ID,
+                                        POST_COMMENTS.CONTENT,
+                                        POST_COMMENTS.CREATED_AT)
+                                .from(POST_COMMENTS)
+                                .where(POST_COMMENTS.POST_ID.eq(POSTS.ID)))
+                .as("comments")
+                .convertFrom(record -> record.into(PostCommentResponse.class));
+    }
+
+    private Field<List<String>> getTagsMultiSet() {
+        return DSL.multiset(
+                        DSL.select(TAGS.NAME)
+                                .from(TAGS)
+                                .join(POSTS_TAGS)
+                                .on(TAGS.ID.eq(POSTS_TAGS.TAG_ID))
+                                .where(POSTS_TAGS.POST_ID.eq(POSTS.ID)))
+                .as("tags")
+                .convertFrom(record -> record.map(Record1::value1));
     }
 }

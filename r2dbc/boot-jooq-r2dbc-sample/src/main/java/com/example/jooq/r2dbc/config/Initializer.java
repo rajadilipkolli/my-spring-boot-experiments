@@ -34,7 +34,7 @@ public class Initializer implements CommandLineRunner {
     @Override
     @Loggable
     public void run(String... args) {
-        log.info("Running Initializer to use JOOQ only.....");
+        log.info("Running Initializer to use JOOQ only...");
         DeleteUsingStep<PostsTagsRecord> postsTagsRecordDeleteUsingStep =
                 dslContext.deleteFrom(POSTS_TAGS);
         DeleteUsingStep<TagsRecord> tagsRecordDeleteUsingStep = dslContext.deleteFrom(TAGS);

@@ -1,5 +1,6 @@
 package com.example.jooq.r2dbc.entities;
 
+import com.example.jooq.r2dbc.model.Status;
 import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.ToString;
