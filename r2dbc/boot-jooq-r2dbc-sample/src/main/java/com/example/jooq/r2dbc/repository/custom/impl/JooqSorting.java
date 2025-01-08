@@ -39,7 +39,9 @@ public class JooqSorting {
             return (TableField<?, ?>) field.get(tableType);
         } catch (NoSuchFieldException | IllegalAccessException ex) {
             throw new InvalidDataAccessApiUsageException(
-                    "Could not find table field: %s".formatted(sortFieldName), ex);
+                    "Could not find table field '%s' in table type '%s'"
+                            .formatted(sortFieldName, tableType.getClass().getSimpleName()),
+                    ex);
         }
     }
 

@@ -26,6 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -125,9 +126,11 @@ public class PostService {
     }
 
     public Mono<PaginatedResult<PostResponse>> findByKeyword(String keyword, Pageable pageable) {
+        String sanitizedKeyword =
+                StringUtils.hasText(keyword) ? keyword.replaceAll("[\n\r\t]", "_") : "";
         log.debug(
-                "findByKeyword with keyword :{} with offset :{} and limit :{}",
-                keyword,
+                "findByKeyword with sanitizedKeyword :{} with offset :{} and limit :{}",
+                sanitizedKeyword,
                 pageable.getOffset(),
                 pageable.getPageSize());
 

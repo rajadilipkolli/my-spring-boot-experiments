@@ -14,6 +14,8 @@ import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Record1;
 import org.jooq.impl.DSL;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -22,6 +24,8 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 public class CustomPostRepositoryImpl extends JooqSorting implements CustomPostRepository {
+
+    private static final Logger log = LoggerFactory.getLogger(CustomPostRepositoryImpl.class);
     private final DSLContext dslContext;
 
     public CustomPostRepositoryImpl(DSLContext dslContext) {
@@ -30,10 +34,21 @@ public class CustomPostRepositoryImpl extends JooqSorting implements CustomPostR
 
     @Override
     public Mono<Page<PostResponse>> findByKeyword(String keyword, Pageable pageable) {
+        log.debug("Searching posts with keyword: {}, pageable: {}", keyword, pageable);
         // Build the where condition dynamically
         Condition condition = DSL.trueCondition();
         if (StringUtils.hasText(keyword)) {
-            condition = condition.and(POSTS.TITLE.likeIgnoreCase("%" + keyword + "%"));
+            condition =
+                    condition.and(
+                            DSL.or(
+                                    POSTS.TITLE.likeIgnoreCase(
+                                            DSL.concat(
+                                                    DSL.val("%"), DSL.val(keyword), DSL.val("%"))),
+                                    POSTS.CONTENT.likeIgnoreCase(
+                                            DSL.concat(
+                                                    DSL.val("%"),
+                                                    DSL.val(keyword),
+                                                    DSL.val("%")))));
         }
 
         // Construct the main data SQL query
@@ -63,7 +78,7 @@ public class CustomPostRepositoryImpl extends JooqSorting implements CustomPostR
                                                         .where(POSTS_TAGS.POST_ID.eq(POSTS.ID)))
                                         .as("tags")
                                         .convertFrom(records -> records.map(Record1::value1)))
-                        .from(POSTS.leftJoin(POST_COMMENTS).on(POST_COMMENTS.POST_ID.eq(POSTS.ID)))
+                        .from(POSTS)
                         .where(condition)
                         .orderBy(getSortFields(pageable.getSort(), POSTS))
                         .limit(pageable.getPageSize())
@@ -84,8 +99,14 @@ public class CustomPostRepositoryImpl extends JooqSorting implements CustomPostR
                                                         record.value4(), // Comments
                                                         record.value5() // Tags
                                                         ))
+                                .doOnError(
+                                        e ->
+                                                log.error(
+                                                        "Error executing data query: {}",
+                                                        e.getMessage()))
                                 .collectList(),
                         Mono.from(countQuery).map(Record1::value1))
+                .doOnError(e -> log.error("Error executing count query: {}", e.getMessage()))
                 .map(tuple -> new PageImpl<>(tuple.getT1(), pageable, tuple.getT2()));
     }
 }

@@ -1,5 +1,6 @@
 package com.example.jooq.r2dbc.entities;
 
+import java.util.Objects;
 import java.util.UUID;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.springframework.data.annotation.Id;
@@ -39,5 +40,18 @@ public class Tags {
     @Override
     public String toString() {
         return new ToStringBuilder(this).append("id", id).append("name", name).toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Tags)) return false;
+        Tags tags = (Tags) o;
+        return Objects.equals(name, tags.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name);
     }
 }
