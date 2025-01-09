@@ -93,7 +93,8 @@ public class Initializer implements CommandLineRunner {
                 .thenMany(postRepository.retrievePostsWithCommentsAndTags())
                 .subscribe(
                         data -> log.debug("Retrieved data: {}", data),
-                        error -> log.debug("error: ", error),
+                        error ->
+                                log.debug("Failed to retrieve posts with comments and tags", error),
                         () -> log.debug("done"));
     }
 }

@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
 
 import com.example.jooq.r2dbc.common.ContainerConfig;
+import com.example.jooq.r2dbc.config.JooqConfiguration;
 import com.example.jooq.r2dbc.config.QueryProxyExecutionListener;
 import com.example.jooq.r2dbc.config.R2dbcConfiguration;
 import com.example.jooq.r2dbc.entities.Comment;
@@ -29,7 +30,12 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 @DataR2dbcTest
-@Import({ContainerConfig.class, R2dbcConfiguration.class, QueryProxyExecutionListener.class})
+@Import({
+    ContainerConfig.class,
+    JooqConfiguration.class,
+    R2dbcConfiguration.class,
+    QueryProxyExecutionListener.class
+})
 class PostRepositoryTest {
 
     @Autowired private PostRepository postRepository;
@@ -145,7 +151,7 @@ class PostRepositoryTest {
                         throwable ->
                                 throwable instanceof DataIntegrityViolationException
                                         && throwable.getMessage().contains("unique constraint"))
-                .verify();
+                .verify(Duration.ofSeconds(5));
     }
 
     @Test

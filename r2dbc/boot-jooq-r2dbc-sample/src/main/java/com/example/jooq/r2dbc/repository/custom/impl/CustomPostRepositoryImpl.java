@@ -79,6 +79,13 @@ public class CustomPostRepositoryImpl extends JooqSorting implements CustomPostR
                 .map(record -> record.into(PostResponse.class));
     }
 
+    /**
+     * Creates a base select query for posts with their associated comments and tags. The query
+     * includes: - Basic post fields (id, title, content, created_by, status) - Nested comments as a
+     * multiset - Associated tags as a multiset
+     *
+     * @return SelectJoinStep configured with the base query
+     */
     private SelectJoinStep<
                     Record7<
                             UUID,
