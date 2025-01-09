@@ -90,10 +90,11 @@ public class Initializer implements CommandLineRunner {
                                                                         "test comments 2")
                                                                 .returningResult(POST_COMMENTS.ID))
                                         .collectList())
-                .thenMany(postRepository.retrievePostsWithCommentsAndTags(null))
+                .thenMany(postRepository.retrievePostsWithCommentsAndTags())
                 .subscribe(
                         data -> log.debug("Retrieved data: {}", data),
-                        error -> log.debug("error: ", error),
+                        error ->
+                                log.debug("Failed to retrieve posts with comments and tags", error),
                         () -> log.debug("done"));
     }
 }

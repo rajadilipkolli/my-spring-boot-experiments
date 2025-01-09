@@ -9,10 +9,13 @@ import com.example.jooq.r2dbc.model.response.PostCommentResponse;
 import com.example.jooq.r2dbc.model.response.PostResponse;
 import com.example.jooq.r2dbc.repository.custom.CustomPostRepository;
 import java.util.List;
+import java.util.UUID;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Field;
 import org.jooq.Record1;
+import org.jooq.Record7;
+import org.jooq.SelectJoinStep;
 import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,7 +49,13 @@ public class CustomPostRepositoryImpl extends JooqSorting implements CustomPostR
         // Execute the data and count queries reactively and build the result page
         return Mono.zip(
                         // Fetch data query
-                        retrievePostsWithCommentsAndTags(condition)
+                        Flux.from(
+                                        commonSelectJoinStep()
+                                                .where(condition)
+                                                .orderBy(getSortFields(pageable.getSort(), POSTS))
+                                                .limit(pageable.getPageSize())
+                                                .offset(pageable.getOffset()))
+                                .map(record -> record.into(PostResponse.class))
                                 .doOnError(
                                         e ->
                                                 log.error(
@@ -63,32 +72,42 @@ public class CustomPostRepositoryImpl extends JooqSorting implements CustomPostR
     }
 
     @Override
-    public Flux<PostResponse> retrievePostsWithCommentsAndTags(Condition condition) {
-        // Start with a base condition
-        Condition whereCondition = DSL.trueCondition();
-
-        // Add the provided condition if it is not null
-        if (condition != null) {
-            whereCondition = whereCondition.and(condition);
-        }
+    public Flux<PostResponse> retrievePostsWithCommentsAndTags() {
 
         // Construct the query
-        return Flux.from(
-                        dslContext
-                                .select(
-                                        POSTS.ID, // Post ID
-                                        POSTS.TITLE, // Post Title
-                                        POSTS.CONTENT, // Post Content
-                                        POSTS.CREATED_BY, // Post Created By
-                                        POSTS.STATUS, // Post status
-                                        // Fetch comments as a multiset
-                                        getCommentsMultiSet(),
-                                        // Fetch tags as a multiset
-                                        getTagsMultiSet())
-                                .from(POSTS)
-                                .where(whereCondition) // Apply the dynamic where condition
-                                .orderBy(POSTS.CREATED_AT))
+        return Flux.from(commonSelectJoinStep().orderBy(POSTS.CREATED_AT))
                 .map(record -> record.into(PostResponse.class));
+    }
+
+    /**
+     * Creates a base select query for posts with their associated comments and tags. The query
+     * includes: - Basic post fields (id, title, content, created_by, status) - Nested comments as a
+     * multiset - Associated tags as a multiset
+     *
+     * @return SelectJoinStep configured with the base query
+     */
+    private SelectJoinStep<
+                    Record7<
+                            UUID,
+                            String,
+                            String,
+                            String,
+                            String,
+                            List<PostCommentResponse>,
+                            List<String>>>
+            commonSelectJoinStep() {
+        return dslContext
+                .select(
+                        POSTS.ID, // Post ID
+                        POSTS.TITLE, // Post Title
+                        POSTS.CONTENT, // Post Content
+                        POSTS.CREATED_BY, // Post Created By
+                        POSTS.STATUS, // Post status
+                        // Fetch comments as a multiset
+                        getCommentsMultiSet(),
+                        // Fetch tags as a multiset
+                        getTagsMultiSet())
+                .from(POSTS);
     }
 
     private Field<List<PostCommentResponse>> getCommentsMultiSet() {
@@ -98,7 +117,8 @@ public class CustomPostRepositoryImpl extends JooqSorting implements CustomPostR
                                         POST_COMMENTS.CONTENT,
                                         POST_COMMENTS.CREATED_AT)
                                 .from(POST_COMMENTS)
-                                .where(POST_COMMENTS.POST_ID.eq(POSTS.ID)))
+                                .where(POST_COMMENTS.POST_ID.eq(POSTS.ID))
+                                .orderBy(POST_COMMENTS.CREATED_AT.desc()))
                 .as("comments")
                 .convertFrom(record -> record.into(PostCommentResponse.class));
     }
