@@ -5,9 +5,9 @@ CREATE
     TABLE
         posts(
             id uuid NOT NULL DEFAULT uuid_generate_v4(),
-            title text,
-            content text,
-            status text,
+            title text NOT NULL,
+            content text NOT NULL,
+            status text NOT NULL,
             created_at timestamptz DEFAULT NOW(),
             created_by text,
             updated_at timestamptz,
@@ -47,3 +47,20 @@ CREATE
                 tag_id
             )
         );
+
+ALTER TABLE
+    posts ADD CONSTRAINT check_title_not_blank CHECK(
+        LENGTH(
+            TRIM( title )
+        )> 0
+    ),
+    ADD CONSTRAINT check_content_not_blank CHECK(
+        LENGTH(
+            TRIM( content )
+        )> 0
+    ),
+    ADD CONSTRAINT check_status_not_blank CHECK(
+        LENGTH(
+            TRIM( status )
+        )> 0
+    );

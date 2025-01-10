@@ -6,6 +6,7 @@ import static com.example.jooq.r2dbc.testcontainersflyway.db.tables.Posts.POSTS;
 import static com.example.jooq.r2dbc.testcontainersflyway.db.tables.Tags.TAGS;
 
 import com.example.jooq.r2dbc.config.logging.Loggable;
+import com.example.jooq.r2dbc.model.Status;
 import com.example.jooq.r2dbc.repository.PostRepository;
 import com.example.jooq.r2dbc.testcontainersflyway.db.tables.records.PostCommentsRecord;
 import com.example.jooq.r2dbc.testcontainersflyway.db.tables.records.PostsRecord;
@@ -43,15 +44,22 @@ public class Initializer implements CommandLineRunner {
         DeleteUsingStep<PostsRecord> postsRecordDeleteUsingStep = dslContext.deleteFrom(POSTS);
 
         Mono.from(postsTagsRecordDeleteUsingStep)
+                .doOnError(e -> log.error("Failed to delete posts_tags", e))
                 .then(Mono.from(tagsRecordDeleteUsingStep))
+                .doOnError(e -> log.error("Failed to delete tags", e))
                 .then(Mono.from(postCommentsRecordDeleteUsingStep))
+                .doOnError(e -> log.error("Failed to delete post_comments", e))
                 .then(Mono.from(postsRecordDeleteUsingStep))
+                .doOnError(e -> log.error("Failed to delete posts", e))
                 .then(
                         Mono.from(
                                 dslContext
                                         .insertInto(POSTS)
-                                        .columns(POSTS.TITLE, POSTS.CONTENT)
-                                        .values("jooq test", "content of Jooq test")
+                                        .columns(POSTS.TITLE, POSTS.CONTENT, POSTS.STATUS)
+                                        .values(
+                                                "jooq test",
+                                                "content of Jooq test",
+                                                Status.PUBLISHED.name())
                                         .returningResult(POSTS.ID)))
                 .flatMap(
                         postId ->
@@ -94,7 +102,7 @@ public class Initializer implements CommandLineRunner {
                 .subscribe(
                         data -> log.debug("Retrieved data: {}", data),
                         error ->
-                                log.debug("Failed to retrieve posts with comments and tags", error),
+                                log.error("Failed to retrieve posts with comments and tags", error),
                         () -> log.debug("done"));
     }
 }

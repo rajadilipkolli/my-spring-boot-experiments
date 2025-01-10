@@ -8,6 +8,7 @@ import static org.jooq.impl.DSL.multiset;
 import static org.jooq.impl.DSL.select;
 
 import com.example.jooq.r2dbc.entities.Post;
+import com.example.jooq.r2dbc.model.Status;
 import com.example.jooq.r2dbc.model.request.CreatePostCommand;
 import com.example.jooq.r2dbc.model.request.CreatePostComment;
 import com.example.jooq.r2dbc.model.response.PaginatedResult;
@@ -70,8 +71,11 @@ public class PostService {
         var createPostSQL =
                 dslContext
                         .insertInto(POSTS)
-                        .columns(POSTS.TITLE, POSTS.CONTENT)
-                        .values(createPostCommand.title(), createPostCommand.content())
+                        .columns(POSTS.TITLE, POSTS.CONTENT, POSTS.STATUS)
+                        .values(
+                                createPostCommand.title(),
+                                createPostCommand.content(),
+                                Status.DRAFT.name())
                         .returningResult(POSTS.ID);
 
         return Flux.fromIterable(createPostCommand.tagName())
