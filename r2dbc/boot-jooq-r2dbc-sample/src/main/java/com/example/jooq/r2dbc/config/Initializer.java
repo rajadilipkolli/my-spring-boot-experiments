@@ -44,9 +44,13 @@ public class Initializer implements CommandLineRunner {
         DeleteUsingStep<PostsRecord> postsRecordDeleteUsingStep = dslContext.deleteFrom(POSTS);
 
         Mono.from(postsTagsRecordDeleteUsingStep)
+                .doOnError(e -> log.error("Failed to delete posts_tags", e))
                 .then(Mono.from(tagsRecordDeleteUsingStep))
+                .doOnError(e -> log.error("Failed to delete tags", e))
                 .then(Mono.from(postCommentsRecordDeleteUsingStep))
+                .doOnError(e -> log.error("Failed to delete post_comments", e))
                 .then(Mono.from(postsRecordDeleteUsingStep))
+                .doOnError(e -> log.error("Failed to delete posts", e))
                 .then(
                         Mono.from(
                                 dslContext
@@ -98,7 +102,7 @@ public class Initializer implements CommandLineRunner {
                 .subscribe(
                         data -> log.debug("Retrieved data: {}", data),
                         error ->
-                                log.debug("Failed to retrieve posts with comments and tags", error),
+                                log.error("Failed to retrieve posts with comments and tags", error),
                         () -> log.debug("done"));
     }
 }

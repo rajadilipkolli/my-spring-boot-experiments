@@ -226,8 +226,10 @@ class PostRepositoryTest {
         return Stream.of(
                 Arguments.of(null, "content", Status.DRAFT, "title"),
                 Arguments.of("", "content", Status.DRAFT, "title"),
+                Arguments.of("   ", "content", Status.DRAFT, "title"),
                 Arguments.of("title", "content", null, "status"),
                 Arguments.of("title", "", Status.DRAFT, "content"),
+                Arguments.of("title", "   ", Status.DRAFT, "content"),
                 Arguments.of("title", null, Status.DRAFT, "content"));
     }
 
