@@ -6,6 +6,7 @@ import static com.example.jooq.r2dbc.testcontainersflyway.db.tables.Posts.POSTS;
 import static com.example.jooq.r2dbc.testcontainersflyway.db.tables.Tags.TAGS;
 
 import com.example.jooq.r2dbc.config.logging.Loggable;
+import com.example.jooq.r2dbc.model.Status;
 import com.example.jooq.r2dbc.repository.PostRepository;
 import com.example.jooq.r2dbc.testcontainersflyway.db.tables.records.PostCommentsRecord;
 import com.example.jooq.r2dbc.testcontainersflyway.db.tables.records.PostsRecord;
@@ -50,8 +51,11 @@ public class Initializer implements CommandLineRunner {
                         Mono.from(
                                 dslContext
                                         .insertInto(POSTS)
-                                        .columns(POSTS.TITLE, POSTS.CONTENT)
-                                        .values("jooq test", "content of Jooq test")
+                                        .columns(POSTS.TITLE, POSTS.CONTENT, POSTS.STATUS)
+                                        .values(
+                                                "jooq test",
+                                                "content of Jooq test",
+                                                Status.PUBLISHED.name())
                                         .returningResult(POSTS.ID)))
                 .flatMap(
                         postId ->
