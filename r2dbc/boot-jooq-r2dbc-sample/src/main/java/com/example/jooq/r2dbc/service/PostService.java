@@ -8,6 +8,7 @@ import static org.jooq.impl.DSL.multiset;
 import static org.jooq.impl.DSL.select;
 
 import com.example.jooq.r2dbc.entities.Post;
+import com.example.jooq.r2dbc.model.Status;
 import com.example.jooq.r2dbc.model.request.CreatePostCommand;
 import com.example.jooq.r2dbc.model.request.CreatePostComment;
 import com.example.jooq.r2dbc.model.response.PaginatedResult;
