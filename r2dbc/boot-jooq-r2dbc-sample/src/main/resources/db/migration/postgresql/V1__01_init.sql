@@ -5,9 +5,9 @@ CREATE
     TABLE
         posts(
             id uuid NOT NULL DEFAULT uuid_generate_v4(),
-            title text,
-            content text,
-            status text,
+            title text NOT NULL,
+            content text NOT NULL,
+            status text NOT NULL,
             created_at timestamptz DEFAULT NOW(),
             created_by text,
             updated_at timestamptz,

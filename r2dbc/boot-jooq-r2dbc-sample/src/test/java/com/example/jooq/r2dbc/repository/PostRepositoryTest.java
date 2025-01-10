@@ -204,6 +204,13 @@ class PostRepositoryTest {
                 .verify();
     }
 
+    @Test
+    void testInsertPostWithInvalidDataShouldFail() {
+        StepVerifier.create(postRepository.save(new Post().setTitle("").setContent("")))
+                .expectError(IllegalArgumentException.class)
+                .verify();
+    }
+
     private Mono<Post> createPost() {
         return postRepository.save(
                 new Post().setTitle("jooq test").setContent("content of Jooq test"));
