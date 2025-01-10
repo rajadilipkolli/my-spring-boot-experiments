@@ -47,3 +47,20 @@ CREATE
                 tag_id
             )
         );
+
+ALTER TABLE
+    posts ADD CONSTRAINT check_title_not_blank CHECK(
+        LENGTH(
+            TRIM( title )
+        )> 0
+    ),
+    ADD CONSTRAINT check_content_not_blank CHECK(
+        LENGTH(
+            TRIM( content )
+        )> 0
+    ),
+    ADD CONSTRAINT check_status_not_blank CHECK(
+        LENGTH(
+            TRIM( status )
+        )> 0
+    );
