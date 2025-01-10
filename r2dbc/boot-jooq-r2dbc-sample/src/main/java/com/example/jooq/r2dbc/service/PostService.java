@@ -70,8 +70,11 @@ public class PostService {
         var createPostSQL =
                 dslContext
                         .insertInto(POSTS)
-                        .columns(POSTS.TITLE, POSTS.CONTENT)
-                        .values(createPostCommand.title(), createPostCommand.content())
+                        .columns(POSTS.TITLE, POSTS.CONTENT, POSTS.STATUS)
+                        .values(
+                                createPostCommand.title(),
+                                createPostCommand.content(),
+                                Status.DRAFT.name())
                         .returningResult(POSTS.ID);
 
         return Flux.fromIterable(createPostCommand.tagName())
