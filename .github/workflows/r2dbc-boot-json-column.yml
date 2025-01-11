@@ -1,0 +1,35 @@
+name: boot-r2dbc-json-column
+
+on:
+  push:
+    paths:
+      - "r2dbc/boot-r2dbc-json-column/**"
+    branches: [main]
+  pull_request:
+    paths:
+      - "r2dbc/boot-r2dbc-json-column/**"
+    types:
+      - opened
+      - synchronize
+      - reopened
+
+jobs:
+  build:
+    name: Run Unit & Integration Tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: "r2dbc/boot-r2dbc-json-column"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4.6.0
+        with:
+          java-version: 21
+          distribution: "temurin"
+          cache: "maven"
+      - name: Build and analyze
+        run: ./mvnw clean verify

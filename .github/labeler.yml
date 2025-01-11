@@ -106,6 +106,7 @@
   - changed-files:
       - any-glob-to-any-file:
           - r2dbc/boot-jooq-r2dbc-sample/**/*
+          - r2dbc/boot-r2dbc-json-column/**/*
           - r2dbc/boot-r2dbc-sample/**/*
           - r2dbc/boot-r2dbc-reactive-cache/**/*
 "component: jobrunr":
@@ -160,6 +161,7 @@
           - jpa/multitenancy/schema/pom.xml
           - open-api-spring-boot/pom.xml
           - r2dbc/boot-jooq-r2dbc-sample/pom.xml
+          - r2dbc/boot-r2dbc-json-column/pom.xml
           - r2dbc/boot-r2dbc-sample/pom.xml
           - r2dbc/boot-r2dbc-reactive-cache/pom.xml
           - scheduler/boot-scheduler-jobrunr/pom.xml
