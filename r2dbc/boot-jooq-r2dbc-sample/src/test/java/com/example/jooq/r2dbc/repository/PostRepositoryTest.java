@@ -18,8 +18,12 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.UUID;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.r2dbc.DataR2dbcTest;
 import org.springframework.context.annotation.Import;
@@ -204,11 +208,29 @@ class PostRepositoryTest {
                 .verify();
     }
 
-    @Test
-    void testInsertPostWithInvalidDataShouldFail() {
-        StepVerifier.create(postRepository.save(new Post().setTitle("").setContent("")))
-                .expectError(IllegalArgumentException.class)
+    @ParameterizedTest
+    @MethodSource("invalidPostProvider")
+    void testInsertPostWithInvalidDataShouldFail(
+            String title, String content, Status status, String expectedError) {
+        StepVerifier.create(
+                        postRepository.save(
+                                new Post().setTitle(title).setContent(content).setStatus(status)))
+                .expectErrorMatches(
+                        throwable ->
+                                throwable instanceof DataIntegrityViolationException
+                                        && throwable.getMessage().contains(expectedError))
                 .verify();
+    }
+
+    private static Stream<Arguments> invalidPostProvider() {
+        return Stream.of(
+                Arguments.of(null, "content", Status.DRAFT, "title"),
+                Arguments.of("", "content", Status.DRAFT, "title"),
+                Arguments.of("   ", "content", Status.DRAFT, "title"),
+                Arguments.of("title", "content", null, "status"),
+                Arguments.of("title", "", Status.DRAFT, "content"),
+                Arguments.of("title", "   ", Status.DRAFT, "content"),
+                Arguments.of("title", null, Status.DRAFT, "content"));
     }
 
     private Mono<Post> createPost() {
