@@ -42,6 +42,7 @@
 * [open-api-spring-boot](open-api-spring-boot/README.md)
 * [r2dbc](r2dbc/README.md)
   * [r2dbc-jooq](r2dbc/boot-jooq-r2dbc-sample/README.md)
+  * [r2dbc-boot-json-column](r2dbc/boot-r2dbc-json-column/ReadMe.md)
   * [r2dbc-boot](r2dbc/boot-r2dbc-sample/README.md)
   * [reactive-cache](r2dbc/boot-r2dbc-reactive-cache/README.md)
 * [scheduler](scheduler/README.md)
