@@ -11,7 +11,7 @@ CREATE
             status VARCHAR(255) DEFAULT 'DRAFT',
             created_at TIMESTAMP, --NOT NULL DEFAULT LOCALTIMESTAMP,
             updated_at TIMESTAMP,
-            version INTEGER
+            version INTEGER DEFAULT 0 NOT NULL
         );
 
 CREATE
