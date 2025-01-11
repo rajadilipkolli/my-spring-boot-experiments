@@ -2,14 +2,19 @@ package com.example.learning.handler;
 
 import static org.springframework.web.reactive.function.server.ServerResponse.*;
 
+import com.example.learning.entity.Comment;
 import com.example.learning.entity.Post;
 import com.example.learning.repository.CommentRepository;
 import com.example.learning.repository.PostRepository;
 import java.net.URI;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
+import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Mono;
 
 @Component
@@ -24,15 +29,21 @@ public class PostHandler {
     }
 
     public Mono<ServerResponse> all(ServerRequest req) {
-        return ok().body(
-                        this.postRepository.findAll().flatMap(post -> commentRepository
-                                .findByPostId(post.getId())
-                                .collectList()
-                                .map(comments -> {
-                                    post.setComments(comments);
-                                    return post;
-                                })),
-                        Post.class);
+        return this.postRepository
+                .findAll()
+                .collectList()
+                .flatMap(posts -> {
+                    var postIds = posts.stream().map(Post::getId).collect(Collectors.toList());
+                    return commentRepository
+                            .findAllByPostIdIn(postIds)
+                            .collectMultimap(Comment::getPostId)
+                            .map(commentsByPost -> {
+                                posts.forEach(post -> post.setComments(
+                                        (List<Comment>) commentsByPost.getOrDefault(post.getId(), List.of())));
+                                return posts;
+                            });
+                })
+                .flatMap(posts -> ok().bodyValue(posts));
     }
 
     public Mono<ServerResponse> create(ServerRequest req) {
@@ -49,22 +60,20 @@ public class PostHandler {
     }
 
     public Mono<ServerResponse> update(ServerRequest req) {
-        var existed = this.postRepository.findById(UUID.fromString(req.pathVariable("id")));
-        return Mono.zip(
-                        (data) -> {
-                            Post p = (Post) data[0];
-                            Post p2 = (Post) data[1];
-                            p.setTitle(p2.getTitle());
-                            p.setContent(p2.getContent());
-                            p.setMetadata(p2.getMetadata());
-                            p.setStatus(p2.getStatus());
-                            return p;
-                        },
-                        existed,
-                        req.bodyToMono(Post.class))
-                .cast(Post.class)
+        return this.postRepository
+                .findById(UUID.fromString(req.pathVariable("id")))
+                .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found")))
+                .flatMap(existingPost -> req.bodyToMono(Post.class).map(updatedPost -> {
+                    existingPost.setTitle(updatedPost.getTitle());
+                    existingPost.setContent(updatedPost.getContent());
+                    existingPost.setMetadata(updatedPost.getMetadata());
+                    existingPost.setStatus(updatedPost.getStatus());
+                    return existingPost;
+                }))
                 .flatMap(this.postRepository::save)
-                .flatMap(post -> noContent().build());
+                .flatMap(post -> noContent().build())
+                .onErrorResume(IllegalArgumentException.class, e -> ServerResponse.badRequest()
+                        .bodyValue(e.getMessage()));
     }
 
     public Mono<ServerResponse> delete(ServerRequest req) {
