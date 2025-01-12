@@ -83,7 +83,7 @@ class BatchConfig implements JobExecutionListener {
     JpaPagingItemReader<Customer> jpaPagingItemReader(
             @Value("#{stepExecution.jobExecution.jobParameters}") JobParameters jobParameters) {
         // use your jobParameters
-        Map<String, Object> parameterValuesMap = new HashMap<>(2);
+        Map<String, Object> parameterValuesMap = HashMap.newHashMap(2);
         parameterValuesMap.put("minId", jobParameters.getLong("minId"));
         parameterValuesMap.put("maxId", jobParameters.getLong("maxId"));
         return new JpaPagingItemReaderBuilder<Customer>()
