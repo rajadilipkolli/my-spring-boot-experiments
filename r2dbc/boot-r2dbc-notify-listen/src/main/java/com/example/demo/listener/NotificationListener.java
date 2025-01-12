@@ -18,16 +18,26 @@ public class NotificationListener {
 
     private final PostgresqlConnection connection;
     private final ApplicationEventPublisher eventPublisher;
-    private final Sinks.Many<NotificationEvent> notificationSink =
-            Sinks.many().multicast().onBackpressureBuffer();
+    private final NotificationProperties properties;
+    private final Sinks.Many<NotificationEvent> notificationSink;
 
-    public NotificationListener(PostgresqlConnection connection, ApplicationEventPublisher eventPublisher) {
-        this.connection = connection;
+    public NotificationListener(
+            PostgresqlConnection postgresqlConnection,
+            ApplicationEventPublisher eventPublisher,
+            NotificationProperties properties) {
+        this.connection = postgresqlConnection;
         this.eventPublisher = eventPublisher;
+        this.properties = properties;
+        this.notificationSink = Sinks.many().unicast().onBackpressureBuffer();
     }
 
     @PostConstruct
     public void initialize() {
+        // Listen to the configured channel by default
+        listenTo(properties.channelName())
+                .doOnError(error -> log.error("Error listening to channel: {}", error.getMessage()))
+                .doOnSuccess(notificationEvent -> log.info("Listening to channel: {}", notificationEvent))
+                .subscribe();
         // Subscribe to notifications
         connection
                 .getNotifications()
@@ -62,9 +72,8 @@ public class NotificationListener {
     public void cleanup() {
         connection
                 .close()
-                .subscribe(
-                        null,
-                        error -> log.error("Error closing connection", error),
-                        () -> log.info("Notification listener connection closed"));
+                .doOnError(error -> log.error("Error closing connection", error))
+                .doOnSuccess(unused -> log.info("Notification listener connection closed"))
+                .subscribe();
     }
 }
