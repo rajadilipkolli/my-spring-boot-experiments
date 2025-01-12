@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Configuration;
 import reactor.core.publisher.Mono;
 
 @Configuration(proxyBeanMethods = false)
-public class PostgresqlConnectionConfig {
+class PostgresqlConnectionConfig {
 
     private final ConnectionFactory connectionFactory;
 

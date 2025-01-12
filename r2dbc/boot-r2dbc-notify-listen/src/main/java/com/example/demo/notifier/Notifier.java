@@ -1,17 +1,19 @@
-package com.example.demo.listener;
+package com.example.demo.notifier;
 
 import io.r2dbc.postgresql.api.PostgresqlConnection;
 import io.r2dbc.postgresql.api.PostgresqlResult;
 import jakarta.annotation.PreDestroy;
 import java.text.MessageFormat;
 import java.time.LocalDateTime;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
 @Component
-@Slf4j
 public class Notifier {
+
+    private static final Logger log = LoggerFactory.getLogger(Notifier.class);
 
     private final PostgresqlConnection sender;
 

@@ -5,12 +5,14 @@ import io.r2dbc.postgresql.api.PostgresqlResult;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import java.time.Duration;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 @Component
-@Slf4j
 class Listener {
+
+    private static final Logger log = LoggerFactory.getLogger(Listener.class);
 
     private final PostgresqlConnection receiver;
 
