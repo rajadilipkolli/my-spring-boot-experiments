@@ -6,7 +6,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import lombok.*;
-import org.springframework.data.annotation.*;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.annotation.Transient;
+import org.springframework.data.annotation.Version;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
@@ -47,6 +51,7 @@ public class Post {
     private Long version;
 
     @Transient
+    @Builder.Default
     private List<Comment> comments = new ArrayList<>(); // This field is transient and will be populated manually
 
     public enum Status {

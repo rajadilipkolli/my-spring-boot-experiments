@@ -1,11 +1,10 @@
 version: '3.8'
 services:
 
-  spring-boot-jooq-r2dbc-sample:
+  boot-r2dbc-json-column:
     build: ..
     ports:
       - "18080:8080"
-      - "18787:8787"
     restart: always
     depends_on:
       - postgresqldb
@@ -15,3 +14,13 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgresqldb:5432/appdb
       - SPRING_DATASOURCE_USERNAME=appuser
       - SPRING_DATASOURCE_PASSWORD=secret
+    deploy:
+      resources:
+        limits:
+          memory: 768M
+          cpus: '1'
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3

@@ -2,18 +2,30 @@ package com.example.learning.handler;
 
 import static org.springframework.web.reactive.function.server.ServerResponse.*;
 
+import com.example.learning.entity.Comment;
 import com.example.learning.entity.Post;
+import com.example.learning.model.response.PagedResult;
 import com.example.learning.repository.CommentRepository;
 import com.example.learning.repository.PostRepository;
 import java.net.URI;
+import java.util.List;
 import java.util.UUID;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
+import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Mono;
 
 @Component
 public class PostHandler {
+
+    private static final Logger log = LoggerFactory.getLogger(PostHandler.class);
 
     private final PostRepository postRepository;
     private final CommentRepository commentRepository;
@@ -24,15 +36,63 @@ public class PostHandler {
     }
 
     public Mono<ServerResponse> all(ServerRequest req) {
-        return ok().body(
-                        this.postRepository.findAll().flatMap(post -> commentRepository
-                                .findByPostId(post.getId())
-                                .collectList()
-                                .map(comments -> {
-                                    post.setComments(comments);
-                                    return post;
-                                })),
-                        Post.class);
+        // Parse and validate pagination parameters
+        Integer pageNumber = req.queryParam("page")
+                .map(page -> {
+                    int pageNum = Integer.parseInt(page);
+                    if (pageNum < 0) {
+                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Page number cannot be negative");
+                    }
+                    return pageNum;
+                })
+                .orElse(0);
+
+        Integer pageSize = req.queryParam("size")
+                .map(size -> {
+                    int sizeNum = Integer.parseInt(size);
+                    if (sizeNum <= 0 || sizeNum > 50) {
+                        throw new ResponseStatusException(
+                                HttpStatus.BAD_REQUEST,
+                                "Page size must be greater than 0 and less than or equal to 50");
+                    }
+                    return sizeNum;
+                })
+                .orElse(10);
+
+        // Parse sorting parameters
+        String sortBy = req.queryParam("sort")
+                .filter(field ->
+                        List.of("createdAt", "title", "content", "status").contains(field))
+                .orElse("createdAt");
+        String direction = req.queryParam("direction")
+                .filter(dir -> dir.equalsIgnoreCase("ASC") || dir.equalsIgnoreCase("DESC"))
+                .orElse("DESC");
+
+        return this.postRepository
+                .findAllWithPagination(pageNumber * pageSize, pageSize, sortBy, direction)
+                .collectList()
+                .flatMap(posts -> {
+                    var postIds = posts.stream().map(Post::getId).toList();
+                    return commentRepository
+                            .findAllByPostIdIn(postIds)
+                            .collectMultimap(Comment::getPostId)
+                            .map(commentsByPost -> {
+                                posts.forEach(post -> post.setComments(
+                                        (List<Comment>) commentsByPost.getOrDefault(post.getId(), List.of())));
+                                return posts;
+                            });
+                })
+                .zipWith(this.postRepository.count())
+                .map(tuple -> {
+                    List<Post> posts = tuple.getT1();
+                    Long totalElements = tuple.getT2();
+                    PageImpl<Post> postsPage = new PageImpl<>(
+                            posts,
+                            PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.fromString(direction), sortBy)),
+                            totalElements);
+                    return new PagedResult<>(postsPage);
+                })
+                .flatMap(response -> ok().bodyValue(response));
     }
 
     public Mono<ServerResponse> create(ServerRequest req) {
@@ -49,22 +109,23 @@ public class PostHandler {
     }
 
     public Mono<ServerResponse> update(ServerRequest req) {
-        var existed = this.postRepository.findById(UUID.fromString(req.pathVariable("id")));
-        return Mono.zip(
-                        (data) -> {
-                            Post p = (Post) data[0];
-                            Post p2 = (Post) data[1];
-                            p.setTitle(p2.getTitle());
-                            p.setContent(p2.getContent());
-                            p.setMetadata(p2.getMetadata());
-                            p.setStatus(p2.getStatus());
-                            return p;
-                        },
-                        existed,
-                        req.bodyToMono(Post.class))
-                .cast(Post.class)
+        return this.postRepository
+                .findById(UUID.fromString(req.pathVariable("id")))
+                .switchIfEmpty(Mono.error(new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, String.format("Post not found with id: %s", req.pathVariable("id")))))
+                .flatMap(existingPost -> req.bodyToMono(Post.class).map(updatedPost -> {
+                    existingPost.setTitle(updatedPost.getTitle());
+                    existingPost.setContent(updatedPost.getContent());
+                    existingPost.setMetadata(updatedPost.getMetadata());
+                    existingPost.setStatus(updatedPost.getStatus());
+                    return existingPost;
+                }))
                 .flatMap(this.postRepository::save)
-                .flatMap(post -> noContent().build());
+                .flatMap(post -> noContent().build())
+                .onErrorResume(IllegalArgumentException.class, e -> {
+                    log.error("Error updating post: {}", e.getMessage());
+                    return ServerResponse.badRequest().bodyValue(e.getMessage());
+                });
     }
 
     public Mono<ServerResponse> delete(ServerRequest req) {

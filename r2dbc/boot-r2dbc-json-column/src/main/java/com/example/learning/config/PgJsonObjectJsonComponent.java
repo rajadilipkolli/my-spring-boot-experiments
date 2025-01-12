@@ -21,7 +21,7 @@ class PgJsonObjectJsonComponent {
         @Override
         public Json deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
             var value = ctxt.readTree(p);
-            log.info("read json value :{}", value);
+            log.debug("read json value :{}", value);
             return Json.of(value.toString());
         }
     }
@@ -31,11 +31,12 @@ class PgJsonObjectJsonComponent {
         @Override
         public void serialize(Json value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
             var text = value.asString();
-            log.info("The raw json value from PostgresSQL JSON type:{}", text);
+            log.debug("The raw json value from PostgresSQL JSON type:{}", text);
             JsonFactory factory = new JsonFactory();
-            JsonParser parser = factory.createParser(text);
-            var node = gen.getCodec().readTree(parser);
-            serializers.defaultSerializeValue(node, gen);
+            try (JsonParser parser = factory.createParser(text)) {
+                var node = gen.getCodec().readTree(parser);
+                serializers.defaultSerializeValue(node, gen);
+            }
         }
     }
 }
