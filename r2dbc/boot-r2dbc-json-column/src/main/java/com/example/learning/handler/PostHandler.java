@@ -4,12 +4,15 @@ import static org.springframework.web.reactive.function.server.ServerResponse.*;
 
 import com.example.learning.entity.Comment;
 import com.example.learning.entity.Post;
+import com.example.learning.model.response.PagedResult;
 import com.example.learning.repository.CommentRepository;
 import com.example.learning.repository.PostRepository;
 import java.net.URI;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
@@ -29,8 +32,10 @@ public class PostHandler {
     }
 
     public Mono<ServerResponse> all(ServerRequest req) {
+        int page = Integer.parseInt(req.queryParam("page").orElse("0"));
+        int size = Integer.parseInt(req.queryParam("size").orElse("10"));
         return this.postRepository
-                .findAll()
+                .findAllWithPagination(page * size, size)
                 .collectList()
                 .flatMap(posts -> {
                     var postIds = posts.stream().map(Post::getId).collect(Collectors.toList());
@@ -43,7 +48,14 @@ public class PostHandler {
                                 return posts;
                             });
                 })
-                .flatMap(posts -> ok().bodyValue(posts));
+                .zipWith(this.postRepository.count())
+                .map(tuple -> {
+                    List<Post> posts = tuple.getT1();
+                    Long totalElements = tuple.getT2();
+                    PageImpl<Post> postsPage = new PageImpl<>(posts, Pageable.ofSize(size), totalElements);
+                    return new PagedResult<>(postsPage);
+                })
+                .flatMap(response -> ok().bodyValue(response));
     }
 
     public Mono<ServerResponse> create(ServerRequest req) {

@@ -5,7 +5,9 @@ CREATE
     TABLE
         IF NOT EXISTS posts(
             id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-            title TEXT NOT NULL,
+            title TEXT NOT NULL CHECK(
+                LENGTH(title)<= 500
+            ),
             content TEXT NOT NULL,
             metadata JSON DEFAULT '{}', -- In this sample, use Varchar to store enum(name), Spring Data R2dbc can convert Java Enum to pg VARCHAR, and reverse.
             status TEXT DEFAULT 'DRAFT',
