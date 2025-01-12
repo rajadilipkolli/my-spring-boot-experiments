@@ -40,14 +40,11 @@ public class NotificationListener {
         // Listen to the configured channel by default
         listenTo(notificationProperties.channelName())
                 .retryWhen(Retry.backoff(3, Duration.ofSeconds(1)))
-                .subscribe(
-                        postgresqlResult -> log.debug(postgresqlResult.toString()),
-                        error -> log.error("Fatal error in channel subscription", error));
+                .subscribe(null, error -> log.error("Fatal error in channel subscription", error));
         // Subscribe to notifications
         postgresqlConnection
                 .getNotifications()
                 .limitRate(100)
-                .delayElements(Duration.ofSeconds(1))
                 .map(notification -> new NotificationEvent(
                         notification.getName(), notification.getParameter(), notification.getProcessId()))
                 .doOnNext(notificationEvent -> {
