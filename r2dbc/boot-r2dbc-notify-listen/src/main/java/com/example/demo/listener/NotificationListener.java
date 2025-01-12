@@ -93,6 +93,8 @@ public class NotificationListener {
                 .doOnError(error -> log.error("Error closing connection", error))
                 .doOnSuccess(unused -> log.info("Notification listener connection closed"))
                 .retryWhen(Retry.backoff(3, Duration.ofSeconds(1)))
-                .block(Duration.ofSeconds(5));
+                .subscribe(
+                        unused -> log.info("Notification listener cleanup completed"),
+                        error -> log.error("Failed to cleanup notification listener", error));
     }
 }

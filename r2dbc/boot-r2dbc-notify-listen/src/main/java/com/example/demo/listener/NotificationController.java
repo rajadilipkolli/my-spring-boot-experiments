@@ -25,7 +25,11 @@ class NotificationController {
 
     @GetMapping(path = "/notifications/{channel}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     Flux<NotificationEvent> streamChannelNotifications(
-            @PathVariable @Pattern(regexp = "[a-zA-Z0-9_]+") String channel) {
+            @PathVariable
+                    @Pattern(
+                            regexp = "[a-zA-Z0-9_]+",
+                            message = "Channel name must contain only letters, numbers, and underscores")
+                    String channel) {
         return notificationListener.listenTo(channel).thenMany(notificationListener.getNotificationStream(channel));
     }
 }

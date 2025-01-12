@@ -26,17 +26,23 @@ public class Notifier {
         return req.bodyToMono(NotificationRequest.class)
                 .flatMap(notificationRequest -> notificationListener
                         .listenTo(notificationRequest.channel())
-                        .doOnSuccess(postgresqlResult -> log.info(postgresqlResult.toString()))
-                        .then(Mono.defer(() -> {
-                            log.debug("Channel {} registered, sending notification", notificationRequest.channel());
-                            return databaseClient
-                                    .sql("SELECT pg_notify(:channel, :message)")
-                                    .bind("channel", notificationRequest.channel())
-                                    .bind("message", notificationRequest.message())
-                                    .fetch()
-                                    .rowsUpdated()
-                                    .flatMap(rowsUpdated -> ServerResponse.ok().bodyValue(rowsUpdated));
-                        })))
-                .doOnError(error -> log.error("Failed to send notification", error));
+                        .doOnSuccess(postgresqlResult -> log.debug(postgresqlResult.toString()))
+                        .then(Mono.defer(() -> sendNotification(notificationRequest))))
+                .onErrorResume(error -> {
+                    log.error("Failed to process notification request", error);
+                    return ServerResponse.status(500).bodyValue("Failed to process notification request");
+                });
+    }
+
+    private Mono<ServerResponse> sendNotification(NotificationRequest notificationRequest) {
+        log.debug("Channel {} registered, sending notification", notificationRequest.channel());
+        return databaseClient
+                .sql("SELECT pg_notify(:channel, :message)")
+                .bind("channel", notificationRequest.channel())
+                .bind("message", notificationRequest.message())
+                .fetch()
+                .rowsUpdated()
+                .flatMap(rowsUpdated -> ServerResponse.ok().bodyValue(rowsUpdated))
+                .onErrorResume(error -> ServerResponse.status(500).bodyValue("Failed to send notification"));
     }
 }
