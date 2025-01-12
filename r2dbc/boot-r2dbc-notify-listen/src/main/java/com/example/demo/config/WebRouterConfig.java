@@ -1,5 +1,8 @@
 package com.example.demo.config;
 
+import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.web.reactive.function.server.RequestPredicates.accept;
+import static org.springframework.web.reactive.function.server.RequestPredicates.contentType;
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 import static org.springframework.web.reactive.function.server.ServerResponse.noContent;
 
@@ -17,6 +20,7 @@ class WebRouterConfig {
     RouterFunction<ServerResponse> routes(Notifier notifier) {
         return route().GET("/hello", request -> notifier.send()
                         .then(Mono.defer(() -> noContent().build())))
+                .POST("/api/notify", contentType(APPLICATION_JSON).and(accept(APPLICATION_JSON)), notifier::notifyData)
                 .build();
     }
 }
