@@ -11,6 +11,8 @@ import java.net.URI;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -22,6 +24,8 @@ import reactor.core.publisher.Mono;
 
 @Component
 public class PostHandler {
+
+    private static final Logger log = LoggerFactory.getLogger(PostHandler.class);
 
     private final PostRepository postRepository;
     private final CommentRepository commentRepository;
@@ -74,7 +78,8 @@ public class PostHandler {
     public Mono<ServerResponse> update(ServerRequest req) {
         return this.postRepository
                 .findById(UUID.fromString(req.pathVariable("id")))
-                .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found")))
+                .switchIfEmpty(Mono.error(new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, String.format("Post not found with id: %s", req.pathVariable("id")))))
                 .flatMap(existingPost -> req.bodyToMono(Post.class).map(updatedPost -> {
                     existingPost.setTitle(updatedPost.getTitle());
                     existingPost.setContent(updatedPost.getContent());
@@ -84,8 +89,10 @@ public class PostHandler {
                 }))
                 .flatMap(this.postRepository::save)
                 .flatMap(post -> noContent().build())
-                .onErrorResume(IllegalArgumentException.class, e -> ServerResponse.badRequest()
-                        .bodyValue(e.getMessage()));
+                .onErrorResume(IllegalArgumentException.class, e -> {
+                    log.error("Error updating post: {}", e.getMessage());
+                    return ServerResponse.badRequest().bodyValue(e.getMessage());
+                });
     }
 
     public Mono<ServerResponse> delete(ServerRequest req) {

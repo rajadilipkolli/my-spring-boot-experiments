@@ -13,6 +13,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
+import reactor.test.StepVerifier;
 
 class PostHandlerIntTest extends AbstractIntegrationTest {
 
@@ -30,7 +31,12 @@ class PostHandlerIntTest extends AbstractIntegrationTest {
                 .collect(Collectors.toList());
 
         // Clear existing data and save new test data
-        postRepository.deleteAll().thenMany(postRepository.saveAll(posts)).blockLast();
+        StepVerifier.create(postRepository
+                        .deleteAll()
+                        .thenMany(postRepository.saveAll(posts))
+                        .collectList())
+                .expectNextCount(1)
+                .verifyComplete();
     }
 
     @Test
@@ -52,6 +58,20 @@ class PostHandlerIntTest extends AbstractIntegrationTest {
                     assertThat(pagedResult.hasPrevious()).isEqualTo(false);
                     List<Post> posts = pagedResult.data();
                     assertThat(posts).isNotNull().isNotEmpty().hasSize(10);
+                    // Verify content and order
+                    assertThat(posts)
+                            .extracting(Post::getTitle)
+                            .containsExactly(
+                                    "Test Post 1",
+                                    "Test Post 2",
+                                    "Test Post 3",
+                                    "Test Post 4",
+                                    "Test Post 5",
+                                    "Test Post 6",
+                                    "Test Post 7",
+                                    "Test Post 8",
+                                    "Test Post 9",
+                                    "Test Post 10");
                 });
     }
 
@@ -74,6 +94,10 @@ class PostHandlerIntTest extends AbstractIntegrationTest {
                     assertThat(pagedResult.hasPrevious()).isEqualTo(false);
                     List<Post> posts = pagedResult.data();
                     assertThat(posts).isNotNull().isNotEmpty().hasSize(5);
+                    // Verify content
+                    assertThat(posts)
+                            .extracting(Post::getTitle)
+                            .containsExactly("Test Post 1", "Test Post 2", "Test Post 3", "Test Post 4", "Test Post 5");
                 });
     }
 
@@ -90,12 +114,24 @@ class PostHandlerIntTest extends AbstractIntegrationTest {
                     assertThat(pagedResult.totalElements()).isEqualTo(20);
                     assertThat(pagedResult.pageNumber()).isEqualTo(1);
                     assertThat(pagedResult.totalPages()).isEqualTo(3);
-                    assertThat(pagedResult.isFirst()).isEqualTo(true);
+                    assertThat(pagedResult.isFirst()).isEqualTo(false);
                     assertThat(pagedResult.isLast()).isEqualTo(false);
                     assertThat(pagedResult.hasNext()).isEqualTo(true);
-                    assertThat(pagedResult.hasPrevious()).isEqualTo(false);
+                    assertThat(pagedResult.hasPrevious()).isEqualTo(true);
                     List<Post> posts = pagedResult.data();
                     assertThat(posts).isNotNull().isNotEmpty().hasSize(8);
+                    // Verify content
+                    assertThat(posts)
+                            .extracting(Post::getTitle)
+                            .containsExactly(
+                                    "Test Post 9",
+                                    "Test Post 10",
+                                    "Test Post 11",
+                                    "Test Post 12",
+                                    "Test Post 13",
+                                    "Test Post 14",
+                                    "Test Post 15",
+                                    "Test Post 16");
                 });
     }
 
