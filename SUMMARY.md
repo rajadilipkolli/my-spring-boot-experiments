@@ -43,6 +43,7 @@
 * [r2dbc](r2dbc/README.md)
   * [r2dbc-jooq](r2dbc/boot-jooq-r2dbc-sample/README.md)
   * [PostgreSQL JSON and enum column support](r2dbc/boot-r2dbc-json-column/README.md)
+  * [PostgreSQL Notify and Listen support using reactive spring boot](r2dbc/boot-r2dbc-notify-listen/README.md)
   * [r2dbc-boot](r2dbc/boot-r2dbc-sample/README.md)
   * [reactive-cache](r2dbc/boot-r2dbc-reactive-cache/README.md)
 * [scheduler](scheduler/README.md)
