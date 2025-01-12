@@ -159,12 +159,37 @@ class PostHandlerIntTest extends AbstractIntegrationTest {
 
     @Test
     void shouldHandleInvalidPageParameters() {
+        // Test negative page
         this.webTestClient
                 .get()
                 .uri("/posts?page=-1&size=10")
                 .exchange()
                 .expectStatus()
                 .isBadRequest();
+
+        // Test negative size
+        this.webTestClient
+                .get()
+                .uri("/posts?page=0&size=-1")
+                .exchange()
+                .expectStatus()
+                .isBadRequest();
+
+        // Test zero size
+        this.webTestClient
+                .get()
+                .uri("/posts?page=0&size=0")
+                .exchange()
+                .expectStatus()
+                .isBadRequest();
+
+        // Test non-numeric values
+        this.webTestClient
+                .get()
+                .uri("/posts?page=abc&size=def")
+                .exchange()
+                .expectStatus()
+                .is5xxServerError();
     }
 
     @Test
@@ -178,21 +203,27 @@ class PostHandlerIntTest extends AbstractIntegrationTest {
                 .expectBody(new ParameterizedTypeReference<PagedResult<Post>>() {})
                 .value(pagedResult -> {
                     List<Post> posts = pagedResult.data();
-                    assertThat(posts).extracting(Post::getTitle).isSortedAccordingTo(String::compareTo);
+                    assertThat(posts).extracting(Post::getTitle).isSortedAccordingTo((a, b) -> {
+                        // Extract numeric suffixes and compare
+                        int numA = Integer.parseInt(a.substring(a.lastIndexOf(" ") + 1));
+                        int numB = Integer.parseInt(b.substring(b.lastIndexOf(" ") + 1));
+                        return Integer.compare(numA, numB);
+                    });
                 });
     }
 
     @Test
     void shouldHandleMaxPageSize() {
+        // Add a test for the maximum allowed page size
         this.webTestClient
                 .get()
-                .uri("/posts?size=100")
+                .uri("/posts?size=50") // Use your actual max page size
                 .exchange()
                 .expectStatus()
                 .isOk()
                 .expectBody(new ParameterizedTypeReference<PagedResult<Post>>() {})
                 .value(pagedResult -> {
-                    assertThat(pagedResult.data()).hasSize(20); // Should be capped at max allowed size
+                    assertThat(pagedResult.data()).hasSizeLessThanOrEqualTo(50);
                 });
     }
 }

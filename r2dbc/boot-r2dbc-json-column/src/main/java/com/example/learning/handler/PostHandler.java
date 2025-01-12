@@ -50,15 +50,20 @@ public class PostHandler {
         Integer pageSize = req.queryParam("size")
                 .map(size -> {
                     int sizeNum = Integer.parseInt(size);
-                    if (sizeNum <= 0 || sizeNum >= 50) {
-                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Page size must be greater than 0");
+                    if (sizeNum <= 0 || sizeNum > 50) {
+                        throw new ResponseStatusException(
+                                HttpStatus.BAD_REQUEST,
+                                "Page size must be greater than 0 and less than or equal to 50");
                     }
                     return sizeNum;
                 })
                 .orElse(10);
 
         // Parse sorting parameters
-        String sortBy = req.queryParam("sort").orElse("createdAt");
+        String sortBy = req.queryParam("sort")
+                .filter(field ->
+                        List.of("createdAt", "title", "content", "status").contains(field))
+                .orElse("createdAt");
         String direction = req.queryParam("direction")
                 .filter(dir -> dir.equalsIgnoreCase("ASC") || dir.equalsIgnoreCase("DESC"))
                 .orElse("DESC");

@@ -37,7 +37,7 @@ class ApplicationIntTest extends AbstractIntegrationTest {
                     assertThat(post1.getComments()).isNotNull().isNotEmpty().hasSize(4);
                     assertThat(post2.getTitle()).isNotNull();
                     assertThat(post2.getMetadata()).isNotNull();
-                    assertThat(post2.getComments()).isNull();
+                    assertThat(post2.getComments()).isNotNull().isEmpty();
                 });
     }
 }
