@@ -10,11 +10,11 @@ import com.example.learning.repository.PostRepository;
 import java.net.URI;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
@@ -36,13 +36,38 @@ public class PostHandler {
     }
 
     public Mono<ServerResponse> all(ServerRequest req) {
-        int page = Integer.parseInt(req.queryParam("page").orElse("0"));
-        int size = Integer.parseInt(req.queryParam("size").orElse("10"));
+        // Parse and validate pagination parameters
+        Integer pageNumber = req.queryParam("page")
+                .map(page -> {
+                    int pageNum = Integer.parseInt(page);
+                    if (pageNum < 0) {
+                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Page number cannot be negative");
+                    }
+                    return pageNum;
+                })
+                .orElse(0);
+
+        Integer pageSize = req.queryParam("size")
+                .map(size -> {
+                    int sizeNum = Integer.parseInt(size);
+                    if (sizeNum <= 0 || sizeNum >= 50) {
+                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Page size must be greater than 0");
+                    }
+                    return sizeNum;
+                })
+                .orElse(10);
+
+        // Parse sorting parameters
+        String sortBy = req.queryParam("sort").orElse("createdAt");
+        String direction = req.queryParam("direction")
+                .filter(dir -> dir.equalsIgnoreCase("ASC") || dir.equalsIgnoreCase("DESC"))
+                .orElse("DESC");
+
         return this.postRepository
-                .findAllWithPagination(page * size, size)
+                .findAllWithPagination(pageNumber * pageSize, pageSize, sortBy, direction)
                 .collectList()
                 .flatMap(posts -> {
-                    var postIds = posts.stream().map(Post::getId).collect(Collectors.toList());
+                    var postIds = posts.stream().map(Post::getId).toList();
                     return commentRepository
                             .findAllByPostIdIn(postIds)
                             .collectMultimap(Comment::getPostId)
@@ -56,7 +81,10 @@ public class PostHandler {
                 .map(tuple -> {
                     List<Post> posts = tuple.getT1();
                     Long totalElements = tuple.getT2();
-                    PageImpl<Post> postsPage = new PageImpl<>(posts, Pageable.ofSize(size), totalElements);
+                    PageImpl<Post> postsPage = new PageImpl<>(
+                            posts,
+                            PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.fromString(direction), sortBy)),
+                            totalElements);
                     return new PagedResult<>(postsPage);
                 })
                 .flatMap(response -> ok().bodyValue(response));

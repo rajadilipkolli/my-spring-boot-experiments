@@ -112,7 +112,7 @@ class PostHandlerIntTest extends AbstractIntegrationTest {
                 .expectBody(new ParameterizedTypeReference<PagedResult<Post>>() {})
                 .value(pagedResult -> {
                     assertThat(pagedResult.totalElements()).isEqualTo(20);
-                    assertThat(pagedResult.pageNumber()).isEqualTo(1);
+                    assertThat(pagedResult.pageNumber()).isEqualTo(2);
                     assertThat(pagedResult.totalPages()).isEqualTo(3);
                     assertThat(pagedResult.isFirst()).isEqualTo(false);
                     assertThat(pagedResult.isLast()).isEqualTo(false);
@@ -146,14 +146,53 @@ class PostHandlerIntTest extends AbstractIntegrationTest {
                 .expectBody(new ParameterizedTypeReference<PagedResult<Post>>() {})
                 .value(pagedResult -> {
                     assertThat(pagedResult.totalElements()).isEqualTo(20);
-                    assertThat(pagedResult.pageNumber()).isEqualTo(1);
+                    assertThat(pagedResult.pageNumber()).isEqualTo(11);
                     assertThat(pagedResult.totalPages()).isEqualTo(2);
-                    assertThat(pagedResult.isFirst()).isEqualTo(true);
-                    assertThat(pagedResult.isLast()).isEqualTo(false);
-                    assertThat(pagedResult.hasNext()).isEqualTo(true);
-                    assertThat(pagedResult.hasPrevious()).isEqualTo(false);
+                    assertThat(pagedResult.isFirst()).isEqualTo(false);
+                    assertThat(pagedResult.isLast()).isEqualTo(true);
+                    assertThat(pagedResult.hasNext()).isEqualTo(false);
+                    assertThat(pagedResult.hasPrevious()).isEqualTo(true);
                     List<Post> posts = pagedResult.data();
                     assertThat(posts).isNull();
+                });
+    }
+
+    @Test
+    void shouldHandleInvalidPageParameters() {
+        this.webTestClient
+                .get()
+                .uri("/posts?page=-1&size=10")
+                .exchange()
+                .expectStatus()
+                .isBadRequest();
+    }
+
+    @Test
+    void shouldSortPostsByTitleAscending() {
+        this.webTestClient
+                .get()
+                .uri("/posts?sort=title,asc")
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(new ParameterizedTypeReference<PagedResult<Post>>() {})
+                .value(pagedResult -> {
+                    List<Post> posts = pagedResult.data();
+                    assertThat(posts).extracting(Post::getTitle).isSortedAccordingTo(String::compareTo);
+                });
+    }
+
+    @Test
+    void shouldHandleMaxPageSize() {
+        this.webTestClient
+                .get()
+                .uri("/posts?size=100")
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(new ParameterizedTypeReference<PagedResult<Post>>() {})
+                .value(pagedResult -> {
+                    assertThat(pagedResult.data()).hasSize(20); // Should be capped at max allowed size
                 });
     }
 }

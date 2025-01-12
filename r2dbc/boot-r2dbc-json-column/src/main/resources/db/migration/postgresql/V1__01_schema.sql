@@ -34,7 +34,11 @@ CREATE
     TABLE
         IF NOT EXISTS comments(
             id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-            content TEXT NOT NULL,
+            content TEXT NOT NULL CHECK(
+                LENGTH(
+                    TRIM( content )
+                )> 0
+            ),
             created_at TIMESTAMP,
             updated_at TIMESTAMP,
             version INTEGER,
