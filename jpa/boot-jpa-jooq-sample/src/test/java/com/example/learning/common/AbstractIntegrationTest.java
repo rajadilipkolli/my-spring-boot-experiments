@@ -17,8 +17,7 @@ import org.springframework.test.web.servlet.assertj.MockMvcTester;
 @ActiveProfiles({PROFILE_TEST})
 @SpringBootTest(
         webEnvironment = RANDOM_PORT,
-        classes = {SQLContainerConfig.class},
-        properties = {"jdbc.datasource-proxy.enabled=false"})
+        classes = {SQLContainerConfig.class})
 @AutoConfigureMockMvc
 @ExtendWith(InstancioExtension.class)
 public abstract class AbstractIntegrationTest {
