@@ -4,6 +4,7 @@ import com.example.learning.entities.Post;
 import com.example.learning.exception.PostAlreadyExistsException;
 import com.example.learning.mapper.PostMapper;
 import com.example.learning.model.request.PostRequest;
+import com.example.learning.model.response.PostResponse;
 import com.example.learning.repository.PostRepository;
 import com.example.learning.service.PostService;
 import java.util.Optional;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service("jpaPostService")
+@Transactional(readOnly = true)
 public class JPAPostServiceImpl implements PostService {
 
     private static final Logger log = LoggerFactory.getLogger(JPAPostServiceImpl.class);
@@ -37,5 +39,10 @@ public class JPAPostServiceImpl implements PostService {
             Post post = this.postMapper.postRequestToEntity(postRequest, userName);
             this.postRepository.save(post);
         }
+    }
+
+    @Override
+    public PostResponse fetchPostByUserNameAndTitle(String userName, String title) {
+        throw new UnsupportedOperationException();
     }
 }

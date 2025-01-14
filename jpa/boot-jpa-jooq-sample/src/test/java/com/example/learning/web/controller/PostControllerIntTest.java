@@ -7,6 +7,7 @@ import com.example.learning.entities.Tag;
 import com.example.learning.model.request.PostCommentRequest;
 import com.example.learning.model.request.PostRequest;
 import com.example.learning.model.request.TagRequest;
+import com.example.learning.model.response.PostResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.net.URI;
 import java.time.LocalDateTime;
@@ -55,6 +56,29 @@ class PostControllerIntTest extends AbstractIntegrationTest {
             assertThat(retrieveTag.getTagName()).isEqualTo("spring");
             assertThat(retrieveTag.getTagDescription()).isEqualTo("Beautiful Spring"); // Original description retained
         });
+
+        this.mockMvcTester
+                .get()
+                .uri("/api/users/{user_name}/posts/{title}", "junit", "newPostTitle")
+                .accept(MediaType.APPLICATION_JSON)
+                .assertThat()
+                .hasStatusOk()
+                .hasContentType(MediaType.APPLICATION_JSON)
+                .bodyJson()
+                .convertTo(PostResponse.class)
+                .satisfies(postResponse -> {
+                    assertThat(postResponse).isNotNull();
+                    assertThat(postResponse.title()).isEqualTo("newPostTitle");
+                    assertThat(postResponse.content()).isEqualTo("newPostContent");
+                    assertThat(postResponse.published()).isNotNull().isEqualTo(true);
+                    assertThat(postResponse.publishedAt())
+                            .isNotNull()
+                            .isEqualTo(LocalDateTime.parse("2025-01-15T10:00:00"));
+                    assertThat(postResponse.author()).isNotNull().isEqualTo("junit");
+                    assertThat(postResponse.createdAt()).isNotNull().isBeforeOrEqualTo(LocalDateTime.now());
+                    assertThat(postResponse.tags()).isNotNull().hasSize(3);
+                    assertThat(postResponse.comments()).isNotNull().hasSize(2);
+                });
     }
 
     @Test

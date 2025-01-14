@@ -1,6 +1,7 @@
 package com.example.learning.web.controller;
 
 import com.example.learning.model.request.PostRequest;
+import com.example.learning.model.response.PostResponse;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -40,4 +41,9 @@ public interface PostAPI {
     ResponseEntity<Object> createPostByUserName(
             @Valid @RequestBody PostRequest postRequest,
             @NotBlank @Parameter(description = "Username of the post creator") String userName);
+
+    @Tag(name = "Post API")
+    ResponseEntity<PostResponse> getPostByUserNameAndTitle(
+            @Parameter(description = "Username of the post creator") String userName,
+            @Parameter(description = "Title of the post to retrieve") String title);
 }
