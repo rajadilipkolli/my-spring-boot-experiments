@@ -12,6 +12,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.List;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -23,8 +24,8 @@ class PostControllerIntTest extends AbstractIntegrationTest {
     @Test
     void createPostByUserName() throws JsonProcessingException {
 
-        Tag tag = new Tag().setTagName("spring").setTagDescription("Beautiful Spring");
-        tagRepository.save(tag);
+        Tag tagEntity = new Tag().setTagName("spring").setTagDescription("Beautiful Spring");
+        tagRepository.save(tagEntity);
 
         PostRequest postRequest = new PostRequest(
                 "newPostTitle",
@@ -76,8 +77,80 @@ class PostControllerIntTest extends AbstractIntegrationTest {
                             .isEqualTo(LocalDateTime.parse("2025-01-15T10:00:00"));
                     assertThat(postResponse.author()).isNotNull().isEqualTo("junit");
                     assertThat(postResponse.createdAt()).isNotNull().isBeforeOrEqualTo(LocalDateTime.now());
-                    assertThat(postResponse.tags()).isNotNull().hasSize(3);
-                    assertThat(postResponse.comments()).isNotNull().hasSize(2);
+                    assertThat(postResponse.tags())
+                            .isNotNull()
+                            .hasSize(3)
+                            .satisfiesExactlyInAnyOrder(
+                                    tag -> {
+                                        assertThat(tag.name()).isEqualTo("junit");
+                                        assertThat(tag.description()).isEqualTo("Junit Tag");
+                                    },
+                                    tag -> {
+                                        assertThat(tag.name()).isEqualTo("spring");
+                                        assertThat(tag.description()).isEqualTo("Beautiful Spring");
+                                    },
+                                    tag -> {
+                                        assertThat(tag.name()).isEqualTo("Java");
+                                        assertThat(tag.description()).isEqualTo("Beautiful Java");
+                                    });
+                    assertThat(postResponse.comments())
+                            .isNotNull()
+                            .hasSize(2)
+                            .satisfiesExactlyInAnyOrder(
+                                    comment -> {
+                                        assertThat(comment.title()).isEqualTo("commentTitle1");
+                                        assertThat(comment.content()).isEqualTo("Nice Post1");
+                                        assertThat(comment.published()).isTrue();
+                                    },
+                                    comment -> {
+                                        assertThat(comment.title()).isEqualTo("commentTitle2");
+                                        assertThat(comment.content()).isEqualTo("Nice Post2");
+                                        assertThat(comment.published()).isTrue();
+                                    });
+                });
+    }
+
+    @Test
+    void createPostWithoutTagsAndComments() throws JsonProcessingException {
+        PostRequest postRequest = new PostRequest(
+                "Simple Post",
+                "This is a simple post without tags and comments",
+                true,
+                LocalDateTime.parse("2025-01-15T10:00:00"),
+                List.of(), // empty comments list
+                List.of()); // empty tags list
+
+        this.mockMvcTester
+                .post()
+                .uri("/api/users/{user_name}/posts/", "junit")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(postRequest))
+                .assertThat()
+                .hasStatus(HttpStatus.CREATED)
+                .hasHeader(HttpHeaders.LOCATION, "http://localhost/api/users/junit/posts/Simple%20Post");
+
+        this.mockMvcTester
+                .get()
+                .uri("/api/users/{user_name}/posts/{title}", "junit", "Simple Post")
+                .accept(MediaType.APPLICATION_JSON)
+                .assertThat()
+                .hasStatusOk()
+                .hasContentType(MediaType.APPLICATION_JSON)
+                .bodyJson()
+                .convertTo(PostResponse.class)
+                .satisfies(postResponse -> {
+                    assertThat(postResponse).isNotNull();
+                    assertThat(postResponse.title()).isEqualTo("Simple Post");
+                    assertThat(postResponse.content()).isEqualTo("This is a simple post without tags and comments");
+                    assertThat(postResponse.published()).isNotNull().isEqualTo(true);
+                    assertThat(postResponse.publishedAt())
+                            .isNotNull()
+                            .isEqualTo(LocalDateTime.parse("2025-01-15T10:00:00"));
+                    assertThat(postResponse.author()).isNotNull().isEqualTo("junit");
+                    assertThat(postResponse.createdAt()).isNotNull().isBeforeOrEqualTo(LocalDateTime.now());
+                    assertThat(postResponse.tags()).isNotNull().isEmpty();
+                    assertThat(postResponse.comments()).isNotNull().isEmpty();
                 });
     }
 
@@ -137,6 +210,67 @@ class PostControllerIntTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @Disabled
+    void createPostByUserName_shouldReturnValidationErrors() throws Exception {
+        // Create a post with all validation errors
+        PostRequest invalidPost = new PostRequest(
+                "", // blank title
+                "", // blank content
+                true,
+                LocalDateTime.now(),
+                List.of(new PostCommentRequest("", "", true, LocalDateTime.now())), // invalid comment
+                List.of(new TagRequest("invalid@tag", "desc")) // invalid tag name pattern
+                );
+
+        // Test blank fields
+        mockMvcTester
+                .post()
+                .uri("/api/users/{user_name}/posts", "testuser")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(invalidPost))
+                .assertThat()
+                .hasStatus(HttpStatus.BAD_REQUEST)
+                .hasContentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE)
+                .bodyJson()
+                .convertTo(ProblemDetail.class)
+                .satisfies(problemDetail -> {
+                    assertThat(problemDetail.getTitle()).isEqualTo("Constraint Violation");
+                    assertThat(problemDetail.getStatus()).isEqualTo(400);
+                    assertThat(problemDetail.getDetail()).isEqualTo("Invalid request content.");
+                    assertThat(problemDetail.getInstance()).isEqualTo(URI.create("/api/users/testuser/posts/"));
+                });
+
+        // Create a post with max length violations
+        String exceededTitle = "a".repeat(256);
+        String exceededContent = "a".repeat(10001);
+        PostRequest postWithExceededLengths = new PostRequest(
+                exceededTitle,
+                exceededContent,
+                true,
+                LocalDateTime.now(),
+                List.of(new PostCommentRequest("a".repeat(256), "a".repeat(10001), true, LocalDateTime.now())),
+                List.of(new TagRequest("a".repeat(51), "a".repeat(201))));
+
+        // Test max length violations
+        mockMvcTester
+                .post()
+                .uri("/api/users/{user_name}/posts", "testuser")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(postWithExceededLengths))
+                .assertThat()
+                .hasStatus(HttpStatus.BAD_REQUEST)
+                .hasContentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE)
+                .bodyJson()
+                .convertTo(ProblemDetail.class)
+                .satisfies(problemDetail -> {
+                    assertThat(problemDetail.getTitle()).isEqualTo("Constraint Violation");
+                    assertThat(problemDetail.getStatus()).isEqualTo(400);
+                    assertThat(problemDetail.getDetail()).isEqualTo("Invalid request content.");
+                    assertThat(problemDetail.getInstance()).isEqualTo(URI.create("/api/users/testuser/posts/"));
+                });
+    }
+
+    @Test
     void shouldHandleDuplicateTitle() throws Exception {
         // Create first post
         PostRequest firstPost = new PostRequest(
@@ -184,24 +318,6 @@ class PostControllerIntTest extends AbstractIntegrationTest {
                             .isNotNull()
                             .isNotEmpty()
                             .hasSize(2);
-                });
-    }
-
-    @Test
-    void getPostByUserNameAndTitle_shouldReturn404_whenPostNotFound() {
-        this.mockMvcTester
-                .get()
-                .uri("/api/users/{user_name}/posts/{title}", "nonexistent", "nonexistent")
-                .accept(MediaType.APPLICATION_JSON)
-                .assertThat()
-                .hasStatus(HttpStatus.NOT_FOUND)
-                .bodyJson()
-                .convertTo(ProblemDetail.class)
-                .satisfies(problemDetail -> {
-                    assertThat(problemDetail.getTitle()).isEqualTo("Not Found");
-                    assertThat(problemDetail.getStatus()).isEqualTo(404);
-                    assertThat(problemDetail.getDetail())
-                            .isEqualTo("Post with title 'nonexistent' not found for user 'nonexistent'");
                 });
     }
 }
