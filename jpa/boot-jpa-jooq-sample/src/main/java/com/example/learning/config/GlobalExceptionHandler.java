@@ -7,6 +7,8 @@ import java.time.Instant;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
@@ -21,6 +23,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 @ControllerAdvice
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class GlobalExceptionHandler {
+
+    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -60,12 +64,20 @@ public class GlobalExceptionHandler {
             ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
                     resourceNotFoundException.getHttpStatus(), resourceNotFoundException.getMessage());
             problemDetail.setTitle("Not Found");
-            problemDetail.setType(URI.create("http://api.boot-jpa-jooq.com/errors/not-found"));
+            problemDetail.setType(URI.create("https://api.boot-jpa-jooq.com/errors/not-found"));
             problemDetail.setProperty("errorCategory", "Generic");
             problemDetail.setProperty("timestamp", Instant.now().toString());
             return problemDetail;
         } else {
-            return ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(500), exception.getMessage());
+            ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+                    HttpStatusCode.valueOf(500), "An unexpected error occurred while processing your request");
+            problemDetail.setTitle("Internal Server Error");
+            problemDetail.setType(URI.create("https://api.boot-jpa-jooq.com/errors/internal-error"));
+            problemDetail.setProperty("errorCategory", "Generic");
+            problemDetail.setProperty("timestamp", Instant.now().toString());
+            // Log the actual exception for debugging
+            log.error("Unexpected error", exception);
+            return problemDetail;
         }
     }
 
