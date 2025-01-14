@@ -6,12 +6,19 @@ import com.example.learning.entities.Tag;
 import com.example.learning.model.request.PostCommentRequest;
 import com.example.learning.model.request.PostRequest;
 import com.example.learning.model.request.TagRequest;
-import org.mapstruct.*;
+import org.mapstruct.CollectionMappingStrategy;
+import org.mapstruct.DecoratedWith;
+import org.mapstruct.InjectionStrategy;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingConstants;
+import org.mapstruct.NullValueCheckStrategy;
 
 @Mapper(
         componentModel = MappingConstants.ComponentModel.SPRING,
         injectionStrategy = InjectionStrategy.CONSTRUCTOR,
-        nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
+        nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS,
+        collectionMappingStrategy = CollectionMappingStrategy.ADDER_PREFERRED)
 @DecoratedWith(PostMapperDecorator.class)
 public interface PostMapper {
 

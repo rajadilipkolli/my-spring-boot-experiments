@@ -2,7 +2,6 @@ package com.example.learning.web.controller;
 
 import com.example.learning.model.request.PostRequest;
 import com.example.learning.service.PostService;
-import jakarta.validation.Valid;
 import java.net.URI;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -23,7 +22,7 @@ class PostController implements PostAPI {
     @PostMapping("/{user_name}/posts/")
     @Override
     public ResponseEntity<Object> createPostByUserName(
-            @RequestBody @Valid PostRequest postRequest, @PathVariable("user_name") String userName) {
+            @RequestBody PostRequest postRequest, @PathVariable("user_name") String userName) {
         this.jpaPostService.createPost(postRequest, userName);
 
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()

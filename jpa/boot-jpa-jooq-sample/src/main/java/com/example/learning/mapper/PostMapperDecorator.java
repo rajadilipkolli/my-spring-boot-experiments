@@ -7,7 +7,9 @@ import com.example.learning.model.request.PostRequest;
 import com.example.learning.model.request.TagRequest;
 import com.example.learning.repository.TagRepository;
 import java.util.List;
-import java.util.Optional;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public abstract class PostMapperDecorator implements PostMapper {
@@ -33,13 +35,25 @@ public abstract class PostMapperDecorator implements PostMapper {
             return;
         }
 
-        tagRequests.forEach(tagRequest -> {
-            // Check if the tag already exists
-            Optional<Tag> tagOptional = this.tagRepository.findByTagName(tagRequest.name());
-            Tag tag = tagOptional.orElseGet(() -> tagRequestToTag(tagRequest));
-            // Use the managed Tag entity to create and associate PostTag
-            post.addTag(tag);
-        });
+        Map<String, TagRequest> newTagRequests =
+                tagRequests.stream().collect(Collectors.toMap(TagRequest::name, Function.identity()));
+
+        // Find existing tags in a single query
+        List<Tag> existingTags = tagRepository.findByTagNameIn(newTagRequests.keySet());
+        Map<String, Tag> tagMap = existingTags.stream().collect(Collectors.toMap(Tag::getTagName, Function.identity()));
+
+        // Create new tags in batch
+        List<Tag> newTags = newTagRequests.entrySet().stream()
+                .filter(e -> !tagMap.containsKey(e.getKey()))
+                .map(e -> tagRequestToTag(e.getValue()))
+                .collect(Collectors.toList());
+        if (!newTags.isEmpty()) {
+            tagRepository.saveAll(newTags);
+            newTags.forEach(tag -> tagMap.put(tag.getTagName(), tag));
+        }
+
+        // Associate all tags with the post
+        tagRequests.forEach(tagRequest -> post.addTag(tagMap.get(tagRequest.name())));
     }
 
     private void addPostCommentsToPost(List<PostCommentRequest> comments, Post post) {
