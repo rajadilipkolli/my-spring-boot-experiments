@@ -49,7 +49,7 @@ public class GlobalExceptionHandler {
         problemDetail.setTitle("Duplicate entry");
         problemDetail.setType(URI.create("https://api.boot-jpa-jooq.com/errors/already-exists"));
         problemDetail.setProperty("errorCategory", "Generic");
-        problemDetail.setProperty("timestamp", Instant.now());
+        problemDetail.setProperty("timestamp", Instant.now().toString());
         return problemDetail;
     }
 

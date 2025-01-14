@@ -30,6 +30,7 @@ public class JPAPostServiceImpl implements PostService {
     public void createPost(PostRequest postRequest, String userName) {
         Optional<Post> byTitleIgnoreCase = this.postRepository.findByTitleIgnoreCase(postRequest.title());
         if (byTitleIgnoreCase.isPresent()) {
+            log.debug("Post with title '{}' already exists", postRequest.title());
             throw new PostAlreadyExistsException(postRequest.title());
         } else {
             log.debug("Creating post with title '{}' for user '{}'", postRequest.title(), userName);

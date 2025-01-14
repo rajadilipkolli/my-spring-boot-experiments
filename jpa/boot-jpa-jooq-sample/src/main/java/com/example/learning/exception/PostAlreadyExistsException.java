@@ -5,6 +5,8 @@ import org.springframework.http.HttpStatusCode;
 
 public class PostAlreadyExistsException extends RuntimeException {
 
+    private static final long serialVersionUID = 1L;
+
     private static final HttpStatus httpStatus = HttpStatus.CONFLICT;
 
     public PostAlreadyExistsException(String title) {
