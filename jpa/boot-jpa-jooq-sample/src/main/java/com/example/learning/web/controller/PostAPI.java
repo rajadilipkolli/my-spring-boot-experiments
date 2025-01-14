@@ -42,8 +42,20 @@ public interface PostAPI {
             @Valid @RequestBody PostRequest postRequest,
             @NotBlank @Parameter(description = "Username of the post creator") String userName);
 
+    @Operation(summary = "Retrieves a post by username and title")
+    @ApiResponses(
+            value = {
+                @ApiResponse(
+                        responseCode = "200",
+                        description = "Post retrieved successfully",
+                        content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE)}),
+                @ApiResponse(
+                        responseCode = "404",
+                        description = "Post not found",
+                        content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE)})
+            })
     @Tag(name = "Post API")
     ResponseEntity<PostResponse> getPostByUserNameAndTitle(
-            @Parameter(description = "Username of the post creator") String userName,
-            @Parameter(description = "Title of the post to retrieve") String title);
+            @NotBlank @Parameter(description = "Username of the post creator") String userName,
+            @NotBlank @Parameter(description = "Title of the post to retrieve") String title);
 }

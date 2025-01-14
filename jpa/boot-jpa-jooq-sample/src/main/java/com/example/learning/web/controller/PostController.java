@@ -20,7 +20,7 @@ class PostController implements PostAPI {
 
     PostController(
             @Qualifier("jpaPostService") PostService jpaPostService,
-            @Qualifier("JooqPostService") PostService jooqPostService) {
+            @Qualifier("jooqPostService") PostService jooqPostService) {
         this.jpaPostService = jpaPostService;
         this.jooqPostService = jooqPostService;
     }

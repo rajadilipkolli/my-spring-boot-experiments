@@ -186,4 +186,22 @@ class PostControllerIntTest extends AbstractIntegrationTest {
                             .hasSize(2);
                 });
     }
+
+    @Test
+    void getPostByUserNameAndTitle_shouldReturn404_whenPostNotFound() {
+        this.mockMvcTester
+                .get()
+                .uri("/api/users/{user_name}/posts/{title}", "nonexistent", "nonexistent")
+                .accept(MediaType.APPLICATION_JSON)
+                .assertThat()
+                .hasStatus(HttpStatus.NOT_FOUND)
+                .bodyJson()
+                .convertTo(ProblemDetail.class)
+                .satisfies(problemDetail -> {
+                    assertThat(problemDetail.getTitle()).isEqualTo("Not Found");
+                    assertThat(problemDetail.getStatus()).isEqualTo(404);
+                    assertThat(problemDetail.getDetail())
+                            .isEqualTo("Post with title 'nonexistent' not found for user 'nonexistent'");
+                });
+    }
 }

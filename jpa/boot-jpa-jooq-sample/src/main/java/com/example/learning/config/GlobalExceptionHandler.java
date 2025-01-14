@@ -1,6 +1,7 @@
 package com.example.learning.config;
 
 import com.example.learning.exception.PostAlreadyExistsException;
+import com.example.learning.exception.ResourceNotFoundException;
 import java.net.URI;
 import java.time.Instant;
 import java.util.Comparator;
@@ -51,6 +52,21 @@ public class GlobalExceptionHandler {
         problemDetail.setProperty("errorCategory", "Generic");
         problemDetail.setProperty("timestamp", Instant.now().toString());
         return problemDetail;
+    }
+
+    @ExceptionHandler(Exception.class)
+    ProblemDetail onException(Exception exception) {
+        if (exception instanceof ResourceNotFoundException resourceNotFoundException) {
+            ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+                    resourceNotFoundException.getHttpStatus(), resourceNotFoundException.getMessage());
+            problemDetail.setTitle("Not Found");
+            problemDetail.setType(URI.create("http://api.boot-jpa-jooq.com/errors/not-found"));
+            problemDetail.setProperty("errorCategory", "Generic");
+            problemDetail.setProperty("timestamp", Instant.now().toString());
+            return problemDetail;
+        } else {
+            return ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(500), exception.getMessage());
+        }
     }
 
     record ApiValidationError(String object, String field, Object rejectedValue, String message) {}
