@@ -45,7 +45,6 @@ class DetailsServiceImplTest {
     void setUp() {
         detailsService = new DetailsServiceImpl(cardHolderRepository, memberRepository, asyncExecutor);
         // Configure executor to run tasks immediately in the same thread
-        // Configure executor to run tasks immediately in the same thread
         doAnswer(invocation -> {
                     ((Runnable) invocation.getArgument(0)).run();
                     return null;
@@ -66,7 +65,7 @@ class DetailsServiceImplTest {
 
         given(memberRepository.existsByMemberIdIgnoreCase(memberId)).willReturn(true);
         given(cardHolderRepository.findByMemberId(eq(memberId))).willReturn(Optional.of(cardHolder));
-        given(memberRepository.findByMemberId(eq(memberId))).willReturn(Optional.of(member));
+        given(memberRepository.findByMemberIdIgnoreCase(memberId)).willReturn(member);
 
         // Act
         ResponseDto result = detailsService.getDetails(memberId);
@@ -99,10 +98,11 @@ class DetailsServiceImplTest {
         String memberId = "test-member-id";
         Member member = new Member();
         member.setName("John Doe");
+        member.setMemberId(memberId);
 
         given(memberRepository.existsByMemberIdIgnoreCase(memberId)).willReturn(true);
+        given(memberRepository.findByMemberIdIgnoreCase(memberId)).willReturn(member);
         given(cardHolderRepository.findByMemberId(eq(memberId))).willReturn(Optional.empty());
-        given(memberRepository.findByMemberId(eq(memberId))).willReturn(Optional.of(member));
 
         // Act
         ResponseDto result = detailsService.getDetails(memberId);

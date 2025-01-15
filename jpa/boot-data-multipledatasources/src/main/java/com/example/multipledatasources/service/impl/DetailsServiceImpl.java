@@ -40,11 +40,11 @@ public class DetailsServiceImpl implements DetailsService {
         if (exists) {
             CompletableFuture<Optional<CardHolder>> cardHolderFuture =
                     CompletableFuture.supplyAsync(() -> cardHolderRepository.findByMemberId(memberId), asyncExecutor);
-            CompletableFuture<Optional<Member>> memberFuture =
-                    CompletableFuture.supplyAsync(() -> memberRepository.findByMemberId(memberId), asyncExecutor);
+            CompletableFuture<Member> memberFuture = CompletableFuture.supplyAsync(
+                    () -> memberRepository.findByMemberIdIgnoreCase(memberId), asyncExecutor);
 
-            CompletableFuture<ResponseDto> responseFuture = cardHolderFuture.thenCombine(
-                    memberFuture, (cardHolder, member) -> mapToResponse(cardHolder, member, memberId));
+            CompletableFuture<ResponseDto> responseFuture =
+                    cardHolderFuture.thenCombine(memberFuture, this::mapToResponse);
 
             try {
                 return responseFuture.get(5, TimeUnit.SECONDS);
@@ -65,9 +65,8 @@ public class DetailsServiceImpl implements DetailsService {
         }
     }
 
-    private ResponseDto mapToResponse(Optional<CardHolder> cardHolderOpt, Optional<Member> memberOpt, String memberId) {
+    private ResponseDto mapToResponse(Optional<CardHolder> cardHolderOpt, Member member) {
         String cardNumber = cardHolderOpt.map(CardHolder::getCardNumber).orElse(null);
-        String name = memberOpt.map(Member::getName).orElse(null);
-        return new ResponseDto(memberId, cardNumber, name);
+        return new ResponseDto(member.getMemberId(), cardNumber, member.getName());
     }
 }

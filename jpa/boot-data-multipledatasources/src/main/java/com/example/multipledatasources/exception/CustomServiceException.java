@@ -4,6 +4,8 @@ import org.springframework.http.HttpStatus;
 
 public class CustomServiceException extends RuntimeException {
 
+    private static final long serialVersionUID = 1L;
+
     private final HttpStatus httpStatus;
 
     public CustomServiceException(String errorMessage, Throwable e, HttpStatus httpStatus) {
