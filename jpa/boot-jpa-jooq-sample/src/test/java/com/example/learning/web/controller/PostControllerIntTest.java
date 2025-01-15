@@ -12,7 +12,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.List;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -206,67 +205,6 @@ class PostControllerIntTest extends AbstractIntegrationTest {
                     assertThat(problemDetail.getStatus()).isEqualTo(400);
                     assertThat(problemDetail.getDetail()).isEqualTo("Invalid request content.");
                     assertThat(problemDetail.getInstance()).isEqualTo(URI.create("/api/users/junit/posts/"));
-                });
-    }
-
-    @Test
-    @Disabled
-    void createPostByUserName_shouldReturnValidationErrors() throws Exception {
-        // Create a post with all validation errors
-        PostRequest invalidPost = new PostRequest(
-                "", // blank title
-                "", // blank content
-                true,
-                LocalDateTime.now(),
-                List.of(new PostCommentRequest("", "", true, LocalDateTime.now())), // invalid comment
-                List.of(new TagRequest("invalid@tag", "desc")) // invalid tag name pattern
-                );
-
-        // Test blank fields
-        mockMvcTester
-                .post()
-                .uri("/api/users/{user_name}/posts", "testuser")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(invalidPost))
-                .assertThat()
-                .hasStatus(HttpStatus.BAD_REQUEST)
-                .hasContentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE)
-                .bodyJson()
-                .convertTo(ProblemDetail.class)
-                .satisfies(problemDetail -> {
-                    assertThat(problemDetail.getTitle()).isEqualTo("Constraint Violation");
-                    assertThat(problemDetail.getStatus()).isEqualTo(400);
-                    assertThat(problemDetail.getDetail()).isEqualTo("Invalid request content.");
-                    assertThat(problemDetail.getInstance()).isEqualTo(URI.create("/api/users/testuser/posts/"));
-                });
-
-        // Create a post with max length violations
-        String exceededTitle = "a".repeat(256);
-        String exceededContent = "a".repeat(10001);
-        PostRequest postWithExceededLengths = new PostRequest(
-                exceededTitle,
-                exceededContent,
-                true,
-                LocalDateTime.now(),
-                List.of(new PostCommentRequest("a".repeat(256), "a".repeat(10001), true, LocalDateTime.now())),
-                List.of(new TagRequest("a".repeat(51), "a".repeat(201))));
-
-        // Test max length violations
-        mockMvcTester
-                .post()
-                .uri("/api/users/{user_name}/posts", "testuser")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(postWithExceededLengths))
-                .assertThat()
-                .hasStatus(HttpStatus.BAD_REQUEST)
-                .hasContentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE)
-                .bodyJson()
-                .convertTo(ProblemDetail.class)
-                .satisfies(problemDetail -> {
-                    assertThat(problemDetail.getTitle()).isEqualTo("Constraint Violation");
-                    assertThat(problemDetail.getStatus()).isEqualTo(400);
-                    assertThat(problemDetail.getDetail()).isEqualTo("Invalid request content.");
-                    assertThat(problemDetail.getInstance()).isEqualTo(URI.create("/api/users/testuser/posts/"));
                 });
     }
 
