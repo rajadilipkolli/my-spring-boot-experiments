@@ -13,6 +13,7 @@ import com.example.multipledatasources.dto.ResponseDto;
 import com.example.multipledatasources.entities.cardholder.CardHolder;
 import com.example.multipledatasources.entities.member.Member;
 import com.example.multipledatasources.exception.CustomServiceException;
+import com.example.multipledatasources.exception.MemberNotFoundException;
 import com.example.multipledatasources.repository.cardholder.CardHolderRepository;
 import com.example.multipledatasources.repository.member.MemberRepository;
 import java.util.Optional;
@@ -63,6 +64,7 @@ class DetailsServiceImplTest {
         member.setName("John Doe");
         member.setMemberId(memberId);
 
+        given(memberRepository.existsByMemberIdIgnoreCase(memberId)).willReturn(true);
         given(cardHolderRepository.findByMemberId(eq(memberId))).willReturn(Optional.of(cardHolder));
         given(memberRepository.findByMemberId(eq(memberId))).willReturn(Optional.of(member));
 
@@ -78,20 +80,17 @@ class DetailsServiceImplTest {
     }
 
     @Test
+    @MockitoSettings(strictness = Strictness.LENIENT)
     void getDetails_WhenEntitiesDoNotExist_ShouldReturnEmptyResponse() {
         // Arrange
         String memberId = "non-existent-id";
-        given(cardHolderRepository.findByMemberId(eq(memberId))).willReturn(Optional.empty());
-        given(memberRepository.findByMemberId(eq(memberId))).willReturn(Optional.empty());
-
-        // Act
-        ResponseDto result = detailsService.getDetails(memberId);
-
-        // Assert
-        assertThat(result).isNotNull();
-        assertThat(result.memberId()).isEqualTo(memberId);
-        assertThat(result.cardNumber()).isNull();
-        assertThat(result.memberName()).isNull();
+        given(memberRepository.existsByMemberIdIgnoreCase(memberId)).willReturn(false);
+        // Act & Assert
+        assertThatThrownBy(() -> detailsService.getDetails(memberId))
+                .isInstanceOf(MemberNotFoundException.class)
+                .hasMessageContaining("Member with memberId non-existent-id not Found")
+                .extracting("httpStatus")
+                .isEqualTo(HttpStatus.NOT_FOUND);
     }
 
     @Test
@@ -101,6 +100,7 @@ class DetailsServiceImplTest {
         Member member = new Member();
         member.setName("John Doe");
 
+        given(memberRepository.existsByMemberIdIgnoreCase(memberId)).willReturn(true);
         given(cardHolderRepository.findByMemberId(eq(memberId))).willReturn(Optional.empty());
         given(memberRepository.findByMemberId(eq(memberId))).willReturn(Optional.of(member));
 
@@ -118,6 +118,7 @@ class DetailsServiceImplTest {
     void getDetails_WhenRepositoryThrowsException_ShouldPropagateError() {
         // Arrange
         String memberId = "test-member-id";
+        given(memberRepository.existsByMemberIdIgnoreCase(memberId)).willReturn(true);
         RuntimeException expectedException = new RuntimeException("Database error");
         given(cardHolderRepository.findByMemberId(eq(memberId))).willThrow(expectedException);
 
@@ -125,7 +126,9 @@ class DetailsServiceImplTest {
         assertThatThrownBy(() -> detailsService.getDetails(memberId))
                 .isInstanceOf(CustomServiceException.class)
                 .hasMessage("Failed to fetch details for member: test-member-id")
-                .hasCause(expectedException);
+                .hasCause(expectedException)
+                .extracting("httpStatus")
+                .isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @Test
@@ -133,6 +136,7 @@ class DetailsServiceImplTest {
     void getDetails_WhenOperationTimesOut_ShouldThrowException() {
         // Arrange
         String memberId = "test-member-id";
+        given(memberRepository.existsByMemberIdIgnoreCase(memberId)).willReturn(true);
         doAnswer(invocation -> {
                     throw new CustomServiceException(
                             "Operation timed out while fetching details for member: " + memberId,
