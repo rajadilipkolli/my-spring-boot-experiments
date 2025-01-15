@@ -22,6 +22,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
+import org.springframework.http.HttpStatus;
 
 @ExtendWith(MockitoExtension.class)
 class DetailsServiceImplTest {
@@ -108,7 +111,7 @@ class DetailsServiceImplTest {
         assertThat(result).isNotNull();
         assertThat(result.memberId()).isEqualTo(memberId);
         assertThat(result.cardNumber()).isNull();
-        assertThat(result.memberName()).isNull();
+        assertThat(result.memberName()).isEqualTo("John Doe");
     }
 
     @Test
@@ -123,5 +126,25 @@ class DetailsServiceImplTest {
                 .isInstanceOf(CustomServiceException.class)
                 .hasMessage("Failed to fetch details for member: test-member-id")
                 .hasCause(expectedException);
+    }
+
+    @Test
+    @MockitoSettings(strictness = Strictness.LENIENT)
+    void getDetails_WhenOperationTimesOut_ShouldThrowException() {
+        // Arrange
+        String memberId = "test-member-id";
+        doAnswer(invocation -> {
+                    Thread.sleep(6000); // Simulate timeout
+                    return null;
+                })
+                .when(asyncExecutor)
+                .execute(any(Runnable.class));
+
+        // Act & Assert
+        assertThatThrownBy(() -> detailsService.getDetails(memberId))
+                .isInstanceOf(CustomServiceException.class)
+                .hasMessageContaining("Operation timed out")
+                .extracting("httpStatus")
+                .isEqualTo(HttpStatus.REQUEST_TIMEOUT);
     }
 }

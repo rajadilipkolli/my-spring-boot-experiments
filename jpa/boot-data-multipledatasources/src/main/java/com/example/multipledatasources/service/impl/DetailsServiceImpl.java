@@ -33,11 +33,6 @@ public class DetailsServiceImpl implements DetailsService {
         this.asyncExecutor = asyncExecutor;
     }
 
-    public DetailsServiceImpl(CardHolderRepository cardHolderRepository, MemberRepository memberRepository) {
-        this.cardHolderRepository = cardHolderRepository;
-        this.memberRepository = memberRepository;
-    }
-
     @Override
     public ResponseDto getDetails(String memberId) throws CustomServiceException {
         var cardHolderFuture =
@@ -52,13 +47,9 @@ public class DetailsServiceImpl implements DetailsService {
             return responseFuture.get(5, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw new CustomServiceException(
-                    "Operation interrupted while fetching details for member: " + memberId,
-                    e,
-                    HttpStatus.REQUEST_TIMEOUT);
+            throw new CustomServiceException("Operation interrupted while fetching details for member: " + memberId, e);
         } catch (ExecutionException e) {
-            throw new CustomServiceException(
-                    "Failed to fetch details for member: " + memberId, e.getCause(), HttpStatus.REQUEST_TIMEOUT);
+            throw new CustomServiceException("Failed to fetch details for member: " + memberId, e.getCause());
         } catch (TimeoutException e) {
             throw new CustomServiceException(
                     "Operation timed out while fetching details for member: " + memberId,
@@ -68,11 +59,8 @@ public class DetailsServiceImpl implements DetailsService {
     }
 
     private ResponseDto mapToResponse(Optional<CardHolder> cardHolderOpt, Optional<Member> memberOpt, String memberId) {
-        if (cardHolderOpt.isPresent() && memberOpt.isPresent()) {
-            CardHolder cardHolder = cardHolderOpt.get();
-            Member member = memberOpt.get();
-            return new ResponseDto(member.getMemberId(), cardHolder.getCardNumber(), member.getName());
-        }
-        return new ResponseDto(memberId, null, null);
+        String cardNumber = cardHolderOpt.map(CardHolder::getCardNumber).orElse(null);
+        String name = memberOpt.map(Member::getName).orElse(null);
+        return new ResponseDto(memberId, cardNumber, name);
     }
 }

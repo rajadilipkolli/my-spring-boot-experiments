@@ -35,6 +35,7 @@ public class GlobalExceptionHandler {
                 .sorted(Comparator.comparing(ApiValidationError::field))
                 .toList();
         problemDetail.setProperty("violations", validationErrorsList);
+        problemDetail.setProperty("timestamp", Instant.now().toString());
         return problemDetail;
     }
 
