@@ -33,6 +33,11 @@ public class DetailsServiceImpl implements DetailsService {
         this.asyncExecutor = asyncExecutor;
     }
 
+    public DetailsServiceImpl(CardHolderRepository cardHolderRepository, MemberRepository memberRepository) {
+        this.cardHolderRepository = cardHolderRepository;
+        this.memberRepository = memberRepository;
+    }
+
     @Override
     public ResponseDto getDetails(String memberId) throws CustomServiceException {
         var cardHolderFuture =
