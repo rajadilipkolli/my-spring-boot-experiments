@@ -69,7 +69,11 @@ public class CardHolder {
         return new StringJoiner(", ", CardHolder.class.getSimpleName() + "[", "]")
                 .add("id=" + id)
                 .add("memberId='" + memberId + "'")
-                .add("cardNumber='" + cardNumber + "'")
+                .add("cardNumber='"
+                        + (cardNumber != null
+                                ? "****" + cardNumber.substring(Math.max(0, cardNumber.length() - 4))
+                                : null)
+                        + "'")
                 .toString();
     }
 }
