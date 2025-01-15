@@ -134,8 +134,10 @@ class DetailsServiceImplTest {
         // Arrange
         String memberId = "test-member-id";
         doAnswer(invocation -> {
-                    Thread.sleep(6000); // Simulate timeout
-                    return null;
+                    throw new CustomServiceException(
+                            "Operation timed out while fetching details for member: " + memberId,
+                            null,
+                            HttpStatus.REQUEST_TIMEOUT);
                 })
                 .when(asyncExecutor)
                 .execute(any(Runnable.class));

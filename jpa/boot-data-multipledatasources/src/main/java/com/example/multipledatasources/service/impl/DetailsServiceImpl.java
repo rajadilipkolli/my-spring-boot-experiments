@@ -51,6 +51,8 @@ public class DetailsServiceImpl implements DetailsService {
         } catch (ExecutionException e) {
             throw new CustomServiceException("Failed to fetch details for member: " + memberId, e.getCause());
         } catch (TimeoutException e) {
+            cardHolderFuture.cancel(true);
+            memberFuture.cancel(true);
             throw new CustomServiceException(
                     "Operation timed out while fetching details for member: " + memberId,
                     e,
