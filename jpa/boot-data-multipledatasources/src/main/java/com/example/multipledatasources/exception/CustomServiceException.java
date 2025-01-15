@@ -6,9 +6,13 @@ public class CustomServiceException extends RuntimeException {
 
     private final HttpStatus httpStatus;
 
-    public CustomServiceException(String errorMessage, Throwable e) {
+    public CustomServiceException(String errorMessage, Throwable e, HttpStatus httpStatus) {
         super(errorMessage, e);
-        this.httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
+        this.httpStatus = httpStatus;
+    }
+
+    public CustomServiceException(String errorMessage, Throwable e) {
+        this(errorMessage, e, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     public HttpStatus getHttpStatus() {

@@ -1,6 +1,7 @@
 package com.example.multipledatasources.configuration;
 
 import com.example.multipledatasources.exception.CustomServiceException;
+import java.time.Instant;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -42,6 +43,7 @@ public class GlobalExceptionHandler {
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
                 customServiceException.getHttpStatus(), customServiceException.getMessage());
         problemDetail.setTitle("Custom Service Exception");
+        problemDetail.setProperty("timestamp", Instant.now().toString());
         return problemDetail;
     }
 
