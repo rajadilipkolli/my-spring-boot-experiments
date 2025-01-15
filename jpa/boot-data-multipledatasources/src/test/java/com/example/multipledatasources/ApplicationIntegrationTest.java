@@ -1,40 +1,41 @@
 package com.example.multipledatasources;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import com.example.multipledatasources.common.ContainersConfiguration;
+import com.example.multipledatasources.dto.ResponseDto;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.assertj.MockMvcTester;
 
 @SpringBootTest(
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-        classes = {ContainersConfiguration.class, MultipleDataSourcesApplication.class})
+        classes = {ContainersConfiguration.class})
 @AutoConfigureMockMvc
 class ApplicationIntegrationTest {
 
     @Autowired
-    private MockMvc mockMvc;
+    private MockMvcTester mockMvcTester;
 
     @Test
-    void verifyBootStrap() throws Exception {
+    void verifyBootStrap() {
 
-        this.mockMvc
-                .perform(get("/details/{memberId}", "1").accept(MediaType.APPLICATION_JSON))
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(
-                        content()
-                                .json(
-                                        """
-                {"memberId":"1","cardNumber":"1234-5678-9012-3456","memberName":"raja"}
-                """));
+        this.mockMvcTester
+                .get()
+                .uri("/details/{memberId}", "1")
+                .accept(MediaType.APPLICATION_JSON)
+                .assertThat()
+                .hasStatusOk()
+                .hasContentType(MediaType.APPLICATION_JSON)
+                .bodyJson()
+                .convertTo(ResponseDto.class)
+                .satisfies(responseDto -> {
+                    assertThat(responseDto.memberId()).isEqualTo("1");
+                    assertThat(responseDto.cardNumber()).isEqualTo("1234-5678-9012-3456");
+                    assertThat(responseDto.memberName()).isEqualTo("raja");
+                });
     }
 }

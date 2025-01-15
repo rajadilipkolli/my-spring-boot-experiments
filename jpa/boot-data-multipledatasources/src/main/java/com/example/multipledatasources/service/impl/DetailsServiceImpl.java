@@ -7,26 +7,49 @@ import com.example.multipledatasources.repository.cardholder.CardHolderRepositor
 import com.example.multipledatasources.repository.member.MemberRepository;
 import com.example.multipledatasources.service.DetailsService;
 import java.util.Optional;
-import lombok.RequiredArgsConstructor;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 @Service
-@RequiredArgsConstructor
 public class DetailsServiceImpl implements DetailsService {
 
     private final CardHolderRepository cardHolderRepository;
     private final MemberRepository memberRepository;
+    private final Executor asyncExecutor;
+
+    public DetailsServiceImpl(
+            CardHolderRepository cardHolderRepository,
+            MemberRepository memberRepository,
+            @Qualifier("taskExecutor") Executor asyncExecutor) {
+        this.cardHolderRepository = cardHolderRepository;
+        this.memberRepository = memberRepository;
+        this.asyncExecutor = asyncExecutor;
+    }
 
     @Override
     public ResponseDto getDetails(String memberId) {
-        Optional<CardHolder> cardHolderByMemberId = this.cardHolderRepository.findByMemberId(memberId);
-        Optional<Member> memberByMemberId = this.memberRepository.findByMemberId(memberId);
-        if (cardHolderByMemberId.isPresent() && memberByMemberId.isPresent()) {
-            return new ResponseDto(
-                    memberId,
-                    cardHolderByMemberId.get().getCardNumber(),
-                    memberByMemberId.get().getName());
+        CompletableFuture<Optional<CardHolder>> cardHolderFuture =
+                CompletableFuture.supplyAsync(() -> cardHolderRepository.findByMemberId(memberId), asyncExecutor);
+
+        CompletableFuture<Optional<Member>> memberFuture =
+                CompletableFuture.supplyAsync(() -> memberRepository.findByMemberId(memberId), asyncExecutor);
+
+        try {
+            CompletableFuture.allOf(cardHolderFuture, memberFuture).join();
+            Optional<CardHolder> cardHolder = cardHolderFuture.get();
+            Optional<Member> member = memberFuture.get();
+
+            if (cardHolder.isPresent() && member.isPresent()) {
+                return new ResponseDto(
+                        memberId, cardHolder.get().getCardNumber(), member.get().getName());
+            }
+        } catch (InterruptedException | ExecutionException e) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException("Error fetching details", e);
         }
-        return new ResponseDto(null, null, null);
+        return new ResponseDto(memberId, null, null);
     }
 }
