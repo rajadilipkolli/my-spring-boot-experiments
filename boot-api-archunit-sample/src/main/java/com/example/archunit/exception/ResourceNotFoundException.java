@@ -1,17 +1,17 @@
 package com.example.archunit.exception;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 
 public class ResourceNotFoundException extends RuntimeException {
 
-    private static final HttpStatus HTTP_STATUS = HttpStatus.NOT_FOUND;
+    private final HttpStatus httpStatus;
 
     public ResourceNotFoundException(String errorMessage) {
         super(errorMessage);
+        this.httpStatus = HttpStatus.NOT_FOUND;
     }
 
-    public HttpStatusCode getHttpStatus() {
-        return HTTP_STATUS;
+    public HttpStatus getHttpStatus() {
+        return httpStatus;
     }
 }

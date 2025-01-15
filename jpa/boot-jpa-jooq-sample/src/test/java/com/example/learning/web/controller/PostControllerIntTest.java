@@ -12,7 +12,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.List;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -210,7 +209,6 @@ class PostControllerIntTest extends AbstractIntegrationTest {
     }
 
     @Test
-    @Disabled
     void createPostByUserName_shouldReturnValidationErrors() throws Exception {
         // Create a post with all validation errors
         PostRequest invalidPost = new PostRequest(
@@ -225,7 +223,7 @@ class PostControllerIntTest extends AbstractIntegrationTest {
         // Test blank fields
         mockMvcTester
                 .post()
-                .uri("/api/users/{user_name}/posts", "testuser")
+                .uri("/api/users/{user_name}/posts/", "testuser")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(invalidPost))
                 .assertThat()
@@ -254,7 +252,7 @@ class PostControllerIntTest extends AbstractIntegrationTest {
         // Test max length violations
         mockMvcTester
                 .post()
-                .uri("/api/users/{user_name}/posts", "testuser")
+                .uri("/api/users/{user_name}/posts/", "testuser")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(postWithExceededLengths))
                 .assertThat()
