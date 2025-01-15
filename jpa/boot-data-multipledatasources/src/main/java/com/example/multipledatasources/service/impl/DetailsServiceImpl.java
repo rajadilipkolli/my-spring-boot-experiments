@@ -7,18 +7,22 @@ import com.example.multipledatasources.repository.cardholder.CardHolderRepositor
 import com.example.multipledatasources.repository.member.MemberRepository;
 import com.example.multipledatasources.service.DetailsService;
 import java.util.Optional;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
-@RequiredArgsConstructor
 public class DetailsServiceImpl implements DetailsService {
 
     private final CardHolderRepository cardHolderRepository;
     private final MemberRepository memberRepository;
 
+    public DetailsServiceImpl(CardHolderRepository cardHolderRepository, MemberRepository memberRepository) {
+        this.cardHolderRepository = cardHolderRepository;
+        this.memberRepository = memberRepository;
+    }
+
     @Override
     public ResponseDto getDetails(String memberId) {
+        // fetch data from database parallel
         Optional<CardHolder> cardHolderByMemberId = this.cardHolderRepository.findByMemberId(memberId);
         Optional<Member> memberByMemberId = this.memberRepository.findByMemberId(memberId);
         if (cardHolderByMemberId.isPresent() && memberByMemberId.isPresent()) {

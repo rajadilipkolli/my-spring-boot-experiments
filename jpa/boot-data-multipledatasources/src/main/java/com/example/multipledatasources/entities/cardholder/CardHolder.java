@@ -7,17 +7,10 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.util.Objects;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import java.util.StringJoiner;
 import org.hibernate.Hibernate;
 
 @Entity
-@Getter
-@Setter
-@ToString
-@RequiredArgsConstructor
 @Table(name = "card_holder")
 public class CardHolder {
 
@@ -31,6 +24,33 @@ public class CardHolder {
     @Column(nullable = false, name = "card_number")
     private String cardNumber;
 
+    public Long getId() {
+        return id;
+    }
+
+    public CardHolder setId(Long id) {
+        this.id = id;
+        return this;
+    }
+
+    public String getMemberId() {
+        return memberId;
+    }
+
+    public CardHolder setMemberId(String memberId) {
+        this.memberId = memberId;
+        return this;
+    }
+
+    public String getCardNumber() {
+        return cardNumber;
+    }
+
+    public CardHolder setCardNumber(String cardNumber) {
+        this.cardNumber = cardNumber;
+        return this;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -42,5 +62,18 @@ public class CardHolder {
     @Override
     public int hashCode() {
         return getClass().hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", CardHolder.class.getSimpleName() + "[", "]")
+                .add("id=" + id)
+                .add("memberId='" + memberId + "'")
+                .add("cardNumber='"
+                        + (cardNumber != null
+                                ? "****" + cardNumber.substring(Math.max(0, cardNumber.length() - 4))
+                                : null)
+                        + "'")
+                .toString();
     }
 }
