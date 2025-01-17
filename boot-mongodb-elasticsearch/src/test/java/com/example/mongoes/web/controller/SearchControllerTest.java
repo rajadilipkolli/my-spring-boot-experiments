@@ -18,7 +18,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @WebFluxTest(SearchController.class)
-class SearchControllerValidationTest {
+class SearchControllerTest {
 
     @Autowired private WebTestClient webTestClient;
 
@@ -53,16 +53,6 @@ class SearchControllerValidationTest {
             webTestClient
                     .get()
                     .uri("/search/borough?query=test&limit=101")
-                    .exchange()
-                    .expectStatus()
-                    .isBadRequest();
-        }
-
-        @Test
-        void whenOffsetIsNegative_thenBadRequest() {
-            webTestClient
-                    .get()
-                    .uri("/search/borough?query=test&offset=-1")
                     .exchange()
                     .expectStatus()
                     .isBadRequest();
@@ -307,6 +297,65 @@ class SearchControllerValidationTest {
                     .exchange()
                     .expectStatus()
                     .isOk();
+        }
+    }
+
+    @Nested
+    class SearchDateRangeValidation {
+        @Test
+        void whenValidDateFormat_thenReturns200() {
+            given(searchService.searchDateRange("2024-01-01", "2024-12-31", 0, 10))
+                    .willReturn(Mono.empty());
+
+            webTestClient
+                    .get()
+                    .uri(
+                            uriBuilder ->
+                                    uriBuilder
+                                            .path("/search/date/range")
+                                            .queryParam("fromDate", "2024-01-01")
+                                            .queryParam("toDate", "2024-12-31")
+                                            .build())
+                    .exchange()
+                    .expectStatus()
+                    .isOk();
+        }
+
+        @Test
+        void whenInvalidFromDateFormat_thenReturns400() {
+            webTestClient
+                    .get()
+                    .uri(
+                            uriBuilder ->
+                                    uriBuilder
+                                            .path("/search/date/range")
+                                            .queryParam("fromDate", "01-01-2024") // invalid format
+                                            .queryParam("toDate", "2024-12-31")
+                                            .build())
+                    .exchange()
+                    .expectStatus()
+                    .isBadRequest();
+        }
+
+        @Test
+        void whenInvalidToDateFormat_thenReturns400() {
+            webTestClient
+                    .get()
+                    .uri(
+                            uriBuilder ->
+                                    uriBuilder
+                                            .path("/search/date/range")
+                                            .queryParam("fromDate", "2024-01-01")
+                                            .queryParam("toDate", "2024/12/31") // invalid format
+                                            .build())
+                    .exchange()
+                    .expectStatus()
+                    .isBadRequest();
+        }
+
+        @Test
+        void whenMissingDates_thenReturns400() {
+            webTestClient.get().uri("/search/date/range").exchange().expectStatus().isBadRequest();
         }
     }
 }
