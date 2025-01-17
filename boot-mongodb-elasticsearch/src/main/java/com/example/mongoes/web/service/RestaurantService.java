@@ -10,6 +10,7 @@ import com.example.mongoes.mongodb.repository.RestaurantRepository;
 import com.example.mongoes.utils.AppConstants;
 import com.example.mongoes.utils.DateUtility;
 import com.example.mongoes.web.exception.DuplicateRestaurantException;
+import com.example.mongoes.web.model.GradesRequest;
 import com.example.mongoes.web.model.RestaurantRequest;
 import com.mongodb.client.model.changestream.ChangeStreamDocument;
 import com.mongodb.client.model.changestream.OperationType;
@@ -127,12 +128,12 @@ public class RestaurantService {
     }
 
     @Transactional
-    public Mono<Restaurant> addGrade(Grades grade, Long restaurantId) {
+    public Mono<Restaurant> addGrade(GradesRequest grade, Long restaurantId) {
         return this.restaurantRepository
                 .findByRestaurantId(restaurantId)
                 .flatMap(
                         restaurant -> {
-                            restaurant.getGrades().add(grade);
+                            restaurant.getGrades().add(grade.toGrade());
                             return this.save(restaurant);
                         });
     }
