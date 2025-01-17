@@ -1,9 +1,5 @@
 package com.example.mongoes.web.controller;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 
 import com.example.mongoes.response.AggregationSearchResponse;
@@ -74,7 +70,7 @@ class SearchControllerValidationTest {
 
         @Test
         void whenValidParameters_thenOk() {
-            given(searchService.searchMatchBorough(anyString(), anyInt(), anyInt()))
+            given(searchService.searchMatchBorough("test", 0, 10))
                     .willReturn(Mono.just(Flux.empty()));
 
             webTestClient
@@ -90,9 +86,7 @@ class SearchControllerValidationTest {
     class SearchBoolMustValidation {
         @Test
         void whenValidParameters_thenReturns200() {
-            given(
-                            searchService.queryBoolWithMust(
-                                    anyString(), anyString(), anyString(), anyInt(), anyInt()))
+            given(searchService.queryBoolWithMust("Manhattan", "Italian", "Restaurant", 0, 10))
                     .willReturn(Mono.just(Flux.empty()));
 
             webTestClient
@@ -244,7 +238,7 @@ class SearchControllerValidationTest {
         void whenValidSearchParameters_thenOk() {
             given(
                             searchService.aggregateSearch(
-                                    anyString(), anyList(), anyString(), anyInt(), anyInt(), any()))
+                                    "test", List.of("name"), "DESC", 10, 0, "restaurant_id"))
                     .willReturn(
                             Mono.just(
                                     new AggregationSearchResponse(
