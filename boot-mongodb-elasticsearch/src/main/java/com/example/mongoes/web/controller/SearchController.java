@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
 import java.util.List;
@@ -74,9 +75,9 @@ class SearchController {
 
     @GetMapping("/search/must/bool")
     Mono<ResponseEntity<Flux<Restaurant>>> searchBoolMust(
-            @RequestParam String borough,
-            @RequestParam String cuisine,
-            @RequestParam String name,
+            @RequestParam @NotBlank(message = "Borough cannot be blank") String borough,
+            @RequestParam @NotBlank(message = "Cuisine cannot be blank") String cuisine,
+            @RequestParam @NotBlank(message = "Name cannot be blank") String name,
             @RequestParam(defaultValue = "10") @Min(1) @Max(100) Integer limit,
             @RequestParam(defaultValue = "0") @Min(0) Integer offset) {
         return searchService
@@ -146,9 +147,11 @@ class SearchController {
 
     @GetMapping("/search/aggregate")
     Mono<ResponseEntity<AggregationSearchResponse>> aggregateSearch(
-            @RequestParam String searchKeyword,
-            @RequestParam List<String> fieldNames,
-            @RequestParam(required = false, defaultValue = "10") @Min(1) @Max(100) Integer limit,
+            @RequestParam @NotBlank(message = "Search keyword cannot be blank")
+                    String searchKeyword,
+            @RequestParam @NotEmpty(message = "Field names cannot be empty")
+                    List<String> fieldNames,
+            @RequestParam(required = false, defaultValue = "15") @Min(1) @Max(100) Integer limit,
             @RequestParam(required = false, defaultValue = "0") @Min(0) Integer offset,
             @RequestParam(required = false, defaultValue = "DESC") String sortOrder,
             @RequestParam(required = false, defaultValue = "restaurant_id") String... sortFields) {
