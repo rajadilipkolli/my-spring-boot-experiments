@@ -1,8 +1,8 @@
 package com.example.mongoes.web.controller;
 
-import com.example.mongoes.document.Grades;
 import com.example.mongoes.document.Restaurant;
 import com.example.mongoes.response.GenericMessage;
+import com.example.mongoes.web.model.GradesRequest;
 import com.example.mongoes.web.model.RestaurantRequest;
 import com.example.mongoes.web.service.RestaurantService;
 import io.micrometer.core.annotation.Timed;
@@ -61,7 +61,7 @@ class RestaurantController {
 
     @PostMapping("/{restaurantId}/grade")
     Mono<ResponseEntity<Restaurant>> addGradeToRestaurant(
-            @RequestBody @Valid Grades request, @PathVariable("restaurantId") Long id) {
+            @RequestBody @Valid GradesRequest request, @PathVariable("restaurantId") Long id) {
         return this.restaurantService.addGrade(request, id).map(ResponseEntity::ok);
     }
 
@@ -75,7 +75,7 @@ class RestaurantController {
 
     @PutMapping("/{restaurantId}/grades/")
     Mono<ResponseEntity<Restaurant>> addNotesToRestaurant(
-            @PathVariable Long restaurantId, @RequestBody @Valid Grades grades) {
+            @PathVariable Long restaurantId, @RequestBody @Valid GradesRequest grades) {
         return restaurantService.addGrade(grades, restaurantId).map(ResponseEntity::ok);
     }
 

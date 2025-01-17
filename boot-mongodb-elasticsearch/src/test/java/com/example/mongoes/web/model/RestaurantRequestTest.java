@@ -3,7 +3,6 @@ package com.example.mongoes.web.model;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.example.mongoes.document.Address;
-import com.example.mongoes.document.Grades;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -26,8 +25,9 @@ class RestaurantRequestTest {
     void serializeInCorrectFormat() throws IOException {
         Address address = new Address();
         address.setLocation(new Point(-73.9, 40.8));
-        Grades grade = new Grades("A", LocalDateTime.of(2022, 1, 1, 1, 1, 1), 15);
-        Grades grade1 = new Grades("B", LocalDateTime.of(2022, 3, 31, 23, 59, 59), 15);
+        GradesRequest grade = new GradesRequest("A", LocalDateTime.of(2022, 1, 1, 1, 1, 1), 15);
+        GradesRequest grade1 =
+                new GradesRequest("B", LocalDateTime.of(2022, 3, 31, 23, 59, 59), 15);
         RestaurantRequest restaurantRequest =
                 new RestaurantRequest(
                         1L,
