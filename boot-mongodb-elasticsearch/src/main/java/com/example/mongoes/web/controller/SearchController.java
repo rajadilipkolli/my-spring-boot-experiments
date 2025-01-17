@@ -17,6 +17,7 @@ import jakarta.validation.constraints.Positive;
 import java.util.List;
 import org.springframework.data.elasticsearch.core.SearchPage;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -25,16 +26,17 @@ import reactor.core.publisher.Mono;
 
 @RestController
 @Timed
-public class SearchController {
+@Validated
+class SearchController {
 
     private final SearchService searchService;
 
-    public SearchController(SearchService searchService) {
+    SearchController(SearchService searchService) {
         this.searchService = searchService;
     }
 
     @GetMapping("/search/borough")
-    public Mono<ResponseEntity<Flux<Restaurant>>> searchPhrase(
+    Mono<ResponseEntity<Flux<Restaurant>>> searchPhrase(
             @RequestParam String query,
             @RequestParam(defaultValue = "10") Integer limit,
             @RequestParam(defaultValue = "0") Integer offset) {
@@ -42,7 +44,7 @@ public class SearchController {
     }
 
     @GetMapping("/search/multi")
-    public Mono<ResponseEntity<SearchPage<Restaurant>>> searchMulti(
+    Mono<ResponseEntity<SearchPage<Restaurant>>> searchMulti(
             @RequestParam String query,
             @RequestParam(defaultValue = "10") Integer limit,
             @RequestParam(defaultValue = "0") Integer offset,
@@ -54,7 +56,7 @@ public class SearchController {
     }
 
     @GetMapping("/search/term/borough")
-    public Mono<ResponseEntity<SearchPage<Restaurant>>> searchTermForBorough(
+    Mono<ResponseEntity<SearchPage<Restaurant>>> searchTermForBorough(
             @RequestParam String query,
             @RequestParam(defaultValue = "10") Integer limit,
             @RequestParam(defaultValue = "0") Integer offset) {
@@ -62,7 +64,7 @@ public class SearchController {
     }
 
     @GetMapping("/search/terms")
-    public Mono<ResponseEntity<SearchPage<Restaurant>>> searchTerms(
+    Mono<ResponseEntity<SearchPage<Restaurant>>> searchTerms(
             @RequestParam("query") List<String> queries,
             @RequestParam(defaultValue = "10") Integer limit,
             @RequestParam(defaultValue = "0") Integer offset) {
@@ -70,7 +72,7 @@ public class SearchController {
     }
 
     @GetMapping("/search/must/bool")
-    public Mono<ResponseEntity<Flux<Restaurant>>> searchBoolMust(
+    Mono<ResponseEntity<Flux<Restaurant>>> searchBoolMust(
             @RequestParam String borough,
             @RequestParam String cuisine,
             @RequestParam String name,
@@ -82,7 +84,7 @@ public class SearchController {
     }
 
     @GetMapping("/search/should/bool")
-    public Mono<ResponseEntity<SearchPage<Restaurant>>> searchBoolShould(
+    Mono<ResponseEntity<SearchPage<Restaurant>>> searchBoolShould(
             @RequestParam String borough,
             @RequestParam String cuisine,
             @RequestParam String name,
@@ -94,7 +96,7 @@ public class SearchController {
     }
 
     @GetMapping("/search/wildcard/borough")
-    public Mono<ResponseEntity<SearchPage<Restaurant>>> searchBoolShould(
+    Mono<ResponseEntity<SearchPage<Restaurant>>> searchBoolShould(
             @RequestParam String query,
             @RequestParam(defaultValue = "10") Integer limit,
             @RequestParam(defaultValue = "0") Integer offset) {
@@ -102,7 +104,7 @@ public class SearchController {
     }
 
     @GetMapping("/search/regexp/borough")
-    public Mono<ResponseEntity<SearchPage<Restaurant>>> searchRegularExpression(
+    Mono<ResponseEntity<SearchPage<Restaurant>>> searchRegularExpression(
             @RequestParam String query,
             @RequestParam(defaultValue = "10") Integer limit,
             @RequestParam(defaultValue = "0") Integer offset) {
@@ -110,7 +112,7 @@ public class SearchController {
     }
 
     @GetMapping("/search/simple")
-    public Mono<ResponseEntity<SearchPage<Restaurant>>> searchSimpleQueryForBoroughAndCuisine(
+    Mono<ResponseEntity<SearchPage<Restaurant>>> searchSimpleQueryForBoroughAndCuisine(
             @RequestParam String query,
             @RequestParam(defaultValue = "10") Integer limit,
             @RequestParam(defaultValue = "0") Integer offset) {
@@ -120,7 +122,7 @@ public class SearchController {
     }
 
     @GetMapping("/search/restaurant/range")
-    public Mono<ResponseEntity<SearchPage<Restaurant>>> searchRestaurantIdRange(
+    Mono<ResponseEntity<SearchPage<Restaurant>>> searchRestaurantIdRange(
             @RequestParam Long lowerLimit,
             @RequestParam Long upperLimit,
             @RequestParam(defaultValue = "10") Integer limit,
@@ -131,7 +133,7 @@ public class SearchController {
     }
 
     @GetMapping("/search/date/range")
-    public Mono<ResponseEntity<SearchPage<Restaurant>>> searchDateRange(
+    Mono<ResponseEntity<SearchPage<Restaurant>>> searchDateRange(
             @RequestParam String fromDate,
             @RequestParam String toDate,
             @RequestParam(defaultValue = "10") Integer limit,
@@ -142,7 +144,7 @@ public class SearchController {
     }
 
     @GetMapping("/search/aggregate")
-    public Mono<ResponseEntity<AggregationSearchResponse>> aggregateSearch(
+    Mono<ResponseEntity<AggregationSearchResponse>> aggregateSearch(
             @RequestParam String searchKeyword,
             @RequestParam List<String> fieldNames,
             @RequestParam(required = false, defaultValue = "15") Integer limit,
@@ -165,7 +167,7 @@ public class SearchController {
                 @ApiResponse(responseCode = "400", description = "Invalid parameters provided")
             })
     @GetMapping("/search/restaurant/withInRange")
-    public Flux<ResultData> searchRestaurantsWithInRange(
+    Flux<ResultData> searchRestaurantsWithInRange(
             @Parameter(
                             description = "Latitude coordinate (between -90 and 90)",
                             example = "40.7128")

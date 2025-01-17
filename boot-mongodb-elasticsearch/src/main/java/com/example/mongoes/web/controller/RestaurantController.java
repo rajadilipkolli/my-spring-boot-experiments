@@ -13,6 +13,7 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import org.springframework.data.elasticsearch.core.SearchPage;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -26,24 +27,24 @@ import reactor.core.publisher.Mono;
 @RestController
 @Timed
 @RequestMapping("/api/restaurant")
-public class RestaurantController {
+@Validated
+class RestaurantController {
 
     private final RestaurantService restaurantService;
 
-    public RestaurantController(RestaurantService restaurantService) {
+    RestaurantController(RestaurantService restaurantService) {
         this.restaurantService = restaurantService;
     }
 
     @GetMapping
-    public Mono<ResponseEntity<SearchPage<Restaurant>>> findAllRestaurants(
+    Mono<ResponseEntity<SearchPage<Restaurant>>> findAllRestaurants(
             @Valid @RequestParam(defaultValue = "10") @Size(max = 999) int limit,
             @RequestParam(defaultValue = "0") int offset) {
         return restaurantService.findAllRestaurants(offset, limit).map(ResponseEntity::ok);
     }
 
     @GetMapping("/name/{restaurantName}")
-    public Mono<ResponseEntity<Restaurant>> findRestaurantByName(
-            @PathVariable String restaurantName) {
+    Mono<ResponseEntity<Restaurant>> findRestaurantByName(@PathVariable String restaurantName) {
         return restaurantService
                 .findByRestaurantName(restaurantName)
                 .map(ResponseEntity::ok)
@@ -51,7 +52,7 @@ public class RestaurantController {
     }
 
     @GetMapping("/{restaurantId}")
-    public Mono<ResponseEntity<Restaurant>> findRestaurantById(@PathVariable Long restaurantId) {
+    Mono<ResponseEntity<Restaurant>> findRestaurantById(@PathVariable Long restaurantId) {
         return restaurantService
                 .findByRestaurantId(restaurantId)
                 .map(ResponseEntity::ok)
@@ -59,13 +60,13 @@ public class RestaurantController {
     }
 
     @PostMapping("/{restaurantId}/grade")
-    public Mono<Restaurant> addGradeToRestaurant(
+    Mono<Restaurant> addGradeToRestaurant(
             @RequestBody Grades request, @PathVariable("restaurantId") Long id) {
         return this.restaurantService.addGrade(request, id);
     }
 
     @GetMapping("/total")
-    public Mono<ResponseEntity<Long>> totalCount() {
+    Mono<ResponseEntity<Long>> totalCount() {
         return restaurantService
                 .totalCount()
                 .map(ResponseEntity::ok)
@@ -73,13 +74,13 @@ public class RestaurantController {
     }
 
     @PutMapping("/{restaurantId}/grades/")
-    public Mono<ResponseEntity<Restaurant>> addNotesToRestaurant(
+    Mono<ResponseEntity<Restaurant>> addNotesToRestaurant(
             @PathVariable Long restaurantId, @RequestBody Grades grades) {
         return restaurantService.addGrade(grades, restaurantId).map(ResponseEntity::ok);
     }
 
     @PostMapping
-    public Mono<ResponseEntity<GenericMessage>> createRestaurant(
+    Mono<ResponseEntity<GenericMessage>> createRestaurant(
             @RequestBody @Valid RestaurantRequest restaurantRequest) {
         return this.restaurantService
                 .createRestaurant(restaurantRequest)
