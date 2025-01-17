@@ -96,7 +96,7 @@ class SearchController {
     }
 
     @GetMapping("/search/wildcard/borough")
-    Mono<ResponseEntity<SearchPage<Restaurant>>> searchBoolShould(
+    Mono<ResponseEntity<SearchPage<Restaurant>>> searchWildcard(
             @RequestParam String query,
             @RequestParam(defaultValue = "10") Integer limit,
             @RequestParam(defaultValue = "0") Integer offset) {

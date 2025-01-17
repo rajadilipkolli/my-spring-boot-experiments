@@ -7,7 +7,7 @@ import com.example.mongoes.web.model.RestaurantRequest;
 import com.example.mongoes.web.service.RestaurantService;
 import io.micrometer.core.annotation.Timed;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.Max;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -38,7 +38,7 @@ class RestaurantController {
 
     @GetMapping
     Mono<ResponseEntity<SearchPage<Restaurant>>> findAllRestaurants(
-            @Valid @RequestParam(defaultValue = "10") @Size(max = 999) int limit,
+            @Valid @RequestParam(defaultValue = "10") @Max(999) int limit,
             @RequestParam(defaultValue = "0") int offset) {
         return restaurantService.findAllRestaurants(offset, limit).map(ResponseEntity::ok);
     }
@@ -60,9 +60,9 @@ class RestaurantController {
     }
 
     @PostMapping("/{restaurantId}/grade")
-    Mono<Restaurant> addGradeToRestaurant(
-            @RequestBody Grades request, @PathVariable("restaurantId") Long id) {
-        return this.restaurantService.addGrade(request, id);
+    Mono<ResponseEntity<Restaurant>> addGradeToRestaurant(
+            @RequestBody @Valid Grades request, @PathVariable("restaurantId") Long id) {
+        return this.restaurantService.addGrade(request, id).map(ResponseEntity::ok);
     }
 
     @GetMapping("/total")
@@ -75,7 +75,7 @@ class RestaurantController {
 
     @PutMapping("/{restaurantId}/grades/")
     Mono<ResponseEntity<Restaurant>> addNotesToRestaurant(
-            @PathVariable Long restaurantId, @RequestBody Grades grades) {
+            @PathVariable Long restaurantId, @RequestBody @Valid Grades grades) {
         return restaurantService.addGrade(grades, restaurantId).map(ResponseEntity::ok);
     }
 
@@ -87,19 +87,17 @@ class RestaurantController {
                 .map(
                         restaurant ->
                                 ResponseEntity.created(
-                                                URI.create(
-                                                        "/api/restaurant/name/%s"
-                                                                .formatted(
-                                                                        URLEncoder.encode(
-                                                                                restaurantRequest
-                                                                                        .name(),
-                                                                                StandardCharsets
-                                                                                        .UTF_8))))
+                                                createRestaurantUri(restaurantRequest.name()))
                                         .body(
                                                 new GenericMessage(
                                                         "restaurant with name %s created"
                                                                 .formatted(
                                                                         restaurantRequest
                                                                                 .name()))));
+    }
+
+    private URI createRestaurantUri(String restaurantName) {
+        String encodedName = URLEncoder.encode(restaurantName, StandardCharsets.UTF_8);
+        return URI.create("/api/restaurant/name/%s".formatted(encodedName));
     }
 }
