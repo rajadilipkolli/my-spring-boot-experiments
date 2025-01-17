@@ -19,10 +19,6 @@ public record GradesRequest(
                 Integer score) {
 
     public Grades toGrade() {
-        Grades grades = new Grades();
-        grades.setDate(date);
-        grades.setGrade(grade);
-        grades.setScore(score);
-        return grades;
+        return new Grades(grade, date, score);
     }
 }

@@ -3,9 +3,13 @@ package com.example.mongoes.web.controller;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 
+import com.example.mongoes.document.Address;
+import com.example.mongoes.document.Restaurant;
 import com.example.mongoes.web.model.GradesRequest;
+import com.example.mongoes.web.model.RestaurantRequest;
 import com.example.mongoes.web.service.RestaurantService;
 import java.time.LocalDateTime;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
@@ -61,11 +65,60 @@ class RestaurantControllerTest {
     }
 
     @Test
+    void whenRestaurantRequestWithNullName_thenBadRequest() {
+        RestaurantRequest invalidRequest =
+                new RestaurantRequest(1L, null, "borough", "cuisine", new Address(), List.of());
+
+        this.webTestClient
+                .post()
+                .uri("/api/restaurant")
+                .bodyValue(invalidRequest)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isBadRequest();
+    }
+
+    @Test
+    void whenRestaurantRequestWithEmptyBorough_thenBadRequest() {
+        RestaurantRequest invalidRequest =
+                new RestaurantRequest(1L, "name", "", "cuisine", new Address(), List.of());
+
+        this.webTestClient
+                .post()
+                .uri("/api/restaurant")
+                .bodyValue(invalidRequest)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isBadRequest();
+    }
+
+    @Test
+    void whenValidGrade_thenReturns200() {
+        // given
+        Long restaurantId = 1L;
+        GradesRequest validGrade = new GradesRequest("A", LocalDateTime.now(), 90);
+        when(restaurantService.addGrade(validGrade, restaurantId))
+                .thenReturn(Mono.just(new Restaurant()));
+
+        // when/then
+        webTestClient
+                .post()
+                .uri("/api/restaurant/{restaurantId}/grade", restaurantId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(validGrade)
+                .exchange()
+                .expectStatus()
+                .isOk();
+    }
+
+    @Test
     void whenInvalidGrade_thenReturns400() {
         // given
         Long restaurantId = 1L;
         // grade is required but not set
-        GradesRequest invalidGrade = new GradesRequest(null, null, null);   
+        GradesRequest invalidGrade = new GradesRequest(null, null, null);
 
         // when/then
         webTestClient
