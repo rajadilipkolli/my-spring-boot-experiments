@@ -1,6 +1,8 @@
 package com.example.mongoes.web.controller;
 
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.example.mongoes.document.Address;
@@ -27,7 +29,7 @@ class RestaurantControllerTest {
 
     @Test
     void findAllRestaurants_WithValidLimit_ShouldReturnOk() {
-        when(restaurantService.findAllRestaurants(anyInt(), anyInt())).thenReturn(Mono.empty());
+        when(restaurantService.findAllRestaurants(eq(0), eq(100))).thenReturn(Mono.empty());
 
         webTestClient
                 .get()
@@ -40,6 +42,8 @@ class RestaurantControllerTest {
                 .exchange()
                 .expectStatus()
                 .isOk();
+
+        verify(restaurantService).findAllRestaurants(0, 100);
     }
 
     @Test

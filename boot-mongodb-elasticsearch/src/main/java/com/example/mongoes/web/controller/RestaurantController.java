@@ -8,6 +8,9 @@ import com.example.mongoes.web.service.RestaurantService;
 import io.micrometer.core.annotation.Timed;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -44,7 +47,9 @@ class RestaurantController {
     }
 
     @GetMapping("/name/{restaurantName}")
-    Mono<ResponseEntity<Restaurant>> findRestaurantByName(@PathVariable String restaurantName) {
+    Mono<ResponseEntity<Restaurant>> findRestaurantByName(
+            @PathVariable @NotBlank @Size(max = 255) @Pattern(regexp = "^[a-zA-Z0-9 .-]+$")
+                    String restaurantName) {
         return restaurantService
                 .findByRestaurantName(restaurantName)
                 .map(ResponseEntity::ok)

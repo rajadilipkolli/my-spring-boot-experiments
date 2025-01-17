@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
 import java.util.List;
@@ -37,17 +38,17 @@ class SearchController {
 
     @GetMapping("/search/borough")
     Mono<ResponseEntity<Flux<Restaurant>>> searchPhrase(
-            @RequestParam String query,
-            @RequestParam(defaultValue = "10") Integer limit,
-            @RequestParam(defaultValue = "0") Integer offset) {
+            @RequestParam @NotBlank(message = "Query cannot be blank") String query,
+            @RequestParam(defaultValue = "10") @Min(1) @Max(100) Integer limit,
+            @RequestParam(defaultValue = "0") @Min(0) Integer offset) {
         return searchService.searchMatchBorough(query, offset, limit).map(ResponseEntity::ok);
     }
 
     @GetMapping("/search/multi")
     Mono<ResponseEntity<SearchPage<Restaurant>>> searchMulti(
-            @RequestParam String query,
-            @RequestParam(defaultValue = "10") Integer limit,
-            @RequestParam(defaultValue = "0") Integer offset,
+            @RequestParam @NotBlank(message = "Query cannot be blank") String query,
+            @RequestParam(defaultValue = "10") @Min(1) @Max(100) Integer limit,
+            @RequestParam(defaultValue = "0") @Min(0) Integer offset,
             @RequestParam(value = "prefix_phrase_enabled", defaultValue = "false")
                     Boolean prefixPhraseEnabled) {
         return searchService
@@ -57,17 +58,17 @@ class SearchController {
 
     @GetMapping("/search/term/borough")
     Mono<ResponseEntity<SearchPage<Restaurant>>> searchTermForBorough(
-            @RequestParam String query,
-            @RequestParam(defaultValue = "10") Integer limit,
-            @RequestParam(defaultValue = "0") Integer offset) {
+            @RequestParam @NotBlank(message = "Query cannot be blank") String query,
+            @RequestParam(defaultValue = "10") @Min(1) @Max(100) Integer limit,
+            @RequestParam(defaultValue = "0") @Min(0) Integer offset) {
         return searchService.termQueryForBorough(query, offset, limit).map(ResponseEntity::ok);
     }
 
     @GetMapping("/search/terms")
     Mono<ResponseEntity<SearchPage<Restaurant>>> searchTerms(
             @RequestParam("query") List<String> queries,
-            @RequestParam(defaultValue = "10") Integer limit,
-            @RequestParam(defaultValue = "0") Integer offset) {
+            @RequestParam(defaultValue = "10") @Min(1) @Max(100) Integer limit,
+            @RequestParam(defaultValue = "0") @Min(0) Integer offset) {
         return searchService.termsQueryForBorough(queries, offset, limit).map(ResponseEntity::ok);
     }
 
@@ -76,8 +77,8 @@ class SearchController {
             @RequestParam String borough,
             @RequestParam String cuisine,
             @RequestParam String name,
-            @RequestParam(defaultValue = "10") Integer limit,
-            @RequestParam(defaultValue = "0") Integer offset) {
+            @RequestParam(defaultValue = "10") @Min(1) @Max(100) Integer limit,
+            @RequestParam(defaultValue = "0") @Min(0) Integer offset) {
         return searchService
                 .queryBoolWithMust(borough, cuisine, name, offset, limit)
                 .map(ResponseEntity::ok);
@@ -88,8 +89,8 @@ class SearchController {
             @RequestParam String borough,
             @RequestParam String cuisine,
             @RequestParam String name,
-            @RequestParam(defaultValue = "10") Integer limit,
-            @RequestParam(defaultValue = "0") Integer offset) {
+            @RequestParam(defaultValue = "10") @Min(1) @Max(100) Integer limit,
+            @RequestParam(defaultValue = "0") @Min(0) Integer offset) {
         return searchService
                 .queryBoolWithShould(borough, cuisine, name, offset, limit)
                 .map(ResponseEntity::ok);
@@ -97,25 +98,25 @@ class SearchController {
 
     @GetMapping("/search/wildcard/borough")
     Mono<ResponseEntity<SearchPage<Restaurant>>> searchWildcard(
-            @RequestParam String query,
-            @RequestParam(defaultValue = "10") Integer limit,
-            @RequestParam(defaultValue = "0") Integer offset) {
+            @RequestParam @NotBlank(message = "Query cannot be blank") String query,
+            @RequestParam(defaultValue = "10") @Min(1) @Max(100) Integer limit,
+            @RequestParam(defaultValue = "0") @Min(0) Integer offset) {
         return searchService.wildcardSearch(query, offset, limit).map(ResponseEntity::ok);
     }
 
     @GetMapping("/search/regexp/borough")
     Mono<ResponseEntity<SearchPage<Restaurant>>> searchRegularExpression(
-            @RequestParam String query,
-            @RequestParam(defaultValue = "10") Integer limit,
-            @RequestParam(defaultValue = "0") Integer offset) {
+            @RequestParam @NotBlank(message = "Query cannot be blank") String query,
+            @RequestParam(defaultValue = "10") @Min(1) @Max(100) Integer limit,
+            @RequestParam(defaultValue = "0") @Min(0) Integer offset) {
         return searchService.regExpSearch(query, offset, limit).map(ResponseEntity::ok);
     }
 
     @GetMapping("/search/simple")
     Mono<ResponseEntity<SearchPage<Restaurant>>> searchSimpleQueryForBoroughAndCuisine(
-            @RequestParam String query,
-            @RequestParam(defaultValue = "10") Integer limit,
-            @RequestParam(defaultValue = "0") Integer offset) {
+            @RequestParam @NotBlank(message = "Query cannot be blank") String query,
+            @RequestParam(defaultValue = "10") @Min(1) @Max(100) Integer limit,
+            @RequestParam(defaultValue = "0") @Min(0) Integer offset) {
         return searchService
                 .searchSimpleQueryForBoroughAndCuisine(query, offset, limit)
                 .map(ResponseEntity::ok);
@@ -125,8 +126,8 @@ class SearchController {
     Mono<ResponseEntity<SearchPage<Restaurant>>> searchRestaurantIdRange(
             @RequestParam Long lowerLimit,
             @RequestParam Long upperLimit,
-            @RequestParam(defaultValue = "10") Integer limit,
-            @RequestParam(defaultValue = "0") Integer offset) {
+            @RequestParam(defaultValue = "10") @Min(1) @Max(100) Integer limit,
+            @RequestParam(defaultValue = "0") @Min(0) Integer offset) {
         return searchService
                 .searchRestaurantIdRange(lowerLimit, upperLimit, offset, limit)
                 .map(ResponseEntity::ok);
@@ -136,8 +137,8 @@ class SearchController {
     Mono<ResponseEntity<SearchPage<Restaurant>>> searchDateRange(
             @RequestParam String fromDate,
             @RequestParam String toDate,
-            @RequestParam(defaultValue = "10") Integer limit,
-            @RequestParam(defaultValue = "0") Integer offset) {
+            @RequestParam(defaultValue = "10") @Min(1) @Max(100) Integer limit,
+            @RequestParam(defaultValue = "0") @Min(0) Integer offset) {
         return searchService
                 .searchDateRange(fromDate, toDate, offset, limit)
                 .map(ResponseEntity::ok);
@@ -147,8 +148,8 @@ class SearchController {
     Mono<ResponseEntity<AggregationSearchResponse>> aggregateSearch(
             @RequestParam String searchKeyword,
             @RequestParam List<String> fieldNames,
-            @RequestParam(required = false, defaultValue = "15") Integer limit,
-            @RequestParam(required = false, defaultValue = "0") Integer offset,
+            @RequestParam(required = false, defaultValue = "10") @Min(1) @Max(100) Integer limit,
+            @RequestParam(required = false, defaultValue = "0") @Min(0) Integer offset,
             @RequestParam(required = false, defaultValue = "DESC") String sortOrder,
             @RequestParam(required = false, defaultValue = "restaurant_id") String... sortFields) {
         return searchService
