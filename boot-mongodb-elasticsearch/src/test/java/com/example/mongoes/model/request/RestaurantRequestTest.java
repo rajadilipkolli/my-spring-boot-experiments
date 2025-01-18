@@ -1,4 +1,4 @@
-package com.example.mongoes.web.model;
+package com.example.mongoes.model.request;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

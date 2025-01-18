@@ -5,8 +5,8 @@ import static org.mockito.Mockito.when;
 
 import com.example.mongoes.document.Address;
 import com.example.mongoes.document.Restaurant;
-import com.example.mongoes.web.model.GradesRequest;
-import com.example.mongoes.web.model.RestaurantRequest;
+import com.example.mongoes.model.request.GradesRequest;
+import com.example.mongoes.model.request.RestaurantRequest;
 import com.example.mongoes.web.service.RestaurantService;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;

@@ -2,7 +2,7 @@ package com.example.mongoes.web.controller;
 
 import static org.mockito.BDDMockito.given;
 
-import com.example.mongoes.response.AggregationSearchResponse;
+import com.example.mongoes.model.response.AggregationSearchResponse;
 import com.example.mongoes.web.service.SearchService;
 import java.util.List;
 import java.util.Map;

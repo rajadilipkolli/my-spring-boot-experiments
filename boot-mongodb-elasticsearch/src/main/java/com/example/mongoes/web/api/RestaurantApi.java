@@ -1,9 +1,9 @@
 package com.example.mongoes.web.api;
 
 import com.example.mongoes.document.Restaurant;
-import com.example.mongoes.response.GenericMessage;
-import com.example.mongoes.web.model.GradesRequest;
-import com.example.mongoes.web.model.RestaurantRequest;
+import com.example.mongoes.model.request.GradesRequest;
+import com.example.mongoes.model.request.RestaurantRequest;
+import com.example.mongoes.model.response.GenericMessage;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;

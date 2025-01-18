@@ -1,3 +1,3 @@
-package com.example.mongoes.response;
+package com.example.mongoes.model.response;
 
 public record GenericMessage(String message) {}

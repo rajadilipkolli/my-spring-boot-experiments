@@ -1,9 +1,9 @@
 package com.example.mongoes.web.service;
 
 import com.example.mongoes.document.Restaurant;
+import com.example.mongoes.model.response.AggregationSearchResponse;
+import com.example.mongoes.model.response.ResultData;
 import com.example.mongoes.repository.elasticsearch.RestaurantESRepository;
-import com.example.mongoes.response.AggregationSearchResponse;
-import com.example.mongoes.response.ResultData;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

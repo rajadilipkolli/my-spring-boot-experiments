@@ -1,4 +1,4 @@
-package com.example.mongoes.response;
+package com.example.mongoes.model.response;
 
 import com.example.mongoes.document.Restaurant;
 import java.util.List;

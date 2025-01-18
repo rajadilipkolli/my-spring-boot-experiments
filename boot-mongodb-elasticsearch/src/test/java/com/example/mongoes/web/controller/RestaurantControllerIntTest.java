@@ -2,8 +2,8 @@ package com.example.mongoes.web.controller;
 
 import com.example.mongoes.common.AbstractIntegrationTest;
 import com.example.mongoes.document.Address;
-import com.example.mongoes.web.model.GradesRequest;
-import com.example.mongoes.web.model.RestaurantRequest;
+import com.example.mongoes.model.request.GradesRequest;
+import com.example.mongoes.model.request.RestaurantRequest;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.junit.jupiter.api.Test;

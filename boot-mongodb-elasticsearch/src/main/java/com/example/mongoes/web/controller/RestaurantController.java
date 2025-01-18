@@ -1,10 +1,10 @@
 package com.example.mongoes.web.controller;
 
 import com.example.mongoes.document.Restaurant;
-import com.example.mongoes.response.GenericMessage;
+import com.example.mongoes.model.request.GradesRequest;
+import com.example.mongoes.model.request.RestaurantRequest;
+import com.example.mongoes.model.response.GenericMessage;
 import com.example.mongoes.web.api.RestaurantApi;
-import com.example.mongoes.web.model.GradesRequest;
-import com.example.mongoes.web.model.RestaurantRequest;
 import com.example.mongoes.web.service.RestaurantService;
 import io.micrometer.core.annotation.Timed;
 import java.net.URI;
