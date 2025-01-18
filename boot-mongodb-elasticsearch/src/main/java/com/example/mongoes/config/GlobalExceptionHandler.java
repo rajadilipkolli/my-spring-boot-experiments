@@ -35,7 +35,7 @@ public class GlobalExceptionHandler {
     Mono<ProblemDetail> handleValidationErrors(WebExchangeBindException ex) {
         ProblemDetail problemDetail =
                 ProblemDetail.forStatusAndDetail(
-                        HttpStatusCode.valueOf(400), "Invalid request content.");
+                        HttpStatusCode.valueOf(400), "Request failed validation checks.");
         problemDetail.setTitle("Constraint Violation");
         List<ApiValidationError> validationErrorsList =
                 ex.getAllErrors().stream()

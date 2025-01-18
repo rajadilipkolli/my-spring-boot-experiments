@@ -71,7 +71,28 @@ class RestaurantControllerTest {
                                         .build())
                 .exchange()
                 .expectStatus()
-                .isBadRequest();
+                .isBadRequest()
+                .expectHeader()
+                .contentType(MediaType.APPLICATION_PROBLEM_JSON)
+                .expectBody()
+                .json(
+                        """
+                        {
+                   	"type": "about:blank",
+                   	"title": "Constraint Violation",
+                   	"status": 400,
+                   	"detail": "Validation failed",
+                   	"instance": "/api/restaurant",
+                   	"violations": [
+                   		{
+                   			"object": "RestaurantController",
+                   			"field": "findAllRestaurants.limit",
+                   			"rejectedValue": 1000,
+                   			"message": "must be less than or equal to 999"
+                   		}
+                   	]
+                   }
+                  """);
     }
 
     @Test
@@ -86,7 +107,14 @@ class RestaurantControllerTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus()
-                .isBadRequest();
+                .isBadRequest()
+                .expectHeader()
+                .contentType(MediaType.APPLICATION_PROBLEM_JSON)
+                .expectBody()
+                .json(
+                        """
+                        {"type":"about:blank","title":"Bad Request","status":400,"detail":"Invalid request content.","instance":"/api/restaurant"}
+                  """);
     }
 
     @Test
@@ -101,7 +129,14 @@ class RestaurantControllerTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus()
-                .isBadRequest();
+                .isBadRequest()
+                .expectHeader()
+                .contentType(MediaType.APPLICATION_PROBLEM_JSON)
+                .expectBody()
+                .json(
+                        """
+                        {"type":"about:blank","title":"Bad Request","status":400,"detail":"Invalid request content.","instance":"/api/restaurant"}
+                  """);
     }
 
     @Test
@@ -138,7 +173,14 @@ class RestaurantControllerTest {
                 .bodyValue(invalidGrade)
                 .exchange()
                 .expectStatus()
-                .isBadRequest();
+                .isBadRequest()
+                .expectHeader()
+                .contentType(MediaType.APPLICATION_PROBLEM_JSON)
+                .expectBody()
+                .json(
+                        """
+                        {"type":"about:blank","title":"Bad Request","status":400,"detail":"Invalid request content.","instance":"/api/restaurant/1/grade"}
+                  """);
     }
 
     @Test
@@ -155,7 +197,14 @@ class RestaurantControllerTest {
                 .bodyValue(invalidGrade)
                 .exchange()
                 .expectStatus()
-                .isBadRequest();
+                .isBadRequest()
+                .expectHeader()
+                .contentType(MediaType.APPLICATION_PROBLEM_JSON)
+                .expectBody()
+                .json(
+                        """
+                        {"type":"about:blank","title":"Bad Request","status":400,"detail":"Invalid request content.","instance":"/api/restaurant/1/grade"}
+                  """);
     }
 
     @Test
@@ -211,7 +260,9 @@ class RestaurantControllerTest {
                 .uri("/api/restaurant/name/{restaurantName}", emptyName)
                 .exchange()
                 .expectStatus()
-                .isBadRequest();
+                .isBadRequest()
+                .expectHeader()
+                .contentType(MediaType.APPLICATION_PROBLEM_JSON);
     }
 
     @Test
@@ -223,7 +274,14 @@ class RestaurantControllerTest {
                 .uri("/api/restaurant/name/{restaurantName}", tooLongName)
                 .exchange()
                 .expectStatus()
-                .isBadRequest();
+                .isBadRequest()
+                .expectHeader()
+                .contentType(MediaType.APPLICATION_PROBLEM_JSON)
+                .expectBody()
+                .json(
+                        """
+                  {"type":"about:blank","title":"Constraint Violation","status":400,"detail":"Validation failed","instance":"/api/restaurant/name/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","violations":[{"object":"RestaurantController","field":"findRestaurantByName.restaurantName","rejectedValue":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","message":"size must be between 0 and 255"}]}
+                  """);
     }
 
     @Test
