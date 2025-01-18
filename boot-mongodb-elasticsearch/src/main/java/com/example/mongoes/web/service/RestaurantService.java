@@ -171,7 +171,7 @@ public class RestaurantService {
                 .watchCollection(AppConstants.RESTAURANT_COLLECTION)
                 .resumeAt(getChangeStreamOption())
                 .listen()
-                .delayElements(Duration.ofMillis(5))
+                .delayElements(Duration.ofMillis(3))
                 .publishOn(Schedulers.boundedElastic())
                 .doOnNext(
                         restaurantChangeStreamEvent -> {
