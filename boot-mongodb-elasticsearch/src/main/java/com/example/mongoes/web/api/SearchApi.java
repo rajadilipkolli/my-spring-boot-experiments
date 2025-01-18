@@ -156,7 +156,8 @@ public interface SearchApi {
             })
     @GetMapping("/search/terms")
     Mono<ResponseEntity<SearchPage<Restaurant>>> searchTerms(
-            @RequestParam("query") List<String> queries,
+            @RequestParam("query") @NotEmpty(message = "Queries list cannot be empty")
+                    List<String> queries,
             @RequestParam(defaultValue = "10") @Min(1) @Max(100) Integer limit,
             @RequestParam(defaultValue = "0") @Min(0) Integer offset);
 
@@ -242,12 +243,15 @@ public interface SearchApi {
 
     @Operation(
             summary = "Wildcard borough search",
-            description = "Search for restaurants using wildcard pattern matching on borough names")
-    @ApiResponse(
-            responseCode = "200",
-            description = "Successfully retrieved restaurants",
-            content = @Content(schema = @Schema(implementation = SearchPage.class)))
-    @ApiResponse(responseCode = "400", description = "Invalid parameters provided")
+            description = "Search for restaurants using wildcard pattern matching on borough names",
+            responses = {
+                @ApiResponse(
+                        responseCode = "200",
+                        description = "Successfully retrieved restaurants",
+                        content = @Content(schema = @Schema(implementation = SearchPage.class))),
+                @ApiResponse(responseCode = "400", description = "Invalid parameters provided")
+            })
+    @GetMapping("/search/wildcard")
     Mono<ResponseEntity<SearchPage<Restaurant>>> searchWildcard(
             @Parameter(description = "Wildcard pattern for search", example = "Man")
                     @RequestParam
@@ -259,17 +263,19 @@ public interface SearchApi {
     @Operation(
             summary = "Regular expression borough search",
             description =
-                    "Search for restaurants using regular expression pattern matching on borough names")
-    @ApiResponse(
-            responseCode = "200",
-            description = "Successfully retrieved restaurants",
-            content = @Content(schema = @Schema(implementation = SearchPage.class)))
-    @ApiResponse(responseCode = "400", description = "Invalid parameters provided")
+                    "Search for restaurants using regular expression pattern matching on borough names",
+            responses = {
+                @ApiResponse(
+                        responseCode = "200",
+                        description = "Successfully retrieved restaurants",
+                        content = @Content(schema = @Schema(implementation = SearchPage.class))),
+                @ApiResponse(responseCode = "400", description = "Invalid parameters provided")
+            })
     @GetMapping("/search/regexp/borough")
     Mono<ResponseEntity<SearchPage<Restaurant>>> searchRegularExpression(
             @Parameter(description = "Regular expression pattern", example = "Man.*")
                     @RequestParam
-                    @NotBlank
+                    @NotBlank(message = "Query cannot be blank")
                     String query,
             @Parameter(description = "Maximum number of results (1-100)", example = "10")
                     @RequestParam(defaultValue = "10")
@@ -284,17 +290,19 @@ public interface SearchApi {
     @Operation(
             summary = "Simple query search",
             description =
-                    "Search for restaurants using a simple query string across borough and cuisine")
-    @ApiResponse(
-            responseCode = "200",
-            description = "Successfully retrieved restaurants",
-            content = @Content(schema = @Schema(implementation = SearchPage.class)))
-    @ApiResponse(responseCode = "400", description = "Invalid parameters provided")
+                    "Search for restaurants using a simple query string across borough and cuisine",
+            responses = {
+                @ApiResponse(
+                        responseCode = "200",
+                        description = "Successfully retrieved restaurants",
+                        content = @Content(schema = @Schema(implementation = SearchPage.class))),
+                @ApiResponse(responseCode = "400", description = "Invalid parameters provided")
+            })
     @GetMapping("/search/simple")
     Mono<ResponseEntity<SearchPage<Restaurant>>> searchSimpleQueryForBoroughAndCuisine(
             @Parameter(description = "Search query string", example = "Manhattan AND Italian")
                     @RequestParam
-                    @NotBlank
+                    @NotBlank(message = "Query cannot be blank")
                     String query,
             @Parameter(description = "Maximum number of results (1-100)", example = "10")
                     @RequestParam(defaultValue = "10")
@@ -308,17 +316,25 @@ public interface SearchApi {
 
     @Operation(
             summary = "Restaurant ID range search",
-            description = "Search for restaurants within a specified ID range")
-    @ApiResponse(
-            responseCode = "200",
-            description = "Successfully retrieved restaurants",
-            content = @Content(schema = @Schema(implementation = SearchPage.class)))
-    @ApiResponse(responseCode = "400", description = "Invalid parameters provided")
+            description = "Search for restaurants within a specified ID range",
+            responses = {
+                @ApiResponse(
+                        responseCode = "200",
+                        description = "Successfully retrieved restaurants",
+                        content = @Content(schema = @Schema(implementation = SearchPage.class))),
+                @ApiResponse(responseCode = "400", description = "Invalid parameters provided")
+            })
     @GetMapping("/search/restaurant/range")
     Mono<ResponseEntity<SearchPage<Restaurant>>> searchRestaurantIdRange(
-            @Parameter(description = "Lower limit of restaurant ID", example = "1000") @RequestParam
+            @Parameter(description = "Lower limit of restaurant ID", example = "1000")
+                    @RequestParam
+                    @NotNull(message = "Lower limit is required")
+                    @Positive(message = "Lower limit must be positive")
                     Long lowerLimit,
-            @Parameter(description = "Upper limit of restaurant ID", example = "2000") @RequestParam
+            @Parameter(description = "Upper limit of restaurant ID", example = "2000")
+                    @RequestParam
+                    @Positive(message = "Upper limit must be positive")
+                    @NotNull(message = "Upper limit is required")
                     Long upperLimit,
             @Parameter(description = "Maximum number of results (1-100)", example = "10")
                     @RequestParam(defaultValue = "10")
@@ -332,22 +348,26 @@ public interface SearchApi {
 
     @Operation(
             summary = "Date range search",
-            description = "Search for restaurants within a specified date range")
-    @ApiResponse(
-            responseCode = "200",
-            description = "Successfully retrieved restaurants",
-            content = @Content(schema = @Schema(implementation = SearchPage.class)))
-    @ApiResponse(responseCode = "400", description = "Invalid parameters provided")
+            description = "Search for restaurants within a specified date range",
+            responses = {
+                @ApiResponse(
+                        responseCode = "200",
+                        description = "Successfully retrieved restaurants",
+                        content = @Content(schema = @Schema(implementation = SearchPage.class))),
+                @ApiResponse(responseCode = "400", description = "Invalid parameters provided")
+            })
     @GetMapping("/search/date/range")
     Mono<ResponseEntity<SearchPage<Restaurant>>> searchDateRange(
             @Parameter(description = "Start date (ISO format)", example = "2024-01-01")
                     @RequestParam
+                    @NotBlank(message = "From date is required")
                     @Pattern(
                             regexp = "^\\d{4}-\\d{2}-\\d{2}$",
                             message = "Date must be in yyyy-MM-dd format")
                     String fromDate,
             @Parameter(description = "End date (ISO format)", example = "2024-12-31")
                     @RequestParam
+                    @NotBlank(message = "To date is required")
                     @Pattern(
                             regexp = "^\\d{4}-\\d{2}-\\d{2}$",
                             message = "Date must be in yyyy-MM-dd format")
@@ -364,19 +384,28 @@ public interface SearchApi {
 
     @Operation(
             summary = "Aggregation search",
-            description = "Search and aggregate results based on specified fields")
-    @ApiResponse(
-            responseCode = "200",
-            description = "Successfully retrieved aggregated results",
-            content = @Content(schema = @Schema(implementation = AggregationSearchResponse.class)))
-    @ApiResponse(responseCode = "400", description = "Invalid parameters provided")
+            description = "Search and aggregate results based on specified fields",
+            responses = {
+                @ApiResponse(
+                        responseCode = "200",
+                        description = "Successfully retrieved aggregated results",
+                        content =
+                                @Content(
+                                        schema =
+                                                @Schema(
+                                                        implementation =
+                                                                AggregationSearchResponse.class))),
+                @ApiResponse(responseCode = "400", description = "Invalid parameters provided")
+            })
     @GetMapping("/search/aggregate")
     Mono<ResponseEntity<AggregationSearchResponse>> aggregateSearch(
-            @Parameter(description = "Search keyword", example = "Italian") @RequestParam @NotBlank
+            @Parameter(description = "Search keyword", example = "Italian")
+                    @RequestParam
+                    @NotBlank(message = "Search keyword cannot be blank")
                     String searchKeyword,
             @Parameter(description = "Fields to aggregate on", example = "['borough', 'cuisine']")
                     @RequestParam
-                    @NotEmpty
+                    @NotEmpty(message = "Field names cannot be empty")
                     List<String> fieldNames,
             @Parameter(description = "Maximum number of results (1-100)", example = "15")
                     @RequestParam(required = false, defaultValue = "15")
@@ -412,6 +441,7 @@ public interface SearchApi {
                     @RequestParam
                     @Min(-90)
                     @Max(90)
+                    @NotNull(message = "Latitude is required")
                     Double lat,
             @Parameter(
                             description = "Longitude coordinate (between -180 and 180)",
@@ -419,10 +449,12 @@ public interface SearchApi {
                     @RequestParam
                     @Min(-180)
                     @Max(180)
+                    @NotNull(message = "Longitude is required")
                     Double lon,
             @Parameter(description = "Distance from coordinates (must be positive)")
                     @RequestParam
                     @Positive
+                    @NotNull(message = "Distance is required")
                     Double distance,
             @Parameter(
                             description = "Unit of distance",
@@ -430,5 +462,6 @@ public interface SearchApi {
                             schema = @Schema(allowableValues = {"km", "mi"}))
                     @RequestParam(defaultValue = "km", required = false)
                     @Pattern(regexp = "^(km|mi)$", message = "Unit must be either 'km' or 'mi'")
+                    @NotBlank(message = "Unit cannot be blank")
                     String unit);
 }

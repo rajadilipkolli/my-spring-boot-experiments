@@ -72,7 +72,10 @@ public interface RestaurantApi {
             })
     @GetMapping("/name/{restaurantName}")
     Mono<ResponseEntity<Restaurant>> findRestaurantByName(
-            @PathVariable @NotBlank @Size(max = 255) @Pattern(regexp = "^[a-zA-Z0-9 .-]+$")
+            @PathVariable
+                    @NotBlank(message = "RestaurantName cant be Blank")
+                    @Size(max = 255)
+                    @Pattern(regexp = "^[a-zA-Z0-9 .-]+$")
                     String restaurantName);
 
     @Operation(
