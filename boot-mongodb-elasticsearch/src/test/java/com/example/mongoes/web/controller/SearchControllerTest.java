@@ -307,6 +307,17 @@ class SearchControllerTest {
     @DisplayName("Coordinate validation tests")
     class CoordinateValidationTests {
 
+        private static final String MISSING_PARAMETER_ERROR_JSON =
+                """
+            {
+                "type": "about:blank",
+                "title": "Bad Request",
+                "status": 400,
+                "detail": "Required query parameter '%s' is not present.",
+                "instance": "/search/restaurant/withInRange"
+            }
+            """;
+
         @ParameterizedTest
         @CsvSource({
             "-91.0, -74.0060, searchRestaurantsWithInRange.lat, -91.0, Latitude must be greater than or equal to -90",
@@ -373,16 +384,7 @@ class SearchControllerTest {
                     .expectStatus()
                     .isBadRequest()
                     .expectBody()
-                    .json(
-                            """
-                                      {
-                                          "type": "about:blank",
-                                          "title": "Bad Request",
-                                          "status": 400,
-                                          "detail": "Required query parameter 'lat' is not present.",
-                                          "instance": "/search/restaurant/withInRange"
-                                      }
-                                      """);
+                    .json(MISSING_PARAMETER_ERROR_JSON.formatted("lat"));
         }
 
         @Test
@@ -402,16 +404,7 @@ class SearchControllerTest {
                     .expectStatus()
                     .isBadRequest()
                     .expectBody()
-                    .json(
-                            """
-                                      {
-                                          "type": "about:blank",
-                                          "title": "Bad Request",
-                                          "status": 400,
-                                          "detail": "Required query parameter 'lon' is not present.",
-                                          "instance": "/search/restaurant/withInRange"
-                                      }
-                                      """);
+                    .json(MISSING_PARAMETER_ERROR_JSON.formatted("lon"));
         }
     }
 

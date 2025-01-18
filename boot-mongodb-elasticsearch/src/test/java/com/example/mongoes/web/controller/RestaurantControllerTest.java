@@ -22,7 +22,9 @@ import org.springframework.data.geo.Point;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 @WebFluxTest(RestaurantController.class)
 class RestaurantControllerTest {
@@ -188,7 +190,17 @@ class RestaurantControllerTest {
                 .jsonPath("$.cuisine")
                 .isEqualTo("Italian")
                 .jsonPath("$.address")
-                .exists();
+                .exists()
+                .jsonPath("$.address.street")
+                .isEqualTo("Street")
+                .jsonPath("$.address.building")
+                .isEqualTo("Building")
+                .jsonPath("$.address.zipcode")
+                .isEqualTo(12345)
+                .jsonPath("$.address.location.x")
+                .isEqualTo(40.0)
+                .jsonPath("$.address.location.y")
+                .isEqualTo(-73.0);
     }
 
     @ParameterizedTest
@@ -273,13 +285,48 @@ class RestaurantControllerTest {
         restaurant.setName(validName);
 
         when(restaurantService.findByRestaurantName(validName))
-                .thenReturn(Mono.just(restaurant).delayElement(Duration.ofSeconds(1)));
+                .thenReturn(Mono.just(restaurant).delayElement(Duration.ofSeconds(3)));
 
         webTestClient
+                .mutate()
+                .responseTimeout(Duration.ofSeconds(6))
+                .build()
                 .get()
                 .uri("/api/restaurant/name/{restaurantName}", validName)
                 .exchange()
                 .expectStatus()
-                .isOk();
+                .isOk()
+                .expectBody()
+                .jsonPath("$.name")
+                .isEqualTo(validName);
+    }
+
+    @Test
+    void handleMultipleConcurrentRequests() {
+        String validName = "Test Restaurant";
+        Restaurant restaurant = new Restaurant();
+        restaurant.setName(validName);
+
+        when(restaurantService.findByRestaurantName(validName)).thenReturn(Mono.just(restaurant));
+
+        Flux<Restaurant> responseFlux =
+                Flux.range(1, 10)
+                        .flatMap(
+                                i ->
+                                        webTestClient
+                                                .get()
+                                                .uri(
+                                                        "/api/restaurant/name/{restaurantName}",
+                                                        validName)
+                                                .exchange()
+                                                .expectStatus()
+                                                .isOk()
+                                                .returnResult(Restaurant.class)
+                                                .getResponseBody());
+
+        StepVerifier.create(responseFlux)
+                .expectNextCount(10)
+                .expectComplete()
+                .verify(Duration.ofSeconds(10));
     }
 }

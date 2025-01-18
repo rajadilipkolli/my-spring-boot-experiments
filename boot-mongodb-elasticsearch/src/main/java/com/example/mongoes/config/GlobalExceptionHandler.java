@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Objects;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
-import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -19,19 +18,17 @@ import reactor.core.publisher.Mono;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(DuplicateRestaurantException.class)
-    public Mono<ResponseEntity<ProblemDetail>> handleDuplicateRestaurantException(
-            DuplicateRestaurantException ex) {
+    public Mono<ProblemDetail> handleDuplicateRestaurantException(DuplicateRestaurantException ex) {
         ProblemDetail problemDetail =
                 ProblemDetail.forStatusAndDetail(ex.getHttpStatus(), ex.getMessage());
-        return Mono.just(ResponseEntity.status(ex.getHttpStatus()).body(problemDetail));
+        return Mono.just(problemDetail);
     }
 
     @ExceptionHandler(RestaurantNotFoundException.class)
-    Mono<ResponseEntity<ProblemDetail>> handleRestaurantNotFoundException(
-            RestaurantNotFoundException ex) {
+    Mono<ProblemDetail> handleRestaurantNotFoundException(RestaurantNotFoundException ex) {
         ProblemDetail problemDetail =
                 ProblemDetail.forStatusAndDetail(ex.getHttpStatus(), ex.getMessage());
-        return Mono.just(ResponseEntity.status(ex.getHttpStatus()).body(problemDetail));
+        return Mono.just(problemDetail);
     }
 
     @ExceptionHandler(WebExchangeBindException.class)

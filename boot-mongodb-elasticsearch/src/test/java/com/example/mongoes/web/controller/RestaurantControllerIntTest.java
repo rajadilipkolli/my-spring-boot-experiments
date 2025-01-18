@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.geo.Point;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 
 class RestaurantControllerIntTest extends AbstractIntegrationTest {
@@ -26,12 +27,7 @@ class RestaurantControllerIntTest extends AbstractIntegrationTest {
                 .expectStatus()
                 .isCreated()
                 .expectHeader()
-                .contentType(MediaType.APPLICATION_JSON)
-                .expectHeader()
-                .exists("location")
-                .expectBody()
-                .jsonPath("$.message")
-                .isEqualTo("restaurant with name junitRestaurant created");
+                .exists(HttpHeaders.LOCATION);
     }
 
     @Test

@@ -3,7 +3,6 @@ package com.example.mongoes.web.controller;
 import com.example.mongoes.document.Restaurant;
 import com.example.mongoes.model.request.GradesRequest;
 import com.example.mongoes.model.request.RestaurantRequest;
-import com.example.mongoes.model.response.GenericMessage;
 import com.example.mongoes.web.api.RestaurantApi;
 import com.example.mongoes.web.service.RestaurantService;
 import io.micrometer.core.annotation.Timed;
@@ -51,7 +50,7 @@ class RestaurantController implements RestaurantApi {
 
     @Override
     public Mono<ResponseEntity<Long>> totalCount() {
-        return restaurantService.totalCount().map(ResponseEntity::ok);
+        return restaurantService.totalCount().defaultIfEmpty(0L).map(ResponseEntity::ok);
     }
 
     @Override
@@ -61,20 +60,14 @@ class RestaurantController implements RestaurantApi {
     }
 
     @Override
-    public Mono<ResponseEntity<GenericMessage>> createRestaurant(
-            RestaurantRequest restaurantRequest) {
+    public Mono<ResponseEntity<Void>> createRestaurant(RestaurantRequest restaurantRequest) {
         return this.restaurantService
                 .createRestaurant(restaurantRequest)
                 .map(
                         restaurant ->
                                 ResponseEntity.created(
                                                 createRestaurantUri(restaurantRequest.name()))
-                                        .body(
-                                                new GenericMessage(
-                                                        "restaurant with name %s created"
-                                                                .formatted(
-                                                                        restaurantRequest
-                                                                                .name()))));
+                                        .build());
     }
 
     private URI createRestaurantUri(String restaurantName) {

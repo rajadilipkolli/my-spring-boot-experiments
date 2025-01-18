@@ -461,6 +461,7 @@ public interface SearchApi {
             @Parameter(description = "Distance from coordinates (must be positive)")
                     @RequestParam
                     @Positive(message = "Distance must be greater than 0")
+                    @Max(value = 20000, message = "Distance cannot exceed 20000")
                     @NotNull(message = "Distance is required")
                     Double distance,
             @Parameter(

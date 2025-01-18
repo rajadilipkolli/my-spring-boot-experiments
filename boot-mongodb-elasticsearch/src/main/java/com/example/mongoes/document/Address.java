@@ -1,5 +1,6 @@
 package com.example.mongoes.document;
 
+import jakarta.validation.constraints.Pattern;
 import java.util.StringJoiner;
 import org.springframework.data.elasticsearch.annotations.GeoPointField;
 import org.springframework.data.geo.Point;
@@ -31,6 +32,7 @@ public class Address {
 
     private String street;
 
+    @Pattern(regexp = "\\d{5}", message = "Invalid zipcode format")
     private Integer zipcode;
 
     public String getBuilding() {
