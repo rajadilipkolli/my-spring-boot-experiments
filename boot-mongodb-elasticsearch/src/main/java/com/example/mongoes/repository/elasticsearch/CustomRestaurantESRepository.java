@@ -1,4 +1,4 @@
-package com.example.mongoes.elasticsearch.repository;
+package com.example.mongoes.repository.elasticsearch;
 
 import com.example.mongoes.document.Restaurant;
 import java.util.List;

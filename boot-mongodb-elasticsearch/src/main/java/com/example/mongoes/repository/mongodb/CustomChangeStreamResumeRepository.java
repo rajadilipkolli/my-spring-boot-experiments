@@ -1,4 +1,4 @@
-package com.example.mongoes.mongodb.repository;
+package com.example.mongoes.repository.mongodb;
 
 import com.mongodb.client.result.UpdateResult;
 import org.bson.BsonTimestamp;

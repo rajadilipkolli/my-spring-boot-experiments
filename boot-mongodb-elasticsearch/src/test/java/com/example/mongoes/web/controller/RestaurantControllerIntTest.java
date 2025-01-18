@@ -16,17 +16,7 @@ class RestaurantControllerIntTest extends AbstractIntegrationTest {
     void createRestaurant() {
         Address address = new Address();
         address.setLocation(new Point(-73.9, 40.8));
-        GradesRequest grade = new GradesRequest("A", LocalDateTime.of(2022, 1, 1, 1, 1, 1), 15);
-        GradesRequest grade1 =
-                new GradesRequest("B", LocalDateTime.of(2022, 3, 31, 23, 59, 59), 15);
-        RestaurantRequest restaurantRequest =
-                new RestaurantRequest(
-                        1L,
-                        "junitRestaurant",
-                        "junitBorough",
-                        "junitCuisine",
-                        address,
-                        List.of(grade, grade1));
+        RestaurantRequest restaurantRequest = getRestaurantRequest(address);
         this.webTestClient
                 .post()
                 .uri("/api/restaurant")
@@ -42,5 +32,18 @@ class RestaurantControllerIntTest extends AbstractIntegrationTest {
                 .expectBody()
                 .jsonPath("$.message")
                 .isEqualTo("restaurant with name junitRestaurant created");
+    }
+
+    private RestaurantRequest getRestaurantRequest(Address address) {
+        GradesRequest grade = new GradesRequest("A", LocalDateTime.of(2022, 1, 1, 1, 1, 1), 15);
+        GradesRequest grade1 =
+                new GradesRequest("B", LocalDateTime.of(2022, 3, 31, 23, 59, 59), 15);
+        return new RestaurantRequest(
+                1L,
+                "junitRestaurant",
+                "junitBorough",
+                "junitCuisine",
+                address,
+                List.of(grade, grade1));
     }
 }

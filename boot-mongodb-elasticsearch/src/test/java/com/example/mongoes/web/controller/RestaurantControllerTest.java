@@ -149,4 +149,71 @@ class RestaurantControllerTest {
                 .expectStatus()
                 .isBadRequest();
     }
+
+    @Test
+    void findRestaurantByName_WithValidName_ShouldReturnOk() {
+        String validName = "Test Restaurant";
+        Restaurant restaurant = new Restaurant();
+        restaurant.setName(validName);
+
+        when(restaurantService.findByRestaurantName(validName)).thenReturn(Mono.just(restaurant));
+
+        webTestClient
+                .get()
+                .uri("/api/restaurant/name/{restaurantName}", validName)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody()
+                .jsonPath("$.name")
+                .isEqualTo(validName);
+    }
+
+    @Test
+    void findRestaurantByName_WithEmptyName_ShouldReturnBadRequest() {
+        webTestClient
+                .get()
+                .uri("/api/restaurant/name/{restaurantName}", " ")
+                .exchange()
+                .expectStatus()
+                .isBadRequest();
+    }
+
+    @Test
+    void findRestaurantByName_WithTooLongName_ShouldReturnBadRequest() {
+        String tooLongName = "a".repeat(256); // Create a string longer than 255 characters
+
+        webTestClient
+                .get()
+                .uri("/api/restaurant/name/{restaurantName}", tooLongName)
+                .exchange()
+                .expectStatus()
+                .isBadRequest();
+    }
+
+    @Test
+    void findRestaurantByName_WithInvalidCharacters_ShouldReturnBadRequest() {
+        String nameWithInvalidChars = "Test@Restaurant#123";
+
+        webTestClient
+                .get()
+                .uri("/api/restaurant/name/{restaurantName}", nameWithInvalidChars)
+                .exchange()
+                .expectStatus()
+                .isBadRequest();
+    }
+
+    @Test
+    void findRestaurantByName_WithNonExistentName_ShouldReturnNotFound() {
+        String nonExistentName = "Non Existent Restaurant";
+
+        when(restaurantService.findByRestaurantName(nonExistentName)).thenReturn(Mono.empty());
+
+        webTestClient
+                .get()
+                .uri("/api/restaurant/name/{restaurantName}", nonExistentName)
+                .exchange()
+                .expectStatus()
+                .isNotFound();
+    }
 }

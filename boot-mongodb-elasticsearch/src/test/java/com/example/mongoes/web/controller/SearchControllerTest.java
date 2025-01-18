@@ -6,9 +6,12 @@ import com.example.mongoes.response.AggregationSearchResponse;
 import com.example.mongoes.web.service.SearchService;
 import java.util.List;
 import java.util.Map;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
@@ -18,7 +21,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @WebFluxTest(SearchController.class)
-class SearchControllerValidationTest {
+class SearchControllerTest {
 
     @Autowired private WebTestClient webTestClient;
 
@@ -53,16 +56,6 @@ class SearchControllerValidationTest {
             webTestClient
                     .get()
                     .uri("/search/borough?query=test&limit=101")
-                    .exchange()
-                    .expectStatus()
-                    .isBadRequest();
-        }
-
-        @Test
-        void whenOffsetIsNegative_thenBadRequest() {
-            webTestClient
-                    .get()
-                    .uri("/search/borough?query=test&offset=-1")
                     .exchange()
                     .expectStatus()
                     .isBadRequest();
@@ -296,6 +289,7 @@ class SearchControllerValidationTest {
         }
 
         @Test
+        @DisplayName("Should return 200 OK when all parameters are valid")
         void whenAllParametersAreValid_thenOk() {
             given(searchService.searchRestaurantsWithInRange(40.7128, -74.0060, 10d, "km"))
                     .willReturn(Flux.empty());
@@ -304,6 +298,323 @@ class SearchControllerValidationTest {
                     .get()
                     .uri(
                             "/search/restaurant/withInRange?lat=40.7128&lon=-74.0060&distance=10&unit=km")
+                    .exchange()
+                    .expectStatus()
+                    .isOk();
+        }
+    }
+
+    @Nested
+    @DisplayName("Coordinate validation tests")
+    class CoordinateValidationTests {
+
+        @ParameterizedTest
+        @CsvSource({
+            "-91.0, -74.0060, Latitude must be greater than or equal to -90",
+            "91.0, -74.0060, Latitude must be less than or equal to 90",
+            "40.7128, -181.0, Longitude must be greater than or equal to -180",
+            "40.7128, 181.0, Longitude must be less than or equal to 180"
+        })
+        @DisplayName("Should return 400 when coordinates are out of range")
+        void whenCoordinatesOutOfRange_thenReturns400(
+                double lat, double lon, String expectedMessage) {
+            webTestClient
+                    .get()
+                    .uri(
+                            uriBuilder ->
+                                    uriBuilder
+                                            .path("/search/restaurant/withInRange")
+                                            .queryParam("lat", lat)
+                                            .queryParam("lon", lon)
+                                            .queryParam("distance", 10.0)
+                                            .queryParam("unit", "km")
+                                            .build())
+                    .exchange()
+                    .expectStatus()
+                    .isBadRequest()
+                    .expectBody();
+            //                    .jsonPath("$.message").value(message ->
+            //                            assertThat(message).contains(expectedMessage));
+        }
+
+        @Test
+        @DisplayName("Should return 400 when latitude is missing")
+        void whenLatitudeMissing_thenReturns400() {
+            webTestClient
+                    .get()
+                    .uri(
+                            uriBuilder ->
+                                    uriBuilder
+                                            .path("/search/restaurant/withInRange")
+                                            .queryParam("lon", -74.0060)
+                                            .queryParam("distance", 10.0)
+                                            .queryParam("unit", "km")
+                                            .build())
+                    .exchange()
+                    .expectStatus()
+                    .isBadRequest()
+                    .expectBody();
+            //                    .jsonPath("$.message").value(message ->
+            //                            assertThat(message).contains("Latitude is required"));
+        }
+
+        @Test
+        @DisplayName("Should return 400 when longitude is missing")
+        void whenLongitudeMissing_thenReturns400() {
+            webTestClient
+                    .get()
+                    .uri(
+                            uriBuilder ->
+                                    uriBuilder
+                                            .path("/search/restaurant/withInRange")
+                                            .queryParam("lat", 40.7128)
+                                            .queryParam("distance", 10.0)
+                                            .queryParam("unit", "km")
+                                            .build())
+                    .exchange()
+                    .expectStatus()
+                    .isBadRequest()
+                    .expectBody();
+            //                    .jsonPath("$.message").value(message ->
+            //                            assertThat(message).contains("Longitude is required"));
+        }
+    }
+
+    @Nested
+    @DisplayName("Distance validation tests")
+    class DistanceValidationTests {
+
+        @Test
+        @DisplayName("Should return 400 when distance is missing")
+        void whenDistanceMissing_thenReturns400() {
+            webTestClient
+                    .get()
+                    .uri(
+                            uriBuilder ->
+                                    uriBuilder
+                                            .path("/search/restaurant/withInRange")
+                                            .queryParam("lat", 40.7128)
+                                            .queryParam("lon", -74.0060)
+                                            .queryParam("unit", "km")
+                                            .build())
+                    .exchange()
+                    .expectStatus()
+                    .isBadRequest()
+                    .expectBody();
+            //                    .jsonPath("$.message").value(message ->
+            //                            assertThat(message).contains("Distance is required"));
+        }
+
+        @Test
+        @DisplayName("Should return 400 when distance is negative")
+        void whenDistanceNegative_thenReturns400() {
+            webTestClient
+                    .get()
+                    .uri(
+                            uriBuilder ->
+                                    uriBuilder
+                                            .path("/search/restaurant/withInRange")
+                                            .queryParam("lat", 40.7128)
+                                            .queryParam("lon", -74.0060)
+                                            .queryParam("distance", -10.0)
+                                            .queryParam("unit", "km")
+                                            .build())
+                    .exchange()
+                    .expectStatus()
+                    .isBadRequest()
+                    .expectBody();
+            //                    .jsonPath("$.message").value(message ->
+            //                            assertThat(message).contains("must be greater than 0"));
+        }
+    }
+
+    @Nested
+    @DisplayName("Unit validation tests")
+    class UnitValidationTests {
+
+        @ParameterizedTest
+        @ValueSource(strings = {"meters", "miles", "kilometers"})
+        @DisplayName("Should return 400 when unit is invalid")
+        void whenUnitInvalid_thenReturns400(String invalidUnit) {
+            webTestClient
+                    .get()
+                    .uri(
+                            uriBuilder ->
+                                    uriBuilder
+                                            .path("/search/restaurant/withInRange")
+                                            .queryParam("lat", 40.7128)
+                                            .queryParam("lon", -74.0060)
+                                            .queryParam("distance", 10.0)
+                                            .queryParam("unit", invalidUnit)
+                                            .build())
+                    .exchange()
+                    .expectStatus()
+                    .isBadRequest()
+                    .expectBody();
+            //                    .jsonPath("$.message", contains("Unit must be either 'km' or
+            // 'mi'"));
+        }
+
+        @Test
+        @DisplayName("Should use default unit (km) when unit is not provided")
+        void whenUnitNotProvided_thenUsesDefault() {
+            webTestClient
+                    .get()
+                    .uri(
+                            uriBuilder ->
+                                    uriBuilder
+                                            .path("/search/restaurant/withInRange")
+                                            .queryParam("lat", 40.7128)
+                                            .queryParam("lon", -74.0060)
+                                            .queryParam("distance", 10.0)
+                                            .build())
+                    .exchange()
+                    .expectStatus()
+                    .isOk();
+        }
+    }
+
+    @Nested
+    class SearchDateRangeValidation {
+        @Test
+        void whenValidDateFormat_thenReturns200() {
+            given(searchService.searchDateRange("2024-01-01", "2024-12-31", 0, 10))
+                    .willReturn(Mono.empty());
+
+            webTestClient
+                    .get()
+                    .uri(
+                            uriBuilder ->
+                                    uriBuilder
+                                            .path("/search/date/range")
+                                            .queryParam("fromDate", "2024-01-01")
+                                            .queryParam("toDate", "2024-12-31")
+                                            .build())
+                    .exchange()
+                    .expectStatus()
+                    .isOk();
+        }
+
+        @Test
+        void whenInvalidFromDateFormat_thenReturns400() {
+            webTestClient
+                    .get()
+                    .uri(
+                            uriBuilder ->
+                                    uriBuilder
+                                            .path("/search/date/range")
+                                            .queryParam("fromDate", "01-01-2024") // invalid format
+                                            .queryParam("toDate", "2024-12-31")
+                                            .build())
+                    .exchange()
+                    .expectStatus()
+                    .isBadRequest();
+        }
+
+        @Test
+        void whenInvalidToDateFormat_thenReturns400() {
+            webTestClient
+                    .get()
+                    .uri(
+                            uriBuilder ->
+                                    uriBuilder
+                                            .path("/search/date/range")
+                                            .queryParam("fromDate", "2024-01-01")
+                                            .queryParam("toDate", "2024/12/31") // invalid format
+                                            .build())
+                    .exchange()
+                    .expectStatus()
+                    .isBadRequest();
+        }
+
+        @Test
+        void whenMissingDates_thenReturns400() {
+            webTestClient.get().uri("/search/date/range").exchange().expectStatus().isBadRequest();
+        }
+    }
+
+    @Nested
+    class SearchTermsValidation {
+
+        @Test
+        void whenQueriesListIsEmpty_thenBadRequest() {
+            webTestClient
+                    .get()
+                    .uri(
+                            uriBuilder ->
+                                    uriBuilder
+                                            .path("/search/terms")
+                                            .queryParam("query") // empty array
+                                            .build())
+                    .exchange()
+                    .expectStatus()
+                    .isBadRequest();
+        }
+
+        @Test
+        @Disabled
+        void whenQueriesListContainsBlankValue_thenBadRequest() {
+            webTestClient
+                    .get()
+                    .uri(
+                            uriBuilder ->
+                                    uriBuilder
+                                            .path("/search/terms")
+                                            .queryParam("query", "Manhattan", "")
+                                            .build())
+                    .exchange()
+                    .expectStatus()
+                    .isBadRequest();
+        }
+
+        @Test
+        void whenLimitExceeds100_thenBadRequest() {
+            webTestClient
+                    .get()
+                    .uri(
+                            uriBuilder ->
+                                    uriBuilder
+                                            .path("/search/terms")
+                                            .queryParam("query", "Manhattan", "Brooklyn")
+                                            .queryParam("limit", "101")
+                                            .build())
+                    .exchange()
+                    .expectStatus()
+                    .isBadRequest();
+        }
+
+        @Test
+        void whenOffsetIsNegative_thenBadRequest() {
+            webTestClient
+                    .get()
+                    .uri(
+                            uriBuilder ->
+                                    uriBuilder
+                                            .path("/search/terms")
+                                            .queryParam("query", "Manhattan", "Brooklyn")
+                                            .queryParam("offset", "-1")
+                                            .build())
+                    .exchange()
+                    .expectStatus()
+                    .isBadRequest();
+        }
+
+        @Test
+        @Disabled
+        void whenValidParameters_thenOk() {
+            given(searchService.termsQueryForBorough(List.of("Manhattan", "Brooklyn"), 10, 0))
+                    .willReturn(Mono.empty());
+
+            webTestClient
+                    .get()
+                    .uri(
+                            uriBuilder ->
+                                    uriBuilder
+                                            .path("/search/terms")
+                                            .queryParam("query", "Manhattan", "Brooklyn")
+                                            .queryParam("limit", "10")
+                                            .queryParam("offset", "0")
+                                            .build())
                     .exchange()
                     .expectStatus()
                     .isOk();

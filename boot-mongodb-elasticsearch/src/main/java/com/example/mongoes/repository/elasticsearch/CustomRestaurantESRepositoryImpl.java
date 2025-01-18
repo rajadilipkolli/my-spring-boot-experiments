@@ -1,4 +1,4 @@
-package com.example.mongoes.elasticsearch.repository;
+package com.example.mongoes.repository.elasticsearch;
 
 import co.elastic.clients.elasticsearch._types.FieldValue;
 import co.elastic.clients.elasticsearch._types.aggregations.Aggregation;
@@ -270,6 +270,8 @@ public class CustomRestaurantESRepositoryImpl implements CustomRestaurantESRepos
 
     /**
      * below is the console query
+     *
+     * <p>
      *
      * {@snippet :
      * """
