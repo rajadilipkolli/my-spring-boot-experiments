@@ -611,7 +611,7 @@ class SearchControllerTest {
                             uriBuilder ->
                                     uriBuilder
                                             .path("/search/terms")
-                                            .queryParam("query", " ")
+                                            .queryParam("query", "Manhattan", " ")
                                             .build())
                     .exchange()
                     .expectStatus()

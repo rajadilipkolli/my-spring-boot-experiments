@@ -11,20 +11,18 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.data.geo.Point;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class RestaurantControllerIntTest extends AbstractIntegrationTest {
 
     @Test
-    @Order(101)
     void findAllRestaurants_ShouldReturnPagedResults() {
+
+        // Setup test data
+        createSampleRestaurants(1L);
 
         this.webTestClient
                 .get()
@@ -40,16 +38,11 @@ class RestaurantControllerIntTest extends AbstractIntegrationTest {
     }
 
     @Test
-    @Order(1)
     void createRestaurant() {
-        Address address =
-                new Address()
-                        .setBuilding("junitBuilding")
-                        .setStreet("junitStreet")
-                        .setZipcode(98765);
-        address.setLocation(new Point(-73.9, 40.8));
-        RestaurantRequest restaurantRequest =
-                getRestaurantRequest(address, "junitRestaurant", 101L);
+        // Setup test data
+        createSampleRestaurants(2L);
+
+        RestaurantRequest restaurantRequest = getRestaurantRequest(null, "Restaurant" + 2, 2L);
         this.webTestClient
                 .post()
                 .uri("/api/restaurant")
@@ -57,14 +50,32 @@ class RestaurantControllerIntTest extends AbstractIntegrationTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus()
-                .isCreated()
+                .isEqualTo(409)
                 .expectHeader()
-                .exists(HttpHeaders.LOCATION);
+                .contentType(MediaType.APPLICATION_PROBLEM_JSON)
+                .expectBody()
+                .json(
+                        """
+                        {
+                        "type":"about:blank",
+                        "title":"Conflict",
+                        "status":409,
+                        "detail":"Restaurant with name Restaurant2 already exists",
+                        "instance":"/api/restaurant"
+                        }
+                        """);
     }
 
     @Test
-    @Order(2)
     void findRestaurantByName_WithExistingName_ShouldReturnRestaurant() {
+
+        // Setup: Create a restaurant first
+        Address address =
+                new Address().setBuilding("testBuilding").setStreet("testStreet").setZipcode(98765);
+        address.setLocation(new Point(-73.8, 40.1));
+        RestaurantRequest restaurantRequest = getRestaurantRequest(address, "testRestaurant", 101L);
+
+        createRestaurantAndWaitForIndex(restaurantRequest);
 
         // Then fetch by name
         await().atMost(Duration.ofSeconds(5))
@@ -75,7 +86,7 @@ class RestaurantControllerIntTest extends AbstractIntegrationTest {
                                         .get()
                                         .uri(
                                                 "/api/restaurant/name/{restaurantName}",
-                                                "junitRestaurant")
+                                                "testRestaurant")
                                         .exchange()
                                         .expectStatus()
                                         .isOk()
@@ -85,7 +96,7 @@ class RestaurantControllerIntTest extends AbstractIntegrationTest {
                                         .jsonPath("$.restaurantId")
                                         .isEqualTo(101)
                                         .jsonPath("$.name")
-                                        .isEqualTo("junitRestaurant")
+                                        .isEqualTo("testRestaurant")
                                         .jsonPath("$.borough")
                                         .isEqualTo("junitBorough")
                                         .jsonPath("$.cuisine")
@@ -93,15 +104,15 @@ class RestaurantControllerIntTest extends AbstractIntegrationTest {
                                         .jsonPath("$.version")
                                         .isEqualTo(0)
                                         .jsonPath("$.address.building")
-                                        .isEqualTo("junitBuilding")
+                                        .isEqualTo("testBuilding")
                                         .jsonPath("$.address.street")
-                                        .isEqualTo("junitStreet")
+                                        .isEqualTo("testStreet")
                                         .jsonPath("$.address.zipcode")
                                         .isEqualTo(98765)
                                         .jsonPath("$.address.location.x")
-                                        .isEqualTo(-73.9)
+                                        .isEqualTo(-73.8)
                                         .jsonPath("$.address.location.y")
-                                        .isEqualTo(40.8)
+                                        .isEqualTo(40.1)
                                         .jsonPath("$.grades")
                                         .isArray()
                                         .jsonPath("$.grades.size()")
@@ -109,49 +120,10 @@ class RestaurantControllerIntTest extends AbstractIntegrationTest {
     }
 
     @Test
-    @Order(3)
-    void findRestaurantById_WithExistingId_ShouldReturnRestaurant() {
-        // First create a restaurant
-        Address address = new Address();
-        address.setLocation(new Point(-73.9, 40.8));
-        RestaurantRequest restaurantRequest = getRestaurantRequest(address, "newName", 1000L);
-
-        String locationHeader =
-                this.webTestClient
-                        .post()
-                        .uri("/api/restaurant")
-                        .bodyValue(restaurantRequest)
-                        .accept(MediaType.APPLICATION_JSON)
-                        .exchange()
-                        .expectStatus()
-                        .isCreated()
-                        .returnResult(Void.class)
-                        .getResponseHeaders()
-                        .getFirst(HttpHeaders.LOCATION);
-
-        // Extract ID from location header
-        String restaurantName = locationHeader.substring(locationHeader.lastIndexOf("/") + 1);
-
-        // Then fetch by name
-        await().atMost(Duration.ofSeconds(5))
-                .pollInterval(Duration.ofMillis(500))
-                .untilAsserted(
-                        () -> {
-                            this.webTestClient
-                                    .get()
-                                    .uri("/api/restaurant/name/{restaurantName}", restaurantName)
-                                    .exchange()
-                                    .expectStatus()
-                                    .isOk()
-                                    .expectBody()
-                                    .jsonPath("$.name")
-                                    .isEqualTo(restaurantName);
-                        });
-    }
-
-    @Test
-    @Order(4)
     void totalCount_ShouldReturnNumberOfRestaurants() {
+
+        // Setup: Create multiple restaurants
+        createSampleRestaurants(3L);
 
         // Then get total count
         await().atMost(Duration.ofSeconds(5))
@@ -172,15 +144,15 @@ class RestaurantControllerIntTest extends AbstractIntegrationTest {
     }
 
     @Test
-    @Order(11)
     void addGradeToRestaurant_ShouldAddNewGrade() {
-
+        // Setup: Create multiple restaurants
+        createSampleRestaurants(4L);
         // Then add a new grade
         GradesRequest newGrade = new GradesRequest("C", LocalDateTime.now(), 10);
 
         this.webTestClient
                 .post()
-                .uri("/api/restaurant/{restaurantId}/grade", 101)
+                .uri("/api/restaurant/{restaurantId}/grade", 1)
                 .bodyValue(newGrade)
                 .exchange()
                 .expectStatus()
@@ -193,12 +165,14 @@ class RestaurantControllerIntTest extends AbstractIntegrationTest {
     }
 
     @Test
-    @Order(12)
     @Disabled
     void addNotesToRestaurant_ShouldUpdateGrades() {
 
+        // Setup: Create multiple restaurants
+        createSampleRestaurants(5L);
+
         // Then update grades
-        GradesRequest updatedGrade = new GradesRequest("A+", LocalDateTime.now(), 20);
+        GradesRequest updatedGrade = new GradesRequest("B", LocalDateTime.now(), 20);
 
         this.webTestClient
                 .put()
@@ -225,14 +199,14 @@ class RestaurantControllerIntTest extends AbstractIntegrationTest {
                 .expectBody()
                 .json(
                         """
-                {
-                    "type":"about:blank",
-                    "title":"Not Found",
-                    "status":404,
-                    "detail":"Restaurant not found with id: 999999",
-                    "instance":"/api/restaurant/999999"
-                }
-                """);
+                        {
+                        "type":"about:blank",
+                        "title":"Not Found",
+                        "status":404,
+                        "detail":"Restaurant not found with id: 999999",
+                        "instance":"/api/restaurant/999999"
+                        }
+                        """);
     }
 
     @Test
@@ -269,5 +243,51 @@ class RestaurantControllerIntTest extends AbstractIntegrationTest {
                 "junitCuisine",
                 address,
                 List.of(grade, grade1));
+    }
+
+    private void createSampleRestaurants(Long restaurantId) {
+        Address address1 =
+                new Address().setBuilding("building1").setStreet("street1").setZipcode(12345);
+        address1.setLocation(new Point(-73.9, 40.8));
+
+        Address address2 =
+                new Address().setBuilding("building2").setStreet("street2").setZipcode(67890);
+        address2.setLocation(new Point(-73.8, 40.7));
+
+        RestaurantRequest restaurant1 =
+                getRestaurantRequest(address1, "Restaurant" + restaurantId, restaurantId);
+        RestaurantRequest restaurant2 =
+                getRestaurantRequest(
+                        address2, "Restaurant" + restaurantId + 10000, restaurantId + 10000);
+
+        createRestaurantAndWaitForIndex(restaurant1);
+        createRestaurantAndWaitForIndex(restaurant2);
+    }
+
+    private void createRestaurantAndWaitForIndex(RestaurantRequest request) {
+        this.webTestClient
+                .post()
+                .uri("/api/restaurant")
+                .bodyValue(request)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isCreated()
+                .expectHeader()
+                .exists(HttpHeaders.LOCATION);
+
+        // Wait for Elasticsearch indexing
+        await().atMost(Duration.ofSeconds(5))
+                .pollInterval(Duration.ofMillis(500))
+                .untilAsserted(
+                        () ->
+                                this.webTestClient
+                                        .get()
+                                        .uri(
+                                                "/api/restaurant/{restaurantId}",
+                                                request.restaurantId())
+                                        .exchange()
+                                        .expectStatus()
+                                        .isOk());
     }
 }
