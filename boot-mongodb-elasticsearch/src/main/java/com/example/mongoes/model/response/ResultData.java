@@ -1,4 +1,4 @@
-package com.example.mongoes.response;
+package com.example.mongoes.model.response;
 
 import org.springframework.data.geo.Point;
 

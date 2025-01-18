@@ -1,8 +1,8 @@
 package com.example.mongoes.web.controller;
 
 import com.example.mongoes.document.Restaurant;
-import com.example.mongoes.response.AggregationSearchResponse;
-import com.example.mongoes.response.ResultData;
+import com.example.mongoes.model.response.AggregationSearchResponse;
+import com.example.mongoes.model.response.ResultData;
 import com.example.mongoes.web.api.SearchApi;
 import com.example.mongoes.web.service.SearchService;
 import io.micrometer.core.annotation.Timed;

@@ -2,11 +2,10 @@ package com.example.mongoes.web.controller;
 
 import static org.mockito.BDDMockito.given;
 
-import com.example.mongoes.response.AggregationSearchResponse;
+import com.example.mongoes.model.response.AggregationSearchResponse;
 import com.example.mongoes.web.service.SearchService;
 import java.util.List;
 import java.util.Map;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -308,16 +307,31 @@ class SearchControllerTest {
     @DisplayName("Coordinate validation tests")
     class CoordinateValidationTests {
 
+        private static final String MISSING_PARAMETER_ERROR_JSON =
+                """
+            {
+                "type": "about:blank",
+                "title": "Bad Request",
+                "status": 400,
+                "detail": "Required query parameter '%s' is not present.",
+                "instance": "/search/restaurant/withInRange"
+            }
+            """;
+
         @ParameterizedTest
         @CsvSource({
-            "-91.0, -74.0060, Latitude must be greater than or equal to -90",
-            "91.0, -74.0060, Latitude must be less than or equal to 90",
-            "40.7128, -181.0, Longitude must be greater than or equal to -180",
-            "40.7128, 181.0, Longitude must be less than or equal to 180"
+            "-91.0, -74.0060, searchRestaurantsWithInRange.lat, -91.0, Latitude must be greater than or equal to -90",
+            "91.0, -74.0060, searchRestaurantsWithInRange.lat, 91.0, Latitude must be less than or equal to 90",
+            "40.7128, -181.0, searchRestaurantsWithInRange.lon, -181.0, Longitude must be greater than or equal to -180",
+            "40.7128, 181.0, searchRestaurantsWithInRange.lon, 181.0, Longitude must be less than or equal to 180"
         })
         @DisplayName("Should return 400 when coordinates are out of range")
         void whenCoordinatesOutOfRange_thenReturns400(
-                double lat, double lon, String expectedMessage) {
+                double lat,
+                double lon,
+                String field,
+                double rejectedValue,
+                String expectedMessage) {
             webTestClient
                     .get()
                     .uri(
@@ -332,9 +346,25 @@ class SearchControllerTest {
                     .exchange()
                     .expectStatus()
                     .isBadRequest()
-                    .expectBody();
-            //                    .jsonPath("$.message").value(message ->
-            //                            assertThat(message).contains(expectedMessage));
+                    .expectBody()
+                    .jsonPath("$.type")
+                    .isEqualTo("about:blank")
+                    .jsonPath("$.title")
+                    .isEqualTo("Constraint Violation")
+                    .jsonPath("$.status")
+                    .isEqualTo(400)
+                    .jsonPath("$.detail")
+                    .isEqualTo("Validation failed")
+                    .jsonPath("$.instance")
+                    .isEqualTo("/search/restaurant/withInRange")
+                    .jsonPath("$.violations[0].object")
+                    .isEqualTo("SearchController")
+                    .jsonPath("$.violations[0].field")
+                    .isEqualTo(field)
+                    .jsonPath("$.violations[0].rejectedValue")
+                    .isEqualTo(rejectedValue)
+                    .jsonPath("$.violations[0].message")
+                    .isEqualTo(expectedMessage);
         }
 
         @Test
@@ -353,9 +383,8 @@ class SearchControllerTest {
                     .exchange()
                     .expectStatus()
                     .isBadRequest()
-                    .expectBody();
-            //                    .jsonPath("$.message").value(message ->
-            //                            assertThat(message).contains("Latitude is required"));
+                    .expectBody()
+                    .json(MISSING_PARAMETER_ERROR_JSON.formatted("lat"));
         }
 
         @Test
@@ -374,9 +403,8 @@ class SearchControllerTest {
                     .exchange()
                     .expectStatus()
                     .isBadRequest()
-                    .expectBody();
-            //                    .jsonPath("$.message").value(message ->
-            //                            assertThat(message).contains("Longitude is required"));
+                    .expectBody()
+                    .json(MISSING_PARAMETER_ERROR_JSON.formatted("lon"));
         }
     }
 
@@ -400,9 +428,17 @@ class SearchControllerTest {
                     .exchange()
                     .expectStatus()
                     .isBadRequest()
-                    .expectBody();
-            //                    .jsonPath("$.message").value(message ->
-            //                            assertThat(message).contains("Distance is required"));
+                    .expectBody()
+                    .json(
+                            """
+                                      {
+                                          "type": "about:blank",
+                                          "title": "Bad Request",
+                                          "status": 400,
+                                          "detail": "Required query parameter 'distance' is not present.",
+                                          "instance": "/search/restaurant/withInRange"
+                                      }
+                                      """);
         }
 
         @Test
@@ -422,9 +458,25 @@ class SearchControllerTest {
                     .exchange()
                     .expectStatus()
                     .isBadRequest()
-                    .expectBody();
-            //                    .jsonPath("$.message").value(message ->
-            //                            assertThat(message).contains("must be greater than 0"));
+                    .expectBody()
+                    .json(
+                            """
+                            {
+                             	"type": "about:blank",
+                             	"title": "Constraint Violation",
+                             	"status": 400,
+                             	"detail": "Validation failed",
+                             	"instance": "/search/restaurant/withInRange",
+                             	"violations": [
+                             		{
+                             			"object": "SearchController",
+                             			"field": "searchRestaurantsWithInRange.distance",
+                             			"rejectedValue": -10.0,
+                             			"message": "Distance must be greater than 0"
+                             		}
+                             	]
+                            }
+                            """);
         }
     }
 
@@ -552,7 +604,6 @@ class SearchControllerTest {
         }
 
         @Test
-        @Disabled
         void whenQueriesListContainsBlankValue_thenBadRequest() {
             webTestClient
                     .get()
@@ -560,7 +611,7 @@ class SearchControllerTest {
                             uriBuilder ->
                                     uriBuilder
                                             .path("/search/terms")
-                                            .queryParam("query", "Manhattan", "")
+                                            .queryParam("query", "Manhattan", " ")
                                             .build())
                     .exchange()
                     .expectStatus()
@@ -600,9 +651,8 @@ class SearchControllerTest {
         }
 
         @Test
-        @Disabled
         void whenValidParameters_thenOk() {
-            given(searchService.termsQueryForBorough(List.of("Manhattan", "Brooklyn"), 10, 0))
+            given(searchService.termsQueryForBorough(List.of("Manhattan", "Brooklyn"), 0, 10))
                     .willReturn(Mono.empty());
 
             webTestClient
@@ -618,6 +668,220 @@ class SearchControllerTest {
                     .exchange()
                     .expectStatus()
                     .isOk();
+        }
+    }
+
+    @Nested
+    class SearchRestaurantIdRangeValidationTests {
+
+        @Test
+        void searchRestaurantIdRange_WithValidLimits_ShouldReturnOk() {
+            given(searchService.searchRestaurantIdRange(1000L, 2000L, 0, 10))
+                    .willReturn(Mono.empty());
+            webTestClient
+                    .get()
+                    .uri(
+                            uriBuilder ->
+                                    uriBuilder
+                                            .path("/search/restaurant/range")
+                                            .queryParam("lowerLimit", 1000)
+                                            .queryParam("upperLimit", 2000)
+                                            .build())
+                    .exchange()
+                    .expectStatus()
+                    .isOk();
+        }
+
+        @Test
+        void searchRestaurantIdRange_WithNullLowerLimit_ShouldReturnBadRequest() {
+            webTestClient
+                    .get()
+                    .uri(
+                            uriBuilder ->
+                                    uriBuilder
+                                            .path("/search/restaurant/range")
+                                            .queryParam("upperLimit", 2000)
+                                            .build())
+                    .exchange()
+                    .expectStatus()
+                    .isBadRequest()
+                    .expectBody()
+                    .json(
+                            """
+                            {
+                                "type": "about:blank",
+                                "title": "Bad Request",
+                                "status": 400,
+                                "detail": "Required query parameter 'lowerLimit' is not present.",
+                                "instance": "/search/restaurant/range"
+                            }
+                            """);
+        }
+
+        @Test
+        void searchRestaurantIdRange_WithNullUpperLimit_ShouldReturnBadRequest() {
+            webTestClient
+                    .get()
+                    .uri(
+                            uriBuilder ->
+                                    uriBuilder
+                                            .path("/search/restaurant/range")
+                                            .queryParam("lowerLimit", 1000)
+                                            .build())
+                    .exchange()
+                    .expectStatus()
+                    .isBadRequest()
+                    .expectBody()
+                    .json(
+                            """
+                            {
+                                "type": "about:blank",
+                                "title": "Bad Request",
+                                "status": 400,
+                                "detail": "Required query parameter 'upperLimit' is not present.",
+                                "instance": "/search/restaurant/range"
+                            }
+                            """);
+        }
+
+        @Test
+        void searchRestaurantIdRange_WithZeroLowerLimit_ShouldReturnBadRequest() {
+            webTestClient
+                    .get()
+                    .uri(
+                            uriBuilder ->
+                                    uriBuilder
+                                            .path("/search/restaurant/range")
+                                            .queryParam("lowerLimit", 0)
+                                            .queryParam("upperLimit", 2000)
+                                            .build())
+                    .exchange()
+                    .expectStatus()
+                    .isBadRequest()
+                    .expectBody()
+                    .json(
+                            """
+                            {
+                            	"type": "about:blank",
+                            	"title": "Constraint Violation",
+                            	"status": 400,
+                            	"detail": "Validation failed",
+                            	"instance": "/search/restaurant/range",
+                            	"violations": [
+                            		{
+                            			"object": "SearchController",
+                            			"field": "searchRestaurantIdRange.lowerLimit",
+                            			"rejectedValue": 0,
+                            			"message": "Lower limit must be positive"
+                            		}
+                            	]
+                            }
+                            """);
+        }
+
+        @Test
+        void searchRestaurantIdRange_WithZeroUpperLimit_ShouldReturnBadRequest() {
+            webTestClient
+                    .get()
+                    .uri(
+                            uriBuilder ->
+                                    uriBuilder
+                                            .path("/search/restaurant/range")
+                                            .queryParam("lowerLimit", 1000)
+                                            .queryParam("upperLimit", 0)
+                                            .build())
+                    .exchange()
+                    .expectStatus()
+                    .isBadRequest()
+                    .expectBody()
+                    .json(
+                            """
+                            {
+                             	"type": "about:blank",
+                             	"title": "Constraint Violation",
+                             	"status": 400,
+                             	"detail": "Validation failed",
+                             	"instance": "/search/restaurant/range",
+                             	"violations": [
+                             		{
+                             			"object": "SearchController",
+                             			"field": "searchRestaurantIdRange.upperLimit",
+                             			"rejectedValue": 0,
+                             			"message": "Upper limit must be positive"
+                             		}
+                             	]
+                            }
+                            """);
+        }
+
+        @Test
+        void searchRestaurantIdRange_WithNegativeLowerLimit_ShouldReturnBadRequest() {
+            webTestClient
+                    .get()
+                    .uri(
+                            uriBuilder ->
+                                    uriBuilder
+                                            .path("/search/restaurant/range")
+                                            .queryParam("lowerLimit", -1000)
+                                            .queryParam("upperLimit", 2000)
+                                            .build())
+                    .exchange()
+                    .expectStatus()
+                    .isBadRequest()
+                    .expectBody()
+                    .json(
+                            """
+                            {
+                             	"type": "about:blank",
+                             	"title": "Constraint Violation",
+                             	"status": 400,
+                             	"detail": "Validation failed",
+                             	"instance": "/search/restaurant/range",
+                             	"violations": [
+                             		{
+                             			"object": "SearchController",
+                             			"field": "searchRestaurantIdRange.lowerLimit",
+                             			"rejectedValue": -1000,
+                             			"message": "Lower limit must be positive"
+                             		}
+                             	]
+                            }
+                            """);
+        }
+
+        @Test
+        void searchRestaurantIdRange_WithNegativeUpperLimit_ShouldReturnBadRequest() {
+            webTestClient
+                    .get()
+                    .uri(
+                            uriBuilder ->
+                                    uriBuilder
+                                            .path("/search/restaurant/range")
+                                            .queryParam("lowerLimit", 1000)
+                                            .queryParam("upperLimit", -2000)
+                                            .build())
+                    .exchange()
+                    .expectStatus()
+                    .isBadRequest()
+                    .expectBody()
+                    .json(
+                            """
+                            {
+                             	"type": "about:blank",
+                             	"title": "Constraint Violation",
+                             	"status": 400,
+                             	"detail": "Validation failed",
+                             	"instance": "/search/restaurant/range",
+                             	"violations": [
+                             		{
+                             			"object": "SearchController",
+                             			"field": "searchRestaurantIdRange.upperLimit",
+                             			"rejectedValue": -2000,
+                             			"message": "Upper limit must be positive"
+                             		}
+                             	]
+                            }
+                            """);
         }
     }
 }

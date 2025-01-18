@@ -2,13 +2,13 @@ package com.example.mongoes.web.exception;
 
 import org.springframework.http.HttpStatus;
 
-public class DuplicateRestaurantException extends RuntimeException {
+public class RestaurantNotFoundException extends RuntimeException {
 
     private final HttpStatus httpStatus;
 
-    public DuplicateRestaurantException(String message) {
+    public RestaurantNotFoundException(String message) {
         super(message);
-        this.httpStatus = HttpStatus.CONFLICT;
+        this.httpStatus = HttpStatus.NOT_FOUND;
     }
 
     public HttpStatus getHttpStatus() {

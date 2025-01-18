@@ -4,14 +4,15 @@ import com.example.mongoes.document.Address;
 import com.example.mongoes.document.ChangeStreamResume;
 import com.example.mongoes.document.Grades;
 import com.example.mongoes.document.Restaurant;
+import com.example.mongoes.model.request.GradesRequest;
+import com.example.mongoes.model.request.RestaurantRequest;
 import com.example.mongoes.repository.elasticsearch.RestaurantESRepository;
 import com.example.mongoes.repository.mongodb.ChangeStreamResumeRepository;
 import com.example.mongoes.repository.mongodb.RestaurantRepository;
 import com.example.mongoes.utils.AppConstants;
 import com.example.mongoes.utils.DateUtility;
 import com.example.mongoes.web.exception.DuplicateRestaurantException;
-import com.example.mongoes.web.model.GradesRequest;
-import com.example.mongoes.web.model.RestaurantRequest;
+import com.example.mongoes.web.exception.RestaurantNotFoundException;
 import com.mongodb.client.model.changestream.ChangeStreamDocument;
 import com.mongodb.client.model.changestream.OperationType;
 import java.nio.charset.StandardCharsets;
@@ -143,11 +144,21 @@ public class RestaurantService {
     }
 
     public Mono<Restaurant> findByRestaurantName(String restaurantName) {
-        return this.restaurantESRepository.findByName(restaurantName);
+        return this.restaurantESRepository
+                .findByName(restaurantName)
+                .switchIfEmpty(
+                        Mono.error(
+                                new RestaurantNotFoundException(
+                                        "Restaurant not found with name: " + restaurantName)));
     }
 
     public Mono<Restaurant> findByRestaurantId(Long restaurantId) {
-        return this.restaurantESRepository.findByRestaurantId(restaurantId);
+        return this.restaurantESRepository
+                .findByRestaurantId(restaurantId)
+                .switchIfEmpty(
+                        Mono.error(
+                                new RestaurantNotFoundException(
+                                        "Restaurant not found with id: " + restaurantId)));
     }
 
     public Mono<Long> totalCount() {
@@ -160,7 +171,7 @@ public class RestaurantService {
                 .watchCollection(AppConstants.RESTAURANT_COLLECTION)
                 .resumeAt(getChangeStreamOption())
                 .listen()
-                .delayElements(Duration.ofMillis(5))
+                .delayElements(Duration.ofMillis(3))
                 .publishOn(Schedulers.boundedElastic())
                 .doOnNext(
                         restaurantChangeStreamEvent -> {

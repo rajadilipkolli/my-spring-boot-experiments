@@ -1,4 +1,4 @@
-package com.example.mongoes.web.model;
+package com.example.mongoes.model.request;
 
 import com.example.mongoes.document.Grades;
 import jakarta.validation.constraints.Max;

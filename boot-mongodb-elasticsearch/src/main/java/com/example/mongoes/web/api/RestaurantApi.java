@@ -1,9 +1,8 @@
 package com.example.mongoes.web.api;
 
 import com.example.mongoes.document.Restaurant;
-import com.example.mongoes.response.GenericMessage;
-import com.example.mongoes.web.model.GradesRequest;
-import com.example.mongoes.web.model.RestaurantRequest;
+import com.example.mongoes.model.request.GradesRequest;
+import com.example.mongoes.model.request.RestaurantRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -181,14 +180,10 @@ public interface RestaurantApi {
                                                             implementation =
                                                                     RestaurantRequest.class))),
             responses = {
-                @ApiResponse(
-                        responseCode = "201",
-                        description = "Restaurant created successfully",
-                        content =
-                                @Content(schema = @Schema(implementation = GenericMessage.class))),
+                @ApiResponse(responseCode = "201", description = "Restaurant created successfully"),
                 @ApiResponse(responseCode = "400", description = "Invalid restaurant data")
             })
     @PostMapping
-    Mono<ResponseEntity<GenericMessage>> createRestaurant(
+    Mono<ResponseEntity<Void>> createRestaurant(
             @RequestBody @Valid RestaurantRequest restaurantRequest);
 }

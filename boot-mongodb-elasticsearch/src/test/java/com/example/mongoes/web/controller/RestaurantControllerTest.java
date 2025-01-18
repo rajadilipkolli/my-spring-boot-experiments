@@ -5,18 +5,26 @@ import static org.mockito.Mockito.when;
 
 import com.example.mongoes.document.Address;
 import com.example.mongoes.document.Restaurant;
-import com.example.mongoes.web.model.GradesRequest;
-import com.example.mongoes.web.model.RestaurantRequest;
+import com.example.mongoes.model.request.GradesRequest;
+import com.example.mongoes.model.request.RestaurantRequest;
 import com.example.mongoes.web.service.RestaurantService;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
+import org.springframework.data.geo.Point;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 @WebFluxTest(RestaurantController.class)
 class RestaurantControllerTest {
@@ -63,7 +71,28 @@ class RestaurantControllerTest {
                                         .build())
                 .exchange()
                 .expectStatus()
-                .isBadRequest();
+                .isBadRequest()
+                .expectHeader()
+                .contentType(MediaType.APPLICATION_PROBLEM_JSON)
+                .expectBody()
+                .json(
+                        """
+                        {
+                   	"type": "about:blank",
+                   	"title": "Constraint Violation",
+                   	"status": 400,
+                   	"detail": "Validation failed",
+                   	"instance": "/api/restaurant",
+                   	"violations": [
+                   		{
+                   			"object": "RestaurantController",
+                   			"field": "findAllRestaurants.limit",
+                   			"rejectedValue": 1000,
+                   			"message": "must be less than or equal to 999"
+                   		}
+                   	]
+                   }
+                  """);
     }
 
     @Test
@@ -78,7 +107,14 @@ class RestaurantControllerTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus()
-                .isBadRequest();
+                .isBadRequest()
+                .expectHeader()
+                .contentType(MediaType.APPLICATION_PROBLEM_JSON)
+                .expectBody()
+                .json(
+                        """
+                        {"type":"about:blank","title":"Bad Request","status":400,"detail":"Invalid request content.","instance":"/api/restaurant"}
+                  """);
     }
 
     @Test
@@ -93,7 +129,14 @@ class RestaurantControllerTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus()
-                .isBadRequest();
+                .isBadRequest()
+                .expectHeader()
+                .contentType(MediaType.APPLICATION_PROBLEM_JSON)
+                .expectBody()
+                .json(
+                        """
+                        {"type":"about:blank","title":"Bad Request","status":400,"detail":"Invalid request content.","instance":"/api/restaurant"}
+                  """);
     }
 
     @Test
@@ -130,7 +173,14 @@ class RestaurantControllerTest {
                 .bodyValue(invalidGrade)
                 .exchange()
                 .expectStatus()
-                .isBadRequest();
+                .isBadRequest()
+                .expectHeader()
+                .contentType(MediaType.APPLICATION_PROBLEM_JSON)
+                .expectBody()
+                .json(
+                        """
+                        {"type":"about:blank","title":"Bad Request","status":400,"detail":"Invalid request content.","instance":"/api/restaurant/1/grade"}
+                  """);
     }
 
     @Test
@@ -147,7 +197,14 @@ class RestaurantControllerTest {
                 .bodyValue(invalidGrade)
                 .exchange()
                 .expectStatus()
-                .isBadRequest();
+                .isBadRequest()
+                .expectHeader()
+                .contentType(MediaType.APPLICATION_PROBLEM_JSON)
+                .expectBody()
+                .json(
+                        """
+                        {"type":"about:blank","title":"Bad Request","status":400,"detail":"Invalid request content.","instance":"/api/restaurant/1/grade"}
+                  """);
     }
 
     @Test
@@ -155,6 +212,14 @@ class RestaurantControllerTest {
         String validName = "Test Restaurant";
         Restaurant restaurant = new Restaurant();
         restaurant.setName(validName);
+        restaurant.setBorough("Manhattan");
+        restaurant.setCuisine("Italian");
+        restaurant.setAddress(
+                new Address()
+                        .setStreet("Street")
+                        .setBuilding("Building")
+                        .setZipcode(12345)
+                        .setLocation(new Point(40.0, -73.0)));
 
         when(restaurantService.findByRestaurantName(validName)).thenReturn(Mono.just(restaurant));
 
@@ -164,19 +229,40 @@ class RestaurantControllerTest {
                 .exchange()
                 .expectStatus()
                 .isOk()
+                .expectHeader()
+                .contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
                 .jsonPath("$.name")
-                .isEqualTo(validName);
+                .isEqualTo(validName)
+                .jsonPath("$.borough")
+                .isEqualTo("Manhattan")
+                .jsonPath("$.cuisine")
+                .isEqualTo("Italian")
+                .jsonPath("$.address")
+                .exists()
+                .jsonPath("$.address.street")
+                .isEqualTo("Street")
+                .jsonPath("$.address.building")
+                .isEqualTo("Building")
+                .jsonPath("$.address.zipcode")
+                .isEqualTo(12345)
+                .jsonPath("$.address.location.x")
+                .isEqualTo(40.0)
+                .jsonPath("$.address.location.y")
+                .isEqualTo(-73.0);
     }
 
-    @Test
-    void findRestaurantByName_WithEmptyName_ShouldReturnBadRequest() {
+    @ParameterizedTest
+    @ValueSource(strings = {" ", "   "})
+    void findRestaurantByName_WithEmptyName_ShouldReturnBadRequest(String emptyName) {
         webTestClient
                 .get()
-                .uri("/api/restaurant/name/{restaurantName}", " ")
+                .uri("/api/restaurant/name/{restaurantName}", emptyName)
                 .exchange()
                 .expectStatus()
-                .isBadRequest();
+                .isBadRequest()
+                .expectHeader()
+                .contentType(MediaType.APPLICATION_PROBLEM_JSON);
     }
 
     @Test
@@ -188,32 +274,117 @@ class RestaurantControllerTest {
                 .uri("/api/restaurant/name/{restaurantName}", tooLongName)
                 .exchange()
                 .expectStatus()
-                .isBadRequest();
+                .isBadRequest()
+                .expectHeader()
+                .contentType(MediaType.APPLICATION_PROBLEM_JSON)
+                .expectBody()
+                .json(
+                        """
+                  {"type":"about:blank","title":"Constraint Violation","status":400,"detail":"Validation failed","instance":"/api/restaurant/name/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","violations":[{"object":"RestaurantController","field":"findRestaurantByName.restaurantName","rejectedValue":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","message":"size must be between 0 and 255"}]}
+                  """);
     }
 
     @Test
-    void findRestaurantByName_WithInvalidCharacters_ShouldReturnBadRequest() {
-        String nameWithInvalidChars = "Test@Restaurant#123";
+    void findRestaurantByName_WithMaxLengthName_ShouldReturnOk() {
+        String maxLengthName = "a".repeat(255);
+        Restaurant restaurant = new Restaurant();
+        restaurant.setName(maxLengthName);
+
+        when(restaurantService.findByRestaurantName(maxLengthName))
+                .thenReturn(Mono.just(restaurant));
+
+        webTestClient
+                .get()
+                .uri("/api/restaurant/name/{restaurantName}", maxLengthName)
+                .exchange()
+                .expectStatus()
+                .isOk();
+    }
+
+    /** Restaurant names should only contain letters, numbers, spaces, and hyphens. */
+    @ParameterizedTest
+    @ValueSource(strings = {"Test@Restaurant", "Restaurant#123", "Restaurant$", "Restaurant&Co"})
+    void findRestaurantByName_WithInvalidCharacters_ShouldReturnBadRequest(
+            String nameWithInvalidChars) {
 
         webTestClient
                 .get()
                 .uri("/api/restaurant/name/{restaurantName}", nameWithInvalidChars)
                 .exchange()
                 .expectStatus()
-                .isBadRequest();
+                .isBadRequest()
+                .expectBody()
+                .jsonPath("$.type")
+                .isEqualTo("about:blank")
+                .jsonPath("$.title")
+                .isEqualTo("Constraint Violation")
+                .jsonPath("$.status")
+                .isEqualTo(400)
+                .jsonPath("$.detail")
+                .isEqualTo("Validation failed")
+                .jsonPath("$.instance")
+                .isEqualTo(
+                        "/api/restaurant/name/"
+                                + URLEncoder.encode(nameWithInvalidChars, StandardCharsets.UTF_8))
+                .jsonPath("$.violations[0].object")
+                .isEqualTo("RestaurantController")
+                .jsonPath("$.violations[0].field")
+                .isEqualTo("findRestaurantByName.restaurantName")
+                .jsonPath("$.violations[0].rejectedValue")
+                .isEqualTo(nameWithInvalidChars)
+                .jsonPath("$.violations[0].message")
+                .isEqualTo("must match \"^[a-zA-Z0-9 .-]+$\"");
     }
 
     @Test
-    void findRestaurantByName_WithNonExistentName_ShouldReturnNotFound() {
-        String nonExistentName = "Non Existent Restaurant";
+    void findRestaurantByName_WithSlowResponse_ShouldEventuallyComplete() {
+        String validName = "Test Restaurant";
+        Restaurant restaurant = new Restaurant();
+        restaurant.setName(validName);
 
-        when(restaurantService.findByRestaurantName(nonExistentName)).thenReturn(Mono.empty());
+        when(restaurantService.findByRestaurantName(validName))
+                .thenReturn(Mono.just(restaurant).delayElement(Duration.ofSeconds(3)));
 
         webTestClient
+                .mutate()
+                .responseTimeout(Duration.ofSeconds(6))
+                .build()
                 .get()
-                .uri("/api/restaurant/name/{restaurantName}", nonExistentName)
+                .uri("/api/restaurant/name/{restaurantName}", validName)
                 .exchange()
                 .expectStatus()
-                .isNotFound();
+                .isOk()
+                .expectBody()
+                .jsonPath("$.name")
+                .isEqualTo(validName);
+    }
+
+    @Test
+    void handleMultipleConcurrentRequests() {
+        String validName = "Test Restaurant";
+        Restaurant restaurant = new Restaurant();
+        restaurant.setName(validName);
+
+        when(restaurantService.findByRestaurantName(validName)).thenReturn(Mono.just(restaurant));
+
+        Flux<Restaurant> responseFlux =
+                Flux.range(1, 10)
+                        .flatMap(
+                                i ->
+                                        webTestClient
+                                                .get()
+                                                .uri(
+                                                        "/api/restaurant/name/{restaurantName}",
+                                                        validName)
+                                                .exchange()
+                                                .expectStatus()
+                                                .isOk()
+                                                .returnResult(Restaurant.class)
+                                                .getResponseBody());
+
+        StepVerifier.create(responseFlux)
+                .expectNextCount(10)
+                .expectComplete()
+                .verify(Duration.ofSeconds(10));
     }
 }

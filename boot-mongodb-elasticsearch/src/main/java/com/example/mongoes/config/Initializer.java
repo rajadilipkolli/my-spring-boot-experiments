@@ -6,9 +6,7 @@ import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.boot.context.event.ApplicationStartedEvent;
 import org.springframework.context.annotation.Profile;
-import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -30,11 +28,5 @@ public class Initializer implements CommandLineRunner {
                 .thenMany(restaurantService.loadData())
                 .log()
                 .subscribe(null, null, () -> log.info("done initialization..."));
-    }
-
-    @EventListener(ApplicationStartedEvent.class)
-    public void startListeningToChangeStream() {
-        log.info("Inside ApplicationStartedEvent");
-        this.restaurantService.changeStreamProcessor().log().subscribe();
     }
 }
