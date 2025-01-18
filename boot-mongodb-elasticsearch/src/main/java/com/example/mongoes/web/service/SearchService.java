@@ -1,7 +1,7 @@
 package com.example.mongoes.web.service;
 
 import com.example.mongoes.document.Restaurant;
-import com.example.mongoes.elasticsearch.repository.RestaurantESRepository;
+import com.example.mongoes.repository.elasticsearch.RestaurantESRepository;
 import com.example.mongoes.response.AggregationSearchResponse;
 import com.example.mongoes.response.ResultData;
 import java.util.HashMap;

@@ -1,4 +1,4 @@
-package com.example.mongoes.elasticsearch.repository;
+package com.example.mongoes.repository.elasticsearch;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;

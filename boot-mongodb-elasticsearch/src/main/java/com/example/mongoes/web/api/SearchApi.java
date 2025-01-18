@@ -248,11 +248,8 @@ public interface SearchApi {
             description = "Successfully retrieved restaurants",
             content = @Content(schema = @Schema(implementation = SearchPage.class)))
     @ApiResponse(responseCode = "400", description = "Invalid parameters provided")
-    @GetMapping("/search/wildcard/borough")
     Mono<ResponseEntity<SearchPage<Restaurant>>> searchWildcard(
-            @Parameter(
-                            description = "Wildcard pattern (use * for any characters)",
-                            example = "Man*")
+            @Parameter(description = "Wildcard pattern for search", example = "Man")
                     @RequestParam
                     @NotBlank(message = "Query cannot be blank")
                     String query,

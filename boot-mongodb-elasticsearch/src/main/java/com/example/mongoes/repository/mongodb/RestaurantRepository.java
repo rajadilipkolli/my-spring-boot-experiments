@@ -1,4 +1,4 @@
-package com.example.mongoes.mongodb.repository;
+package com.example.mongoes.repository.mongodb;
 
 import com.example.mongoes.document.Restaurant;
 import org.springframework.data.mongodb.repository.ReactiveMongoRepository;
