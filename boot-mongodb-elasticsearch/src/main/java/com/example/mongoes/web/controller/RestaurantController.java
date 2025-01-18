@@ -36,18 +36,12 @@ class RestaurantController implements RestaurantApi {
 
     @Override
     public Mono<ResponseEntity<Restaurant>> findRestaurantByName(String restaurantName) {
-        return restaurantService
-                .findByRestaurantName(restaurantName)
-                .map(ResponseEntity::ok)
-                .defaultIfEmpty(ResponseEntity.notFound().build());
+        return restaurantService.findByRestaurantName(restaurantName).map(ResponseEntity::ok);
     }
 
     @Override
     public Mono<ResponseEntity<Restaurant>> findRestaurantById(Long restaurantId) {
-        return restaurantService
-                .findByRestaurantId(restaurantId)
-                .map(ResponseEntity::ok)
-                .defaultIfEmpty(ResponseEntity.notFound().build());
+        return restaurantService.findByRestaurantId(restaurantId).map(ResponseEntity::ok);
     }
 
     @Override
@@ -57,10 +51,7 @@ class RestaurantController implements RestaurantApi {
 
     @Override
     public Mono<ResponseEntity<Long>> totalCount() {
-        return restaurantService
-                .totalCount()
-                .map(ResponseEntity::ok)
-                .defaultIfEmpty(ResponseEntity.notFound().build());
+        return restaurantService.totalCount().map(ResponseEntity::ok);
     }
 
     @Override

@@ -1,11 +1,15 @@
 package com.example.mongoes.config;
 
-import com.example.mongoes.response.GenericMessage;
 import com.example.mongoes.web.exception.DuplicateRestaurantException;
+import com.example.mongoes.web.exception.RestaurantNotFoundException;
 import jakarta.validation.ConstraintViolationException;
+import java.util.Comparator;
 import java.util.List;
-import org.springframework.http.HttpStatus;
+import java.util.Objects;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.bind.support.WebExchangeBindException;
@@ -15,43 +19,65 @@ import reactor.core.publisher.Mono;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(DuplicateRestaurantException.class)
-    public ResponseEntity<GenericMessage> handleDuplicateRestaurantException(
+    public Mono<ResponseEntity<ProblemDetail>> handleDuplicateRestaurantException(
             DuplicateRestaurantException ex) {
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(new GenericMessage(ex.getMessage()));
+        ProblemDetail problemDetail =
+                ProblemDetail.forStatusAndDetail(ex.getHttpStatus(), ex.getMessage());
+        return Mono.just(ResponseEntity.status(ex.getHttpStatus()).body(problemDetail));
     }
 
-    record ValidationError(String field, String message) {}
-
-    record ErrorResponse(String error, List<ValidationError> details) {}
+    @ExceptionHandler(RestaurantNotFoundException.class)
+    Mono<ResponseEntity<ProblemDetail>> handleRestaurantNotFoundException(
+            RestaurantNotFoundException ex) {
+        ProblemDetail problemDetail =
+                ProblemDetail.forStatusAndDetail(ex.getHttpStatus(), ex.getMessage());
+        return Mono.just(ResponseEntity.status(ex.getHttpStatus()).body(problemDetail));
+    }
 
     @ExceptionHandler(WebExchangeBindException.class)
-    Mono<ResponseEntity<ErrorResponse>> handleValidationErrors(WebExchangeBindException ex) {
-        List<ValidationError> validationErrors =
-                ex.getBindingResult().getFieldErrors().stream()
+    Mono<ProblemDetail> handleValidationErrors(WebExchangeBindException ex) {
+        ProblemDetail problemDetail =
+                ProblemDetail.forStatusAndDetail(
+                        HttpStatusCode.valueOf(400), "Invalid request content.");
+        problemDetail.setTitle("Constraint Violation");
+        List<ApiValidationError> validationErrorsList =
+                ex.getAllErrors().stream()
                         .map(
-                                error ->
-                                        new ValidationError(
-                                                error.getField(), error.getDefaultMessage()))
+                                objectError -> {
+                                    FieldError fieldError = (FieldError) objectError;
+                                    return new ApiValidationError(
+                                            fieldError.getObjectName(),
+                                            fieldError.getField(),
+                                            fieldError.getRejectedValue(),
+                                            Objects.requireNonNull(
+                                                    fieldError.getDefaultMessage(), ""));
+                                })
+                        .sorted(Comparator.comparing(ApiValidationError::field))
                         .toList();
-
-        return Mono.just(
-                ResponseEntity.badRequest()
-                        .body(new ErrorResponse("Validation failed", validationErrors)));
+        problemDetail.setProperty("violations", validationErrorsList);
+        return Mono.just(problemDetail);
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
-    Mono<ResponseEntity<ErrorResponse>> handleConstraintViolation(ConstraintViolationException ex) {
-        List<ValidationError> validationErrors =
+    Mono<ProblemDetail> handleConstraintViolation(ConstraintViolationException ex) {
+
+        ProblemDetail problemDetail =
+                ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(400), "Validation failed");
+        problemDetail.setTitle("Constraint Violation");
+        List<ApiValidationError> validationErrorsList =
                 ex.getConstraintViolations().stream()
                         .map(
                                 violation ->
-                                        new ValidationError(
+                                        new ApiValidationError(
+                                                violation.getRootBeanClass().getSimpleName(),
                                                 violation.getPropertyPath().toString(),
+                                                violation.getInvalidValue(),
                                                 violation.getMessage()))
+                        .sorted(Comparator.comparing(ApiValidationError::field))
                         .toList();
-
-        return Mono.just(
-                ResponseEntity.badRequest()
-                        .body(new ErrorResponse("Validation failed", validationErrors)));
+        problemDetail.setProperty("violations", validationErrorsList);
+        return Mono.just(problemDetail);
     }
+
+    record ApiValidationError(String object, String field, Object rejectedValue, String message) {}
 }

@@ -10,7 +10,14 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.constraints.*;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Positive;
 import java.util.List;
 import org.springframework.data.elasticsearch.core.SearchPage;
 import org.springframework.http.ResponseEntity;
@@ -156,8 +163,8 @@ public interface SearchApi {
             })
     @GetMapping("/search/terms")
     Mono<ResponseEntity<SearchPage<Restaurant>>> searchTerms(
-            @RequestParam("query") @NotEmpty(message = "Queries list cannot be empty")
-                    List<String> queries,
+            @RequestParam("query") @NotEmpty(message = "Queries list cannot be empty") @Valid
+                    List<@NotBlank(message = "Query term cannot be blank") String> queries,
             @RequestParam(defaultValue = "10") @Min(1) @Max(100) Integer limit,
             @RequestParam(defaultValue = "0") @Min(0) Integer offset);
 
@@ -439,21 +446,21 @@ public interface SearchApi {
                             description = "Latitude coordinate (between -90 and 90)",
                             example = "40.7128")
                     @RequestParam
-                    @Min(-90)
-                    @Max(90)
+                    @Min(value = -90, message = "Latitude must be greater than or equal to -90")
+                    @Max(value = 90, message = "Latitude must be less than or equal to 90")
                     @NotNull(message = "Latitude is required")
                     Double lat,
             @Parameter(
                             description = "Longitude coordinate (between -180 and 180)",
                             example = "-74.0060")
                     @RequestParam
-                    @Min(-180)
-                    @Max(180)
+                    @Min(value = -180, message = "Longitude must be greater than or equal to -180")
+                    @Max(value = 180, message = "Longitude must be less than or equal to 180")
                     @NotNull(message = "Longitude is required")
                     Double lon,
             @Parameter(description = "Distance from coordinates (must be positive)")
                     @RequestParam
-                    @Positive
+                    @Positive(message = "Distance must be greater than 0")
                     @NotNull(message = "Distance is required")
                     Double distance,
             @Parameter(

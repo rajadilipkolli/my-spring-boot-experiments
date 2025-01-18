@@ -37,32 +37,36 @@ public class Address {
         return building;
     }
 
-    public void setBuilding(String building) {
+    public Address setBuilding(String building) {
         this.building = building;
+        return this;
     }
 
     public Point getLocation() {
         return location;
     }
 
-    public void setLocation(Point location) {
+    public Address setLocation(Point location) {
         this.location = location;
+        return this;
     }
 
     public String getStreet() {
         return street;
     }
 
-    public void setStreet(String street) {
+    public Address setStreet(String street) {
         this.street = street;
+        return this;
     }
 
     public Integer getZipcode() {
         return zipcode;
     }
 
-    public void setZipcode(Integer zipcode) {
+    public Address setZipcode(Integer zipcode) {
         this.zipcode = zipcode;
+        return this;
     }
 
     @Override

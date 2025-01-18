@@ -34,6 +34,28 @@ class RestaurantControllerIntTest extends AbstractIntegrationTest {
                 .isEqualTo("restaurant with name junitRestaurant created");
     }
 
+    @Test
+    void findRestaurantByName_WithNonExistentName_ShouldReturnNotFound() {
+        String nonExistentName = "Non Existent Restaurant";
+        webTestClient
+                .get()
+                .uri("/api/restaurant/name/{restaurantName}", nonExistentName)
+                .exchange()
+                .expectStatus()
+                .isNotFound()
+                .expectBody()
+                .json(
+                        """
+                        {
+                            "type":"about:blank",
+                            "title":"Not Found",
+                            "status":404,
+                            "detail":"Restaurant not found with name: Non Existent Restaurant",
+                            "instance":"/api/restaurant/name/Non%20Existent%20Restaurant"
+                        }
+                        """);
+    }
+
     private RestaurantRequest getRestaurantRequest(Address address) {
         GradesRequest grade = new GradesRequest("A", LocalDateTime.of(2022, 1, 1, 1, 1, 1), 15);
         GradesRequest grade1 =

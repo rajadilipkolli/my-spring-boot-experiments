@@ -10,6 +10,7 @@ import com.example.mongoes.repository.mongodb.RestaurantRepository;
 import com.example.mongoes.utils.AppConstants;
 import com.example.mongoes.utils.DateUtility;
 import com.example.mongoes.web.exception.DuplicateRestaurantException;
+import com.example.mongoes.web.exception.RestaurantNotFoundException;
 import com.example.mongoes.web.model.GradesRequest;
 import com.example.mongoes.web.model.RestaurantRequest;
 import com.mongodb.client.model.changestream.ChangeStreamDocument;
@@ -143,11 +144,21 @@ public class RestaurantService {
     }
 
     public Mono<Restaurant> findByRestaurantName(String restaurantName) {
-        return this.restaurantESRepository.findByName(restaurantName);
+        return this.restaurantESRepository
+                .findByName(restaurantName)
+                .switchIfEmpty(
+                        Mono.error(
+                                new RestaurantNotFoundException(
+                                        "Restaurant not found with name: " + restaurantName)));
     }
 
     public Mono<Restaurant> findByRestaurantId(Long restaurantId) {
-        return this.restaurantESRepository.findByRestaurantId(restaurantId);
+        return this.restaurantESRepository
+                .findByRestaurantId(restaurantId)
+                .switchIfEmpty(
+                        Mono.error(
+                                new RestaurantNotFoundException(
+                                        "Restaurant not found with id: " + restaurantId)));
     }
 
     public Mono<Long> totalCount() {
