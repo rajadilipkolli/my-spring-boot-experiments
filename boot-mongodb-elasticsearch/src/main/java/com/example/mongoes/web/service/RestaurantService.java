@@ -96,11 +96,11 @@ public class RestaurantService {
                 .flatMap(
                         exists -> {
                             if (exists) {
-                                return Mono.error(
-                                        new DuplicateRestaurantException(
-                                                String.format(
-                                                        "Restaurant with name '%s' already exists",
-                                                        restaurantRequest.name())));
+                                String errorMessage =
+                                        String.format(
+                                                "Restaurant with name '%s' already exists",
+                                                restaurantRequest.name());
+                                return Mono.error(new DuplicateRestaurantException(errorMessage));
                             }
                             return restaurantRepository.save(restaurantRequest.toRestaurant());
                         });

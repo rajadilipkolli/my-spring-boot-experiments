@@ -50,7 +50,14 @@ public class ChangeStreamStartupListener {
                 .log()
                 .doOnError(error -> log.error("Error in change stream: {}", error.getMessage()))
                 .doOnComplete(() -> log.info("Change stream completed"))
-                .retryWhen(Retry.backoff(5, Duration.ofSeconds(10)))
+                .retryWhen(
+                        Retry.backoff(5, Duration.ofSeconds(10))
+                                .maxAttempts(3)
+                                .doBeforeRetry(
+                                        signal ->
+                                                log.warn(
+                                                        "Retrying after failure: {}",
+                                                        signal.failure().getMessage())))
                 .subscribe();
     }
 
@@ -126,6 +133,11 @@ public class ChangeStreamStartupListener {
                             this.changeStreamResumeRepository
                                     .update(restaurantChangeStreamEvent.getBsonTimestamp())
                                     .log()
+                                    .doOnError(
+                                            error ->
+                                                    log.error(
+                                                            "Failed to update resume token: {}",
+                                                            error.getMessage()))
                                     .subscribe();
                         });
     }
