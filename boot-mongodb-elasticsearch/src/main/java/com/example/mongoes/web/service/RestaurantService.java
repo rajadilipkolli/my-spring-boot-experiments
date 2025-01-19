@@ -1,6 +1,5 @@
 package com.example.mongoes.web.service;
 
-import com.example.mongoes.document.Grades;
 import com.example.mongoes.document.Restaurant;
 import com.example.mongoes.model.request.GradesRequest;
 import com.example.mongoes.model.request.RestaurantRequest;
@@ -54,9 +53,12 @@ public class RestaurantService {
                 .flatMap(
                         restaurant -> {
                             restaurant.getGrades().clear();
-                            List<Grades> gradesList =
-                                    gradesRequestList.stream().map(GradesRequest::toGrade).toList();
-                            restaurant.getGrades().addAll(gradesList);
+                            restaurant
+                                    .getGrades()
+                                    .addAll(
+                                            gradesRequestList.stream()
+                                                    .map(GradesRequest::toGrade)
+                                                    .toList());
                             return this.save(restaurant);
                         });
     }
@@ -90,13 +92,17 @@ public class RestaurantService {
     public Mono<Object> createRestaurant(RestaurantRequest restaurantRequest) {
         return restaurantRepository
                 .findByName(restaurantRequest.name())
+                .hasElement()
                 .flatMap(
-                        existingRestaurant ->
-                                Mono.error(
+                        exists -> {
+                            if (exists) {
+                                return Mono.error(
                                         new DuplicateRestaurantException(
-                                                "Restaurant with name "
-                                                        + restaurantRequest.name()
-                                                        + " already exists")))
-                .switchIfEmpty(restaurantRepository.save(restaurantRequest.toRestaurant()));
+                                                String.format(
+                                                        "Restaurant with name '%s' already exists",
+                                                        restaurantRequest.name())));
+                            }
+                            return restaurantRepository.save(restaurantRequest.toRestaurant());
+                        });
     }
 }

@@ -9,7 +9,6 @@ import com.mongodb.client.model.changestream.ChangeStreamDocument;
 import com.mongodb.client.model.changestream.OperationType;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.List;
 import java.util.Objects;
 import org.bson.BsonTimestamp;
 import org.bson.Document;
@@ -22,6 +21,7 @@ import org.springframework.data.mongodb.core.ChangeStreamOptions;
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 import reactor.util.retry.Retry;
 
@@ -55,11 +55,14 @@ public class ChangeStreamStartupListener {
     }
 
     public Flux<ChangeStreamEvent<Restaurant>> changeStreamProcessor() {
-        return reactiveMongoTemplate
-                .changeStream(Restaurant.class)
-                .watchCollection(AppConstants.RESTAURANT_COLLECTION)
-                .resumeAt(getChangeStreamOption())
-                .listen()
+        return getChangeStreamOption()
+                .flatMapMany(
+                        options ->
+                                reactiveMongoTemplate
+                                        .changeStream(Restaurant.class)
+                                        .watchCollection(AppConstants.RESTAURANT_COLLECTION)
+                                        .resumeAt(options)
+                                        .listen())
                 .delayElements(Duration.ofMillis(1))
                 .publishOn(Schedulers.boundedElastic())
                 .doOnNext(
@@ -127,24 +130,25 @@ public class ChangeStreamStartupListener {
                         });
     }
 
-    private ChangeStreamOptions getChangeStreamOption() {
-        List<ChangeStreamResume> resumeTokenList = getResumeToken();
-        ChangeStreamOptions.ChangeStreamOptionsBuilder changeStreamOptionsBuilder;
-        if (resumeTokenList.isEmpty()) {
-            // Scenario where MongoDb is started freshly hence resumeToken is empty
-            changeStreamOptionsBuilder =
-                    ChangeStreamOptions.builder()
-                            .resumeAt(new BsonTimestamp(Instant.now().getEpochSecond()));
-        } else {
-            changeStreamOptionsBuilder =
-                    ChangeStreamOptions.builder()
-                            .resumeAt(resumeTokenList.getFirst().getResumeTimestamp());
-        }
-        changeStreamOptionsBuilder.returnFullDocumentOnUpdate();
-        return changeStreamOptionsBuilder.build();
+    private Mono<ChangeStreamOptions> getChangeStreamOption() {
+        return getResumeToken()
+                .map(
+                        resumeToken -> {
+                            ChangeStreamOptions.ChangeStreamOptionsBuilder
+                                    changeStreamOptionsBuilder =
+                                            ChangeStreamOptions.builder()
+                                                    .resumeAt(resumeToken.getResumeTimestamp());
+                            changeStreamOptionsBuilder.returnFullDocumentOnUpdate();
+                            return changeStreamOptionsBuilder.build();
+                        })
+                .defaultIfEmpty(
+                        ChangeStreamOptions.builder()
+                                .resumeAt(new BsonTimestamp(Instant.now().getEpochSecond()))
+                                .returnFullDocumentOnUpdate()
+                                .build());
     }
 
-    private List<ChangeStreamResume> getResumeToken() {
-        return this.changeStreamResumeRepository.findAll().toStream().toList();
+    private Mono<ChangeStreamResume> getResumeToken() {
+        return this.changeStreamResumeRepository.findFirstByOrderByResumeTimestampDesc();
     }
 }

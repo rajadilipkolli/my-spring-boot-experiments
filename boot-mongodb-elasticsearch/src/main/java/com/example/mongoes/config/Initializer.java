@@ -76,7 +76,11 @@ public class Initializer implements CommandLineRunner {
 
     private Restaurant documentToRestaurant(Document document) {
         Restaurant restaurant = new Restaurant();
-        restaurant.setRestaurantId(Long.valueOf(document.get("restaurant_id", String.class)));
+        String restaurantId = document.get("restaurant_id", String.class);
+        if (restaurantId == null || restaurantId.isBlank()) {
+            throw new IllegalArgumentException("Restaurant ID is required");
+        }
+        restaurant.setRestaurantId(Long.valueOf(restaurantId));
         restaurant.setName(document.get("name", String.class));
         restaurant.setCuisine(document.get("cuisine", String.class));
         restaurant.setBorough(document.get("borough", String.class));
@@ -87,8 +91,14 @@ public class Initializer implements CommandLineRunner {
         address.setStreet(addressDoc.get("street", String.class));
         address.setZipcode(Integer.valueOf(addressDoc.get("zipcode", String.class)));
         List<Double> coord = addressDoc.getList("coord", Double.class);
-        Point geoJsonPoint = new Point(coord.getFirst(), coord.get(1));
-        address.setLocation(geoJsonPoint);
+        if (coord.size() == 2) {
+            Point geoJsonPoint = new Point(coord.getFirst(), coord.getLast());
+            address.setLocation(geoJsonPoint);
+        } else {
+            // Handle the error case appropriately
+            log.warn("Invalid coordinates for restaurant ID: {}", restaurant.getRestaurantId());
+        }
+
         restaurant.setAddress(address);
 
         List<Grades> gradesList = getGradesList(document.getList("grades", Document.class));

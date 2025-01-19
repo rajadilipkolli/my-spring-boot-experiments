@@ -75,7 +75,7 @@ class RestaurantControllerIntTest extends AbstractIntegrationTest {
                         "type":"about:blank",
                         "title":"Conflict",
                         "status":409,
-                        "detail":"Restaurant with name Restaurant2 already exists",
+                        "detail":"Restaurant with name 'Restaurant2' already exists",
                         "instance":"/api/restaurant"
                         }
                         """);
