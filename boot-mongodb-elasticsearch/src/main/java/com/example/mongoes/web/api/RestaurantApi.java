@@ -163,7 +163,9 @@ public interface RestaurantApi {
                             content =
                                     @Content(
                                             schema =
-                                                    @Schema(implementation = GradesRequest.class))),
+                                                    @Schema(
+                                                            implementation = List.class,
+                                                            subTypes = {GradesRequest.class}))),
             responses = {
                 @ApiResponse(
                         responseCode = "200",
@@ -175,7 +177,7 @@ public interface RestaurantApi {
                         description = "Restaurant not found",
                         content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
             })
-    @PutMapping("/{restaurantId}/grades/")
+    @PutMapping("/{restaurantId}/grades")
     Mono<ResponseEntity<Restaurant>> updateGradesOfRestaurant(
             @PathVariable Long restaurantId, @RequestBody @Valid List<GradesRequest> grades);
 

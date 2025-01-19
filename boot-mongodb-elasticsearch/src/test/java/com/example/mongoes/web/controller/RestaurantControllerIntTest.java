@@ -53,7 +53,7 @@ class RestaurantControllerIntTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void createRestaurant() {
+    void createRestaurant_WithDuplicateName_ShouldReturnConflict() {
         // Setup test data
         createSampleRestaurants(2L);
 
@@ -180,7 +180,7 @@ class RestaurantControllerIntTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void ShouldUpdateGrades() {
+    void updateGradesOfRestaurant_ShouldUpdateAllGrades() {
 
         // Setup: Create multiple restaurants
         createSampleRestaurants(5L);
@@ -191,7 +191,7 @@ class RestaurantControllerIntTest extends AbstractIntegrationTest {
 
         this.webTestClient
                 .put()
-                .uri("/api/restaurant/{restaurantId}/grades/", 5)
+                .uri("/api/restaurant/{restaurantId}/grades", 5)
                 .bodyValue(List.of(updatedGrade))
                 .exchange()
                 .expectStatus()
@@ -228,7 +228,7 @@ class RestaurantControllerIntTest extends AbstractIntegrationTest {
                 .jsonPath("$.grades[0].date")
                 .isEqualTo("2025-01-19T13:40:35")
                 .jsonPath("$.grades[0].score")
-                .isEqualTo("20");
+                .isEqualTo(20);
     }
 
     @Test

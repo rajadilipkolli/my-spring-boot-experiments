@@ -23,6 +23,7 @@ import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 import reactor.core.scheduler.Schedulers;
+import reactor.util.retry.Retry;
 
 @Component
 public class ChangeStreamStartupListener {
@@ -49,6 +50,7 @@ public class ChangeStreamStartupListener {
                 .log()
                 .doOnError(error -> log.error("Error in change stream: {}", error.getMessage()))
                 .doOnComplete(() -> log.info("Change stream completed"))
+                .retryWhen(Retry.backoff(5, Duration.ofSeconds(10)))
                 .subscribe();
     }
 
@@ -71,26 +73,50 @@ public class ChangeStreamStartupListener {
                                     this.restaurantESRepository
                                             .delete(restaurant)
                                             .log()
+                                            .doOnError(
+                                                    error ->
+                                                            log.error(
+                                                                    "Error deleting restaurant: {}",
+                                                                    error.getMessage()))
                                             .subscribe();
                                 } else if (restaurantChangeStreamEvent.getOperationType()
                                                 == OperationType.REPLACE
                                         || restaurantChangeStreamEvent.getOperationType()
                                                 == OperationType.INSERT) {
-                                    this.restaurantESRepository.save(restaurant).log().subscribe();
+                                    this.restaurantESRepository
+                                            .save(restaurant)
+                                            .log()
+                                            .doOnError(
+                                                    error ->
+                                                            log.error(
+                                                                    "Error saving restaurant: {}",
+                                                                    error.getMessage()))
+                                            .subscribe();
                                 }
                             } else {
                                 ChangeStreamDocument<Document> eventRaw =
                                         restaurantChangeStreamEvent.getRaw();
                                 if (Objects.requireNonNull(eventRaw).getOperationType()
                                         == OperationType.DELETE) {
-                                    assert eventRaw.getDocumentKey() != null;
-                                    var objectId =
-                                            eventRaw.getDocumentKey()
-                                                    .get("_id")
-                                                    .asObjectId()
-                                                    .getValue()
-                                                    .toString();
-                                    this.restaurantESRepository.deleteById(objectId).subscribe();
+                                    if (eventRaw.getDocumentKey() != null) {
+                                        var objectId =
+                                                eventRaw.getDocumentKey()
+                                                        .get("_id")
+                                                        .asObjectId()
+                                                        .getValue()
+                                                        .toString();
+                                        this.restaurantESRepository
+                                                .deleteById(objectId)
+                                                .doOnError(
+                                                        error ->
+                                                                log.error(
+                                                                        "Error deleting restaurant by ID: {}",
+                                                                        error.getMessage()))
+                                                .subscribe();
+                                    } else {
+                                        log.warn(
+                                                "Document key is null for DELETE operation. Cannot delete restaurant from repository.");
+                                    }
                                 }
                             }
 

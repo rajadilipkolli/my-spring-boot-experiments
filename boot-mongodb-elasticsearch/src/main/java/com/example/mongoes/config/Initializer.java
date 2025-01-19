@@ -41,7 +41,10 @@ public class Initializer implements CommandLineRunner {
                 .deleteAll()
                 .thenMany(this.loadData())
                 .log()
-                .subscribe(null, null, () -> log.info("done initialization..."));
+                .subscribe(
+                        null,
+                        error -> log.error("Error during initialization: ", error),
+                        () -> log.info("Done initialization."));
     }
 
     private Flux<Restaurant> loadData() {
@@ -68,7 +71,7 @@ public class Initializer implements CommandLineRunner {
         return Flux.fromIterable(restaurantStringList)
                 .map(Document::parse)
                 .map(this::documentToRestaurant)
-                .flatMap(restaurantRepository::save);
+                .flatMap(restaurantRepository::save, 10);
     }
 
     private Restaurant documentToRestaurant(Document document) {

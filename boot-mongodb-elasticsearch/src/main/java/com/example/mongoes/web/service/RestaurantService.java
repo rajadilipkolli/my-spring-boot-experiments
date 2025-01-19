@@ -88,7 +88,7 @@ public class RestaurantService {
     }
 
     public Mono<Object> createRestaurant(RestaurantRequest restaurantRequest) {
-        return restaurantESRepository
+        return restaurantRepository
                 .findByName(restaurantRequest.name())
                 .flatMap(
                         existingRestaurant ->
