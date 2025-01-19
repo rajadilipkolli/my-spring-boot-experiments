@@ -14,7 +14,9 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import java.util.List;
 import org.springframework.data.elasticsearch.core.SearchPage;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -66,7 +68,10 @@ public interface RestaurantApi {
                         responseCode = "200",
                         description = "Restaurant found",
                         content = @Content(schema = @Schema(implementation = Restaurant.class))),
-                @ApiResponse(responseCode = "404", description = "Restaurant not found"),
+                @ApiResponse(
+                        responseCode = "404",
+                        description = "Restaurant not found",
+                        content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
                 @ApiResponse(responseCode = "400", description = "Invalid restaurant name format")
             })
     @GetMapping("/name/{restaurantName}")
@@ -91,7 +96,10 @@ public interface RestaurantApi {
                         responseCode = "200",
                         description = "Restaurant found",
                         content = @Content(schema = @Schema(implementation = Restaurant.class))),
-                @ApiResponse(responseCode = "404", description = "Restaurant not found")
+                @ApiResponse(
+                        responseCode = "404",
+                        description = "Restaurant not found",
+                        content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
             })
     @GetMapping("/{restaurantId}")
     Mono<ResponseEntity<Restaurant>> findRestaurantById(@PathVariable Long restaurantId);
@@ -119,7 +127,10 @@ public interface RestaurantApi {
                         description = "Grade added successfully",
                         content = @Content(schema = @Schema(implementation = Restaurant.class))),
                 @ApiResponse(responseCode = "400", description = "Invalid grade data"),
-                @ApiResponse(responseCode = "404", description = "Restaurant not found")
+                @ApiResponse(
+                        responseCode = "404",
+                        description = "Restaurant not found",
+                        content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
             })
     @PostMapping("/{restaurantId}/grade")
     Mono<ResponseEntity<Restaurant>> addGradeToRestaurant(
@@ -131,14 +142,13 @@ public interface RestaurantApi {
             responses = {
                 @ApiResponse(
                         responseCode = "200",
-                        description = "Total count retrieved successfully"),
-                @ApiResponse(responseCode = "404", description = "Count not available")
+                        description = "Total count retrieved successfully")
             })
     @GetMapping("/total")
     Mono<ResponseEntity<Long>> totalCount();
 
     @Operation(
-            summary = "Add notes to restaurant",
+            summary = "Update grades of restaurant",
             description = "Updates the grades of an existing restaurant",
             parameters = {
                 @Parameter(
@@ -157,14 +167,17 @@ public interface RestaurantApi {
             responses = {
                 @ApiResponse(
                         responseCode = "200",
-                        description = "Notes added successfully",
+                        description = "Grades updated successfully",
                         content = @Content(schema = @Schema(implementation = Restaurant.class))),
                 @ApiResponse(responseCode = "400", description = "Invalid grade data"),
-                @ApiResponse(responseCode = "404", description = "Restaurant not found")
+                @ApiResponse(
+                        responseCode = "404",
+                        description = "Restaurant not found",
+                        content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
             })
     @PutMapping("/{restaurantId}/grades/")
-    Mono<ResponseEntity<Restaurant>> addNotesToRestaurant(
-            @PathVariable Long restaurantId, @RequestBody @Valid GradesRequest grades);
+    Mono<ResponseEntity<Restaurant>> updateGradesOfRestaurant(
+            @PathVariable Long restaurantId, @RequestBody @Valid List<GradesRequest> grades);
 
     @Operation(
             summary = "Create new restaurant",
