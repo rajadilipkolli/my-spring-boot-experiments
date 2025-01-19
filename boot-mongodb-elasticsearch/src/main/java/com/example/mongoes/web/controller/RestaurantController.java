@@ -9,6 +9,7 @@ import io.micrometer.core.annotation.Timed;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import org.springframework.data.elasticsearch.core.SearchPage;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -54,9 +55,11 @@ class RestaurantController implements RestaurantApi {
     }
 
     @Override
-    public Mono<ResponseEntity<Restaurant>> addNotesToRestaurant(
-            Long restaurantId, GradesRequest grades) {
-        return restaurantService.addGrade(grades, restaurantId).map(ResponseEntity::ok);
+    public Mono<ResponseEntity<Restaurant>> updateGradesOfRestaurant(
+            Long restaurantId, List<GradesRequest> gradesRequestList) {
+        return restaurantService
+                .updateGrades(gradesRequestList, restaurantId)
+                .map(ResponseEntity::ok);
     }
 
     @Override

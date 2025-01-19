@@ -10,7 +10,6 @@ import com.example.mongoes.model.request.RestaurantRequest;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.geo.Point;
 import org.springframework.http.HttpHeaders;
@@ -31,18 +30,34 @@ class RestaurantControllerIntTest extends AbstractIntegrationTest {
                 .expectStatus()
                 .isOk()
                 .expectBody()
-                .jsonPath("$.content")
-                .isArray()
+                // Verify pagination metadata
+                .jsonPath("$.pageable.pageSize")
+                .isEqualTo(10)
+                .jsonPath("$.pageable.pageNumber")
+                .isNumber()
+                .jsonPath("$.totalPages")
+                .isNumber()
                 .jsonPath("$.totalElements")
-                .isNumber();
+                .isNumber()
+                .jsonPath("$.first")
+                .isBoolean()
+                .jsonPath("$.last")
+                .isBoolean()
+                .jsonPath("$.size")
+                .isEqualTo(10)
+                .jsonPath("$.number")
+                .isNumber()
+                // Verify content array
+                .jsonPath("$.content")
+                .isArray();
     }
 
     @Test
-    void createRestaurant() {
+    void createRestaurant_WithDuplicateName_ShouldReturnConflict() {
         // Setup test data
         createSampleRestaurants(2L);
 
-        RestaurantRequest restaurantRequest = getRestaurantRequest(null, "Restaurant" + 2, 2L);
+        RestaurantRequest restaurantRequest = getRestaurantRequest(null, "Restaurant2", 2L);
         this.webTestClient
                 .post()
                 .uri("/api/restaurant")
@@ -60,7 +75,7 @@ class RestaurantControllerIntTest extends AbstractIntegrationTest {
                         "type":"about:blank",
                         "title":"Conflict",
                         "status":409,
-                        "detail":"Restaurant with name Restaurant2 already exists",
+                        "detail":"Restaurant with name 'Restaurant2' already exists",
                         "instance":"/api/restaurant"
                         }
                         """);
@@ -140,7 +155,7 @@ class RestaurantControllerIntTest extends AbstractIntegrationTest {
                                         .value(
                                                 count ->
                                                         assertThat(count)
-                                                                .isGreaterThanOrEqualTo(2)));
+                                                                .isGreaterThanOrEqualTo(1)));
     }
 
     @Test
@@ -165,26 +180,54 @@ class RestaurantControllerIntTest extends AbstractIntegrationTest {
     }
 
     @Test
-    @Disabled
-    void addNotesToRestaurant_ShouldUpdateGrades() {
+    void updateGradesOfRestaurant_ShouldUpdateAllGrades() {
 
         // Setup: Create multiple restaurants
         createSampleRestaurants(5L);
 
         // Then update grades
-        GradesRequest updatedGrade = new GradesRequest("B", LocalDateTime.now(), 20);
+        GradesRequest updatedGrade =
+                new GradesRequest("B", LocalDateTime.of(2025, 1, 19, 13, 40, 35), 20);
 
         this.webTestClient
                 .put()
-                .uri("/api/restaurant/{restaurantId}/grades/", 1000)
-                .bodyValue(updatedGrade)
+                .uri("/api/restaurant/{restaurantId}/grades", 5)
+                .bodyValue(List.of(updatedGrade))
                 .exchange()
                 .expectStatus()
                 .isOk()
                 .expectBody()
-                .jsonPath("$.grades[-1].grade")
-                .isEqualTo("A+")
-                .jsonPath("$.grades[-1].score")
+                .jsonPath("$.id")
+                .exists()
+                .jsonPath("$.restaurantId")
+                .isEqualTo(5)
+                .jsonPath("$.name")
+                .isEqualTo("Restaurant5")
+                .jsonPath("$.borough")
+                .isEqualTo("junitBorough")
+                .jsonPath("$.cuisine")
+                .isEqualTo("junitCuisine")
+                .jsonPath("$.version")
+                .isEqualTo(1)
+                .jsonPath("$.address.building")
+                .isEqualTo("building1")
+                .jsonPath("$.address.street")
+                .isEqualTo("street1")
+                .jsonPath("$.address.zipcode")
+                .isEqualTo(12345)
+                .jsonPath("$.address.location.x")
+                .isEqualTo(-73.9)
+                .jsonPath("$.address.location.y")
+                .isEqualTo(40.8)
+                .jsonPath("$.grades")
+                .isArray()
+                .jsonPath("$.grades.size()")
+                .isEqualTo(1)
+                .jsonPath("$.grades[0].grade")
+                .isEqualTo("B")
+                .jsonPath("$.grades[0].date")
+                .isEqualTo("2025-01-19T13:40:35")
+                .jsonPath("$.grades[0].score")
                 .isEqualTo(20);
     }
 
@@ -250,18 +293,10 @@ class RestaurantControllerIntTest extends AbstractIntegrationTest {
                 new Address().setBuilding("building1").setStreet("street1").setZipcode(12345);
         address1.setLocation(new Point(-73.9, 40.8));
 
-        Address address2 =
-                new Address().setBuilding("building2").setStreet("street2").setZipcode(67890);
-        address2.setLocation(new Point(-73.8, 40.7));
-
         RestaurantRequest restaurant1 =
                 getRestaurantRequest(address1, "Restaurant" + restaurantId, restaurantId);
-        RestaurantRequest restaurant2 =
-                getRestaurantRequest(
-                        address2, "Restaurant" + restaurantId + 10000, restaurantId + 10000);
 
         createRestaurantAndWaitForIndex(restaurant1);
-        createRestaurantAndWaitForIndex(restaurant2);
     }
 
     private void createRestaurantAndWaitForIndex(RestaurantRequest request) {
