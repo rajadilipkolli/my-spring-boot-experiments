@@ -10,6 +10,7 @@ import com.example.multipledatasources.repository.member.MemberRepository;
 import com.example.multipledatasources.service.DetailsService;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
@@ -47,12 +48,14 @@ public class DetailsServiceImpl implements DetailsService {
                     cardHolderFuture.thenCombine(memberFuture, this::mapToResponse);
 
             try {
-                return responseFuture.get(5, TimeUnit.SECONDS);
+                return responseFuture.get(3, TimeUnit.SECONDS);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 throw new CustomServiceException(
                         "Operation interrupted while fetching details for member: " + memberId, e);
-            } catch (ExecutionException e) {
+            } catch (ExecutionException | CompletionException e) {
+                cardHolderFuture.cancel(true);
+                memberFuture.cancel(true);
                 throw new CustomServiceException("Failed to fetch details for member: " + memberId, e.getCause());
             } catch (TimeoutException e) {
                 throw new CustomServiceException(

@@ -16,15 +16,16 @@ import com.example.multipledatasources.exception.CustomServiceException;
 import com.example.multipledatasources.exception.MemberNotFoundException;
 import com.example.multipledatasources.repository.cardholder.CardHolderRepository;
 import com.example.multipledatasources.repository.member.MemberRepository;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Executor;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.junit.jupiter.MockitoSettings;
-import org.mockito.quality.Strictness;
 import org.springframework.http.HttpStatus;
 
 @ExtendWith(MockitoExtension.class)
@@ -39,11 +40,13 @@ class DetailsServiceImplTest {
     @Mock
     private Executor asyncExecutor;
 
+    @Captor
+    private ArgumentCaptor<Runnable> taskCaptor;
+
+    @InjectMocks
     private DetailsServiceImpl detailsService;
 
-    @BeforeEach
-    void setUp() {
-        detailsService = new DetailsServiceImpl(cardHolderRepository, memberRepository, asyncExecutor);
+    private void configureExecutorForSuccess() {
         // Configure executor to run tasks immediately in the same thread
         doAnswer(invocation -> {
                     ((Runnable) invocation.getArgument(0)).run();
@@ -63,6 +66,7 @@ class DetailsServiceImplTest {
         member.setName("John Doe");
         member.setMemberId(memberId);
 
+        configureExecutorForSuccess();
         given(memberRepository.existsByMemberIdIgnoreCase(memberId)).willReturn(true);
         given(cardHolderRepository.findByMemberId(eq(memberId))).willReturn(Optional.of(cardHolder));
         given(memberRepository.findByMemberIdIgnoreCase(memberId)).willReturn(member);
@@ -75,11 +79,12 @@ class DetailsServiceImplTest {
         assertThat(result.memberId()).isEqualTo(memberId);
         assertThat(result.cardNumber()).isEqualTo("1234-5678");
         assertThat(result.memberName()).isEqualTo("John Doe");
-        verify(asyncExecutor, times(2)).execute(any(Runnable.class));
+        verify(asyncExecutor, times(2)).execute(taskCaptor.capture());
+        List<Runnable> capturedTasks = taskCaptor.getAllValues();
+        assertThat(capturedTasks).hasSize(2);
     }
 
     @Test
-    @MockitoSettings(strictness = Strictness.LENIENT)
     void getDetails_WhenEntitiesDoNotExist_ShouldReturnEmptyResponse() {
         // Arrange
         String memberId = "non-existent-id";
@@ -99,6 +104,8 @@ class DetailsServiceImplTest {
         Member member = new Member();
         member.setName("John Doe");
         member.setMemberId(memberId);
+
+        configureExecutorForSuccess();
 
         given(memberRepository.existsByMemberIdIgnoreCase(memberId)).willReturn(true);
         given(memberRepository.findByMemberIdIgnoreCase(memberId)).willReturn(member);
@@ -122,6 +129,7 @@ class DetailsServiceImplTest {
         RuntimeException expectedException = new RuntimeException("Database error");
         given(cardHolderRepository.findByMemberId(eq(memberId))).willThrow(expectedException);
 
+        configureExecutorForSuccess();
         // Act & Assert
         assertThatThrownBy(() -> detailsService.getDetails(memberId))
                 .isInstanceOf(CustomServiceException.class)
@@ -132,7 +140,6 @@ class DetailsServiceImplTest {
     }
 
     @Test
-    @MockitoSettings(strictness = Strictness.LENIENT)
     void getDetails_WhenOperationTimesOut_ShouldThrowException() {
         // Arrange
         String memberId = "test-member-id";
