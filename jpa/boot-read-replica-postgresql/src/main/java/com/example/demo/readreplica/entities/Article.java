@@ -1,5 +1,7 @@
 package com.example.demo.readreplica.entities;
 
+import com.example.demo.readreplica.domain.ArticleDTO;
+import com.example.demo.readreplica.domain.CommentDTO;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -8,6 +10,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -87,5 +90,16 @@ public class Article {
     public void removeComment(Comment comment) {
         this.comments.remove(comment);
         comment.setArticle(null);
+    }
+
+    @Transient
+    public ArticleDTO convertToArticleDTO() {
+        return new ArticleDTO(
+                getTitle(),
+                getAuthored(),
+                getPublished(),
+                getComments().stream()
+                        .map(comment -> new CommentDTO(comment.getComment()))
+                        .toList());
     }
 }
