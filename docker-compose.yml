@@ -12,7 +12,7 @@ services:
       - SA_PASSWORD=password
 
   mysql:
-    image: mysql:9.1
+    image: mysql:9.2
     ports:
       - "3306:3306"
     volumes:

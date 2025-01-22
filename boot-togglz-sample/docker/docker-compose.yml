@@ -2,7 +2,7 @@ version: '3.8'
 services:
 
   mysqldb:
-    image: mysql:9.1
+    image: mysql:9.2
     environment:
       - MYSQL_DATABASE=appdb
       - MYSQL_USER=appuser
