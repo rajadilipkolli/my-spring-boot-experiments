@@ -13,7 +13,7 @@ public interface PostService {
      * @param userName the username of the post author
      * @param title the title of the post
      * @return the post response containing post details, comments, and tags
-     * @throws ResourceNotFoundException if the post is not found
+     * @throws com.example.learning.exception.ResourceNotFoundException if the post is not found
      */
     PostResponse fetchPostByUserNameAndTitle(String userName, String title);
 }
