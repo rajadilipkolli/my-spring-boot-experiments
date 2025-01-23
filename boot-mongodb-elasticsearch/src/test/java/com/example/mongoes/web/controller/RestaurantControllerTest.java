@@ -1,7 +1,8 @@
 package com.example.mongoes.web.controller;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import com.example.mongoes.document.Address;
 import com.example.mongoes.document.Restaurant;
@@ -35,7 +36,7 @@ class RestaurantControllerTest {
 
     @Test
     void findAllRestaurants_WithValidLimit_ShouldReturnOk() {
-        when(restaurantService.findAllRestaurants(0, 100)).thenReturn(Mono.empty());
+        given(restaurantService.findAllRestaurants(0, 100)).willReturn(Mono.empty());
 
         webTestClient
                 .get()
@@ -54,7 +55,7 @@ class RestaurantControllerTest {
 
     @Test
     void findAllRestaurants_WithDefaultLimit_ShouldReturnOk() {
-        when(restaurantService.findAllRestaurants(0, 10)).thenReturn(Mono.empty());
+        given(restaurantService.findAllRestaurants(0, 10)).willReturn(Mono.empty());
 
         webTestClient.get().uri("/api/restaurant").exchange().expectStatus().isOk();
     }
@@ -140,12 +141,12 @@ class RestaurantControllerTest {
     }
 
     @Test
-    void whenValidGrade_thenReturns200() {
+    void whenValidGrade_willReturns200() {
         // given
         Long restaurantId = 1L;
         GradesRequest validGrade = new GradesRequest("A", LocalDateTime.now(), 90);
-        when(restaurantService.addGrade(validGrade, restaurantId))
-                .thenReturn(Mono.just(new Restaurant()));
+        given(restaurantService.addGrade(validGrade, restaurantId))
+                .willReturn(Mono.just(new Restaurant()));
 
         // when/then
         webTestClient
@@ -159,7 +160,7 @@ class RestaurantControllerTest {
     }
 
     @Test
-    void whenInvalidGrade_thenReturns400() {
+    void whenInvalidGrade_willReturns400() {
         // given
         Long restaurantId = 1L;
         // grade is required but not set
@@ -184,7 +185,7 @@ class RestaurantControllerTest {
     }
 
     @Test
-    void whenNegativeScore_thenReturns400() {
+    void whenNegativeScore_willReturns400() {
         // given
         Long restaurantId = 1L;
         GradesRequest invalidGrade = new GradesRequest("A", LocalDateTime.now(), -1);
@@ -221,7 +222,7 @@ class RestaurantControllerTest {
                         .setZipcode(12345)
                         .setLocation(new Point(40.0, -73.0)));
 
-        when(restaurantService.findByRestaurantName(validName)).thenReturn(Mono.just(restaurant));
+        given(restaurantService.findByRestaurantName(validName)).willReturn(Mono.just(restaurant));
 
         webTestClient
                 .get()
@@ -290,8 +291,8 @@ class RestaurantControllerTest {
         Restaurant restaurant = new Restaurant();
         restaurant.setName(maxLengthName);
 
-        when(restaurantService.findByRestaurantName(maxLengthName))
-                .thenReturn(Mono.just(restaurant));
+        given(restaurantService.findByRestaurantName(maxLengthName))
+                .willReturn(Mono.just(restaurant));
 
         webTestClient
                 .get()
@@ -342,8 +343,8 @@ class RestaurantControllerTest {
         Restaurant restaurant = new Restaurant();
         restaurant.setName(validName);
 
-        when(restaurantService.findByRestaurantName(validName))
-                .thenReturn(Mono.just(restaurant).delayElement(Duration.ofSeconds(3)));
+        given(restaurantService.findByRestaurantName(validName))
+                .willReturn(Mono.just(restaurant).delayElement(Duration.ofSeconds(3)));
 
         webTestClient
                 .mutate()
@@ -365,7 +366,7 @@ class RestaurantControllerTest {
         Restaurant restaurant = new Restaurant();
         restaurant.setName(validName);
 
-        when(restaurantService.findByRestaurantName(validName)).thenReturn(Mono.just(restaurant));
+        given(restaurantService.findByRestaurantName(validName)).willReturn(Mono.just(restaurant));
 
         Flux<Restaurant> responseFlux =
                 Flux.range(1, 10)
@@ -386,5 +387,128 @@ class RestaurantControllerTest {
                 .expectNextCount(10)
                 .expectComplete()
                 .verify(Duration.ofSeconds(10));
+    }
+
+    @Test
+    void findRestaurantById_WithValidId_ShouldReturnOk() {
+        Long validId = 1L;
+        Restaurant restaurant = new Restaurant();
+        restaurant.setId(String.valueOf(validId));
+
+        given(restaurantService.findByRestaurantId(validId)).willReturn(Mono.just(restaurant));
+
+        webTestClient
+                .get()
+                .uri("/api/restaurant/{restaurantId}", validId)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectHeader()
+                .contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.id")
+                .isEqualTo(validId);
+    }
+
+    @Test
+    void createRestaurant_WithValidRequest_ShouldReturnCreated() {
+        RestaurantRequest validRequest =
+                new RestaurantRequest(
+                        1L, "Test Restaurant", "borough", "cuisine", new Address(), List.of());
+        Restaurant restaurant = new Restaurant();
+        restaurant.setName(validRequest.name());
+
+        given(restaurantService.createRestaurant(any(RestaurantRequest.class)))
+                .willReturn(Mono.just(restaurant));
+
+        webTestClient
+                .post()
+                .uri("/api/restaurant")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(validRequest)
+                .exchange()
+                .expectStatus()
+                .isCreated()
+                .expectHeader()
+                .valueEquals("Location", "/api/restaurant/name/Test+Restaurant");
+    }
+
+    @Test
+    void createRestaurant_WithInvalidRequest_ShouldReturnBadRequest() {
+        RestaurantRequest invalidRequest =
+                new RestaurantRequest(1L, "", "borough", "cuisine", new Address(), List.of());
+
+        webTestClient
+                .post()
+                .uri("/api/restaurant")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(invalidRequest)
+                .exchange()
+                .expectStatus()
+                .isBadRequest()
+                .expectHeader()
+                .contentType(MediaType.APPLICATION_PROBLEM_JSON)
+                .expectBody()
+                .json(
+                        """
+                    {"type":"about:blank","title":"Bad Request","status":400,"detail":"Invalid request content.","instance":"/api/restaurant"}
+              """);
+    }
+
+    @Test
+    void updateGradesOfRestaurant_WithValidRequest_ShouldReturnOk() {
+        Long restaurantId = 1L;
+        List<GradesRequest> validGrades = List.of(new GradesRequest("A", LocalDateTime.now(), 90));
+        Restaurant restaurant = new Restaurant();
+        restaurant.setId(String.valueOf(restaurantId));
+
+        given(restaurantService.updateGrades(validGrades, restaurantId))
+                .willReturn(Mono.just(restaurant));
+
+        webTestClient
+                .put()
+                .uri("/api/restaurant/{restaurantId}/grades", restaurantId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(validGrades)
+                .exchange()
+                .expectStatus()
+                .isOk();
+    }
+
+    @Test
+    void updateGradesOfRestaurant_WithInvalidRequest_ShouldReturnBadRequest() {
+        Long restaurantId = 1L;
+        List<GradesRequest> invalidGrades = List.of(new GradesRequest(null, null, null));
+
+        webTestClient
+                .put()
+                .uri("/api/restaurant/{restaurantId}/grades", restaurantId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(invalidGrades)
+                .exchange()
+                .expectStatus()
+                .isBadRequest()
+                .expectHeader()
+                .contentType(MediaType.APPLICATION_PROBLEM_JSON)
+                .expectBody()
+                .json(
+                        """
+                        {"type":"about:blank","title":"Constraint Violation","status":400,"detail":"Validation failed","instance":"/api/restaurant/1/grades","violations":[{"object":"RestaurantController","field":"updateGradesOfRestaurant.grades[0].date","rejectedValue":null,"message":"Date cannot be null"},{"object":"RestaurantController","field":"updateGradesOfRestaurant.grades[0].grade","rejectedValue":null,"message":"Grade cannot be blank"},{"object":"RestaurantController","field":"updateGradesOfRestaurant.grades[0].score","rejectedValue":null,"message":"Score cannot be null"}]}
+                        """);
+    }
+
+    @Test
+    void totalCount_ShouldReturnOk() {
+        given(restaurantService.totalCount()).willReturn(Mono.just(100L));
+
+        webTestClient
+                .get()
+                .uri("/api/restaurant/total")
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody()
+                .jsonPath("$")
+                .isEqualTo(100L);
     }
 }

@@ -884,4 +884,221 @@ class SearchControllerTest {
                             """);
         }
     }
+
+    @Nested
+    class SearchBoolShouldValidation {
+        @Test
+        void whenValidParameters_thenReturns200() {
+            given(searchService.queryBoolWithShould("Manhattan", "Italian", "Restaurant", 0, 10))
+                    .willReturn(Mono.empty());
+
+            webTestClient
+                    .get()
+                    .uri(
+                            uriBuilder ->
+                                    uriBuilder
+                                            .path("/search/should/bool")
+                                            .queryParam("borough", "Manhattan")
+                                            .queryParam("cuisine", "Italian")
+                                            .queryParam("name", "Restaurant")
+                                            .queryParam("limit", 10)
+                                            .queryParam("offset", 0)
+                                            .build())
+                    .exchange()
+                    .expectStatus()
+                    .isOk();
+        }
+
+        @Test
+        void whenLimitExceeds100_thenReturns400() {
+            webTestClient
+                    .get()
+                    .uri(
+                            uriBuilder ->
+                                    uriBuilder
+                                            .path("/search/should/bool")
+                                            .queryParam("borough", "Manhattan")
+                                            .queryParam("cuisine", "Italian")
+                                            .queryParam("name", "Restaurant")
+                                            .queryParam("limit", 101)
+                                            .build())
+                    .exchange()
+                    .expectStatus()
+                    .isBadRequest();
+        }
+
+        @Test
+        void whenLimitIsZero_thenSearchShouldBoolReturns400() {
+            webTestClient
+                    .get()
+                    .uri(
+                            uriBuilder ->
+                                    uriBuilder
+                                            .path("/search/should/bool")
+                                            .queryParam("borough", "Manhattan")
+                                            .queryParam("cuisine", "Italian")
+                                            .queryParam("name", "Restaurant")
+                                            .queryParam("limit", 0)
+                                            .build())
+                    .exchange()
+                    .expectStatus()
+                    .isBadRequest();
+        }
+
+        @Test
+        void whenOffsetIsNegative_thenReturns400() {
+            webTestClient
+                    .get()
+                    .uri(
+                            uriBuilder ->
+                                    uriBuilder
+                                            .path("/search/should/bool")
+                                            .queryParam("borough", "Manhattan")
+                                            .queryParam("cuisine", "Italian")
+                                            .queryParam("name", "Restaurant")
+                                            .queryParam("offset", -1)
+                                            .build())
+                    .exchange()
+                    .expectStatus()
+                    .isBadRequest();
+        }
+    }
+
+    @Nested
+    class SearchWildcardValidation {
+        @Test
+        void whenValidParameters_thenReturns200() {
+            given(searchService.wildcardSearch("Man", 0, 10)).willReturn(Mono.empty());
+
+            webTestClient
+                    .get()
+                    .uri("/search/wildcard?query=Man&limit=10&offset=0")
+                    .exchange()
+                    .expectStatus()
+                    .isOk();
+        }
+
+        @Test
+        void whenQueryIsBlank_thenReturns400() {
+            webTestClient
+                    .get()
+                    .uri("/search/wildcard?query=&limit=10&offset=0")
+                    .exchange()
+                    .expectStatus()
+                    .isBadRequest();
+        }
+
+        @Test
+        void whenLimitExceeds100_thenReturns400() {
+            webTestClient
+                    .get()
+                    .uri("/search/wildcard?query=Man&limit=101&offset=0")
+                    .exchange()
+                    .expectStatus()
+                    .isBadRequest();
+        }
+
+        @Test
+        void whenOffsetIsNegative_thenReturns400() {
+            webTestClient
+                    .get()
+                    .uri("/search/wildcard?query=Man&limit=10&offset=-1")
+                    .exchange()
+                    .expectStatus()
+                    .isBadRequest();
+        }
+    }
+
+    @Nested
+    class SearchRegularExpressionValidation {
+        @Test
+        void whenValidParameters_thenReturns200() {
+            given(searchService.regExpSearch("Man.*", 0, 10)).willReturn(Mono.empty());
+
+            webTestClient
+                    .get()
+                    .uri("/search/regexp/borough?query=Man.*&limit=10&offset=0")
+                    .exchange()
+                    .expectStatus()
+                    .isOk();
+        }
+
+        @Test
+        void whenQueryIsBlank_thenReturns400() {
+            webTestClient
+                    .get()
+                    .uri("/search/regexp/borough?query=&limit=10&offset=0")
+                    .exchange()
+                    .expectStatus()
+                    .isBadRequest();
+        }
+
+        @Test
+        void whenLimitExceeds100_thenReturns400() {
+            webTestClient
+                    .get()
+                    .uri("/search/regexp/borough?query=Man.*&limit=101&offset=0")
+                    .exchange()
+                    .expectStatus()
+                    .isBadRequest();
+        }
+
+        @Test
+        void whenOffsetIsNegative_thenReturns400() {
+            webTestClient
+                    .get()
+                    .uri("/search/regexp/borough?query=Man.*&limit=10&offset=-1")
+                    .exchange()
+                    .expectStatus()
+                    .isBadRequest();
+        }
+    }
+
+    @Nested
+    class SearchSimpleQueryForBoroughAndCuisineValidation {
+        @Test
+        void whenValidParameters_thenReturns200() {
+            given(
+                            searchService.searchSimpleQueryForBoroughAndCuisine(
+                                    "Manhattan AND Italian", 0, 10))
+                    .willReturn(Mono.empty());
+
+            webTestClient
+                    .get()
+                    .uri("/search/simple?query=Manhattan AND Italian&limit=10&offset=0")
+                    .exchange()
+                    .expectStatus()
+                    .isOk();
+        }
+
+        @Test
+        void whenQueryIsBlank_thenReturns400() {
+            webTestClient
+                    .get()
+                    .uri("/search/simple?query=&limit=10&offset=0")
+                    .exchange()
+                    .expectStatus()
+                    .isBadRequest();
+        }
+
+        @Test
+        void whenLimitExceeds100_thenReturns400() {
+            webTestClient
+                    .get()
+                    .uri("/search/simple?query=Manhattan AND Italian&limit=101&offset=0")
+                    .exchange()
+                    .expectStatus()
+                    .isBadRequest();
+        }
+
+        @Test
+        void whenOffsetIsNegative_thenReturns400() {
+            webTestClient
+                    .get()
+                    .uri("/search/simple?query=Manhattan AND Italian&limit=10&offset=-1")
+                    .exchange()
+                    .expectStatus()
+                    .isBadRequest();
+        }
+    }
 }

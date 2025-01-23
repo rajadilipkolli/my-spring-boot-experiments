@@ -309,7 +309,9 @@ class RestaurantControllerIntTest extends AbstractIntegrationTest {
                 .expectStatus()
                 .isCreated()
                 .expectHeader()
-                .exists(HttpHeaders.LOCATION);
+                .exists(HttpHeaders.LOCATION)
+                .expectHeader()
+                .valueEquals(HttpHeaders.LOCATION, "/api/restaurant/name/" + request.name());
 
         // Wait for Elasticsearch indexing
         await().atMost(Duration.ofSeconds(5))
