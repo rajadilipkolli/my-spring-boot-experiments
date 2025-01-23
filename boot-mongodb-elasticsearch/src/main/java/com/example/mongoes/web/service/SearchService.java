@@ -11,6 +11,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.elasticsearch.client.elc.ElasticsearchAggregations;
+import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchPage;
 import org.springframework.data.elasticsearch.core.geo.GeoPoint;
 import org.springframework.stereotype.Service;
@@ -127,7 +128,9 @@ public class SearchService {
                                                 elasticsearchAggregations.aggregationsAsMap());
                             }
                             return new AggregationSearchResponse(
-                                    searchPage.getContent(),
+                                    searchPage.getContent().stream()
+                                            .map(SearchHit::getContent)
+                                            .toList(),
                                     map,
                                     searchPage.getPageable(),
                                     searchPage.getTotalPages(),

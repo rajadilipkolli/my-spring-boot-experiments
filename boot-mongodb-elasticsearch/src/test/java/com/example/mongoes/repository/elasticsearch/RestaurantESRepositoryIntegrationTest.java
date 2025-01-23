@@ -434,7 +434,7 @@ class RestaurantESRepositoryIntegrationTest extends AbstractIntegrationTest {
         Mono<SearchPage<Restaurant>> aggregationMono =
                 this.restaurantESRepository.aggregateSearch(
                         "Pizza",
-                        List.of("restautant_name", "borough", "cuisine"),
+                        List.of("restaurant_name", "borough", "cuisine"),
                         Sort.Direction.ASC,
                         10,
                         0,
