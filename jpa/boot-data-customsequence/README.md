@@ -19,3 +19,6 @@ docker-compose -f docker/docker-compose.yml up -d
 ### Reference
 
 * https://vladmihalcea.com/lazyconnectiondatasourceproxy-spring-data-jpa/
+
+### Notes
+* MariaDb doesn't support pooled-lo algorithm for fetching sequences and store in db, so for each insert it will fetch next sequence value.
