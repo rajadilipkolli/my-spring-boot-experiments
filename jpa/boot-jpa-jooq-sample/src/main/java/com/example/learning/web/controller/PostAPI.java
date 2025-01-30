@@ -72,4 +72,49 @@ public interface PostAPI {
     ResponseEntity<PostResponse> getPostByUserNameAndTitle(
             @NotBlank @Parameter(description = "Username of the post creator") String userName,
             @NotBlank @Parameter(description = "Title of the post to retrieve") String title);
+
+    @Operation(summary = "Updates a post by username and title")
+    @ApiResponses(
+            value = {
+                @ApiResponse(
+                        responseCode = "200",
+                        description = "Post updated successfully",
+                        content = {
+                            @Content(
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                    schema = @Schema(implementation = PostResponse.class))
+                        }),
+                @ApiResponse(
+                        responseCode = "404",
+                        description = "Post not found",
+                        content = {
+                            @Content(
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                    schema = @Schema(implementation = ProblemDetail.class))
+                        }),
+            })
+    ResponseEntity<PostResponse> updatePostByUserName(
+            @RequestBody @Valid PostRequest postRequest,
+            @NotBlank @Parameter(description = "Username of the post creator") String userName,
+            @NotBlank @Parameter(description = "Title of the post to retrieve") String title);
+
+    @Operation(summary = "Deletes a post by username and title")
+    @ApiResponses(
+            value = {
+                @ApiResponse(
+                        responseCode = "202",
+                        description = "Post deleted successfully",
+                        content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE)}),
+                @ApiResponse(
+                        responseCode = "404",
+                        description = "Post not found",
+                        content = {
+                            @Content(
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                    schema = @Schema(implementation = ProblemDetail.class))
+                        }),
+            })
+    ResponseEntity<Void> deletePostByUserName(
+            @NotBlank @Parameter(description = "Username of the post creator") String userName,
+            @NotBlank @Parameter(description = "Title of the post to retrieve") String title);
 }

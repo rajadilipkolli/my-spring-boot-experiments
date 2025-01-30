@@ -3,6 +3,7 @@ package com.example.learning.web.controller;
 import com.example.learning.model.request.PostRequest;
 import com.example.learning.model.response.PostResponse;
 import com.example.learning.service.PostService;
+import jakarta.validation.Valid;
 import java.net.URI;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
@@ -25,6 +26,14 @@ class PostController implements PostAPI {
         this.jooqPostService = jooqPostService;
     }
 
+    @GetMapping("/{user_name}/posts/{title}")
+    @Override
+    public ResponseEntity<PostResponse> getPostByUserNameAndTitle(
+            @PathVariable("user_name") String userName, @PathVariable("title") String title) {
+        PostResponse postResponse = this.jooqPostService.fetchPostByUserNameAndTitle(userName, title);
+        return ResponseEntity.ok(postResponse);
+    }
+
     @PostMapping("/{user_name}/posts/")
     @Override
     public ResponseEntity<Object> createPostByUserName(
@@ -39,11 +48,21 @@ class PostController implements PostAPI {
         return ResponseEntity.created(location).build();
     }
 
-    @GetMapping("/{user_name}/posts/{title}")
+    @PutMapping("/{user_name}/posts/{title}")
     @Override
-    public ResponseEntity<PostResponse> getPostByUserNameAndTitle(
-            @PathVariable("user_name") String userName, @PathVariable("title") String title) {
-        PostResponse postResponse = this.jooqPostService.fetchPostByUserNameAndTitle(userName, title);
+    public ResponseEntity<PostResponse> updatePostByUserName(
+            @RequestBody @Valid PostRequest postRequest,
+            @PathVariable("user_name") String userName,
+            @PathVariable("title") String title) {
+        PostResponse postResponse = this.jpaPostService.updatePostByUserNameAndId(postRequest, userName, title);
         return ResponseEntity.ok(postResponse);
+    }
+
+    @DeleteMapping("/{user_name}/posts/{title}")
+    @Override
+    public ResponseEntity<Void> deletePostByUserName(
+            @PathVariable("user_name") String userName, @PathVariable("title") String title) {
+        this.jpaPostService.deletePostByIdAndUserName(userName, title);
+        return ResponseEntity.accepted().build();
     }
 }

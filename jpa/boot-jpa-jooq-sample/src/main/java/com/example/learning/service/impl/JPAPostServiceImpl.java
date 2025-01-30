@@ -2,6 +2,7 @@ package com.example.learning.service.impl;
 
 import com.example.learning.entities.Post;
 import com.example.learning.exception.PostAlreadyExistsException;
+import com.example.learning.exception.PostNotFoundException;
 import com.example.learning.mapper.PostMapper;
 import com.example.learning.model.request.PostRequest;
 import com.example.learning.model.response.PostResponse;
@@ -38,6 +39,29 @@ public class JPAPostServiceImpl implements PostService {
             Post post = this.postMapper.postRequestToEntity(postRequest, userName);
             this.postRepository.save(post);
         }
+    }
+
+    @Override
+    @Transactional
+    public PostResponse updatePostByUserNameAndId(PostRequest postRequest, String userName, String title) {
+        return this.postRepository
+                .findByTitleAndDetails_CreatedBy(title, userName)
+                .map(post -> {
+                    log.debug("Updating post with title '{}' for user '{}'", title, userName);
+                    this.postMapper.updateReferenceValues(postRequest, post);
+                    Post updatedPost = this.postRepository.save(post);
+                    return this.postMapper.postToPostResponse(updatedPost);
+                })
+                .orElseThrow(() -> {
+                    log.debug("Post with title '{}' for user '{}' not found", title, userName);
+                    return new PostNotFoundException(title);
+                });
+    }
+
+    @Override
+    @Transactional
+    public void deletePostByIdAndUserName(String userName, String title) {
+        this.postRepository.deleteByTitleAndCreatedBy(title, userName);
     }
 
     /**

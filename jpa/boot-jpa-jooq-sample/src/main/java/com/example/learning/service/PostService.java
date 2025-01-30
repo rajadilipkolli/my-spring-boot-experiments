@@ -5,8 +5,6 @@ import com.example.learning.model.response.PostResponse;
 
 public interface PostService {
 
-    void createPost(PostRequest postRequest, String userName);
-
     /**
      * Fetches a post by username and title.
      *
@@ -16,4 +14,10 @@ public interface PostService {
      * @throws com.example.learning.exception.ResourceNotFoundException if the post is not found
      */
     PostResponse fetchPostByUserNameAndTitle(String userName, String title);
+
+    void createPost(PostRequest postRequest, String userName);
+
+    PostResponse updatePostByUserNameAndId(PostRequest postRequest, String userName, String title);
+
+    void deletePostByIdAndUserName(String userName, String title);
 }
