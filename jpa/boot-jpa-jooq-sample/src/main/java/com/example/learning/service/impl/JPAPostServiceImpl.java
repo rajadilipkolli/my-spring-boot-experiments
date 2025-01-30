@@ -43,7 +43,7 @@ public class JPAPostServiceImpl implements PostService {
 
     @Override
     @Transactional
-    public PostResponse updatePostByUserNameAndId(PostRequest postRequest, String userName, String title) {
+    public PostResponse updatePostByUserNameAndTitle(PostRequest postRequest, String userName, String title) {
         return this.postRepository
                 .findByTitleAndDetails_CreatedBy(title, userName)
                 .map(post -> {
@@ -60,7 +60,12 @@ public class JPAPostServiceImpl implements PostService {
 
     @Override
     @Transactional
-    public void deletePostByIdAndUserName(String userName, String title) {
+    public void deletePostByTitleAndUserName(String userName, String title) {
+        boolean exists = this.postRepository.existsByTitleAndDetails_CreatedBy(title, userName);
+        if (!exists) {
+            log.debug("Post with title '{}' for user '{}' not found", title, userName);
+            throw new PostNotFoundException(title);
+        }
         this.postRepository.deleteByTitleAndCreatedBy(title, userName);
     }
 

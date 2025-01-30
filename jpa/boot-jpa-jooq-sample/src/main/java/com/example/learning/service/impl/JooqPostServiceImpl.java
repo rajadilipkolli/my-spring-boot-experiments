@@ -49,8 +49,8 @@ public class JooqPostServiceImpl implements PostService {
      * @throws UnsupportedOperationException always
      */
     @Override
-    public PostResponse updatePostByUserNameAndId(PostRequest postRequest, String userName, String title) {
-        return null;
+    public PostResponse updatePostByUserNameAndTitle(PostRequest postRequest, String userName, String title) {
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -86,7 +86,7 @@ public class JooqPostServiceImpl implements PostService {
      * @throws UnsupportedOperationException always
      */
     @Override
-    public void deletePostByIdAndUserName(String userName, String title) {
+    public void deletePostByTitleAndUserName(String userName, String title) {
         throw new UnsupportedOperationException();
     }
 

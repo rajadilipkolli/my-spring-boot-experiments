@@ -10,7 +10,7 @@ import java.util.Objects;
 public class PostTagId implements Serializable {
 
     @Serial
-    private static final long serialVersionUID = 999L;
+    private static final long serialVersionUID = 1L;
 
     @Column(name = "post_id")
     private Long postId;

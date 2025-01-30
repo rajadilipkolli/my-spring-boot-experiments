@@ -20,4 +20,6 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     @Modifying
     @Query("delete from Post p where p.title = :title and p.details.createdBy = :createdBy")
     int deleteByTitleAndCreatedBy(@Param("title") String title, @Param("createdBy") String createdBy);
+
+    boolean existsByTitleAndDetails_CreatedBy(String title, String userName);
 }

@@ -287,7 +287,7 @@ class PostControllerIntTest extends AbstractIntegrationTest {
                 .delete()
                 .uri("/api/users/{user_name}/posts/{title}", "junit", "Simple Post")
                 .assertThat()
-                .hasStatus(HttpStatus.ACCEPTED);
+                .hasStatus(HttpStatus.NO_CONTENT);
     }
 
     @Test

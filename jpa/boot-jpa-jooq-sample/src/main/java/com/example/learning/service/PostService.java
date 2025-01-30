@@ -17,7 +17,7 @@ public interface PostService {
 
     void createPost(PostRequest postRequest, String userName);
 
-    PostResponse updatePostByUserNameAndId(PostRequest postRequest, String userName, String title);
+    PostResponse updatePostByUserNameAndTitle(PostRequest postRequest, String userName, String title);
 
-    void deletePostByIdAndUserName(String userName, String title);
+    void deletePostByTitleAndUserName(String userName, String title);
 }
