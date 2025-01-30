@@ -42,6 +42,17 @@ public class JooqPostServiceImpl implements PostService {
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * This operation is not supported in the JOOQ implementation.
+     * Please use the JPA implementation (jpaPostService) instead.
+     *
+     * @throws UnsupportedOperationException always
+     */
+    @Override
+    public PostResponse updatePostByUserNameAndTitle(PostRequest postRequest, String userName, String title) {
+        throw new UnsupportedOperationException();
+    }
+
     @Override
     public PostResponse fetchPostByUserNameAndTitle(String userName, String title) {
 
@@ -66,6 +77,17 @@ public class JooqPostServiceImpl implements PostService {
         }
 
         return response;
+    }
+
+    /**
+     * This operation is not supported in the JOOQ implementation.
+     * Please use the JPA implementation (jpaPostService) instead.
+     *
+     * @throws UnsupportedOperationException always
+     */
+    @Override
+    public void deletePostByTitleAndUserName(String userName, String title) {
+        throw new UnsupportedOperationException();
     }
 
     private Field<List<TagResponse>> fetchTagsSubQuery() {

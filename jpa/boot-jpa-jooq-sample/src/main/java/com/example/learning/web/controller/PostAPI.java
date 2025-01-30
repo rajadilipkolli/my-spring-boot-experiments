@@ -5,6 +5,7 @@ import com.example.learning.model.response.PostResponse;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.info.Info;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -72,4 +73,56 @@ public interface PostAPI {
     ResponseEntity<PostResponse> getPostByUserNameAndTitle(
             @NotBlank @Parameter(description = "Username of the post creator") String userName,
             @NotBlank @Parameter(description = "Title of the post to retrieve") String title);
+
+    @Operation(summary = "Updates a post by username and title")
+    @ApiResponses(
+            value = {
+                @ApiResponse(
+                        responseCode = "200",
+                        description = "Post updated successfully",
+                        content = {
+                            @Content(
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                    schema = @Schema(implementation = PostResponse.class))
+                        }),
+                @ApiResponse(
+                        responseCode = "400",
+                        description = "Invalid input",
+                        content = {
+                            @Content(
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                    schema = @Schema(implementation = ProblemDetail.class))
+                        }),
+                @ApiResponse(
+                        responseCode = "404",
+                        description = "Post not found",
+                        content = {
+                            @Content(
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                    schema = @Schema(implementation = ProblemDetail.class))
+                        }),
+            })
+    ResponseEntity<PostResponse> updatePostByUserNameAndTitle(
+            @RequestBody @Valid PostRequest postRequest,
+            @NotBlank @Parameter(name = "user_name", description = "Username of the post creator", in = ParameterIn.PATH)
+                    String userName,
+            @NotBlank @Parameter(description = "Title of the post to update", in = ParameterIn.PATH) String title);
+
+    @Operation(summary = "Deletes a post by username and title")
+    @ApiResponses(
+            value = {
+                @ApiResponse(responseCode = "204", description = "Post deleted successfully", content = @Content),
+                @ApiResponse(
+                        responseCode = "404",
+                        description = "Post not found",
+                        content = {
+                            @Content(
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                    schema = @Schema(implementation = ProblemDetail.class))
+                        }),
+            })
+    ResponseEntity<Void> deletePostByUserNameAndTitle(
+            @NotBlank @Parameter(name = "user_name", description = "Username of the post creator", in = ParameterIn.PATH)
+                    String userName,
+            @NotBlank @Parameter(description = "Title of the post to delete", in = ParameterIn.PATH) String title);
 }

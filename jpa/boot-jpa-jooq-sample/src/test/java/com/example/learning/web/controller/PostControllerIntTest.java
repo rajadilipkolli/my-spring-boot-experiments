@@ -258,4 +258,272 @@ class PostControllerIntTest extends AbstractIntegrationTest {
                             .hasSize(2);
                 });
     }
+
+    @Test
+    void createPostWithOutTagsAndDelete() throws JsonProcessingException {
+        PostRequest postRequest = new PostRequest(
+                "Simple Post",
+                "This is a simple post without tags",
+                true,
+                LocalDateTime.parse("2025-01-15T10:00:00"),
+                List.of(
+                        new PostCommentRequest(
+                                "commentTitle1", "Nice Post1", true, LocalDateTime.parse("2025-01-16T10:00:00")),
+                        new PostCommentRequest(
+                                "commentTitle2", "Nice Post2", true, LocalDateTime.parse("2025-01-14T10:00:00"))),
+                List.of()); // empty tags list
+
+        this.mockMvcTester
+                .post()
+                .uri("/api/users/{user_name}/posts/", "junit")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(postRequest))
+                .assertThat()
+                .hasStatus(HttpStatus.CREATED)
+                .hasHeader(HttpHeaders.LOCATION, "http://localhost/api/users/junit/posts/Simple%20Post");
+
+        this.mockMvcTester
+                .delete()
+                .uri("/api/users/{user_name}/posts/{title}", "junit", "Simple Post")
+                .assertThat()
+                .hasStatus(HttpStatus.NO_CONTENT);
+    }
+
+    @Test
+    void updatePostByUserNameWithNewCommentsAndTags() throws JsonProcessingException {
+
+        PostRequest postRequest = new PostRequest(
+                "existingPostTitle",
+                "This is a simple post without tags",
+                true,
+                LocalDateTime.parse("2025-01-15T10:00:00"),
+                List.of(
+                        new PostCommentRequest(
+                                "commentTitle1", "Nice Post1", true, LocalDateTime.parse("2025-01-16T10:00:00")),
+                        new PostCommentRequest(
+                                "commentTitle2", "Nice Post2", true, LocalDateTime.parse("2025-01-14T10:00:00"))),
+                List.of()); // empty tags list
+
+        this.mockMvcTester
+                .post()
+                .uri("/api/users/{user_name}/posts/", "junit")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(postRequest))
+                .assertThat()
+                .hasStatus(HttpStatus.CREATED)
+                .hasHeader(HttpHeaders.LOCATION, "http://localhost/api/users/junit/posts/existingPostTitle");
+
+        postRequest = new PostRequest(
+                "existingPostTitle",
+                "updatedContent",
+                true,
+                LocalDateTime.parse("2025-01-16T10:00:00"),
+                List.of(
+                        new PostCommentRequest(
+                                "newCommentTitle1", "New Comment1", true, LocalDateTime.parse("2025-01-16T10:00:00")),
+                        new PostCommentRequest(
+                                "newCommentTitle2", "New Comment2", true, LocalDateTime.parse("2025-01-14T10:00:00"))),
+                List.of(new TagRequest("newTag1", "New Tag 1"), new TagRequest("newTag2", "New Tag 2")));
+
+        this.mockMvcTester
+                .put()
+                .uri("/api/users/{user_name}/posts/{title}", "junit", "existingPostTitle")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(postRequest))
+                .assertThat()
+                .hasStatusOk()
+                .hasContentType(MediaType.APPLICATION_JSON)
+                .bodyJson()
+                .convertTo(PostResponse.class)
+                .satisfies(postResponse -> {
+                    assertThat(postResponse).isNotNull();
+                    assertThat(postResponse.title()).isEqualTo("existingPostTitle");
+                    assertThat(postResponse.content()).isEqualTo("updatedContent");
+                    assertThat(postResponse.published()).isNotNull().isEqualTo(true);
+                    assertThat(postResponse.publishedAt())
+                            .isNotNull()
+                            .isEqualTo(LocalDateTime.parse("2025-01-16T10:00:00"));
+                    assertThat(postResponse.author()).isNotNull().isEqualTo("junit");
+                    assertThat(postResponse.tags())
+                            .isNotNull()
+                            .hasSize(2)
+                            .satisfiesExactlyInAnyOrder(
+                                    tag -> {
+                                        assertThat(tag.name()).isEqualTo("newTag1");
+                                        assertThat(tag.description()).isEqualTo("New Tag 1");
+                                    },
+                                    tag -> {
+                                        assertThat(tag.name()).isEqualTo("newTag2");
+                                        assertThat(tag.description()).isEqualTo("New Tag 2");
+                                    });
+                    assertThat(postResponse.comments())
+                            .isNotNull()
+                            .hasSize(2)
+                            .satisfiesExactlyInAnyOrder(
+                                    comment -> {
+                                        assertThat(comment.title()).isEqualTo("newCommentTitle1");
+                                        assertThat(comment.content()).isEqualTo("New Comment1");
+                                        assertThat(comment.published()).isTrue();
+                                    },
+                                    comment -> {
+                                        assertThat(comment.title()).isEqualTo("newCommentTitle2");
+                                        assertThat(comment.content()).isEqualTo("New Comment2");
+                                        assertThat(comment.published()).isTrue();
+                                    });
+                });
+    }
+
+    @Test
+    void updatePostByUserNameWithRemovedCommentsAndTags() throws JsonProcessingException {
+
+        PostRequest postRequest = new PostRequest(
+                "postWithOutTags",
+                "This is a simple post without tags",
+                true,
+                LocalDateTime.parse("2025-01-15T10:00:00"),
+                List.of(
+                        new PostCommentRequest(
+                                "commentTitle1", "Nice Post1", true, LocalDateTime.parse("2025-01-16T10:00:00")),
+                        new PostCommentRequest(
+                                "commentTitle2", "Nice Post2", true, LocalDateTime.parse("2025-01-14T10:00:00"))),
+                List.of()); // empty tags list
+
+        this.mockMvcTester
+                .post()
+                .uri("/api/users/{user_name}/posts/", "junit")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(postRequest))
+                .assertThat()
+                .hasStatus(HttpStatus.CREATED)
+                .hasHeader(HttpHeaders.LOCATION, "http://localhost/api/users/junit/posts/postWithOutTags");
+
+        postRequest = new PostRequest(
+                "postWithOutTags",
+                "updatedContent",
+                true,
+                LocalDateTime.parse("2025-01-16T10:00:00"),
+                List.of(), // empty comments list
+                List.of()); // empty tags list
+
+        this.mockMvcTester
+                .put()
+                .uri("/api/users/{user_name}/posts/{title}", "junit", "postWithOutTags")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(postRequest))
+                .assertThat()
+                .hasStatusOk()
+                .hasContentType(MediaType.APPLICATION_JSON)
+                .bodyJson()
+                .convertTo(PostResponse.class)
+                .satisfies(postResponse -> {
+                    assertThat(postResponse).isNotNull();
+                    assertThat(postResponse.title()).isEqualTo("postWithOutTags");
+                    assertThat(postResponse.content()).isEqualTo("updatedContent");
+                    assertThat(postResponse.published()).isNotNull().isEqualTo(true);
+                    assertThat(postResponse.publishedAt())
+                            .isNotNull()
+                            .isEqualTo(LocalDateTime.parse("2025-01-16T10:00:00"));
+                    assertThat(postResponse.author()).isNotNull().isEqualTo("junit");
+                    assertThat(postResponse.tags()).isNotNull().isEmpty();
+                    assertThat(postResponse.comments()).isNotNull().isEmpty();
+                });
+    }
+
+    @Test
+    void updatePostByUserNameWithExistingCommentsAndTags() throws JsonProcessingException {
+        PostRequest postRequest = new PostRequest(
+                "existingPostTitleWithTagsAndComments",
+                "updatedContent",
+                true,
+                LocalDateTime.parse("2025-01-15T10:00:00"),
+                List.of(
+                        new PostCommentRequest("existingCommentTitle1", "Updated Comment1", false, null),
+                        new PostCommentRequest("existingCommentTitle2", "Updated Comment2", false, null)),
+                List.of(new TagRequest("existingTag1", "Updated Tag"), new TagRequest("existingTag2", "Updated Tag")));
+
+        this.mockMvcTester
+                .post()
+                .uri("/api/users/{user_name}/posts/", "junit")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(postRequest))
+                .assertThat()
+                .hasStatus(HttpStatus.CREATED)
+                .hasHeader(
+                        HttpHeaders.LOCATION,
+                        "http://localhost/api/users/junit/posts/existingPostTitleWithTagsAndComments");
+
+        postRequest = new PostRequest(
+                "existingPostTitle",
+                "updatedContent",
+                true,
+                LocalDateTime.parse("2025-01-15T10:00:00"),
+                List.of(
+                        new PostCommentRequest(
+                                "existingCommentTitle1",
+                                "Updated Comment1",
+                                true,
+                                LocalDateTime.parse("2025-01-16T10:00:00")),
+                        new PostCommentRequest(
+                                "existingCommentTitle2",
+                                "Updated Comment2",
+                                true,
+                                LocalDateTime.parse("2025-01-14T10:00:00"))),
+                List.of(
+                        new TagRequest("existingTag1", "Updated Tag 1"),
+                        new TagRequest("existingTag2", "Updated Tag 2")));
+
+        this.mockMvcTester
+                .put()
+                .uri("/api/users/{user_name}/posts/{title}", "junit", "existingPostTitleWithTagsAndComments")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(postRequest))
+                .assertThat()
+                .hasStatusOk()
+                .hasContentType(MediaType.APPLICATION_JSON)
+                .bodyJson()
+                .convertTo(PostResponse.class)
+                .satisfies(postResponse -> {
+                    assertThat(postResponse).isNotNull();
+                    assertThat(postResponse.title()).isEqualTo("existingPostTitle");
+                    assertThat(postResponse.content()).isEqualTo("updatedContent");
+                    assertThat(postResponse.published()).isNotNull().isEqualTo(true);
+                    assertThat(postResponse.publishedAt())
+                            .isNotNull()
+                            .isEqualTo(LocalDateTime.parse("2025-01-15T10:00:00"));
+                    assertThat(postResponse.author()).isNotNull().isEqualTo("junit");
+                    assertThat(postResponse.tags())
+                            .isNotNull()
+                            .hasSize(2)
+                            .satisfiesExactlyInAnyOrder(
+                                    tag -> {
+                                        assertThat(tag.name()).isEqualTo("existingTag1");
+                                        assertThat(tag.description()).isEqualTo("Updated Tag 1");
+                                    },
+                                    tag -> {
+                                        assertThat(tag.name()).isEqualTo("existingTag2");
+                                        assertThat(tag.description()).isEqualTo("Updated Tag 2");
+                                    });
+                    assertThat(postResponse.comments())
+                            .isNotNull()
+                            .hasSize(2)
+                            .satisfiesExactlyInAnyOrder(
+                                    comment -> {
+                                        assertThat(comment.title()).isEqualTo("existingCommentTitle1");
+                                        assertThat(comment.content()).isEqualTo("Updated Comment1");
+                                        assertThat(comment.published()).isTrue();
+                                    },
+                                    comment -> {
+                                        assertThat(comment.title()).isEqualTo("existingCommentTitle2");
+                                        assertThat(comment.content()).isEqualTo("Updated Comment2");
+                                        assertThat(comment.published()).isTrue();
+                                    });
+                });
+    }
 }
