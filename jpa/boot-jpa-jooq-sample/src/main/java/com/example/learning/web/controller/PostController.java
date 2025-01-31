@@ -68,7 +68,7 @@ class PostController implements PostAPI {
     @Override
     public ResponseEntity<Void> deletePostByUserNameAndTitle(
             @PathVariable("user_name") String userName, @PathVariable("title") String title) {
-        this.jpaPostService.deletePostByTitleAndUserName(userName, title);
+        this.jpaPostService.deletePostByUserNameAndTitle(userName, title);
         return ResponseEntity.noContent().build();
     }
 }

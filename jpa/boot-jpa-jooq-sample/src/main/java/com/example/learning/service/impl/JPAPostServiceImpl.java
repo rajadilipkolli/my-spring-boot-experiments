@@ -54,17 +54,19 @@ public class JPAPostServiceImpl implements PostService {
                 })
                 .orElseThrow(() -> {
                     log.debug("Post with title '{}' for user '{}' not found", title, userName);
-                    return new PostNotFoundException(title);
+                    return new PostNotFoundException(
+                            String.format("Post with title '%s' not found for user '%s'", title, userName));
                 });
     }
 
     @Override
     @Transactional
-    public void deletePostByTitleAndUserName(String userName, String title) {
+    public void deletePostByUserNameAndTitle(String userName, String title) {
         boolean exists = this.postRepository.existsByTitleAndDetails_CreatedBy(title, userName);
         if (!exists) {
             log.debug("Post with title '{}' for user '{}' not found", title, userName);
-            throw new PostNotFoundException(title);
+            throw new PostNotFoundException(
+                    String.format("Post with title '%s' not found for user '%s'", title, userName));
         }
         this.postRepository.deleteByTitleAndCreatedBy(title, userName);
     }
