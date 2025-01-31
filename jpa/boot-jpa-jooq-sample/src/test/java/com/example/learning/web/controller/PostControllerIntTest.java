@@ -262,7 +262,7 @@ class PostControllerIntTest extends AbstractIntegrationTest {
     @Test
     void createPostWithCommentsWithoutTagsAndDelete() throws JsonProcessingException {
         PostRequest postRequest = new PostRequest(
-                "Simple Post",
+                "postWithCommentsWithOutTags",
                 "This is a simple post without tags",
                 true,
                 LocalDateTime.parse("2025-01-15T10:00:00"),
@@ -281,11 +281,11 @@ class PostControllerIntTest extends AbstractIntegrationTest {
                 .content(objectMapper.writeValueAsString(postRequest))
                 .assertThat()
                 .hasStatus(HttpStatus.CREATED)
-                .hasHeader(HttpHeaders.LOCATION, "http://localhost/api/users/junit/posts/Simple%20Post");
+                .hasHeader(HttpHeaders.LOCATION, "http://localhost/api/users/junit/posts/postWithCommentsWithOutTags");
 
         this.mockMvcTester
                 .delete()
-                .uri("/api/users/{user_name}/posts/{title}", "junit", "Simple Post")
+                .uri("/api/users/{user_name}/posts/{title}", "junit", "postWithCommentsWithOutTags")
                 .assertThat()
                 .hasStatus(HttpStatus.NO_CONTENT);
     }

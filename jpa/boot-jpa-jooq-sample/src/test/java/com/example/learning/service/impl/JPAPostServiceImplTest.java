@@ -28,7 +28,7 @@ class JPAPostServiceImplTest {
     private JPAPostServiceImpl jpaPostService;
 
     @Test
-    void deletePostByIdAndUserName_WhenPostExists_ShouldDeleteSuccessfully() {
+    void deletePostByUserNameAndTitle_WhenPostExists_ShouldDeleteSuccessfully() {
         // Arrange
         String userName = "testUser";
         String title = "Test Title";
@@ -44,7 +44,7 @@ class JPAPostServiceImplTest {
     }
 
     @Test
-    void deletePostByIdAndUserName_WhenPostDoesNotExist_ShouldThrowException() {
+    void deletePostByUserNameAndTitle_WhenPostDoesNotExist_ShouldThrowException() {
         // Arrange
         String userName = "testUser";
         String title = "Test Title";
