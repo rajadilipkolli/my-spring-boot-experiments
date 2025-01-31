@@ -49,9 +49,9 @@ public class JPAPostServiceImpl implements PostService {
                 .map(post -> {
                     log.debug("Updating post with title '{}' for user '{}'", title, userName);
                     this.postMapper.updateReferenceValues(postRequest, post);
-                    Post updatedPost = this.postRepository.save(post);
-                    return this.postMapper.postToPostResponse(updatedPost);
+                    return this.postRepository.save(post);
                 })
+                .map(this.postMapper::postToPostResponse)
                 .orElseThrow(() -> {
                     log.debug("Post with title '{}' for user '{}' not found", title, userName);
                     return new PostNotFoundException(

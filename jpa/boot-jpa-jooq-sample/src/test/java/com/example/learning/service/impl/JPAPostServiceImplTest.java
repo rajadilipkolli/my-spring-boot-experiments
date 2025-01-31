@@ -51,7 +51,7 @@ class JPAPostServiceImplTest {
         given(postRepository.existsByTitleAndDetails_CreatedBy(title, userName)).willReturn(false);
 
         // Act & Assert
-        assertThatThrownBy(() -> jpaPostService.deletePostByUserNameAndTitle(userName, title), "Test exception code")
+        assertThatThrownBy(() -> jpaPostService.deletePostByUserNameAndTitle(userName, title))
                 .isInstanceOf(PostNotFoundException.class)
                 .hasMessageContaining("Post with title 'Test Title' not found for user 'testUser'");
         verify(postRepository).existsByTitleAndDetails_CreatedBy(title, userName);

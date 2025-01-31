@@ -12,7 +12,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -106,50 +110,6 @@ class PostControllerIntTest extends AbstractIntegrationTest {
                                         assertThat(comment.content()).isEqualTo("Nice Post2");
                                         assertThat(comment.published()).isTrue();
                                     });
-                });
-    }
-
-    @Test
-    void createPostWithoutTagsAndComments() throws JsonProcessingException {
-        PostRequest postRequest = new PostRequest(
-                "Simple Post",
-                "This is a simple post without tags and comments",
-                true,
-                LocalDateTime.parse("2025-01-15T10:00:00"),
-                List.of(), // empty comments list
-                List.of()); // empty tags list
-
-        this.mockMvcTester
-                .post()
-                .uri("/api/users/{user_name}/posts/", "junit")
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(postRequest))
-                .assertThat()
-                .hasStatus(HttpStatus.CREATED)
-                .hasHeader(HttpHeaders.LOCATION, "http://localhost/api/users/junit/posts/Simple%20Post");
-
-        this.mockMvcTester
-                .get()
-                .uri("/api/users/{user_name}/posts/{title}", "junit", "Simple Post")
-                .accept(MediaType.APPLICATION_JSON)
-                .assertThat()
-                .hasStatusOk()
-                .hasContentType(MediaType.APPLICATION_JSON)
-                .bodyJson()
-                .convertTo(PostResponse.class)
-                .satisfies(postResponse -> {
-                    assertThat(postResponse).isNotNull();
-                    assertThat(postResponse.title()).isEqualTo("Simple Post");
-                    assertThat(postResponse.content()).isEqualTo("This is a simple post without tags and comments");
-                    assertThat(postResponse.published()).isNotNull().isEqualTo(true);
-                    assertThat(postResponse.publishedAt())
-                            .isNotNull()
-                            .isEqualTo(LocalDateTime.parse("2025-01-15T10:00:00"));
-                    assertThat(postResponse.author()).isNotNull().isEqualTo("junit");
-                    assertThat(postResponse.createdAt()).isNotNull().isBeforeOrEqualTo(LocalDateTime.now());
-                    assertThat(postResponse.tags()).isNotNull().isEmpty();
-                    assertThat(postResponse.comments()).isNotNull().isEmpty();
                 });
     }
 
@@ -729,5 +689,98 @@ class PostControllerIntTest extends AbstractIntegrationTest {
                                         assertThat(comment.publishedAt()).isNull();
                                     });
                 });
+    }
+
+    @ParameterizedTest
+    @MethodSource("postTestCases")
+    void shouldHandlePostOperationsWithDifferentConfigurations(
+            String title, List<PostCommentRequest> comments, List<TagRequest> tags, boolean expectEmpty)
+            throws JsonProcessingException {
+
+        PostRequest postRequest = new PostRequest(
+                title, "Test content", true, LocalDateTime.parse("2025-01-15T10:00:00"), comments, tags);
+
+        // Test creation
+        this.mockMvcTester
+                .post()
+                .uri("/api/users/{user_name}/posts/", "junit")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(postRequest))
+                .assertThat()
+                .hasStatus(HttpStatus.CREATED)
+                .hasHeader(HttpHeaders.LOCATION, "http://localhost/api/users/junit/posts/" + title);
+
+        // Test retrieval
+        this.mockMvcTester
+                .get()
+                .uri("/api/users/{user_name}/posts/{title}", "junit", title)
+                .accept(MediaType.APPLICATION_JSON)
+                .assertThat()
+                .hasStatusOk()
+                .hasContentType(MediaType.APPLICATION_JSON)
+                .bodyJson()
+                .convertTo(PostResponse.class)
+                .satisfies(postResponse -> {
+                    assertThat(postResponse).isNotNull();
+                    assertThat(postResponse.title()).isEqualTo(title);
+                    assertThat(postResponse.content()).isEqualTo("Test content");
+                    assertThat(postResponse.published()).isTrue();
+                    assertThat(postResponse.publishedAt()).isEqualTo(LocalDateTime.parse("2025-01-15T10:00:00"));
+                    assertThat(postResponse.author()).isEqualTo("junit");
+                    assertThat(postResponse.createdAt()).isNotNull().isBeforeOrEqualTo(LocalDateTime.now());
+
+                    if (expectEmpty) {
+                        assertThat(postResponse.comments()).isEmpty();
+                        assertThat(postResponse.tags()).isEmpty();
+                    } else {
+                        if (!comments.isEmpty()) {
+                            assertThat(postResponse.comments())
+                                    .hasSize(comments.size())
+                                    .allSatisfy(comment -> {
+                                        assertThat(comment.published()).isTrue();
+                                        assertThat(comment.publishedAt()).isNotNull();
+                                    });
+                        }
+                        if (!tags.isEmpty()) {
+                            assertThat(postResponse.tags()).hasSize(tags.size()).allSatisfy(tag -> {
+                                assertThat(tag.name()).isNotEmpty();
+                                assertThat(tag.description()).isNotEmpty();
+                            });
+                        }
+                    }
+                });
+    }
+
+    static Stream<Arguments> postTestCases() {
+        return Stream.of(
+                // Empty post (no comments, no tags)
+                Arguments.of("emptyPost", List.of(), List.of(), true),
+
+                // Post with comments only
+                Arguments.of(
+                        "postWithComments",
+                        List.of(
+                                new PostCommentRequest(
+                                        "comment1", "content1", true, LocalDateTime.parse("2025-01-16T10:00:00")),
+                                new PostCommentRequest(
+                                        "comment2", "content2", true, LocalDateTime.parse("2025-01-14T10:00:00"))),
+                        List.of(),
+                        false),
+
+                // Post with tags only
+                Arguments.of(
+                        "postWithTags",
+                        List.of(),
+                        List.of(new TagRequest("tag1", "Tag 1"), new TagRequest("tag2", "Tag 2")),
+                        false),
+
+                // Post with both comments and tags
+                Arguments.of(
+                        "postWithCommentsAndTags",
+                        List.of(new PostCommentRequest(
+                                "comment1", "content1", true, LocalDateTime.parse("2025-01-16T10:00:00"))),
+                        List.of(new TagRequest("tag1", "Tag 1")),
+                        false));
     }
 }
