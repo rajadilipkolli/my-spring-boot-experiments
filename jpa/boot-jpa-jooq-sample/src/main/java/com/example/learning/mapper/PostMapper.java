@@ -16,6 +16,7 @@ import java.util.List;
 import org.mapstruct.CollectionMappingStrategy;
 import org.mapstruct.DecoratedWith;
 import org.mapstruct.InjectionStrategy;
+import org.mapstruct.IterableMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
@@ -48,6 +49,7 @@ public interface PostMapper {
     @Mapping(source = "review", target = "content")
     PostComment postCommentRequestToPostComment(PostCommentRequest postCommentRequest);
 
+    @IterableMapping(elementTargetType = PostComment.class)
     List<PostComment> postCommentsRequestListToPostCommentList(List<PostCommentRequest> comments);
 
     @Mapping(target = "id", ignore = true)
@@ -55,6 +57,7 @@ public interface PostMapper {
     @Mapping(source = "description", target = "tagDescription")
     Tag tagRequestToTag(TagRequest tagRequest);
 
+    @IterableMapping(elementTargetType = Tag.class)
     List<Tag> tagRequestListToTagList(List<TagRequest> tags);
 
     @Mapping(target = "modifiedAt", ignore = true)

@@ -52,92 +52,64 @@ public abstract class PostMapperDecorator implements PostMapper {
         post.setContent(postRequest.content());
         post.setPublished(postRequest.published());
         post.setPublishedAt(postRequest.publishedAt());
-        if (!CollectionUtils.isEmpty(post.getComments())) {
-            if (!CollectionUtils.isEmpty(postRequest.comments())) {
-                // convertPostCommentsDTO to PostComment Entities
-                List<PostComment> updatePostCommentsRequest =
-                        this.postMapperDelegate.postCommentsRequestListToPostCommentList(postRequest.comments());
+        updateComments(postRequest, post);
+        updateTags(postRequest, post);
+    }
 
-                // Remove the existing database rows that are no
-                // longer found in the incoming collection (postCommentRequested)
-                List<PostComment> postCommentsToRemove = post.getComments().stream()
-                        .filter(postComment -> !updatePostCommentsRequest.contains(postComment))
-                        .toList();
-                postCommentsToRemove.forEach(post::removeComment);
-
-                // Update the existing database rows which can be found
-                // in the incoming collection (updateCustomerRequest.getOrders())
-                List<PostComment> newPostComments = updatePostCommentsRequest.stream()
-                        .filter(postComment -> !post.getComments().contains(postComment))
-                        .toList();
-
-                updatePostCommentsRequest.stream()
-                        .filter(postComment -> !newPostComments.contains(postComment))
-                        .forEach((postComment) -> {
-                            postComment.setPost(post);
-                            PostComment mergedPostComment = this.postCommentRepository.save(postComment);
-                            post.getComments().set(post.getComments().indexOf(mergedPostComment), mergedPostComment);
-                        });
-
-                // Add the rows found in the incoming collection,
-                // which cannot be found in the current database snapshot
-                newPostComments.forEach(post::addComment);
-            } else {
-                List<PostComment> comments = new ArrayList<>(post.getComments());
-                for (PostComment comment : comments) {
-                    post.removeComment(comment);
-                }
-            }
-        } else {
-            addPostCommentsToPost(postRequest.comments(), post);
+    private void updateTags(PostRequest postRequest, Post post) {
+        if (CollectionUtils.isEmpty(postRequest.tags())) {
+            new ArrayList<>(post.getTags()).forEach(postTag -> post.removeTag(postTag.getTag()));
+            return;
         }
-        if (!CollectionUtils.isEmpty(post.getTags())) {
-            if (!CollectionUtils.isEmpty(postRequest.tags())) {
 
-                // convertPostCommentsDTO to PostComment Entities
-                List<Tag> updateTagsRequest = this.postMapperDelegate.tagRequestListToTagList(postRequest.tags());
+        List<Tag> updateTagsRequest = this.postMapperDelegate.tagRequestListToTagList(postRequest.tags());
+        List<Tag> existingTags = post.getTags().stream().map(PostTag::getTag).toList();
 
-                List<Tag> existingTags =
-                        post.getTags().stream().map(PostTag::getTag).toList();
+        Map<String, Tag> existingTagMap =
+                existingTags.stream().collect(Collectors.toMap(Tag::getTagName, Function.identity()));
 
-                // Remove the existing database rows that are no
-                // longer found in the incoming collection (updateTagsRequest)
-                List<Tag> tagsToRemoveList = existingTags.stream()
-                        .filter(tag -> !updateTagsRequest.contains(tag))
-                        .toList();
-                tagsToRemoveList.forEach(post::removeTag);
-
-                List<String> tagNames =
-                        existingTags.stream().map(Tag::getTagName).toList();
-                // Update the existing database rows which can be found
-                // in the incoming collection (updateTagsRequest)
-                List<Tag> newTagsList = updateTagsRequest.stream()
-                        .filter(tag -> !tagNames.contains(tag.getTagName()))
-                        .toList();
-
-                updateTagsRequest.stream()
-                        .filter(tag -> !newTagsList.contains(tag))
-                        .forEach((tag) -> {
-                            tag.setId(existingTags.stream()
-                                    .filter(t -> t.getTagName().equals(tag.getTagName()))
-                                    .findFirst()
-                                    .get()
-                                    .getId());
-                            Tag mergedTag = this.tagRepository.save(tag);
-                            PostTag mergedPostTag = new PostTag(post, mergedTag);
-                            post.getTags().set(post.getTags().indexOf(mergedPostTag), mergedPostTag);
-                        });
-
-                // Add the rows found in the incoming collection,
-                // which cannot be found in the current database snapshot
-                newTagsList.forEach(post::addTag);
-
+        List<Tag> newTags = new ArrayList<>();
+        for (Tag tag : updateTagsRequest) {
+            if (!existingTagMap.containsKey(tag.getTagName())) {
+                newTags.add(tag);
             } else {
-                post.getTags().forEach(postTag -> post.removeTag(postTag.getTag()));
+                tag.setId(existingTagMap.get(tag.getTagName()).getId());
+                Tag mergedTag = this.tagRepository.save(tag);
+                PostTag mergedPostTag = new PostTag(post, mergedTag);
+                post.getTags().set(post.getTags().indexOf(mergedPostTag), mergedPostTag);
             }
-        } else {
-            addPostTagsToPost(postRequest.tags(), post);
         }
+
+        List<Tag> tagsToRemove = existingTags.stream()
+                .filter(tag -> !updateTagsRequest.contains(tag))
+                .toList();
+        tagsToRemove.forEach(post::removeTag);
+
+        if (!newTags.isEmpty()) {
+            tagRepository.saveAll(newTags).forEach(post::addTag);
+        }
+    }
+
+    private void updateComments(PostRequest postRequest, Post post) {
+        List<PostComment> existingComments = new ArrayList<>(post.getComments());
+        List<PostComment> updatedComments =
+                this.postMapperDelegate.postCommentsRequestListToPostCommentList(postRequest.comments());
+
+        // Remove comments that are not in the updated request
+        existingComments.stream()
+                .filter(comment -> !updatedComments.contains(comment))
+                .forEach(post::removeComment);
+
+        // Update existing comments and add new ones
+        updatedComments.forEach(comment -> {
+            comment.setPost(post);
+            if (existingComments.contains(comment)) {
+                PostComment mergedComment = this.postCommentRepository.save(comment);
+                post.getComments().set(post.getComments().indexOf(mergedComment), mergedComment);
+            } else {
+                post.addComment(comment);
+            }
+        });
     }
 
     private void addPostTagsToPost(List<TagRequest> tagRequests, Post post) {

@@ -7,7 +7,7 @@ import java.io.Serializable;
 import java.util.Objects;
 
 @Embeddable
-public class PostTagId implements Serializable {
+public final class PostTagId implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
