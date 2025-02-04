@@ -7,11 +7,14 @@ import com.example.learning.entities.Tag;
 import com.example.learning.model.request.PostCommentRequest;
 import com.example.learning.model.request.PostRequest;
 import com.example.learning.model.request.TagRequest;
+import com.example.learning.model.response.PostCommentResponse;
 import com.example.learning.model.response.PostResponse;
+import com.example.learning.model.response.TagResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -735,18 +738,30 @@ class PostControllerIntTest extends AbstractIntegrationTest {
                         assertThat(postResponse.tags()).isEmpty();
                     } else {
                         if (!comments.isEmpty()) {
+                            @SuppressWarnings("unchecked")
+                            Consumer<PostCommentResponse>[] commentConsumers = comments.stream()
+                                    .<Consumer<PostCommentResponse>>map(expected -> actual -> {
+                                        assertThat(actual.title()).isEqualTo(expected.title());
+                                        assertThat(actual.content()).isEqualTo(expected.review());
+                                        assertThat(actual.published()).isEqualTo(expected.published());
+                                        assertThat(actual.publishedAt()).isNotNull();
+                                    })
+                                    .toArray(Consumer[]::new);
                             assertThat(postResponse.comments())
                                     .hasSize(comments.size())
-                                    .allSatisfy(comment -> {
-                                        assertThat(comment.published()).isTrue();
-                                        assertThat(comment.publishedAt()).isNotNull();
-                                    });
+                                    .satisfiesExactlyInAnyOrder(commentConsumers);
                         }
                         if (!tags.isEmpty()) {
-                            assertThat(postResponse.tags()).hasSize(tags.size()).allSatisfy(tag -> {
-                                assertThat(tag.name()).isNotEmpty();
-                                assertThat(tag.description()).isNotEmpty();
-                            });
+                            @SuppressWarnings("unchecked")
+                            Consumer<TagResponse>[] tagConsumers = tags.stream()
+                                    .<Consumer<TagResponse>>map(expected -> actual -> {
+                                        assertThat(actual.name()).isEqualTo(expected.name());
+                                        assertThat(actual.description()).isEqualTo(expected.description());
+                                    })
+                                    .toArray(Consumer[]::new);
+                            assertThat(postResponse.tags())
+                                    .hasSize(tags.size())
+                                    .satisfiesExactlyInAnyOrder(tagConsumers);
                         }
                     }
                 });
