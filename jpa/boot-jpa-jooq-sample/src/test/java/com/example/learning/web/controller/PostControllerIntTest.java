@@ -263,16 +263,15 @@ class PostControllerIntTest extends AbstractIntegrationTest {
                 .hasStatus(HttpStatus.NOT_FOUND)
                 .bodyJson()
                 .convertTo(ProblemDetail.class)
-                .satisfies(problemDetail -> {
-                    assertThat(problemDetail.getType())
-                            .isEqualTo(URI.create("https://api.boot-jpa-jooq.com/errors/not-found"));
-                    assertThat(problemDetail.getTitle()).isEqualTo("Not Found");
-                    assertThat(problemDetail.getStatus()).isEqualTo(404);
-                    assertThat(problemDetail.getDetail())
-                            .isEqualTo("Post with title 'NonExistingPost' not found for user 'junit'");
-                    assertThat(problemDetail.getInstance())
-                            .isEqualTo(URI.create("/api/users/junit/posts/NonExistingPost"));
-                });
+                .satisfies(problemDetail -> assertNotFoundProblemDetail(problemDetail, "NonExistingPost"));
+    }
+
+    private void assertNotFoundProblemDetail(ProblemDetail problemDetail, String title) {
+        assertThat(problemDetail.getType()).isEqualTo(URI.create("https://api.boot-jpa-jooq.com/errors/not-found"));
+        assertThat(problemDetail.getTitle()).isEqualTo("Not Found");
+        assertThat(problemDetail.getStatus()).isEqualTo(404);
+        assertThat(problemDetail.getDetail()).isEqualTo("Post with title '" + title + "' not found for user 'junit'");
+        assertThat(problemDetail.getInstance()).isEqualTo(URI.create("/api/users/junit/posts/" + title));
     }
 
     @Test
@@ -285,16 +284,7 @@ class PostControllerIntTest extends AbstractIntegrationTest {
                 .hasStatus(HttpStatus.NOT_FOUND)
                 .bodyJson()
                 .convertTo(ProblemDetail.class)
-                .satisfies(problemDetail -> {
-                    assertThat(problemDetail.getType())
-                            .isEqualTo(URI.create("https://api.boot-jpa-jooq.com/errors/not-found"));
-                    assertThat(problemDetail.getTitle()).isEqualTo("Not Found");
-                    assertThat(problemDetail.getStatus()).isEqualTo(404);
-                    assertThat(problemDetail.getDetail())
-                            .isEqualTo("Post with title 'NonExistingPost' not found for user 'junit'");
-                    assertThat(problemDetail.getInstance())
-                            .isEqualTo(URI.create("/api/users/junit/posts/NonExistingPost"));
-                });
+                .satisfies(problemDetail -> assertNotFoundProblemDetail(problemDetail, "NonExistingPost"));
     }
 
     @Test
