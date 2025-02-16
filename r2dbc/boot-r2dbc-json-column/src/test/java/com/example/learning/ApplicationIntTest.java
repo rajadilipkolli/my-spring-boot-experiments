@@ -40,4 +40,43 @@ class ApplicationIntTest extends AbstractIntegrationTest {
                     assertThat(post2.getComments()).isNotNull().isEmpty();
                 });
     }
+
+    @Test
+    void healthEndpointShouldReturnUp() {
+        webTestClient
+                .get()
+                .uri("/actuator/health")
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody()
+                .jsonPath("$.status")
+                .isEqualTo("UP");
+    }
+
+    @Test
+    void healthEndpointShouldShowDetails() {
+        webTestClient
+                .get()
+                .uri("/actuator/health")
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody()
+                .jsonPath("$.components")
+                .exists();
+    }
+
+    @Test
+    void metricsEndpointShouldBeAccessible() {
+        webTestClient
+                .get()
+                .uri("/actuator/metrics")
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody()
+                .jsonPath("$.names")
+                .isArray();
+    }
 }
