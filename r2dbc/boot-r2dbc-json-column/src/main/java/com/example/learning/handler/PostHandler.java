@@ -7,6 +7,7 @@ import com.example.learning.entity.Post;
 import com.example.learning.model.response.PagedResult;
 import com.example.learning.repository.CommentRepository;
 import com.example.learning.repository.PostRepository;
+import io.micrometer.core.annotation.Timed;
 import java.net.URI;
 import java.util.List;
 import java.util.UUID;
@@ -35,6 +36,7 @@ public class PostHandler {
         this.commentRepository = commentRepository;
     }
 
+    @Timed(value = "posts.all", longTask = true, histogram = true)
     public Mono<ServerResponse> all(ServerRequest req) {
         // Parse and validate pagination parameters
         Integer pageNumber = req.queryParam("page")

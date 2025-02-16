@@ -122,6 +122,21 @@
             <artifactId>grafana</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.zipkin.brave</groupId>
+            <artifactId>brave-tests</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-tracing-test</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -152,7 +167,7 @@
                 <configuration>
                     <java>
                         <palantirJavaFormat>
-                            <version>2.50.0</version>
+                            <version>2.51.0</version>
                         </palantirJavaFormat>
                         <importOrder />
                         <removeUnusedImports />
