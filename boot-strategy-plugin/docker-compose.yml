@@ -27,7 +27,7 @@ services:
             - "3100:3100" # loki needs to be exposed so it receives logs
 
     prometheus:
-        image: prom/prometheus:v3.1.0
+        image: prom/prometheus:v3.2.0
         extra_hosts: ['host.docker.internal:host-gateway']
         container_name: prometheus
         depends_on:
