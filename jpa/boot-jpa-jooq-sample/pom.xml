@@ -22,7 +22,7 @@
         <spotless.version>2.44.2</spotless.version>
         <instancio.version>5.3.0</instancio.version>
 
-        <jooq.version>3.19.18</jooq.version>
+        <jooq.version>3.20.0</jooq.version>
 
         <project.testresult.directory>${project.build.directory}/test-results</project.testresult.directory>
         <junit.utReportFolder>${project.testresult.directory}/test</junit.utReportFolder>
