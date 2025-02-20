@@ -111,7 +111,9 @@ class OrderItemControllerTest {
                 .perform(get("/api/order/items/{id}", orderItemId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.orderItemId", is(orderItemId), Long.class))
-                .andExpect(jsonPath("$.price", is(orderItem.price()), BigDecimal.class));
+                .andExpect(jsonPath("$.price", is(orderItem.price()), BigDecimal.class))
+                .andExpect(jsonPath("$.quantity", is(orderItem.quantity())))
+                .andExpect(jsonPath("$.itemCode", is(orderItem.itemCode())));
     }
 
     @Test
@@ -143,7 +145,9 @@ class OrderItemControllerTest {
                         .content(objectMapper.writeValueAsString(orderItemRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.orderItemId", is(orderItemId), Long.class))
-                .andExpect(jsonPath("$.price", is(orderItem.price()), BigDecimal.class));
+                .andExpect(jsonPath("$.price", is(orderItem.price()), BigDecimal.class))
+                .andExpect(jsonPath("$.quantity", is(orderItem.quantity())))
+                .andExpect(jsonPath("$.itemCode", is(orderItem.itemCode())));
     }
 
     @Test
@@ -157,7 +161,9 @@ class OrderItemControllerTest {
                 .perform(delete("/api/order/items/{id}", orderItemId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.orderItemId", is(orderItemId), Long.class))
-                .andExpect(jsonPath("$.price", is(orderItem.price()), BigDecimal.class));
+                .andExpect(jsonPath("$.price", is(orderItem.price()), BigDecimal.class))
+                .andExpect(jsonPath("$.quantity", is(orderItem.quantity())))
+                .andExpect(jsonPath("$.itemCode", is(orderItem.itemCode())));
     }
 
     @Test

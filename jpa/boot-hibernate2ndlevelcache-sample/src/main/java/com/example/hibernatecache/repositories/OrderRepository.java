@@ -10,6 +10,6 @@ public interface OrderRepository extends BaseJpaRepository<Order, Long>, PagingA
 
     void deleteAll();
 
-    @Query("SELECT o FROM Order o join fetch o.orderItems WHERE o.id = :id")
+    @Query("SELECT o FROM Order o join fetch o.orderItems oi WHERE o.id = :id ORDER BY oi.itemCode")
     Optional<Order> findById(Long id);
 }

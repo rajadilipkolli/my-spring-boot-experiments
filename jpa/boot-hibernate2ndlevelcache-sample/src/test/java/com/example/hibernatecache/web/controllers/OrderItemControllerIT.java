@@ -95,7 +95,8 @@ class OrderItemControllerIT extends AbstractIntegrationTest {
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_JSON_VALUE)))
                 .andExpect(jsonPath("$.orderItemId", is(orderItem.getId()), Long.class))
                 .andExpect(jsonPath("$.price", is(orderItem.getPrice()), BigDecimal.class))
-                .andExpect(jsonPath("$.quantity", is(orderItem.getQuantity())));
+                .andExpect(jsonPath("$.quantity", is(orderItem.getQuantity())))
+                .andExpect(jsonPath("$.itemCode", is(orderItem.getItemCode())));
     }
 
     @Test
@@ -111,7 +112,8 @@ class OrderItemControllerIT extends AbstractIntegrationTest {
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_JSON_VALUE)))
                 .andExpect(jsonPath("$.orderItemId", is(orderItemId), Long.class))
                 .andExpect(jsonPath("$.price", is(200.09)))
-                .andExpect(jsonPath("$.quantity", is(orderItemRequest.quantity())));
+                .andExpect(jsonPath("$.quantity", is(orderItemRequest.quantity())))
+                .andExpect(jsonPath("$.itemCode", is(orderItemRequest.itemCode())));
     }
 
     @Test
@@ -141,6 +143,7 @@ class OrderItemControllerIT extends AbstractIntegrationTest {
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_JSON_VALUE)))
                 .andExpect(jsonPath("$.orderItemId", is(orderItem.getId()), Long.class))
                 .andExpect(jsonPath("$.price", is(orderItem.getPrice()), BigDecimal.class))
-                .andExpect(jsonPath("$.quantity", is(orderItem.getQuantity())));
+                .andExpect(jsonPath("$.quantity", is(orderItem.getQuantity())))
+                .andExpect(jsonPath("$.itemCode", is(orderItem.getItemCode())));
     }
 }

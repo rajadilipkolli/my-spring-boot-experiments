@@ -6,8 +6,11 @@ import com.example.hibernatecache.model.request.OrderItemRequest;
 import com.example.hibernatecache.model.request.OrderRequest;
 import com.example.hibernatecache.model.response.OrderResponse;
 import java.math.BigDecimal;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.InjectionStrategy;
 import org.mapstruct.IterableMapping;
@@ -54,17 +57,18 @@ public interface OrderMapper {
     @AfterMapping
     default void mapOrderItemWithRequestAndCalculateTotalPrice(OrderRequest orderRequest, @MappingTarget Order order) {
         AtomicReference<BigDecimal> totalPrice;
+        Set<String> existingItemCodes;
         if (CollectionUtils.isEmpty(order.getOrderItems())) {
+            existingItemCodes = new HashSet<>();
             totalPrice = new AtomicReference<>(BigDecimal.ZERO);
         } else {
             totalPrice = new AtomicReference<>(order.getPrice());
+            existingItemCodes =
+                    order.getOrderItems().stream().map(OrderItem::getItemCode).collect(Collectors.toSet());
         }
 
         orderRequest.orderItems().forEach(orderItemRequest -> {
-            if (order.getOrderItems().stream()
-                    .map(OrderItem::getItemCode)
-                    .toList()
-                    .contains(orderItemRequest.itemCode())) {
+            if (existingItemCodes.contains(orderItemRequest.itemCode())) {
                 return;
             }
             order.addOrderItem(toOrderItemEntity(orderItemRequest));

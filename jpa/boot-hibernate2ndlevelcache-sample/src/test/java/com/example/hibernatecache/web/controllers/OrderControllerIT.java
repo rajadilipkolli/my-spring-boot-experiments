@@ -105,6 +105,7 @@ class OrderControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.orderItems.size()", is(1)))
                 .andExpect(jsonPath("$.orderItems[0].price", is(10)))
                 .andExpect(jsonPath("$.orderItems[0].quantity", is(10)))
+                .andExpect(jsonPath("$.orderItems[0].itemCode", is("ITM001")))
                 .andExpect(jsonPath("$.orderItems[0].orderItemId", notNullValue()));
     }
 
@@ -134,12 +135,13 @@ class OrderControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.orderItems.size()", is(2)))
                 .andExpect(jsonPath("$.orderItems[0].price", is(10)))
                 .andExpect(jsonPath("$.orderItems[0].quantity", is(10)))
+                .andExpect(jsonPath("$.orderItems[0].itemCode", is("ITM1")))
                 .andExpect(jsonPath("$.orderItems[0].orderItemId", notNullValue()));
     }
 
     @Test
     void shouldReturn400WhenCreateNewOrderWithoutName() throws Exception {
-        OrderRequest orderRequest = new OrderRequest(null, null, null);
+        OrderRequest orderRequest = new OrderRequest(null, null, List.of(new OrderItemRequest(null, null, null)));
 
         this.mockMvc
                 .perform(post("/api/orders")
@@ -152,10 +154,15 @@ class OrderControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.status", is(400)))
                 .andExpect(jsonPath("$.detail", is("Invalid request content.")))
                 .andExpect(jsonPath("$.instance", is("/api/orders")))
-                .andExpect(jsonPath("$.violations", hasSize(1)))
+                .andExpect(jsonPath("$.violations", hasSize(4)))
                 .andExpect(jsonPath("$.violations[0].field", is("name")))
                 .andExpect(jsonPath("$.violations[0].message", is("Name cannot be blank")))
-                .andReturn();
+                .andExpect(jsonPath("$.violations[1].field", is("orderItems[0].itemCode")))
+                .andExpect(jsonPath("$.violations[1].message", is("ItemCode cannot be Blank")))
+                .andExpect(jsonPath("$.violations[2].field", is("orderItems[0].price")))
+                .andExpect(jsonPath("$.violations[2].message", is("Price is required")))
+                .andExpect(jsonPath("$.violations[3].field", is("orderItems[0].quantity")))
+                .andExpect(jsonPath("$.violations[3].message", is("Quantity is required")));
     }
 
     @Test
@@ -178,6 +185,7 @@ class OrderControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.orderItems.size()", is(1)))
                 .andExpect(jsonPath("$.orderItems[0].price", is(10)))
                 .andExpect(jsonPath("$.orderItems[0].quantity", is(10)))
+                .andExpect(jsonPath("$.orderItems[0].itemCode", is("ITM001")))
                 .andExpect(jsonPath("$.orderItems[0].orderItemId", notNullValue()));
     }
 
@@ -196,6 +204,7 @@ class OrderControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.orderItems.size()", is(1)))
                 .andExpect(jsonPath("$.orderItems[0].price", is(10)))
                 .andExpect(jsonPath("$.orderItems[0].quantity", is(10)))
+                .andExpect(jsonPath("$.orderItems[0].itemCode", is("ITM001")))
                 .andExpect(jsonPath("$.orderItems[0].orderItemId", notNullValue()));
     }
 }
