@@ -51,7 +51,7 @@ class OrderItemControllerIT extends AbstractIntegrationTest {
                 .setPhone("9876543211")
                 .addOrder(new Order()
                         .setName("First Order")
-                        .setPrice(BigDecimal.TEN)
+                        .setPrice(BigDecimal.valueOf(111))
                         .addOrderItem(new OrderItem().setPrice(BigDecimal.TEN).setQuantity(10))
                         .addOrderItem(new OrderItem().setPrice(BigDecimal.TWO).setQuantity(5))
                         .addOrderItem(new OrderItem().setPrice(BigDecimal.ONE).setQuantity(1))));
