@@ -2,6 +2,7 @@ package com.example.hibernatecache.web.controllers;
 
 import static com.example.hibernatecache.utils.AppConstants.PROFILE_TEST;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -33,6 +34,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -68,16 +70,19 @@ class OrderItemControllerTest {
                 .setId(1L)
                 .setPrice(BigDecimal.TEN)
                 .setQuantity(10)
+                .setItemCode("ITM1")
                 .setOrder(savedOrder));
         orderItemList.add(new OrderItem()
                 .setId(2L)
                 .setPrice(BigDecimal.TWO)
                 .setQuantity(5)
+                .setItemCode("ITM2")
                 .setOrder(savedOrder));
         orderItemList.add(new OrderItem()
                 .setId(3L)
                 .setPrice(BigDecimal.ONE)
                 .setQuantity(1)
+                .setItemCode("ITM3")
                 .setOrder(savedOrder));
     }
 
@@ -125,7 +130,7 @@ class OrderItemControllerTest {
         this.mockMvc
                 .perform(get("/api/order/items/{id}", orderItemId))
                 .andExpect(status().isNotFound())
-                .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                 .andExpect(jsonPath("$.type", is("http://api.boot-hibernate2ndlevelcache-sample.com/errors/not-found")))
                 .andExpect(jsonPath("$.title", is("Not Found")))
                 .andExpect(jsonPath("$.status", is(404)))
@@ -142,7 +147,7 @@ class OrderItemControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(orderItemRequest)))
                 .andExpect(status().isBadRequest())
-                .andExpect(header().string("Content-Type", is("application/problem+json")))
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                 .andExpect(jsonPath("$.type", is("about:blank")))
                 .andExpect(jsonPath("$.title", is("Constraint Violation")))
                 .andExpect(jsonPath("$.status", is(400)))
@@ -173,6 +178,30 @@ class OrderItemControllerTest {
     }
 
     @Test
+    void shouldReturn400WhenUpdatingWithInvalidValues() throws Exception {
+        Long orderItemId = orderItemList.getFirst().getId();
+        OrderItemRequest orderItemRequest = new OrderItemRequest(new BigDecimal("-1.0"), -1, "");
+
+        this.mockMvc
+                .perform(put("/api/order/items/{id}", orderItemId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(orderItemRequest)))
+                .andExpect(status().isBadRequest())
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
+                .andExpect(jsonPath("$.type", is("about:blank")))
+                .andExpect(jsonPath("$.title", is("Constraint Violation")))
+                .andExpect(jsonPath("$.status", is(400)))
+                .andExpect(jsonPath("$.violations", hasSize(3)))
+                .andExpect(jsonPath("$.violations[*].field", containsInAnyOrder("price", "quantity", "itemCode")))
+                .andExpect(jsonPath(
+                        "$.violations[*].message",
+                        containsInAnyOrder(
+                                "Price must be greater than zero",
+                                "Quantity must be positive",
+                                "ItemCode cannot be Blank")));
+    }
+
+    @Test
     void shouldDeleteOrderItem() throws Exception {
         Long orderItemId = 1L;
         OrderItemResponse orderItem = new OrderItemResponse(orderItemId, "ITM1", BigDecimal.TEN, 10);
@@ -195,7 +224,7 @@ class OrderItemControllerTest {
 
         this.mockMvc
                 .perform(delete("/api/order/items/{id}", orderItemId))
-                .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                 .andExpect(jsonPath("$.type", is("http://api.boot-hibernate2ndlevelcache-sample.com/errors/not-found")))
                 .andExpect(jsonPath("$.title", is("Not Found")))
                 .andExpect(jsonPath("$.status", is(404)))
