@@ -101,7 +101,7 @@ class OrderControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.orderId", is(order.getId()), Long.class))
                 .andExpect(jsonPath("$.customerId", is(savedCustomer.getId()), Long.class))
                 .andExpect(jsonPath("$.name", is(order.getName())))
-                .andExpect(jsonPath("$.price", is(100)))
+                .andExpect(jsonPath("$.price", is(10 * 10))) // price * quantity
                 .andExpect(jsonPath("$.orderItems.size()", is(1)))
                 .andExpect(jsonPath("$.orderItems[0].price", is(10)))
                 .andExpect(jsonPath("$.orderItems[0].quantity", is(10)))
@@ -162,7 +162,7 @@ class OrderControllerIT extends AbstractIntegrationTest {
     void shouldUpdateOrder() throws Exception {
         Long customerId = savedCustomer.getId();
         OrderRequest orderRequest = new OrderRequest(
-                customerId, "Updated Order", List.of(new OrderItemRequest(BigDecimal.TEN, 10, "ITM1")));
+                customerId, "Updated Order", List.of(new OrderItemRequest(BigDecimal.TEN, 10, "ITM001")));
 
         Long orderId = orderList.getFirst().getId();
         this.mockMvc
@@ -174,7 +174,7 @@ class OrderControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.orderId", is(orderId), Long.class))
                 .andExpect(jsonPath("$.customerId", is(customerId), Long.class))
                 .andExpect(jsonPath("$.name", is("Updated Order")))
-                .andExpect(jsonPath("$.price", is(100)))
+                .andExpect(jsonPath("$.price", is(10 * 10))) // price * quantity
                 .andExpect(jsonPath("$.orderItems.size()", is(1)))
                 .andExpect(jsonPath("$.orderItems[0].price", is(10)))
                 .andExpect(jsonPath("$.orderItems[0].quantity", is(10)))
@@ -192,7 +192,7 @@ class OrderControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.orderId", is(order.getId()), Long.class))
                 .andExpect(jsonPath("$.customerId", is(savedCustomer.getId()), Long.class))
                 .andExpect(jsonPath("$.name", is(order.getName())))
-                .andExpect(jsonPath("$.price", is(100)))
+                .andExpect(jsonPath("$.price", is(10 * 10))) // price * quantity
                 .andExpect(jsonPath("$.orderItems.size()", is(1)))
                 .andExpect(jsonPath("$.orderItems[0].price", is(10)))
                 .andExpect(jsonPath("$.orderItems[0].quantity", is(10)))

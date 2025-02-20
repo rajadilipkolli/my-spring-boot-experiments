@@ -181,6 +181,23 @@ class OrderControllerTest {
     }
 
     @Test
+    void shouldReturn400WhenCreateNewOrderWithInvalidPriceAndQuantity() throws Exception {
+        OrderRequest orderRequest =
+                new OrderRequest(1L, "some text", List.of(new OrderItemRequest(BigDecimal.valueOf(-1), -1, "ORD1")));
+
+        this.mockMvc
+                .perform(post("/api/orders")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(orderRequest)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.violations", hasSize(2)))
+                .andExpect(jsonPath("$.violations[0].field", is("orderItems[0].price")))
+                .andExpect(jsonPath("$.violations[0].message", is("Price must be greater than zero")))
+                .andExpect(jsonPath("$.violations[1].field", is("orderItems[0].quantity")))
+                .andExpect(jsonPath("$.violations[1].message", is("Quantity must be positive")));
+    }
+
+    @Test
     void shouldUpdateOrder() throws Exception {
         Long orderId = 1L;
         OrderRequest orderRequest = new OrderRequest(

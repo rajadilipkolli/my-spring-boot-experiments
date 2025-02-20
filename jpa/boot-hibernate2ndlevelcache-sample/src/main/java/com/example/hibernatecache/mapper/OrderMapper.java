@@ -16,6 +16,7 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValueCheckStrategy;
+import org.springframework.util.CollectionUtils;
 
 @Mapper(
         componentModel = MappingConstants.ComponentModel.SPRING,
@@ -29,6 +30,7 @@ public interface OrderMapper {
     @Mapping(target = "orderItems", ignore = true)
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "customer.id", source = "customerId")
+    @Mapping(target = "price", ignore = true)
     Order toEntity(OrderRequest orderRequest);
 
     @Mapping(target = "customerId", source = "customer.id")
@@ -42,15 +44,29 @@ public interface OrderMapper {
     @Mapping(target = "orderItems", ignore = true)
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "customer", ignore = true)
+    @Mapping(target = "price", ignore = true)
     void updateOrderWithRequest(OrderRequest orderRequest, @MappingTarget Order savedOrder);
 
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "order", ignore = true)
     OrderItem toOrderItemEntity(OrderItemRequest orderItemRequest);
 
     @AfterMapping
     default void mapOrderItemWithRequestAndCalculateTotalPrice(OrderRequest orderRequest, @MappingTarget Order order) {
-        var totalPrice = new AtomicReference<>(BigDecimal.ZERO);
+        AtomicReference<BigDecimal> totalPrice;
+        if (CollectionUtils.isEmpty(order.getOrderItems())) {
+            totalPrice = new AtomicReference<>(BigDecimal.ZERO);
+        } else {
+            totalPrice = new AtomicReference<>(order.getPrice());
+        }
+
         orderRequest.orderItems().forEach(orderItemRequest -> {
+            if (order.getOrderItems().stream()
+                    .map(OrderItem::getItemCode)
+                    .toList()
+                    .contains(orderItemRequest.itemCode())) {
+                return;
+            }
             order.addOrderItem(toOrderItemEntity(orderItemRequest));
             BigDecimal price = orderItemRequest.price().multiply(BigDecimal.valueOf(orderItemRequest.quantity()));
             totalPrice.updateAndGet(current -> current.add(price));
