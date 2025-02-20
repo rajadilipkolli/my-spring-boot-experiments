@@ -53,7 +53,7 @@ public class SearchRequest {
     public String toString() {
         return "SearchRequest{" + "searchCriteriaList="
                 + searchCriteriaList + ", sortRequests="
-                + sortRequests + ", scrollDirection='"
-                + scrollDirection + "'}";
+                + sortRequests + ", scrollDirection="
+                + scrollDirection + "}";
     }
 }

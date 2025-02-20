@@ -70,12 +70,13 @@ public class AnimalService {
         Specification<Animal> specification =
                 animalEntitySpecification.specificationBuilder(searchRequest.getSearchCriteriaList(), Animal.class);
 
-        ScrollPosition.Direction scrollDirection;
-        if ("BACKWARD".equalsIgnoreCase(searchRequest.getScrollDirection())) {
-            scrollDirection = ScrollPosition.Direction.BACKWARD;
-        } else {
-            scrollDirection = ScrollPosition.Direction.FORWARD;
-        }
+        ScrollPosition.Direction scrollDirection = Optional.ofNullable(searchRequest.getScrollDirection())
+                .map(String::toUpperCase)
+                .map(ScrollPosition.Direction::valueOf)
+                .filter(direction -> direction == ScrollPosition.Direction.BACKWARD)
+                .map(direction -> ScrollPosition.Direction.BACKWARD)
+                .orElse(ScrollPosition.Direction.FORWARD);
+
         // Create initial ScrollPosition or continue from the given scrollId
         ScrollPosition position = scrollId == null
                 ? ScrollPosition.keyset()
