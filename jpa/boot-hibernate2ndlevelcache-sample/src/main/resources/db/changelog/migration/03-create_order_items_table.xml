@@ -19,11 +19,14 @@
             <column name="id" type="bigint" defaultValueSequenceNext="order_items_seq">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
+            <column name="item_code" type="${string.type}">
+                <constraints nullable="false"/>
+            </column>
             <column name="price" type="java.math.BigDecimal">
                 <constraints nullable="false"/>
             </column>
             <column name="quantity" type="integer">
-                <constraints nullable="false"/>
+                <constraints nullable="false" checkConstraint="quantity > 0"/>
             </column>
             <column name="order_id" type="bigint">
                 <constraints nullable="false"/>

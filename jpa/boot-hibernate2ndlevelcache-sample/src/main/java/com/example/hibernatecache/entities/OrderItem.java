@@ -23,6 +23,9 @@ public class OrderItem {
     private Long id;
 
     @Column(nullable = false)
+    private String itemCode;
+
+    @Column(nullable = false)
     private BigDecimal price;
 
     @Column(nullable = false)
@@ -38,6 +41,15 @@ public class OrderItem {
 
     public OrderItem setId(Long id) {
         this.id = id;
+        return this;
+    }
+
+    public String getItemCode() {
+        return itemCode;
+    }
+
+    public OrderItem setItemCode(String itemCode) {
+        this.itemCode = itemCode;
         return this;
     }
 

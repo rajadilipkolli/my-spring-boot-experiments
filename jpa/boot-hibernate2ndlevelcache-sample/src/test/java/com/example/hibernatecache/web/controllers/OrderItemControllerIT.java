@@ -40,9 +40,9 @@ class OrderItemControllerIT extends AbstractIntegrationTest {
 
     @BeforeEach
     void setUp() {
-        orderItemRepository.deleteAll();
+        customerRepository.deleteAll(); // Delete parent first to cascade
         orderRepository.deleteAll();
-        customerRepository.deleteAll();
+        orderItemRepository.deleteAll();
 
         Customer savedCustomer = customerRepository.persist(new Customer()
                 .setFirstName("firstName 1")
@@ -52,9 +52,18 @@ class OrderItemControllerIT extends AbstractIntegrationTest {
                 .addOrder(new Order()
                         .setName("First Order")
                         .setPrice(BigDecimal.valueOf(111))
-                        .addOrderItem(new OrderItem().setPrice(BigDecimal.TEN).setQuantity(10))
-                        .addOrderItem(new OrderItem().setPrice(BigDecimal.TWO).setQuantity(5))
-                        .addOrderItem(new OrderItem().setPrice(BigDecimal.ONE).setQuantity(1))));
+                        .addOrderItem(new OrderItem()
+                                .setPrice(BigDecimal.TEN)
+                                .setQuantity(10)
+                                .setItemCode("ITM1"))
+                        .addOrderItem(new OrderItem()
+                                .setPrice(BigDecimal.TWO)
+                                .setQuantity(5)
+                                .setItemCode("ITM2"))
+                        .addOrderItem(new OrderItem()
+                                .setPrice(BigDecimal.ONE)
+                                .setQuantity(1)
+                                .setItemCode("ITM3"))));
         savedOrder = savedCustomer.getOrders().getFirst();
         orderItemList = savedOrder.getOrderItems();
     }
@@ -92,7 +101,7 @@ class OrderItemControllerIT extends AbstractIntegrationTest {
     @Test
     void shouldUpdateOrderItem() throws Exception {
         Long orderItemId = orderItemList.getFirst().getId();
-        OrderItemRequest orderItemRequest = new OrderItemRequest(new BigDecimal("200.09"), 20);
+        OrderItemRequest orderItemRequest = new OrderItemRequest(new BigDecimal("200.09"), 20, "ITM1");
 
         this.mockMvc
                 .perform(put("/api/order/items/{id}", orderItemId)
@@ -108,7 +117,7 @@ class OrderItemControllerIT extends AbstractIntegrationTest {
     @Test
     void shouldReturn404WhenUpdatingNonExistingOrderItem() throws Exception {
         Long orderItemId = 999L;
-        OrderItemRequest orderItemRequest = new OrderItemRequest(BigDecimal.ONE, 10);
+        OrderItemRequest orderItemRequest = new OrderItemRequest(BigDecimal.ONE, 10, "IMT3");
 
         this.mockMvc
                 .perform(put("/api/order/items/{id}", orderItemId)

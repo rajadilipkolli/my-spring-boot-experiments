@@ -7,6 +7,7 @@ import com.example.hibernatecache.model.request.OrderRequest;
 import com.example.hibernatecache.model.response.OrderResponse;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.InjectionStrategy;
 import org.mapstruct.IterableMapping;
@@ -48,14 +49,12 @@ public interface OrderMapper {
 
     @AfterMapping
     default void mapOrderItemWithRequestAndCalculateTotalPrice(OrderRequest orderRequest, @MappingTarget Order order) {
-        var holder = new Object() {
-            BigDecimal totalPrice = BigDecimal.ZERO;
-        };
+        var totalPrice = new AtomicReference<>(BigDecimal.ZERO);
         orderRequest.orderItems().forEach(orderItemRequest -> {
             order.addOrderItem(toOrderItemEntity(orderItemRequest));
             BigDecimal price = orderItemRequest.price().multiply(BigDecimal.valueOf(orderItemRequest.quantity()));
-            holder.totalPrice = holder.totalPrice.add(price);
+            totalPrice.updateAndGet(current -> current.add(price));
         });
-        order.setPrice(holder.totalPrice);
+        order.setPrice(totalPrice.get());
     }
 }

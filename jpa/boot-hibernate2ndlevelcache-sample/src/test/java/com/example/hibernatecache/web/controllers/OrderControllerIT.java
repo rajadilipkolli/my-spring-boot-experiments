@@ -52,15 +52,24 @@ class OrderControllerIT extends AbstractIntegrationTest {
                 .addOrder(new Order()
                         .setName("First Order")
                         .setPrice(BigDecimal.valueOf(100))
-                        .addOrderItem(new OrderItem().setPrice(BigDecimal.TEN).setQuantity(10)))
+                        .addOrderItem(new OrderItem()
+                                .setItemCode("ITM001")
+                                .setPrice(BigDecimal.TEN)
+                                .setQuantity(10)))
                 .addOrder(new Order()
                         .setName("Second Order")
                         .setPrice(BigDecimal.valueOf(4))
-                        .addOrderItem(new OrderItem().setPrice(BigDecimal.TWO).setQuantity(5)))
+                        .addOrderItem(new OrderItem()
+                                .setItemCode("ITM002")
+                                .setPrice(BigDecimal.TWO)
+                                .setQuantity(5)))
                 .addOrder(new Order()
                         .setName("Third Order")
                         .setPrice(BigDecimal.valueOf(1))
-                        .addOrderItem(new OrderItem().setPrice(BigDecimal.ONE).setQuantity(1))));
+                        .addOrderItem(new OrderItem()
+                                .setItemCode("ITM003")
+                                .setPrice(BigDecimal.ONE)
+                                .setQuantity(1))));
         orderList = savedCustomer.getOrders();
     }
 
@@ -104,7 +113,13 @@ class OrderControllerIT extends AbstractIntegrationTest {
         OrderRequest orderRequest = new OrderRequest(
                 savedCustomer.getId(),
                 "New Order",
-                List.of(new OrderItemRequest(BigDecimal.TEN, 10), new OrderItemRequest(BigDecimal.TWO, 2)));
+                List.of(
+                        new OrderItemRequest(BigDecimal.TEN, 10, "ITM1"),
+                        new OrderItemRequest(BigDecimal.TWO, 2, "ITM2")));
+
+        var expectedTotal = orderRequest.orderItems().stream()
+                .map(item -> item.price().multiply(BigDecimal.valueOf(item.quantity())))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
         this.mockMvc
                 .perform(post("/api/orders")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -115,7 +130,7 @@ class OrderControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.orderId", notNullValue()))
                 .andExpect(jsonPath("$.customerId", is(savedCustomer.getId()), Long.class))
                 .andExpect(jsonPath("$.name", is(orderRequest.name())))
-                .andExpect(jsonPath("$.price", is(104)))
+                .andExpect(jsonPath("$.price", is(expectedTotal.intValue())))
                 .andExpect(jsonPath("$.orderItems.size()", is(2)))
                 .andExpect(jsonPath("$.orderItems[0].price", is(10)))
                 .andExpect(jsonPath("$.orderItems[0].quantity", is(10)))
@@ -146,8 +161,8 @@ class OrderControllerIT extends AbstractIntegrationTest {
     @Test
     void shouldUpdateOrder() throws Exception {
         Long customerId = savedCustomer.getId();
-        OrderRequest orderRequest =
-                new OrderRequest(customerId, "Updated Order", List.of(new OrderItemRequest(BigDecimal.TEN, 10)));
+        OrderRequest orderRequest = new OrderRequest(
+                customerId, "Updated Order", List.of(new OrderItemRequest(BigDecimal.TEN, 10, "ITM1")));
 
         Long orderId = orderList.getFirst().getId();
         this.mockMvc

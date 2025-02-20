@@ -63,9 +63,21 @@ class OrderItemControllerTest {
                 .setPhone("9876543211");
         savedOrder = new Order().setName("First Order").setPrice(BigDecimal.TEN).setCustomer(savedCustomer);
         orderItemList = new ArrayList<>();
-        orderItemList.add(new OrderItem().setId(1L).setPrice(BigDecimal.TEN).setOrder(savedOrder));
-        orderItemList.add(new OrderItem().setId(2L).setPrice(BigDecimal.TWO).setOrder(savedOrder));
-        orderItemList.add(new OrderItem().setId(3L).setPrice(BigDecimal.ONE).setOrder(savedOrder));
+        orderItemList.add(new OrderItem()
+                .setId(1L)
+                .setPrice(BigDecimal.TEN)
+                .setQuantity(10)
+                .setOrder(savedOrder));
+        orderItemList.add(new OrderItem()
+                .setId(2L)
+                .setPrice(BigDecimal.TWO)
+                .setQuantity(5)
+                .setOrder(savedOrder));
+        orderItemList.add(new OrderItem()
+                .setId(3L)
+                .setPrice(BigDecimal.ONE)
+                .setQuantity(1)
+                .setOrder(savedOrder));
     }
 
     @Test
@@ -92,7 +104,7 @@ class OrderItemControllerTest {
     @Test
     void shouldFindOrderItemById() throws Exception {
         Long orderItemId = 1L;
-        OrderItemResponse orderItem = new OrderItemResponse(orderItemId, BigDecimal.TEN, 10);
+        OrderItemResponse orderItem = new OrderItemResponse(orderItemId, "ITM3", BigDecimal.TEN, 10);
         given(orderItemService.findOrderItemById(orderItemId)).willReturn(Optional.of(orderItem));
 
         this.mockMvc
@@ -120,8 +132,8 @@ class OrderItemControllerTest {
     @Test
     void shouldUpdateOrderItem() throws Exception {
         Long orderItemId = 1L;
-        OrderItemResponse orderItem = new OrderItemResponse(orderItemId, BigDecimal.TWO, 2);
-        OrderItemRequest orderItemRequest = new OrderItemRequest(BigDecimal.TWO, 2);
+        OrderItemResponse orderItem = new OrderItemResponse(orderItemId, "ITM2", BigDecimal.TWO, 2);
+        OrderItemRequest orderItemRequest = new OrderItemRequest(BigDecimal.TWO, 2, "IMT2");
         given(orderItemService.updateOrderItem(eq(orderItemId), any(OrderItemRequest.class)))
                 .willReturn(orderItem);
 
@@ -137,7 +149,7 @@ class OrderItemControllerTest {
     @Test
     void shouldDeleteOrderItem() throws Exception {
         Long orderItemId = 1L;
-        OrderItemResponse orderItem = new OrderItemResponse(orderItemId, BigDecimal.TEN, 10);
+        OrderItemResponse orderItem = new OrderItemResponse(orderItemId, "ITM1", BigDecimal.TEN, 10);
         given(orderItemService.findOrderItemById(orderItemId)).willReturn(Optional.of(orderItem));
         doNothing().when(orderItemService).deleteOrderItemById(orderItemId);
 
@@ -164,8 +176,8 @@ class OrderItemControllerTest {
 
     List<OrderItemResponse> getOrderItemResponseList() {
         return orderItemList.stream()
-                .map(orderItem ->
-                        new OrderItemResponse(orderItem.getId(), orderItem.getPrice(), orderItem.getQuantity()))
+                .map(orderItem -> new OrderItemResponse(
+                        orderItem.getId(), orderItem.getItemCode(), orderItem.getPrice(), orderItem.getQuantity()))
                 .toList();
     }
 }

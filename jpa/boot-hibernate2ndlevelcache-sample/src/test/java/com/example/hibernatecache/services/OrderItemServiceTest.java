@@ -87,12 +87,13 @@ class OrderItemServiceTest {
     private OrderItem getOrderItem() {
         OrderItem orderItem = new OrderItem();
         orderItem.setId(1L);
+        orderItem.setItemCode("ITM1");
         orderItem.setPrice(BigDecimal.TEN);
         orderItem.setQuantity(10);
         return orderItem;
     }
 
     private OrderItemResponse getOrderItemResponse() {
-        return new OrderItemResponse(1L, BigDecimal.TEN, 10);
+        return new OrderItemResponse(1L, "ITM1", BigDecimal.TEN, 10);
     }
 }
