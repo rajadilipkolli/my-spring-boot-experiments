@@ -44,28 +44,31 @@ class OrderItemControllerIT extends AbstractIntegrationTest {
         orderRepository.deleteAll();
         orderItemRepository.deleteAll();
 
-        Customer savedCustomer = customerRepository.persist(new Customer()
+        Customer savedCustomer = customerRepository.persist(createTestCustomer());
+        savedOrder = savedCustomer.getOrders().getFirst();
+        orderItemList = savedOrder.getOrderItems();
+    }
+
+    private Customer createTestCustomer() {
+        return new Customer()
                 .setFirstName("firstName 1")
                 .setLastName("lastName 1")
                 .setEmail("email1@junit.com")
                 .setPhone("9876543211")
-                .addOrder(new Order()
-                        .setName("First Order")
-                        .setPrice(BigDecimal.valueOf(111))
-                        .addOrderItem(new OrderItem()
-                                .setPrice(BigDecimal.TEN)
-                                .setQuantity(10)
-                                .setItemCode("ITM1"))
-                        .addOrderItem(new OrderItem()
-                                .setPrice(BigDecimal.TWO)
-                                .setQuantity(5)
-                                .setItemCode("ITM2"))
-                        .addOrderItem(new OrderItem()
-                                .setPrice(BigDecimal.ONE)
-                                .setQuantity(1)
-                                .setItemCode("ITM3"))));
-        savedOrder = savedCustomer.getOrders().getFirst();
-        orderItemList = savedOrder.getOrderItems();
+                .addOrder(createTestOrder());
+    }
+
+    private Order createTestOrder() {
+        return new Order()
+                .setName("First Order")
+                .setPrice(BigDecimal.valueOf(111))
+                .addOrderItem(createOrderItem(BigDecimal.TEN, 10, "ITM1"))
+                .addOrderItem(createOrderItem(BigDecimal.TWO, 5, "ITM2"))
+                .addOrderItem(createOrderItem(BigDecimal.ONE, 1, "ITM3"));
+    }
+
+    private OrderItem createOrderItem(BigDecimal price, int quantity, String itemCode) {
+        return new OrderItem().setPrice(price).setQuantity(quantity).setItemCode(itemCode);
     }
 
     @Test
@@ -118,7 +121,8 @@ class OrderItemControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldReturn404WhenUpdatingNonExistingOrderItem() throws Exception {
-        Long orderItemId = 999L;
+        Long orderItemId =
+                orderItemList.stream().mapToLong(OrderItem::getId).max().orElse(0L) + 1;
         OrderItemRequest orderItemRequest = new OrderItemRequest(BigDecimal.ONE, 10, "IMT3");
 
         this.mockMvc

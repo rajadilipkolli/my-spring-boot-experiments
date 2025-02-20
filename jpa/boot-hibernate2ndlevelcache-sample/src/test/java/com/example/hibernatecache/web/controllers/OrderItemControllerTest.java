@@ -2,6 +2,7 @@ package com.example.hibernatecache.web.controllers;
 
 import static com.example.hibernatecache.utils.AppConstants.PROFILE_TEST;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
@@ -129,6 +130,27 @@ class OrderItemControllerTest {
                 .andExpect(jsonPath("$.title", is("Not Found")))
                 .andExpect(jsonPath("$.status", is(404)))
                 .andExpect(jsonPath("$.detail").value("OrderItem with Id '%d' not found".formatted(orderItemId)));
+    }
+
+    @Test
+    void shouldReturn400WhenPriceIsNegative() throws Exception {
+        Long orderItemId = 1L;
+        OrderItemRequest orderItemRequest = new OrderItemRequest(new BigDecimal("-10.00"), 1, "ITM1");
+
+        this.mockMvc
+                .perform(put("/api/order/items/{id}", orderItemId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(orderItemRequest)))
+                .andExpect(status().isBadRequest())
+                .andExpect(header().string("Content-Type", is("application/problem+json")))
+                .andExpect(jsonPath("$.type", is("about:blank")))
+                .andExpect(jsonPath("$.title", is("Constraint Violation")))
+                .andExpect(jsonPath("$.status", is(400)))
+                .andExpect(jsonPath("$.detail", is("Invalid request content.")))
+                .andExpect(jsonPath("$.instance", is("/api/order/items/1")))
+                .andExpect(jsonPath("$.violations", hasSize(1)))
+                .andExpect(jsonPath("$.violations[0].field", is("price")))
+                .andExpect(jsonPath("$.violations[0].message", is("Price must be greater than zero")));
     }
 
     @Test
