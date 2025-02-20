@@ -53,9 +53,9 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                 .addOrder(new Order()
                         .setName("First Order")
                         .setPrice(BigDecimal.TEN)
-                        .addOrderItem(new OrderItem().setText("First OrderItem"))
-                        .addOrderItem(new OrderItem().setText("Second OrderItem"))
-                        .addOrderItem(new OrderItem().setText("Third OrderItem"))));
+                        .addOrderItem(new OrderItem().setPrice(BigDecimal.TEN).setQuantity(4))
+                        .addOrderItem(new OrderItem().setPrice(BigDecimal.TWO).setQuantity(2))
+                        .addOrderItem(new OrderItem().setPrice(BigDecimal.ONE).setQuantity(1))));
         customerList.add(new Customer()
                 .setFirstName("firstName 2")
                 .setLastName("lastName 2")

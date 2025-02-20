@@ -55,9 +55,9 @@ class OrderItemControllerIT extends AbstractIntegrationTest {
                 .addOrder(new Order()
                         .setName("First Order")
                         .setPrice(BigDecimal.TEN)
-                        .addOrderItem(new OrderItem().setText("First OrderItem"))
-                        .addOrderItem(new OrderItem().setText("Second OrderItem"))
-                        .addOrderItem(new OrderItem().setText("Third OrderItem"))));
+                        .addOrderItem(new OrderItem().setPrice(BigDecimal.TEN).setQuantity(10))
+                        .addOrderItem(new OrderItem().setPrice(BigDecimal.TWO).setQuantity(5))
+                        .addOrderItem(new OrderItem().setPrice(BigDecimal.ONE).setQuantity(1))));
         savedOrder = savedCustomer.getOrders().getFirst();
         orderItemList = savedOrder.getOrderItems();
     }
@@ -88,12 +88,13 @@ class OrderItemControllerIT extends AbstractIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_JSON_VALUE)))
                 .andExpect(jsonPath("$.orderItemId", is(orderItem.getId()), Long.class))
-                .andExpect(jsonPath("$.text", is(orderItem.getText())));
+                .andExpect(jsonPath("$.price", is(orderItem.getPrice()), BigDecimal.class))
+                .andExpect(jsonPath("$.quantity", is(orderItem.getQuantity())));
     }
 
     @Test
     void shouldCreateNewOrderItem() throws Exception {
-        OrderItemRequest orderItemRequest = new OrderItemRequest("New OrderItem", savedOrder.getId());
+        OrderItemRequest orderItemRequest = new OrderItemRequest("99.99", 10, savedOrder.getId());
         this.mockMvc
                 .perform(post("/api/order/items")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -102,12 +103,13 @@ class OrderItemControllerIT extends AbstractIntegrationTest {
                 .andExpect(header().exists(HttpHeaders.LOCATION))
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_JSON_VALUE)))
                 .andExpect(jsonPath("$.orderItemId", notNullValue()))
-                .andExpect(jsonPath("$.text", is(orderItemRequest.text())));
+                .andExpect(jsonPath("$.price", is(99.99)))
+                .andExpect(jsonPath("$.quantity", is(orderItemRequest.quantity())));
     }
 
     @Test
-    void shouldReturn400WhenCreateNewOrderItemWithoutText() throws Exception {
-        OrderItemRequest orderItemRequest = new OrderItemRequest(null, null);
+    void shouldReturn400WhenCreateNewOrderItemWithoutPrice() throws Exception {
+        OrderItemRequest orderItemRequest = new OrderItemRequest(null, -1, null);
 
         this.mockMvc
                 .perform(post("/api/order/items")
@@ -120,16 +122,18 @@ class OrderItemControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.status", is(400)))
                 .andExpect(jsonPath("$.detail", is("Invalid request content.")))
                 .andExpect(jsonPath("$.instance", is("/api/order/items")))
-                .andExpect(jsonPath("$.violations", hasSize(1)))
-                .andExpect(jsonPath("$.violations[0].field", is("text")))
-                .andExpect(jsonPath("$.violations[0].message", is("Text cannot be empty")))
+                .andExpect(jsonPath("$.violations", hasSize(2)))
+                .andExpect(jsonPath("$.violations[0].field", is("price")))
+                .andExpect(jsonPath("$.violations[0].message", is("Price cannot be blank")))
+                .andExpect(jsonPath("$.violations[1].field", is("quantity")))
+                .andExpect(jsonPath("$.violations[1].message", is("Quantity must be positive")))
                 .andReturn();
     }
 
     @Test
     void shouldUpdateOrderItem() throws Exception {
         Long orderItemId = orderItemList.getFirst().getId();
-        OrderItemRequest orderItemRequest = new OrderItemRequest("Updated OrderItem", savedOrder.getId());
+        OrderItemRequest orderItemRequest = new OrderItemRequest("200.09", 20, savedOrder.getId());
 
         this.mockMvc
                 .perform(put("/api/order/items/{id}", orderItemId)
@@ -138,7 +142,8 @@ class OrderItemControllerIT extends AbstractIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_JSON_VALUE)))
                 .andExpect(jsonPath("$.orderItemId", is(orderItemId), Long.class))
-                .andExpect(jsonPath("$.text", is(orderItemRequest.text())));
+                .andExpect(jsonPath("$.price", is(200.09)))
+                .andExpect(jsonPath("$.quantity", is(orderItemRequest.quantity())));
     }
 
     @Test
@@ -150,6 +155,7 @@ class OrderItemControllerIT extends AbstractIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_JSON_VALUE)))
                 .andExpect(jsonPath("$.orderItemId", is(orderItem.getId()), Long.class))
-                .andExpect(jsonPath("$.text", is(orderItem.getText())));
+                .andExpect(jsonPath("$.price", is(orderItem.getPrice()), BigDecimal.class))
+                .andExpect(jsonPath("$.quantity", is(orderItem.getQuantity())));
     }
 }

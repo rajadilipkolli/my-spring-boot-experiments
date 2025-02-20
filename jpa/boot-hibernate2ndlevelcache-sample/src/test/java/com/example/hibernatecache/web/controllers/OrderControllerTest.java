@@ -73,19 +73,19 @@ class OrderControllerTest {
                 .setName("text 1")
                 .setPrice(BigDecimal.TEN)
                 .setCustomer(customer)
-                .setOrderItems(List.of(new OrderItem().setId(1L).setText("item1"))));
+                .setOrderItems(List.of(new OrderItem().setId(1L).setPrice(BigDecimal.ONE))));
         this.orderList.add(new Order()
                 .setId(2L)
                 .setName("text 2")
                 .setPrice(BigDecimal.TEN)
                 .setCustomer(customer)
-                .setOrderItems(List.of(new OrderItem().setId(2L).setText("item2"))));
+                .setOrderItems(List.of(new OrderItem().setId(2L).setPrice(BigDecimal.TWO))));
         this.orderList.add(new Order()
                 .setId(3L)
                 .setName("text 3")
                 .setPrice(BigDecimal.TEN)
                 .setCustomer(customer)
-                .setOrderItems(List.of(new OrderItem().setId(3L).setText("item3"))));
+                .setOrderItems(List.of(new OrderItem().setId(3L).setPrice(BigDecimal.TEN))));
     }
 
     @Test
@@ -255,7 +255,8 @@ class OrderControllerTest {
 
     private List<OrderItemResponse> getOrderItemResponse(List<OrderItem> orderItems) {
         return orderItems.stream()
-                .map(orderItem -> new OrderItemResponse(orderItem.getId(), orderItem.getText()))
+                .map(orderItem ->
+                        new OrderItemResponse(orderItem.getId(), orderItem.getPrice(), orderItem.getQuantity()))
                 .toList();
     }
 }

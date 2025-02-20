@@ -68,9 +68,9 @@ class OrderItemControllerTest {
                 .setPhone("9876543211");
         savedOrder = new Order().setName("First Order").setPrice(BigDecimal.TEN).setCustomer(savedCustomer);
         orderItemList = new ArrayList<>();
-        orderItemList.add(new OrderItem().setId(1L).setText("First OrderItem").setOrder(savedOrder));
-        orderItemList.add(new OrderItem().setId(2L).setText("Second OrderItem").setOrder(savedOrder));
-        orderItemList.add(new OrderItem().setId(3L).setText("Third OrderItem").setOrder(savedOrder));
+        orderItemList.add(new OrderItem().setId(1L).setPrice(BigDecimal.TEN).setOrder(savedOrder));
+        orderItemList.add(new OrderItem().setId(2L).setPrice(BigDecimal.TWO).setOrder(savedOrder));
+        orderItemList.add(new OrderItem().setId(3L).setPrice(BigDecimal.ONE).setOrder(savedOrder));
     }
 
     @Test
@@ -97,18 +97,19 @@ class OrderItemControllerTest {
     @Test
     void shouldFindOrderItemById() throws Exception {
         Long orderItemId = 1L;
-        OrderItemResponse orderItem = new OrderItemResponse(orderItemId, "text 1");
+        OrderItemResponse orderItem = new OrderItemResponse(orderItemId, BigDecimal.TEN, 10);
         given(orderItemService.findOrderItemById(orderItemId)).willReturn(Optional.of(orderItem));
 
         this.mockMvc
                 .perform(get("/api/order/items/{id}", orderItemId))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.text", is(orderItem.text())));
+                .andExpect(jsonPath("$.orderItemId", is(orderItemId), Long.class))
+                .andExpect(jsonPath("$.price", is(orderItem.price()), BigDecimal.class));
     }
 
     @Test
     void shouldReturn404WhenFetchingNonExistingOrderItem() throws Exception {
-        Long orderItemId = 1L;
+        Long orderItemId = 999L;
         given(orderItemService.findOrderItemById(orderItemId)).willReturn(Optional.empty());
 
         this.mockMvc
@@ -123,9 +124,8 @@ class OrderItemControllerTest {
 
     @Test
     void shouldCreateNewOrderItem() throws Exception {
-
-        OrderItemResponse orderItem = new OrderItemResponse(1L, "some text");
-        OrderItemRequest orderItemRequest = new OrderItemRequest("some text", 1L);
+        OrderItemResponse orderItem = new OrderItemResponse(1L, BigDecimal.TWO, 10);
+        OrderItemRequest orderItemRequest = new OrderItemRequest("2", 10, 1L);
         given(orderItemService.saveOrderItem(any(OrderItemRequest.class))).willReturn(orderItem);
 
         this.mockMvc
@@ -135,12 +135,12 @@ class OrderItemControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(header().exists(HttpHeaders.LOCATION))
                 .andExpect(jsonPath("$.orderItemId", notNullValue()))
-                .andExpect(jsonPath("$.text", is(orderItem.text())));
+                .andExpect(jsonPath("$.price", is(orderItem.price()), BigDecimal.class));
     }
 
     @Test
-    void shouldReturn400WhenCreateNewOrderItemWithoutText() throws Exception {
-        OrderItemRequest orderItemRequest = new OrderItemRequest(null, null);
+    void shouldReturn400WhenCreateNewOrderItemWithoutPrice() throws Exception {
+        OrderItemRequest orderItemRequest = new OrderItemRequest(null, 10, 1L);
 
         this.mockMvc
                 .perform(post("/api/order/items")
@@ -154,16 +154,16 @@ class OrderItemControllerTest {
                 .andExpect(jsonPath("$.detail", is("Invalid request content.")))
                 .andExpect(jsonPath("$.instance", is("/api/order/items")))
                 .andExpect(jsonPath("$.violations", hasSize(1)))
-                .andExpect(jsonPath("$.violations[0].field", is("text")))
-                .andExpect(jsonPath("$.violations[0].message", is("Text cannot be empty")))
+                .andExpect(jsonPath("$.violations[0].field", is("price")))
+                .andExpect(jsonPath("$.violations[0].message", is("Price cannot be blank")))
                 .andReturn();
     }
 
     @Test
     void shouldUpdateOrderItem() throws Exception {
         Long orderItemId = 1L;
-        OrderItemResponse orderItem = new OrderItemResponse(orderItemId, "Updated text");
-        OrderItemRequest orderItemRequest = new OrderItemRequest("Updated text", 1L);
+        OrderItemResponse orderItem = new OrderItemResponse(orderItemId, BigDecimal.TWO, 2);
+        OrderItemRequest orderItemRequest = new OrderItemRequest("2", 2, 1L);
         given(orderItemService.updateOrderItem(eq(orderItemId), any(OrderItemRequest.class)))
                 .willReturn(orderItem);
 
@@ -173,13 +173,13 @@ class OrderItemControllerTest {
                         .content(objectMapper.writeValueAsString(orderItemRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.orderItemId", is(orderItemId), Long.class))
-                .andExpect(jsonPath("$.text", is(orderItem.text())));
+                .andExpect(jsonPath("$.price", is(orderItem.price()), BigDecimal.class));
     }
 
     @Test
     void shouldReturn404WhenUpdatingNonExistingOrderItem() throws Exception {
-        Long orderItemId = 1L;
-        OrderItemRequest orderItemRequest = new OrderItemRequest("Updated text", 1L);
+        Long orderItemId = 999L;
+        OrderItemRequest orderItemRequest = new OrderItemRequest("Updated OrderItem", 10, 1L);
         given(orderItemService.updateOrderItem(eq(orderItemId), any(OrderItemRequest.class)))
                 .willThrow(new OrderItemNotFoundException(orderItemId));
 
@@ -198,19 +198,20 @@ class OrderItemControllerTest {
     @Test
     void shouldDeleteOrderItem() throws Exception {
         Long orderItemId = 1L;
-        OrderItemResponse orderItem = new OrderItemResponse(orderItemId, "Some text");
+        OrderItemResponse orderItem = new OrderItemResponse(orderItemId, BigDecimal.TEN, 10);
         given(orderItemService.findOrderItemById(orderItemId)).willReturn(Optional.of(orderItem));
         doNothing().when(orderItemService).deleteOrderItemById(orderItemId);
 
         this.mockMvc
                 .perform(delete("/api/order/items/{id}", orderItemId))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.text", is(orderItem.text())));
+                .andExpect(jsonPath("$.orderItemId", is(orderItemId), Long.class))
+                .andExpect(jsonPath("$.price", is(orderItem.price()), BigDecimal.class));
     }
 
     @Test
     void shouldReturn404WhenDeletingNonExistingOrderItem() throws Exception {
-        Long orderItemId = 1L;
+        Long orderItemId = 999L;
         given(orderItemService.findOrderItemById(orderItemId)).willReturn(Optional.empty());
 
         this.mockMvc
@@ -224,7 +225,8 @@ class OrderItemControllerTest {
 
     List<OrderItemResponse> getOrderItemResponseList() {
         return orderItemList.stream()
-                .map(orderItem -> new OrderItemResponse(orderItem.getId(), orderItem.getText()))
+                .map(orderItem ->
+                        new OrderItemResponse(orderItem.getId(), orderItem.getPrice(), orderItem.getQuantity()))
                 .toList();
     }
 }
