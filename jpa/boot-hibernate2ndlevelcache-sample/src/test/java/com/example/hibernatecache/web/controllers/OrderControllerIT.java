@@ -15,6 +15,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.example.hibernatecache.common.AbstractIntegrationTest;
 import com.example.hibernatecache.entities.Customer;
 import com.example.hibernatecache.entities.Order;
+import com.example.hibernatecache.entities.OrderItem;
+import com.example.hibernatecache.model.request.OrderItemRequest;
 import com.example.hibernatecache.model.request.OrderRequest;
 import com.example.hibernatecache.repositories.CustomerRepository;
 import com.example.hibernatecache.repositories.OrderRepository;
@@ -48,9 +50,15 @@ class OrderControllerIT extends AbstractIntegrationTest {
                 .setLastName("lastName 1")
                 .setEmail("email1@junit.com")
                 .setPhone("9876543211")
-                .addOrder(new Order().setName("First Order").setPrice(BigDecimal.TEN))
-                .addOrder(new Order().setName("Second Order").setPrice(BigDecimal.TEN))
-                .addOrder(new Order().setName("Third Order").setPrice(BigDecimal.TEN)));
+                .addOrder(new Order()
+                        .setName("First Order")
+                        .addOrderItem(new OrderItem().setPrice(BigDecimal.TEN).setQuantity(10)))
+                .addOrder(new Order()
+                        .setName("Second Order")
+                        .addOrderItem(new OrderItem().setPrice(BigDecimal.TWO).setQuantity(5)))
+                .addOrder(new Order()
+                        .setName("Third Order")
+                        .addOrderItem(new OrderItem().setPrice(BigDecimal.ONE).setQuantity(1))));
         orderList = savedCustomer.getOrders();
     }
 
@@ -87,7 +95,10 @@ class OrderControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldCreateNewOrder() throws Exception {
-        OrderRequest orderRequest = new OrderRequest(savedCustomer.getId(), "New Order", BigDecimal.TEN);
+        OrderRequest orderRequest = new OrderRequest(
+                savedCustomer.getId(),
+                "New Order",
+                List.of(new OrderItemRequest(BigDecimal.TEN, 10), new OrderItemRequest(BigDecimal.TWO, 2)));
         this.mockMvc
                 .perform(post("/api/orders")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -98,13 +109,16 @@ class OrderControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.orderId", notNullValue()))
                 .andExpect(jsonPath("$.customerId", is(savedCustomer.getId()), Long.class))
                 .andExpect(jsonPath("$.name", is(orderRequest.name())))
-                .andExpect(jsonPath("$.price", is(orderRequest.price()), BigDecimal.class))
-                .andExpect(jsonPath("$.orderItems", empty()));
+                .andExpect(jsonPath("$.price", is(104)))
+                .andExpect(jsonPath("$.orderItems.size()", is(2)))
+                .andExpect(jsonPath("$.orderItems[0].price", is(10)))
+                .andExpect(jsonPath("$.orderItems[0].quantity", is(10)))
+                .andExpect(jsonPath("$.orderItems[0].orderItemId", notNullValue()));
     }
 
     @Test
     void shouldReturn400WhenCreateNewOrderWithoutName() throws Exception {
-        OrderRequest orderRequest = new OrderRequest(null, null, BigDecimal.ZERO);
+        OrderRequest orderRequest = new OrderRequest(null, null, null);
 
         this.mockMvc
                 .perform(post("/api/orders")
@@ -117,18 +131,17 @@ class OrderControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.status", is(400)))
                 .andExpect(jsonPath("$.detail", is("Invalid request content.")))
                 .andExpect(jsonPath("$.instance", is("/api/orders")))
-                .andExpect(jsonPath("$.violations", hasSize(2)))
+                .andExpect(jsonPath("$.violations", hasSize(1)))
                 .andExpect(jsonPath("$.violations[0].field", is("name")))
                 .andExpect(jsonPath("$.violations[0].message", is("Name cannot be blank")))
-                .andExpect(jsonPath("$.violations[1].field", is("price")))
-                .andExpect(jsonPath("$.violations[1].message", is("Value must be greater than or equal to 0.01")))
                 .andReturn();
     }
 
     @Test
     void shouldUpdateOrder() throws Exception {
         Long customerId = savedCustomer.getId();
-        OrderRequest orderRequest = new OrderRequest(customerId, "Updated Order", BigDecimal.TWO);
+        OrderRequest orderRequest =
+                new OrderRequest(customerId, "Updated Order", List.of(new OrderItemRequest(BigDecimal.TEN, 10)));
 
         Long orderId = orderList.getFirst().getId();
         this.mockMvc
@@ -140,7 +153,7 @@ class OrderControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.orderId", is(orderId), Long.class))
                 .andExpect(jsonPath("$.customerId", is(customerId), Long.class))
                 .andExpect(jsonPath("$.name", is("Updated Order")))
-                .andExpect(jsonPath("$.price", is(orderRequest.price()), BigDecimal.class))
+                .andExpect(jsonPath("$.price", is(100)))
                 .andExpect(jsonPath("$.orderItems", empty()));
     }
 

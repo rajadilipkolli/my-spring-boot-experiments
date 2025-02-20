@@ -1,9 +1,13 @@
 package com.example.hibernatecache.mapper;
 
 import com.example.hibernatecache.entities.Order;
+import com.example.hibernatecache.entities.OrderItem;
+import com.example.hibernatecache.model.request.OrderItemRequest;
 import com.example.hibernatecache.model.request.OrderRequest;
 import com.example.hibernatecache.model.response.OrderResponse;
+import java.math.BigDecimal;
 import java.util.List;
+import org.mapstruct.AfterMapping;
 import org.mapstruct.InjectionStrategy;
 import org.mapstruct.IterableMapping;
 import org.mapstruct.Mapper;
@@ -38,4 +42,20 @@ public interface OrderMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "customer", ignore = true)
     void updateOrderWithRequest(OrderRequest orderRequest, @MappingTarget Order savedOrder);
+
+    @Mapping(target = "id", ignore = true)
+    OrderItem toOrderItemEntity(OrderItemRequest orderItemRequest);
+
+    @AfterMapping
+    default void mapOrderItemWithRequestAndCalculateTotalPrice(OrderRequest orderRequest, @MappingTarget Order order) {
+        var holder = new Object() {
+            BigDecimal totalPrice = BigDecimal.ZERO;
+        };
+        orderRequest.orderItems().forEach(orderItemRequest -> {
+            order.addOrderItem(toOrderItemEntity(orderItemRequest));
+            BigDecimal price = orderItemRequest.price().multiply(BigDecimal.valueOf(orderItemRequest.quantity()));
+            holder.totalPrice = holder.totalPrice.add(price);
+        });
+        order.setPrice(holder.totalPrice);
+    }
 }
