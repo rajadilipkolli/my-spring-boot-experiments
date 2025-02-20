@@ -55,13 +55,6 @@ public class OrderItemService {
     }
 
     @Transactional
-    public OrderItemResponse saveOrderItem(OrderItemRequest orderItemRequest) {
-        OrderItem orderItem = orderItemMapper.toEntity(orderItemRequest);
-        OrderItem savedOrderItem = orderItemRepository.persist(orderItem);
-        return orderItemMapper.toResponse(savedOrderItem);
-    }
-
-    @Transactional
     public OrderItemResponse updateOrderItem(Long id, OrderItemRequest orderItemRequest) {
         OrderItem orderItem = orderItemRepository.findById(id).orElseThrow(() -> new OrderItemNotFoundException(id));
 

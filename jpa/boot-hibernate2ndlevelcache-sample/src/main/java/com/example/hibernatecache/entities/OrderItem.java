@@ -9,7 +9,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotEmpty;
+import java.math.BigDecimal;
 import java.util.Objects;
 import org.hibernate.proxy.HibernateProxy;
 
@@ -23,7 +23,13 @@ public class OrderItem {
     private Long id;
 
     @Column(nullable = false)
-    @NotEmpty(message = "Text cannot be empty") private String text;
+    private String itemCode;
+
+    @Column(nullable = false)
+    private BigDecimal price;
+
+    @Column(nullable = false)
+    private Integer quantity;
 
     @ManyToOne
     @JoinColumn(name = "order_id")
@@ -38,12 +44,30 @@ public class OrderItem {
         return this;
     }
 
-    public @NotEmpty(message = "Text cannot be empty") String getText() {
-        return text;
+    public String getItemCode() {
+        return itemCode;
     }
 
-    public OrderItem setText(@NotEmpty(message = "Text cannot be empty") String text) {
-        this.text = text;
+    public OrderItem setItemCode(String itemCode) {
+        this.itemCode = itemCode;
+        return this;
+    }
+
+    public BigDecimal getPrice() {
+        return price;
+    }
+
+    public OrderItem setPrice(BigDecimal price) {
+        this.price = price;
+        return this;
+    }
+
+    public Integer getQuantity() {
+        return quantity;
+    }
+
+    public OrderItem setQuantity(Integer quantity) {
+        this.quantity = quantity;
         return this;
     }
 

@@ -21,6 +21,7 @@ import com.example.hibernatecache.entities.Order;
 import com.example.hibernatecache.entities.OrderItem;
 import com.example.hibernatecache.exception.OrderNotFoundException;
 import com.example.hibernatecache.model.query.FindOrdersQuery;
+import com.example.hibernatecache.model.request.OrderItemRequest;
 import com.example.hibernatecache.model.request.OrderRequest;
 import com.example.hibernatecache.model.response.OrderItemResponse;
 import com.example.hibernatecache.model.response.OrderResponse;
@@ -73,19 +74,22 @@ class OrderControllerTest {
                 .setName("text 1")
                 .setPrice(BigDecimal.TEN)
                 .setCustomer(customer)
-                .setOrderItems(List.of(new OrderItem().setId(1L).setText("item1"))));
+                .setOrderItems(List.of(
+                        new OrderItem().setId(1L).setPrice(BigDecimal.ONE).setQuantity(10))));
         this.orderList.add(new Order()
                 .setId(2L)
                 .setName("text 2")
                 .setPrice(BigDecimal.TEN)
                 .setCustomer(customer)
-                .setOrderItems(List.of(new OrderItem().setId(2L).setText("item2"))));
+                .setOrderItems(List.of(
+                        new OrderItem().setId(2L).setPrice(BigDecimal.TWO).setQuantity(5))));
         this.orderList.add(new Order()
                 .setId(3L)
                 .setName("text 3")
                 .setPrice(BigDecimal.TEN)
                 .setCustomer(customer)
-                .setOrderItems(List.of(new OrderItem().setId(3L).setText("item3"))));
+                .setOrderItems(List.of(
+                        new OrderItem().setId(3L).setPrice(BigDecimal.TEN).setQuantity(2))));
     }
 
     @Test
@@ -139,7 +143,8 @@ class OrderControllerTest {
     @Test
     void shouldCreateNewOrder() throws Exception {
 
-        OrderRequest orderRequest = new OrderRequest(1L, "some text", BigDecimal.TEN);
+        OrderRequest orderRequest =
+                new OrderRequest(1L, "some text", List.of(new OrderItemRequest(BigDecimal.TEN, 10, "ORD1")));
         OrderResponse orderResponse = new OrderResponse(1L, 1L, "some text", BigDecimal.TEN, new ArrayList<>());
         given(orderService.saveOrder(any(OrderRequest.class))).willReturn(orderResponse);
         this.mockMvc
@@ -154,7 +159,7 @@ class OrderControllerTest {
 
     @Test
     void shouldReturn400WhenCreateNewOrderWithoutName() throws Exception {
-        OrderRequest orderRequest = new OrderRequest(null, null, null);
+        OrderRequest orderRequest = new OrderRequest(null, null, List.of());
 
         this.mockMvc
                 .perform(post("/api/orders")
@@ -170,15 +175,33 @@ class OrderControllerTest {
                 .andExpect(jsonPath("$.violations", hasSize(2)))
                 .andExpect(jsonPath("$.violations[0].field", is("name")))
                 .andExpect(jsonPath("$.violations[0].message", is("Name cannot be blank")))
-                .andExpect(jsonPath("$.violations[1].field", is("price")))
-                .andExpect(jsonPath("$.violations[1].message", is("Price cannot be null")))
+                .andExpect(jsonPath("$.violations[1].field", is("orderItems")))
+                .andExpect(jsonPath("$.violations[1].message", is("OrderItems are required")))
                 .andReturn();
+    }
+
+    @Test
+    void shouldReturn400WhenCreateNewOrderWithInvalidPriceAndQuantity() throws Exception {
+        OrderRequest orderRequest =
+                new OrderRequest(1L, "some text", List.of(new OrderItemRequest(BigDecimal.valueOf(-1), -1, "ORD1")));
+
+        this.mockMvc
+                .perform(post("/api/orders")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(orderRequest)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.violations", hasSize(2)))
+                .andExpect(jsonPath("$.violations[0].field", is("orderItems[0].price")))
+                .andExpect(jsonPath("$.violations[0].message", is("Price must be greater than zero")))
+                .andExpect(jsonPath("$.violations[1].field", is("orderItems[0].quantity")))
+                .andExpect(jsonPath("$.violations[1].message", is("Quantity must be positive")));
     }
 
     @Test
     void shouldUpdateOrder() throws Exception {
         Long orderId = 1L;
-        OrderRequest orderRequest = new OrderRequest(customer.getId(), "Updated text", BigDecimal.TEN);
+        OrderRequest orderRequest = new OrderRequest(
+                customer.getId(), "Updated text", List.of(new OrderItemRequest(BigDecimal.TEN, 10, "ORD1")));
         OrderResponse orderResponse =
                 new OrderResponse(customer.getId(), orderId, "New text", BigDecimal.TEN, new ArrayList<>());
         given(orderService.findOrderById(orderId)).willReturn(Optional.of(orderResponse));
@@ -198,7 +221,8 @@ class OrderControllerTest {
     @Test
     void shouldReturn404WhenUpdatingNonExistingOrder() throws Exception {
         Long orderId = 1L;
-        OrderRequest orderRequest = new OrderRequest(orderId, "Updated text", BigDecimal.TEN);
+        OrderRequest orderRequest =
+                new OrderRequest(orderId, "Updated text", List.of(new OrderItemRequest(BigDecimal.TEN, 10, "ORD1")));
         given(orderService.updateOrder(eq(orderId), any(OrderRequest.class)))
                 .willThrow(new OrderNotFoundException(orderId));
 
@@ -255,7 +279,8 @@ class OrderControllerTest {
 
     private List<OrderItemResponse> getOrderItemResponse(List<OrderItem> orderItems) {
         return orderItems.stream()
-                .map(orderItem -> new OrderItemResponse(orderItem.getId(), orderItem.getText()))
+                .map(orderItem -> new OrderItemResponse(
+                        orderItem.getId(), orderItem.getItemCode(), orderItem.getPrice(), orderItem.getQuantity()))
                 .toList();
     }
 }

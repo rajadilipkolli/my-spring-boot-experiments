@@ -1,11 +1,8 @@
 package com.example.hibernatecache.web.controllers;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -43,23 +40,35 @@ class OrderItemControllerIT extends AbstractIntegrationTest {
 
     @BeforeEach
     void setUp() {
-        orderItemRepository.deleteAll();
+        customerRepository.deleteAll(); // Delete parent first to cascade
         orderRepository.deleteAll();
-        customerRepository.deleteAll();
+        orderItemRepository.deleteAll();
 
-        Customer savedCustomer = customerRepository.persist(new Customer()
+        Customer savedCustomer = customerRepository.persist(createTestCustomer());
+        savedOrder = savedCustomer.getOrders().getFirst();
+        orderItemList = savedOrder.getOrderItems();
+    }
+
+    private Customer createTestCustomer() {
+        return new Customer()
                 .setFirstName("firstName 1")
                 .setLastName("lastName 1")
                 .setEmail("email1@junit.com")
                 .setPhone("9876543211")
-                .addOrder(new Order()
-                        .setName("First Order")
-                        .setPrice(BigDecimal.TEN)
-                        .addOrderItem(new OrderItem().setText("First OrderItem"))
-                        .addOrderItem(new OrderItem().setText("Second OrderItem"))
-                        .addOrderItem(new OrderItem().setText("Third OrderItem"))));
-        savedOrder = savedCustomer.getOrders().getFirst();
-        orderItemList = savedOrder.getOrderItems();
+                .addOrder(createTestOrder());
+    }
+
+    private Order createTestOrder() {
+        return new Order()
+                .setName("First Order")
+                .setPrice(BigDecimal.valueOf(111))
+                .addOrderItem(createOrderItem(BigDecimal.TEN, 10, "ITM1"))
+                .addOrderItem(createOrderItem(BigDecimal.TWO, 5, "ITM2"))
+                .addOrderItem(createOrderItem(BigDecimal.ONE, 1, "ITM3"));
+    }
+
+    private OrderItem createOrderItem(BigDecimal price, int quantity, String itemCode) {
+        return new OrderItem().setPrice(price).setQuantity(quantity).setItemCode(itemCode);
     }
 
     @Test
@@ -88,48 +97,15 @@ class OrderItemControllerIT extends AbstractIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_JSON_VALUE)))
                 .andExpect(jsonPath("$.orderItemId", is(orderItem.getId()), Long.class))
-                .andExpect(jsonPath("$.text", is(orderItem.getText())));
-    }
-
-    @Test
-    void shouldCreateNewOrderItem() throws Exception {
-        OrderItemRequest orderItemRequest = new OrderItemRequest("New OrderItem", savedOrder.getId());
-        this.mockMvc
-                .perform(post("/api/order/items")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(orderItemRequest)))
-                .andExpect(status().isCreated())
-                .andExpect(header().exists(HttpHeaders.LOCATION))
-                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_JSON_VALUE)))
-                .andExpect(jsonPath("$.orderItemId", notNullValue()))
-                .andExpect(jsonPath("$.text", is(orderItemRequest.text())));
-    }
-
-    @Test
-    void shouldReturn400WhenCreateNewOrderItemWithoutText() throws Exception {
-        OrderItemRequest orderItemRequest = new OrderItemRequest(null, null);
-
-        this.mockMvc
-                .perform(post("/api/order/items")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(orderItemRequest)))
-                .andExpect(status().isBadRequest())
-                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
-                .andExpect(jsonPath("$.type", is("about:blank")))
-                .andExpect(jsonPath("$.title", is("Constraint Violation")))
-                .andExpect(jsonPath("$.status", is(400)))
-                .andExpect(jsonPath("$.detail", is("Invalid request content.")))
-                .andExpect(jsonPath("$.instance", is("/api/order/items")))
-                .andExpect(jsonPath("$.violations", hasSize(1)))
-                .andExpect(jsonPath("$.violations[0].field", is("text")))
-                .andExpect(jsonPath("$.violations[0].message", is("Text cannot be empty")))
-                .andReturn();
+                .andExpect(jsonPath("$.price", is(orderItem.getPrice()), BigDecimal.class))
+                .andExpect(jsonPath("$.quantity", is(orderItem.getQuantity())))
+                .andExpect(jsonPath("$.itemCode", is(orderItem.getItemCode())));
     }
 
     @Test
     void shouldUpdateOrderItem() throws Exception {
         Long orderItemId = orderItemList.getFirst().getId();
-        OrderItemRequest orderItemRequest = new OrderItemRequest("Updated OrderItem", savedOrder.getId());
+        OrderItemRequest orderItemRequest = new OrderItemRequest(new BigDecimal("200.09"), 20, "ITM1");
 
         this.mockMvc
                 .perform(put("/api/order/items/{id}", orderItemId)
@@ -138,7 +114,27 @@ class OrderItemControllerIT extends AbstractIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_JSON_VALUE)))
                 .andExpect(jsonPath("$.orderItemId", is(orderItemId), Long.class))
-                .andExpect(jsonPath("$.text", is(orderItemRequest.text())));
+                .andExpect(jsonPath("$.price", is(200.09)))
+                .andExpect(jsonPath("$.quantity", is(orderItemRequest.quantity())))
+                .andExpect(jsonPath("$.itemCode", is(orderItemRequest.itemCode())));
+    }
+
+    @Test
+    void shouldReturn404WhenUpdatingNonExistingOrderItem() throws Exception {
+        Long orderItemId =
+                orderItemList.stream().mapToLong(OrderItem::getId).max().orElse(0L) + 1;
+        OrderItemRequest orderItemRequest = new OrderItemRequest(BigDecimal.ONE, 10, "IMT3");
+
+        this.mockMvc
+                .perform(put("/api/order/items/{id}", orderItemId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(orderItemRequest)))
+                .andExpect(status().isNotFound())
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
+                .andExpect(jsonPath("$.type", is("http://api.boot-hibernate2ndlevelcache-sample.com/errors/not-found")))
+                .andExpect(jsonPath("$.title", is("Not Found")))
+                .andExpect(jsonPath("$.status", is(404)))
+                .andExpect(jsonPath("$.detail").value("OrderItem with Id '%d' not found".formatted(orderItemId)));
     }
 
     @Test
@@ -150,6 +146,8 @@ class OrderItemControllerIT extends AbstractIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_JSON_VALUE)))
                 .andExpect(jsonPath("$.orderItemId", is(orderItem.getId()), Long.class))
-                .andExpect(jsonPath("$.text", is(orderItem.getText())));
+                .andExpect(jsonPath("$.price", is(orderItem.getPrice()), BigDecimal.class))
+                .andExpect(jsonPath("$.quantity", is(orderItem.getQuantity())))
+                .andExpect(jsonPath("$.itemCode", is(orderItem.getItemCode())));
     }
 }
