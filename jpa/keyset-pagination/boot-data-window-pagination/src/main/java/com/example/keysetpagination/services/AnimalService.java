@@ -70,10 +70,16 @@ public class AnimalService {
         Specification<Animal> specification =
                 animalEntitySpecification.specificationBuilder(searchRequest.getSearchCriteriaList(), Animal.class);
 
+        ScrollPosition.Direction scrollDirection;
+        if ("BACKWARD".equalsIgnoreCase(searchRequest.getScrollDirection())) {
+            scrollDirection = ScrollPosition.Direction.BACKWARD;
+        } else {
+            scrollDirection = ScrollPosition.Direction.FORWARD;
+        }
         // Create initial ScrollPosition or continue from the given scrollId
         ScrollPosition position = scrollId == null
                 ? ScrollPosition.keyset()
-                : ScrollPosition.of(Collections.singletonMap("id", scrollId), ScrollPosition.Direction.FORWARD);
+                : ScrollPosition.of(Collections.singletonMap("id", scrollId), scrollDirection);
 
         // Parse and create sort orders
         List<Sort.Order> orders = CollectionUtils.isEmpty(searchRequest.getSortRequests())
