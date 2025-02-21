@@ -16,7 +16,7 @@
 
     <properties>
         <java.version>21</java.version>
-        <spotless.version>2.44.2</spotless.version>
+        <spotless.version>2.44.3</spotless.version>
         <!-- test properties -->
         <jacoco-maven-plugin.version>0.8.12</jacoco-maven-plugin.version>
         <jacoco.minimum.coverage>0.80</jacoco.minimum.coverage>
