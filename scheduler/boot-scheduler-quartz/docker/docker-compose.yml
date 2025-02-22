@@ -1,7 +1,7 @@
 services:
 
   postgresqldb:
-    image: postgres:17.3-alpine
+    image: postgres:17.4-alpine
     environment:
       - POSTGRES_USER=appuser
       - POSTGRES_PASSWORD=secret
