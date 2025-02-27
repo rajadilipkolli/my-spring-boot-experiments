@@ -12,7 +12,7 @@ public class ContainerConfig {
     @Bean
     @ServiceConnection
     PostgreSQLContainer<?> postgreSQLContainer() {
-        return new PostgreSQLContainer<>(DockerImageName.parse("postgres").withTag("17.2-alpine"))
+        return new PostgreSQLContainer<>(DockerImageName.parse("postgres").withTag("17.3-alpine"))
                 .withCommand("postgres -c wal_level=logical"); // Enable logical decoding for NOTIFY/LISTEN;
     }
 }
