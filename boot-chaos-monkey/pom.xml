@@ -22,7 +22,7 @@
         <springdoc-openapi.version>2.8.5</springdoc-openapi.version>
 
         <gatling.version>3.13.4</gatling.version>
-        <gatling-maven-plugin.version>4.15.1</gatling-maven-plugin.version>
+        <gatling-maven-plugin.version>4.16.1</gatling-maven-plugin.version>
 
         <project.testresult.directory>${project.build.directory}/test-results</project.testresult.directory>
         <spotless.version>2.44.3</spotless.version>
