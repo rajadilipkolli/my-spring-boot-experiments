@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.4.3</version>
+        <version>3.4.4</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.example</groupId>
@@ -20,7 +20,7 @@
         <commons-io.version>2.18.0</commons-io.version>
 
         <properties-maven-plugin.version>1.2.1</properties-maven-plugin.version>
-        <sonar-maven-plugin.version>5.0.0.4389</sonar-maven-plugin.version>
+        <sonar-maven-plugin.version>5.1.0.4751</sonar-maven-plugin.version>
     </properties>
 
     <dependencies>

@@ -2,7 +2,7 @@ version: '3.8'
 services:
 
   grafana:
-    image: grafana/grafana:11.5.2
+    image: grafana/grafana:11.6.0
     extra_hosts: ['host.docker.internal:host-gateway']
     container_name: grafana
     ports:
@@ -30,7 +30,7 @@ services:
     command: --config.file=/etc/prometheus/prometheus.yml --log.level=debug
 
   alertmanager:
-    image: prom/alertmanager:v0.28.0
+    image: prom/alertmanager:v0.28.1
     ports:
       - "9093:9093"
     volumes:

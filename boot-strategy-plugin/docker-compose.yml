@@ -1,7 +1,7 @@
 version: "3.8"
 services:
     tempo:
-        image: grafana/tempo:2.7.1
+        image: grafana/tempo:2.7.2
         extra_hosts: ['host.docker.internal:host-gateway']
         container_name: tempo
         command: [ "-config.file=/etc/tempo.yaml" ]
@@ -45,7 +45,7 @@ services:
             test: wget --no-verbose --tries=1 --spider http://localhost:9090/status || exit 1
 
     grafana:
-        image: grafana/grafana:11.5.2
+        image: grafana/grafana:11.6.0
         extra_hosts: ['host.docker.internal:host-gateway']
         container_name: grafana
         depends_on:
