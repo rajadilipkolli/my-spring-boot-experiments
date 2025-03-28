@@ -19,7 +19,7 @@
 				"vscjava.vscode-java-pack",
 				"vmware.vscode-boot-dev-pack",
 				"vscjava.vscode-lombok",
-				"vscjava.vscode-gradle"
+				"redhat.java"
 			]
 		}
 	},
