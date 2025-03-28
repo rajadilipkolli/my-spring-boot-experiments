@@ -56,8 +56,8 @@ public class LocalDateTimeScalar {
                     case StringValue stringValue -> parseString(stringValue.getValue());
                     case String inputString -> parseString(inputString);
                     case LocalDateTime localDateTime -> localDateTime;
-                    default -> throw new CoercingParseValueException(
-                            "Expected a 'String' but was '" + typeName(input) + "'.");
+                    default ->
+                        throw new CoercingParseValueException("Expected a 'String' but was '" + typeName(input) + "'.");
                 };
             }
 
