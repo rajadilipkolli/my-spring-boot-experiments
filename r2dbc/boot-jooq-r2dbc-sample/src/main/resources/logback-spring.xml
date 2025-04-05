@@ -24,5 +24,6 @@
     <logger name="org.jooq.tools.LoggerListener" level="DEBUG"/>
     <logger name="io.r2dbc.proxy" level="DEBUG"/>
     <logger name="io.r2dbc.proxy.observation" level="INFO" />
+    <logger name="io.r2dbc.proxy.listener" level="DEBUG" />
 
 </configuration>
