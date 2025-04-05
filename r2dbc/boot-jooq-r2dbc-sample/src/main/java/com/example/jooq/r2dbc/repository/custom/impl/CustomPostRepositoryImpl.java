@@ -1,9 +1,9 @@
 package com.example.jooq.r2dbc.repository.custom.impl;
 
-import static com.example.jooq.r2dbc.testcontainersflyway.db.Tables.POSTS;
-import static com.example.jooq.r2dbc.testcontainersflyway.db.Tables.POSTS_TAGS;
-import static com.example.jooq.r2dbc.testcontainersflyway.db.Tables.POST_COMMENTS;
-import static com.example.jooq.r2dbc.testcontainersflyway.db.Tables.TAGS;
+import static com.example.jooq.r2dbc.dbgen.Tables.POSTS;
+import static com.example.jooq.r2dbc.dbgen.Tables.POSTS_TAGS;
+import static com.example.jooq.r2dbc.dbgen.Tables.POST_COMMENTS;
+import static com.example.jooq.r2dbc.dbgen.Tables.TAGS;
 
 import com.example.jooq.r2dbc.model.response.PostCommentResponse;
 import com.example.jooq.r2dbc.model.response.PostResponse;

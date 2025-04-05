@@ -1,17 +1,17 @@
 package com.example.jooq.r2dbc.config;
 
-import static com.example.jooq.r2dbc.testcontainersflyway.db.Tables.POSTS_TAGS;
-import static com.example.jooq.r2dbc.testcontainersflyway.db.tables.PostComments.POST_COMMENTS;
-import static com.example.jooq.r2dbc.testcontainersflyway.db.tables.Posts.POSTS;
-import static com.example.jooq.r2dbc.testcontainersflyway.db.tables.Tags.TAGS;
+import static com.example.jooq.r2dbc.dbgen.Tables.POSTS_TAGS;
+import static com.example.jooq.r2dbc.dbgen.tables.PostComments.POST_COMMENTS;
+import static com.example.jooq.r2dbc.dbgen.tables.Posts.POSTS;
+import static com.example.jooq.r2dbc.dbgen.tables.Tags.TAGS;
 
 import com.example.jooq.r2dbc.config.logging.Loggable;
+import com.example.jooq.r2dbc.dbgen.tables.records.PostCommentsRecord;
+import com.example.jooq.r2dbc.dbgen.tables.records.PostsRecord;
+import com.example.jooq.r2dbc.dbgen.tables.records.PostsTagsRecord;
+import com.example.jooq.r2dbc.dbgen.tables.records.TagsRecord;
 import com.example.jooq.r2dbc.model.Status;
 import com.example.jooq.r2dbc.repository.PostRepository;
-import com.example.jooq.r2dbc.testcontainersflyway.db.tables.records.PostCommentsRecord;
-import com.example.jooq.r2dbc.testcontainersflyway.db.tables.records.PostsRecord;
-import com.example.jooq.r2dbc.testcontainersflyway.db.tables.records.PostsTagsRecord;
-import com.example.jooq.r2dbc.testcontainersflyway.db.tables.records.TagsRecord;
 import org.jooq.DSLContext;
 import org.jooq.DeleteUsingStep;
 import org.slf4j.Logger;

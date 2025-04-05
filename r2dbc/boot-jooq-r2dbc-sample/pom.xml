@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.4.1</version>
+        <version>3.4.4</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.example.jooq.r2dbc</groupId>
@@ -180,7 +180,7 @@
                 </configuration>
             </plugin>
 
-            <plugin>
+            <!--<plugin>
                 <groupId>org.testcontainers</groupId>
                 <artifactId>testcontainers-jooq-codegen-maven-plugin</artifactId>
                 <version>${testcontainers-jooq-codegen-maven-plugin.version}</version>
@@ -205,32 +205,32 @@
                         <phase>generate-sources</phase>
                         <configuration>
                             <database>
-                                <!--
+                                &lt;!&ndash;
                                 "type" can be: POSTGRES, MYSQL, MARIADB
-                                -->
+                                &ndash;&gt;
                                 <type>POSTGRES</type>
-                                <!--
+                                &lt;!&ndash;
                                 "containerImage" is optional.
                                 The defaults are 
                                     POSTGRES: postgres:15.2-alpine
                                     MYSQL: mysql:8.0.33
                                     MARIADB: mariadb:10.11
-                                -->
+                                &ndash;&gt;
                                 <containerImage>postgres:17.4-alpine</containerImage>
                             </database>
                             <flyway>
-                                <!--
+                                &lt;!&ndash;
                                 You can configure any supporting flyway config here.
                                 see https://flywaydb.org/documentation/configuration/parameters/ 
-                                -->
-                                <locations> <!-- optional -->
+                                &ndash;&gt;
+                                <locations> &lt;!&ndash; optional &ndash;&gt;
                                     filesystem:src/main/resources/db/migration/postgresql
                                 </locations>
                             </flyway>
-                            <!-- 
+                            &lt;!&ndash;
                                 You can configure any supporting jooq config here. 
                                 see https://www.jooq.org/doc/latest/manual/code-generation/codegen-configuration/
-                            -->
+                            &ndash;&gt;
                             <jooq>
                                 <generator>
                                     <database>
@@ -247,7 +247,7 @@
                         </configuration>
                     </execution>
                 </executions>
-            </plugin>
+            </plugin>-->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
