@@ -14,5 +14,4 @@ public class R2dbcConfiguration {
     ReactiveAuditorAware<String> myAuditorProvider() {
         return () -> Mono.justOrEmpty("appUser");
     }
-
 }

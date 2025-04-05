@@ -33,11 +33,7 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 @DataR2dbcTest
-@Import({
-    ContainerConfig.class,
-    JooqConfiguration.class,
-    R2dbcConfiguration.class
-})
+@Import({ContainerConfig.class, JooqConfiguration.class, R2dbcConfiguration.class})
 class PostRepositoryTest {
 
     @Autowired private PostRepository postRepository;
