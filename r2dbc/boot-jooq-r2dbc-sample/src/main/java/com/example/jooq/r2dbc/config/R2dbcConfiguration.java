@@ -1,5 +1,6 @@
 package com.example.jooq.r2dbc.config;
 
+import org.springframework.boot.autoconfigure.r2dbc.ProxyConnectionFactoryCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.domain.ReactiveAuditorAware;
@@ -13,5 +14,11 @@ public class R2dbcConfiguration {
     @Bean
     ReactiveAuditorAware<String> myAuditorProvider() {
         return () -> Mono.justOrEmpty("appUser");
+    }
+
+    @Bean
+    ProxyConnectionFactoryCustomizer proxyConnectionFactoryCustomizer(
+            QueryProxyExecutionListener queryProxyExecutionListener) {
+        return connectionFactory -> connectionFactory.listener(queryProxyExecutionListener);
     }
 }

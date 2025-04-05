@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.within;
 
 import com.example.jooq.r2dbc.common.ContainerConfig;
 import com.example.jooq.r2dbc.config.JooqConfiguration;
+import com.example.jooq.r2dbc.config.QueryProxyExecutionListener;
 import com.example.jooq.r2dbc.config.R2dbcConfiguration;
 import com.example.jooq.r2dbc.entities.Comment;
 import com.example.jooq.r2dbc.entities.Post;
@@ -33,7 +34,12 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 @DataR2dbcTest
-@Import({ContainerConfig.class, JooqConfiguration.class, R2dbcConfiguration.class})
+@Import({
+    ContainerConfig.class,
+    JooqConfiguration.class,
+    R2dbcConfiguration.class,
+    QueryProxyExecutionListener.class
+})
 class PostRepositoryTest {
 
     @Autowired private PostRepository postRepository;
