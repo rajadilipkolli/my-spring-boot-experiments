@@ -28,16 +28,16 @@ public class ReactiveDataConfig {
     @Bean
     ConnectionFactoryOptionsBuilderCustomizer postgresCustomizer() {
         return builder -> {
-            builder.option(ConnectionFactoryOptions.LOCK_WAIT_TIMEOUT, Duration.ofSeconds(30));
-            builder.option(ConnectionFactoryOptions.STATEMENT_TIMEOUT, Duration.ofMinutes(1));
-            builder.option(ConnectionFactoryOptions.DRIVER, "proxy");
-            builder.option(ConnectionFactoryOptions.PROTOCOL, "postgresql");
-            builder.option(
-                    ProxyConnectionFactoryProvider.PROXY_LISTENERS,
-                    List.of(
-                            new MetricsExecutionListener(registry, Duration.ofSeconds(5)),
-                            new QueryTimeMetricsExecutionListener(registry),
-                            new TracingExecutionListener(tracer)));
+            builder.option(ConnectionFactoryOptions.LOCK_WAIT_TIMEOUT, Duration.ofSeconds(30))
+                    .option(ConnectionFactoryOptions.STATEMENT_TIMEOUT, Duration.ofMinutes(1))
+                    .option(ConnectionFactoryOptions.DRIVER, "proxy")
+                    .option(ConnectionFactoryOptions.PROTOCOL, "postgresql")
+                    .option(
+                            ProxyConnectionFactoryProvider.PROXY_LISTENERS,
+                            List.of(
+                                    new MetricsExecutionListener(registry, Duration.ofSeconds(5)),
+                                    new QueryTimeMetricsExecutionListener(registry),
+                                    new TracingExecutionListener(tracer)));
         };
     }
 
