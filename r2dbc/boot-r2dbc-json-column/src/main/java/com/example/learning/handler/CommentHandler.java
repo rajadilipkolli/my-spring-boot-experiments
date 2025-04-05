@@ -5,6 +5,7 @@ import static org.springframework.web.reactive.function.server.ServerResponse.ok
 
 import com.example.learning.entity.Comment;
 import com.example.learning.repository.CommentRepository;
+import io.micrometer.observation.annotation.Observed;
 import java.net.URI;
 import java.util.UUID;
 import org.springframework.stereotype.Component;
@@ -13,6 +14,7 @@ import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Mono;
 
 @Component
+@Observed(name = "commentService")
 public class CommentHandler {
 
     private final CommentRepository comments;

@@ -8,6 +8,7 @@ import com.example.learning.model.response.PagedResult;
 import com.example.learning.repository.CommentRepository;
 import com.example.learning.repository.PostRepository;
 import io.micrometer.core.annotation.Timed;
+import io.micrometer.observation.annotation.Observed;
 import java.net.URI;
 import java.util.List;
 import java.util.UUID;
@@ -24,6 +25,7 @@ import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Mono;
 
 @Component
+@Observed(name = "postService")
 public class PostHandler {
 
     private static final Logger log = LoggerFactory.getLogger(PostHandler.class);
