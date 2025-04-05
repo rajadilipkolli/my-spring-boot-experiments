@@ -11,7 +11,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.io.Serial;
 import java.io.Serializable;
-import java.time.OffsetDateTime;
+import java.time.LocalDateTime;
 import java.util.Objects;
 import org.hibernate.Hibernate;
 
@@ -33,7 +33,7 @@ public class PostComment extends Auditable implements Serializable {
 
     private boolean published;
 
-    private OffsetDateTime publishedAt;
+    private LocalDateTime publishedAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id", nullable = false)
@@ -77,11 +77,11 @@ public class PostComment extends Auditable implements Serializable {
         return this;
     }
 
-    public OffsetDateTime getPublishedAt() {
+    public LocalDateTime getPublishedAt() {
         return publishedAt;
     }
 
-    public PostComment setPublishedAt(OffsetDateTime publishedAt) {
+    public PostComment setPublishedAt(LocalDateTime publishedAt) {
         this.publishedAt = publishedAt;
         return this;
     }

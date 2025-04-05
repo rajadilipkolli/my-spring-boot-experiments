@@ -1,17 +1,30 @@
 version: 2.1
 
+executors:
+  machine_executor_amd64:
+    machine:
+      image: ubuntu-2404:current
+    environment:
+      architecture: "amd64"
+      platform: "linux/amd64"
+
 jobs:
   build:
     docker:
-      - image: 'cimg/openjdk:21.0.5'
+      - image: 'cimg/openjdk:21.0.6'
     steps:
       - checkout
       - run:
           name: Analyze on SonarCloud
           command: mvn verify sonar:sonar -Dsonar.projectKey=rajadilipkolli_my-spring-boot-experiments
+    executor: machine_executor_amd64
 
 workflows:
   main:
     jobs:
       - build:
           context: SonarCloud
+          filters:
+            branches:
+              only:
+                - main

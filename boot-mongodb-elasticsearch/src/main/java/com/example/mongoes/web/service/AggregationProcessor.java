@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service;
  * "dateRangeAggregation": {"2023-01-01 - 2023-12-31": 100} }
  */
 @Service
-class AggregationProcessor {
+public class AggregationProcessor {
 
     private static final Logger log = LoggerFactory.getLogger(AggregationProcessor.class);
 

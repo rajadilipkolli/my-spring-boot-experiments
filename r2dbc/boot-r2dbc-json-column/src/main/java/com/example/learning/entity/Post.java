@@ -48,7 +48,7 @@ public class Post {
 
     @Column("version")
     @Version
-    private Long version;
+    private Short version;
 
     @Transient
     @Builder.Default

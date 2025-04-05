@@ -591,8 +591,7 @@ class AnimalControllerIT extends AbstractIntegrationTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(
                                         """
-
-                                                {
+                                        {
                                           "searchCriteriaList": [
                                             {
                                               "type": "group",
@@ -655,5 +654,65 @@ class AnimalControllerIT extends AbstractIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content.size()", is(2))) // "Shark" and "Eagle"
                 .andExpect(jsonPath("$.last", is(true)));
+    }
+
+    @Test
+    void shouldFetchAnimalsWithBackwardDirectionUsingSearch() throws Exception {
+        // Fetch the first page of animals
+        String contentAsString = this.mockMvc
+                .perform(
+                        post("/api/animals/search")
+                                .param("pageSize", "2")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(
+                                        """
+                                {
+                                    "searchCriteriaList": [
+                                      {
+                                        "queryOperator": "LIKE",
+                                        "field": "name",
+                                        "values": ["%e%"]
+                                      }
+                                    ]
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content.size()", is(2)))
+                .andExpect(jsonPath("$.last", is(false)))
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        CustomWindow<Animal> window = objectMapper.readValue(
+                contentAsString,
+                objectMapper.getTypeFactory().constructParametricType(CustomWindow.class, Animal.class));
+        List<Animal> animalResponses = window.getContent();
+
+        // Fetch the previous page using backward direction
+        this.mockMvc
+                .perform(
+                        post("/api/animals/search")
+                                .param("pageSize", "2")
+                                .param(
+                                        "scrollId",
+                                        String.valueOf(
+                                                animalResponses.getFirst().getId()))
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(
+                                        """
+                                {
+                                    "searchCriteriaList": [
+                                      {
+                                        "queryOperator": "LIKE",
+                                        "field": "name",
+                                        "values": ["%e%"]
+                                      }
+                                    ],
+                                    "sortDirection": "BACKWARD"
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content.size()", is(2)))
+                .andExpect(jsonPath("$.last", is(false)));
     }
 }

@@ -1,6 +1,6 @@
-# MongoDB and Elasticsearch Reactive Integration
+# Spring Boot Reactive MongoDB and Elasticsearch Integration
 
-Integrates a reactive MongoDB backend with a reactive Elasticsearch instance for enhanced real-time searching capabilities, including geospatial queries.
+A reactive Spring Boot application demonstrating seamless integration between MongoDB and Elasticsearch, featuring real-time search capabilities including geospatial queries, full-text search, and aggregations.
 
 ---
 
@@ -12,73 +12,164 @@ Integrates a reactive MongoDB backend with a reactive Elasticsearch instance for
 
 ---
 
-### Run tests
+## Architecture
 
-```shell
-./mvnw clean verify
+The application follows a reactive architecture pattern using Spring WebFlux:
+
+```mermaid
+sequenceDiagram
+participant Client
+participant RestaurantController
+participant RestaurantService
+participant MongoDB
+participant ChangeStreamResume
+participant Elasticsearch
+
+Client->>RestaurantController: Create/Update Restaurant
+RestaurantController->>RestaurantService: Process Request
+RestaurantService->>MongoDB: Save Data
+MongoDB-->>ChangeStreamResume: Trigger Change Stream
+ChangeStreamResume->>Elasticsearch: Sync Changes
+Note over ChangeStreamResume,Elasticsearch: Resume Token Management
+RestaurantService-->>RestaurantController: Return Response
+RestaurantController-->>Client: HTTP Response
+```
+---
+
+## Key Features
+- Reactive API endpoints using Spring WebFlux and reactive drivers
+- **Real-time Synchronization**: MongoDB change streams to Elasticsearch
+- MongoDB for primary data storage
+- Advanced Search Capabilities:
+  - Full-text search
+  - Geospatial queries
+  - Aggregation operations
+- Comprehensive validation
+- Exception handling
+- **API Documentation**: OpenAPI/Swagger UI integration
+
+---
+
+## Sequence Diagrams
+
+### Restaurant Creation Flow
+```mermaid
+sequenceDiagram
+    participant C as Client
+    participant RC as RestaurantController
+    participant RS as RestaurantService
+    participant MR as MongoRepository
+    participant ER as ESRepository
+    
+    C->>RC: POST /api/restaurant
+    RC->>RC: Validate Request
+    RC->>RS: createRestaurant()
+    RS->>MR: save()
+    MR-->>RS: Restaurant
+    RS->>ER: index()
+    ER-->>RS: Success
+    RS-->>RC: Restaurant
+    RC-->>C: 201 Created
 ```
 
-### Run locally
-```shell
-docker-compose -f docker/docker-compose.yml up -d
+### Search Operation Flow
+```mermaid
+sequenceDiagram
+    participant C as Client
+    participant SC as SearchController
+    participant SS as SearchService
+    participant ER as ESRepository
+    
+    C->>SC: GET /api/search
+    SC->>SC: Validate Parameters
+    SC->>SS: search()
+    SS->>ER: search()
+    ER-->>SS: SearchResults
+    SS-->>SC: SearchPage
+    SC-->>C: 200 OK
+```
+---
+
+## Data Flow
+
+```mermaid
+flowchart LR
+    Client --> RestController
+    RestController --> Service
+    Service --> MongoDB
+    MongoDB --> ChangeStream
+    ChangeStream --> Elasticsearch
+    Service --> Elasticsearch
+```
+---
+## Configuration Notes
+
+### MongoDB
+- Uses replica set for change streams
+- Transaction support with `ReactiveMongoTransactionManager`
+- Default database: mongoes
+
+## Getting Started
+
+### Prerequisites
+- JDK 21+
+- Docker and Docker Compose
+- Maven 3.9+
+
+---
+
+### Running Locally
+1. Start the infrastructure:
+```bash
+docker compose -f docker/docker-compose.yml up -d
+```
+
+2. Run the application:
+```bash
 ./mvnw spring-boot:run -Dspring-boot.run.profiles=local
 ```
 
-### Useful Links
-* Swagger UI: http://localhost:8080/swagger-ui.html
-* Actuator Endpoint: http://localhost:8080/actuator
-* Prometheus: http://localhost:9090/
-* Grafana: http://localhost:3000/ (admin/admin)
-* Kibana: http://localhost:5601/app/kibana#/dev_tools/console?_g=()
-* Elasticsearch : http://localhost:9200/
-* MongoExpress : http://localhost:8081
+### Running Tests
+```bash
+./mvnw clean verify
+```
 
 ---
 
-## Mongodb Notes
+## API Documentation
+- Swagger UI: http://localhost:8080/swagger-ui.html
+- OpenAPI Spec: http://localhost:8080/v3/api-docs
 
-Transactions with `ReactiveMongoTransactionManager`
+## Monitoring
+- Actuator: http://localhost:8080/actuator
+- Prometheus: http://localhost:9090
+- Grafana: http://localhost:3000 (admin/admin)
 
+## Development Tools
+- Kibana: http://localhost:5601/app/kibana#/dev_tools/console?_g=()
+- Elasticsearch: http://localhost:9200
+- Mongo Express: http://localhost:8081
+
+## Useful Elasticsearch Commands
+- Count documents: `GET /restaurant/_count`
+- Search all: `GET /restaurant/_search`
+- View mapping: `GET /restaurant/_mapping`
+
+## Configuration Properties
+Key application properties:
+```properties
+spring.data.mongodb.database=mongoes
+spring.data.mongodb.uri=mongodb://localhost:27017/mongoes?replicaSet=rs0
+spring.elasticsearch.uris=localhost:9200
+spring.elasticsearch.socket-timeout=10s
 ```
-@Configuration
-public class DataStoreConfiguration extends AbstractReactiveMongoConfiguration {
 
-    @Value("${spring.data.mongodb.database}")
-    private String databaseName;
-
-    @Bean
-    ReactiveMongoTransactionManager transactionManager(ReactiveMongoDatabaseFactory factory) {
-        return new ReactiveMongoTransactionManager(factory);
-    }
-
-    @Override
-    protected String getDatabaseName() {
-        return this.databaseName;
-    }
-}
-```
----
-
-## Elasticsearch Notes
-
-### UseFull ElasticSearch Commands
-- Count http://localhost:9200/restaurant/_count
-- Search http://localhost:9200/restaurant/_search
-- Mapping http://localhost:9200/restaurant/_mapping
-
+## Exception Handling
+The application includes global exception handling for:
+- Validation errors
+- Duplicate entries
+- Resource not found
+- General server errors
 
 ### Reference
 - https://medium.com/geekculture/elastic-search-queries-hands-on-examples-fe5b2bc10c0e
-
-### Exceptions & Resolutions
- * When using reactive elasticeSearch is we get below issue like raiseLimitException then solution should be to raise the memory using property
-
-``` 
-2022-10-01 21:24:14.156 ERROR 34465 --- [or-http-epoll-2] a.w.r.e.AbstractErrorWebExceptionHandler : [8006d397-1]  500 Server Error for HTTP GET "/restaurant?limit=1000&offset=1"
-
-org.springframework.core.io.buffer.DataBufferLimitException: Exceeded limit on max bytes to buffer : 262144
-        at org.springframework.core.io.buffer.LimitedDataBufferList.raiseLimitException(LimitedDataBufferList.java:99)
-```
-
-
-To fix this set `spring.elasticsearch.webclient.max-in-memory-size=-1` for unlimited memory

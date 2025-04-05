@@ -13,12 +13,12 @@ public class ContainersConfig {
     @Bean
     @ServiceConnection
     PostgreSQLContainer<?> postgreSQLContainer() {
-        return new PostgreSQLContainer<>(DockerImageName.parse("postgres").withTag("17.2-alpine"));
+        return new PostgreSQLContainer<>(DockerImageName.parse("postgres").withTag("17.4-alpine"));
     }
 
     @Bean
     @ServiceConnection("redis")
     RedisContainer redisContainer() {
-        return new RedisContainer(DockerImageName.parse("redis").withTag("7.4.0-alpine"));
+        return new RedisContainer(DockerImageName.parse("redis").withTag("7.4.2-alpine"));
     }
 }

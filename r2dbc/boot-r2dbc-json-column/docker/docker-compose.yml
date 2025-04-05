@@ -1,7 +1,7 @@
 services:
 
   postgresqldb:
-    image: postgres:17.2-alpine
+    image: postgres:17.4-alpine
     environment:
       - POSTGRES_USER=appuser
       - POSTGRES_PASSWORD=secret
@@ -10,7 +10,7 @@ services:
       - "5432:5432"
 
   grafanalgtm:
-    image: grafana/otel-lgtm:0.8.2
+    image: grafana/otel-lgtm:0.9.3
     extra_hosts: ['host.docker.internal:host-gateway']
     container_name: grafanalgtm
     environment:
@@ -20,7 +20,6 @@ services:
       - "4317:4317"
       - "4318:4318"
       - "9090:9090"
-
 
   pgadmin4:
     image: dpage/pgadmin4

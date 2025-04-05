@@ -1,7 +1,7 @@
 services:
   postgres:
     container_name: postgres_movie_db
-    image: postgres:17.2-alpine
+    image: postgres:17.4-alpine
     environment:
       POSTGRES_USER: appuser
       POSTGRES_PASSWORD: secret

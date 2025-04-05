@@ -1,14 +1,13 @@
 package com.example.mongoes.config;
 
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
-import org.springframework.data.web.config.SpringDataJacksonConfiguration;
+import org.springframework.data.geo.GeoModule;
 import org.springframework.web.reactive.config.CorsRegistry;
 import org.springframework.web.reactive.config.WebFluxConfigurer;
 
 @Configuration(proxyBeanMethods = false)
-@Import(SpringDataJacksonConfiguration.class)
-public class WebFluxConfig implements WebFluxConfigurer {
+class WebFluxConfig implements WebFluxConfigurer {
 
     private final ApplicationProperties properties;
 
@@ -23,5 +22,10 @@ public class WebFluxConfig implements WebFluxConfigurer {
                 .allowedHeaders(properties.getCors().getAllowedHeaders())
                 .allowedOriginPatterns(properties.getCors().getAllowedOriginPatterns())
                 .allowCredentials(properties.getCors().isAllowCredentials());
+    }
+
+    @Bean
+    GeoModule jacksonGeoModule() {
+        return new GeoModule();
     }
 }

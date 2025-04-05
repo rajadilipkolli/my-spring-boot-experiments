@@ -12,7 +12,7 @@ services:
       - SA_PASSWORD=password
 
   mysql:
-    image: mysql:9.1
+    image: mysql:9.2
     ports:
       - "3306:3306"
     volumes:
@@ -24,7 +24,7 @@ services:
       - MYSQL_DATABASE=mydatabase
 
   postgres:
-    image: postgres:17.2-alpine
+    image: postgres:17.4-alpine
     ports:
       - "5432:5432"
     volumes:
@@ -65,7 +65,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
 
   mongodb:
-    image: mongo:8.0.4
+    image: mongo:8.0.6
     ports:
       - "27017:27017"
     volumes:

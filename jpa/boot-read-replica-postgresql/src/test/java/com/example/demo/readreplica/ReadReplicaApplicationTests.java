@@ -7,7 +7,6 @@ import static org.awaitility.Awaitility.await;
 import java.time.LocalDateTime;
 import java.util.concurrent.TimeUnit;
 import javax.sql.DataSource;
-import net.ttddyy.dsproxy.support.ProxyDataSource;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
@@ -57,20 +56,18 @@ class ReadReplicaApplicationTests {
         assertThat(targetDataSource)
                 .isNotNull()
                 .withFailMessage("Target DataSource must not be null")
-                .isInstanceOf(ProxyDataSource.class);
+                .isInstanceOf(DataSource.class);
 
-        primaryJdbcTemplate =
-                new JdbcTemplate(((ProxyDataSource) targetDataSource).getDataSource());
+        primaryJdbcTemplate = new JdbcTemplate(targetDataSource);
 
         // Setup replica template
         Object readOnlyDataSource = ReflectionTestUtils.getField(lazyProxy, "readOnlyDataSource");
         assertThat(readOnlyDataSource)
                 .isNotNull()
                 .withFailMessage("Read-only DataSource must not be null")
-                .isInstanceOf(ProxyDataSource.class);
+                .isInstanceOf(DataSource.class);
 
-        replicaJdbcTemplate =
-                new JdbcTemplate(((ProxyDataSource) readOnlyDataSource).getDataSource());
+        replicaJdbcTemplate = new JdbcTemplate((DataSource) readOnlyDataSource);
     }
 
     @Test

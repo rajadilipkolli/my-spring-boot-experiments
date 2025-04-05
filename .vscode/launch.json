@@ -180,6 +180,26 @@
             "projectName": "boot-graphql-webflux",
             "args": "--spring.profiles.active=local",
             "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-MongoESApplication<boot-mongodb-elasticsearch>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.example.mongoes.MongoESApplication",
+            "projectName": "boot-mongodb-elasticsearch",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-TestMongoESApplication<boot-mongodb-elasticsearch>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.example.mongoes.TestMongoESApplication",
+            "projectName": "boot-mongodb-elasticsearch",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
         }
     ]
 }

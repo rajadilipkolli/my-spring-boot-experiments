@@ -17,10 +17,6 @@ import org.mapstruct.NullValueCheckStrategy;
         suppressTimestampInGenerated = true)
 public interface OrderItemMapper {
 
-    @Mapping(target = "order.id", source = "orderId")
-    @Mapping(target = "id", ignore = true)
-    OrderItem toEntity(OrderItemRequest orderItemRequest);
-
     @Mapping(source = "id", target = "orderItemId")
     OrderItemResponse toResponse(OrderItem orderItem);
 

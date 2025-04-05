@@ -72,7 +72,7 @@ class CustomerControllerTest {
                 .andExpect(jsonPath("$.hasPrevious", is(false)));
     }
 
-    private static List<CustomerResponse> getCustomerResponses() {
+    private List<CustomerResponse> getCustomerResponses() {
         List<CustomerResponse> customerMappedList = new ArrayList<>();
         customerMappedList.add(
                 new CustomerResponse(1L, "firstName 1", "lastName 1", "email1@junit.com", "9876543211", null));

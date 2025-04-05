@@ -1,12 +1,14 @@
 package com.example.jooq.r2dbc.service;
 
-import static com.example.jooq.r2dbc.testcontainersflyway.db.Tables.POSTS;
-import static com.example.jooq.r2dbc.testcontainersflyway.db.Tables.POSTS_TAGS;
-import static com.example.jooq.r2dbc.testcontainersflyway.db.Tables.POST_COMMENTS;
-import static com.example.jooq.r2dbc.testcontainersflyway.db.Tables.TAGS;
+import static com.example.jooq.r2dbc.dbgen.Tables.POSTS;
+import static com.example.jooq.r2dbc.dbgen.Tables.POSTS_TAGS;
+import static com.example.jooq.r2dbc.dbgen.Tables.POST_COMMENTS;
+import static com.example.jooq.r2dbc.dbgen.Tables.TAGS;
 import static org.jooq.impl.DSL.multiset;
 import static org.jooq.impl.DSL.select;
 
+import com.example.jooq.r2dbc.dbgen.tables.records.PostCommentsRecord;
+import com.example.jooq.r2dbc.dbgen.tables.records.PostsTagsRecord;
 import com.example.jooq.r2dbc.entities.Post;
 import com.example.jooq.r2dbc.model.Status;
 import com.example.jooq.r2dbc.model.request.CreatePostCommand;
@@ -15,8 +17,6 @@ import com.example.jooq.r2dbc.model.response.PaginatedResult;
 import com.example.jooq.r2dbc.model.response.PostResponse;
 import com.example.jooq.r2dbc.model.response.PostSummary;
 import com.example.jooq.r2dbc.repository.PostRepository;
-import com.example.jooq.r2dbc.testcontainersflyway.db.tables.records.PostCommentsRecord;
-import com.example.jooq.r2dbc.testcontainersflyway.db.tables.records.PostsTagsRecord;
 import java.util.List;
 import java.util.UUID;
 import org.jooq.DSLContext;

@@ -5,7 +5,7 @@
 		"ghcr.io/devcontainers/features/java:1": {
 			"version": "none",
 			"installMaven": "true",
-			"installGradle": "true"
+			"installGradle": "false"
 		},
 		"ghcr.io/devcontainers/features/node:1": {
 			"version": "lts"
@@ -19,7 +19,7 @@
 				"vscjava.vscode-java-pack",
 				"vmware.vscode-boot-dev-pack",
 				"vscjava.vscode-lombok",
-				"vscjava.vscode-gradle"
+				"redhat.java"
 			]
 		}
 	},

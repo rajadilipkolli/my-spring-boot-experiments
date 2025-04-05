@@ -1,104 +1,80 @@
 package com.example.mongoes.web.controller;
 
-import com.example.mongoes.document.Grades;
 import com.example.mongoes.document.Restaurant;
-import com.example.mongoes.response.GenericMessage;
-import com.example.mongoes.web.model.RestaurantRequest;
+import com.example.mongoes.model.request.GradesRequest;
+import com.example.mongoes.model.request.RestaurantRequest;
+import com.example.mongoes.web.api.RestaurantApi;
 import com.example.mongoes.web.service.RestaurantService;
 import io.micrometer.core.annotation.Timed;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.Size;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import org.springframework.data.elasticsearch.core.SearchPage;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
 
 @RestController
 @Timed
 @RequestMapping("/api/restaurant")
-public class RestaurantController {
+@Validated
+class RestaurantController implements RestaurantApi {
 
     private final RestaurantService restaurantService;
 
-    public RestaurantController(RestaurantService restaurantService) {
+    RestaurantController(RestaurantService restaurantService) {
         this.restaurantService = restaurantService;
     }
 
-    @GetMapping
-    public Mono<ResponseEntity<SearchPage<Restaurant>>> findAllRestaurants(
-            @Valid @RequestParam(defaultValue = "10") @Size(max = 999) int limit,
-            @RequestParam(defaultValue = "0") int offset) {
+    @Override
+    public Mono<ResponseEntity<SearchPage<Restaurant>>> findAllRestaurants(int limit, int offset) {
         return restaurantService.findAllRestaurants(offset, limit).map(ResponseEntity::ok);
     }
 
-    @GetMapping("/name/{restaurantName}")
-    public Mono<ResponseEntity<Restaurant>> findRestaurantByName(
-            @PathVariable String restaurantName) {
-        return restaurantService
-                .findByRestaurantName(restaurantName)
-                .map(ResponseEntity::ok)
-                .defaultIfEmpty(ResponseEntity.notFound().build());
+    @Override
+    public Mono<ResponseEntity<Restaurant>> findRestaurantByName(String restaurantName) {
+        return restaurantService.findByRestaurantName(restaurantName).map(ResponseEntity::ok);
     }
 
-    @GetMapping("/{restaurantId}")
-    public Mono<ResponseEntity<Restaurant>> findRestaurantById(@PathVariable Long restaurantId) {
-        return restaurantService
-                .findByRestaurantId(restaurantId)
-                .map(ResponseEntity::ok)
-                .defaultIfEmpty(ResponseEntity.notFound().build());
+    @Override
+    public Mono<ResponseEntity<Restaurant>> findRestaurantById(Long restaurantId) {
+        return restaurantService.findByRestaurantId(restaurantId).map(ResponseEntity::ok);
     }
 
-    @PostMapping("/{restaurantId}/grade")
-    public Mono<Restaurant> addGradeToRestaurant(
-            @RequestBody Grades request, @PathVariable("restaurantId") Long id) {
-        return this.restaurantService.addGrade(request, id);
+    @Override
+    public Mono<ResponseEntity<Restaurant>> addGradeToRestaurant(GradesRequest request, Long id) {
+        return this.restaurantService.addGrade(request, id).map(ResponseEntity::ok);
     }
 
-    @GetMapping("/total")
+    @Override
     public Mono<ResponseEntity<Long>> totalCount() {
+        return restaurantService.totalCount().defaultIfEmpty(0L).map(ResponseEntity::ok);
+    }
+
+    @Override
+    public Mono<ResponseEntity<Restaurant>> updateGradesOfRestaurant(
+            Long restaurantId, List<GradesRequest> gradesRequestList) {
         return restaurantService
-                .totalCount()
-                .map(ResponseEntity::ok)
-                .defaultIfEmpty(ResponseEntity.notFound().build());
+                .updateGrades(gradesRequestList, restaurantId)
+                .map(ResponseEntity::ok);
     }
 
-    @PutMapping("/{restaurantId}/grades/")
-    public Mono<ResponseEntity<Restaurant>> addNotesToRestaurant(
-            @PathVariable Long restaurantId, @RequestBody Grades grades) {
-        return restaurantService.addGrade(grades, restaurantId).map(ResponseEntity::ok);
-    }
-
-    @PostMapping
-    public Mono<ResponseEntity<GenericMessage>> createRestaurant(
-            @RequestBody @Valid RestaurantRequest restaurantRequest) {
+    @Override
+    public Mono<ResponseEntity<Void>> createRestaurant(RestaurantRequest restaurantRequest) {
         return this.restaurantService
                 .createRestaurant(restaurantRequest)
                 .map(
                         restaurant ->
                                 ResponseEntity.created(
-                                                URI.create(
-                                                        "/api/restaurant/name/%s"
-                                                                .formatted(
-                                                                        URLEncoder.encode(
-                                                                                restaurantRequest
-                                                                                        .name(),
-                                                                                StandardCharsets
-                                                                                        .UTF_8))))
-                                        .body(
-                                                new GenericMessage(
-                                                        "restaurant with name %s created"
-                                                                .formatted(
-                                                                        restaurantRequest
-                                                                                .name()))));
+                                                createRestaurantUri(restaurantRequest.name()))
+                                        .build());
+    }
+
+    private URI createRestaurantUri(String restaurantName) {
+        String encodedName = URLEncoder.encode(restaurantName, StandardCharsets.UTF_8);
+        return URI.create("/api/restaurant/name/%s".formatted(encodedName));
     }
 }

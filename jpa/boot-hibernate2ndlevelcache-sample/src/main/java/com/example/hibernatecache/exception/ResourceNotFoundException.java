@@ -4,13 +4,14 @@ import org.springframework.http.HttpStatus;
 
 public class ResourceNotFoundException extends RuntimeException {
 
-    private static final HttpStatus HTTP_STATUS = HttpStatus.NOT_FOUND;
+    private final HttpStatus httpStatus;
 
     public ResourceNotFoundException(String errorMessage) {
         super(errorMessage);
+        this.httpStatus = HttpStatus.NOT_FOUND;
     }
 
     public HttpStatus getHttpStatus() {
-        return HTTP_STATUS;
+        return httpStatus;
     }
 }

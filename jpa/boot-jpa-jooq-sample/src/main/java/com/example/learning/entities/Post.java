@@ -12,6 +12,7 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import org.hibernate.Hibernate;
@@ -168,14 +169,16 @@ public class Post extends Auditable implements Serializable {
         if (tag == null) {
             return;
         }
-        this.tags.removeIf(postTag -> {
+        // This prevents ConcurrentModificationException
+        for (Iterator<PostTag> iterator = tags.iterator(); iterator.hasNext(); ) {
+            PostTag postTag = iterator.next();
+
             if (postTag.getPost().equals(this) && postTag.getTag().equals(tag)) {
+                iterator.remove();
                 postTag.setPost(null);
                 postTag.setTag(null);
-                return true;
             }
-            return false;
-        });
+        }
     }
 
     @Override

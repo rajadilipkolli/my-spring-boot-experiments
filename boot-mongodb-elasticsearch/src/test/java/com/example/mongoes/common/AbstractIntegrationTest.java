@@ -3,6 +3,7 @@ package com.example.mongoes.common;
 import static com.example.mongoes.utils.AppConstants.PROFILE_TEST;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
+import com.example.mongoes.repository.elasticsearch.RestaurantESRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -15,4 +16,6 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 public abstract class AbstractIntegrationTest {
 
     @Autowired protected WebTestClient webTestClient;
+
+    @Autowired protected RestaurantESRepository restaurantESRepository;
 }

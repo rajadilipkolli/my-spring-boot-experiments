@@ -1,11 +1,11 @@
-FROM eclipse-temurin:21.0.5_11-jre-alpine as builder
+FROM eclipse-temurin:21.0.6_7-jre-alpine as builder
 WORKDIR /app
 ARG JAR_FILE=target/boot-r2dbc-json-column-0.0.1-SNAPSHOT.jar
 COPY ${JAR_FILE} application.jar
 RUN java -Djarmode=layertools -jar application.jar extract
 
 # the second stage of our build will copy the extracted layers
-FROM eclipse-temurin:21.0.5_11-jre-alpine
+FROM eclipse-temurin:21.0.6_7-jre-alpine
 WORKDIR /app
 RUN addgroup -S spring && adduser -S spring -G spring
 USER spring:spring

@@ -13,6 +13,7 @@ import com.example.hibernatecache.model.query.FindOrderItemsQuery;
 import com.example.hibernatecache.model.response.OrderItemResponse;
 import com.example.hibernatecache.model.response.PagedResult;
 import com.example.hibernatecache.repositories.OrderItemRepository;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
@@ -69,7 +70,8 @@ class OrderItemServiceTest {
         assertThat(optionalOrderItem).isPresent();
         OrderItemResponse orderItem = optionalOrderItem.get();
         assertThat(orderItem.orderItemId()).isEqualTo(1L);
-        assertThat(orderItem.text()).isEqualTo("junitTest");
+        assertThat(orderItem.price()).isEqualTo(BigDecimal.TEN);
+        assertThat(orderItem.quantity()).isEqualTo(10);
     }
 
     @Test
@@ -85,11 +87,13 @@ class OrderItemServiceTest {
     private OrderItem getOrderItem() {
         OrderItem orderItem = new OrderItem();
         orderItem.setId(1L);
-        orderItem.setText("junitTest");
+        orderItem.setItemCode("ITM1");
+        orderItem.setPrice(BigDecimal.TEN);
+        orderItem.setQuantity(10);
         return orderItem;
     }
 
     private OrderItemResponse getOrderItemResponse() {
-        return new OrderItemResponse(1L, "junitTest");
+        return new OrderItemResponse(1L, "ITM1", BigDecimal.TEN, 10);
     }
 }

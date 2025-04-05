@@ -1,7 +1,6 @@
 package com.example.demo.readreplica.service;
 
 import com.example.demo.readreplica.domain.ArticleDTO;
-import com.example.demo.readreplica.domain.CommentDTO;
 import com.example.demo.readreplica.entities.Article;
 import com.example.demo.readreplica.repository.ArticleRepository;
 import java.util.Optional;
@@ -19,7 +18,7 @@ public class ArticleService {
     }
 
     public Optional<ArticleDTO> findArticleById(Long id) {
-        return this.articleRepository.findByArticleId(id).map(this::convertToArticleDTO);
+        return this.articleRepository.findByArticleId(id).map(Article::convertToArticleDTO);
     }
 
     public boolean existsById(Long id) {
@@ -36,15 +35,5 @@ public class ArticleService {
     @Transactional
     public void deleteById(Long id) {
         articleRepository.deleteById(id);
-    }
-
-    private ArticleDTO convertToArticleDTO(Article articleEntity) {
-        return new ArticleDTO(
-                articleEntity.getTitle(),
-                articleEntity.getAuthored(),
-                articleEntity.getPublished(),
-                articleEntity.getComments().stream()
-                        .map(comment -> new CommentDTO(comment.getComment()))
-                        .toList());
     }
 }

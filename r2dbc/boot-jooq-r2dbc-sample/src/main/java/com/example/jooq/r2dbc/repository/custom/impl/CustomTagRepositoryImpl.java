@@ -1,6 +1,6 @@
 package com.example.jooq.r2dbc.repository.custom.impl;
 
-import static com.example.jooq.r2dbc.testcontainersflyway.db.Tables.TAGS;
+import static com.example.jooq.r2dbc.dbgen.Tables.TAGS;
 
 import com.example.jooq.r2dbc.entities.Tags;
 import com.example.jooq.r2dbc.repository.custom.CustomTagRepository;

@@ -17,12 +17,12 @@ public class ContainersConfiguration {
 
     @Bean
     MySQLContainer<?> mySQLContainer() {
-        return new MySQLContainer<>(DockerImageName.parse("mysql").withTag("9.1"));
+        return new MySQLContainer<>(DockerImageName.parse("mysql").withTag("9.2"));
     }
 
     @Bean
     PostgreSQLContainer<?> postgreSQLContainer() {
-        return new PostgreSQLContainer<>(DockerImageName.parse("postgres").withTag("17.2-alpine"));
+        return new PostgreSQLContainer<>(DockerImageName.parse("postgres").withTag("17.4-alpine"));
     }
 
     @Bean

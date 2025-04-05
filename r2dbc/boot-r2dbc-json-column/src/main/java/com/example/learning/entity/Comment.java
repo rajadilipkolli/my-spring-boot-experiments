@@ -38,5 +38,5 @@ public class Comment {
 
     @Column("version")
     @Version
-    private Long version;
+    private Short version;
 }
