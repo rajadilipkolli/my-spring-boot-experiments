@@ -16,7 +16,7 @@
 
     <properties>
         <java.version>21</java.version>
-        <spotless.version>2.44.3</spotless.version>
+        <spotless.version>2.44.4</spotless.version>
         <commons-io.version>2.18.0</commons-io.version>
 
         <properties-maven-plugin.version>1.2.1</properties-maven-plugin.version>
