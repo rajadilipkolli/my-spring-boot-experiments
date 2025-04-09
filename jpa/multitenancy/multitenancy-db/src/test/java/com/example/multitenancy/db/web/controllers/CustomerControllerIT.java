@@ -1,6 +1,7 @@
 package com.example.multitenancy.db.web.controllers;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -10,11 +11,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.example.multitenancy.db.common.AbstractIntegrationTest;
+import com.example.multitenancy.db.config.multitenant.TenantIdentifierResolver;
 import com.example.multitenancy.db.entities.Customer;
 import com.example.multitenancy.db.repositories.CustomerRepository;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -22,18 +25,32 @@ import org.springframework.http.MediaType;
 class CustomerControllerIT extends AbstractIntegrationTest {
 
     @Autowired private CustomerRepository customerRepository;
+    @Autowired private TenantIdentifierResolver tenantIdentifierResolver;
 
     private List<Customer> customerList = null;
+    private List<Customer> secondaryCustomers = null;
 
     @BeforeEach
     void setUp() {
         customerRepository.deleteAll();
 
+        // Set tenant to primary and save customers
+        tenantIdentifierResolver.setCurrentTenant("primary");
         customerList = new ArrayList<>();
         customerList.add(new Customer(null, "First Customer"));
         customerList.add(new Customer(null, "Second Customer"));
-        customerList.add(new Customer(null, "Third Customer"));
-        customerList = customerRepository.saveAll(customerList);
+        customerRepository.saveAll(customerList);
+
+        // Set tenant to secondary and save customers
+        tenantIdentifierResolver.setCurrentTenant("secondary");
+        secondaryCustomers = new ArrayList<>();
+        secondaryCustomers.add(new Customer(null, "First Customer"));
+        secondaryCustomers.add(new Customer(null, "Second Customer"));
+        secondaryCustomers.add(new Customer(null, "Third Customer"));
+        customerRepository.saveAll(secondaryCustomers);
+
+        // Reset tenant to unknown
+        tenantIdentifierResolver.setCurrentTenant(null);
     }
 
     @Test
@@ -41,7 +58,10 @@ class CustomerControllerIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(get("/api/customers"))
                 .andExpect(status().isBadRequest())
-                .andExpect(header().string("Content-Type", is("application/problem+json")))
+                .andExpect(
+                        header().string(
+                                        "Content-Type",
+                                        is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                 .andExpect(jsonPath("$.type", is("about:blank")))
                 .andExpect(jsonPath("$.title", is("Bad Request")))
                 .andExpect(jsonPath("$.status", is(400)))
@@ -54,7 +74,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(get("/api/customers").header("X-tenantId", "junk"))
                 .andExpect(status().isForbidden())
-                .andExpect(header().string("Content-Type", is("application/json")))
+                .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_JSON_VALUE)))
                 .andExpect(jsonPath("$.error", is("Unknown Database tenant")));
     }
 
@@ -101,7 +121,10 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(customer)))
                 .andExpect(status().isBadRequest())
-                .andExpect(header().string("Content-Type", is("application/problem+json")))
+                .andExpect(
+                        header().string(
+                                        "Content-Type",
+                                        is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                 .andExpect(jsonPath("$.type", is("about:blank")))
                 .andExpect(jsonPath("$.title", is("Bad Request")))
                 .andExpect(jsonPath("$.status", is(400)))
@@ -135,5 +158,104 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                                 .header("X-tenantId", "primary"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.text", is(customer.getText())));
+    }
+
+    @Nested
+    class SecondaryTenantTests {
+
+        @Test
+        void shouldFetchAllCustomersForSecondaryTenant() throws Exception {
+            mockMvc.perform(get("/api/customers").header("X-tenantId", "secondary"))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.size()", is(secondaryCustomers.size())));
+        }
+
+        @Test
+        void shouldCreateNewCustomerForSecondaryTenant() throws Exception {
+
+            Customer customer = new Customer(null, "New Secondary Customer");
+
+            mockMvc.perform(
+                            post("/api/customers")
+                                    .header("X-tenantId", "secondary")
+                                    .contentType(MediaType.APPLICATION_JSON)
+                                    .content(objectMapper.writeValueAsString(customer)))
+                    .andExpect(status().isCreated())
+                    .andExpect(jsonPath("$.id", notNullValue()))
+                    .andExpect(jsonPath("$.text", is(customer.getText())));
+        }
+
+        @Test
+        void shouldFindCustomerByIdForSecondaryTenant() throws Exception {
+
+            Customer customer = secondaryCustomers.getFirst();
+            mockMvc.perform(
+                            get("/api/customers/{id}", customer.getId())
+                                    .header("X-tenantId", "secondary"))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.text", is(customer.getText())));
+        }
+
+        @Test
+        void shouldUpdateCustomerForSecondaryTenant() throws Exception {
+            Customer customer = secondaryCustomers.getFirst();
+            customer.setText("Updated Secondary Customer");
+
+            mockMvc.perform(
+                            put("/api/customers/{id}", customer.getId())
+                                    .header("X-tenantId", "secondary")
+                                    .contentType(MediaType.APPLICATION_JSON)
+                                    .content(objectMapper.writeValueAsString(customer)))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.text", is(customer.getText())));
+        }
+
+        @Test
+        void shouldDeleteCustomerForSecondaryTenant() throws Exception {
+            Customer customer = secondaryCustomers.getFirst();
+
+            mockMvc.perform(
+                            delete("/api/customers/{id}", customer.getId())
+                                    .header("X-tenantId", "secondary"))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.text", is(customer.getText())));
+        }
+
+        @Test
+        void shouldNotDeleteCustomerForSecondaryTenant() throws Exception {
+            Customer customer = customerList.getFirst();
+
+            mockMvc.perform(
+                            delete("/api/customers/{id}", customer.getId())
+                                    .header("X-tenantId", "secondary"))
+                    .andExpect(status().isNotFound());
+        }
+
+        @Test
+        void shouldReturn404WhenFetchingNonExistingCustomerForSecondaryTenant() throws Exception {
+            mockMvc.perform(get("/api/customers/{id}", 999L).header("X-tenantId", "secondary"))
+                    .andExpect(status().isNotFound());
+        }
+
+        @Test
+        void shouldReturn400WhenCreatingCustomerWithEmptyTextForSecondaryTenant() throws Exception {
+            Customer customer = new Customer(null, "");
+
+            mockMvc.perform(
+                            post("/api/customers")
+                                    .header("X-tenantId", "secondary")
+                                    .contentType(MediaType.APPLICATION_JSON)
+                                    .content(objectMapper.writeValueAsString(customer)))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(
+                            header().string(
+                                            "Content-Type",
+                                            is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
+                    .andExpect(jsonPath("$.type", is("about:blank")))
+                    .andExpect(jsonPath("$.title", is("Bad Request")))
+                    .andExpect(jsonPath("$.status", is(400)))
+                    .andExpect(jsonPath("$.detail", is("Invalid request content.")))
+                    .andExpect(jsonPath("$.instance", is("/api/customers")));
+        }
     }
 }
