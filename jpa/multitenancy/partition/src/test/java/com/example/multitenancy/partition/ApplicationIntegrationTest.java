@@ -15,8 +15,6 @@ import com.example.multitenancy.partition.repositories.CustomerRepository;
 import java.nio.charset.StandardCharsets;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
@@ -109,8 +107,6 @@ class ApplicationIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    @Disabled
-    @DisplayName("This is failing after upgrading to 3.1.x, check in higher versions")
     void findById() {
 
         final Customer rock = createCustomer(SUBSYSTEM_P, "Rock");
