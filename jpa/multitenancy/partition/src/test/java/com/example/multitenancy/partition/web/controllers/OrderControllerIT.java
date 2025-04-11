@@ -81,8 +81,7 @@ class OrderControllerIT extends AbstractIntegrationTest {
                                 .content(objectMapper.writeValueAsString(order)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id", notNullValue()))
--               .andExpect(jsonPath("$.amount", is(order.amount())))
-+               .andExpect(jsonPath("$.amount").value(order.amount().doubleValue()))
+                .andExpect(jsonPath("$.amount").value(order.amount().doubleValue()))
                 .andExpect(jsonPath("$.orderDate", is(order.orderDate().toString())));
         assertThat(this.orderRepository.count()).isEqualTo(count + 1);
     }
