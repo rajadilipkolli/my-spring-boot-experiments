@@ -1,5 +1,6 @@
 package com.example.multitenancy.partition.services;
 
+import com.example.multitenancy.partition.dto.OrderRequestDTO;
 import com.example.multitenancy.partition.entities.Order;
 import com.example.multitenancy.partition.repositories.OrderRepository;
 import java.util.List;
@@ -9,7 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@Transactional
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class OrderService {
 
@@ -23,10 +24,21 @@ public class OrderService {
         return orderRepository.findById(id);
     }
 
+    @Transactional
+    public Order saveOrder(OrderRequestDTO order) {
+        Order orderEntity = new Order();
+        orderEntity.setAmount(order.amount());
+        orderEntity.setOrderDate(order.orderDate());
+
+        return orderRepository.save(orderEntity);
+    }
+
+    @Transactional
     public Order saveOrder(Order order) {
         return orderRepository.save(order);
     }
 
+    @Transactional
     public void deleteOrderById(Long id) {
         orderRepository.deleteById(id);
     }

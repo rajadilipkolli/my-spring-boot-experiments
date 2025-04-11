@@ -6,6 +6,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -24,8 +25,8 @@ public class Order {
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
 
-    @Column(nullable = false, columnDefinition = "NUMERIC")
-    private Double amount;
+    @Column(nullable = false)
+    private BigDecimal amount;
 
     @Column(name = "order_date", nullable = false)
     private LocalDate orderDate;

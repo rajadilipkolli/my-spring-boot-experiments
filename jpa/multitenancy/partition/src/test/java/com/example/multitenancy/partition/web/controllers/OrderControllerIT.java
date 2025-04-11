@@ -12,8 +12,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.example.multitenancy.partition.common.AbstractIntegrationTest;
 import com.example.multitenancy.partition.config.tenant.TenantIdentifierResolver;
+import com.example.multitenancy.partition.dto.OrderRequestDTO;
 import com.example.multitenancy.partition.entities.Order;
 import com.example.multitenancy.partition.repositories.OrderRepository;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -37,12 +39,12 @@ class OrderControllerIT extends AbstractIntegrationTest {
         orderRepository.deleteAll();
 
         orderList = new ArrayList<>();
-        orderList.add(new Order(null, 100.0, LocalDate.of(2025, 1, 1)));
-        orderList.add(new Order(null, 200.0, LocalDate.of(2025, 6, 1)));
-        orderList.add(new Order(null, 300.0, LocalDate.of(2025, 12, 31)));
-        orderList.add(new Order(null, 150.0, LocalDate.of(2023, 1, 1)));
-        orderList.add(new Order(null, 250.0, LocalDate.of(2024, 6, 1)));
-        orderList.add(new Order(null, 350.0, LocalDate.of(2022, 12, 31)));
+        orderList.add(new Order(null, BigDecimal.valueOf(100.0), LocalDate.of(2025, 1, 1)));
+        orderList.add(new Order(null, BigDecimal.valueOf(200.0), LocalDate.of(2025, 6, 1)));
+        orderList.add(new Order(null, BigDecimal.valueOf(300.0), LocalDate.of(2025, 12, 31)));
+        orderList.add(new Order(null, BigDecimal.valueOf(150.0), LocalDate.of(2023, 1, 1)));
+        orderList.add(new Order(null, BigDecimal.valueOf(250.0), LocalDate.of(2024, 6, 1)));
+        orderList.add(new Order(null, BigDecimal.valueOf(350.0), LocalDate.of(2022, 12, 31)));
         orderList = orderRepository.saveAll(orderList);
     }
 
@@ -62,12 +64,14 @@ class OrderControllerIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(get("/api/orders/{id}", orderId).param("tenant", "dbsystc"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.amount", is(order.getAmount())));
+                .andExpect(jsonPath("$.amount", is(order.getAmount())))
+                .andExpect(jsonPath("$.orderDate", is(order.getOrderDate().toString())));
     }
 
     @Test
     void shouldCreateNewOrder() throws Exception {
-        Order order = new Order(null, 400.0, LocalDate.of(2025, 7, 1));
+        OrderRequestDTO order =
+                new OrderRequestDTO(BigDecimal.valueOf(400.0), LocalDate.of(2025, 7, 1));
         long count = this.orderRepository.count();
         this.mockMvc
                 .perform(
@@ -77,15 +81,15 @@ class OrderControllerIT extends AbstractIntegrationTest {
                                 .content(objectMapper.writeValueAsString(order)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id", notNullValue()))
-                .andExpect(jsonPath("$.amount", is(order.getAmount())));
+                .andExpect(jsonPath("$.amount", is(order.amount())))
+                .andExpect(jsonPath("$.orderDate", is(order.orderDate().toString())));
         assertThat(this.orderRepository.count()).isEqualTo(count + 1);
     }
 
     @Test
     void shouldUpdateOrder() throws Exception {
         Order order = orderList.getFirst();
-        order.setAmount(500.0);
-
+        order.setAmount(BigDecimal.valueOf(500.0));
         this.mockMvc
                 .perform(
                         put("/api/orders/{id}", order.getId())
