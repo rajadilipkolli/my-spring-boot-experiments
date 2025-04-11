@@ -64,7 +64,7 @@ class OrderControllerIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(get("/api/orders/{id}", orderId).param("tenant", "dbsystc"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.amount", is(order.getAmount())))
+                .andExpect(jsonPath("$.amount").value(order.getAmount().doubleValue()))
                 .andExpect(jsonPath("$.orderDate", is(order.getOrderDate().toString())));
     }
 
@@ -81,7 +81,8 @@ class OrderControllerIT extends AbstractIntegrationTest {
                                 .content(objectMapper.writeValueAsString(order)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id", notNullValue()))
-                .andExpect(jsonPath("$.amount", is(order.amount())))
+-               .andExpect(jsonPath("$.amount", is(order.amount())))
++               .andExpect(jsonPath("$.amount").value(order.amount().doubleValue()))
                 .andExpect(jsonPath("$.orderDate", is(order.orderDate().toString())));
         assertThat(this.orderRepository.count()).isEqualTo(count + 1);
     }
@@ -97,7 +98,7 @@ class OrderControllerIT extends AbstractIntegrationTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(order)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.amount", is(order.getAmount())));
+                .andExpect(jsonPath("$.amount").value(order.getAmount().doubleValue()));
     }
 
     @Test
