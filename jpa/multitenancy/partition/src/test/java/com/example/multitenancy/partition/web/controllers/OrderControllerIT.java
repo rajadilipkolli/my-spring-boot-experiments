@@ -69,6 +69,14 @@ class OrderControllerIT extends AbstractIntegrationTest {
     }
 
     @Test
+    void shouldReturn404WhenFetchingNonExistentOrder() throws Exception {
+        Long nonExistentOrderId = 999L;
+        this.mockMvc
+                .perform(get("/api/orders/{id}", nonExistentOrderId).param("tenant", "dbsystc"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
     void shouldCreateNewOrder() throws Exception {
         OrderRequestDTO order =
                 new OrderRequestDTO(BigDecimal.valueOf(400.0), LocalDate.of(2025, 7, 1));
@@ -113,14 +121,9 @@ class OrderControllerIT extends AbstractIntegrationTest {
     @Test
     void shouldVerifyPartitionByRange() {
         // Query orders within the 2025 partition range
-        List<Order> ordersIn2025 =
-                orderRepository.findAll().stream()
-                        .filter(
-                                order ->
-                                        order.getOrderDate().isAfter(LocalDate.of(2024, 12, 31))
-                                                && order.getOrderDate()
-                                                        .isBefore(LocalDate.of(2026, 1, 1)))
-                        .toList();
+        LocalDate startDate = LocalDate.of(2025, 1, 1);
+        LocalDate endDate = LocalDate.of(2025, 12, 31);
+        List<Order> ordersIn2025 = orderRepository.findByOrderDateBetween(startDate, endDate);
 
         // Fixing the assertion to match the expected size of orders in 2025
         assertThat(ordersIn2025).hasSize(3);
