@@ -20,14 +20,14 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 class OrderControllerIT extends AbstractIntegrationTest {
 
     @Autowired private OrderRepository orderRepository;
     @Autowired private TenantIdentifierResolver tenantIdentifierResolver;
-@Autowired private JdbcTemplate jdbcTemplate;
+    @Autowired private JdbcTemplate jdbcTemplate;
 
     private List<Order> orderList;
 
@@ -126,66 +126,70 @@ class OrderControllerIT extends AbstractIntegrationTest {
                                 order.getOrderDate().isAfter(LocalDate.of(2024, 12, 31))
                                         && order.getOrderDate().isBefore(LocalDate.of(2026, 1, 1)));
     }
-@Test
+
+    @Test
     void shouldVerifyPhysicalPartitioning() {
         // Ensure correct tenant is set
         tenantIdentifierResolver.setCurrentTenant("dbsystc");
-        
-        // 1. Verify that the partitioned tables exist in the database
-        List
 
-<String> partitionTables = jdbcTemplate.queryForList(
-                "SELECT c.relname AS child_table " +
-                "FROM pg_inherits i " +
-                "JOIN pg_class p ON p.oid = i.inhparent " +
-                "JOIN pg_class c ON c.oid = i.inhrelid " +
-                "JOIN pg_namespace n ON n.oid = c.relnamespace " +
-                "WHERE p.relname = 'orders' " +
-                "ORDER BY c.relname",
-                String.class);
-        
-        // Ensure that partition tables exist (e.g., orders_2022, orders_2023, orders_2024, orders_2025)
+        // 1. Verify that the partitioned tables exist in the database
+        List<String> partitionTables =
+                jdbcTemplate.queryForList(
+                        "SELECT c.relname AS child_table "
+                                + "FROM pg_inherits i "
+                                + "JOIN pg_class p ON p.oid = i.inhparent "
+                                + "JOIN pg_class c ON c.oid = i.inhrelid "
+                                + "JOIN pg_namespace n ON n.oid = c.relnamespace "
+                                + "WHERE p.relname = 'orders' "
+                                + "ORDER BY c.relname",
+                        String.class);
+
+        // Ensure that partition tables exist (e.g., orders_2022, orders_2023, orders_2024,
+        // orders_2025)
         assertThat(partitionTables).isNotEmpty();
-        assertThat(partitionTables).contains("orders_2022", "orders_2023", "orders_2024", "orders_2025");
-        
+        assertThat(partitionTables)
+                .contains("orders_2022", "orders_2023", "orders_2024", "orders_2025");
+
         // 2. Verify that orders are stored in the correct partitions based on order dates
-        Order order2025 = orderList.stream()
-                .filter(o -> o.getOrderDate().getYear() == 2025)
-                .findFirst()
-                .orElseThrow();
-        
+        Order order2025 =
+                orderList.stream()
+                        .filter(o -> o.getOrderDate().getYear() == 2025)
+                        .findFirst()
+                        .orElseThrow();
+
         // Confirm the order exists within the 2025 partition
-        Integer countIn2025 = jdbcTemplate.queryForObject(
-                "SELECT COUNT(*) FROM orders_2025 WHERE id = ?",
-                Integer.class,
-                order2025.getId());
+        Integer countIn2025 =
+                jdbcTemplate.queryForObject(
+                        "SELECT COUNT(*) FROM orders_2025 WHERE id = ?",
+                        Integer.class,
+                        order2025.getId());
         assertThat(countIn2025).isEqualTo(1);
-        
+
         // Confirm the order does not exist in the 2024 partition
-        Integer countIn2024 = jdbcTemplate.queryForObject(
-                "SELECT COUNT(*) FROM orders_2024 WHERE id = ?",
-                Integer.class,
-                order2025.getId());
+        Integer countIn2024 =
+                jdbcTemplate.queryForObject(
+                        "SELECT COUNT(*) FROM orders_2024 WHERE id = ?",
+                        Integer.class,
+                        order2025.getId());
         assertThat(countIn2024).isZero();
-        
+
         // 3. Verify the overall order count within each partition matches the test data
         verifyOrdersInPartition(2022, 1); // Expected 1 order in 2022
         verifyOrdersInPartition(2023, 1); // Expected 1 order in 2023
         verifyOrdersInPartition(2024, 1); // Expected 1 order in 2024
         verifyOrdersInPartition(2025, 3); // Expected 3 orders in 2025
     }
-    
+
     /**
-     * Helper method to verify that the correct number of orders exist in a specific year's partition.
+     * Helper method to verify that the correct number of orders exist in a specific year's
+     * partition.
      *
      * @param year The year corresponding to the partition.
      * @param expectedCount The expected number of orders in that partition.
      */
     private void verifyOrdersInPartition(int year, int expectedCount) {
-        Integer count = jdbcTemplate.queryForObject(
-                "SELECT COUNT(*) FROM orders_" + year,
-                Integer.class);
+        Integer count =
+                jdbcTemplate.queryForObject("SELECT COUNT(*) FROM orders_" + year, Integer.class);
         assertThat(count).isEqualTo(expectedCount);
     }
-
 }
