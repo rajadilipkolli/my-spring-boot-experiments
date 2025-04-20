@@ -82,18 +82,12 @@
             <artifactId>liquibase-core</artifactId>
         </dependency>
 
-         <!-- ESAPI for validation with proper exclusions , check again for higher versions -->
+         <!-- ESAPI for validation -->
         <dependency>
             <groupId>org.owasp.esapi</groupId>
             <artifactId>esapi</artifactId>
             <version>2.6.0.0</version>
             <classifier>jakarta</classifier>
-            <exclusions>
-                <exclusion>
-                    <groupId>commons-fileupload</groupId>
-                    <artifactId>commons-fileupload</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
 
         <dependency>
