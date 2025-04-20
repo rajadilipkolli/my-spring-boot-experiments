@@ -31,7 +31,8 @@ class DataInitializer {
 
         Member member = new Member().setMemberId(memberId).setName("raja");
 
-        CardHolder cardHolder = new CardHolder().setMemberId(memberId).setCardNumber("1234-5678-9012-3456");
+        // Use a valid VISA format: 4[0-9]{12}([0-9]{3})
+        CardHolder cardHolder = new CardHolder().setMemberId(memberId).setCardNumber("4111111111111111");
 
         CardHolder savedCardHolder = this.cardHolderRepository.save(cardHolder);
         log.info("Saved CardHolder :{}", savedCardHolder);

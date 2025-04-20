@@ -82,6 +82,14 @@
             <artifactId>liquibase-core</artifactId>
         </dependency>
 
+         <!-- ESAPI for validation with proper exclusions -->
+        <dependency>
+            <groupId>org.owasp.esapi</groupId>
+            <artifactId>esapi</artifactId>
+            <version>2.6.0.0</version>
+            <classifier>jakarta</classifier>
+        </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
@@ -106,11 +114,6 @@
             <groupId>org.testcontainers</groupId>
             <artifactId>postgresql</artifactId>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.owasp.esapi</groupId>
-            <artifactId>esapi</artifactId>
-            <version>2.6.0.0</version>
         </dependency>
     </dependencies>
 
