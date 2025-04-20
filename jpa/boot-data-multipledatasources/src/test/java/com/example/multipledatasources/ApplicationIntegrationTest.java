@@ -41,7 +41,7 @@ class ApplicationIntegrationTest {
                 .convertTo(ResponseDto.class)
                 .satisfies(responseDto -> {
                     assertThat(responseDto.memberId()).isEqualTo("1");
-                    assertThat(responseDto.cardNumber()).isEqualTo("1234-5678-9012-3456");
+                    assertThat(responseDto.cardNumber()).isEqualTo("4111111111111111");
                     assertThat(responseDto.memberName()).isEqualTo("raja");
                 });
     }

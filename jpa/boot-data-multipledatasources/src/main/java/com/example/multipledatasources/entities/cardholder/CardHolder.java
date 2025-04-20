@@ -9,6 +9,8 @@ import jakarta.persistence.Table;
 import java.util.Objects;
 import java.util.StringJoiner;
 import org.hibernate.Hibernate;
+import org.owasp.esapi.ESAPI;
+import org.owasp.esapi.errors.ValidationException;
 
 @Entity
 @Table(name = "card_holder")
@@ -47,7 +49,11 @@ public class CardHolder {
     }
 
     public CardHolder setCardNumber(String cardNumber) {
-        this.cardNumber = cardNumber;
+        try {
+            this.cardNumber = ESAPI.validator().getValidCreditCard("cardNumber", cardNumber, false);
+        } catch (ValidationException e) {
+            throw new IllegalArgumentException("Invalid credit card number", e);
+        }
         return this;
     }
 

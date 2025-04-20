@@ -60,8 +60,9 @@ class DetailsServiceImplTest {
     void getDetails_WhenBothEntitiesExist_ShouldReturnCompleteResponse() {
         // Arrange
         String memberId = "test-member-id";
+        String validVisaCard = "4111111111111111"; // Raw digits format matching ESAPI pattern
         CardHolder cardHolder = new CardHolder();
-        cardHolder.setCardNumber("1234-5678");
+        cardHolder.setCardNumber(validVisaCard);
         Member member = new Member();
         member.setName("John Doe");
         member.setMemberId(memberId);
@@ -77,7 +78,7 @@ class DetailsServiceImplTest {
         // Assert
         assertThat(result).isNotNull();
         assertThat(result.memberId()).isEqualTo(memberId);
-        assertThat(result.cardNumber()).isEqualTo("1234-5678");
+        assertThat(result.cardNumber()).isEqualTo(validVisaCard);
         assertThat(result.memberName()).isEqualTo("John Doe");
         verify(asyncExecutor, times(2)).execute(taskCaptor.capture());
         List<Runnable> capturedTasks = taskCaptor.getAllValues();
