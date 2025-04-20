@@ -61,7 +61,7 @@ class DetailsServiceImplTest {
         // Arrange
         String memberId = "test-member-id";
         CardHolder cardHolder = new CardHolder();
-        cardHolder.setCardNumber("1234-5678");
+        cardHolder.setCardNumber("4111-1111-1111-1111"); // Valid credit card format
         Member member = new Member();
         member.setName("John Doe");
         member.setMemberId(memberId);
@@ -77,7 +77,7 @@ class DetailsServiceImplTest {
         // Assert
         assertThat(result).isNotNull();
         assertThat(result.memberId()).isEqualTo(memberId);
-        assertThat(result.cardNumber()).isEqualTo("1234-5678");
+        assertThat(result.cardNumber()).isEqualTo("4111-1111-1111-1111");
         assertThat(result.memberName()).isEqualTo("John Doe");
         verify(asyncExecutor, times(2)).execute(taskCaptor.capture());
         List<Runnable> capturedTasks = taskCaptor.getAllValues();
