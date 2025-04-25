@@ -45,7 +45,7 @@ services:
       - PGADMIN_DEFAULT_PASSWORD=admin
 
   redis:
-    image: redis:7.4.2-alpine
+    image: redis:7.4.3-alpine
     ports:
       - "6379:6379"
     command: redis-server --save 60 1 --requirepass MDNcVb924a --loglevel warning
