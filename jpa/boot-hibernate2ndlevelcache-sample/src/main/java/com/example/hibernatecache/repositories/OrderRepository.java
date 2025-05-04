@@ -1,15 +1,26 @@
 package com.example.hibernatecache.repositories;
 
+import static org.hibernate.jpa.AvailableHints.HINT_CACHEABLE;
+
 import com.example.hibernatecache.entities.Order;
 import io.hypersistence.utils.spring.repository.BaseJpaRepository;
+import jakarta.persistence.QueryHint;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.QueryHints;
 import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.data.repository.query.Param;
 
 public interface OrderRepository extends BaseJpaRepository<Order, Long>, PagingAndSortingRepository<Order, Long> {
 
     void deleteAll();
 
+    @QueryHints(@QueryHint(name = HINT_CACHEABLE, value = "true"))
     @Query("SELECT o FROM Order o join fetch o.orderItems oi WHERE o.id = :id ORDER BY oi.itemCode")
-    Optional<Order> findById(Long id);
+    Optional<Order> findById(@Param("id") Long id);
+
+    @QueryHints(@QueryHint(name = HINT_CACHEABLE, value = "true"))
+    @Query("SELECT o FROM Order o join fetch o.orderItems oi WHERE o.customer.id = :customerId ORDER BY oi.itemCode")
+    List<Order> findByCustomerId(@Param("customerId") Long customerId);
 }
