@@ -11,11 +11,14 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import java.util.Objects;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.proxy.HibernateProxy;
 
 @Entity
 @Table(name = "order_items")
 @Cacheable
+@Cache(region = "orderItemCache", usage = CacheConcurrencyStrategy.READ_WRITE)
 public class OrderItem {
 
     @Id
