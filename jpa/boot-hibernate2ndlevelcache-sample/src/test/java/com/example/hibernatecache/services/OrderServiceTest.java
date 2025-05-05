@@ -7,11 +7,13 @@ import static org.mockito.BDDMockito.times;
 import static org.mockito.BDDMockito.verify;
 import static org.mockito.BDDMockito.willDoNothing;
 
+import com.example.hibernatecache.entities.Customer;
 import com.example.hibernatecache.entities.Order;
 import com.example.hibernatecache.mapper.OrderMapper;
 import com.example.hibernatecache.model.response.OrderResponse;
 import com.example.hibernatecache.repositories.CustomerRepository;
 import com.example.hibernatecache.repositories.OrderRepository;
+import jakarta.persistence.EntityManager;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Optional;
@@ -32,6 +34,9 @@ class OrderServiceTest {
 
     @Mock
     private CustomerRepository customerRepository;
+
+    @Mock
+    private EntityManager entityManager;
 
     @InjectMocks
     private OrderService orderService;
@@ -56,6 +61,7 @@ class OrderServiceTest {
         Order testOrder = getOrder();
         given(orderRepository.findById(1L)).willReturn(Optional.of(testOrder));
         willDoNothing().given(orderRepository).deleteById(1L);
+        willDoNothing().given(entityManager).getEntityManagerFactory();
 
         // when
         orderService.deleteOrderById(1L);
@@ -68,6 +74,7 @@ class OrderServiceTest {
         Order order = new Order();
         order.setId(1L);
         order.setName("junitTest");
+        order.setCustomer(new Customer().setId(1L));
         return order;
     }
 
