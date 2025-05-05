@@ -93,24 +93,14 @@ public class OrderService {
     public void deleteOrderById(Long id) {
         Order order = orderRepository.findById(id).orElseThrow(() -> new OrderNotFoundException(id));
 
-        // Capture customer reference before deletion for cache invalidation
-        Customer customer = null;
-        if (order.getCustomer() != null) {
-            Long customerId = order.getCustomer().getId();
-            customer = customerRepository.findById(customerId).orElse(null);
-        }
-
         // Delete order
         orderRepository.deleteById(id);
 
         // Force cache eviction for the customer's orders collection
-        if (customer != null) {
-            // Clear the specific cache region for customer orders
-            entityManager.getEntityManagerFactory().getCache().evict(Customer.class, customer.getId());
-
-            // Also clear the customer cache entry to ensure fresh data
-            entityManager.getEntityManagerFactory().getCache().evict(Customer.class, customer.getId());
-        }
+        entityManager
+                .getEntityManagerFactory()
+                .getCache()
+                .evict(Customer.class, order.getCustomer().getId());
     }
 
     public Optional<Order> findById(Long id) {
