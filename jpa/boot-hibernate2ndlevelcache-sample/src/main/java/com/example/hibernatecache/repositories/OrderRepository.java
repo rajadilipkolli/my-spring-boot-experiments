@@ -2,39 +2,25 @@ package com.example.hibernatecache.repositories;
 
 import static org.hibernate.jpa.AvailableHints.HINT_CACHEABLE;
 
-import com.example.hibernatecache.entities.Order;
+import com.example.hibernatecache.entities.OrderItem;
 import io.hypersistence.utils.spring.repository.BaseJpaRepository;
 import jakarta.persistence.QueryHint;
 import java.util.List;
-import java.util.Optional;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.QueryHints;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
-import org.springframework.transaction.annotation.Transactional;
 
-public interface OrderRepository extends BaseJpaRepository<Order, Long>, PagingAndSortingRepository<Order, Long> {
+public interface OrderItemRepository
+        extends BaseJpaRepository<OrderItem, Long>, PagingAndSortingRepository<OrderItem, Long> {
 
-    @Transactional
-    @Modifying
-    @Query("delete from Order o")
     void deleteAll();
 
+    @Query("select o from OrderItem o where o.order.id = :orderId")
     @QueryHints(@QueryHint(name = HINT_CACHEABLE, value = "true"))
-    @Query("SELECT o FROM Order o join fetch o.orderItems oi WHERE o.id = :id ORDER BY oi.itemCode")
-    Optional<Order> findById(@Param("id") Long id);
+    List<OrderItem> findByOrder_Id(@Param("orderId") Long orderId);
 
     @QueryHints(@QueryHint(name = HINT_CACHEABLE, value = "true"))
-    @Query("SELECT o FROM Order o join fetch o.orderItems oi WHERE o.customer.id = :customerId ORDER BY oi.itemCode")
-    List<Order> findByCustomerId(@Param("customerId") Long customerId);
-
-    @Query("SELECT o.id FROM Order o")
-    List<Long> findAllOrderIds();
-
-    @Override
-    @Transactional
-    @Modifying
-    @Query("delete from Order o where o.id = :id")
-    void deleteById(@Param("id") Long id);
+    @Query("select o.id from OrderItem o")
+    List<Long> findAllOrderItemIds();
 }
