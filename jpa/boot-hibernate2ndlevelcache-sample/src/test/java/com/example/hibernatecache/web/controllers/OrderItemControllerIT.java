@@ -13,27 +13,14 @@ import com.example.hibernatecache.entities.Customer;
 import com.example.hibernatecache.entities.Order;
 import com.example.hibernatecache.entities.OrderItem;
 import com.example.hibernatecache.model.request.OrderItemRequest;
-import com.example.hibernatecache.repositories.CustomerRepository;
-import com.example.hibernatecache.repositories.OrderItemRepository;
-import com.example.hibernatecache.repositories.OrderRepository;
 import java.math.BigDecimal;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 
 class OrderItemControllerIT extends AbstractIntegrationTest {
-
-    @Autowired
-    private OrderItemRepository orderItemRepository;
-
-    @Autowired
-    private OrderRepository orderRepository;
-
-    @Autowired
-    private CustomerRepository customerRepository;
 
     private List<OrderItem> orderItemList = null;
     Order savedOrder;

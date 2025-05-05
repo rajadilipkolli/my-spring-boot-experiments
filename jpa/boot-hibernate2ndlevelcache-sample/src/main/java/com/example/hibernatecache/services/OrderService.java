@@ -1,5 +1,6 @@
 package com.example.hibernatecache.services;
 
+import com.example.hibernatecache.entities.Customer;
 import com.example.hibernatecache.entities.Order;
 import com.example.hibernatecache.exception.OrderNotFoundException;
 import com.example.hibernatecache.mapper.OrderMapper;
@@ -7,7 +8,10 @@ import com.example.hibernatecache.model.query.FindOrdersQuery;
 import com.example.hibernatecache.model.request.OrderRequest;
 import com.example.hibernatecache.model.response.OrderResponse;
 import com.example.hibernatecache.model.response.PagedResult;
+import com.example.hibernatecache.repositories.CustomerRepository;
 import com.example.hibernatecache.repositories.OrderRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
@@ -23,10 +27,16 @@ public class OrderService {
 
     private final OrderRepository orderRepository;
     private final OrderMapper orderMapper;
+    private final CustomerRepository customerRepository;
 
-    public OrderService(OrderRepository orderRepository, OrderMapper orderMapper) {
+    @PersistenceContext
+    private EntityManager entityManager;
+
+    public OrderService(
+            OrderRepository orderRepository, OrderMapper orderMapper, CustomerRepository customerRepository) {
         this.orderRepository = orderRepository;
         this.orderMapper = orderMapper;
+        this.customerRepository = customerRepository;
     }
 
     public PagedResult<OrderResponse> findAllOrders(FindOrdersQuery findOrdersQuery) {
@@ -48,6 +58,11 @@ public class OrderService {
                         ? Sort.Order.asc(findOrdersQuery.sortBy())
                         : Sort.Order.desc(findOrdersQuery.sortBy()));
         return PageRequest.of(pageNo, findOrdersQuery.pageSize(), sort);
+    }
+
+    public List<OrderResponse> findOrdersByCustomerId(Long customerId) {
+        List<Order> orders = orderRepository.findByCustomerId(customerId);
+        return orderMapper.mapToOrderResponseList(orders);
     }
 
     public Optional<OrderResponse> findOrderById(Long id) {
@@ -76,6 +91,29 @@ public class OrderService {
 
     @Transactional
     public void deleteOrderById(Long id) {
+        Order order = orderRepository.findById(id).orElseThrow(() -> new OrderNotFoundException(id));
+
+        // Capture customer reference before deletion for cache invalidation
+        Customer customer = null;
+        if (order.getCustomer() != null) {
+            Long customerId = order.getCustomer().getId();
+            customer = customerRepository.findById(customerId).orElse(null);
+        }
+
+        // Delete order
         orderRepository.deleteById(id);
+
+        // Force cache eviction for the customer's orders collection
+        if (customer != null) {
+            // Clear the specific cache region for customer orders
+            entityManager.getEntityManagerFactory().getCache().evict(Customer.class, customer.getId());
+
+            // Also clear the customer cache entry to ensure fresh data
+            entityManager.getEntityManagerFactory().getCache().evict(Customer.class, customer.getId());
+        }
+    }
+
+    public Optional<Order> findById(Long id) {
+        return orderRepository.findById(id);
     }
 }

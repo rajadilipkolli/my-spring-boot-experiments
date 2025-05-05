@@ -10,6 +10,7 @@ import static org.mockito.BDDMockito.willDoNothing;
 import com.example.hibernatecache.entities.Order;
 import com.example.hibernatecache.mapper.OrderMapper;
 import com.example.hibernatecache.model.response.OrderResponse;
+import com.example.hibernatecache.repositories.CustomerRepository;
 import com.example.hibernatecache.repositories.OrderRepository;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -28,6 +29,9 @@ class OrderServiceTest {
 
     @Mock
     private OrderMapper orderMapper;
+
+    @Mock
+    private CustomerRepository customerRepository;
 
     @InjectMocks
     private OrderService orderService;
@@ -49,9 +53,13 @@ class OrderServiceTest {
     @Test
     void deleteOrderById() {
         // given
+        Order testOrder = getOrder();
+        given(orderRepository.findById(1L)).willReturn(Optional.of(testOrder));
         willDoNothing().given(orderRepository).deleteById(1L);
+
         // when
         orderService.deleteOrderById(1L);
+
         // then
         verify(orderRepository, times(1)).deleteById(1L);
     }

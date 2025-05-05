@@ -17,25 +17,16 @@ import com.example.hibernatecache.entities.Customer;
 import com.example.hibernatecache.entities.Order;
 import com.example.hibernatecache.entities.OrderItem;
 import com.example.hibernatecache.model.request.CustomerRequest;
-import com.example.hibernatecache.repositories.CustomerRepository;
-import com.example.hibernatecache.repositories.OrderRepository;
 import io.hypersistence.utils.jdbc.validator.SQLStatementCountValidator;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 
 class CustomerControllerIT extends AbstractIntegrationTest {
-
-    @Autowired
-    private CustomerRepository customerRepository;
-
-    @Autowired
-    private OrderRepository orderRepository;
 
     private List<Customer> customerList = null;
 

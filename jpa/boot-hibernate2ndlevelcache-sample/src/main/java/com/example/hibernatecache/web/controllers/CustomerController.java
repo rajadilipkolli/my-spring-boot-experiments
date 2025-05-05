@@ -4,11 +4,14 @@ import com.example.hibernatecache.exception.CustomerNotFoundException;
 import com.example.hibernatecache.model.query.FindCustomersQuery;
 import com.example.hibernatecache.model.request.CustomerRequest;
 import com.example.hibernatecache.model.response.CustomerResponse;
+import com.example.hibernatecache.model.response.OrderResponse;
 import com.example.hibernatecache.model.response.PagedResult;
 import com.example.hibernatecache.services.CustomerService;
+import com.example.hibernatecache.services.OrderService;
 import com.example.hibernatecache.utils.AppConstants;
 import jakarta.validation.Valid;
 import java.net.URI;
+import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -27,9 +30,11 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 class CustomerController {
 
     private final CustomerService customerService;
+    private final OrderService orderService;
 
-    CustomerController(CustomerService customerService) {
+    CustomerController(CustomerService customerService, OrderService orderService) {
         this.customerService = customerService;
+        this.orderService = orderService;
     }
 
     @GetMapping
@@ -48,6 +53,14 @@ class CustomerController {
                 .findCustomerById(id)
                 .map(ResponseEntity::ok)
                 .orElseThrow(() -> new CustomerNotFoundException(id));
+    }
+
+    @GetMapping("/{id}/orders")
+    ResponseEntity<List<OrderResponse>> getCustomerOrders(@PathVariable Long id) {
+        if (!customerService.existsById(id)) {
+            throw new CustomerNotFoundException(id);
+        }
+        return ResponseEntity.ok(orderService.findOrdersByCustomerId(id));
     }
 
     @GetMapping("/search")
