@@ -50,6 +50,10 @@ public class CustomerService {
         return PageRequest.of(pageNo, findCustomersQuery.pageSize(), sort);
     }
 
+    public boolean existsById(Long id) {
+        return customerRepository.existsById(id);
+    }
+
     public Optional<CustomerResponse> findCustomerById(Long id) {
         return customerRepository.findById(id).map(customerMapper::toResponse);
     }

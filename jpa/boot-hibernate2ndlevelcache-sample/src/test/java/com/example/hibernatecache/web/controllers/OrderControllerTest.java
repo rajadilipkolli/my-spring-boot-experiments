@@ -26,6 +26,7 @@ import com.example.hibernatecache.model.request.OrderRequest;
 import com.example.hibernatecache.model.response.OrderItemResponse;
 import com.example.hibernatecache.model.response.OrderResponse;
 import com.example.hibernatecache.model.response.PagedResult;
+import com.example.hibernatecache.services.OrderItemService;
 import com.example.hibernatecache.services.OrderService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
@@ -53,6 +54,9 @@ class OrderControllerTest {
 
     @MockitoBean
     private OrderService orderService;
+
+    @MockitoBean
+    private OrderItemService orderItemService;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -248,7 +252,7 @@ class OrderControllerTest {
 
         this.mockMvc
                 .perform(delete("/api/orders/{id}", orderId))
-                .andExpect(status().isOk())
+                .andExpect(status().isAccepted())
                 .andExpect(jsonPath("$.name", is(order.name())));
     }
 

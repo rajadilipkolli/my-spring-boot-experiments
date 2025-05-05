@@ -36,6 +36,7 @@ public class OrderItem {
 
     @ManyToOne
     @JoinColumn(name = "order_id")
+    @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
     private Order order;
 
     public Long getId() {

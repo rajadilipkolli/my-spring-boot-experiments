@@ -3,12 +3,15 @@ package com.example.hibernatecache.web.controllers;
 import com.example.hibernatecache.exception.OrderNotFoundException;
 import com.example.hibernatecache.model.query.FindOrdersQuery;
 import com.example.hibernatecache.model.request.OrderRequest;
+import com.example.hibernatecache.model.response.OrderItemResponse;
 import com.example.hibernatecache.model.response.OrderResponse;
 import com.example.hibernatecache.model.response.PagedResult;
+import com.example.hibernatecache.services.OrderItemService;
 import com.example.hibernatecache.services.OrderService;
 import com.example.hibernatecache.utils.AppConstants;
 import jakarta.validation.Valid;
 import java.net.URI;
+import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -27,9 +30,11 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 class OrderController {
 
     private final OrderService orderService;
+    private final OrderItemService orderItemService;
 
-    OrderController(OrderService orderService) {
+    OrderController(OrderService orderService, OrderItemService orderItemService) {
         this.orderService = orderService;
+        this.orderItemService = orderItemService;
     }
 
     @GetMapping
@@ -45,6 +50,16 @@ class OrderController {
     @GetMapping("/{id}")
     ResponseEntity<OrderResponse> getOrderById(@PathVariable Long id) {
         return orderService.findOrderById(id).map(ResponseEntity::ok).orElseThrow(() -> new OrderNotFoundException(id));
+    }
+
+    @GetMapping("/{id}/items")
+    ResponseEntity<List<OrderItemResponse>> getOrderItems(@PathVariable Long id) {
+        List<OrderItemResponse> orderItemsByOrderId = orderItemService.findOrderItemsByOrderId(id);
+        if (orderItemsByOrderId.isEmpty()) {
+            throw new OrderNotFoundException(id);
+        } else {
+            return ResponseEntity.ok(orderItemsByOrderId);
+        }
     }
 
     @PostMapping
@@ -67,8 +82,8 @@ class OrderController {
         return orderService
                 .findOrderById(id)
                 .map(order -> {
-                    orderService.deleteOrderById(id);
-                    return ResponseEntity.ok(order);
+                    orderService.deleteOrderById(order.orderId());
+                    return ResponseEntity.accepted().body(order);
                 })
                 .orElseThrow(() -> new OrderNotFoundException(id));
     }

@@ -1,5 +1,6 @@
 package com.example.hibernatecache.entities;
 
+import jakarta.persistence.Cacheable;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -22,6 +23,7 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
                     name = "uc_customer_email",
                     columnNames = {"email"})
         })
+@Cacheable
 @Cache(region = "customerCache", usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Customer {
 
@@ -40,7 +42,7 @@ public class Customer {
     private String phone;
 
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+    @Cache(region = "customerOrdersCache", usage = CacheConcurrencyStrategy.READ_WRITE)
     private List<Order> orders = new ArrayList<>();
 
     public Long getId() {

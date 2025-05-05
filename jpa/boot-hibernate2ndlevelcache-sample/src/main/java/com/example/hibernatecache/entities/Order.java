@@ -37,10 +37,11 @@ public class Order {
 
     @ManyToOne
     @JoinColumn(name = "customer_id")
+    @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
     private Customer customer;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+    @Cache(region = "orderItemsCache", usage = CacheConcurrencyStrategy.READ_WRITE)
     private List<OrderItem> orderItems = new ArrayList<>();
 
     public Long getId() {

@@ -1,6 +1,7 @@
 package com.example.hibernatecache.repositories;
 
 import static org.hibernate.jpa.AvailableHints.HINT_CACHEABLE;
+import static org.hibernate.jpa.HibernateHints.HINT_JDBC_BATCH_SIZE;
 
 import com.example.hibernatecache.entities.Customer;
 import io.hypersistence.utils.spring.repository.BaseJpaRepository;
@@ -20,8 +21,14 @@ public interface CustomerRepository
     @EntityGraph(attributePaths = {"orders"})
     Optional<Customer> findByFirstName(String firstName);
 
+    @Override
+    @QueryHints(@QueryHint(name = HINT_CACHEABLE, value = "true"))
+    @EntityGraph(attributePaths = {"orders"})
+    Optional<Customer> findById(Long aLong);
+
+    @QueryHints(@QueryHint(name = HINT_JDBC_BATCH_SIZE, value = "25"))
+    @Query("delete from Customer ")
     @Transactional
     @Modifying
-    @Query("delete from Customer c")
-    void deleteAll();
+    void deleteAllInBatch();
 }

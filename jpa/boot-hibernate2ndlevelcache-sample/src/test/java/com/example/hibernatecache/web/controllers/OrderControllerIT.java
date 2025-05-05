@@ -17,23 +17,14 @@ import com.example.hibernatecache.entities.Order;
 import com.example.hibernatecache.entities.OrderItem;
 import com.example.hibernatecache.model.request.OrderItemRequest;
 import com.example.hibernatecache.model.request.OrderRequest;
-import com.example.hibernatecache.repositories.CustomerRepository;
-import com.example.hibernatecache.repositories.OrderRepository;
 import java.math.BigDecimal;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 
 class OrderControllerIT extends AbstractIntegrationTest {
-
-    @Autowired
-    private OrderRepository orderRepository;
-
-    @Autowired
-    private CustomerRepository customerRepository;
 
     private List<Order> orderList = null;
 
@@ -41,8 +32,8 @@ class OrderControllerIT extends AbstractIntegrationTest {
 
     @BeforeEach
     void setUp() {
-        orderRepository.deleteAll();
-        customerRepository.deleteAll();
+        orderRepository.deleteAllInBatch();
+        customerRepository.deleteAllInBatch();
 
         savedCustomer = customerRepository.persist(new Customer()
                 .setFirstName("firstName 1")
@@ -195,7 +186,7 @@ class OrderControllerIT extends AbstractIntegrationTest {
 
         this.mockMvc
                 .perform(delete("/api/orders/{id}", order.getId()))
-                .andExpect(status().isOk())
+                .andExpect(status().isAccepted())
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_JSON_VALUE)))
                 .andExpect(jsonPath("$.orderId", is(order.getId()), Long.class))
                 .andExpect(jsonPath("$.customerId", is(savedCustomer.getId()), Long.class))
