@@ -27,9 +27,9 @@ class OrderItemControllerIT extends AbstractIntegrationTest {
 
     @BeforeEach
     void setUp() {
-        customerRepository.deleteAll(); // Delete parent first to cascade
-        orderRepository.deleteAll();
-        orderItemRepository.deleteAll();
+        customerRepository.deleteAllInBatch(); // Delete parent first to cascade
+        orderRepository.deleteAllInBatch();
+        orderItemRepository.deleteAllInBatch();
 
         Customer savedCustomer = customerRepository.persist(createTestCustomer());
         savedOrder = savedCustomer.getOrders().getFirst();

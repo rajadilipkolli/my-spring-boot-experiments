@@ -27,20 +27,9 @@ class EntityCacheIT extends AbstractIntegrationTest {
     @BeforeEach
     void setUp() throws Exception {
         // Clean database between tests - first find existing entities
-        List<Long> orderItems = orderItemRepository.findAllOrderItemIds();
-        List<Long> orders = orderRepository.findAllOrderIds();
-        List<Long> customers = customerRepository.findAllCustomerIds();
-
-        // Delete in proper order to avoid constraint violations
-        if (!orderItems.isEmpty()) {
-            orderItems.forEach(itemId -> orderItemRepository.deleteById(itemId));
-        }
-        if (!orders.isEmpty()) {
-            orders.forEach(orderId -> orderRepository.deleteById(orderId));
-        }
-        if (!customers.isEmpty()) {
-            customers.forEach(customerId -> customerRepository.deleteById(customerId));
-        }
+        orderItemRepository.deleteAllInBatch();
+        orderRepository.deleteAllInBatch();
+        customerRepository.deleteAllInBatch();
 
         // Create test data
         CustomerRequest customerRequest = new CustomerRequest("CacheTest", "LastName", "cache@test.com", "1234567890");
@@ -244,5 +233,64 @@ class EntityCacheIT extends AbstractIntegrationTest {
         // The key test is that the database is hit because the cache was invalidated, 1- customer exists, 1-order, 1-
         // customer
         SQLStatementCountValidator.assertSelectCount(3);
+    }
+
+    @Test
+    void shouldEvictCacheOnOrderItemDelete() throws Exception {
+        // Get order items to cache them first
+        String response = this.mockMvc
+                .perform(get("/api/orders/{id}/items", testOrderId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.size()", is(2)))
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        // Get first order item ID
+        Long orderItemId =
+                objectMapper.readTree(response).get(0).path("orderItemId").asLong();
+
+        // Ensure items are in cache by making a second request - this should hit cache
+        SQLStatementCountValidator.reset();
+
+        this.mockMvc
+                .perform(get("/api/orders/{id}/items", testOrderId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.size()", is(2)));
+
+        // Verify no SQL queries were executed (served from cache)
+        SQLStatementCountValidator.assertSelectCount(0);
+        SQLStatementCountValidator.assertTotalCount(0);
+
+        // -------------------- STEP 1: Delete an order item --------------------
+        this.mockMvc.perform(delete("/api/order/items/{id}", orderItemId)).andExpect(status().isOk());
+
+        // Reset SQL counter after deletion
+        SQLStatementCountValidator.assertDeleteCount(1);
+        SQLStatementCountValidator.reset();
+
+        // -------------------- STEP 2: Verify order items list is updated and cache is invalidated --------------------
+        // Now get order items again - should now have only 1 item left
+        this.mockMvc
+                .perform(get("/api/orders/{id}/items", testOrderId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.size()", is(1)));
+
+        // The cache should be invalidated, causing a database query
+        SQLStatementCountValidator.assertSelectCount(1);
+        SQLStatementCountValidator.assertTotalCount(1);
+
+        // -------------------- STEP 3: Verify parent order cache is also invalidated --------------------
+        SQLStatementCountValidator.reset();
+
+        // Get the order again - should also hit database since its items collection was modified
+        this.mockMvc
+                .perform(get("/api/orders/{id}", testOrderId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.orderItems.size()", is(1)));
+
+        // Order cache should be invalidated due to child collection change
+        SQLStatementCountValidator.assertSelectCount(1);
+        SQLStatementCountValidator.assertTotalCount(1);
     }
 }

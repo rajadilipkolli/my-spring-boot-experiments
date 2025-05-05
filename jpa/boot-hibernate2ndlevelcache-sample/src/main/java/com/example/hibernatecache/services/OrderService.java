@@ -8,10 +8,8 @@ import com.example.hibernatecache.model.query.FindOrdersQuery;
 import com.example.hibernatecache.model.request.OrderRequest;
 import com.example.hibernatecache.model.response.OrderResponse;
 import com.example.hibernatecache.model.response.PagedResult;
-import com.example.hibernatecache.repositories.CustomerRepository;
 import com.example.hibernatecache.repositories.OrderRepository;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
@@ -27,16 +25,13 @@ public class OrderService {
 
     private final OrderRepository orderRepository;
     private final OrderMapper orderMapper;
-    private final CustomerRepository customerRepository;
 
-    @PersistenceContext
-    private EntityManager entityManager;
+    private final EntityManager entityManager;
 
-    public OrderService(
-            OrderRepository orderRepository, OrderMapper orderMapper, CustomerRepository customerRepository) {
+    public OrderService(OrderRepository orderRepository, OrderMapper orderMapper, EntityManager entityManager) {
         this.orderRepository = orderRepository;
         this.orderMapper = orderMapper;
-        this.customerRepository = customerRepository;
+        this.entityManager = entityManager;
     }
 
     public PagedResult<OrderResponse> findAllOrders(FindOrdersQuery findOrdersQuery) {
@@ -101,9 +96,5 @@ public class OrderService {
                 .getEntityManagerFactory()
                 .getCache()
                 .evict(Customer.class, order.getCustomer().getId());
-    }
-
-    public Optional<Order> findById(Long id) {
-        return orderRepository.findById(id);
     }
 }

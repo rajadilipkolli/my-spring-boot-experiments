@@ -1,6 +1,7 @@
 package com.example.hibernatecache.repositories;
 
 import static org.hibernate.jpa.AvailableHints.HINT_CACHEABLE;
+import static org.hibernate.jpa.HibernateHints.HINT_JDBC_BATCH_SIZE;
 
 import com.example.hibernatecache.entities.Order;
 import io.hypersistence.utils.spring.repository.BaseJpaRepository;
@@ -16,11 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 public interface OrderRepository extends BaseJpaRepository<Order, Long>, PagingAndSortingRepository<Order, Long> {
 
-    @Transactional
-    @Modifying
-    @Query("delete from Order o")
-    void deleteAll();
-
     @QueryHints(@QueryHint(name = HINT_CACHEABLE, value = "true"))
     @Query("SELECT o FROM Order o join fetch o.orderItems oi WHERE o.id = :id ORDER BY oi.itemCode")
     Optional<Order> findById(@Param("id") Long id);
@@ -29,12 +25,15 @@ public interface OrderRepository extends BaseJpaRepository<Order, Long>, PagingA
     @Query("SELECT o FROM Order o join fetch o.orderItems oi WHERE o.customer.id = :customerId ORDER BY oi.itemCode")
     List<Order> findByCustomerId(@Param("customerId") Long customerId);
 
-    @Query("SELECT o.id FROM Order o")
-    List<Long> findAllOrderIds();
-
     @Override
     @Transactional
     @Modifying
     @Query("delete from Order o where o.id = :id")
     void deleteById(@Param("id") Long id);
+
+    @QueryHints(@QueryHint(name = HINT_JDBC_BATCH_SIZE, value = "25"))
+    @Query("delete from Order")
+    @Transactional
+    @Modifying
+    void deleteAllInBatch();
 }

@@ -32,8 +32,8 @@ class OrderControllerIT extends AbstractIntegrationTest {
 
     @BeforeEach
     void setUp() {
-        orderRepository.deleteAll();
-        customerRepository.deleteAll();
+        orderRepository.deleteAllInBatch();
+        customerRepository.deleteAllInBatch();
 
         savedCustomer = customerRepository.persist(new Customer()
                 .setFirstName("firstName 1")

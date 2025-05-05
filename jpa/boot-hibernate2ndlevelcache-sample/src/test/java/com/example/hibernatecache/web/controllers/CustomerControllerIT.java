@@ -32,8 +32,8 @@ class CustomerControllerIT extends AbstractIntegrationTest {
 
     @BeforeEach
     void setUp() {
-        orderRepository.deleteAll();
-        customerRepository.deleteAll();
+        orderRepository.deleteAllInBatch();
+        customerRepository.deleteAllInBatch();
 
         customerList = new ArrayList<>();
         customerList.add(new Customer()

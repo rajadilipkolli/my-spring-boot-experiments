@@ -6,14 +6,16 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.times;
 import static org.mockito.BDDMockito.verify;
 import static org.mockito.BDDMockito.willDoNothing;
+import static org.mockito.Mockito.mock;
 
 import com.example.hibernatecache.entities.Customer;
 import com.example.hibernatecache.entities.Order;
 import com.example.hibernatecache.mapper.OrderMapper;
 import com.example.hibernatecache.model.response.OrderResponse;
-import com.example.hibernatecache.repositories.CustomerRepository;
 import com.example.hibernatecache.repositories.OrderRepository;
+import jakarta.persistence.Cache;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Optional;
@@ -31,9 +33,6 @@ class OrderServiceTest {
 
     @Mock
     private OrderMapper orderMapper;
-
-    @Mock
-    private CustomerRepository customerRepository;
 
     @Mock
     private EntityManager entityManager;
@@ -61,13 +60,20 @@ class OrderServiceTest {
         Order testOrder = getOrder();
         given(orderRepository.findById(1L)).willReturn(Optional.of(testOrder));
         willDoNothing().given(orderRepository).deleteById(1L);
-        willDoNothing().given(entityManager).getEntityManagerFactory();
+
+        // Mock EntityManager cache hierarchy
+        EntityManagerFactory mockFactory = mock(EntityManagerFactory.class);
+        Cache mockCache = mock(Cache.class);
+        given(entityManager.getEntityManagerFactory()).willReturn(mockFactory);
+        given(mockFactory.getCache()).willReturn(mockCache);
+        willDoNothing().given(mockCache).evict(Customer.class, 1L);
 
         // when
         orderService.deleteOrderById(1L);
 
         // then
         verify(orderRepository, times(1)).deleteById(1L);
+        verify(mockCache, times(1)).evict(Customer.class, 1L);
     }
 
     private Order getOrder() {
