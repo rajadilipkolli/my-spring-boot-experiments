@@ -22,7 +22,7 @@ public class ContainersConfig {
     @Bean
     RedisContainer redisContainer() throws IOException {
         RedisContainer redisContainer =
-                new RedisContainer(DockerImageName.parse("redis").withTag("7.4.3-alpine"));
+                new RedisContainer(DockerImageName.parse("redis").withTag("8.0.0-alpine"));
         redisContainer.start();
         String ymlContent = """
                 singleServerConfig:
