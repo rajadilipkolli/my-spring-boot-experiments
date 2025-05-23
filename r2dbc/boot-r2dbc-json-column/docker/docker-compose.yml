@@ -10,7 +10,7 @@ services:
       - "5432:5432"
 
   grafanalgtm:
-    image: grafana/otel-lgtm:0.11.1
+    image: grafana/otel-lgtm:0.11.2
     extra_hosts: ['host.docker.internal:host-gateway']
     container_name: grafanalgtm
     environment:
