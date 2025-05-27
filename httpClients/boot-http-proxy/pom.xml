@@ -93,7 +93,7 @@
         <dependency>
             <groupId>org.zalando</groupId>
             <artifactId>logbook-spring-boot-starter</artifactId>
-            <version>3.12.0</version>
+            <version>3.12.1</version>
         </dependency>
 
         <dependency>
