@@ -1,6 +1,7 @@
 package com.example.ultimateredis.repository;
 
 import com.example.ultimateredis.model.Actor;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
@@ -12,5 +13,5 @@ public interface ActorRepository extends CrudRepository<Actor, String> {
 
     Optional<Actor> findByNameAndAge(String name, Integer age);
 
-    void deleteByName(String name);
+    List<Actor> findAllByName(String name);
 }

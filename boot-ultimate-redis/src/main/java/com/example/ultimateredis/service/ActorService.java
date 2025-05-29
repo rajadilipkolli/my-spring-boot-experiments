@@ -44,7 +44,8 @@ public class ActorService {
     }
 
     public void deleteActorByName(String name) {
-        actorRepository.deleteByName(name);
+        List<Actor> actors = actorRepository.findAllByName(name);
+        actors.forEach(actor -> actorRepository.deleteById(actor.getId()));
     }
 
     public void deleteAll() {
