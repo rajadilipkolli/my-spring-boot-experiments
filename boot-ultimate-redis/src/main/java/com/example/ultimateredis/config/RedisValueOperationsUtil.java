@@ -1,5 +1,6 @@
 package com.example.ultimateredis.config;
 
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
@@ -26,5 +27,16 @@ public class RedisValueOperationsUtil<T> {
 
     public void setExpire(String key, long timeout, TimeUnit unit) {
         redisTemplate.expire(key, timeout, unit);
+    }
+
+    public Set<String> getKeysWithPattern(String pattern) {
+        return redisTemplate.keys(pattern);
+    }
+
+    public void deleteByPattern(String pattern) {
+        Set<String> keys = redisTemplate.keys(pattern);
+        if (!keys.isEmpty()) {
+            redisTemplate.delete(keys);
+        }
     }
 }
