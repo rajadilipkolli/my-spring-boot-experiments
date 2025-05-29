@@ -2,6 +2,7 @@ package com.example.ultimateredis.service;
 
 import com.example.ultimateredis.config.RedisValueOperationsUtil;
 import com.example.ultimateredis.model.AddRedisRequest;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,5 +30,15 @@ public class RedisService {
     public String getValue(String key) {
         log.info("get value {}", key);
         return redisStringUtil.getValue(key);
+    }
+
+    public Set<String> getKeysByPattern(String pattern) {
+        log.info("getting keys matching pattern: {}", pattern);
+        return redisStringUtil.getKeysWithPattern(pattern);
+    }
+
+    public void deleteByPattern(String pattern) {
+        log.info("deleting keys matching pattern: {}", pattern);
+        redisStringUtil.deleteByPattern(pattern);
     }
 }
