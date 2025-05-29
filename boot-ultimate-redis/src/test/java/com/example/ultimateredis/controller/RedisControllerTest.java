@@ -127,7 +127,7 @@ class RedisControllerTest extends AbstractIntegrationTest {
     }
 
     @Test
-    @Order(3)
+    @Order(5)
     void expireFromCache() {
         await().pollDelay(Duration.ofMinutes(1))
                 .pollInterval(Duration.ofSeconds(1))
