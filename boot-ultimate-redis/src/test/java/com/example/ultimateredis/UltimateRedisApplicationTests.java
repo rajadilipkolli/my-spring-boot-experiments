@@ -16,8 +16,6 @@ import org.springframework.data.redis.core.RedisTemplate;
 
 class UltimateRedisApplicationTests extends AbstractIntegrationTest {
 
-    @Autowired private RedisTemplate<String, String> stringRedisTemplate;
-
     @Autowired private RedisTemplate<String, Object> redisTemplate;
 
     @Autowired private RedisValueOperationsUtil<String> redisValueOpsUtil;
@@ -36,7 +34,6 @@ class UltimateRedisApplicationTests extends AbstractIntegrationTest {
 
     @Test
     void contextLoads() {
-        assertThat(stringRedisTemplate).isNotNull();
         assertThat(redisTemplate).isNotNull();
     }
 

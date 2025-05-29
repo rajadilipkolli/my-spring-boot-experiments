@@ -67,7 +67,6 @@ public class Initializer implements CommandLineRunner {
             log.info("Saved Actor using Data: {}", actorTom.get());
             sampleName = actorService.findActorByNameAndAge("tom", 60);
             log.info("Fetched Actor: {}", sampleName.isPresent());
-            // Not working
             actorService.deleteActorByName(actorTom.get().getName());
             log.info(
                     "deleted Actor: {}",
