@@ -287,15 +287,19 @@ class ActorControllerTest extends AbstractIntegrationTest {
 
     @Test
     void shouldDeleteActorsByName() {
-        // First verify the actor exists
-        this.mockMvcTester
-                .get()
-                .uri("/api/actors/search/by-name")
-                .param("name", testActor2.getName())
-                .assertThat()
-                .hasStatusOk();
+        // Create additional actors with the same name to test batch deletion
+        Actor duplicateNameActor1 =
+                new Actor(UUID.randomUUID().toString(), testActor2.getName(), 35);
+        Actor duplicateNameActor2 =
+                new Actor(UUID.randomUUID().toString(), testActor2.getName(), 40);
+        actorRepository.save(duplicateNameActor1);
+        actorRepository.save(duplicateNameActor2);
 
-        // Delete by name
+        // First verify multiple actors with the same name exist
+        List<Actor> actorsWithSameName = actorRepository.findAllByName(testActor2.getName());
+        assertThat(actorsWithSameName).hasSize(3); // Original + 2 new ones
+
+        // Delete by name (should use transaction and delete all in one batch)
         this.mockMvcTester
                 .delete()
                 .uri("/api/actors/by-name")
@@ -303,7 +307,7 @@ class ActorControllerTest extends AbstractIntegrationTest {
                 .assertThat()
                 .hasStatus(HttpStatus.NO_CONTENT);
 
-        // Verify the actor was deleted
+        // Verify all actors with that name were deleted
         this.mockMvcTester
                 .get()
                 .uri("/api/actors/search/by-name")
