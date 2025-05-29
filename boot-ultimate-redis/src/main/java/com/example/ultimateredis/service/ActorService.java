@@ -5,6 +5,7 @@ import com.example.ultimateredis.repository.ActorRepository;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class ActorService {
@@ -43,8 +44,10 @@ public class ActorService {
         actorRepository.deleteById(id);
     }
 
+    @Transactional
     public void deleteActorByName(String name) {
-        actorRepository.deleteByName(name);
+        List<String> ids = actorRepository.findAllByName(name).stream().map(Actor::getId).toList();
+        actorRepository.deleteAllById(ids);
     }
 
     public void deleteAll() {

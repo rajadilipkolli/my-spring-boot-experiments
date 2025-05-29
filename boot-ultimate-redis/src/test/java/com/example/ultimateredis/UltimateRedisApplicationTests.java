@@ -9,7 +9,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 
 class UltimateRedisApplicationTests extends AbstractIntegrationTest {
 
-    @Autowired private RedisTemplate<String, String> redisTemplate;
+    @Autowired private RedisTemplate<String, Object> redisTemplate;
 
     @Test
     void contextLoads() {
