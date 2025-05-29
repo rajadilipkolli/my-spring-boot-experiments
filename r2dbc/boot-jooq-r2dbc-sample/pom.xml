@@ -216,7 +216,7 @@
                                     MYSQL: mysql:8.0.33
                                     MARIADB: mariadb:10.11
                                 &ndash;&gt;
-                                <containerImage>postgres:17.4-alpine</containerImage>
+                                <containerImage>postgres:17.5-alpine</containerImage>
                             </database>
                             <flyway>
                                 &lt;!&ndash;

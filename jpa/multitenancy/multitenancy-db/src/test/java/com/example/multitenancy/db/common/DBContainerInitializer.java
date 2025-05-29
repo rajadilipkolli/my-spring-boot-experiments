@@ -11,10 +11,10 @@ public class DBContainerInitializer
         implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
     private static final PostgreSQLContainer<?> POSTGRE_SQL_CONTAINER =
-            new PostgreSQLContainer<>(DockerImageName.parse("postgres").withTag("17.4-alpine"));
+            new PostgreSQLContainer<>(DockerImageName.parse("postgres").withTag("17.5-alpine"));
 
     private static final PostgreSQLContainer<?> POSTGRE_SQL_CONTAINER_1 =
-            new PostgreSQLContainer<>(DockerImageName.parse("postgres").withTag("17.4-alpine"));
+            new PostgreSQLContainer<>(DockerImageName.parse("postgres").withTag("17.5-alpine"));
 
     static {
         Startables.deepStart(POSTGRE_SQL_CONTAINER, POSTGRE_SQL_CONTAINER_1).join();
