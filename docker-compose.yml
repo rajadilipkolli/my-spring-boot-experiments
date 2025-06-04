@@ -65,7 +65,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
 
   mongodb:
-    image: mongo:8.0.9
+    image: mongo:8.0.10
     ports:
       - "27017:27017"
     volumes:
