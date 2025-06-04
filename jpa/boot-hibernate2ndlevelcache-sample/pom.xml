@@ -98,7 +98,7 @@
         <dependency>
             <groupId>org.redisson</groupId>
             <artifactId>redisson-hibernate-6</artifactId>
-            <version>3.48.0</version>
+            <version>3.49.0</version>
         </dependency>
         <dependency>
             <groupId>io.hypersistence</groupId>
