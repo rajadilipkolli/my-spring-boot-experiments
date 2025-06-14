@@ -27,15 +27,14 @@ public class RedisHealthController {
         boolean isConnected;
         String errorMessage = null;
 
-        try {
+        // Use try-with-resources to ensure connection is properly closed
+        try (var connection = redisTemplate.getConnectionFactory().getConnection()) {
             // Ping Redis to check connectivity
-            String pingResult = redisTemplate.getConnectionFactory().getConnection().ping();
+            String pingResult = connection.ping();
             isConnected = "PONG".equalsIgnoreCase(pingResult);
 
             // Add connection info if available
-            healthStatus.put(
-                    "connectionInfo",
-                    redisTemplate.getConnectionFactory().getConnection().serverCommands().info());
+            healthStatus.put("connectionInfo", connection.serverCommands().info());
         } catch (Exception e) {
             isConnected = false;
             errorMessage = e.getMessage();

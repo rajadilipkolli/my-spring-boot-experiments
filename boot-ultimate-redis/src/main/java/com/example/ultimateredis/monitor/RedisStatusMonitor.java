@@ -26,7 +26,7 @@ public class RedisStatusMonitor {
      * Scheduled task that runs every 30 seconds to check Redis connection status Logs any issues
      * encountered
      */
-    @Scheduled(fixedRate = 30000)
+    @Scheduled(fixedRateString = "${redis.monitor.interval:30000}")
     public void monitorRedisStatus() {
         try (RedisConnection connection = redisConnectionFactory.getConnection()) {
             // Check if ping works - do this first since it's simpler
@@ -36,7 +36,7 @@ public class RedisStatusMonitor {
             }
 
             // Get server info
-            Properties info = connection.info();
+            Properties info = connection.serverCommands().info();
 
             String redisVersion = info.getProperty("redis_version");
             String uptime = info.getProperty("uptime_in_seconds");
