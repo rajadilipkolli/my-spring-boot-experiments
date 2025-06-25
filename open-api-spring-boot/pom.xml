@@ -19,7 +19,7 @@
         <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <spring-cloud.version>2025.0.0</spring-cloud.version>
-        <openapi-generator.version>7.13.0</openapi-generator.version>
+        <openapi-generator.version>7.14.0</openapi-generator.version>
         <springdoc-openapi.version>2.8.9</springdoc-openapi.version>
     </properties>
 
