@@ -19,7 +19,7 @@ services:
       - prometheus
 
   prometheus:
-    image: prom/prometheus:v3.4.1
+    image: prom/prometheus:v3.4.2
     extra_hosts: ['host.docker.internal:host-gateway']
     container_name: prometheus
     ports:
