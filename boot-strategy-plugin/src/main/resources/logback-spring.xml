@@ -22,6 +22,7 @@
  			agent=loki4j
  			app=${appName:-boot-strategy-plugin}
  			host=${HOSTNAME:-localhost}
+			traceID=%X{traceId:-NONE}
  		</labels>
  		
  		<!-- Structured metadata for additional context -->
