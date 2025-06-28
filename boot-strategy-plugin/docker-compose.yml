@@ -1,4 +1,4 @@
-version: "3.8"
+name: boot-strategy-plugin
 services:
     tempo:
         image: grafana/tempo:2.7.2
