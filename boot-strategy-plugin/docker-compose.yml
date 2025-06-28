@@ -11,7 +11,8 @@ services:
             - ./platform/tempo/tempo-local.yaml:/etc/tempo.yaml:ro
         ports:
             - "3200:3200"     # Tempo
-            - "4317:4317"     # OTLP
+            - "4317:4317"     # OTLP gRPC
+            - "4318:4318"     # OTLP HTTP
             - "9411:9411"     # Zipkin
         healthcheck:
             interval: 5s

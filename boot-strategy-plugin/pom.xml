@@ -62,7 +62,7 @@
         <!-- For Latency Visualization -->
         <dependency>
             <groupId>io.opentelemetry</groupId>
-            <artifactId>opentelemetry-exporter-zipkin</artifactId>
+            <artifactId>opentelemetry-exporter-otlp</artifactId>
         </dependency>
         <!-- For pushing logs out -->
         <dependency>
