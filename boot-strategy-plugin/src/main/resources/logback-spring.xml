@@ -5,19 +5,30 @@
  	<springProperty scope="context" name="lokiUri" source="loki.uri"/>
 
  	<appender name="LOKI" class="com.github.loki4j.logback.Loki4jAppender">
- 		<batchTimeoutMs>2000</batchTimeoutMs>
+ 		<!-- Batch configuration moved to separate section in v2.0 -->
+ 		<batch>
+ 			<timeoutMs>2000</timeoutMs>
+ 		</batch>
+ 		
+ 		<!-- HTTP configuration -->
  		<http>
  			<url>${lokiUri:-http://localhost:3100/loki/api/v1/push}</url>
  		</http>
- 		<format>
- 			<label>
- 				<pattern>application=${appName},hostname=${HOSTNAME},traceID=%X{traceId:-NONE},level=%level</pattern>
- 			</label>
- 			<message>
- 				<pattern>${FILE_LOG_PATTERN}</pattern>
- 			</message>
- 			<sortByTime>true</sortByTime>
- 		</format>
+ 		
+ 		<!-- Labels configuration (was format.label.pattern in v1.6) -->
+ 		<labels>
+			application=${appName}
+			hostname=${HOSTNAME}
+			traceID=%X{traceId:-NONE}
+			level=%level
+ 		</labels>
+ 		
+ 		<!-- Message configuration (was format.message.pattern in v1.6) -->
+ 		<message>
+ 			<pattern>${FILE_LOG_PATTERN}</pattern>
+ 		</message>
+ 		
+ 		<!-- Enable metrics -->
  		<metricsEnabled>true</metricsEnabled>
  	</appender>
 
@@ -27,4 +38,6 @@
 
     <logger name="com.example.plugin" level="DEBUG"/>
     <logger name="org.springframework" level="INFO"/>
+    <!-- Enable Loki4j debug logging to troubleshoot issues -->
+    <logger name="com.github.loki4j" level="DEBUG"/>
 </configuration>
