@@ -24,4 +24,7 @@
  	<root level="INFO">
  		<appender-ref ref="LOKI"/>
  	</root>
+
+	<logger name="com.example.plugin" level="DEBUG"/>
+    <logger name="org.springframework" level="INFO"/>
 </configuration>

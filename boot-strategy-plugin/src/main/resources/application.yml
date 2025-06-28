@@ -46,3 +46,9 @@ spring:
 
 loki:
   uri: http://localhost:3100/loki/api/v1/push
+
+server:
+  port: 8080
+  compression:
+    enabled: true
+
