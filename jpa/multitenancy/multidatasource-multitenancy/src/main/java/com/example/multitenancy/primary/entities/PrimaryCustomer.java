@@ -7,7 +7,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
-import jakarta.validation.constraints.NotBlank;
 import java.util.Objects;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
@@ -25,12 +24,11 @@ public class PrimaryCustomer {
     private Long id;
 
     @Column(nullable = false)
-    @NotBlank(message = "Text cannot be blank")
     private String text;
 
     @Version
     @Column(name = "version")
-    private Short version;
+    private Short version = 0;
 
     @Column(nullable = false)
     @TenantId

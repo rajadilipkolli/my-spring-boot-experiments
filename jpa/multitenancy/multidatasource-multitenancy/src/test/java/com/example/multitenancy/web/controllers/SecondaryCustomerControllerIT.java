@@ -196,7 +196,7 @@ class SecondaryCustomerControllerIT extends AbstractIntegrationTest {
                     .andExpect(jsonPath("$.instance", is("/api/customers/secondary")))
                     .andExpect(jsonPath("$.violations", hasSize(1)))
                     .andExpect(jsonPath("$.violations[0].field", is("name")))
-                    .andExpect(jsonPath("$.violations[0].message", is("Name cannot be empty")));
+                    .andExpect(jsonPath("$.violations[0].message", is("Name cannot be blank")));
         }
 
         @Test
@@ -212,7 +212,7 @@ class SecondaryCustomerControllerIT extends AbstractIntegrationTest {
                     .andExpect(status().isBadRequest())
                     .andExpect(header().string("Content-Type", is("application/problem+json")))
                     .andExpect(jsonPath("$.violations[0].field", is("name")))
-                    .andExpect(jsonPath("$.violations[0].message", is("Name cannot be empty")));
+                    .andExpect(jsonPath("$.violations[0].message", is("Name cannot be blank")));
         }
 
         @Test
@@ -228,7 +228,7 @@ class SecondaryCustomerControllerIT extends AbstractIntegrationTest {
                     .andExpect(status().isBadRequest())
                     .andExpect(header().string("Content-Type", is("application/problem+json")))
                     .andExpect(jsonPath("$.violations[0].field", is("name")))
-                    .andExpect(jsonPath("$.violations[0].message", is("Name cannot be empty")));
+                    .andExpect(jsonPath("$.violations[0].message", is("Name cannot be blank")));
         }
     }
 

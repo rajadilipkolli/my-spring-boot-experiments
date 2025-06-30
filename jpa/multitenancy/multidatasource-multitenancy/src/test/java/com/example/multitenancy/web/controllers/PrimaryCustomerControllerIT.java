@@ -13,6 +13,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.example.multitenancy.common.AbstractIntegrationTest;
 import com.example.multitenancy.primary.entities.PrimaryCustomer;
+import com.example.multitenancy.primary.model.request.PrimaryCustomerRequest;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -119,7 +120,7 @@ class PrimaryCustomerControllerIT extends AbstractIntegrationTest {
         @Test
         @DisplayName("Should create new customer successfully")
         void shouldCreateNewCustomer() throws Exception {
-            PrimaryCustomer newCustomer = new PrimaryCustomer().setText("New Customer");
+            PrimaryCustomerRequest newCustomer = new PrimaryCustomerRequest("New Customer");
 
             mockMvc.perform(
                             post("/api/customers/primary")
@@ -127,7 +128,7 @@ class PrimaryCustomerControllerIT extends AbstractIntegrationTest {
                                     .contentType(MediaType.APPLICATION_JSON)
                                     .content(objectMapper.writeValueAsString(newCustomer)))
                     .andExpect(status().isCreated())
-                    .andExpect(jsonPath("$.text", is(newCustomer.getText())))
+                    .andExpect(jsonPath("$.text", is(newCustomer.text())))
                     .andExpect(jsonPath("$.tenant", is("primary")))
                     .andExpect(jsonPath("$.id", notNullValue()));
         }
@@ -135,7 +136,7 @@ class PrimaryCustomerControllerIT extends AbstractIntegrationTest {
         @Test
         @DisplayName("Should return 400 when creating customer without text")
         void shouldReturn400WhenCreateNewCustomerWithoutText() throws Exception {
-            PrimaryCustomer primaryCustomer = new PrimaryCustomer().setText(null);
+            PrimaryCustomerRequest primaryCustomer = new PrimaryCustomerRequest(null);
 
             mockMvc.perform(
                             post("/api/customers/primary")
@@ -160,7 +161,7 @@ class PrimaryCustomerControllerIT extends AbstractIntegrationTest {
         @Test
         @DisplayName("Should return 400 when creating customer with empty text")
         void shouldReturn400WhenCreateNewCustomerWithEmptyText() throws Exception {
-            PrimaryCustomer primaryCustomer = new PrimaryCustomer().setText("");
+            PrimaryCustomerRequest primaryCustomer = new PrimaryCustomerRequest("");
 
             mockMvc.perform(
                             post("/api/customers/primary")
@@ -179,7 +180,7 @@ class PrimaryCustomerControllerIT extends AbstractIntegrationTest {
         @Test
         @DisplayName("Should return 400 when creating customer with whitespace-only text")
         void shouldReturn400WhenCreateNewCustomerWithWhitespaceOnlyText() throws Exception {
-            PrimaryCustomer primaryCustomer = new PrimaryCustomer().setText("   ");
+            PrimaryCustomerRequest primaryCustomer = new PrimaryCustomerRequest("   ");
 
             mockMvc.perform(
                             post("/api/customers/primary")
@@ -204,23 +205,26 @@ class PrimaryCustomerControllerIT extends AbstractIntegrationTest {
         @DisplayName("Should update customer successfully")
         void shouldUpdateCustomer() throws Exception {
             PrimaryCustomer primaryCustomer = primaryCustomerList.getFirst();
-            primaryCustomer.setText("Updated Customer");
+            PrimaryCustomerRequest primaryCustomerRequest =
+                    new PrimaryCustomerRequest("Updated Customer");
 
             mockMvc.perform(
                             put("/api/customers/primary/{id}", primaryCustomer.getId())
                                     .header("X-tenantId", "primary")
                                     .contentType(MediaType.APPLICATION_JSON)
-                                    .content(objectMapper.writeValueAsString(primaryCustomer)))
+                                    .content(
+                                            objectMapper.writeValueAsString(
+                                                    primaryCustomerRequest)))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.text", is(primaryCustomer.getText())))
+                    .andExpect(jsonPath("$.id", is(primaryCustomer.getId())))
+                    .andExpect(jsonPath("$.text", is(primaryCustomerRequest.text())))
                     .andExpect(jsonPath("$.tenant", is("primary")));
         }
 
         @Test
         @DisplayName("Should return 404 when updating non-existent customer")
         void shouldReturn404WhenUpdatingNonExistentCustomer() throws Exception {
-            PrimaryCustomer nonExistentCustomer = new PrimaryCustomer().setText("Non-existent");
-            nonExistentCustomer.setId(99999L);
+            PrimaryCustomerRequest nonExistentCustomer = new PrimaryCustomerRequest("Non-existent");
 
             mockMvc.perform(
                             put("/api/customers/primary/{id}", 99999L)
@@ -234,13 +238,13 @@ class PrimaryCustomerControllerIT extends AbstractIntegrationTest {
         @DisplayName("Should return 400 when updating customer with invalid data")
         void shouldReturn400WhenUpdatingCustomerWithInvalidData() throws Exception {
             PrimaryCustomer primaryCustomer = primaryCustomerList.getFirst();
-            primaryCustomer.setText(null);
+            PrimaryCustomerRequest request = new PrimaryCustomerRequest(null);
 
             mockMvc.perform(
                             put("/api/customers/primary/{id}", primaryCustomer.getId())
                                     .header("X-tenantId", "primary")
                                     .contentType(MediaType.APPLICATION_JSON)
-                                    .content(objectMapper.writeValueAsString(primaryCustomer)))
+                                    .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isBadRequest())
                     .andExpect(
                             header().string(

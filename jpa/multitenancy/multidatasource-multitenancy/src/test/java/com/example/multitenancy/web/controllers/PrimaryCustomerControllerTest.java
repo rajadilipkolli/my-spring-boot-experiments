@@ -18,6 +18,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.example.multitenancy.config.multitenant.TenantIdentifierResolver;
 import com.example.multitenancy.primary.controllers.PrimaryCustomerController;
 import com.example.multitenancy.primary.entities.PrimaryCustomer;
+import com.example.multitenancy.primary.model.request.PrimaryCustomerRequest;
 import com.example.multitenancy.primary.services.PrimaryCustomerService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
@@ -92,11 +93,13 @@ class PrimaryCustomerControllerTest {
 
     @Test
     void shouldCreateNewCustomer() throws Exception {
-        given(primaryCustomerService.saveCustomer(any(PrimaryCustomer.class)))
-                .willAnswer((invocation) -> invocation.getArgument(0));
 
         PrimaryCustomer primaryCustomer =
                 new PrimaryCustomer(1L, "some text", (short) 0, "dbsystc");
+
+        given(primaryCustomerService.saveCustomer(any(PrimaryCustomerRequest.class)))
+                .willReturn(primaryCustomer);
+
         this.mockMvc
                 .perform(
                         post("/api/customers/primary")
