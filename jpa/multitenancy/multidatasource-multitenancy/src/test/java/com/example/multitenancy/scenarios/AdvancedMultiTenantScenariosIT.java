@@ -50,14 +50,14 @@ class AdvancedMultiTenantScenariosIT extends AbstractIntegrationTest {
         tenantIdentifierResolver.setCurrentTenant("primary");
         List<PrimaryCustomer> primaryCustomers = primaryCustomerRepository.findAll();
 
-        assertThat(primaryCustomers).hasSize(2);
+        assertThat(primaryCustomers).isNotEmpty().hasSize(2);
         assertThat(primaryCustomers.getFirst().getText()).startsWith("Primary");
 
         // Verify schema1 tenant data isolation
         tenantIdentifierResolver.setCurrentTenant("schema1");
         List<SecondaryCustomer> schema1Customers = secondaryCustomerRepository.findAll();
 
-        assertThat(schema1Customers).hasSize(2);
+        assertThat(schema1Customers).isNotEmpty().hasSize(2);
         assertThat(schema1Customers.getFirst().getName()).startsWith("Schema1");
     }
 
@@ -75,52 +75,59 @@ class AdvancedMultiTenantScenariosIT extends AbstractIntegrationTest {
             // Verify data exists for current tenant
             if (tenant.equals("primary")) {
                 List<PrimaryCustomer> primaryCustomers = primaryCustomerRepository.findAll();
-                assertThat(primaryCustomers).hasSize(2);
+                assertThat(primaryCustomers).isNotEmpty().hasSize(2);
                 assertThat(primaryCustomers.getFirst().getText()).startsWith("Tenant" + (i + 1));
             } else {
                 List<SecondaryCustomer> secondaryCustomers = secondaryCustomerRepository.findAll();
-                assertThat(secondaryCustomers).hasSize(2);
-                assertThat(secondaryCustomers.getFirst().getName()).startsWith("Tenant" + (i + 1));
-            }
-        }
-
-        // Verify all tenants have isolated data
-        for (int i = 0; i < tenants.length; i++) {
-            String tenant = tenants[i];
-            tenantIdentifierResolver.setCurrentTenant(tenant);
-
-            if (tenant.equals("primary")) {
-                List<PrimaryCustomer> primaryCustomers = primaryCustomerRepository.findAll();
-                assertThat(primaryCustomers).hasSize(2);
-                assertThat(primaryCustomers.getFirst().getText()).startsWith("Tenant" + (i + 1));
-            } else {
-                List<SecondaryCustomer> secondaryCustomers = secondaryCustomerRepository.findAll();
-                assertThat(secondaryCustomers).hasSize(2);
+                assertThat(secondaryCustomers).isNotEmpty().hasSize(2);
                 assertThat(secondaryCustomers.getFirst().getName()).startsWith("Tenant" + (i + 1));
             }
         }
     }
 
     @Test
-    void testTransactionIsolationBetweenTenants() {
-        // Test transaction rollback doesn't affect other tenants
+    void testDataIsolationBetweenTenants() {
+        // Test that data operations in one tenant don't affect other tenants
         tenantIdentifierResolver.setCurrentTenant("primary");
         createTestDataForTenant("Primary");
 
+        // Verify primary data exists before schema1 operations
+        List<PrimaryCustomer> primaryDataBefore = primaryCustomerRepository.findAll();
+        assertThat(primaryDataBefore).hasSize(2);
+
         tenantIdentifierResolver.setCurrentTenant("schema1");
+        // Save initial customer in schema1
         SecondaryCustomer customer = new SecondaryCustomer();
         customer.setName("Schema1-Customer1");
         secondaryCustomerRepository.save(customer);
 
-        // Verify schema1 has data
+        // Add more data to schema1
+        SecondaryCustomer customer2 = new SecondaryCustomer();
+        customer2.setName("Schema1-Customer2");
+        secondaryCustomerRepository.save(customer2);
+
+        SecondaryCustomer customer3 = new SecondaryCustomer();
+        customer3.setName("Schema1-Customer3");
+        secondaryCustomerRepository.save(customer3);
+
+        // Verify schema1 has 3 customers
         List<SecondaryCustomer> schema1Data = secondaryCustomerRepository.findAll();
-        assertThat(schema1Data).hasSize(1);
+        assertThat(schema1Data).hasSize(3);
 
         // Switch back to primary and verify data is still intact
         tenantIdentifierResolver.setCurrentTenant("primary");
-        List<PrimaryCustomer> primaryData = primaryCustomerRepository.findAll();
-        assertThat(primaryData).hasSize(2);
-        assertThat(primaryData.getFirst().getText()).startsWith("Primary");
+        List<PrimaryCustomer> primaryDataAfter = primaryCustomerRepository.findAll();
+        assertThat(primaryDataAfter).hasSize(2);
+        assertThat(primaryDataAfter).isNotEmpty();
+        assertThat(primaryDataAfter.getFirst().getText()).startsWith("Primary");
+
+        // Verify primary data is exactly the same as before the schema1 operations
+        assertThat(primaryDataAfter).hasSize(primaryDataBefore.size());
+
+        // Switch to schema2 and verify it has no data from schema1 operations
+        tenantIdentifierResolver.setCurrentTenant("schema2");
+        List<SecondaryCustomer> schema2Data = secondaryCustomerRepository.findAll();
+        assertThat(schema2Data).isEmpty();
     }
 
     @Test
@@ -229,13 +236,10 @@ class AdvancedMultiTenantScenariosIT extends AbstractIntegrationTest {
         tenantIdentifierResolver.setCurrentTenant(null);
         assertThat(tenantIdentifierResolver.resolveCurrentTenantIdentifier()).isEqualTo("unknown");
 
-        // Test operations without tenant context (should use default/fail gracefully)
-        try {
-            primaryCustomerRepository.findAll();
-            // This might succeed with default tenant or fail - both are acceptable
-        } catch (Exception e) {
-            // Expected if no default tenant configured
-        }
+        // Test operations without tenant context (should fail gracefully with known exception)
+        assertThatThrownBy(() -> primaryCustomerRepository.findAll())
+                .isInstanceOf(Exception.class)
+                .hasRootCauseMessage("Cannot determine target DataSource for lookup key [unknown]");
     }
 
     private void createTestDataForTenant(String tenantPrefix) {

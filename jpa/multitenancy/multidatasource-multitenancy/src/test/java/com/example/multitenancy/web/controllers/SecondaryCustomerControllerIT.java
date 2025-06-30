@@ -11,6 +11,7 @@ import com.example.multitenancy.secondary.entities.SecondaryCustomer;
 import com.example.multitenancy.secondary.model.request.SecondaryCustomerRequest;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -525,6 +526,85 @@ class SecondaryCustomerControllerIT extends AbstractIntegrationTest {
             mockMvc.perform(get("/api/customers/secondary").header("X-tenantId", "schema2"))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.size()", is(1)));
+        }
+
+        @Test
+        @DisplayName("Should handle truly concurrent requests to different tenants")
+        void shouldHandleTrulyConcurrentRequestsToDifferentTenants() throws Exception {
+            // Prepare test data for concurrent access
+            SecondaryCustomer schema1Customer =
+                    new SecondaryCustomer().setName("Concurrent Schema1 Customer");
+            SecondaryCustomer schema2Customer =
+                    new SecondaryCustomer().setName("Concurrent Schema2 Customer");
+
+            String schema1Json = objectMapper.writeValueAsString(schema1Customer);
+            String schema2Json = objectMapper.writeValueAsString(schema2Customer);
+
+            // Number of concurrent requests to make per tenant
+            final int CONCURRENT_REQUESTS = 10;
+
+            // Create completable futures for schema1 requests
+            List<CompletableFuture<Void>> schema1Futures = new ArrayList<>();
+            for (int i = 0; i < CONCURRENT_REQUESTS; i++) {
+                CompletableFuture<Void> future =
+                        CompletableFuture.runAsync(
+                                () -> {
+                                    try {
+                                        mockMvc.perform(
+                                                        post("/api/customers/secondary")
+                                                                .header("X-tenantId", "schema1")
+                                                                .contentType(
+                                                                        MediaType.APPLICATION_JSON)
+                                                                .content(schema1Json))
+                                                .andExpect(status().isCreated());
+                                    } catch (Exception e) {
+                                        throw new RuntimeException(e);
+                                    }
+                                });
+                schema1Futures.add(future);
+            }
+
+            // Create completable futures for schema2 requests
+            List<CompletableFuture<Void>> schema2Futures = new ArrayList<>();
+            for (int i = 0; i < CONCURRENT_REQUESTS; i++) {
+                CompletableFuture<Void> future =
+                        CompletableFuture.runAsync(
+                                () -> {
+                                    try {
+                                        mockMvc.perform(
+                                                        post("/api/customers/secondary")
+                                                                .header("X-tenantId", "schema2")
+                                                                .contentType(
+                                                                        MediaType.APPLICATION_JSON)
+                                                                .content(schema2Json))
+                                                .andExpect(status().isCreated());
+                                    } catch (Exception e) {
+                                        throw new RuntimeException(e);
+                                    }
+                                });
+                schema2Futures.add(future);
+            }
+
+            // Wait for all futures to complete
+            CompletableFuture<Void> allSchema1Futures =
+                    CompletableFuture.allOf(schema1Futures.toArray(new CompletableFuture[0]));
+            CompletableFuture<Void> allSchema2Futures =
+                    CompletableFuture.allOf(schema2Futures.toArray(new CompletableFuture[0]));
+
+            // Join both sets of futures
+            CompletableFuture.allOf(allSchema1Futures, allSchema2Futures).join();
+
+            // Verify data integrity - each schema should have received its requests
+            mockMvc.perform(get("/api/customers/secondary").header("X-tenantId", "schema1"))
+                    .andExpect(status().isOk())
+                    .andExpect(
+                            jsonPath(
+                                    "$.size()",
+                                    is(3 + CONCURRENT_REQUESTS))); // 3 from setUp + new ones
+
+            mockMvc.perform(get("/api/customers/secondary").header("X-tenantId", "schema2"))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.size()", is(CONCURRENT_REQUESTS)));
         }
     }
 }
