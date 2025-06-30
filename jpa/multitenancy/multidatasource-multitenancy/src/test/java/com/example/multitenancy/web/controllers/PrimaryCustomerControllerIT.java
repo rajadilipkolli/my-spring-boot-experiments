@@ -16,9 +16,11 @@ import com.example.multitenancy.primary.entities.PrimaryCustomer;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 
+@DisplayName("Primary Customer Controller Integration Tests")
 class PrimaryCustomerControllerIT extends AbstractIntegrationTest {
 
     private List<PrimaryCustomer> primaryCustomerList = null;
@@ -113,7 +115,7 @@ class PrimaryCustomerControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.instance", is("/api/customers/primary")))
                 .andExpect(jsonPath("$.violations", hasSize(1)))
                 .andExpect(jsonPath("$.violations[0].field", is("text")))
-                .andExpect(jsonPath("$.violations[0].message", is("Text cannot be empty")))
+                .andExpect(jsonPath("$.violations[0].message", is("Text cannot be blank")))
                 .andReturn();
     }
 

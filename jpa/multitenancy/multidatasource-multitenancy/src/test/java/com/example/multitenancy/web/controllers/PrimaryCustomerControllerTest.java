@@ -127,7 +127,7 @@ class PrimaryCustomerControllerTest {
                 .andExpect(jsonPath("$.instance", is("/api/customers/primary")))
                 .andExpect(jsonPath("$.violations", hasSize(1)))
                 .andExpect(jsonPath("$.violations[0].field", is("text")))
-                .andExpect(jsonPath("$.violations[0].message", is("Text cannot be empty")))
+                .andExpect(jsonPath("$.violations[0].message", is("Text cannot be blank")))
                 .andReturn();
     }
 
