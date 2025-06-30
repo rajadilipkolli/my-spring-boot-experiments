@@ -3,12 +3,12 @@ package com.example.multitenancy.primary.controllers;
 import com.example.multitenancy.primary.entities.PrimaryCustomer;
 import com.example.multitenancy.primary.services.PrimaryCustomerService;
 import com.example.multitenancy.utils.AppConstants;
+import jakarta.validation.Valid;
 import java.util.List;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,11 +22,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/customers/primary")
-@Slf4j
-@RequiredArgsConstructor
 public class PrimaryCustomerController {
 
+    private static final Logger log = LoggerFactory.getLogger(PrimaryCustomerController.class);
     private final PrimaryCustomerService primaryCustomerService;
+
+    public PrimaryCustomerController(PrimaryCustomerService primaryCustomerService) {
+        this.primaryCustomerService = primaryCustomerService;
+    }
 
     @GetMapping
     public List<PrimaryCustomer> getAllCustomers(
@@ -48,7 +51,7 @@ public class PrimaryCustomerController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public PrimaryCustomer createCustomer(
-            @RequestBody @Validated PrimaryCustomer primaryCustomer,
+            @RequestBody @Valid PrimaryCustomer primaryCustomer,
             @RequestHeader(AppConstants.X_TENANT_ID) String tenantId) {
         log.info("creating customer by for tenant : {}", tenantId);
         return primaryCustomerService.saveCustomer(primaryCustomer);
@@ -57,7 +60,7 @@ public class PrimaryCustomerController {
     @PutMapping("/{id}")
     public ResponseEntity<PrimaryCustomer> updateCustomer(
             @PathVariable Long id,
-            @RequestBody PrimaryCustomer primaryCustomer,
+            @RequestBody @Valid PrimaryCustomer primaryCustomer,
             @RequestHeader(AppConstants.X_TENANT_ID) String tenantId) {
         log.info("updating customer for id {} in tenant : {}", id, tenantId);
         return primaryCustomerService
