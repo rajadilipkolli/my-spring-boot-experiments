@@ -9,10 +9,8 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Version;
 import jakarta.validation.constraints.NotBlank;
 import java.util.Objects;
-import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import org.hibernate.annotations.TenantId;
 import org.hibernate.proxy.HibernateProxy;
 
@@ -30,7 +28,6 @@ public class PrimaryCustomer {
     @NotBlank(message = "Text cannot be blank")
     private String text;
 
-    @Setter(AccessLevel.NONE)
     @Version
     @Column(name = "version")
     private Short version;
@@ -59,6 +56,11 @@ public class PrimaryCustomer {
 
     public Short getVersion() {
         return version;
+    }
+
+    public PrimaryCustomer setVersion(Short version) {
+        this.version = version;
+        return this;
     }
 
     public String getTenant() {
@@ -95,9 +97,5 @@ public class PrimaryCustomer {
                         .getPersistentClass()
                         .hashCode()
                 : getClass().hashCode();
-    }
-
-    public void setVersion(Short version) {
-        this.version = version;
     }
 }
