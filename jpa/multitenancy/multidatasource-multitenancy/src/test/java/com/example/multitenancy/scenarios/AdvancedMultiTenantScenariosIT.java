@@ -12,10 +12,10 @@ import com.example.multitenancy.primary.entities.PrimaryCustomer;
 import com.example.multitenancy.primary.model.request.PrimaryCustomerRequest;
 import com.example.multitenancy.secondary.entities.SecondaryCustomer;
 import com.example.multitenancy.secondary.model.request.SecondaryCustomerRequest;
-import jakarta.validation.ConstraintViolationException;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.MediaType;
 
 class AdvancedMultiTenantScenariosIT extends AbstractIntegrationTest {
@@ -173,8 +173,8 @@ class AdvancedMultiTenantScenariosIT extends AbstractIntegrationTest {
                             invalidCustomer.setText(""); // Invalid empty text
                             primaryCustomerRepository.saveAndFlush(invalidCustomer);
                         })
-                .isInstanceOf(ConstraintViolationException.class)
-                .hasMessageContaining("validation");
+                .isInstanceOf(DataIntegrityViolationException.class)
+                .hasMessageContaining("cannot insert NULL");
 
         // Verify tenant context is still correct
         assertThat(tenantIdentifierResolver.resolveCurrentTenantIdentifier()).isEqualTo("primary");

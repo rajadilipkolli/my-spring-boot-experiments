@@ -100,12 +100,14 @@ class PrimaryCustomerControllerTest {
         given(primaryCustomerService.saveCustomer(any(PrimaryCustomerRequest.class)))
                 .willReturn(primaryCustomer);
 
+        PrimaryCustomerRequest request = new PrimaryCustomerRequest("some text");
+
         this.mockMvc
                 .perform(
                         post("/api/customers/primary")
                                 .header("X-tenantId", "primary")
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(primaryCustomer)))
+                                .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id", notNullValue()))
                 .andExpect(jsonPath("$.text", is(primaryCustomer.getText())));
