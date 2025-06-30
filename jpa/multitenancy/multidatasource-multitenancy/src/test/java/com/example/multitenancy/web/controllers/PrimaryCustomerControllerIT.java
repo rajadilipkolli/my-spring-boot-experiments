@@ -216,8 +216,9 @@ class PrimaryCustomerControllerIT extends AbstractIntegrationTest {
                                             objectMapper.writeValueAsString(
                                                     primaryCustomerRequest)))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.id", is(primaryCustomer.getId())))
+                    .andExpect(jsonPath("$.id", is(primaryCustomer.getId()), Long.class))
                     .andExpect(jsonPath("$.text", is(primaryCustomerRequest.text())))
+                    .andExpect(jsonPath("$.version", is(1)))
                     .andExpect(jsonPath("$.tenant", is("primary")));
         }
 
