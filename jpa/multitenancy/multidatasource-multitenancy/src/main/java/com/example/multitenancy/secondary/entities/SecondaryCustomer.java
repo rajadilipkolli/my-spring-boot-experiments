@@ -22,11 +22,6 @@ public class SecondaryCustomer {
     @NotBlank(message = "Name cannot be empty")
     private String name;
 
-    public SecondaryCustomer(Long id, String name) {
-        this.id = id;
-        this.name = name;
-    }
-
     public SecondaryCustomer() {}
 
     public Long getId() {

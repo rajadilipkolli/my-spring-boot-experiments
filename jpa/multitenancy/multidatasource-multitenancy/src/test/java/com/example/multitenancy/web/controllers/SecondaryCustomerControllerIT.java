@@ -24,9 +24,9 @@ class SecondaryCustomerControllerIT extends AbstractIntegrationTest {
         secondaryCustomerRepository.deleteAllInBatch();
 
         secondaryCustomerList = new ArrayList<>();
-        secondaryCustomerList.add(new SecondaryCustomer(null, "First Customer"));
-        secondaryCustomerList.add(new SecondaryCustomer(null, "Second Customer"));
-        secondaryCustomerList.add(new SecondaryCustomer(null, "Third Customer"));
+        secondaryCustomerList.add(new SecondaryCustomer().setName("First Customer"));
+        secondaryCustomerList.add(new SecondaryCustomer().setName("Second Customer"));
+        secondaryCustomerList.add(new SecondaryCustomer().setName("Third Customer"));
         secondaryCustomerList = secondaryCustomerRepository.saveAll(secondaryCustomerList);
     }
 
@@ -86,7 +86,7 @@ class SecondaryCustomerControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldCreateNewCustomer() throws Exception {
-        SecondaryCustomer newCustomer = new SecondaryCustomer(null, "New Customer");
+        SecondaryCustomer newCustomer = new SecondaryCustomer().setName("New Customer");
         this.mockMvc
                 .perform(
                         post("/api/customers/secondary")
@@ -100,7 +100,7 @@ class SecondaryCustomerControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldReturn400WhenCreateNewCustomerWithoutName() throws Exception {
-        SecondaryCustomer secondaryCustomer = new SecondaryCustomer(null, null);
+        SecondaryCustomer secondaryCustomer = new SecondaryCustomer().setName(null);
 
         this.mockMvc
                 .perform(

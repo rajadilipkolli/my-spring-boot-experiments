@@ -34,7 +34,7 @@ public class PrimaryCustomer {
 
     @Column(nullable = false)
     @TenantId
-    private String tenant;
+    private String tenant = "primary";
 
     public Long getId() {
         return id;
