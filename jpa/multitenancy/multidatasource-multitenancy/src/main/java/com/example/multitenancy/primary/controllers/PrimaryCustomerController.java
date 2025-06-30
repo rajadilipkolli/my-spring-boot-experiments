@@ -1,6 +1,7 @@
 package com.example.multitenancy.primary.controllers;
 
 import com.example.multitenancy.primary.entities.PrimaryCustomer;
+import com.example.multitenancy.primary.model.request.PrimaryCustomerRequest;
 import com.example.multitenancy.primary.services.PrimaryCustomerService;
 import com.example.multitenancy.utils.AppConstants;
 import jakarta.validation.Valid;
@@ -51,23 +52,25 @@ public class PrimaryCustomerController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public PrimaryCustomer createCustomer(
-            @RequestBody @Valid PrimaryCustomer primaryCustomer,
+            @RequestBody @Valid PrimaryCustomerRequest primaryCustomerRequest,
             @RequestHeader(AppConstants.X_TENANT_ID) String tenantId) {
         log.info("creating customer by for tenant : {}", tenantId);
-        return primaryCustomerService.saveCustomer(primaryCustomer);
+        return primaryCustomerService.saveCustomer(primaryCustomerRequest);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<PrimaryCustomer> updateCustomer(
             @PathVariable Long id,
-            @RequestBody @Valid PrimaryCustomer primaryCustomer,
+            @RequestBody @Valid PrimaryCustomerRequest primaryCustomerRequest,
             @RequestHeader(AppConstants.X_TENANT_ID) String tenantId) {
         log.info("updating customer for id {} in tenant : {}", id, tenantId);
         return primaryCustomerService
                 .findCustomerById(id)
                 .map(
                         customerObj -> {
-                            primaryCustomer.setId(id);
+                            PrimaryCustomer primaryCustomer = new PrimaryCustomer();
+                            primaryCustomer.setText(primaryCustomerRequest.text());
+                            primaryCustomer.setId(customerObj.getId());
                             return ResponseEntity.ok(
                                     primaryCustomerService.saveCustomer(primaryCustomer));
                         })

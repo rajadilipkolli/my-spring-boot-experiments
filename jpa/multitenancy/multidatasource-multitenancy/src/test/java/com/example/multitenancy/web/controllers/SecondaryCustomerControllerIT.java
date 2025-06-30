@@ -8,6 +8,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.example.multitenancy.common.AbstractIntegrationTest;
 import com.example.multitenancy.secondary.entities.SecondaryCustomer;
+import com.example.multitenancy.secondary.model.request.SecondaryCustomerRequest;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -140,7 +141,7 @@ class SecondaryCustomerControllerIT extends AbstractIntegrationTest {
         @Test
         @DisplayName("Should create new customer successfully")
         void shouldCreateNewCustomer() throws Exception {
-            SecondaryCustomer newCustomer = new SecondaryCustomer().setName("New Customer");
+            SecondaryCustomerRequest newCustomer = new SecondaryCustomerRequest("New Customer");
 
             mockMvc.perform(
                             post("/api/customers/secondary")
@@ -148,14 +149,14 @@ class SecondaryCustomerControllerIT extends AbstractIntegrationTest {
                                     .contentType(MediaType.APPLICATION_JSON)
                                     .content(objectMapper.writeValueAsString(newCustomer)))
                     .andExpect(status().isCreated())
-                    .andExpect(jsonPath("$.name", is(newCustomer.getName())))
+                    .andExpect(jsonPath("$.name", is(newCustomer.name())))
                     .andExpect(jsonPath("$.id", notNullValue()));
         }
 
         @Test
         @DisplayName("Should create customer in different tenant without conflicts")
         void shouldCreateCustomerInDifferentTenant() throws Exception {
-            SecondaryCustomer newCustomer = new SecondaryCustomer().setName("Schema2 Customer");
+            SecondaryCustomerRequest newCustomer = new SecondaryCustomerRequest("Schema2 Customer");
 
             mockMvc.perform(
                             post("/api/customers/secondary")
@@ -163,7 +164,7 @@ class SecondaryCustomerControllerIT extends AbstractIntegrationTest {
                                     .contentType(MediaType.APPLICATION_JSON)
                                     .content(objectMapper.writeValueAsString(newCustomer)))
                     .andExpect(status().isCreated())
-                    .andExpect(jsonPath("$.name", is(newCustomer.getName())))
+                    .andExpect(jsonPath("$.name", is(newCustomer.name())))
                     .andExpect(jsonPath("$.id", notNullValue()));
 
             // Verify tenant isolation - should still have 3 customers in schema1
@@ -180,7 +181,7 @@ class SecondaryCustomerControllerIT extends AbstractIntegrationTest {
         @Test
         @DisplayName("Should return 400 when creating customer without name")
         void shouldReturn400WhenCreateNewCustomerWithoutName() throws Exception {
-            SecondaryCustomer secondaryCustomer = new SecondaryCustomer().setName(null);
+            SecondaryCustomerRequest secondaryCustomer = new SecondaryCustomerRequest(null);
 
             mockMvc.perform(
                             post("/api/customers/secondary")
@@ -196,13 +197,13 @@ class SecondaryCustomerControllerIT extends AbstractIntegrationTest {
                     .andExpect(jsonPath("$.instance", is("/api/customers/secondary")))
                     .andExpect(jsonPath("$.violations", hasSize(1)))
                     .andExpect(jsonPath("$.violations[0].field", is("name")))
-                    .andExpect(jsonPath("$.violations[0].message", is("Name cannot be empty")));
+                    .andExpect(jsonPath("$.violations[0].message", is("Name cannot be blank")));
         }
 
         @Test
         @DisplayName("Should return 400 when creating customer with empty name")
         void shouldReturn400WhenCreateNewCustomerWithEmptyName() throws Exception {
-            SecondaryCustomer secondaryCustomer = new SecondaryCustomer().setName("");
+            var secondaryCustomer = new SecondaryCustomerRequest("");
 
             mockMvc.perform(
                             post("/api/customers/secondary")
@@ -212,13 +213,13 @@ class SecondaryCustomerControllerIT extends AbstractIntegrationTest {
                     .andExpect(status().isBadRequest())
                     .andExpect(header().string("Content-Type", is("application/problem+json")))
                     .andExpect(jsonPath("$.violations[0].field", is("name")))
-                    .andExpect(jsonPath("$.violations[0].message", is("Name cannot be empty")));
+                    .andExpect(jsonPath("$.violations[0].message", is("Name cannot be blank")));
         }
 
         @Test
         @DisplayName("Should return 400 when creating customer with whitespace-only name")
         void shouldReturn400WhenCreateNewCustomerWithWhitespaceOnlyName() throws Exception {
-            SecondaryCustomer secondaryCustomer = new SecondaryCustomer().setName("   ");
+            var secondaryCustomer = new SecondaryCustomerRequest("   ");
 
             mockMvc.perform(
                             post("/api/customers/secondary")
@@ -228,7 +229,7 @@ class SecondaryCustomerControllerIT extends AbstractIntegrationTest {
                     .andExpect(status().isBadRequest())
                     .andExpect(header().string("Content-Type", is("application/problem+json")))
                     .andExpect(jsonPath("$.violations[0].field", is("name")))
-                    .andExpect(jsonPath("$.violations[0].message", is("Name cannot be empty")));
+                    .andExpect(jsonPath("$.violations[0].message", is("Name cannot be blank")));
         }
     }
 
@@ -240,15 +241,15 @@ class SecondaryCustomerControllerIT extends AbstractIntegrationTest {
         @DisplayName("Should update customer successfully")
         void shouldUpdateCustomer() throws Exception {
             SecondaryCustomer secondaryCustomer = secondaryCustomerList.getFirst();
-            secondaryCustomer.setName("Updated Customer");
+            var updateRequest = new SecondaryCustomerRequest("Updated Customer");
 
             mockMvc.perform(
                             put("/api/customers/secondary/{id}", secondaryCustomer.getId())
                                     .header("X-tenantId", "schema1")
                                     .contentType(MediaType.APPLICATION_JSON)
-                                    .content(objectMapper.writeValueAsString(secondaryCustomer)))
+                                    .content(objectMapper.writeValueAsString(updateRequest)))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.name", is(secondaryCustomer.getName())))
+                    .andExpect(jsonPath("$.name", is(updateRequest.name())))
                     .andExpect(jsonPath("$.id", is(secondaryCustomer.getId().intValue())));
         }
 
@@ -256,21 +257,21 @@ class SecondaryCustomerControllerIT extends AbstractIntegrationTest {
         @DisplayName("Should return 404 when updating customer in wrong tenant")
         void shouldReturn404WhenUpdatingCustomerInWrongTenant() throws Exception {
             SecondaryCustomer secondaryCustomer = secondaryCustomerList.getFirst();
-            secondaryCustomer.setName("Updated Customer");
+            var updateRequest = new SecondaryCustomerRequest("Updated Customer");
 
             mockMvc.perform(
                             put("/api/customers/secondary/{id}", secondaryCustomer.getId())
                                     .header("X-tenantId", "schema2")
                                     .contentType(MediaType.APPLICATION_JSON)
-                                    .content(objectMapper.writeValueAsString(secondaryCustomer)))
+                                    .content(objectMapper.writeValueAsString(updateRequest)))
                     .andExpect(status().isNotFound());
         }
 
         @Test
         @DisplayName("Should return 404 when updating non-existent customer")
         void shouldReturn404WhenUpdatingNonExistentCustomer() throws Exception {
-            SecondaryCustomer nonExistentCustomer =
-                    new SecondaryCustomer().setId(99999L).setName("Non-existent");
+            SecondaryCustomerRequest nonExistentCustomer =
+                    new SecondaryCustomerRequest("Non-existent");
 
             mockMvc.perform(
                             put("/api/customers/secondary/{id}", 99999L)
@@ -284,13 +285,13 @@ class SecondaryCustomerControllerIT extends AbstractIntegrationTest {
         @DisplayName("Should return 400 when updating customer with invalid data")
         void shouldReturn400WhenUpdatingCustomerWithInvalidData() throws Exception {
             SecondaryCustomer secondaryCustomer = secondaryCustomerList.getFirst();
-            secondaryCustomer.setName(null);
+            var updateRequest = new SecondaryCustomerRequest(null);
 
             mockMvc.perform(
                             put("/api/customers/secondary/{id}", secondaryCustomer.getId())
                                     .header("X-tenantId", "schema1")
                                     .contentType(MediaType.APPLICATION_JSON)
-                                    .content(objectMapper.writeValueAsString(secondaryCustomer)))
+                                    .content(objectMapper.writeValueAsString(updateRequest)))
                     .andExpect(status().isBadRequest())
                     .andExpect(header().string("Content-Type", is("application/problem+json")));
         }

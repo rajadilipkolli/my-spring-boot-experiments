@@ -6,7 +6,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotBlank;
 import java.util.Objects;
 import org.hibernate.proxy.HibernateProxy;
 
@@ -19,7 +18,6 @@ public class SecondaryCustomer {
     private Long id;
 
     @Column(name = "name", nullable = false)
-    @NotBlank(message = "Name cannot be empty")
     private String name;
 
     public SecondaryCustomer() {}
