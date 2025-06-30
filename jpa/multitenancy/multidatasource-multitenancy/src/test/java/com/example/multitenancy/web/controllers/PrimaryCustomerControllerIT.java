@@ -308,7 +308,7 @@ class PrimaryCustomerControllerIT extends AbstractIntegrationTest {
         @DisplayName("Should handle very long customer text")
         void shouldHandleVeryLongCustomerText() throws Exception {
             String longText = "A".repeat(1000); // Very long text
-            PrimaryCustomer customerWithLongText = new PrimaryCustomer().setText(longText);
+            PrimaryCustomerRequest customerWithLongText = new PrimaryCustomerRequest(longText);
 
             // This might pass or fail depending on database constraints
             // The test verifies the application handles it gracefully
@@ -338,8 +338,8 @@ class PrimaryCustomerControllerIT extends AbstractIntegrationTest {
         @DisplayName("Should handle special characters in customer text")
         void shouldHandleSpecialCharactersInCustomerText() throws Exception {
             String specialCharText = "Customer with émojis 🎉 and spéciál çhars";
-            PrimaryCustomer customerWithSpecialChars =
-                    new PrimaryCustomer().setText(specialCharText);
+            PrimaryCustomerRequest customerWithSpecialChars =
+                    new PrimaryCustomerRequest(specialCharText);
 
             mockMvc.perform(
                             post("/api/customers/primary")
@@ -356,8 +356,8 @@ class PrimaryCustomerControllerIT extends AbstractIntegrationTest {
         @DisplayName("Should handle concurrent requests properly")
         void shouldHandleConcurrentRequestsProperly() throws Exception {
             // This is a basic test - in a real scenario, you'd use proper concurrency testing
-            PrimaryCustomer customer1 = new PrimaryCustomer().setText("Concurrent Customer 1");
-            PrimaryCustomer customer2 = new PrimaryCustomer().setText("Concurrent Customer 2");
+            PrimaryCustomerRequest customer1 = new PrimaryCustomerRequest("Concurrent Customer 1");
+            PrimaryCustomerRequest customer2 = new PrimaryCustomerRequest("Concurrent Customer 2");
 
             // Simulate near-concurrent requests
             mockMvc.perform(

@@ -249,7 +249,7 @@ class SecondaryCustomerControllerIT extends AbstractIntegrationTest {
                                     .contentType(MediaType.APPLICATION_JSON)
                                     .content(objectMapper.writeValueAsString(updateRequest)))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.name", is(secondaryCustomer.getName())))
+                    .andExpect(jsonPath("$.name", is(updateRequest.name())))
                     .andExpect(jsonPath("$.id", is(secondaryCustomer.getId().intValue())));
         }
 

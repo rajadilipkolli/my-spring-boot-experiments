@@ -1,6 +1,7 @@
 package com.example.multitenancy.scenarios;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -11,6 +12,7 @@ import com.example.multitenancy.primary.entities.PrimaryCustomer;
 import com.example.multitenancy.primary.model.request.PrimaryCustomerRequest;
 import com.example.multitenancy.secondary.entities.SecondaryCustomer;
 import com.example.multitenancy.secondary.model.request.SecondaryCustomerRequest;
+import jakarta.validation.ConstraintViolationException;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -164,14 +166,15 @@ class AdvancedMultiTenantScenariosIT extends AbstractIntegrationTest {
         // Test that errors don't corrupt tenant context
         tenantIdentifierResolver.setCurrentTenant("primary");
 
-        try {
-            // Attempt invalid operation
-            PrimaryCustomer invalidCustomer = new PrimaryCustomer();
-            invalidCustomer.setText(""); // Invalid empty text
-            primaryCustomerRepository.saveAndFlush(invalidCustomer);
-        } catch (Exception e) {
-            // Expected to fail
-        }
+        // Test that validation errors don't corrupt tenant context
+        assertThatThrownBy(
+                        () -> {
+                            PrimaryCustomer invalidCustomer = new PrimaryCustomer();
+                            invalidCustomer.setText(""); // Invalid empty text
+                            primaryCustomerRepository.saveAndFlush(invalidCustomer);
+                        })
+                .isInstanceOf(ConstraintViolationException.class)
+                .hasMessageContaining("validation");
 
         // Verify tenant context is still correct
         assertThat(tenantIdentifierResolver.resolveCurrentTenantIdentifier()).isEqualTo("primary");
