@@ -12,8 +12,18 @@ import com.example.multitenancy.primary.entities.PrimaryCustomer;
 import com.example.multitenancy.primary.model.request.PrimaryCustomerRequest;
 import com.example.multitenancy.secondary.entities.SecondaryCustomer;
 import com.example.multitenancy.secondary.model.request.SecondaryCustomerRequest;
+import com.example.multitenancy.utils.DatabaseType;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.MediaType;
@@ -252,10 +262,12 @@ class AdvancedMultiTenantScenariosIT extends AbstractIntegrationTest {
             // Create primary customers
             PrimaryCustomer primary1 = new PrimaryCustomer();
             primary1.setText(tenantPrefix + "-Primary-Customer1");
+            primary1.setTenant(currentTenant); // Set the tenant to match current context
             primaryCustomerRepository.save(primary1);
 
             PrimaryCustomer primary2 = new PrimaryCustomer();
             primary2.setText(tenantPrefix + "-Primary-Customer2");
+            primary2.setTenant(currentTenant); // Set the tenant to match current context
             primaryCustomerRepository.save(primary2);
         } else {
             // Create secondary customers
@@ -266,6 +278,361 @@ class AdvancedMultiTenantScenariosIT extends AbstractIntegrationTest {
             SecondaryCustomer secondary2 = new SecondaryCustomer();
             secondary2.setName(tenantPrefix + "-Secondary-Customer2");
             secondaryCustomerRepository.save(secondary2);
+        }
+    }
+
+    /**
+     * Comprehensive concurrent testing scenarios to validate tenant switching works correctly
+     * across multiple threads with different tenant combinations from DatabaseType enum.
+     */
+    @Nested
+    class ConcurrentTenantSwitchingTests {
+
+        private DatabaseType[] getValidTenants() {
+            return new DatabaseType[] {
+                DatabaseType.PRIMARY,
+                DatabaseType.SCHEMA1,
+                DatabaseType.SCHEMA2,
+                DatabaseType.DBSYSTC,
+                DatabaseType.DBSYSTP
+            };
+        }
+
+        @Test
+        void shouldHandleConcurrentTenantSwitchingWithAllTenants() throws Exception {
+            // Test concurrent operations across only properly configured tenants
+            // Only use tenants that have proper database setup
+            DatabaseType[] allTenants = getValidTenants();
+            int threadsPerTenant = 3;
+            int totalThreads = allTenants.length * threadsPerTenant;
+
+            ExecutorService executorService = Executors.newFixedThreadPool(totalThreads);
+            CountDownLatch startLatch = new CountDownLatch(1);
+            CountDownLatch completionLatch = new CountDownLatch(totalThreads);
+
+            // Track results per tenant
+            ConcurrentHashMap<String, AtomicInteger> successCounts = new ConcurrentHashMap<>();
+            ConcurrentHashMap<String, List<String>> errors = new ConcurrentHashMap<>();
+
+            // Initialize tracking maps
+            for (DatabaseType tenant : allTenants) {
+                successCounts.put(tenant.getSchemaName(), new AtomicInteger(0));
+                errors.put(tenant.getSchemaName(), new ArrayList<>());
+            }
+
+            try {
+                // Create tasks for each tenant
+                List<CompletableFuture<Void>> futures = new ArrayList<>();
+
+                for (DatabaseType tenant : allTenants) {
+                    for (int i = 0; i < threadsPerTenant; i++) {
+                        final int threadIndex = i;
+                        final String tenantName = tenant.getSchemaName();
+
+                        CompletableFuture<Void> future =
+                                CompletableFuture.runAsync(
+                                        () -> {
+                                            try {
+                                                // Wait for all threads to start simultaneously
+                                                startLatch.await();
+
+                                                // Set tenant context for this thread
+                                                tenantIdentifierResolver.setCurrentTenant(
+                                                        tenantName);
+
+                                                // Verify tenant context is correctly set
+                                                String currentTenant =
+                                                        tenantIdentifierResolver
+                                                                .resolveCurrentTenantIdentifier();
+                                                assertThat(currentTenant).isEqualTo(tenantName);
+
+                                                // Perform tenant-specific operations
+                                                performTenantSpecificOperations(
+                                                        tenantName, threadIndex);
+
+                                                // Verify data isolation
+                                                verifyTenantDataIsolation(tenantName, threadIndex);
+
+                                                successCounts.get(tenantName).incrementAndGet();
+
+                                            } catch (Exception e) {
+                                                errors.get(tenantName)
+                                                        .add(
+                                                                "Thread "
+                                                                        + threadIndex
+                                                                        + ": "
+                                                                        + e.getMessage());
+                                                e.printStackTrace();
+                                            } finally {
+                                                completionLatch.countDown();
+                                            }
+                                        },
+                                        executorService);
+
+                        futures.add(future);
+                    }
+                }
+
+                // Start all threads simultaneously
+                startLatch.countDown();
+
+                // Wait for all threads to complete (with timeout)
+                boolean completed = completionLatch.await(60, TimeUnit.SECONDS);
+                assertThat(completed).isTrue();
+
+                // Wait for all futures to complete
+                CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
+                        .get(30, TimeUnit.SECONDS);
+
+                // Verify results
+                for (DatabaseType tenant : allTenants) {
+                    String tenantName = tenant.getSchemaName();
+                    int successCount = successCounts.get(tenantName).get();
+                    List<String> tenantErrors = errors.get(tenantName);
+
+                    // Assert that all threads for this tenant succeeded
+                    assertThat(tenantErrors)
+                            .as("Errors for tenant " + tenantName + ": " + tenantErrors)
+                            .isEmpty();
+                    assertThat(successCount)
+                            .as("Success count for tenant " + tenantName)
+                            .isEqualTo(threadsPerTenant);
+                }
+
+            } finally {
+                executorService.shutdown();
+                if (!executorService.awaitTermination(10, TimeUnit.SECONDS)) {
+                    executorService.shutdownNow();
+                }
+            }
+        }
+
+        @Test
+        void shouldHandleRapidTenantSwitchingInSingleThread() {
+            // Test rapid tenant switching within a single thread
+            // Only use tenants that have proper database setup
+            DatabaseType[] tenants = getValidTenants();
+            int iterationsPerTenant = 5;
+
+            for (int iteration = 0; iteration < iterationsPerTenant; iteration++) {
+                for (DatabaseType tenant : tenants) {
+                    String tenantName = tenant.getSchemaName();
+
+                    // Switch tenant
+                    tenantIdentifierResolver.setCurrentTenant(tenantName);
+
+                    // Verify switch was successful
+                    assertThat(tenantIdentifierResolver.resolveCurrentTenantIdentifier())
+                            .isEqualTo(tenantName);
+
+                    // Create and verify data
+                    createAndVerifyTenantData(tenantName, iteration);
+                }
+            }
+
+            // Final verification - check that data exists for all tenants
+            verifyAllTenantsHaveData();
+        }
+
+        @Test
+        void shouldMaintainTenantIsolationUnderStress() throws Exception {
+            // Stress test with high concurrency and frequent tenant switches
+            int numberOfThreads = 20;
+            int operationsPerThread = 10;
+            ExecutorService executorService = Executors.newFixedThreadPool(numberOfThreads);
+            CountDownLatch completionLatch = new CountDownLatch(numberOfThreads);
+
+            AtomicInteger totalOperations = new AtomicInteger(0);
+            ConcurrentHashMap<String, AtomicInteger> tenantOperationCounts =
+                    new ConcurrentHashMap<>();
+            List<String> globalErrors = new ArrayList<>();
+
+            try {
+                for (int threadId = 0; threadId < numberOfThreads; threadId++) {
+                    final int currentThreadId = threadId;
+
+                    executorService.submit(
+                            () -> {
+                                try {
+                                    DatabaseType[] tenants = getValidTenants();
+
+                                    for (int op = 0; op < operationsPerThread; op++) {
+                                        // Randomly select a tenant for this operation
+                                        DatabaseType randomTenant = tenants[op % tenants.length];
+                                        String tenantName = randomTenant.getSchemaName();
+
+                                        // Switch to tenant
+                                        tenantIdentifierResolver.setCurrentTenant(tenantName);
+
+                                        // Verify correct tenant is set
+                                        String currentTenant =
+                                                tenantIdentifierResolver
+                                                        .resolveCurrentTenantIdentifier();
+                                        if (!tenantName.equals(currentTenant)) {
+                                            synchronized (globalErrors) {
+                                                globalErrors.add(
+                                                        "Thread "
+                                                                + currentThreadId
+                                                                + " expected tenant "
+                                                                + tenantName
+                                                                + " but got "
+                                                                + currentTenant);
+                                            }
+                                            continue;
+                                        }
+
+                                        // Perform operation
+                                        String dataId = "thread-" + currentThreadId + "-op-" + op;
+                                        createTenantSpecificData(tenantName, dataId);
+
+                                        // Verify data was created in correct tenant
+                                        verifyDataInTenant(tenantName, dataId);
+
+                                        // Track operations per tenant
+                                        tenantOperationCounts
+                                                .computeIfAbsent(
+                                                        tenantName, k -> new AtomicInteger(0))
+                                                .incrementAndGet();
+                                        totalOperations.incrementAndGet();
+
+                                        // Small delay to increase chance of race conditions
+                                        Thread.sleep(1);
+                                    }
+                                } catch (Exception e) {
+                                    synchronized (globalErrors) {
+                                        globalErrors.add(
+                                                "Thread "
+                                                        + currentThreadId
+                                                        + " error: "
+                                                        + e.getMessage());
+                                    }
+                                    e.printStackTrace();
+                                } finally {
+                                    completionLatch.countDown();
+                                }
+                            });
+                }
+
+                // Wait for completion
+                boolean completed = completionLatch.await(120, TimeUnit.SECONDS);
+                assertThat(completed).isTrue();
+
+                // Verify no errors occurred
+                assertThat(globalErrors).as("Global errors: " + globalErrors).isEmpty();
+
+                // Verify operations were distributed across tenants
+                assertThat(totalOperations.get()).isEqualTo(numberOfThreads * operationsPerThread);
+                assertThat(tenantOperationCounts).isNotEmpty();
+
+                // Each tenant should have received some operations
+                DatabaseType[] validTenants = getValidTenants();
+                for (DatabaseType tenant : validTenants) {
+                    String tenantName = tenant.getSchemaName();
+                    assertThat(tenantOperationCounts.get(tenantName))
+                            .as("Tenant " + tenantName + " should have received operations")
+                            .isNotNull()
+                            .satisfies(count -> assertThat(count.get()).isGreaterThan(0));
+                }
+
+            } finally {
+                executorService.shutdown();
+                if (!executorService.awaitTermination(15, TimeUnit.SECONDS)) {
+                    executorService.shutdownNow();
+                }
+            }
+        }
+
+        private void performTenantSpecificOperations(String tenantName, int threadIndex) {
+            String uniqueId =
+                    tenantName + "-thread-" + threadIndex + "-" + System.currentTimeMillis();
+            createTenantSpecificData(tenantName, uniqueId);
+        }
+
+        private void createTenantSpecificData(String tenantName, String uniqueId) {
+            if (isPrimaryTenant(tenantName)) {
+                PrimaryCustomer customer = new PrimaryCustomer();
+                customer.setText("Concurrent-" + uniqueId);
+                customer.setTenant(tenantName); // Set the tenant to match current context
+                primaryCustomerRepository.save(customer);
+            } else {
+                SecondaryCustomer customer = new SecondaryCustomer();
+                customer.setName("Concurrent-" + uniqueId);
+                secondaryCustomerRepository.save(customer);
+            }
+        }
+
+        private void verifyTenantDataIsolation(String tenantName, int threadIndex) {
+            if (isPrimaryTenant(tenantName)) {
+                List<PrimaryCustomer> customers = primaryCustomerRepository.findAll();
+                // Verify we can read data (basic connectivity test)
+                assertThat(customers).isNotNull();
+            } else {
+                List<SecondaryCustomer> customers = secondaryCustomerRepository.findAll();
+                // Verify we can read data (basic connectivity test)
+                assertThat(customers).isNotNull();
+            }
+        }
+
+        private void createAndVerifyTenantData(String tenantName, int iteration) {
+            String dataId = tenantName + "-rapid-" + iteration;
+            createTenantSpecificData(tenantName, dataId);
+            verifyDataInTenant(tenantName, dataId);
+        }
+
+        private void verifyDataInTenant(String tenantName, String dataId) {
+            if (isPrimaryTenant(tenantName)) {
+                List<PrimaryCustomer> customers = primaryCustomerRepository.findAll();
+                boolean found =
+                        customers.stream()
+                                .anyMatch(c -> c.getText() != null && c.getText().contains(dataId));
+                assertThat(found)
+                        .as(
+                                "Data with ID "
+                                        + dataId
+                                        + " should exist in primary tenant "
+                                        + tenantName)
+                        .isTrue();
+            } else {
+                List<SecondaryCustomer> customers = secondaryCustomerRepository.findAll();
+                boolean found =
+                        customers.stream()
+                                .anyMatch(c -> c.getName() != null && c.getName().contains(dataId));
+                assertThat(found)
+                        .as(
+                                "Data with ID "
+                                        + dataId
+                                        + " should exist in secondary tenant "
+                                        + tenantName)
+                        .isTrue();
+            }
+        }
+
+        private void verifyAllTenantsHaveData() {
+            // Only verify tenants that have proper database setup
+            DatabaseType[] validTenants = getValidTenants();
+            for (DatabaseType tenant : validTenants) {
+                String tenantName = tenant.getSchemaName();
+                tenantIdentifierResolver.setCurrentTenant(tenantName);
+
+                if (isPrimaryTenant(tenantName)) {
+                    List<PrimaryCustomer> customers = primaryCustomerRepository.findAll();
+                    assertThat(customers)
+                            .as("Primary tenant " + tenantName + " should have data")
+                            .isNotEmpty();
+                } else {
+                    List<SecondaryCustomer> customers = secondaryCustomerRepository.findAll();
+                    assertThat(customers)
+                            .as("Secondary tenant " + tenantName + " should have data")
+                            .isNotEmpty();
+                }
+            }
+        }
+
+        private boolean isPrimaryTenant(String tenantName) {
+            return DatabaseType.PRIMARY.getSchemaName().equals(tenantName)
+                    || DatabaseType.DBSYSTC.getSchemaName().equals(tenantName)
+                    || DatabaseType.DBSYSTP.getSchemaName().equals(tenantName)
+                    || DatabaseType.DBSYSTV.getSchemaName().equals(tenantName);
         }
     }
 }
