@@ -32,14 +32,14 @@ public class SecondaryCustomerService {
     }
 
     @Transactional(transactionManager = "secondaryTransactionManager")
-    public void deleteCustomerById(Long id) {
-        secondaryCustomerRepository.deleteById(id);
-    }
-
-    @Transactional(transactionManager = "secondaryTransactionManager")
     public SecondaryCustomer saveCustomer(SecondaryCustomerRequest secondaryCustomerRequest) {
         SecondaryCustomer secondaryCustomer = new SecondaryCustomer();
         secondaryCustomer.setName(secondaryCustomerRequest.name());
         return secondaryCustomerRepository.save(secondaryCustomer);
+    }
+
+    @Transactional(transactionManager = "secondaryTransactionManager")
+    public void deleteCustomerById(Long id) {
+        secondaryCustomerRepository.deleteById(id);
     }
 }

@@ -34,12 +34,12 @@ public class PrimaryCustomerService {
     }
 
     @Transactional(transactionManager = "primaryTransactionManager")
-    public void deleteCustomerById(Long id) {
-        primaryCustomerRepository.deleteById(id);
+    public PrimaryCustomer saveCustomer(PrimaryCustomer primaryCustomer) {
+        return primaryCustomerRepository.save(primaryCustomer);
     }
 
     @Transactional(transactionManager = "primaryTransactionManager")
-    public PrimaryCustomer saveCustomer(PrimaryCustomer primaryCustomer) {
-        return primaryCustomerRepository.save(primaryCustomer);
+    public void deleteCustomerById(Long id) {
+        primaryCustomerRepository.deleteById(id);
     }
 }
