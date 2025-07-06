@@ -139,6 +139,31 @@ class UltimateRedisApplicationTests extends AbstractIntegrationTest {
     }
 
     @Test
+    void redisRateLimiter_tokenBucket_shouldReplenishTokensOverTime() throws InterruptedException {
+        // Arrange
+        String key = "token-replenish-test";
+        double rate = 5.0; // 5 tokens per second
+        int capacity = 10;
+
+        // Act - consume all tokens
+        for (int i = 0; i < capacity; i++) {
+            assertThat(rateLimiter.tryAcquire(key, rate, capacity)).isTrue();
+        }
+
+        // Verify bucket is empty
+        assertThat(rateLimiter.tryAcquire(key, rate, capacity)).isFalse();
+
+        // Wait for token replenishment (1 second = 5 new tokens)
+        Thread.sleep(1100);
+
+        // Verify tokens are replenished
+        for (int i = 0; i < 5; i++) {
+            assertThat(rateLimiter.tryAcquire(key, rate, capacity)).isTrue();
+        }
+        assertThat(rateLimiter.tryAcquire(key, rate, capacity)).isFalse();
+    }
+
+    @Test
     void redisRateLimiter_shouldLimitRequests() {
         // Arrange
         String key = "rate-limit-test";
