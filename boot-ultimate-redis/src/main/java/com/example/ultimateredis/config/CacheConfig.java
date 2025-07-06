@@ -10,9 +10,11 @@ import org.springframework.cache.Cache;
 import org.springframework.cache.annotation.CachingConfigurer;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.interceptor.CacheErrorHandler;
+import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -25,6 +27,18 @@ import org.springframework.lang.Nullable;
 @EnableConfigurationProperties(CacheConfigurationProperties.class)
 @EnableCaching
 public class CacheConfig implements CachingConfigurer {
+
+    @Bean
+    public ApplicationListener<ContextRefreshedEvent> redisCacheMigrationListener(
+            RedisTemplate<String, Object> redisTemplate) {
+        return event -> {
+            try {
+                redisTemplate.getConnectionFactory().getConnection().serverCommands().flushAll();
+            } catch (Exception e) {
+                // Log or handle migration error if needed
+            }
+        };
+    }
 
     @Bean
     RedisCacheManagerBuilderCustomizer redisCacheManagerBuilderCustomizer(
