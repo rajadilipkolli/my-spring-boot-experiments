@@ -1,14 +1,15 @@
 package com.example.multitenancy.secondary.controller;
 
 import com.example.multitenancy.secondary.entities.SecondaryCustomer;
+import com.example.multitenancy.secondary.model.request.SecondaryCustomerRequest;
 import com.example.multitenancy.secondary.services.SecondaryCustomerService;
 import com.example.multitenancy.utils.AppConstants;
+import jakarta.validation.Valid;
 import java.util.List;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,11 +23,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/customers/secondary")
-@Slf4j
-@RequiredArgsConstructor
 public class SecondaryCustomerController {
 
+    private static final Logger log = LoggerFactory.getLogger(SecondaryCustomerController.class);
     private final SecondaryCustomerService secondaryCustomerService;
+
+    public SecondaryCustomerController(SecondaryCustomerService secondaryCustomerService) {
+        this.secondaryCustomerService = secondaryCustomerService;
+    }
 
     @GetMapping
     public List<SecondaryCustomer> getAllCustomers(
@@ -48,25 +52,27 @@ public class SecondaryCustomerController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public SecondaryCustomer createCustomer(
-            @RequestBody @Validated SecondaryCustomer SecondaryCustomer,
+            @RequestBody @Valid SecondaryCustomerRequest secondaryCustomerRequest,
             @RequestHeader(AppConstants.X_TENANT_ID) String tenantId) {
         log.info("creating customer by for tenant : {}", tenantId);
-        return secondaryCustomerService.saveCustomer(SecondaryCustomer);
+        return secondaryCustomerService.saveCustomer(secondaryCustomerRequest);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<SecondaryCustomer> updateCustomer(
             @PathVariable Long id,
-            @RequestBody SecondaryCustomer SecondaryCustomer,
+            @RequestBody @Valid SecondaryCustomerRequest secondaryCustomerRequest,
             @RequestHeader(AppConstants.X_TENANT_ID) String tenantId) {
         log.info("updating customer for id {} in tenant : {}", id, tenantId);
         return secondaryCustomerService
                 .findCustomerById(id)
                 .map(
                         customerObj -> {
-                            SecondaryCustomer.setId(id);
+                            SecondaryCustomer secondaryCustomer = new SecondaryCustomer();
+                            secondaryCustomer.setId(id);
+                            secondaryCustomer.setName(secondaryCustomerRequest.name());
                             return ResponseEntity.ok(
-                                    secondaryCustomerService.saveCustomer(SecondaryCustomer));
+                                    secondaryCustomerService.saveCustomer(secondaryCustomer));
                         })
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }

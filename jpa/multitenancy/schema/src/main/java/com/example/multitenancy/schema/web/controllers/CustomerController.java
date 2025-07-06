@@ -3,12 +3,12 @@ package com.example.multitenancy.schema.web.controllers;
 import com.example.multitenancy.schema.domain.request.CustomerDto;
 import com.example.multitenancy.schema.entities.Customer;
 import com.example.multitenancy.schema.services.CustomerService;
+import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -47,7 +47,7 @@ public class CustomerController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public Customer createCustomer(
-            @RequestBody @Validated CustomerDto customer, @RequestParam String tenant) {
+            @RequestBody @Valid CustomerDto customer, @RequestParam String tenant) {
         log.info("creating customer by for tenant : {}", tenant);
         return customerService.saveCustomer(customer);
     }
@@ -55,7 +55,7 @@ public class CustomerController {
     @PutMapping("/{id}")
     public ResponseEntity<Customer> updateCustomer(
             @PathVariable Long id,
-            @RequestBody CustomerDto customerDto,
+            @RequestBody @Valid CustomerDto customerDto,
             @RequestParam String tenant) {
         log.info("updating customer for id {} in tenant : {}", id, tenant);
         return customerService

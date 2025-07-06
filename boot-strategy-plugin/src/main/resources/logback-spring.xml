@@ -5,23 +5,51 @@
  	<springProperty scope="context" name="lokiUri" source="loki.uri"/>
 
  	<appender name="LOKI" class="com.github.loki4j.logback.Loki4jAppender">
- 		<batchTimeoutMs>2000</batchTimeoutMs>
+ 		<!-- HTTP configuration -->
  		<http>
  			<url>${lokiUri:-http://localhost:3100/loki/api/v1/push}</url>
  		</http>
- 		<format>
- 			<label>
- 				<pattern>application=${appName},hostname=${HOSTNAME},traceID=%X{traceId:-NONE},level=%level</pattern>
- 			</label>
- 			<message>
- 				<pattern>${FILE_LOG_PATTERN}</pattern>
- 			</message>
- 			<sortByTime>true</sortByTime>
- 		</format>
+ 		
+ 		<!-- Batch configuration -->
+ 		<batch>
+ 			<timeoutMs>2000</timeoutMs>
+ 			<maxItems>1000</maxItems>
+ 			<maxBytes>4194304</maxBytes>
+ 		</batch>
+ 		
+ 		<!-- Labels configuration - required in v2.0 -->
+ 		<labels>
+ 			agent=loki4j
+ 			app=${appName:-boot-strategy-plugin}
+ 			host=${HOSTNAME:-localhost}
+			traceID=%X{traceId:-NONE}
+ 		</labels>
+ 		
+ 		<!-- Structured metadata for additional context -->
+ 		<structuredMetadata>
+ 			level=%level
+ 			thread=%thread
+ 			logger=%logger
+ 		</structuredMetadata>
+ 		
+ 		<!-- Message pattern -->
+ 		<message>
+ 			<pattern>[%thread] %logger{20} - %msg%n</pattern>
+ 		</message>
+ 		
+ 		<!-- Enable metrics -->
  		<metricsEnabled>true</metricsEnabled>
+ 		
+ 		<!-- Enable verbose logging for debugging -->
+ 		<verbose>true</verbose>
  	</appender>
 
  	<root level="INFO">
  		<appender-ref ref="LOKI"/>
  	</root>
+
+    <logger name="com.example.plugin" level="DEBUG"/>
+    <logger name="org.springframework" level="INFO"/>
+    <!-- Enable Loki4j debug logging to troubleshoot issues -->
+    <logger name="com.github.loki4j" level="DEBUG"/>
 </configuration>

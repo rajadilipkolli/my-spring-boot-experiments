@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.HandlerInterceptor;
 
@@ -23,15 +24,29 @@ public class TenantInterceptor implements HandlerInterceptor {
             HttpServletRequest request, HttpServletResponse response, Object handler)
             throws IOException {
         var tenant = request.getParameter("tenant");
-        if (request.getServletPath().startsWith("/api/")
-                && (!StringUtils.hasText(tenant) || !getValidTenants().contains(tenant))) {
-            response.sendError(FORBIDDEN.value(), "Unknown schema tenant");
-            return false;
+        if (request.getRequestURI().startsWith("/api/")) {
+            if (!StringUtils.hasText(tenant)) {
+                response.sendError(400, "Required parameter 'tenant' is not present.");
+                return false;
+            }
+            if (!getValidTenants().contains(tenant)) {
+                response.sendError(FORBIDDEN.value(), "Unknown schema tenant");
+                return false;
+            }
         }
 
         tenantIdentifierResolver.setCurrentTenant(tenant);
 
         return true;
+    }
+
+    @Override
+    public void afterCompletion(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            Object handler,
+            @Nullable Exception ex) {
+        tenantIdentifierResolver.clearCurrentTenant();
     }
 
     private List<String> getValidTenants() {

@@ -18,6 +18,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.example.multitenancy.config.multitenant.TenantIdentifierResolver;
 import com.example.multitenancy.primary.controllers.PrimaryCustomerController;
 import com.example.multitenancy.primary.entities.PrimaryCustomer;
+import com.example.multitenancy.primary.model.request.PrimaryCustomerRequest;
 import com.example.multitenancy.primary.services.PrimaryCustomerService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
@@ -92,17 +93,21 @@ class PrimaryCustomerControllerTest {
 
     @Test
     void shouldCreateNewCustomer() throws Exception {
-        given(primaryCustomerService.saveCustomer(any(PrimaryCustomer.class)))
-                .willAnswer((invocation) -> invocation.getArgument(0));
 
         PrimaryCustomer primaryCustomer =
                 new PrimaryCustomer(1L, "some text", (short) 0, "dbsystc");
+
+        given(primaryCustomerService.saveCustomer(any(PrimaryCustomerRequest.class)))
+                .willReturn(primaryCustomer);
+
+        PrimaryCustomerRequest request = new PrimaryCustomerRequest("some text");
+
         this.mockMvc
                 .perform(
                         post("/api/customers/primary")
                                 .header("X-tenantId", "primary")
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(primaryCustomer)))
+                                .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id", notNullValue()))
                 .andExpect(jsonPath("$.text", is(primaryCustomer.getText())));
@@ -127,7 +132,7 @@ class PrimaryCustomerControllerTest {
                 .andExpect(jsonPath("$.instance", is("/api/customers/primary")))
                 .andExpect(jsonPath("$.violations", hasSize(1)))
                 .andExpect(jsonPath("$.violations[0].field", is("text")))
-                .andExpect(jsonPath("$.violations[0].message", is("Text cannot be empty")))
+                .andExpect(jsonPath("$.violations[0].message", is("Text cannot be blank")))
                 .andReturn();
     }
 

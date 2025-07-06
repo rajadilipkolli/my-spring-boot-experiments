@@ -12,7 +12,7 @@ public class ContainersConfig {
     @Bean
     @ServiceConnection
     OpensearchContainer<?> opensearchContainer() {
-        return new OpensearchContainer<>("opensearchproject/opensearch:3.0.0")
+        return new OpensearchContainer<>("opensearchproject/opensearch:3.1.0")
                 .withStartupAttempts(5)
                 .withStartupTimeout(Duration.ofMinutes(10));
     }
