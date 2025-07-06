@@ -1,6 +1,7 @@
 package com.example.ultimateredis;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 
 import com.example.ultimateredis.common.AbstractIntegrationTest;
 import com.example.ultimateredis.config.RedisRateLimiter;
@@ -52,7 +53,7 @@ class UltimateRedisApplicationTests extends AbstractIntegrationTest {
     }
 
     @Test
-    void redisValueOperations_withExpiry_shouldExpireAfterTime() throws Exception {
+    void redisValueOperations_withExpiry_shouldExpireAfterTime() {
         // Arrange
         String key = "expiring-key";
         String value = "expiring-value";
@@ -64,8 +65,10 @@ class UltimateRedisApplicationTests extends AbstractIntegrationTest {
         // Assert - key exists now
         assertThat(redisValueOpsUtil.getValue(key)).isEqualTo(value);
 
-        // Wait for expiry
-        Thread.sleep(1500);
+        // Wait for expiry using Awaitility
+        await().atMost(Duration.ofSeconds(3))
+                .pollInterval(Duration.ofMillis(100))
+                .until(() -> redisValueOpsUtil.getValue(key) == null);
 
         // Assert - key expired
         assertThat(redisValueOpsUtil.getValue(key)).isNull();
