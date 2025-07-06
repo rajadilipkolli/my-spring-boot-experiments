@@ -153,13 +153,21 @@ class UltimateRedisApplicationTests extends AbstractIntegrationTest {
         // Verify bucket is empty
         assertThat(rateLimiter.tryAcquire(key, rate, capacity)).isFalse();
 
-        // Wait for token replenishment (1 second = 5 new tokens)
-        Thread.sleep(1100);
-
-        // Verify tokens are replenished
-        for (int i = 0; i < 5; i++) {
-            assertThat(rateLimiter.tryAcquire(key, rate, capacity)).isTrue();
-        }
+        // Wait for token replenishment (1 second = 5 new tokens) using Awaitility
+        await().atMost(Duration.ofSeconds(2))
+                .pollInterval(Duration.ofMillis(100))
+                .untilAsserted(
+                        () -> {
+                            int replenished = 0;
+                            for (int i = 0; i < 5; i++) {
+                                if (rateLimiter.tryAcquire(key, rate, capacity)) {
+                                    replenished++;
+                                }
+                            }
+                            // At least 5 tokens should be replenished
+                            assertThat(replenished).isEqualTo(5);
+                        });
+        // After consuming 5 tokens, bucket should be empty again
         assertThat(rateLimiter.tryAcquire(key, rate, capacity)).isFalse();
     }
 

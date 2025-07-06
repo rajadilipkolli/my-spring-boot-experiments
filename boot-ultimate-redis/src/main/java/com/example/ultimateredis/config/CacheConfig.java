@@ -3,6 +3,8 @@ package com.example.ultimateredis.config;
 import com.example.ultimateredis.utils.AppConstants;
 import io.lettuce.core.ReadFrom;
 import java.time.Duration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.cache.RedisCacheManagerBuilderCustomizer;
 import org.springframework.boot.autoconfigure.data.redis.LettuceClientConfigurationBuilderCustomizer;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -28,14 +30,17 @@ import org.springframework.lang.Nullable;
 @EnableCaching
 public class CacheConfig implements CachingConfigurer {
 
+    private static final Logger log = LoggerFactory.getLogger(CacheConfig.class);
+
     @Bean
     public ApplicationListener<ContextRefreshedEvent> redisCacheMigrationListener(
             RedisTemplate<String, Object> redisTemplate) {
         return event -> {
             try {
                 redisTemplate.getConnectionFactory().getConnection().serverCommands().flushAll();
+                log.info("Redis cache flushed successfully during context refresh");
             } catch (Exception e) {
-                // Log or handle migration error if needed
+                log.warn("Failed to flush Redis cache during migration: {}", e.getMessage());
             }
         };
     }
