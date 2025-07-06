@@ -2,6 +2,8 @@ package com.example.ultimateredis.config;
 
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -14,6 +16,7 @@ import org.springframework.stereotype.Component;
 public class RedisMetricsAspect {
 
     private final MeterRegistry meterRegistry;
+    private final Map<String, Timer> timerCache = new ConcurrentHashMap<>();
 
     public RedisMetricsAspect(MeterRegistry meterRegistry) {
         this.meterRegistry = meterRegistry;
@@ -26,11 +29,15 @@ public class RedisMetricsAspect {
     @Around("redisServiceMethods()")
     public Object measureRedisOperationTime(ProceedingJoinPoint joinPoint) throws Throwable {
         String methodName = joinPoint.getSignature().getName();
+
         Timer timer =
-                Timer.builder("redis.operation")
-                        .tag("method", methodName)
-                        .description("Time taken for Redis operations")
-                        .register(meterRegistry);
+                timerCache.computeIfAbsent(
+                        methodName,
+                        m ->
+                                Timer.builder("redis.operation")
+                                        .tag("method", m)
+                                        .description("Time taken for Redis operations")
+                                        .register(meterRegistry));
 
         long start = System.nanoTime();
         boolean error = false;

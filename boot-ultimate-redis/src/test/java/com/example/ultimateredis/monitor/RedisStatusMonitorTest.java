@@ -60,12 +60,16 @@ class RedisStatusMonitorTest {
     void monitorRedisStatus_whenRedisReturnsUnexpectedPing_shouldLogWarning() {
         // Arrange
         when(redisConnection.ping()).thenReturn("ERROR");
+        when(redisConnection.serverCommands()).thenReturn(redisConnection);
+        when(redisConnection.info()).thenReturn(new Properties());
 
         // Act
         redisStatusMonitor.monitorRedisStatus();
 
         // Assert
         verify(redisConnection).ping();
+        verify(redisConnection).serverCommands();
+        verify(redisConnection).info();
     }
 
     @Test
