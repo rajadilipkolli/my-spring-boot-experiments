@@ -42,6 +42,9 @@ class RedisStatusMonitorTest {
         redisInfo.setProperty("connected_clients", "10");
         redisInfo.setProperty("used_memory_human", "100M");
 
+        // Mock the serverCommands() to return the same redisConnection (since info() is called on
+        // serverCommands())
+        when(redisConnection.serverCommands()).thenReturn(redisConnection);
         when(redisConnection.info()).thenReturn(redisInfo);
 
         // Act
@@ -49,6 +52,7 @@ class RedisStatusMonitorTest {
 
         // Assert
         verify(redisConnection).ping();
+        verify(redisConnection).serverCommands();
         verify(redisConnection).info();
     }
 
@@ -56,9 +60,6 @@ class RedisStatusMonitorTest {
     void monitorRedisStatus_whenRedisReturnsUnexpectedPing_shouldLogWarning() {
         // Arrange
         when(redisConnection.ping()).thenReturn("ERROR");
-
-        Properties redisInfo = new Properties();
-        when(redisConnection.info()).thenReturn(redisInfo);
 
         // Act
         redisStatusMonitor.monitorRedisStatus();
