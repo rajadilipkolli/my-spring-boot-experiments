@@ -5,7 +5,14 @@ spring:
     redis:
       lettuce:
         shutdown-timeout: 200ms
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 2
+          max-wait: -1ms
+          time-between-eviction-runs: 60s
       password: redispassword
+      connect-timeout: 5000ms
       sentinel:
         master: mymaster
         nodes: 127.0.0.1:26379,127.0.0.1:26380,127.0.0.1:26381

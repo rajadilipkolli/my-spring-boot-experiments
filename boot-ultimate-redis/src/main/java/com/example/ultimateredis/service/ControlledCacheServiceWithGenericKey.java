@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class ControlledCacheServiceWithGenericKey {
 
-    private static final String CONTROLLED_PREFIX = "myControlledPrefix_";
+    private static final String CONTROLLED_PREFIX = "v2_myControlledPrefix_";
 
     public static String getCacheKey(String relevant) {
         return CONTROLLED_PREFIX + relevant;
