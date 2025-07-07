@@ -14,6 +14,10 @@ public class MultiTenantInterceptor implements HandlerInterceptor {
 
     private final TenantIdentifierResolver tenantIdentifierResolver;
 
+    public MultiTenantInterceptor(TenantIdentifierResolver tenantIdentifierResolver) {
+        this.tenantIdentifierResolver = tenantIdentifierResolver;
+    }
+
     @Override
     public boolean preHandle(
             HttpServletRequest request, HttpServletResponse response, Object handler)

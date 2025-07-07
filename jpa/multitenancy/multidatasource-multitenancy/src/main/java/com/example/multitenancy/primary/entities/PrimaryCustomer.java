@@ -30,6 +30,15 @@ public class PrimaryCustomer {
     @TenantId
     private String tenant = "primary";
 
+    public PrimaryCustomer() {}
+
+    public PrimaryCustomer(Long id, String text, Short version, String tenant) {
+        this.id = id;
+        this.text = text;
+        this.version = version;
+        this.tenant = tenant;
+    }
+
     public Long getId() {
         return id;
     }

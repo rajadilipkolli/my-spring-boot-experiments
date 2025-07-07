@@ -17,6 +17,11 @@ import org.springframework.web.servlet.HandlerInterceptor;
 public class MultiTenantInterceptor implements HandlerInterceptor {
 
     private final TenantIdentifierResolver tenantIdentifierResolver;
+
+    public MultiTenantInterceptor(TenantIdentifierResolver tenantIdentifierResolver) {
+        this.tenantIdentifierResolver = tenantIdentifierResolver;
+    }
+
     private List<String> validTenantsList = new ArrayList<>();
 
     @Override

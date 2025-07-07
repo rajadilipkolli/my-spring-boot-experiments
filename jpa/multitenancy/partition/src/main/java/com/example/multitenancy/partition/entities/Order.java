@@ -23,6 +23,8 @@ public class Order {
     @Column(name = "order_date", nullable = false)
     private LocalDate orderDate;
 
+    public Order() {}
+
     public Order(Long id, BigDecimal amount, LocalDate orderDate) {
         this.id = id;
         this.amount = amount;
