@@ -50,6 +50,42 @@ public class AuthorEntity implements Serializable {
         return this;
     }
 
+    public Long getId() {
+        return id;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public String getMiddleName() {
+        return middleName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public Long getMobile() {
+        return mobile;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public LocalDateTime getRegisteredAt() {
+        return registeredAt;
+    }
+
+    public Short getVersion() {
+        return version;
+    }
+
+    public List<PostEntity> getPostEntities() {
+        return postEntities;
+    }
+
     public AuthorEntity setFirstName(String firstName) {
         this.firstName = firstName;
         return this;

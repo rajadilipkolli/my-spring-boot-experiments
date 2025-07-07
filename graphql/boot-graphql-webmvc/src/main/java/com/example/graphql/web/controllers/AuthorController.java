@@ -26,6 +26,10 @@ public class AuthorController {
 
     private final AuthorService authorService;
 
+    public AuthorController(AuthorService authorService) {
+        this.authorService = authorService;
+    }
+
     @GetMapping
     public List<AuthorResponse> getAllAuthors() {
         return authorService.findAllAuthors();

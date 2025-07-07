@@ -42,6 +42,38 @@ public class PostTagEntity implements Serializable {
         this.id = new PostTagId(postEntity.getId(), tagEntity.getId());
     }
 
+    public PostTagId getId() {
+        return id;
+    }
+
+    public void setId(PostTagId id) {
+        this.id = id;
+    }
+
+    public PostEntity getPostEntity() {
+        return postEntity;
+    }
+
+    public void setPostEntity(PostEntity postEntity) {
+        this.postEntity = postEntity;
+    }
+
+    public TagEntity getTagEntity() {
+        return tagEntity;
+    }
+
+    public void setTagEntity(TagEntity tagEntity) {
+        this.tagEntity = tagEntity;
+    }
+
+    public LocalDateTime getCreatedOn() {
+        return createdOn;
+    }
+
+    public void setCreatedOn(LocalDateTime createdOn) {
+        this.createdOn = createdOn;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {

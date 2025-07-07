@@ -28,6 +28,15 @@ public class PostCommentService {
     private final PostCommentEntityToResponseMapper postCommentEntityToResponseMapper;
     private final PostCommentRequestToEntityMapper postCommentRequestToEntityMapper;
 
+    public PostCommentService(PostCommentRepository postCommentRepository, PostRepository postRepository,
+            PostCommentEntityToResponseMapper postCommentEntityToResponseMapper,
+            PostCommentRequestToEntityMapper postCommentRequestToEntityMapper) {
+        this.postCommentRepository = postCommentRepository;
+        this.postRepository = postRepository;
+        this.postCommentEntityToResponseMapper = postCommentEntityToResponseMapper;
+        this.postCommentRequestToEntityMapper = postCommentRequestToEntityMapper;
+    }
+
     public List<PostCommentResponse> findAllPostComments() {
         List<CompletableFuture<PostCommentResponse>> completableFutureList = postCommentRepository.findAll().stream()
                 .map(postCommentEntity -> CompletableFuture.supplyAsync(

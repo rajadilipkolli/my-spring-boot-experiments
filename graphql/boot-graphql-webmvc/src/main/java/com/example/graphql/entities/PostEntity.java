@@ -54,6 +54,42 @@ public class PostEntity extends Auditable implements Serializable {
         return this;
     }
 
+    public Long getId() {
+        return id;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public boolean isPublished() {
+        return published;
+    }
+
+    public LocalDateTime getPublishedAt() {
+        return publishedAt;
+    }
+
+    public List<PostCommentEntity> getComments() {
+        return comments;
+    }
+
+    public PostDetailsEntity getDetails() {
+        return details;
+    }
+
+    public List<PostTagEntity> getTags() {
+        return tags;
+    }
+
+    public AuthorEntity getAuthorEntity() {
+        return authorEntity;
+    }
+
     public PostEntity setTitle(String title) {
         this.title = title;
         return this;

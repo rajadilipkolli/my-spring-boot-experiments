@@ -22,6 +22,13 @@ public class AuthorService {
     private final ConversionService appConversionService;
     private final AuthorRequestToEntityMapper authorRequestToEntityMapper;
 
+    public AuthorService(AuthorRepository authorRepository, ConversionService appConversionService,
+            AuthorRequestToEntityMapper authorRequestToEntityMapper) {
+        this.authorRepository = authorRepository;
+        this.appConversionService = appConversionService;
+        this.authorRequestToEntityMapper = authorRequestToEntityMapper;
+    }
+
     @Transactional(readOnly = true)
     public List<AuthorResponse> findAllAuthors() {
         return authorRepository.findAll().stream()

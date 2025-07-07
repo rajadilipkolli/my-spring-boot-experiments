@@ -20,6 +20,10 @@ public class PostDetailsController {
 
     private final PostDetailsService postDetailsService;
 
+    public PostDetailsController(PostDetailsService postDetailsService) {
+        this.postDetailsService = postDetailsService;
+    }
+
     @GetMapping
     public List<PostDetailsInfo> getAllPostDetails() {
         return postDetailsService.findAllPostDetails();

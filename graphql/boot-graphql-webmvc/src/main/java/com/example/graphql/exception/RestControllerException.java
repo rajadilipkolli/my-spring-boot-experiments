@@ -10,4 +10,8 @@ public class RestControllerException extends RuntimeException {
         super(errorMessage);
         this.httpStatus = httpStatus;
     }
+
+    public HttpStatus getHttpStatus() {
+        return httpStatus;
+    }
 }

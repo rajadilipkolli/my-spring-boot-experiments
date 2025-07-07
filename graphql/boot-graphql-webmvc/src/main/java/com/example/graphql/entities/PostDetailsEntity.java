@@ -33,6 +33,22 @@ public class PostDetailsEntity extends Auditable implements Serializable {
         return this;
     }
 
+    public Long getId() {
+        return id;
+    }
+
+    public String getDetailsKey() {
+        return detailsKey;
+    }
+
+    public String getCreatedBy() {
+        return createdBy;
+    }
+
+    public PostEntity getPostEntity() {
+        return postEntity;
+    }
+
     public PostDetailsEntity setDetailsKey(String detailsKey) {
         this.detailsKey = detailsKey;
         return this;

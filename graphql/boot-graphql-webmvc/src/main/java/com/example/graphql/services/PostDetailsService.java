@@ -17,6 +17,10 @@ public class PostDetailsService {
 
     private final PostDetailsRepository postDetailsRepository;
 
+    public PostDetailsService(PostDetailsRepository postDetailsRepository) {
+        this.postDetailsRepository = postDetailsRepository;
+    }
+
     public List<PostDetailsInfo> findAllPostDetails() {
         return postDetailsRepository.findAllDetails();
     }

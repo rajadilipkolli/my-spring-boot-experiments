@@ -18,6 +18,10 @@ public class TagGraphQLController {
 
     private final TagService tagService;
 
+    public TagGraphQLController(TagService tagService) {
+        this.tagService = tagService;
+    }
+
     @QueryMapping
     public List<TagEntity> allTags() {
         return this.tagService.findAllTags();

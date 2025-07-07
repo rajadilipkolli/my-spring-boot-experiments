@@ -15,6 +15,10 @@ public class PostCommentsQlController {
 
     private final PostCommentService postCommentService;
 
+    public PostCommentsQlController(PostCommentService postCommentService) {
+        this.postCommentService = postCommentService;
+    }
+
     @MutationMapping
     public PostCommentResponse addCommentToPost(
             @Valid @Argument("addCommentToPostRequest") PostCommentRequest postCommentRequest) {

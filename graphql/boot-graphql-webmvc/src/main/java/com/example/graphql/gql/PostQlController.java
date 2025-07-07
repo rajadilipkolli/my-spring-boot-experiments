@@ -18,6 +18,10 @@ public class PostQlController {
 
     private final PostService postService;
 
+    public PostQlController(PostService postService) {
+        this.postService = postService;
+    }
+
     @QueryMapping
     public List<PostInfo> allPostsByEmail(@Argument("email") String email) {
         return this.postService.findAllPostsByAuthorEmail(email);

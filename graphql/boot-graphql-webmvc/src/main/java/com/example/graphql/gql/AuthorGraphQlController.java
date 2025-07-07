@@ -35,6 +35,14 @@ public class AuthorGraphQlController {
 
     private final TagService tagService;
 
+    public AuthorGraphQlController(AuthorService authorService, PostService postService,
+            PostCommentService postCommentService, TagService tagService) {
+        this.authorService = authorService;
+        this.postService = postService;
+        this.postCommentService = postCommentService;
+        this.tagService = tagService;
+    }
+
     @BatchMapping(typeName = "Author")
     public Map<AuthorResponse, List<PostInfo>> posts(List<AuthorResponse> authorResponses) {
         log.info("Fetching PostInformation by AuthorIds");

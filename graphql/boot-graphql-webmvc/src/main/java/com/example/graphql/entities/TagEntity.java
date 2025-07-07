@@ -25,9 +25,30 @@ public class TagEntity implements Serializable {
 
     private String tagDescription;
 
+    public TagEntity(Long id, String tagName, String tagDescription) {
+        this.id = id;
+        this.tagName = tagName;
+        this.tagDescription = tagDescription;
+    }
+
+    public TagEntity() {
+    }
+
     public TagEntity setId(Long id) {
         this.id = id;
         return this;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public String getTagName() {
+        return tagName;
+    }
+
+    public String getTagDescription() {
+        return tagDescription;
     }
 
     public TagEntity setTagName(String tagName) {

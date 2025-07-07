@@ -40,6 +40,30 @@ public class PostCommentEntity extends Auditable implements Serializable {
         return this;
     }
 
+    public Long getId() {
+        return id;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public boolean isPublished() {
+        return published;
+    }
+
+    public OffsetDateTime getPublishedAt() {
+        return publishedAt;
+    }
+
+    public PostEntity getPostEntity() {
+        return postEntity;
+    }
+
     public PostCommentEntity setTitle(String title) {
         this.title = title;
         return this;

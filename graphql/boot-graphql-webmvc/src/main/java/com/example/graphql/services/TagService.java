@@ -18,6 +18,11 @@ public class TagService {
     private final TagRepository tagRepository;
     private final PostTagRepository postTagRepository;
 
+    public TagService(TagRepository tagRepository, PostTagRepository postTagRepository) {
+        this.tagRepository = tagRepository;
+        this.postTagRepository = postTagRepository;
+    }
+
     public List<TagEntity> findAllTags() {
         return tagRepository.findAll();
     }

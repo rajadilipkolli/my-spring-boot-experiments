@@ -25,6 +25,10 @@ public class PostCommentController {
 
     private final PostCommentService postCommentService;
 
+    public PostCommentController(PostCommentService postCommentService) {
+        this.postCommentService = postCommentService;
+    }
+
     @GetMapping
     public List<PostCommentResponse> getAllPostComments() {
         return postCommentService.findAllPostComments();

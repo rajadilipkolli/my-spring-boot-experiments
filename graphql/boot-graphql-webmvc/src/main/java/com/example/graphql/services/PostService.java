@@ -29,6 +29,16 @@ public class PostService {
     private final ConversionService myConversionService;
     private final NewPostRequestToPostEntityMapper mapNewPostRequestToPostEntityMapper;
 
+    public PostService(PostRepository postRepository, AuthorRepository authorRepository, TagRepository tagRepository,
+            ConversionService myConversionService,
+            NewPostRequestToPostEntityMapper mapNewPostRequestToPostEntityMapper) {
+        this.postRepository = postRepository;
+        this.authorRepository = authorRepository;
+        this.tagRepository = tagRepository;
+        this.myConversionService = myConversionService;
+        this.mapNewPostRequestToPostEntityMapper = mapNewPostRequestToPostEntityMapper;
+    }
+
     public List<PostResponse> findAllPosts() {
         return postRepository.findAll().stream()
                 .map(post -> myConversionService.convert(post, PostResponse.class))
