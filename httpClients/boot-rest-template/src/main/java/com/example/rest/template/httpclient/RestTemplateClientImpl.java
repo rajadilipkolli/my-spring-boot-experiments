@@ -4,7 +4,6 @@ import com.example.rest.template.model.request.ApplicationRestRequest;
 import com.example.rest.template.model.response.ApplicationRestResponse;
 import java.net.URI;
 import java.util.Map;
-import lombok.RequiredArgsConstructor;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -18,10 +17,13 @@ import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
 @Service
-@RequiredArgsConstructor
 public class RestTemplateClientImpl implements RestTemplateClient {
 
     private final RestTemplate restTemplate;
+
+    public RestTemplateClientImpl(RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
+    }
 
     @Override
     public <T> ApplicationRestResponse<T> get(

@@ -1,8 +1,5 @@
 package com.example.choasmonkey.utils;
 
-import lombok.experimental.UtilityClass;
-
-@UtilityClass
 public final class AppConstants {
     public static final String PROFILE_TEST = "test";
     public static final String PROFILE_NOT_TEST = "!" + PROFILE_TEST;
@@ -12,4 +9,8 @@ public final class AppConstants {
     public static final String DEFAULT_SORT_DIRECTION = "asc";
     public static final String DEFAULT_PAGE_NUMBER = "0";
     public static final String DEFAULT_PAGE_SIZE = "10";
+
+    private AppConstants() {
+        // Prevent instantiation
+    }
 }

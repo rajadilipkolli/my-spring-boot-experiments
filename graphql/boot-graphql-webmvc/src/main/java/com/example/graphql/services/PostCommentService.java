@@ -15,13 +15,11 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Transactional(readOnly = true)
-@RequiredArgsConstructor
 @Loggable
 public class PostCommentService {
 
@@ -29,6 +27,17 @@ public class PostCommentService {
     private final PostRepository postRepository;
     private final PostCommentEntityToResponseMapper postCommentEntityToResponseMapper;
     private final PostCommentRequestToEntityMapper postCommentRequestToEntityMapper;
+
+    public PostCommentService(
+            PostCommentRepository postCommentRepository,
+            PostRepository postRepository,
+            PostCommentEntityToResponseMapper postCommentEntityToResponseMapper,
+            PostCommentRequestToEntityMapper postCommentRequestToEntityMapper) {
+        this.postCommentRepository = postCommentRepository;
+        this.postRepository = postRepository;
+        this.postCommentEntityToResponseMapper = postCommentEntityToResponseMapper;
+        this.postCommentRequestToEntityMapper = postCommentRequestToEntityMapper;
+    }
 
     public List<PostCommentResponse> findAllPostComments() {
         List<CompletableFuture<PostCommentResponse>> completableFutureList = postCommentRepository.findAll().stream()

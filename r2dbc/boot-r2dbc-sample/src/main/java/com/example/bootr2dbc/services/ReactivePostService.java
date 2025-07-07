@@ -6,7 +6,6 @@ import com.example.bootr2dbc.mapper.ReactivePostMapper;
 import com.example.bootr2dbc.model.ReactivePostRequest;
 import com.example.bootr2dbc.repositories.ReactiveCommentsRepository;
 import com.example.bootr2dbc.repositories.ReactivePostRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -16,12 +15,20 @@ import reactor.core.publisher.Mono;
 
 @Service
 @Transactional(readOnly = true)
-@RequiredArgsConstructor
 public class ReactivePostService {
 
     private final ReactivePostRepository reactivePostRepository;
     private final ReactiveCommentsRepository reactiveCommentsRepository;
     private final ReactivePostMapper reactivePostMapper;
+
+    public ReactivePostService(
+            ReactivePostRepository reactivePostRepository,
+            ReactiveCommentsRepository reactiveCommentsRepository,
+            ReactivePostMapper reactivePostMapper) {
+        this.reactivePostRepository = reactivePostRepository;
+        this.reactiveCommentsRepository = reactiveCommentsRepository;
+        this.reactivePostMapper = reactivePostMapper;
+    }
 
     public Flux<ReactivePost> findAllReactivePosts(String sortBy, String sortDir) {
         Sort sort =

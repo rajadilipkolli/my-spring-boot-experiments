@@ -1,14 +1,16 @@
 package com.example.rest.webclient.config;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.reactive.config.CorsRegistry;
 import org.springframework.web.reactive.config.WebFluxConfigurer;
 
 @Configuration
-@RequiredArgsConstructor
 public class WebFluxConfig implements WebFluxConfigurer {
     private final ApplicationProperties properties;
+
+    public WebFluxConfig(ApplicationProperties properties) {
+        this.properties = properties;
+    }
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {

@@ -8,16 +8,10 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
 import java.util.Objects;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
 import org.hibernate.Hibernate;
 
 @Entity
 @Table(name = "actors")
-@Getter
-@NoArgsConstructor
-@AllArgsConstructor
 public class Actor {
 
     @Id
@@ -30,9 +24,21 @@ public class Actor {
     @Column(name = "created_on", nullable = false)
     private LocalDate createdOn;
 
+    public Actor() {}
+
+    public Actor(Long id, String name, LocalDate createdOn) {
+        this.id = id;
+        this.name = name;
+        this.createdOn = createdOn;
+    }
+
     public Actor setId(Long id) {
         this.id = id;
         return this;
+    }
+
+    public Long getId() {
+        return id;
     }
 
     public Actor setName(String name) {
@@ -40,9 +46,17 @@ public class Actor {
         return this;
     }
 
+    public String getName() {
+        return name;
+    }
+
     public Actor setCreatedOn(LocalDate createdOn) {
         this.createdOn = createdOn;
         return this;
+    }
+
+    public LocalDate getCreatedOn() {
+        return createdOn;
     }
 
     @Override

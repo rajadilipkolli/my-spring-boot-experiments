@@ -1,7 +1,6 @@
 package com.example.restclient.bootrestclient.config;
 
 import java.util.List;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.web.client.RestClientCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,7 +10,6 @@ import org.springframework.web.client.RestClient;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 
 @Configuration(proxyBeanMethods = false)
-@Slf4j
 @EnableRetry
 public class RestClientConfiguration {
 

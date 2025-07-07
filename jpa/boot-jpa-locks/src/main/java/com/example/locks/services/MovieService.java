@@ -10,7 +10,6 @@ import com.example.locks.model.response.PagedResult;
 import com.example.locks.repositories.MovieRepository;
 import java.util.List;
 import java.util.Optional;
-import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -20,11 +19,15 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Transactional(readOnly = true)
-@RequiredArgsConstructor
 public class MovieService {
 
     private final MovieRepository movieRepository;
     private final JpaLocksMapper jpaLocksMapper;
+
+    public MovieService(MovieRepository movieRepository, JpaLocksMapper jpaLocksMapper) {
+        this.movieRepository = movieRepository;
+        this.jpaLocksMapper = jpaLocksMapper;
+    }
 
     public PagedResult<MovieResponse> findAllMovies(FindMoviesQuery findMoviesQuery) {
 

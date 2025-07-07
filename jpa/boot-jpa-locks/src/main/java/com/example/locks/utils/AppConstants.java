@@ -1,8 +1,5 @@
 package com.example.locks.utils;
 
-import lombok.experimental.UtilityClass;
-
-@UtilityClass
 public final class AppConstants {
     public static final String PROFILE_LOCAL = "local";
     public static final String PROFILE_PROD = "prod";

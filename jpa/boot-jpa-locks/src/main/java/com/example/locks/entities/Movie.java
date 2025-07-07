@@ -15,16 +15,10 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
 import org.hibernate.Hibernate;
 
 @Entity
 @Table(name = "movies")
-@Getter
-@NoArgsConstructor
-@AllArgsConstructor
 public class Movie {
 
     @Id
@@ -61,9 +55,17 @@ public class Movie {
         return this;
     }
 
+    public Long getMovieId() {
+        return movieId;
+    }
+
     public Movie setMovieTitle(String movieTitle) {
         this.movieTitle = movieTitle;
         return this;
+    }
+
+    public String getMovieTitle() {
+        return movieTitle;
     }
 
     public Movie setReleaseDate(LocalDate releaseDate) {
@@ -71,9 +73,17 @@ public class Movie {
         return this;
     }
 
+    public LocalDate getReleaseDate() {
+        return releaseDate;
+    }
+
     public Movie setBudget(BigDecimal budget) {
         this.budget = budget;
         return this;
+    }
+
+    public BigDecimal getBudget() {
+        return budget;
     }
 
     public Movie setReviews(List<Reviews> reviews) {
@@ -81,9 +91,17 @@ public class Movie {
         return this;
     }
 
+    public List<Reviews> getReviews() {
+        return reviews;
+    }
+
     public Movie setDirector(Director director) {
         this.director = director;
         return this;
+    }
+
+    public Director getDirector() {
+        return director;
     }
 
     public Movie setGenres(List<Genre> genres) {
@@ -91,9 +109,17 @@ public class Movie {
         return this;
     }
 
+    public List<Genre> getGenres() {
+        return genres;
+    }
+
     public Movie setActors(List<Actor> actors) {
         this.actors = actors;
         return this;
+    }
+
+    public List<Actor> getActors() {
+        return actors;
     }
 
     @Override

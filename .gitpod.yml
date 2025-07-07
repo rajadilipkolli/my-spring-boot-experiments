@@ -8,7 +8,6 @@ tasks:
 vscode:
   extensions:
     - vscjava.vscode-java-pack
-    - GabrielBB.vscode-lombok
     - richardwillis.vscode-gradle
     - GraphQL.vscode-graphql
     - GraphQL.vscode-graphql-syntax

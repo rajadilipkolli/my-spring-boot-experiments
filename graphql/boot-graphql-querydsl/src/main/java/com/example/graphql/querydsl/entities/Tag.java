@@ -7,16 +7,10 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.util.Objects;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
 import org.hibernate.Hibernate;
 
 @Entity
 @Table(name = "tags")
-@Getter
-@NoArgsConstructor
-@AllArgsConstructor
 public class Tag {
 
     @Id
@@ -26,14 +20,29 @@ public class Tag {
     @Column(nullable = false)
     private String name;
 
+    public Tag(Long id, String name) {
+        this.id = id;
+        this.name = name;
+    }
+
+    public Tag() {}
+
     public Tag setId(Long id) {
         this.id = id;
         return this;
     }
 
+    public Long getId() {
+        return id;
+    }
+
     public Tag setName(String name) {
         this.name = name;
         return this;
+    }
+
+    public String getName() {
+        return name;
     }
 
     @Override

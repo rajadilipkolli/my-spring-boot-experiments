@@ -5,16 +5,18 @@ import com.example.multitenancy.partition.entities.Customer;
 import com.example.multitenancy.partition.repositories.CustomerRepository;
 import java.util.List;
 import java.util.Optional;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Transactional
-@RequiredArgsConstructor
 public class CustomerService {
 
     private final CustomerRepository customerRepository;
+
+    public CustomerService(CustomerRepository customerRepository) {
+        this.customerRepository = customerRepository;
+    }
 
     public List<Customer> findAllCustomers() {
         return customerRepository.findAll();

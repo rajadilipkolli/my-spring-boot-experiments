@@ -5,16 +5,18 @@ import static org.springframework.http.HttpStatus.FORBIDDEN;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 @Configuration(proxyBeanMethods = false)
-@RequiredArgsConstructor
 public class TenantInterceptor implements HandlerInterceptor {
 
     private final TenantIdentifierResolver tenantIdentifierResolver;
+
+    public TenantInterceptor(TenantIdentifierResolver tenantIdentifierResolver) {
+        this.tenantIdentifierResolver = tenantIdentifierResolver;
+    }
 
     @Override
     public boolean preHandle(

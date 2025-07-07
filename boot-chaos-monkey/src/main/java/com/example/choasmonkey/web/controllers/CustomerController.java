@@ -6,7 +6,6 @@ import com.example.choasmonkey.services.CustomerService;
 import com.example.choasmonkey.utils.AppConstants;
 import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationRegistry;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -22,11 +21,16 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 @RestController
 @RequestMapping("/api/customers")
-@RequiredArgsConstructor
 public class CustomerController {
 
     private final CustomerService customerService;
     private final ObservationRegistry observationRegistry;
+
+    public CustomerController(
+            CustomerService customerService, ObservationRegistry observationRegistry) {
+        this.customerService = customerService;
+        this.observationRegistry = observationRegistry;
+    }
 
     @GetMapping
     public CustomerResponse getAllCustomers(

@@ -17,16 +17,10 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
 import org.hibernate.Hibernate;
 
 @Entity
 @Table(name = "posts")
-@Getter
-@AllArgsConstructor
-@NoArgsConstructor
 public class PostEntity extends Auditable implements Serializable {
 
     @Id
@@ -60,9 +54,17 @@ public class PostEntity extends Auditable implements Serializable {
         return this;
     }
 
+    public Long getId() {
+        return id;
+    }
+
     public PostEntity setTitle(String title) {
         this.title = title;
         return this;
+    }
+
+    public String getTitle() {
+        return title;
     }
 
     public PostEntity setContent(String content) {
@@ -70,14 +72,26 @@ public class PostEntity extends Auditable implements Serializable {
         return this;
     }
 
+    public String getContent() {
+        return content;
+    }
+
     public PostEntity setPublished(boolean published) {
         this.published = published;
         return this;
     }
 
+    public boolean isPublished() {
+        return published;
+    }
+
     public PostEntity setPublishedAt(LocalDateTime publishedAt) {
         this.publishedAt = publishedAt;
         return this;
+    }
+
+    public LocalDateTime getPublishedAt() {
+        return publishedAt;
     }
 
     public PostEntity setComments(List<PostCommentEntity> comments) {
@@ -88,6 +102,10 @@ public class PostEntity extends Auditable implements Serializable {
         return this;
     }
 
+    public List<PostCommentEntity> getComments() {
+        return comments;
+    }
+
     public PostEntity setTags(List<PostTagEntity> tags) {
         if (tags == null) {
             tags = new ArrayList<>();
@@ -96,9 +114,17 @@ public class PostEntity extends Auditable implements Serializable {
         return this;
     }
 
+    public List<PostTagEntity> getTags() {
+        return tags;
+    }
+
     public PostEntity setAuthorEntity(AuthorEntity authorEntity) {
         this.authorEntity = authorEntity;
         return this;
+    }
+
+    public AuthorEntity getAuthorEntity() {
+        return authorEntity;
     }
 
     public void addComment(PostCommentEntity comment) {
@@ -120,6 +146,10 @@ public class PostEntity extends Auditable implements Serializable {
             details.setPostEntity(this);
         }
         this.details = details;
+    }
+
+    public PostDetailsEntity getDetails() {
+        return details;
     }
 
     public void addTag(TagEntity tagEntity) {

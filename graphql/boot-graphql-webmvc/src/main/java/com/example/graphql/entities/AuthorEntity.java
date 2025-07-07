@@ -13,15 +13,9 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "authors")
-@Getter
-@NoArgsConstructor
-@AllArgsConstructor
 public class AuthorEntity implements Serializable {
 
     @Id
@@ -56,9 +50,17 @@ public class AuthorEntity implements Serializable {
         return this;
     }
 
+    public Long getId() {
+        return id;
+    }
+
     public AuthorEntity setFirstName(String firstName) {
         this.firstName = firstName;
         return this;
+    }
+
+    public String getFirstName() {
+        return firstName;
     }
 
     public AuthorEntity setMiddleName(String middleName) {
@@ -66,9 +68,17 @@ public class AuthorEntity implements Serializable {
         return this;
     }
 
+    public String getMiddleName() {
+        return middleName;
+    }
+
     public AuthorEntity setLastName(String lastName) {
         this.lastName = lastName;
         return this;
+    }
+
+    public String getLastName() {
+        return lastName;
     }
 
     public AuthorEntity setMobile(Long mobile) {
@@ -76,9 +86,17 @@ public class AuthorEntity implements Serializable {
         return this;
     }
 
+    public Long getMobile() {
+        return mobile;
+    }
+
     public AuthorEntity setEmail(String email) {
         this.email = email;
         return this;
+    }
+
+    public String getEmail() {
+        return email;
     }
 
     public AuthorEntity setRegisteredAt(LocalDateTime registeredAt) {
@@ -86,9 +104,17 @@ public class AuthorEntity implements Serializable {
         return this;
     }
 
+    public LocalDateTime getRegisteredAt() {
+        return registeredAt;
+    }
+
     public AuthorEntity setVersion(Short version) {
         this.version = version;
         return this;
+    }
+
+    public Short getVersion() {
+        return version;
     }
 
     public AuthorEntity setPostEntities(List<PostEntity> postEntities) {
@@ -97,6 +123,10 @@ public class AuthorEntity implements Serializable {
         }
         this.postEntities = postEntities;
         return this;
+    }
+
+    public List<PostEntity> getPostEntities() {
+        return postEntities;
     }
 
     public void addPost(PostEntity postEntity) {

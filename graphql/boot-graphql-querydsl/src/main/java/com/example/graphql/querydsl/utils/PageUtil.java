@@ -1,12 +1,10 @@
 package com.example.graphql.querydsl.utils;
 
 import com.example.graphql.querydsl.model.query.FindQuery;
-import lombok.experimental.UtilityClass;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
-@UtilityClass
 public class PageUtil {
 
     public static Pageable createPageable(FindQuery findQuery) {

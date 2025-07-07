@@ -9,8 +9,6 @@ import com.example.locks.services.MovieService;
 import com.example.locks.utils.AppConstants;
 import jakarta.validation.Valid;
 import java.net.URI;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -26,11 +24,13 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @RestController
 @RequestMapping("/api/movies")
-@Slf4j
-@RequiredArgsConstructor
 public class MovieController {
 
     private final MovieService movieService;
+
+    public MovieController(MovieService movieService) {
+        this.movieService = movieService;
+    }
 
     @GetMapping
     public PagedResult<MovieResponse> getAllMovies(

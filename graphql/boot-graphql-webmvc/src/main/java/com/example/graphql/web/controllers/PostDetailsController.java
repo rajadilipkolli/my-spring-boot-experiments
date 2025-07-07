@@ -5,7 +5,6 @@ import com.example.graphql.model.request.PostDetailsRequest;
 import com.example.graphql.projections.PostDetailsInfo;
 import com.example.graphql.services.PostDetailsService;
 import java.util.List;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,11 +15,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/postdetails")
-@RequiredArgsConstructor
 @Loggable
 public class PostDetailsController {
 
     private final PostDetailsService postDetailsService;
+
+    public PostDetailsController(PostDetailsService postDetailsService) {
+        this.postDetailsService = postDetailsService;
+    }
 
     @GetMapping
     public List<PostDetailsInfo> getAllPostDetails() {

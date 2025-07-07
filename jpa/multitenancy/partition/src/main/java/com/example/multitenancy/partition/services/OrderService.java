@@ -5,16 +5,18 @@ import com.example.multitenancy.partition.entities.Order;
 import com.example.multitenancy.partition.repositories.OrderRepository;
 import java.util.List;
 import java.util.Optional;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Transactional(readOnly = true)
-@RequiredArgsConstructor
 public class OrderService {
 
     private final OrderRepository orderRepository;
+
+    public OrderService(OrderRepository orderRepository) {
+        this.orderRepository = orderRepository;
+    }
 
     public List<Order> findAllOrders() {
         return orderRepository.findAll();

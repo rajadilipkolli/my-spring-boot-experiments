@@ -7,10 +7,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 import java.util.List;
-import lombok.Getter;
 
 @Entity
-@Getter
 @Table(name = "genres")
 public class Genre {
 
@@ -28,13 +26,25 @@ public class Genre {
         return this;
     }
 
+    public Long getGenreId() {
+        return genreId;
+    }
+
     public Genre setGenreName(String genreName) {
         this.genreName = genreName;
         return this;
     }
 
+    public String getGenreName() {
+        return genreName;
+    }
+
     public Genre setMovies(List<Movie> movies) {
         this.movies = movies;
         return this;
+    }
+
+    public List<Movie> getMovies() {
+        return movies;
     }
 }

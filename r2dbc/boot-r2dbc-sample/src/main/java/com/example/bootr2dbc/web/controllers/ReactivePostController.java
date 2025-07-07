@@ -7,7 +7,6 @@ import com.example.bootr2dbc.services.ReactivePostService;
 import com.example.bootr2dbc.utils.AppConstants;
 import java.net.URI;
 import java.util.List;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -24,10 +23,13 @@ import reactor.core.publisher.Mono;
 
 @RestController
 @RequestMapping("/api/posts")
-@RequiredArgsConstructor
 public class ReactivePostController {
 
     private final ReactivePostService reactivePostService;
+
+    public ReactivePostController(ReactivePostService reactivePostService) {
+        this.reactivePostService = reactivePostService;
+    }
 
     @GetMapping("/")
     public Mono<ResponseEntity<List<ReactivePost>>> getAllReactivePosts(

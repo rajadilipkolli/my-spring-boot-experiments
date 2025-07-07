@@ -7,19 +7,23 @@ import com.example.rest.template.model.response.ApplicationRestResponse;
 import com.example.rest.template.repositories.PostRepository;
 import java.util.List;
 import java.util.Map;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Component;
 
 @Component
-@RequiredArgsConstructor
-@Slf4j
 public class Initializer implements CommandLineRunner {
 
+    private static final Logger log = LoggerFactory.getLogger(Initializer.class);
     private final PostRepository postRepository;
     private final RestHandler restHandler;
+
+    public Initializer(PostRepository postRepository, RestHandler restHandler) {
+        this.postRepository = postRepository;
+        this.restHandler = restHandler;
+    }
 
     @Override
     public void run(String... args) {

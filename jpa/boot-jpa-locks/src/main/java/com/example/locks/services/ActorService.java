@@ -11,8 +11,8 @@ import com.example.locks.repositories.ActorRepository;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.PessimisticLockingFailureException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -22,13 +22,17 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@Slf4j
-@RequiredArgsConstructor
 public class ActorService {
 
-    private final JpaLocksMapper mapper;
+    private static final Logger log = LoggerFactory.getLogger(ActorService.class);
 
+    private final JpaLocksMapper mapper;
     private final ActorRepository actorRepository;
+
+    public ActorService(JpaLocksMapper mapper, ActorRepository actorRepository) {
+        this.mapper = mapper;
+        this.actorRepository = actorRepository;
+    }
 
     public PagedResult<ActorResponse> findAllActors(FindActorsQuery findActorsQuery) {
 

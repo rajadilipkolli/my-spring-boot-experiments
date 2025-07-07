@@ -9,17 +9,11 @@ import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import java.io.Serializable;
 import java.util.Objects;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 @Entity
 @Table(
         name = "tags",
         uniqueConstraints = {@UniqueConstraint(columnNames = "tag_name", name = "uc_tag_name")})
-@Getter
-@NoArgsConstructor
-@AllArgsConstructor
 public class TagEntity implements Serializable {
 
     @Id
@@ -31,9 +25,29 @@ public class TagEntity implements Serializable {
 
     private String tagDescription;
 
+    public TagEntity(Long id, String tagName, String tagDescription) {
+        this.id = id;
+        this.tagName = tagName;
+        this.tagDescription = tagDescription;
+    }
+
+    public TagEntity() {}
+
     public TagEntity setId(Long id) {
         this.id = id;
         return this;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public String getTagName() {
+        return tagName;
+    }
+
+    public String getTagDescription() {
+        return tagDescription;
     }
 
     public TagEntity setTagName(String tagName) {

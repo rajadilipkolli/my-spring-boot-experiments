@@ -4,7 +4,6 @@ import com.example.rest.webclient.model.PostDto;
 import com.example.rest.webclient.service.PostService;
 import com.example.rest.webclient.utils.AppConstants;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -23,11 +22,14 @@ import reactor.core.publisher.Mono;
 
 @RestController
 @RequestMapping("/api/posts")
-@RequiredArgsConstructor
 @Validated
 public class PostController {
 
     private final PostService postService;
+
+    public PostController(PostService postService) {
+        this.postService = postService;
+    }
 
     @GetMapping
     public Flux<PostDto> getAllPosts(

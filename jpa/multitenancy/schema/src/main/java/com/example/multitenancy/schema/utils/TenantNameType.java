@@ -1,8 +1,5 @@
 package com.example.multitenancy.schema.utils;
 
-import lombok.Getter;
-
-@Getter
 public enum TenantNameType {
     TEST1("test1"),
     TEST2("test2");
@@ -11,5 +8,9 @@ public enum TenantNameType {
 
     TenantNameType(String tenantName) {
         this.tenantName = tenantName;
+    }
+
+    public String getTenantName() {
+        return tenantName;
     }
 }

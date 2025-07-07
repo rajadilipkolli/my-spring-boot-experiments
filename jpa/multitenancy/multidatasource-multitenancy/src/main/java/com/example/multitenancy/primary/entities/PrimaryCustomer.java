@@ -8,15 +8,11 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
 import java.util.Objects;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
 import org.hibernate.annotations.TenantId;
 import org.hibernate.proxy.HibernateProxy;
 
 @Entity
 @Table(name = "customers")
-@NoArgsConstructor
-@AllArgsConstructor
 public class PrimaryCustomer {
 
     @Id
@@ -33,6 +29,15 @@ public class PrimaryCustomer {
     @Column(nullable = false)
     @TenantId
     private String tenant = "primary";
+
+    public PrimaryCustomer() {}
+
+    public PrimaryCustomer(Long id, String text, Short version, String tenant) {
+        this.id = id;
+        this.text = text;
+        this.version = version;
+        this.tenant = tenant;
+    }
 
     public Long getId() {
         return id;

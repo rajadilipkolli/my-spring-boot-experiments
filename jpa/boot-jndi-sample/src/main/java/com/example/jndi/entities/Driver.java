@@ -7,18 +7,10 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.util.Objects;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 import org.hibernate.Hibernate;
 
 @Entity
 @Table(name = "drivers")
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
 public class Driver {
 
     @Id
@@ -27,6 +19,29 @@ public class Driver {
 
     @Column(nullable = false)
     private String text;
+
+    public Driver() {}
+
+    public Driver(Long id, String text) {
+        this.id = id;
+        this.text = text;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getText() {
+        return text;
+    }
+
+    public void setText(String text) {
+        this.text = text;
+    }
 
     @Override
     public boolean equals(Object o) {

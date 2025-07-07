@@ -9,8 +9,6 @@ import com.example.jndi.services.DriverService;
 import com.example.jndi.utils.AppConstants;
 import jakarta.validation.Valid;
 import java.net.URI;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -26,11 +24,13 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @RestController
 @RequestMapping("/api/drivers")
-@Slf4j
-@RequiredArgsConstructor
 public class DriverController {
 
     private final DriverService driverService;
+
+    public DriverController(DriverService driverService) {
+        this.driverService = driverService;
+    }
 
     @GetMapping
     public PagedResult<DriverResponse> getAllDrivers(

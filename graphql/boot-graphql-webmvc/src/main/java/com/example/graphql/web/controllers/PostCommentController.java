@@ -5,7 +5,6 @@ import com.example.graphql.model.request.PostCommentRequest;
 import com.example.graphql.model.response.PostCommentResponse;
 import com.example.graphql.services.PostCommentService;
 import java.util.List;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -21,11 +20,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/postcomments")
-@RequiredArgsConstructor
 @Loggable
 public class PostCommentController {
 
     private final PostCommentService postCommentService;
+
+    public PostCommentController(PostCommentService postCommentService) {
+        this.postCommentService = postCommentService;
+    }
 
     @GetMapping
     public List<PostCommentResponse> getAllPostComments() {

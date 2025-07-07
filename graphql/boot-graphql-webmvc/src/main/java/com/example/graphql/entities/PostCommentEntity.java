@@ -12,16 +12,10 @@ import jakarta.persistence.Table;
 import java.io.Serializable;
 import java.time.OffsetDateTime;
 import java.util.Objects;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
 import org.hibernate.Hibernate;
 
 @Entity
 @Table(name = "post_comments")
-@Getter
-@NoArgsConstructor
-@AllArgsConstructor
 public class PostCommentEntity extends Auditable implements Serializable {
 
     @Id
@@ -46,9 +40,17 @@ public class PostCommentEntity extends Auditable implements Serializable {
         return this;
     }
 
+    public Long getId() {
+        return id;
+    }
+
     public PostCommentEntity setTitle(String title) {
         this.title = title;
         return this;
+    }
+
+    public String getTitle() {
+        return title;
     }
 
     public PostCommentEntity setContent(String content) {
@@ -56,9 +58,17 @@ public class PostCommentEntity extends Auditable implements Serializable {
         return this;
     }
 
+    public String getContent() {
+        return content;
+    }
+
     public PostCommentEntity setPublished(boolean published) {
         this.published = published;
         return this;
+    }
+
+    public boolean isPublished() {
+        return published;
     }
 
     public PostCommentEntity setPublishedAt(OffsetDateTime publishedAt) {
@@ -66,9 +76,17 @@ public class PostCommentEntity extends Auditable implements Serializable {
         return this;
     }
 
+    public OffsetDateTime getPublishedAt() {
+        return publishedAt;
+    }
+
     public PostCommentEntity setPostEntity(PostEntity postEntity) {
         this.postEntity = postEntity;
         return this;
+    }
+
+    public PostEntity getPostEntity() {
+        return postEntity;
     }
 
     @Override

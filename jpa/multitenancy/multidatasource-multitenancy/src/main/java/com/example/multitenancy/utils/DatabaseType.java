@@ -1,8 +1,5 @@
 package com.example.multitenancy.utils;
 
-import lombok.Getter;
-
-@Getter
 public enum DatabaseType {
     PRIMARY("primary"),
     SECONDARY("secondary"),
@@ -16,5 +13,9 @@ public enum DatabaseType {
 
     DatabaseType(String schemaName) {
         this.schemaName = schemaName;
+    }
+
+    public String getSchemaName() {
+        return schemaName;
     }
 }

@@ -10,15 +10,9 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.io.Serializable;
 import java.util.Objects;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "post_details")
-@Getter
-@AllArgsConstructor
-@NoArgsConstructor
 public class PostDetailsEntity extends Auditable implements Serializable {
 
     @Id
@@ -39,9 +33,17 @@ public class PostDetailsEntity extends Auditable implements Serializable {
         return this;
     }
 
+    public Long getId() {
+        return id;
+    }
+
     public PostDetailsEntity setDetailsKey(String detailsKey) {
         this.detailsKey = detailsKey;
         return this;
+    }
+
+    public String getDetailsKey() {
+        return detailsKey;
     }
 
     public PostDetailsEntity setCreatedBy(String createdBy) {
@@ -49,9 +51,17 @@ public class PostDetailsEntity extends Auditable implements Serializable {
         return this;
     }
 
+    public String getCreatedBy() {
+        return createdBy;
+    }
+
     public PostDetailsEntity setPostEntity(PostEntity postEntity) {
         this.postEntity = postEntity;
         return this;
+    }
+
+    public PostEntity getPostEntity() {
+        return postEntity;
     }
 
     @Override

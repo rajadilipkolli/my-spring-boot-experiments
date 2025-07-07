@@ -4,7 +4,6 @@ import com.example.rest.template.entities.Post;
 import com.example.rest.template.model.response.PagedResult;
 import com.example.rest.template.repositories.PostRepository;
 import java.util.Optional;
-import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -14,10 +13,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Transactional(readOnly = true)
-@RequiredArgsConstructor
 public class PostService {
 
     private final PostRepository postRepository;
+
+    public PostService(PostRepository postRepository) {
+        this.postRepository = postRepository;
+    }
 
     public PagedResult<Post> findAllPosts(int pageNo, int pageSize, String sortBy, String sortDir) {
         Sort sort =

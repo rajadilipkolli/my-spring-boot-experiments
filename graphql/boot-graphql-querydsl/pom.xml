@@ -101,11 +101,6 @@
             <artifactId>spring-boot-configuration-processor</artifactId>
             <optional>true</optional>
         </dependency>
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <optional>true</optional>
-        </dependency>
 
         <!-- Start QueryDSL for JPA -->
         <dependency>
@@ -186,11 +181,6 @@
                         </path>
                         <!-- other annotation processors -->
                         <path>
-                            <groupId>org.projectlombok</groupId>
-                            <artifactId>lombok</artifactId>
-                            <version>${lombok.version}</version>
-                        </path>
-                        <path>
                             <groupId>com.querydsl</groupId>
                             <artifactId>querydsl-apt</artifactId>
                             <classifier>jakarta</classifier>
@@ -205,12 +195,6 @@
                             <groupId>jakarta.annotation</groupId>
                             <artifactId>jakarta.annotation-api</artifactId>
                             <version>3.0.0</version>
-                        </path>
-                        <!-- This is needed when using Lombok 1.18.16 and above -->
-                        <path>
-                            <groupId>org.projectlombok</groupId>
-                            <artifactId>lombok-mapstruct-binding</artifactId>
-                            <version>0.2.0</version>
                         </path>
                     </annotationProcessorPaths>
                     <showWarnings>true</showWarnings>
@@ -454,3 +438,4 @@
     </pluginRepositories>
 
 </project>
+

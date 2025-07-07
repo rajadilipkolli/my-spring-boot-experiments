@@ -2,10 +2,7 @@ package com.scheduler.quartz.model.common;
 
 import java.io.Serial;
 import java.io.Serializable;
-import lombok.Getter;
-import lombok.Setter;
 
-@Getter
 public class Message implements Serializable {
 
     @Serial
@@ -46,10 +43,8 @@ public class Message implements Serializable {
         this.valid = valid;
     }
 
-    @Setter
     boolean valid;
 
-    @Setter
     String msg;
 
     Object data;
@@ -57,5 +52,25 @@ public class Message implements Serializable {
     public void setData(Object data) {
         this.valid = true;
         this.data = data;
+    }
+
+    public boolean isValid() {
+        return valid;
+    }
+
+    public void setValid(boolean valid) {
+        this.valid = valid;
+    }
+
+    public String getMsg() {
+        return msg;
+    }
+
+    public void setMsg(String msg) {
+        this.msg = msg;
+    }
+
+    public Object getData() {
+        return data;
     }
 }

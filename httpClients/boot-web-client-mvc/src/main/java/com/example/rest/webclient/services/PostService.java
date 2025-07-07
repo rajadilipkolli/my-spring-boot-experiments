@@ -3,17 +3,19 @@ package com.example.rest.webclient.services;
 import com.example.rest.webclient.model.response.PostDto;
 import java.util.List;
 import java.util.Optional;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 
 @Service
-@RequiredArgsConstructor
 public class PostService {
 
     private final WebClient webClient;
+
+    public PostService(WebClient webClient) {
+        this.webClient = webClient;
+    }
 
     public List<PostDto> findAllPosts() {
         return webClient

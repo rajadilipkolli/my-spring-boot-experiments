@@ -1,16 +1,14 @@
 package com.example.locks.config;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
 @Component
-@RequiredArgsConstructor
-@Slf4j
 public class Initializer implements CommandLineRunner {
 
-    private final ApplicationProperties properties;
+    private static final Logger log = LoggerFactory.getLogger(Initializer.class);
 
     @Override
     public void run(String... args) {

@@ -7,7 +7,7 @@ class TestStrategyPluginApplication {
 
     public static void main(String[] args) {
         SpringApplication.from(StrategyPluginApplication::main)
-                .with(ContainerConfig.class).run(args);
+                .with(ContainerConfig.class)
+                .run(args);
     }
-
 }

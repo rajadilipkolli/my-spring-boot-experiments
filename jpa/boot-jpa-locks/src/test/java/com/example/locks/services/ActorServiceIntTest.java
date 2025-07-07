@@ -14,13 +14,15 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.IntStream;
-import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-@Slf4j
 class ActorServiceIntTest extends AbstractIntegrationTest {
+
+    private static final Logger log = LoggerFactory.getLogger(ActorServiceIntTest.class);
 
     @Autowired
     private ActorService actorService;

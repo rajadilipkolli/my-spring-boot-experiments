@@ -5,17 +5,21 @@ import com.example.graphql.querydsl.entities.PostComment;
 import com.example.graphql.querydsl.entities.PostDetails;
 import com.example.graphql.querydsl.repositories.PostRepository;
 import java.time.LocalDateTime;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
 @Component
-@RequiredArgsConstructor
-@Slf4j
 class Initializer implements CommandLineRunner {
 
+    private static final Logger log = LoggerFactory.getLogger(Initializer.class);
+
     private final PostRepository postRepository;
+
+    public Initializer(PostRepository postRepository) {
+        this.postRepository = postRepository;
+    }
 
     @Override
     public void run(String... args) {

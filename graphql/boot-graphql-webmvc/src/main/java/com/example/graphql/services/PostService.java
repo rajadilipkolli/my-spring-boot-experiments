@@ -13,14 +13,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import lombok.RequiredArgsConstructor;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Transactional(readOnly = true)
-@RequiredArgsConstructor
 @Loggable
 public class PostService {
 
@@ -30,6 +28,19 @@ public class PostService {
 
     private final ConversionService myConversionService;
     private final NewPostRequestToPostEntityMapper mapNewPostRequestToPostEntityMapper;
+
+    public PostService(
+            PostRepository postRepository,
+            AuthorRepository authorRepository,
+            TagRepository tagRepository,
+            ConversionService myConversionService,
+            NewPostRequestToPostEntityMapper mapNewPostRequestToPostEntityMapper) {
+        this.postRepository = postRepository;
+        this.authorRepository = authorRepository;
+        this.tagRepository = tagRepository;
+        this.myConversionService = myConversionService;
+        this.mapNewPostRequestToPostEntityMapper = mapNewPostRequestToPostEntityMapper;
+    }
 
     public List<PostResponse> findAllPosts() {
         return postRepository.findAll().stream()

@@ -9,8 +9,6 @@ import com.learning.shedlock.services.JobService;
 import com.learning.shedlock.utils.AppConstants;
 import jakarta.validation.Valid;
 import java.net.URI;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -26,11 +24,13 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @RestController
 @RequestMapping("/api/jobs")
-@Slf4j
-@RequiredArgsConstructor
 public class JobController {
 
     private final JobService jobService;
+
+    public JobController(JobService jobService) {
+        this.jobService = jobService;
+    }
 
     @GetMapping
     public PagedResult<JobResponse> getAllJobs(

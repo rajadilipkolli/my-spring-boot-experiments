@@ -6,7 +6,6 @@ import com.example.featuretoggle.model.response.CustomerDTO;
 import com.example.featuretoggle.repositories.CustomerRepository;
 import java.util.List;
 import java.util.Optional;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.togglz.core.Feature;
@@ -15,7 +14,6 @@ import org.togglz.core.util.NamedFeature;
 
 @Service
 @Transactional
-@RequiredArgsConstructor
 @Loggable
 public class CustomerService {
 
@@ -26,6 +24,11 @@ public class CustomerService {
     private static final Feature NAME = new NamedFeature("NAME");
     private static final Feature TEXT = new NamedFeature("TEXT");
     private static final Feature ZIP = new NamedFeature("ZIP");
+
+    public CustomerService(CustomerRepository customerRepository, FeatureManager featureManager) {
+        this.customerRepository = customerRepository;
+        this.featureManager = featureManager;
+    }
 
     @Transactional(readOnly = true)
     public List<Customer> findAllCustomers() {

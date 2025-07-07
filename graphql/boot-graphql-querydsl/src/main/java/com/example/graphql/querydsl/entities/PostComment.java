@@ -3,16 +3,10 @@ package com.example.graphql.querydsl.entities;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.Objects;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
 import org.hibernate.Hibernate;
 
 @Entity
 @Table(name = "post_comments")
-@Getter
-@NoArgsConstructor
-@AllArgsConstructor
 public class PostComment {
 
     @Id
@@ -32,9 +26,17 @@ public class PostComment {
         return this;
     }
 
+    public Long getId() {
+        return id;
+    }
+
     public PostComment setReview(String review) {
         this.review = review;
         return this;
+    }
+
+    public String getReview() {
+        return review;
     }
 
     public PostComment setCreatedOn(LocalDateTime createdOn) {
@@ -42,9 +44,17 @@ public class PostComment {
         return this;
     }
 
+    public LocalDateTime getCreatedOn() {
+        return createdOn;
+    }
+
     public PostComment setPost(Post post) {
         this.post = post;
         return this;
+    }
+
+    public Post getPost() {
+        return post;
     }
 
     @Override

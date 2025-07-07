@@ -11,13 +11,9 @@ import jakarta.persistence.Table;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Objects;
-import lombok.Getter;
-import lombok.Setter;
 
 @Entity(name = "PostTag")
 @Table(name = "post_tag")
-@Setter
-@Getter
 public class PostTagEntity implements Serializable {
 
     @EmbeddedId
@@ -44,6 +40,38 @@ public class PostTagEntity implements Serializable {
         this.postEntity = postEntity;
         this.tagEntity = tagEntity;
         this.id = new PostTagId(postEntity.getId(), tagEntity.getId());
+    }
+
+    public PostTagId getId() {
+        return id;
+    }
+
+    public void setId(PostTagId id) {
+        this.id = id;
+    }
+
+    public PostEntity getPostEntity() {
+        return postEntity;
+    }
+
+    public void setPostEntity(PostEntity postEntity) {
+        this.postEntity = postEntity;
+    }
+
+    public TagEntity getTagEntity() {
+        return tagEntity;
+    }
+
+    public void setTagEntity(TagEntity tagEntity) {
+        this.tagEntity = tagEntity;
+    }
+
+    public LocalDateTime getCreatedOn() {
+        return createdOn;
+    }
+
+    public void setCreatedOn(LocalDateTime createdOn) {
+        this.createdOn = createdOn;
     }
 
     @Override

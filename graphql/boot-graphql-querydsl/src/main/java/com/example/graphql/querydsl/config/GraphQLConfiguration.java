@@ -1,13 +1,15 @@
 package com.example.graphql.querydsl.config;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.graphql.GraphQlSourceBuilderCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-@Slf4j
 @Configuration(proxyBeanMethods = false)
 class GraphQLConfiguration {
+
+    private static final Logger log = LoggerFactory.getLogger(GraphQLConfiguration.class);
 
     @Bean
     GraphQlSourceBuilderCustomizer inspectionCustomizer() {

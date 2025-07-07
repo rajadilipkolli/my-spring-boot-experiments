@@ -8,17 +8,20 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 @Configuration(proxyBeanMethods = false)
-@RequiredArgsConstructor
 public class MultiTenantInterceptor implements HandlerInterceptor {
 
     private final TenantIdentifierResolver tenantIdentifierResolver;
+
+    public MultiTenantInterceptor(TenantIdentifierResolver tenantIdentifierResolver) {
+        this.tenantIdentifierResolver = tenantIdentifierResolver;
+    }
+
     private List<String> validTenantsList = new ArrayList<>();
 
     @Override

@@ -3,11 +3,7 @@ package com.example.keysetpagination.model.query;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.ArrayList;
 import java.util.List;
-import lombok.Getter;
-import lombok.Setter;
 
-@Getter
-@Setter
 public class SearchCriteria {
 
     private QueryOperator queryOperator;
@@ -15,6 +11,30 @@ public class SearchCriteria {
     private List<String> values;
 
     public SearchCriteria() {}
+
+    public QueryOperator getQueryOperator() {
+        return queryOperator;
+    }
+
+    public void setQueryOperator(QueryOperator queryOperator) {
+        this.queryOperator = queryOperator;
+    }
+
+    public String getField() {
+        return field;
+    }
+
+    public void setField(String field) {
+        this.field = field;
+    }
+
+    public List<String> getValues() {
+        return values;
+    }
+
+    public void setValues(List<String> values) {
+        this.values = values;
+    }
 
     @JsonIgnore
     public String getValue() {

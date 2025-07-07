@@ -5,16 +5,18 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
-import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 @Configuration(proxyBeanMethods = false)
-@RequiredArgsConstructor
 public class MultiTenantInterceptor implements HandlerInterceptor {
 
     private final TenantIdentifierResolver tenantIdentifierResolver;
+
+    public MultiTenantInterceptor(TenantIdentifierResolver tenantIdentifierResolver) {
+        this.tenantIdentifierResolver = tenantIdentifierResolver;
+    }
 
     @Override
     public boolean preHandle(

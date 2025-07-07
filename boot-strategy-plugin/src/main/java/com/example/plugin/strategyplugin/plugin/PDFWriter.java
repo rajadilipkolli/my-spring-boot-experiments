@@ -1,11 +1,10 @@
 package com.example.plugin.strategyplugin.plugin;
 
+import com.example.plugin.strategyplugin.domain.GenericDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
-
-import com.example.plugin.strategyplugin.domain.GenericDTO;
 
 @Component
 class PDFWriter implements WriterPlugin {
