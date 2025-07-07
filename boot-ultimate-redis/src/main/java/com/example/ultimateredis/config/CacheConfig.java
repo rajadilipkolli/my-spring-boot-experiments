@@ -3,6 +3,8 @@ package com.example.ultimateredis.config;
 import com.example.ultimateredis.utils.AppConstants;
 import io.lettuce.core.ReadFrom;
 import java.time.Duration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.cache.RedisCacheManagerBuilderCustomizer;
 import org.springframework.boot.autoconfigure.data.redis.LettuceClientConfigurationBuilderCustomizer;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -10,13 +12,15 @@ import org.springframework.cache.Cache;
 import org.springframework.cache.annotation.CachingConfigurer;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.interceptor.CacheErrorHandler;
+import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.serializer.JdkSerializationRedisSerializer;
+import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.lang.Nullable;
@@ -25,6 +29,21 @@ import org.springframework.lang.Nullable;
 @EnableConfigurationProperties(CacheConfigurationProperties.class)
 @EnableCaching
 public class CacheConfig implements CachingConfigurer {
+
+    private static final Logger log = LoggerFactory.getLogger(CacheConfig.class);
+
+    @Bean
+    public ApplicationListener<ContextRefreshedEvent> redisCacheMigrationListener(
+            RedisTemplate<String, Object> redisTemplate) {
+        return event -> {
+            try {
+                redisTemplate.getConnectionFactory().getConnection().serverCommands().flushAll();
+                log.info("Redis cache flushed successfully during context refresh");
+            } catch (Exception e) {
+                log.warn("Failed to flush Redis cache during migration: {}", e.getMessage());
+            }
+        };
+    }
 
     @Bean
     RedisCacheManagerBuilderCustomizer redisCacheManagerBuilderCustomizer(
@@ -59,10 +78,11 @@ public class CacheConfig implements CachingConfigurer {
         RedisTemplate<String, Object> template = new RedisTemplate<>();
         template.setConnectionFactory(connectionFactory);
         template.setKeySerializer(new StringRedisSerializer());
-        template.setValueSerializer(new JdkSerializationRedisSerializer());
+        template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
         template.setHashKeySerializer(new StringRedisSerializer());
-        template.setHashValueSerializer(new JdkSerializationRedisSerializer());
+        template.setHashValueSerializer(new GenericJackson2JsonRedisSerializer());
         template.setEnableTransactionSupport(true);
+        template.afterPropertiesSet();
         return template;
     }
 

@@ -46,7 +46,7 @@ public class TenantInterceptor implements HandlerInterceptor {
             HttpServletResponse response,
             Object handler,
             @Nullable Exception ex) {
-        tenantIdentifierResolver.setCurrentTenant("unknown");
+        tenantIdentifierResolver.clearCurrentTenant();
     }
 
     private List<String> getValidTenants() {

@@ -22,7 +22,33 @@ A comprehensive sample showcasing various Redis usage patterns, including sentin
 
 Available options: MASTER, REPLICA_PREFERRED, MASTER_PREFERRED, etc.
 
----
+## Advanced Features
+
+- Smart GZIP Compression with threshold-based serialization
+- Pattern-based key operations for maintenance
+- Redis Lua scripting support for complex atomic operations
+- Rate limiting with token bucket algorithm
+- Key expiry management with different TTLs for different caches
+- Health check endpoint for monitoring Redis status
+
+## Getting Started
+
+### Start Redis Infrastructure
+```shell
+cd docker
+docker-compose up -d
+```
+
+Or for Sentinel architecture:
+```shell
+cd docker
+docker-compose -f docker-compose-sentinel.yml up -d
+```
+
+### Start the application with a specific profile
+```shell
+./mvnw spring-boot:run -Dspring-boot.run.profiles=sentinel
+```
 
 ## View Keys using cli
 
@@ -46,6 +72,9 @@ keys *
 * Using @Cacheable, @CachePut, @CacheEvict to cache results of method invocations
 * Use Redis to store the cached results
 * Define different TTLs for different Caches
+* Support for Lua scripting and atomic operations
+* Performance metrics via Micrometer
+* Health monitoring and status checks
 
 ## Redis Sentinel
 
@@ -88,7 +117,6 @@ We will run 1 master,1 slave and 3 sentinel instance.
 We are using _REPLICA_PREFERRED_ in here but this configuration can be important in production!
 
 ### Reference
- ### Reference
  - [Spring Boot 3 Redis Sentinel Guide](https://medium.com/@htyesilyurt/spring-boot-3-redis-sentinel-lettuce-client-and-docker-compose-for-high-availability-1f1e3c372a5a)
  - [Ultimate Guide to Redis Cache](https://programmerfriend.com/ultimate-guide-to-redis-cache-with-spring-boot-2-and-spring-data-redis/)
- 
+ - [Redis Lua Scripting](https://redis.io/docs/manual/programmability/eval-intro/)
