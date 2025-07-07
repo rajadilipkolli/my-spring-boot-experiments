@@ -1,6 +1,5 @@
 package com.example.locks.utils;
 
-
 public final class AppConstants {
     public static final String PROFILE_LOCAL = "local";
     public static final String PROFILE_PROD = "prod";

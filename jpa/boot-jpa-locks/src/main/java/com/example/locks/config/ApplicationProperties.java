@@ -27,30 +27,39 @@ public class ApplicationProperties {
         public String getPathPattern() {
             return pathPattern;
         }
+
         public void setPathPattern(String pathPattern) {
             this.pathPattern = pathPattern;
         }
+
         public String getAllowedMethods() {
             return allowedMethods;
         }
+
         public void setAllowedMethods(String allowedMethods) {
             this.allowedMethods = allowedMethods;
         }
+
         public String getAllowedHeaders() {
             return allowedHeaders;
         }
+
         public void setAllowedHeaders(String allowedHeaders) {
             this.allowedHeaders = allowedHeaders;
         }
+
         public String getAllowedOriginPatterns() {
             return allowedOriginPatterns;
         }
+
         public void setAllowedOriginPatterns(String allowedOriginPatterns) {
             this.allowedOriginPatterns = allowedOriginPatterns;
         }
+
         public boolean isAllowCredentials() {
             return allowCredentials;
         }
+
         public void setAllowCredentials(boolean allowCredentials) {
             this.allowCredentials = allowCredentials;
         }

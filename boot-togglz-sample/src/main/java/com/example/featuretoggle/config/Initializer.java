@@ -1,5 +1,7 @@
 package com.example.featuretoggle.config;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 import org.togglz.core.repository.FeatureState;
@@ -8,6 +10,8 @@ import org.togglz.spring.boot.actuate.autoconfigure.TogglzProperties;
 
 @Component
 public class Initializer implements CommandLineRunner {
+
+    private static final Logger log = LoggerFactory.getLogger(Initializer.class);
 
     private final StateRepository jdbcStateRepository;
     private final TogglzProperties togglzProperties;
