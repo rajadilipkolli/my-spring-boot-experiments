@@ -54,41 +54,13 @@ public class AuthorEntity implements Serializable {
         return id;
     }
 
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public String getMiddleName() {
-        return middleName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public Long getMobile() {
-        return mobile;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public LocalDateTime getRegisteredAt() {
-        return registeredAt;
-    }
-
-    public Short getVersion() {
-        return version;
-    }
-
-    public List<PostEntity> getPostEntities() {
-        return postEntities;
-    }
-
     public AuthorEntity setFirstName(String firstName) {
         this.firstName = firstName;
         return this;
+    }
+
+    public String getFirstName() {
+        return firstName;
     }
 
     public AuthorEntity setMiddleName(String middleName) {
@@ -96,9 +68,17 @@ public class AuthorEntity implements Serializable {
         return this;
     }
 
+    public String getMiddleName() {
+        return middleName;
+    }
+
     public AuthorEntity setLastName(String lastName) {
         this.lastName = lastName;
         return this;
+    }
+
+    public String getLastName() {
+        return lastName;
     }
 
     public AuthorEntity setMobile(Long mobile) {
@@ -106,9 +86,17 @@ public class AuthorEntity implements Serializable {
         return this;
     }
 
+    public Long getMobile() {
+        return mobile;
+    }
+
     public AuthorEntity setEmail(String email) {
         this.email = email;
         return this;
+    }
+
+    public String getEmail() {
+        return email;
     }
 
     public AuthorEntity setRegisteredAt(LocalDateTime registeredAt) {
@@ -116,9 +104,17 @@ public class AuthorEntity implements Serializable {
         return this;
     }
 
+    public LocalDateTime getRegisteredAt() {
+        return registeredAt;
+    }
+
     public AuthorEntity setVersion(Short version) {
         this.version = version;
         return this;
+    }
+
+    public Short getVersion() {
+        return version;
     }
 
     public AuthorEntity setPostEntities(List<PostEntity> postEntities) {
@@ -127,6 +123,10 @@ public class AuthorEntity implements Serializable {
         }
         this.postEntities = postEntities;
         return this;
+    }
+
+    public List<PostEntity> getPostEntities() {
+        return postEntities;
     }
 
     public void addPost(PostEntity postEntity) {

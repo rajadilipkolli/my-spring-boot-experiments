@@ -37,21 +37,13 @@ public class PostDetailsEntity extends Auditable implements Serializable {
         return id;
     }
 
-    public String getDetailsKey() {
-        return detailsKey;
-    }
-
-    public String getCreatedBy() {
-        return createdBy;
-    }
-
-    public PostEntity getPostEntity() {
-        return postEntity;
-    }
-
     public PostDetailsEntity setDetailsKey(String detailsKey) {
         this.detailsKey = detailsKey;
         return this;
+    }
+
+    public String getDetailsKey() {
+        return detailsKey;
     }
 
     public PostDetailsEntity setCreatedBy(String createdBy) {
@@ -59,9 +51,17 @@ public class PostDetailsEntity extends Auditable implements Serializable {
         return this;
     }
 
+    public String getCreatedBy() {
+        return createdBy;
+    }
+
     public PostDetailsEntity setPostEntity(PostEntity postEntity) {
         this.postEntity = postEntity;
         return this;
+    }
+
+    public PostEntity getPostEntity() {
+        return postEntity;
     }
 
     @Override

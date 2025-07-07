@@ -44,29 +44,13 @@ public class PostCommentEntity extends Auditable implements Serializable {
         return id;
     }
 
-    public String getTitle() {
-        return title;
-    }
-
-    public String getContent() {
-        return content;
-    }
-
-    public boolean isPublished() {
-        return published;
-    }
-
-    public OffsetDateTime getPublishedAt() {
-        return publishedAt;
-    }
-
-    public PostEntity getPostEntity() {
-        return postEntity;
-    }
-
     public PostCommentEntity setTitle(String title) {
         this.title = title;
         return this;
+    }
+
+    public String getTitle() {
+        return title;
     }
 
     public PostCommentEntity setContent(String content) {
@@ -74,9 +58,17 @@ public class PostCommentEntity extends Auditable implements Serializable {
         return this;
     }
 
+    public String getContent() {
+        return content;
+    }
+
     public PostCommentEntity setPublished(boolean published) {
         this.published = published;
         return this;
+    }
+
+    public boolean isPublished() {
+        return published;
     }
 
     public PostCommentEntity setPublishedAt(OffsetDateTime publishedAt) {
@@ -84,9 +76,17 @@ public class PostCommentEntity extends Auditable implements Serializable {
         return this;
     }
 
+    public OffsetDateTime getPublishedAt() {
+        return publishedAt;
+    }
+
     public PostCommentEntity setPostEntity(PostEntity postEntity) {
         this.postEntity = postEntity;
         return this;
+    }
+
+    public PostEntity getPostEntity() {
+        return postEntity;
     }
 
     @Override
