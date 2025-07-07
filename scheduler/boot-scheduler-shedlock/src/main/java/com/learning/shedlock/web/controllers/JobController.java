@@ -28,6 +28,10 @@ public class JobController {
 
     private final JobService jobService;
 
+    public JobController(JobService jobService) {
+        this.jobService = jobService;
+    }
+
     @GetMapping
     public PagedResult<JobResponse> getAllJobs(
             @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_NUMBER, required = false) int pageNo,

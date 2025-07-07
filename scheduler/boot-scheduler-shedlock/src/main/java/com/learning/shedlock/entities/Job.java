@@ -20,6 +20,29 @@ public class Job {
     @Column(nullable = false)
     private String text;
 
+    public Job() {}
+
+    public Job(Long id, String text) {
+        this.id = id;
+        this.text = text;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getText() {
+        return text;
+    }
+
+    public void setText(String text) {
+        this.text = text;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

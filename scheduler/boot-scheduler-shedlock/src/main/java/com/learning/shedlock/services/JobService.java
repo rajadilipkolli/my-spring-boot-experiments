@@ -24,6 +24,11 @@ public class JobService {
     private final JobRepository jobRepository;
     private final JobMapper jobMapper;
 
+    public JobService(JobRepository jobRepository, JobMapper jobMapper) {
+        this.jobRepository = jobRepository;
+        this.jobMapper = jobMapper;
+    }
+
     public PagedResult<JobResponse> findAllJobs(FindJobsQuery findJobsQuery) {
 
         // create Pageable instance

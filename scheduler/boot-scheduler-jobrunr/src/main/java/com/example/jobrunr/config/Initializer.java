@@ -8,6 +8,8 @@ import org.jobrunr.jobs.annotations.Job;
 import org.jobrunr.scheduling.BackgroundJob;
 import org.jobrunr.scheduling.JobScheduler;
 import org.jobrunr.scheduling.cron.Cron;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
@@ -16,7 +18,13 @@ import org.springframework.stereotype.Component;
 @Profile({AppConstants.PROFILE_NOT_TEST, AppConstants.PROFILE_NOT_PROD})
 public class Initializer implements CommandLineRunner {
 
+    private static final Logger log = LoggerFactory.getLogger(Initializer.class);
+
     private final JobScheduler jobScheduler;
+
+    public Initializer(JobScheduler jobScheduler) {
+        this.jobScheduler = jobScheduler;
+    }
 
     @Override
     public void run(String... args) {
