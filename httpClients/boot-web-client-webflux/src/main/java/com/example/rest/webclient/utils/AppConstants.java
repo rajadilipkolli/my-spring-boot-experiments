@@ -1,6 +1,5 @@
 package com.example.rest.webclient.utils;
 
-
 public final class AppConstants {
     public static final String PROFILE_PROD = "prod";
     public static final String PROFILE_NOT_PROD = "!" + PROFILE_PROD;

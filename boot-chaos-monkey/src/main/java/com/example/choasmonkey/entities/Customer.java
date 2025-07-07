@@ -25,6 +25,13 @@ public class Customer {
     @NotEmpty(message = "Text cannot be empty")
     private String text;
 
+    public Customer() {}
+
+    public Customer(Long id, String text) {
+        this.id = id;
+        this.text = text;
+    }
+
     public Long getId() {
         return id;
     }

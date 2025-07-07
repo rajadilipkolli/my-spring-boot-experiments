@@ -20,6 +20,13 @@ public class Client {
     @Column(nullable = false)
     private String text;
 
+    public Client() {}
+
+    public Client(Long id, String text) {
+        this.id = id;
+        this.text = text;
+    }
+
     public Long getId() {
         return id;
     }
