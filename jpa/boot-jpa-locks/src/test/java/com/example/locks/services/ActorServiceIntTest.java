@@ -16,9 +16,13 @@ import java.util.concurrent.ExecutionException;
 import java.util.stream.IntStream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 class ActorServiceIntTest extends AbstractIntegrationTest {
+
+    private static final Logger log = LoggerFactory.getLogger(ActorServiceIntTest.class);
 
     @Autowired
     private ActorService actorService;

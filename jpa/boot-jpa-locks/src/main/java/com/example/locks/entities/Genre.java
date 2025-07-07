@@ -26,13 +26,25 @@ public class Genre {
         return this;
     }
 
+    public Long getGenreId() {
+        return genreId;
+    }
+
     public Genre setGenreName(String genreName) {
         this.genreName = genreName;
         return this;
     }
 
+    public String getGenreName() {
+        return genreName;
+    }
+
     public Genre setMovies(List<Movie> movies) {
         this.movies = movies;
         return this;
+    }
+
+    public List<Movie> getMovies() {
+        return movies;
     }
 }

@@ -5,13 +5,21 @@ import com.example.keysetpagination.repositories.ActorRepository;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.LongStream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
 @Component
 public class Initializer implements CommandLineRunner {
 
+    private static final Logger log = LoggerFactory.getLogger(Initializer.class);
+
     private final ActorRepository actorRepository;
+
+    public Initializer(ActorRepository actorRepository) {
+        this.actorRepository = actorRepository;
+    }
 
     @Override
     public void run(String... args) {

@@ -28,6 +28,10 @@ public class DriverController {
 
     private final DriverService driverService;
 
+    public DriverController(DriverService driverService) {
+        this.driverService = driverService;
+    }
+
     @GetMapping
     public PagedResult<DriverResponse> getAllDrivers(
             @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_NUMBER, required = false) int pageNo,

@@ -24,6 +24,11 @@ public class DriverService {
     private final DriverRepository driverRepository;
     private final DriverMapper driverMapper;
 
+    public DriverService(DriverRepository driverRepository, DriverMapper driverMapper) {
+        this.driverRepository = driverRepository;
+        this.driverMapper = driverMapper;
+    }
+
     public PagedResult<DriverResponse> findAllDrivers(FindDriversQuery findDriversQuery) {
 
         // create Pageable instance

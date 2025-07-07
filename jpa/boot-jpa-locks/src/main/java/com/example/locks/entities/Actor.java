@@ -40,9 +40,17 @@ public class Actor {
         return this;
     }
 
+    public Long getActorId() {
+        return actorId;
+    }
+
     public Actor setActorName(String actorName) {
         this.actorName = actorName;
         return this;
+    }
+
+    public String getActorName() {
+        return actorName;
     }
 
     public Actor setDob(LocalDate dob) {
@@ -50,9 +58,17 @@ public class Actor {
         return this;
     }
 
+    public LocalDate getDob() {
+        return dob;
+    }
+
     public Actor setNationality(String nationality) {
         this.nationality = nationality;
         return this;
+    }
+
+    public String getNationality() {
+        return nationality;
     }
 
     public Actor setMovies(List<Movie> movies) {
@@ -60,9 +76,17 @@ public class Actor {
         return this;
     }
 
+    public List<Movie> getMovies() {
+        return movies;
+    }
+
     public Actor setVersion(Short version) {
         this.version = version;
         return this;
+    }
+
+    public Short getVersion() {
+        return version;
     }
 
     @Override

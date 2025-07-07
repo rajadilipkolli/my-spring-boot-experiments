@@ -12,6 +12,30 @@ public class SearchCriteria {
 
     public SearchCriteria() {}
 
+    public QueryOperator getQueryOperator() {
+        return queryOperator;
+    }
+
+    public void setQueryOperator(QueryOperator queryOperator) {
+        this.queryOperator = queryOperator;
+    }
+
+    public String getField() {
+        return field;
+    }
+
+    public void setField(String field) {
+        this.field = field;
+    }
+
+    public List<String> getValues() {
+        return values;
+    }
+
+    public void setValues(List<String> values) {
+        this.values = values;
+    }
+
     @JsonIgnore
     public String getValue() {
         return values.getFirst();

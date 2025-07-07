@@ -25,4 +25,54 @@ public class Director {
 
     @OneToMany(mappedBy = "director")
     private List<Movie> movies;
+
+    public Director() {}
+
+    public Director(Long directorId, String directorName, LocalDate dob, String nationality, List<Movie> movies) {
+        this.directorId = directorId;
+        this.directorName = directorName;
+        this.dob = dob;
+        this.nationality = nationality;
+        this.movies = movies;
+    }
+
+    public Long getDirectorId() {
+        return directorId;
+    }
+
+    public void setDirectorId(Long directorId) {
+        this.directorId = directorId;
+    }
+
+    public String getDirectorName() {
+        return directorName;
+    }
+
+    public void setDirectorName(String directorName) {
+        this.directorName = directorName;
+    }
+
+    public LocalDate getDob() {
+        return dob;
+    }
+
+    public void setDob(LocalDate dob) {
+        this.dob = dob;
+    }
+
+    public String getNationality() {
+        return nationality;
+    }
+
+    public void setNationality(String nationality) {
+        this.nationality = nationality;
+    }
+
+    public List<Movie> getMovies() {
+        return movies;
+    }
+
+    public void setMovies(List<Movie> movies) {
+        this.movies = movies;
+    }
 }
