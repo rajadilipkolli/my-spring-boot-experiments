@@ -9,12 +9,16 @@ import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import io.r2dbc.postgresql.codec.Json;
 import java.io.IOException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.jackson.JsonComponent;
 
 @JsonComponent
 class PgJsonObjectJsonComponent {
 
     static class Deserializer extends JsonDeserializer<Json> {
+
+        private static final Logger log = LoggerFactory.getLogger(Deserializer.class);
 
         @Override
         public Json deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
@@ -25,6 +29,8 @@ class PgJsonObjectJsonComponent {
     }
 
     static class Serializer extends JsonSerializer<Json> {
+
+        private static final Logger log = LoggerFactory.getLogger(Serializer.class);
 
         @Override
         public void serialize(Json value, JsonGenerator gen, SerializerProvider serializers) throws IOException {

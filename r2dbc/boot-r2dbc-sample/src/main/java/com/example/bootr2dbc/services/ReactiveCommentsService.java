@@ -18,6 +18,13 @@ public class ReactiveCommentsService {
     private final ReactiveCommentsRepository reactiveCommentsRepository;
     private final ReactivePostCommentMapper reactivePostCommentMapper;
 
+    public ReactiveCommentsService(
+            ReactiveCommentsRepository reactiveCommentsRepository,
+            ReactivePostCommentMapper reactivePostCommentMapper) {
+        this.reactiveCommentsRepository = reactiveCommentsRepository;
+        this.reactivePostCommentMapper = reactivePostCommentMapper;
+    }
+
     public Flux<ReactiveComments> findAllReactiveCommentsByPostId(
             Long postId, String sortBy, String sortDir) {
         Sort sort =

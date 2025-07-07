@@ -8,6 +8,8 @@ import com.example.learning.entity.Post;
 import io.r2dbc.postgresql.codec.Json;
 import java.util.stream.IntStream;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.r2dbc.DataR2dbcTest;
 import org.springframework.context.annotation.Import;
@@ -20,6 +22,8 @@ import reactor.test.StepVerifier;
 @DataR2dbcTest
 @Import({ContainerConfig.class})
 class PostRepositoryTest {
+
+    private static final Logger log = LoggerFactory.getLogger(PostRepositoryTest.class);
 
     @Autowired
     private R2dbcEntityTemplate template;

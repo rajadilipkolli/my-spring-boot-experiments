@@ -9,6 +9,10 @@ import org.springframework.web.reactive.config.WebFluxConfigurer;
 public class WebFluxConfig implements WebFluxConfigurer {
     private final ApplicationProperties properties;
 
+    public WebFluxConfig(ApplicationProperties properties) {
+        this.properties = properties;
+    }
+
     @Override
     public void addCorsMappings(@NonNull CorsRegistry registry) {
         registry.addMapping(properties.getCors().getPathPattern())

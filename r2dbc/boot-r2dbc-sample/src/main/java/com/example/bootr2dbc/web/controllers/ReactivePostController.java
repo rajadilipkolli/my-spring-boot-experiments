@@ -27,6 +27,10 @@ public class ReactivePostController {
 
     private final ReactivePostService reactivePostService;
 
+    public ReactivePostController(ReactivePostService reactivePostService) {
+        this.reactivePostService = reactivePostService;
+    }
+
     @GetMapping("/")
     public Mono<ResponseEntity<List<ReactivePost>>> getAllReactivePosts(
             @RequestParam(defaultValue = AppConstants.DEFAULT_SORT_BY, required = false)

@@ -27,6 +27,10 @@ public class ReactiveCommentsController {
 
     private final ReactiveCommentsService reactiveCommentsService;
 
+    public ReactiveCommentsController(ReactiveCommentsService reactiveCommentsService) {
+        this.reactiveCommentsService = reactiveCommentsService;
+    }
+
     @GetMapping("/")
     public Flux<ReactiveComments> getAllReactiveComments(
             @RequestParam Long postId,

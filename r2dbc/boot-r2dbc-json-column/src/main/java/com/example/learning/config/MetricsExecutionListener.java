@@ -8,8 +8,12 @@ import io.r2dbc.proxy.core.QueryExecutionInfo;
 import io.r2dbc.proxy.listener.ProxyMethodExecutionListener;
 import io.r2dbc.proxy.support.QueryExecutionInfoFormatter;
 import java.time.Duration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MetricsExecutionListener implements ProxyMethodExecutionListener {
+
+    private static final Logger log = LoggerFactory.getLogger(MetricsExecutionListener.class);
 
     private MeterRegistry registry;
 

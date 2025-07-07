@@ -21,6 +21,15 @@ public class ReactivePostService {
     private final ReactiveCommentsRepository reactiveCommentsRepository;
     private final ReactivePostMapper reactivePostMapper;
 
+    public ReactivePostService(
+            ReactivePostRepository reactivePostRepository,
+            ReactiveCommentsRepository reactiveCommentsRepository,
+            ReactivePostMapper reactivePostMapper) {
+        this.reactivePostRepository = reactivePostRepository;
+        this.reactiveCommentsRepository = reactiveCommentsRepository;
+        this.reactivePostMapper = reactivePostMapper;
+    }
+
     public Flux<ReactivePost> findAllReactivePosts(String sortBy, String sortDir) {
         Sort sort =
                 sortDir.equalsIgnoreCase(Sort.Direction.ASC.name())
