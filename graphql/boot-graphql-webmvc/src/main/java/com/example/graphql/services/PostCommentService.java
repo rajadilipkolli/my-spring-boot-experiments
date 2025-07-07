@@ -28,7 +28,9 @@ public class PostCommentService {
     private final PostCommentEntityToResponseMapper postCommentEntityToResponseMapper;
     private final PostCommentRequestToEntityMapper postCommentRequestToEntityMapper;
 
-    public PostCommentService(PostCommentRepository postCommentRepository, PostRepository postRepository,
+    public PostCommentService(
+            PostCommentRepository postCommentRepository,
+            PostRepository postRepository,
             PostCommentEntityToResponseMapper postCommentEntityToResponseMapper,
             PostCommentRequestToEntityMapper postCommentRequestToEntityMapper) {
         this.postCommentRepository = postCommentRepository;

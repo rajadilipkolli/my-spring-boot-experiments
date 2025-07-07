@@ -22,7 +22,9 @@ public class AuthorService {
     private final ConversionService appConversionService;
     private final AuthorRequestToEntityMapper authorRequestToEntityMapper;
 
-    public AuthorService(AuthorRepository authorRepository, ConversionService appConversionService,
+    public AuthorService(
+            AuthorRepository authorRepository,
+            ConversionService appConversionService,
             AuthorRequestToEntityMapper authorRequestToEntityMapper) {
         this.authorRepository = authorRepository;
         this.appConversionService = appConversionService;

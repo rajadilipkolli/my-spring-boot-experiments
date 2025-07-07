@@ -31,8 +31,7 @@ public class TagEntity implements Serializable {
         this.tagDescription = tagDescription;
     }
 
-    public TagEntity() {
-    }
+    public TagEntity() {}
 
     public TagEntity setId(Long id) {
         this.id = id;

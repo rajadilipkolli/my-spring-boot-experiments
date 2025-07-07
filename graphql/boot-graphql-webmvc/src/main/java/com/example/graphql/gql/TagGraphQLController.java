@@ -6,6 +6,8 @@ import com.example.graphql.services.TagService;
 import jakarta.validation.constraints.NotBlank;
 import java.util.List;
 import java.util.Optional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
@@ -15,6 +17,8 @@ import org.springframework.validation.annotation.Validated;
 @Controller
 @Validated
 public class TagGraphQLController {
+
+    private static final Logger log = LoggerFactory.getLogger(TagGraphQLController.class);
 
     private final TagService tagService;
 

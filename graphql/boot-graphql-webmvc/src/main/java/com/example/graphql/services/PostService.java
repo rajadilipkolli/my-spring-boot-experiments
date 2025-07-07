@@ -29,7 +29,10 @@ public class PostService {
     private final ConversionService myConversionService;
     private final NewPostRequestToPostEntityMapper mapNewPostRequestToPostEntityMapper;
 
-    public PostService(PostRepository postRepository, AuthorRepository authorRepository, TagRepository tagRepository,
+    public PostService(
+            PostRepository postRepository,
+            AuthorRepository authorRepository,
+            TagRepository tagRepository,
             ConversionService myConversionService,
             NewPostRequestToPostEntityMapper mapNewPostRequestToPostEntityMapper) {
         this.postRepository = postRepository;

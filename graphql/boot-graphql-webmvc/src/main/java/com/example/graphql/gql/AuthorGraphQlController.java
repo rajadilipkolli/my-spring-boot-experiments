@@ -16,6 +16,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.BatchMapping;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
@@ -27,6 +29,8 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 public class AuthorGraphQlController {
 
+    private static final Logger log = LoggerFactory.getLogger(AuthorGraphQlController.class);
+
     private final AuthorService authorService;
 
     private final PostService postService;
@@ -35,8 +39,11 @@ public class AuthorGraphQlController {
 
     private final TagService tagService;
 
-    public AuthorGraphQlController(AuthorService authorService, PostService postService,
-            PostCommentService postCommentService, TagService tagService) {
+    public AuthorGraphQlController(
+            AuthorService authorService,
+            PostService postService,
+            PostCommentService postCommentService,
+            TagService tagService) {
         this.authorService = authorService;
         this.postService = postService;
         this.postCommentService = postCommentService;
