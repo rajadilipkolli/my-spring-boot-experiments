@@ -11,7 +11,6 @@ import org.springframework.data.relational.core.mapping.Table;
 
 @Table("reactive_posts")
 public class ReactivePost {
-
     @Id
     @Column("id")
     private Long id;
@@ -38,120 +37,294 @@ public class ReactivePost {
     @LastModifiedBy
     private String updatedBy;
 
-    public Long getId() {
-        return id;
+    public static ReactivePostBuilder builder() {
+        return new ReactivePostBuilder();
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public Long getId() {
+        return this.id;
     }
 
     public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
+        return this.title;
     }
 
     public String getContent() {
-        return content;
-    }
-
-    public void setContent(String content) {
-        this.content = content;
+        return this.content;
     }
 
     public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
+        return this.createdAt;
     }
 
     public String getCreatedBy() {
-        return createdBy;
-    }
-
-    public void setCreatedBy(String createdBy) {
-        this.createdBy = createdBy;
+        return this.createdBy;
     }
 
     public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
+        return this.updatedAt;
     }
 
     public String getUpdatedBy() {
-        return updatedBy;
+        return this.updatedBy;
     }
 
-    public void setUpdatedBy(String updatedBy) {
+    public void setId(final Long id) {
+        this.id = id;
+    }
+
+    public void setTitle(final String title) {
+        this.title = title;
+    }
+
+    public void setContent(final String content) {
+        this.content = content;
+    }
+
+    public void setCreatedAt(final LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public void setCreatedBy(final String createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    public void setUpdatedAt(final LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
+    public void setUpdatedBy(final String updatedBy) {
         this.updatedBy = updatedBy;
     }
 
-    public static Builder builder() {
-        return new Builder();
+    public boolean equals(final Object o) {
+        if (o == this) {
+            return true;
+        } else if (!(o instanceof ReactivePost)) {
+            return false;
+        } else {
+            ReactivePost other = (ReactivePost) o;
+            if (!other.canEqual(this)) {
+                return false;
+            } else {
+                Object this$id = this.getId();
+                Object other$id = other.getId();
+                if (this$id == null) {
+                    if (other$id != null) {
+                        return false;
+                    }
+                } else if (!this$id.equals(other$id)) {
+                    return false;
+                }
+
+                Object this$title = this.getTitle();
+                Object other$title = other.getTitle();
+                if (this$title == null) {
+                    if (other$title != null) {
+                        return false;
+                    }
+                } else if (!this$title.equals(other$title)) {
+                    return false;
+                }
+
+                Object this$content = this.getContent();
+                Object other$content = other.getContent();
+                if (this$content == null) {
+                    if (other$content != null) {
+                        return false;
+                    }
+                } else if (!this$content.equals(other$content)) {
+                    return false;
+                }
+
+                Object this$createdAt = this.getCreatedAt();
+                Object other$createdAt = other.getCreatedAt();
+                if (this$createdAt == null) {
+                    if (other$createdAt != null) {
+                        return false;
+                    }
+                } else if (!this$createdAt.equals(other$createdAt)) {
+                    return false;
+                }
+
+                Object this$createdBy = this.getCreatedBy();
+                Object other$createdBy = other.getCreatedBy();
+                if (this$createdBy == null) {
+                    if (other$createdBy != null) {
+                        return false;
+                    }
+                } else if (!this$createdBy.equals(other$createdBy)) {
+                    return false;
+                }
+
+                Object this$updatedAt = this.getUpdatedAt();
+                Object other$updatedAt = other.getUpdatedAt();
+                if (this$updatedAt == null) {
+                    if (other$updatedAt != null) {
+                        return false;
+                    }
+                } else if (!this$updatedAt.equals(other$updatedAt)) {
+                    return false;
+                }
+
+                Object this$updatedBy = this.getUpdatedBy();
+                Object other$updatedBy = other.getUpdatedBy();
+                if (this$updatedBy == null) {
+                    if (other$updatedBy != null) {
+                        return false;
+                    }
+                } else if (!this$updatedBy.equals(other$updatedBy)) {
+                    return false;
+                }
+
+                return true;
+            }
+        }
     }
 
-    public static class Builder {
+    protected boolean canEqual(final Object other) {
+        return other instanceof ReactivePost;
+    }
+
+    public int hashCode() {
+        int PRIME = 59;
+        int result = 1;
+        Object $id = this.getId();
+        result = result * 59 + ($id == null ? 43 : $id.hashCode());
+        Object $title = this.getTitle();
+        result = result * 59 + ($title == null ? 43 : $title.hashCode());
+        Object $content = this.getContent();
+        result = result * 59 + ($content == null ? 43 : $content.hashCode());
+        Object $createdAt = this.getCreatedAt();
+        result = result * 59 + ($createdAt == null ? 43 : $createdAt.hashCode());
+        Object $createdBy = this.getCreatedBy();
+        result = result * 59 + ($createdBy == null ? 43 : $createdBy.hashCode());
+        Object $updatedAt = this.getUpdatedAt();
+        result = result * 59 + ($updatedAt == null ? 43 : $updatedAt.hashCode());
+        Object $updatedBy = this.getUpdatedBy();
+        result = result * 59 + ($updatedBy == null ? 43 : $updatedBy.hashCode());
+        return result;
+    }
+
+    public String toString() {
+        Long var10000 = this.getId();
+        return "ReactivePost(id="
+                + var10000
+                + ", title="
+                + this.getTitle()
+                + ", content="
+                + this.getContent()
+                + ", createdAt="
+                + String.valueOf(this.getCreatedAt())
+                + ", createdBy="
+                + this.getCreatedBy()
+                + ", updatedAt="
+                + String.valueOf(this.getUpdatedAt())
+                + ", updatedBy="
+                + this.getUpdatedBy()
+                + ")";
+    }
+
+    public ReactivePost(
+            final Long id,
+            final String title,
+            final String content,
+            final LocalDateTime createdAt,
+            final String createdBy,
+            final LocalDateTime updatedAt,
+            final String updatedBy) {
+        this.id = id;
+        this.title = title;
+        this.content = content;
+        this.createdAt = createdAt;
+        this.createdBy = createdBy;
+        this.updatedAt = updatedAt;
+        this.updatedBy = updatedBy;
+    }
+
+    public ReactivePost() {}
+
+    public static class ReactivePostBuilder {
+
         private Long id;
+
         private String title;
+
         private String content;
-        private java.time.LocalDateTime createdAt;
+
+        private LocalDateTime createdAt;
+
         private String createdBy;
-        private java.time.LocalDateTime updatedAt;
+
+        private LocalDateTime updatedAt;
+
         private String updatedBy;
 
-        public Builder id(Long id) {
+        ReactivePostBuilder() {}
+
+        public ReactivePostBuilder id(final Long id) {
             this.id = id;
             return this;
         }
 
-        public Builder title(String title) {
+        public ReactivePostBuilder title(final String title) {
             this.title = title;
             return this;
         }
 
-        public Builder content(String content) {
+        public ReactivePostBuilder content(final String content) {
             this.content = content;
             return this;
         }
 
-        public Builder createdAt(java.time.LocalDateTime createdAt) {
+        public ReactivePostBuilder createdAt(final LocalDateTime createdAt) {
             this.createdAt = createdAt;
             return this;
         }
 
-        public Builder createdBy(String createdBy) {
+        public ReactivePostBuilder createdBy(final String createdBy) {
             this.createdBy = createdBy;
             return this;
         }
 
-        public Builder updatedAt(java.time.LocalDateTime updatedAt) {
+        public ReactivePostBuilder updatedAt(final LocalDateTime updatedAt) {
             this.updatedAt = updatedAt;
             return this;
         }
 
-        public Builder updatedBy(String updatedBy) {
+        public ReactivePostBuilder updatedBy(final String updatedBy) {
             this.updatedBy = updatedBy;
             return this;
         }
 
         public ReactivePost build() {
-            ReactivePost rp = new ReactivePost();
-            rp.id = this.id;
-            rp.title = this.title;
-            rp.content = this.content;
-            rp.createdAt = this.createdAt;
-            rp.createdBy = this.createdBy;
-            rp.updatedAt = this.updatedAt;
-            rp.updatedBy = this.updatedBy;
-            return rp;
+            return new ReactivePost(
+                    this.id,
+                    this.title,
+                    this.content,
+                    this.createdAt,
+                    this.createdBy,
+                    this.updatedAt,
+                    this.updatedBy);
+        }
+
+        public String toString() {
+            Long var10000 = this.id;
+            return "ReactivePost.ReactivePostBuilder(id="
+                    + var10000
+                    + ", title="
+                    + this.title
+                    + ", content="
+                    + this.content
+                    + ", createdAt="
+                    + String.valueOf(this.createdAt)
+                    + ", createdBy="
+                    + this.createdBy
+                    + ", updatedAt="
+                    + String.valueOf(this.updatedAt)
+                    + ", updatedBy="
+                    + this.updatedBy
+                    + ")";
         }
     }
 }
