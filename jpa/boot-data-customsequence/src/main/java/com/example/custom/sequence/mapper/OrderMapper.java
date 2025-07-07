@@ -15,9 +15,7 @@ public class OrderMapper {
     public OrderResponse getOrderResponse(Order order) {
         Customer customer = order.getCustomer();
         return new OrderResponse(
-                order.getId(),
-                order.getText(),
-                new CustomerResponseWithOutOrder(customer.getId(), customer.getText()));
+                order.getId(), order.getText(), new CustomerResponseWithOutOrder(customer.getId(), customer.getText()));
     }
 
     public Order mapToEntity(OrderRequest orderRequest) {

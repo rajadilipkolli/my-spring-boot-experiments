@@ -18,25 +18,19 @@ public class StringPrefixedNumberFormattedSequenceIdGenerator extends SequenceSt
     private final String numberFormat;
 
     public StringPrefixedNumberFormattedSequenceIdGenerator(
-            StringPrefixedSequence config,
-            Member annotatedMember,
-            CustomIdGeneratorCreationContext context) {
+            StringPrefixedSequence config, Member annotatedMember, CustomIdGeneratorCreationContext context) {
         valuePrefix = config.valuePrefix();
         numberFormat = config.numberFormat();
     }
 
     @Override
-    public Serializable generate(SharedSessionContractImplementor session, Object object)
-            throws HibernateException {
+    public Serializable generate(SharedSessionContractImplementor session, Object object) throws HibernateException {
         return valuePrefix + numberFormat.formatted(super.generate(session, object));
     }
 
     @Override
-    public void configure(Type type, Properties params, ServiceRegistry serviceRegistry)
-            throws MappingException {
+    public void configure(Type type, Properties params, ServiceRegistry serviceRegistry) throws MappingException {
         super.configure(
-                new TypeConfiguration().getBasicTypeRegistry().getRegisteredType(Long.class),
-                params,
-                serviceRegistry);
+                new TypeConfiguration().getBasicTypeRegistry().getRegisteredType(Long.class), params, serviceRegistry);
     }
 }

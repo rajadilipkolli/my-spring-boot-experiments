@@ -32,11 +32,17 @@ import org.springframework.data.domain.Sort;
 @ExtendWith(MockitoExtension.class)
 class OrderServiceTest {
 
-    @Mock private OrderRepository orderRepository;
-    @Mock private CustomerService customerService;
-    @Mock private OrderMapper orderMapper;
+    @Mock
+    private OrderRepository orderRepository;
 
-    @InjectMocks private OrderService orderService;
+    @Mock
+    private CustomerService customerService;
+
+    @Mock
+    private OrderMapper orderMapper;
+
+    @InjectMocks
+    private OrderService orderService;
 
     @Test
     void findAllOrders() {
@@ -78,7 +84,8 @@ class OrderServiceTest {
     void saveOrder() {
         // given
         given(customerService.findById("1"))
-                .willReturn(Optional.of(new Customer("1", "custText", List.of())));
+                .willReturn(Optional.of(
+                        new Customer().setId("1").setText("custText").setOrders(List.of())));
         given(orderRepository.persist(getOrder())).willReturn(getOrder());
         given(orderMapper.getOrderResponse(getOrder())).willReturn(getOrderResponse());
         // when
@@ -124,8 +131,7 @@ class OrderServiceTest {
     }
 
     private OrderResponse getOrderResponse() {
-        return new OrderResponse(
-                "1", "junitText", new CustomerResponseWithOutOrder("1", "custText"));
+        return new OrderResponse("1", "junitText", new CustomerResponseWithOutOrder("1", "custText"));
     }
 
     private OrderRequest getOrderReq() {

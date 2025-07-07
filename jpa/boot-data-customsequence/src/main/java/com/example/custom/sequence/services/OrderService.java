@@ -23,28 +23,24 @@ public class OrderService {
     private final CustomerService customerService;
     private final OrderMapper orderMapper;
 
-    public OrderService(
-            OrderRepository orderRepository,
-            CustomerService customerService,
-            OrderMapper orderMapper) {
+    public OrderService(OrderRepository orderRepository, CustomerService customerService, OrderMapper orderMapper) {
         this.orderRepository = orderRepository;
         this.customerService = customerService;
         this.orderMapper = orderMapper;
     }
 
-    public PagedResult<OrderResponse> findAllOrders(
-            int pageNo, int pageSize, String sortBy, String sortDir) {
-        Sort sort =
-                sortDir.equalsIgnoreCase(Sort.Direction.ASC.name())
-                        ? Sort.by(sortBy).ascending()
-                        : Sort.by(sortBy).descending();
+    public PagedResult<OrderResponse> findAllOrders(int pageNo, int pageSize, String sortBy, String sortDir) {
+        Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name())
+                ? Sort.by(sortBy).ascending()
+                : Sort.by(sortBy).descending();
 
         // create Pageable instance
         Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
         Page<Order> ordersPage = orderRepository.findAll(pageable);
 
-        List<OrderResponse> orderResponseList =
-                ordersPage.getContent().stream().map(orderMapper::getOrderResponse).toList();
+        List<OrderResponse> orderResponseList = ordersPage.getContent().stream()
+                .map(orderMapper::getOrderResponse)
+                .toList();
 
         return new PagedResult<>(
                 orderResponseList,
@@ -63,27 +59,22 @@ public class OrderService {
 
     @Transactional
     public Optional<OrderResponse> saveOrder(OrderRequest orderRequest) {
-        return customerService
-                .findById(orderRequest.customerId())
-                .map(
-                        customer -> {
-                            Order order = new Order();
-                            order.setText(orderRequest.text());
-                            order.setCustomer(customer);
-                            return orderMapper.getOrderResponse(orderRepository.persist(order));
-                        });
+        return customerService.findById(orderRequest.customerId()).map(customer -> {
+            Order order = new Order();
+            order.setText(orderRequest.text());
+            order.setCustomer(customer);
+            return orderMapper.getOrderResponse(orderRepository.persist(order));
+        });
     }
 
     @Transactional
     public Optional<OrderResponse> updateOrderById(String id, OrderRequest orderRequest) {
         return orderRepository
                 .findByIdAndCustomer_Id(id, orderRequest.customerId())
-                .map(
-                        order -> {
-                            order.setText(orderRequest.text());
-                            return orderMapper.getOrderResponse(
-                                    orderRepository.mergeAndFlush(order));
-                        });
+                .map(order -> {
+                    order.setText(orderRequest.text());
+                    return orderMapper.getOrderResponse(orderRepository.mergeAndFlush(order));
+                });
     }
 
     @Transactional

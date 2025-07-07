@@ -76,8 +76,7 @@ public interface CustomerAPI {
                         })
             })
     ResponseEntity<CustomerResponse> getCustomerById(
-            @Parameter(name = "id", required = true, in = ParameterIn.PATH) @PathVariable
-                    String id);
+            @Parameter(name = "id", required = true, in = ParameterIn.PATH) @PathVariable String id);
 
     /**
      * POST /api/customers
@@ -93,8 +92,7 @@ public interface CustomerAPI {
                             required = true,
                             content =
                                     @Content(
-                                            schema =
-                                                    @Schema(implementation = CustomerRequest.class),
+                                            schema = @Schema(implementation = CustomerRequest.class),
                                             examples = {
                                                 @ExampleObject(
                                                         value =

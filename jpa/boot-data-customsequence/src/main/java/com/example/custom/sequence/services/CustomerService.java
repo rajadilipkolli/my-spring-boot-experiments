@@ -27,18 +27,15 @@ public class CustomerService {
         this.customerMapper = customerMapper;
     }
 
-    public PagedResult<Customer> findAllCustomers(
-            int pageNo, int pageSize, String sortBy, String sortDir) {
-        Sort sort =
-                sortDir.equalsIgnoreCase(Sort.Direction.ASC.name())
-                        ? Sort.by(sortBy).ascending()
-                        : Sort.by(sortBy).descending();
+    public PagedResult<Customer> findAllCustomers(int pageNo, int pageSize, String sortBy, String sortDir) {
+        Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name())
+                ? Sort.by(sortBy).ascending()
+                : Sort.by(sortBy).descending();
 
         // create Pageable instance
         Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
         Page<String> customerPage = customerRepository.findAllCustomerIds(pageable);
-        List<Customer> customersList =
-                customerRepository.findAllByIdWithOrders(customerPage.getContent());
+        List<Customer> customersList = customerRepository.findAllByIdWithOrders(customerPage.getContent());
 
         return new PagedResult<>(
                 customersList,
@@ -63,24 +60,17 @@ public class CustomerService {
     }
 
     @Transactional
-    public Optional<CustomerResponse> updateCustomerById(
-            String id, CustomerRequest customerRequest) {
-        return customerRepository
-                .findById(id)
-                .map(
-                        foundCustomer -> {
-                            customerMapper.updateCustomerFromRequest(
-                                    customerRequest, foundCustomer);
-                            return customerMapper.mapToResponse(
-                                    customerRepository.merge(foundCustomer));
-                        });
+    public Optional<CustomerResponse> updateCustomerById(String id, CustomerRequest customerRequest) {
+        return customerRepository.findById(id).map(foundCustomer -> {
+            customerMapper.updateCustomerFromRequest(customerRequest, foundCustomer);
+            return customerMapper.mapToResponse(customerRepository.merge(foundCustomer));
+        });
     }
 
     @Transactional
     public Optional<CustomerResponse> deleteCustomerById(String id) {
         Optional<CustomerResponse> optionalCustomer = findCustomerById(id);
-        optionalCustomer.ifPresent(
-                customerResponse -> customerRepository.deleteById(customerResponse.id()));
+        optionalCustomer.ifPresent(customerResponse -> customerRepository.deleteById(customerResponse.id()));
         return optionalCustomer;
     }
 

@@ -27,19 +27,21 @@ import org.springframework.data.domain.Sort;
 @ExtendWith(MockitoExtension.class)
 class CustomerServiceTest {
 
-    @Mock private CustomerRepository customerRepository;
-    @Mock private CustomerMapper customerMapper;
+    @Mock
+    private CustomerRepository customerRepository;
 
-    @InjectMocks private CustomerService customerService;
+    @Mock
+    private CustomerMapper customerMapper;
+
+    @InjectMocks
+    private CustomerService customerService;
 
     @Test
     void findAllCustomers() {
         // given
         Pageable pageable = PageRequest.of(0, 10, Sort.by(Sort.Direction.ASC, "id"));
-        given(customerRepository.findAllCustomerIds(pageable))
-                .willReturn(new PageImpl<>(List.of("CUS_1")));
-        given(customerRepository.findAllByIdWithOrders(List.of("CUS_1")))
-                .willReturn(List.of(getCustomer()));
+        given(customerRepository.findAllCustomerIds(pageable)).willReturn(new PageImpl<>(List.of("CUS_1")));
+        given(customerRepository.findAllByIdWithOrders(List.of("CUS_1"))).willReturn(List.of(getCustomer()));
 
         // when
         PagedResult<Customer> pagedResult = customerService.findAllCustomers(0, 10, "id", "asc");
@@ -112,8 +114,6 @@ class CustomerServiceTest {
 
     private CustomerResponse getCustomerResponse() {
         return new CustomerResponse(
-                "CUS_1",
-                "junitTest",
-                List.of(new OrderResponseWithOutCustomer("ORD_1", "junitTest")));
+                "CUS_1", "junitTest", List.of(new OrderResponseWithOutCustomer("ORD_1", "junitTest")));
     }
 }
