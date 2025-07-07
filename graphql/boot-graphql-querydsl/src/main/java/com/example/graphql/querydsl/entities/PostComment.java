@@ -26,9 +26,17 @@ public class PostComment {
         return this;
     }
 
+    public Long getId() {
+        return id;
+    }
+
     public PostComment setReview(String review) {
         this.review = review;
         return this;
+    }
+
+    public String getReview() {
+        return review;
     }
 
     public PostComment setCreatedOn(LocalDateTime createdOn) {
@@ -36,9 +44,17 @@ public class PostComment {
         return this;
     }
 
+    public LocalDateTime getCreatedOn() {
+        return createdOn;
+    }
+
     public PostComment setPost(Post post) {
         this.post = post;
         return this;
+    }
+
+    public Post getPost() {
+        return post;
     }
 
     @Override

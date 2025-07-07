@@ -26,9 +26,17 @@ public class PostDetails {
         return this;
     }
 
+    public Long getId() {
+        return id;
+    }
+
     public PostDetails setCreatedOn(LocalDateTime createdOn) {
         this.createdOn = createdOn;
         return this;
+    }
+
+    public LocalDateTime getCreatedOn() {
+        return createdOn;
     }
 
     public PostDetails setCreatedBy(String createdBy) {
@@ -36,9 +44,17 @@ public class PostDetails {
         return this;
     }
 
+    public String getCreatedBy() {
+        return createdBy;
+    }
+
     public PostDetails setPost(Post post) {
         this.post = post;
         return this;
+    }
+
+    public Post getPost() {
+        return post;
     }
 
     @Override

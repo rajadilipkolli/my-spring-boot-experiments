@@ -25,6 +25,11 @@ public class PostService {
     private final PostRepository postRepository;
     private final PostMapper postMapper;
 
+    public PostService(PostRepository postRepository, PostMapper postMapper) {
+        this.postRepository = postRepository;
+        this.postMapper = postMapper;
+    }
+
     public PagedResult<PostResponse> findAllPosts(FindQuery findPostsQuery) {
 
         // create Pageable instance

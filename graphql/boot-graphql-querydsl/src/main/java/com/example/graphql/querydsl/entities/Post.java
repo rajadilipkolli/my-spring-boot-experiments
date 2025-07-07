@@ -36,14 +36,26 @@ public class Post {
         return this;
     }
 
+    public Long getId() {
+        return id;
+    }
+
     public Post setTitle(String title) {
         this.title = title;
         return this;
     }
 
+    public String getTitle() {
+        return title;
+    }
+
     public Post setContent(String content) {
         this.content = content;
         return this;
+    }
+
+    public String getContent() {
+        return content;
     }
 
     public Post setComments(List<PostComment> comments) {
@@ -54,9 +66,17 @@ public class Post {
         return this;
     }
 
+    public List<PostComment> getComments() {
+        return comments;
+    }
+
     public Post setDetails(PostDetails details) {
         this.details = details;
         return this;
+    }
+
+    public PostDetails getDetails() {
+        return details;
     }
 
     public Post setTags(List<PostTag> postTags) {
@@ -65,6 +85,10 @@ public class Post {
         }
         this.tags = postTags;
         return this;
+    }
+
+    public List<PostTag> getTags() {
+        return tags;
     }
 
     public void addComment(PostComment comment) {

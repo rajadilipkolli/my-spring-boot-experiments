@@ -23,6 +23,11 @@ public class TagService {
     private final TagRepository tagRepository;
     private final TagMapper tagMapper;
 
+    public TagService(TagRepository tagRepository, TagMapper tagMapper) {
+        this.tagRepository = tagRepository;
+        this.tagMapper = tagMapper;
+    }
+
     public PagedResult<TagResponse> findAllTags(FindQuery findTagsQuery) {
 
         // create Pageable instance

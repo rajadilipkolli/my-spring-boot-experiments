@@ -20,14 +20,29 @@ public class Tag {
     @Column(nullable = false)
     private String name;
 
+    public Tag(Long id, String name) {
+        this.id = id;
+        this.name = name;
+    }
+
+    public Tag() {}
+
     public Tag setId(Long id) {
         this.id = id;
         return this;
     }
 
+    public Long getId() {
+        return id;
+    }
+
     public Tag setName(String name) {
         this.name = name;
         return this;
+    }
+
+    public String getName() {
+        return name;
     }
 
     @Override

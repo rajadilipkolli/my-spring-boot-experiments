@@ -34,6 +34,46 @@ public class PostTag {
         this.id = new PostTagId(post.getId(), tag.getId());
     }
 
+    public PostTag() {
+        // Default constructor for JPA
+    }
+
+    public PostTagId getId() {
+        return id;
+    }
+
+    public PostTag setId(PostTagId id) {
+        this.id = id;
+        return this;
+    }
+
+    public Post getPost() {
+        return post;
+    }
+
+    public PostTag setPost(Post post) {
+        this.post = post;
+        return this;
+    }
+
+    public Tag getTag() {
+        return tag;
+    }
+
+    public PostTag setTag(Tag tag) {
+        this.tag = tag;
+        return this;
+    }
+
+    public LocalDateTime getCreatedOn() {
+        return createdOn;
+    }
+
+    public PostTag setCreatedOn(LocalDateTime createdOn) {
+        this.createdOn = createdOn;
+        return this;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {

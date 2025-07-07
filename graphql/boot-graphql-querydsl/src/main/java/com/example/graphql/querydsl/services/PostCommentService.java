@@ -24,6 +24,11 @@ public class PostCommentService {
     private final PostCommentRepository postCommentRepository;
     private final PostCommentMapper postCommentMapper;
 
+    public PostCommentService(PostCommentRepository postCommentRepository, PostCommentMapper postCommentMapper) {
+        this.postCommentRepository = postCommentRepository;
+        this.postCommentMapper = postCommentMapper;
+    }
+
     public PagedResult<PostCommentResponse> findAllPostComments(FindQuery findPostCommentsQuery) {
 
         // create Pageable instance
