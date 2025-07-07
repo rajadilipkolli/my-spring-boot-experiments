@@ -25,9 +25,7 @@ public class Initializer implements CommandLineRunner {
                         .mapToObj(
                                 actorId -> {
                                     Actor actor =
-                                            new Actor()
-                                                    .setId(actorId)
-                                                    .setName("Actor - %d".formatted(actorId));
+                                            new Actor().setName("Actor - %d".formatted(actorId));
                                     if (actorId % 2 == 0) {
                                         return actor.setCreatedOn(
                                                 LocalDate.now().minusDays(actorId));
