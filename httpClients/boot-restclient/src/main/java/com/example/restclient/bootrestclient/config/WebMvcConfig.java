@@ -10,6 +10,10 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
     private final ApplicationProperties properties;
 
+    public WebMvcConfig(ApplicationProperties properties) {
+        this.properties = properties;
+    }
+
     @Override
     public void addCorsMappings(@NonNull CorsRegistry registry) {
         ApplicationProperties.Cors propertiesCors = properties.getCors();

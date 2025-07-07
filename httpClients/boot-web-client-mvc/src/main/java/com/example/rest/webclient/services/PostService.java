@@ -13,6 +13,10 @@ public class PostService {
 
     private final WebClient webClient;
 
+    public PostService(WebClient webClient) {
+        this.webClient = webClient;
+    }
+
     public List<PostDto> findAllPosts() {
         return webClient
                 .get()

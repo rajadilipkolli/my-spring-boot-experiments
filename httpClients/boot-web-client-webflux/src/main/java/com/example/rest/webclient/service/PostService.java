@@ -14,6 +14,10 @@ public class PostService {
 
     private final WebClient webClient;
 
+    public PostService(WebClient webClient) {
+        this.webClient = webClient;
+    }
+
     public Flux<PostDto> findAllPosts(String sortBy, String sortDir) {
 
         // Create the Comparator based on sortDir and sortBy
