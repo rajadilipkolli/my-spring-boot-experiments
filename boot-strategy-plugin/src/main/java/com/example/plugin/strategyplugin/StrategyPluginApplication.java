@@ -9,7 +9,7 @@ import org.springframework.plugin.core.config.EnablePluginRegistries;
 @EnablePluginRegistries({WriterPlugin.class})
 public class StrategyPluginApplication {
 
-  public static void main(String[] args) {
-    SpringApplication.run(StrategyPluginApplication.class, args);
-  }
+    public static void main(String[] args) {
+        SpringApplication.run(StrategyPluginApplication.class, args);
+    }
 }

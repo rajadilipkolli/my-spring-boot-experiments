@@ -1,19 +1,15 @@
 package com.example.plugin.strategyplugin.exception;
 
+import java.net.URI;
+import java.time.Instant;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.web.ErrorResponseException;
 
-import java.net.URI;
-import java.time.Instant;
-
 public class PluginNotFoundException extends ErrorResponseException {
-    
+
     public PluginNotFoundException(String message) {
-        super(
-                HttpStatus.BAD_REQUEST,
-                asProblemDetail(message),
-                null);
+        super(HttpStatus.BAD_REQUEST, asProblemDetail(message), null);
     }
 
     private static ProblemDetail asProblemDetail(String message) {

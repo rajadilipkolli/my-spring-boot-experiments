@@ -22,8 +22,8 @@ public class StrategyService {
     public GenericDTO fetchData(String type) {
         logger.info("fetching data for type :{}", type);
         return plugins.getPluginFor(type)
-                .orElseThrow(() -> new PluginNotFoundException("Plugin not found for type: " + type))
+                .orElseThrow(
+                        () -> new PluginNotFoundException("Plugin not found for type: " + type))
                 .write("Hello ");
     }
-
 }

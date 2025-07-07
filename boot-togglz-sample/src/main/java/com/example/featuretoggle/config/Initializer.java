@@ -12,8 +12,7 @@ public class Initializer implements CommandLineRunner {
     private final StateRepository jdbcStateRepository;
     private final TogglzProperties togglzProperties;
 
-    public Initializer(
-            StateRepository jdbcStateRepository, TogglzProperties togglzProperties) {
+    public Initializer(StateRepository jdbcStateRepository, TogglzProperties togglzProperties) {
         this.jdbcStateRepository = jdbcStateRepository;
         this.togglzProperties = togglzProperties;
     }

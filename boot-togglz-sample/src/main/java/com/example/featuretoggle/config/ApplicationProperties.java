@@ -24,15 +24,17 @@ public class ApplicationProperties {
         public String getPathPattern() {
             return pathPattern;
         }
+
         public void setPathPattern(String pathPattern) {
             this.pathPattern = pathPattern;
         }
+
         public String getAllowedMethods() {
             return allowedMethods;
         }
+
         public void setAllowedMethods(String allowedMethods) {
             this.allowedMethods = allowedMethods;
         }
-        
     }
 }
