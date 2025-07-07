@@ -1,7 +1,7 @@
 services:
   redis-master:
     container_name: redis-master
-    image: 'bitnami/redis:8.0.2'
+    image: 'bitnami/redis:8.0.3'
     environment:
       - REDIS_REPLICATION_MODE=master
       - REDIS_PASSWORD=redispassword
@@ -9,7 +9,7 @@ services:
       - "6379:6379"
   redis-slave:
     container_name: slave-redis
-    image: 'bitnami/redis:8.0.2'
+    image: 'bitnami/redis:8.0.3'
     environment:
       - REDIS_REPLICATION_MODE=slave
       - REDIS_MASTER_HOST=redis-master
