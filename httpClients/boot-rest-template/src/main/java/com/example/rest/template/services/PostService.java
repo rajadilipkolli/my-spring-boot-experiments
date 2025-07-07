@@ -17,6 +17,10 @@ public class PostService {
 
     private final PostRepository postRepository;
 
+    public PostService(PostRepository postRepository) {
+        this.postRepository = postRepository;
+    }
+
     public PagedResult<Post> findAllPosts(int pageNo, int pageSize, String sortBy, String sortDir) {
         Sort sort =
                 sortDir.equalsIgnoreCase(Sort.Direction.ASC.name())

@@ -16,6 +16,46 @@ public class ApplicationRestRequest {
 
     public ApplicationRestRequest() {}
 
+    public String getPath() {
+        return path;
+    }
+
+    public String getHttpBaseUrl() {
+        return httpBaseUrl;
+    }
+
+    public void setHttpBaseUrl(String httpBaseUrl) {
+        this.httpBaseUrl = httpBaseUrl;
+    }
+
+    public Map<String, String> getQueryParameters() {
+        return queryParameters;
+    }
+
+    public Map<String, Object> getPathVariables() {
+        return pathVariables;
+    }
+
+    public void setPathVariables(Map<String, Object> pathVariables) {
+        this.pathVariables = pathVariables;
+    }
+
+    public Map<String, String> getHeaders() {
+        return headers;
+    }
+
+    public Object getPayload() {
+        return payload;
+    }
+
+    public void setPayload(Object payload) {
+        this.payload = payload;
+    }
+
+    public String getContentType() {
+        return contentType;
+    }
+
     private ApplicationRestRequest(Builder builder) {
         this.path = builder.path;
         this.httpBaseUrl = builder.httpBaseUrl;

@@ -21,6 +21,10 @@ public class RestTemplateClientImpl implements RestTemplateClient {
 
     private final RestTemplate restTemplate;
 
+    public RestTemplateClientImpl(RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
+    }
+
     @Override
     public <T> ApplicationRestResponse<T> get(
             ApplicationRestRequest applicationRestRequest, Class<T> responseType) {

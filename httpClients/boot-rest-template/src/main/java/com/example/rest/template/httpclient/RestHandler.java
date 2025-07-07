@@ -10,6 +10,10 @@ public class RestHandler {
 
     private final RestTemplateClient restTemplateClient;
 
+    public RestHandler(RestTemplateClient restTemplateClient) {
+        this.restTemplateClient = restTemplateClient;
+    }
+
     public ApplicationRestResponse<String> get(ApplicationRestRequest applicationRestRequest) {
 
         return get(applicationRestRequest, String.class);
