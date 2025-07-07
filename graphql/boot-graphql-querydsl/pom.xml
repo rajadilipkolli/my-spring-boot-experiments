@@ -101,7 +101,6 @@
             <artifactId>spring-boot-configuration-processor</artifactId>
             <optional>true</optional>
         </dependency>
-        <dependency>
 
         <!-- Start QueryDSL for JPA -->
         <dependency>
