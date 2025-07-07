@@ -10,8 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 
-@Import(ContainersConfig.class)
 @DataJpaTest(showSql = false, properties = "spring.jpa.hibernate.ddl-auto=validate")
+@Import(ContainersConfig.class)
 class SchemaValidationTest {
 
     @Autowired
