@@ -17,6 +17,10 @@ public class TenantInterceptor implements HandlerInterceptor {
 
     private final TenantIdentifierResolver tenantIdentifierResolver;
 
+    public TenantInterceptor(TenantIdentifierResolver tenantIdentifierResolver) {
+        this.tenantIdentifierResolver = tenantIdentifierResolver;
+    }
+
     @Override
     public boolean preHandle(
             HttpServletRequest request, HttpServletResponse response, Object handler)

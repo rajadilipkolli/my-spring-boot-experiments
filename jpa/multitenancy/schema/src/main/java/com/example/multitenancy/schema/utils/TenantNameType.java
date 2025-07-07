@@ -9,4 +9,8 @@ public enum TenantNameType {
     TenantNameType(String tenantName) {
         this.tenantName = tenantName;
     }
+
+    public String getTenantName() {
+        return tenantName;
+    }
 }

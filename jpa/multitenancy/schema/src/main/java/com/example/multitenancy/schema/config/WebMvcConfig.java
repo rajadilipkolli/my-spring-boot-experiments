@@ -11,6 +11,11 @@ public class WebMvcConfig implements WebMvcConfigurer {
     private final ApplicationProperties properties;
     private final TenantInterceptor tenantInterceptor;
 
+    public WebMvcConfig(ApplicationProperties properties, TenantInterceptor tenantInterceptor) {
+        this.properties = properties;
+        this.tenantInterceptor = tenantInterceptor;
+    }
+
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(tenantInterceptor);

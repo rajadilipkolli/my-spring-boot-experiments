@@ -16,6 +16,11 @@ public class CustomerService {
 
     private final CustomerRepository customerRepository;
 
+    public CustomerService(CustomerRepository customerRepository, CustomerMapper customerMapper) {
+        this.customerRepository = customerRepository;
+        this.customerMapper = customerMapper;
+    }
+
     private final CustomerMapper customerMapper;
 
     public List<Customer> findAllCustomers() {
