@@ -33,6 +33,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+@DataR2dbcTest
 @Import({
     ContainerConfig.class,
     JooqConfiguration.class,

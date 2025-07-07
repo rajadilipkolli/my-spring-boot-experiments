@@ -19,6 +19,7 @@ import org.springframework.context.annotation.Import;
  * This ensures that our entity definitions match the database structure exactly,
  * helping catch mapping inconsistencies early.
  */
+@DataJpaTest(properties = {"spring.jpa.hibernate.ddl-auto=validate"})
 @Import({ContainersConfig.class})
 class SchemaValidationTest {
 

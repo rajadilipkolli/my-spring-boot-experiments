@@ -1,6 +1,5 @@
 package com.example.multitenancy.schema.utils;
 
-
 public enum TenantNameType {
     TEST1("test1"),
     TEST2("test2");

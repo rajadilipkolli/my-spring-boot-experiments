@@ -1,6 +1,5 @@
 package com.example.multitenancy.utils;
 
-
 public enum DatabaseType {
     PRIMARY("primary"),
     SECONDARY("secondary"),

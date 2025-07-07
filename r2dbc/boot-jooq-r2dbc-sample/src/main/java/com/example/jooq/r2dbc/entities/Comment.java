@@ -64,11 +64,16 @@ public class Comment {
 
     @Override
     public String toString() {
-        return "Comment{" +
-                "id=" + id +
-                ", content='" + content + '\'' +
-                ", createdAt=" + createdAt +
-                ", postId=" + postId +
-                '}';
+        return "Comment{"
+                + "id="
+                + id
+                + ", content='"
+                + content
+                + '\''
+                + ", createdAt="
+                + createdAt
+                + ", postId="
+                + postId
+                + '}';
     }
 }

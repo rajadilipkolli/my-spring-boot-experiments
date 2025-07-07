@@ -48,17 +48,16 @@ public class Post {
     private List<Comment> comments = new ArrayList<>(); // This field is transient and will be populated manually
 
     public String toString() {
-        return "Post{" +
-                "id=" + id +
-                ", title='" + title + '\'' +
-                ", content='" + content + '\'' +
-                ", metadata=" + metadata +
-                ", status=" + status +
-                ", createdAt=" + createdAt +
-                ", updatedAt=" + updatedAt +
-                ", version=" + version +
-                ", comments=" + comments +
-                '}';
+        return "Post{" + "id="
+                + id + ", title='"
+                + title + '\'' + ", content='"
+                + content + '\'' + ", metadata="
+                + metadata + ", status="
+                + status + ", createdAt="
+                + createdAt + ", updatedAt="
+                + updatedAt + ", version="
+                + version + ", comments="
+                + comments + '}';
     }
 
     public static Builder builder() {

@@ -219,7 +219,7 @@
                 <configuration>
                     <java>
                         <googleJavaFormat>
-                            <version>1.25.2</version>
+                            <version>1.27.0</version>
                             <style>AOSP</style>
                         </googleJavaFormat>
                     </java>

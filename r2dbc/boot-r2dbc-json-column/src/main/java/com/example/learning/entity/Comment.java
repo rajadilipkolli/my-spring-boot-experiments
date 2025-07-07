@@ -35,14 +35,13 @@ public class Comment {
     private Short version;
 
     public String toString() {
-        return "Comment{" +
-                "id=" + id +
-                ", content='" + content + '\'' +
-                ", postId=" + postId +
-                ", createdAt=" + createdAt +
-                ", updatedAt=" + updatedAt +
-                ", version=" + version +
-                '}';
+        return "Comment{" + "id="
+                + id + ", content='"
+                + content + '\'' + ", postId="
+                + postId + ", createdAt="
+                + createdAt + ", updatedAt="
+                + updatedAt + ", version="
+                + version + '}';
     }
 
     public static Builder builder() {

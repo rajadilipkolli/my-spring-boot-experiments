@@ -17,6 +17,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.r2dbc.core.R2dbcEntityTemplate;
 import reactor.test.StepVerifier;
 
+@DataR2dbcTest
 @Import({ContainerConfig.class})
 class PostRepositoryTest {
 
