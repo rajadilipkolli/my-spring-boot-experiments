@@ -3,7 +3,6 @@ package com.example.jooq.r2dbc.entities;
 import com.example.jooq.r2dbc.model.Status;
 import java.time.LocalDateTime;
 import java.util.UUID;
-import lombok.ToString;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
@@ -12,7 +11,6 @@ import org.springframework.data.annotation.Version;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
-@ToString
 @Table(value = "posts")
 public class Post {
 
@@ -117,5 +115,19 @@ public class Post {
     public Post setVersion(Short version) {
         this.version = version;
         return this;
+    }
+
+    @Override
+    public String toString() {
+        return "Post{" +
+                "id=" + id +
+                ", title='" + title + '\'' +
+                ", content='" + content + '\'' +
+                ", status=" + status +
+                ", createdAt=" + createdAt +
+                ", createdBy='" + createdBy + '\'' +
+                ", updatedAt=" + updatedAt +
+                ", version=" + version +
+                '}';
     }
 }

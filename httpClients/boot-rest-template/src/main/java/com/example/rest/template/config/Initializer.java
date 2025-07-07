@@ -7,15 +7,11 @@ import com.example.rest.template.model.response.ApplicationRestResponse;
 import com.example.rest.template.repositories.PostRepository;
 import java.util.List;
 import java.util.Map;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Component;
 
 @Component
-@RequiredArgsConstructor
-@Slf4j
 public class Initializer implements CommandLineRunner {
 
     private final PostRepository postRepository;

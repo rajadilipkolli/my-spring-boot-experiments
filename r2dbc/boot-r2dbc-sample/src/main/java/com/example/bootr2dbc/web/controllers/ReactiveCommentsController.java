@@ -6,7 +6,6 @@ import com.example.bootr2dbc.services.ReactiveCommentsService;
 import com.example.bootr2dbc.utils.AppConstants;
 import java.net.URI;
 import java.util.UUID;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -24,7 +23,6 @@ import reactor.core.publisher.Mono;
 
 @RestController
 @RequestMapping("/api/posts/comments")
-@RequiredArgsConstructor
 public class ReactiveCommentsController {
 
     private final ReactiveCommentsService reactiveCommentsService;

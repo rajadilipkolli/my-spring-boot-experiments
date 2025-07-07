@@ -6,7 +6,6 @@ import com.example.bootr2dbc.mapper.ReactivePostMapper;
 import com.example.bootr2dbc.model.ReactivePostRequest;
 import com.example.bootr2dbc.repositories.ReactiveCommentsRepository;
 import com.example.bootr2dbc.repositories.ReactivePostRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -16,7 +15,6 @@ import reactor.core.publisher.Mono;
 
 @Service
 @Transactional(readOnly = true)
-@RequiredArgsConstructor
 public class ReactivePostService {
 
     private final ReactivePostRepository reactivePostRepository;

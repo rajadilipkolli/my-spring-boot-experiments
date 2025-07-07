@@ -10,15 +10,9 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.io.Serializable;
 import java.util.Objects;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "post_details")
-@Getter
-@AllArgsConstructor
-@NoArgsConstructor
 public class PostDetailsEntity extends Auditable implements Serializable {
 
     @Id

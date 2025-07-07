@@ -4,7 +4,6 @@ import com.example.multitenancy.db.entities.Customer;
 import com.example.multitenancy.db.services.CustomerService;
 import com.example.multitenancy.db.utils.AppConstants;
 import java.util.List;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -21,7 +20,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/customers")
-@Slf4j
 class CustomerController {
 
     private final CustomerService customerService;

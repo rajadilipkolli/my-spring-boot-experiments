@@ -1,8 +1,6 @@
 package com.example.choasmonkey.utils;
 
-import lombok.experimental.UtilityClass;
 
-@UtilityClass
 public final class AppConstants {
     public static final String PROFILE_TEST = "test";
     public static final String PROFILE_NOT_TEST = "!" + PROFILE_TEST;

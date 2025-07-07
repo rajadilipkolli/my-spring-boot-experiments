@@ -5,7 +5,6 @@ import com.example.bootr2dbc.mapper.ReactivePostCommentMapper;
 import com.example.bootr2dbc.model.ReactiveCommentRequest;
 import com.example.bootr2dbc.repositories.ReactiveCommentsRepository;
 import java.util.UUID;
-import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,7 +13,6 @@ import reactor.core.publisher.Mono;
 
 @Service
 @Transactional(readOnly = true)
-@RequiredArgsConstructor
 public class ReactiveCommentsService {
 
     private final ReactiveCommentsRepository reactiveCommentsRepository;

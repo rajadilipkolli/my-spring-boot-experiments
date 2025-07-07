@@ -3,13 +3,9 @@ package com.example.graphql.querydsl.entities;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.Objects;
-import lombok.Getter;
-import lombok.Setter;
 
 @Entity(name = "PostDetails")
 @Table(name = "post_details")
-@Getter
-@Setter
 public class PostDetails {
 
     @Id

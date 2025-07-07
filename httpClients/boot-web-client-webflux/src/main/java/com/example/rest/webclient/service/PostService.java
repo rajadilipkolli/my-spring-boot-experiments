@@ -2,7 +2,6 @@ package com.example.rest.webclient.service;
 
 import com.example.rest.webclient.model.PostDto;
 import java.util.Comparator;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.BodyInserters;
@@ -11,7 +10,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Service
-@RequiredArgsConstructor
 public class PostService {
 
     private final WebClient webClient;

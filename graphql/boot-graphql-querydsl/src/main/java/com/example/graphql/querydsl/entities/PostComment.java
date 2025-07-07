@@ -3,16 +3,10 @@ package com.example.graphql.querydsl.entities;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.Objects;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
 import org.hibernate.Hibernate;
 
 @Entity
 @Table(name = "post_comments")
-@Getter
-@NoArgsConstructor
-@AllArgsConstructor
 public class PostComment {
 
     @Id

@@ -16,7 +16,6 @@ import java.time.Duration;
 import java.util.Iterator;
 import java.util.List;
 import javax.net.ssl.SSLContext;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.hc.client5.http.ConnectionKeepAliveStrategy;
 import org.apache.hc.client5.http.HttpRoute;
 import org.apache.hc.client5.http.config.ConnectionConfig;
@@ -48,7 +47,6 @@ import org.springframework.web.client.RestTemplate;
 
 @Configuration(proxyBeanMethods = false)
 @EnableScheduling
-@Slf4j
 public class RestTemplateConfiguration {
 
     private final Environment environment;

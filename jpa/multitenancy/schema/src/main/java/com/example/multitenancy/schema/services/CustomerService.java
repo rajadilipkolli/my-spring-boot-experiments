@@ -7,13 +7,11 @@ import com.example.multitenancy.schema.repositories.CustomerRepository;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Transactional
-@RequiredArgsConstructor
 public class CustomerService {
 
     private final CustomerRepository customerRepository;

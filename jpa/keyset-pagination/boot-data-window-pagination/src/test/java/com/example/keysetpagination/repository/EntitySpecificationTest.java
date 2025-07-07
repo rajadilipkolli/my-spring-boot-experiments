@@ -23,7 +23,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.jpa.domain.Specification;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@DataJpaTest
 @Import({ContainersConfig.class, JpaAuditConfig.class})
 class EntitySpecificationTest {
 

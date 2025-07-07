@@ -7,14 +7,12 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
-import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 @Configuration(proxyBeanMethods = false)
-@RequiredArgsConstructor
 public class TenantInterceptor implements HandlerInterceptor {
 
     private final TenantIdentifierResolver tenantIdentifierResolver;

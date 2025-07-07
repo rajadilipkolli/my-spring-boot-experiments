@@ -17,16 +17,10 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
 import org.hibernate.Hibernate;
 
 @Entity
 @Table(name = "posts")
-@Getter
-@AllArgsConstructor
-@NoArgsConstructor
 public class PostEntity extends Auditable implements Serializable {
 
     @Id

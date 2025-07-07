@@ -7,10 +7,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 import java.util.List;
-import lombok.Getter;
 
 @Entity
-@Getter
 @Table(name = "genres")
 public class Genre {
 

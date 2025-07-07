@@ -13,15 +13,9 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "authors")
-@Getter
-@NoArgsConstructor
-@AllArgsConstructor
 public class AuthorEntity implements Serializable {
 
     @Id

@@ -8,9 +8,7 @@ import io.r2dbc.proxy.core.QueryExecutionInfo;
 import io.r2dbc.proxy.listener.ProxyMethodExecutionListener;
 import io.r2dbc.proxy.support.QueryExecutionInfoFormatter;
 import java.time.Duration;
-import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
 public class MetricsExecutionListener implements ProxyMethodExecutionListener {
 
     private MeterRegistry registry;

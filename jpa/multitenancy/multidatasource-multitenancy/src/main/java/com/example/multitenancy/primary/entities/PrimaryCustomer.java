@@ -8,15 +8,11 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
 import java.util.Objects;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
 import org.hibernate.annotations.TenantId;
 import org.hibernate.proxy.HibernateProxy;
 
 @Entity
 @Table(name = "customers")
-@NoArgsConstructor
-@AllArgsConstructor
 public class PrimaryCustomer {
 
     @Id

@@ -1,6 +1,5 @@
 package com.example.bootr2dbc.config;
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -18,7 +17,6 @@ import org.springframework.security.web.server.authorization.AuthorizationContex
 import reactor.core.publisher.Mono;
 
 @Configuration(proxyBeanMethods = false)
-@Slf4j
 public class SecurityConfig {
 
     @Bean

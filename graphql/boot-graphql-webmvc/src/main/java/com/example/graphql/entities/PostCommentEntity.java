@@ -12,16 +12,10 @@ import jakarta.persistence.Table;
 import java.io.Serializable;
 import java.time.OffsetDateTime;
 import java.util.Objects;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
 import org.hibernate.Hibernate;
 
 @Entity
 @Table(name = "post_comments")
-@Getter
-@NoArgsConstructor
-@AllArgsConstructor
 public class PostCommentEntity extends Auditable implements Serializable {
 
     @Id

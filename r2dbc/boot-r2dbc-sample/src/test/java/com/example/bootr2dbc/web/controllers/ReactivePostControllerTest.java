@@ -29,7 +29,6 @@ import reactor.core.publisher.Mono;
 
 @WebFluxTest(controllers = ReactivePostController.class)
 @ActiveProfiles(PROFILE_TEST)
-@WithMockUser(username = "username")
 @Import(SecurityConfig.class) // Import the security configuration
 class ReactivePostControllerTest {
 
@@ -257,7 +256,6 @@ class ReactivePostControllerTest {
     }
 
     @Test
-    @WithMockUser(
             username = "admin",
             roles = {"USER", "ADMIN"})
     void shouldDeleteReactivePost() {
@@ -277,7 +275,6 @@ class ReactivePostControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = "ADMIN")
     void shouldReturn404WhenDeletingNonExistingReactivePost() {
         Long reactivePostId = 1L;
         ReactivePost reactivePost = reactivePostFlux.next().block();

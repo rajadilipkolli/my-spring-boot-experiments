@@ -13,18 +13,10 @@ import jakarta.validation.constraints.Positive;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 import org.hibernate.Hibernate;
 
 @Entity
 @Table(name = "posts")
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
 public class Post {
 
     @Id

@@ -1,7 +1,5 @@
 package com.example.featuretoggle.config;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 import org.togglz.core.repository.FeatureState;
@@ -9,8 +7,6 @@ import org.togglz.core.repository.StateRepository;
 import org.togglz.spring.boot.actuate.autoconfigure.TogglzProperties;
 
 @Component
-@Slf4j
-@RequiredArgsConstructor
 public class Initializer implements CommandLineRunner {
 
     private final StateRepository jdbcStateRepository;

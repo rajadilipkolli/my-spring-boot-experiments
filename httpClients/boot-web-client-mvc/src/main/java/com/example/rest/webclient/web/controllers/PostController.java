@@ -3,7 +3,6 @@ package com.example.rest.webclient.web.controllers;
 import com.example.rest.webclient.model.response.PostDto;
 import com.example.rest.webclient.services.PostService;
 import java.util.List;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -19,7 +18,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/posts")
-@Slf4j
 class PostController {
 
     private final PostService postService;

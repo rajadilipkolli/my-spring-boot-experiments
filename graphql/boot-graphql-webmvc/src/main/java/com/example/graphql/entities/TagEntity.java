@@ -9,17 +9,11 @@ import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import java.io.Serializable;
 import java.util.Objects;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 @Entity
 @Table(
         name = "tags",
         uniqueConstraints = {@UniqueConstraint(columnNames = "tag_name", name = "uc_tag_name")})
-@Getter
-@NoArgsConstructor
-@AllArgsConstructor
 public class TagEntity implements Serializable {
 
     @Id

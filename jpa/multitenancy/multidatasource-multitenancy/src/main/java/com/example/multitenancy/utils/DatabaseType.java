@@ -1,8 +1,6 @@
 package com.example.multitenancy.utils;
 
-import lombok.Getter;
 
-@Getter
 public enum DatabaseType {
     PRIMARY("primary"),
     SECONDARY("secondary"),

@@ -9,17 +9,9 @@ import jakarta.persistence.MapsId;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 import java.util.Objects;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Entity(name = "PostTag")
 @Table(name = "post_tags")
-@Setter
-@Getter
-@NoArgsConstructor
-@AllArgsConstructor
 public class PostTag {
 
     @EmbeddedId

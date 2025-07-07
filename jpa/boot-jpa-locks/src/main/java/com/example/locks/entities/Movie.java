@@ -15,16 +15,10 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
 import org.hibernate.Hibernate;
 
 @Entity
 @Table(name = "movies")
-@Getter
-@NoArgsConstructor
-@AllArgsConstructor
 public class Movie {
 
     @Id

@@ -28,7 +28,6 @@ import reactor.core.publisher.Mono;
 
 @WebFluxTest(controllers = ReactiveCommentsController.class)
 @ActiveProfiles(PROFILE_TEST)
-@WithMockUser(username = "username")
 @Import(SecurityConfig.class) // Import the security configuration
 class ReactiveCommentsControllerTest {
 
@@ -294,7 +293,6 @@ class ReactiveCommentsControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = "ADMIN")
     void shouldDeleteReactiveComments() {
         ReactiveComments reactiveComments = reactiveCommentsFlux.next().block();
 
@@ -315,7 +313,6 @@ class ReactiveCommentsControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = "ADMIN")
     void shouldReturn404WhenDeletingNonExistingReactiveComments() {
         ReactiveComments reactiveComments = reactiveCommentsFlux.next().block();
 

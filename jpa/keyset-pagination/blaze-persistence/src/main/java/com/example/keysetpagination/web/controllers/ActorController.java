@@ -10,7 +10,6 @@ import com.example.keysetpagination.services.ActorService;
 import com.example.keysetpagination.utils.AppConstants;
 import jakarta.validation.Valid;
 import java.net.URI;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -26,7 +25,6 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @RestController
 @RequestMapping("/api/actors")
-@RequiredArgsConstructor
 public class ActorController {
 
     private final ActorService actorService;

@@ -16,8 +16,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.BatchMapping;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
@@ -27,8 +25,6 @@ import org.springframework.validation.annotation.Validated;
 
 @Controller
 @Validated
-@Slf4j
-@RequiredArgsConstructor
 public class AuthorGraphQlController {
 
     private final AuthorService authorService;

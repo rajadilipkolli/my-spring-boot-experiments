@@ -2,13 +2,11 @@ package com.example.jooq.r2dbc.entities;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
-import lombok.ToString;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
-@ToString
 @Table(value = "post_comments")
 public class Comment {
 
@@ -62,5 +60,15 @@ public class Comment {
     public Comment setPostId(UUID postId) {
         this.postId = postId;
         return this;
+    }
+
+    @Override
+    public String toString() {
+        return "Comment{" +
+                "id=" + id +
+                ", content='" + content + '\'' +
+                ", createdAt=" + createdAt +
+                ", postId=" + postId +
+                '}';
     }
 }

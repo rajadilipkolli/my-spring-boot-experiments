@@ -7,7 +7,6 @@ import com.example.learning.common.ContainerConfig;
 import com.example.learning.entity.Post;
 import io.r2dbc.postgresql.codec.Json;
 import java.util.stream.IntStream;
-import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.r2dbc.DataR2dbcTest;
@@ -18,8 +17,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.r2dbc.core.R2dbcEntityTemplate;
 import reactor.test.StepVerifier;
 
-@DataR2dbcTest
-@Slf4j
 @Import({ContainerConfig.class})
 class PostRepositoryTest {
 

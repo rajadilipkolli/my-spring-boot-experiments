@@ -481,7 +481,6 @@ Full tech stack [here](/techstack.md)
 |[org.openjdk.jmh:jmh-core]()|v1.37|04/05/23|Raja Kolli |GPL-3.0-only,GPL-2.0-with-classpath-exception|N/A|
 |[org.openjdk.jmh:jmh-generator-annprocess]()|v1.37|04/05/23|Raja Kolli |GPL-3.0-only,GPL-2.0-with-classpath-exception|N/A|
 |[org.postgresql:postgresql](http://jdbc.postgresql.org)|N/A|08/12/23|Raja Kolli |BSD-2-Clause|N/A|
-|[org.projectlombok:lombok](https://projectlombok.org)|N/A|08/12/23|Raja Kolli |MIT|N/A|
 |[org.springframework.boot:spring-boot-configuration-processor](https://projects.spring.io/spring-boot/#/spring-boot-parent/spring-boot-tools/spring-boot-configuration-processor)|N/A|12/03/23|renovate[bot] |Apache-2.0|N/A|
 |[org.springframework.boot:spring-boot-devtools](https://projects.spring.io/spring-boot/#/spring-boot-parent/spring-boot-devtools)|N/A|12/03/23|renovate[bot] |Apache-2.0|N/A|
 |[org.springframework.boot:spring-boot-starter-actuator](https://projects.spring.io/spring-boot/#/spring-boot-parent/spring-boot-starters/spring-boot-starter-actuator)|N/A|12/03/23|renovate[bot] |Apache-2.0|N/A|

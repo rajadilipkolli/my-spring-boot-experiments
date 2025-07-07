@@ -12,14 +12,10 @@ import jakarta.persistence.Version;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
 import org.hibernate.Hibernate;
 
 @Entity
 @Table(name = "actors")
-@Getter
-@NoArgsConstructor
 public class Actor {
 
     @Id

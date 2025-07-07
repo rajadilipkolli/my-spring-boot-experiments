@@ -9,10 +9,8 @@ import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import io.r2dbc.postgresql.codec.Json;
 import java.io.IOException;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.jackson.JsonComponent;
 
-@Slf4j
 @JsonComponent
 class PgJsonObjectJsonComponent {
 

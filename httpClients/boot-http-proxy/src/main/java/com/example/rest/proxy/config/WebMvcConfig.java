@@ -1,13 +1,11 @@
 package com.example.rest.proxy.config;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.lang.NonNull;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration(proxyBeanMethods = false)
-@RequiredArgsConstructor
 class WebMvcConfig implements WebMvcConfigurer {
     private final ApplicationProperties properties;
 

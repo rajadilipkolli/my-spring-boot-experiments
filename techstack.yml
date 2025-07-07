@@ -724,7 +724,6 @@ tools:
   detection_source: batch-boot-jpa-sample/pom.xml
   last_updated_by: Raja Kolli
   last_updated_on: 2023-08-12 18:09:06.000000000 Z
-- name: org.projectlombok:lombok
   description: 'Spice up your java: Automatic Resource Management'
   license: MIT
   open_source: true
