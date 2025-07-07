@@ -55,10 +55,7 @@ class JobServiceTest {
     }
 
     private Job getJob() {
-        Job job = new Job();
-        job.setId(1L);
-        job.setText("junitTest");
-        return job;
+        return new Job().setId(1L).setText("junitTest");
     }
 
     private JobResponse getJobResponse() {

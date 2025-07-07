@@ -57,9 +57,9 @@ class JobControllerTest {
     @BeforeEach
     void setUp() {
         this.jobList = new ArrayList<>();
-        this.jobList.add(new Job(1L, "text 1"));
-        this.jobList.add(new Job(2L, "text 2"));
-        this.jobList.add(new Job(3L, "text 3"));
+        this.jobList.add(new Job().setId(1L).setText("text 1"));
+        this.jobList.add(new Job().setId(2L).setText("text 2"));
+        this.jobList.add(new Job().setId(3L).setText("text 3"));
     }
 
     @Test
