@@ -180,4 +180,10 @@
                             <version>${org.mapstruct.version}</version>
                         </path>
                         <!-- other annotation processors -->
-                        <path>
+                    </annotationProcessorPaths>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

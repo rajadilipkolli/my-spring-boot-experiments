@@ -64,7 +64,6 @@
             <optional>true</optional>
         </dependency>
         <dependency>
-        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
@@ -150,4 +149,9 @@
                             <version>${mapstruct.version}</version>
                         </path>
                         <!-- other annotation processors -->
-                        <path>
+                    </annotationProcessorPaths>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
