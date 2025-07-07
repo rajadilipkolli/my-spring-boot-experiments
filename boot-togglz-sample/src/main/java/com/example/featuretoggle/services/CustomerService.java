@@ -25,6 +25,11 @@ public class CustomerService {
     private static final Feature TEXT = new NamedFeature("TEXT");
     private static final Feature ZIP = new NamedFeature("ZIP");
 
+    public CustomerService(CustomerRepository customerRepository, FeatureManager featureManager) {
+        this.customerRepository = customerRepository;
+        this.featureManager = featureManager;
+    }
+
     @Transactional(readOnly = true)
     public List<Customer> findAllCustomers() {
         return customerRepository.findAll();

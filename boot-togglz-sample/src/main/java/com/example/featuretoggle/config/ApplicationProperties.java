@@ -33,5 +33,6 @@ public class ApplicationProperties {
         public void setAllowedMethods(String allowedMethods) {
             this.allowedMethods = allowedMethods;
         }
+        
     }
 }
