@@ -1,6 +1,5 @@
 package com.example.restclient.bootrestclient.utils;
 
-
 public class AppConstants {
 
     public static final String PROFILE_PROD = "prod";

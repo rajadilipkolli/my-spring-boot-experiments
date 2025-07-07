@@ -43,36 +43,43 @@ public class ApplicationRestRequest {
             this.path = path != null && !path.startsWith("/") ? "/" + path : path;
             return this;
         }
+
         public Builder httpBaseUrl(String httpBaseUrl) {
             this.httpBaseUrl = httpBaseUrl;
             return this;
         }
+
         public Builder queryParameters(Map<String, String> queryParameters) {
             if (queryParameters != null) {
                 this.queryParameters = new HashMap<>(queryParameters);
             }
             return this;
         }
+
         public Builder pathVariables(Map<String, Object> pathVariables) {
             this.pathVariables = pathVariables;
             return this;
         }
+
         public Builder headers(Map<String, String> headers) {
             if (headers != null) {
                 this.headers = new HashMap<>(headers);
             }
             return this;
         }
+
         public Builder payload(Object payload) {
             this.payload = payload;
             return this;
         }
+
         public Builder contentType(String contentType) {
             if (contentType != null) {
                 this.contentType = contentType;
             }
             return this;
         }
+
         public ApplicationRestRequest build() {
             return new ApplicationRestRequest(this);
         }
