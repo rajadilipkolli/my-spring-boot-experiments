@@ -21,8 +21,8 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
         <java.version>21</java.version>
-        <springdoc-openapi.version>2.6.0</springdoc-openapi.version>
-        <blaze-persistence.version>1.6.15</blaze-persistence.version>
+        <springdoc-openapi.version>2.8.9</springdoc-openapi.version>
+        <blaze-persistence.version>1.6.16-SNAPSHOT</blaze-persistence.version>
 
         <project.testresult.directory>${project.build.directory}/test-results</project.testresult.directory>
         <spotless.version>2.44.5</spotless.version>
@@ -90,7 +90,7 @@
         </dependency>
         <dependency>
             <groupId>com.blazebit</groupId>
-            <artifactId>blaze-persistence-integration-spring-data-3.3</artifactId>
+            <artifactId>blaze-persistence-integration-spring-data-3.4</artifactId>
             <scope>compile</scope>
             <version>${blaze-persistence.version}</version>
         </dependency>
@@ -229,7 +229,7 @@
                 <configuration>
                     <java>
                         <googleJavaFormat>
-                            <version>1.25.2</version>
+                            <version>1.27.0</version>
                             <style>AOSP</style>
                         </googleJavaFormat>
                         <importOrder />
@@ -351,6 +351,11 @@
             <snapshots>
                 <enabled>false</enabled>
             </snapshots>
+        </repository>
+        <repository>
+            <id>sonatype-snapshots</id>
+            <name>Sonatype Snapshots</name>
+            <url>https://central.sonatype.com/repository/maven-snapshots/</url>
         </repository>
     </repositories>
     <pluginRepositories>

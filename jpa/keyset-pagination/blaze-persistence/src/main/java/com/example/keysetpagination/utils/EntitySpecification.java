@@ -31,7 +31,7 @@ public class EntitySpecification<T> {
                             .toList();
             return Specification.allOf(specifications);
         }
-        return Specification.where(null);
+        return null;
     }
 
     private Specification<T> createSpecification(
