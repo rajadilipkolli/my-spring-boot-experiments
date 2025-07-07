@@ -31,12 +31,6 @@ public class Order {
 
     public Order() {}
 
-    public Order(String id, String text, Customer customer) {
-        this.id = id;
-        this.text = text;
-        this.customer = customer;
-    }
-
     public String getId() {
         return id;
     }
@@ -69,8 +63,7 @@ public class Order {
         if (this == o) return true;
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
         Order order = (Order) o;
-        return Objects.equals(text, order.text)
-                && Objects.equals(customer.getId(), order.customer.getId());
+        return Objects.equals(text, order.text) && Objects.equals(customer.getId(), order.customer.getId());
     }
 
     @Override

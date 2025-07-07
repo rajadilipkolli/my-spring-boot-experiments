@@ -10,9 +10,7 @@ import org.springframework.stereotype.Service;
 public class JobMapper {
 
     public Job toEntity(JobRequest jobRequest) {
-        Job job = new Job();
-        job.setText(jobRequest.text());
-        return job;
+        return new Job().setText(jobRequest.text());
     }
 
     public void mapJobWithRequest(Job job, JobRequest jobRequest) {

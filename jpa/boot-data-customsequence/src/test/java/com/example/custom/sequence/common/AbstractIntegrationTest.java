@@ -23,9 +23,12 @@ import org.springframework.test.web.servlet.assertj.MockMvcTester;
 @AutoConfigureMockMvc
 public abstract class AbstractIntegrationTest {
 
-    @Autowired protected MockMvcTester mockMvcTester;
+    @Autowired
+    protected MockMvcTester mockMvcTester;
 
-    @Autowired protected ObjectMapper objectMapper;
+    @Autowired
+    protected ObjectMapper objectMapper;
 
-    @Autowired protected DataSource dataSource;
+    @Autowired
+    protected DataSource dataSource;
 }

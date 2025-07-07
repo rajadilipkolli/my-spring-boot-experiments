@@ -43,22 +43,25 @@ import org.springframework.test.web.servlet.MockMvc;
 @ActiveProfiles(PROFILE_TEST)
 class OrderControllerTest {
 
-    @Autowired private MockMvc mockMvc;
+    @Autowired
+    private MockMvc mockMvc;
 
-    @MockitoBean private OrderService orderService;
+    @MockitoBean
+    private OrderService orderService;
 
-    @Autowired private ObjectMapper objectMapper;
+    @Autowired
+    private ObjectMapper objectMapper;
 
     private List<Order> orderList;
     private Customer customer;
 
     @BeforeEach
     void setUp() {
-        customer = new Customer("CUST_01", "customer1", List.of());
+        customer = new Customer().setId("CUST_01").setText("customer1");
         this.orderList = new ArrayList<>();
-        this.orderList.add(new Order("1", "text 1", customer));
-        this.orderList.add(new Order("2", "text 2", customer));
-        this.orderList.add(new Order("3", "text 3", customer));
+        this.orderList.add(new Order().setId("1").setText("text 1").setCustomer(customer));
+        this.orderList.add(new Order().setId("2").setText("text 2").setCustomer(customer));
+        this.orderList.add(new Order().setId("3").setText("text 3").setCustomer(customer));
     }
 
     @Test
@@ -81,15 +84,9 @@ class OrderControllerTest {
 
     private static @NotNull PagedResult<OrderResponse> getOrderResponsePagedResult() {
         List<OrderResponse> orderResponseList = new ArrayList<>();
-        orderResponseList.add(
-                new OrderResponse(
-                        "1", "text 1", new CustomerResponseWithOutOrder("1", "customer1")));
-        orderResponseList.add(
-                new OrderResponse(
-                        "2", "text 2", new CustomerResponseWithOutOrder("1", "customer1")));
-        orderResponseList.add(
-                new OrderResponse(
-                        "3", "text 3", new CustomerResponseWithOutOrder("1", "customer1")));
+        orderResponseList.add(new OrderResponse("1", "text 1", new CustomerResponseWithOutOrder("1", "customer1")));
+        orderResponseList.add(new OrderResponse("2", "text 2", new CustomerResponseWithOutOrder("1", "customer1")));
+        orderResponseList.add(new OrderResponse("3", "text 3", new CustomerResponseWithOutOrder("1", "customer1")));
         Page<OrderResponse> page = new PageImpl<>(orderResponseList);
         return new PagedResult<>(page);
     }
@@ -97,11 +94,8 @@ class OrderControllerTest {
     @Test
     void shouldFindOrderById() throws Exception {
         String orderId = "1";
-        OrderResponse order =
-                new OrderResponse(
-                        orderId,
-                        "text 1",
-                        new CustomerResponseWithOutOrder(customer.getId(), customer.getText()));
+        OrderResponse order = new OrderResponse(
+                orderId, "text 1", new CustomerResponseWithOutOrder(customer.getId(), customer.getText()));
         given(orderService.findOrderById(orderId)).willReturn(Optional.of(order));
 
         this.mockMvc
@@ -122,13 +116,11 @@ class OrderControllerTest {
     void shouldCreateNewOrder() throws Exception {
 
         OrderRequest orderRequest = new OrderRequest("some text", customer.getId());
-        given(orderService.saveOrder(orderRequest))
-                .willReturn(Optional.of(new OrderResponse("1", "some text", null)));
+        given(orderService.saveOrder(orderRequest)).willReturn(Optional.of(new OrderResponse("1", "some text", null)));
         this.mockMvc
-                .perform(
-                        post("/api/orders")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(orderRequest)))
+                .perform(post("/api/orders")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(orderRequest)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id", notNullValue()))
                 .andExpect(jsonPath("$.text", is(orderRequest.text())));
@@ -139,10 +131,9 @@ class OrderControllerTest {
         OrderRequest order = new OrderRequest(null, null);
 
         this.mockMvc
-                .perform(
-                        post("/api/orders")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(order)))
+                .perform(post("/api/orders")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(order)))
                 .andExpect(status().isBadRequest())
                 .andExpect(header().string("Content-Type", is("application/problem+json")))
                 .andExpect(jsonPath("$.type", is("about:blank")))
@@ -161,20 +152,15 @@ class OrderControllerTest {
     @Test
     void shouldUpdateOrder() throws Exception {
         String orderId = "1";
-        OrderResponse orderResponse =
-                new OrderResponse(
-                        orderId,
-                        "Updated text",
-                        new CustomerResponseWithOutOrder(customer.getId(), customer.getText()));
+        OrderResponse orderResponse = new OrderResponse(
+                orderId, "Updated text", new CustomerResponseWithOutOrder(customer.getId(), customer.getText()));
         OrderRequest orderRequest = new OrderRequest("Updated text", customer.getId());
-        given(orderService.updateOrderById(orderId, orderRequest))
-                .willReturn(Optional.of(orderResponse));
+        given(orderService.updateOrderById(orderId, orderRequest)).willReturn(Optional.of(orderResponse));
 
         this.mockMvc
-                .perform(
-                        put("/api/orders/{id}", orderResponse.id())
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(orderRequest)))
+                .perform(put("/api/orders/{id}", orderResponse.id())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(orderRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.text", is(orderResponse.text())));
     }
@@ -186,10 +172,9 @@ class OrderControllerTest {
         given(orderService.updateOrderById(orderId, orderRequest)).willReturn(Optional.empty());
 
         this.mockMvc
-                .perform(
-                        put("/api/orders/{id}", orderId)
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(orderRequest)))
+                .perform(put("/api/orders/{id}", orderId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(orderRequest)))
                 .andExpect(status().isNotFound());
 
         verify(orderService, times(1)).updateOrderById(orderId, orderRequest);
@@ -198,11 +183,8 @@ class OrderControllerTest {
     @Test
     void shouldDeleteOrder() throws Exception {
         String orderId = "1";
-        OrderResponse order =
-                new OrderResponse(
-                        orderId,
-                        "Some text",
-                        new CustomerResponseWithOutOrder(customer.getId(), customer.getText()));
+        OrderResponse order = new OrderResponse(
+                orderId, "Some text", new CustomerResponseWithOutOrder(customer.getId(), customer.getText()));
         given(orderService.findOrderById(orderId)).willReturn(Optional.of(order));
         doNothing().when(orderService).deleteOrderById(order.id());
 

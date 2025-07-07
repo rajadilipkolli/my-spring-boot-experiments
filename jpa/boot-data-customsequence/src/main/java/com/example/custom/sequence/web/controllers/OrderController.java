@@ -32,23 +32,17 @@ public class OrderController {
 
     @GetMapping
     public PagedResult<OrderResponse> getAllOrders(
-            @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_NUMBER, required = false)
-                    int pageNo,
-            @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_SIZE, required = false)
-                    int pageSize,
-            @RequestParam(defaultValue = AppConstants.DEFAULT_SORT_BY, required = false)
-                    String sortBy,
-            @RequestParam(defaultValue = AppConstants.DEFAULT_SORT_DIRECTION, required = false)
-                    String sortDir) {
+            @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_NUMBER, required = false) int pageNo,
+            @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_SIZE, required = false) int pageSize,
+            @RequestParam(defaultValue = AppConstants.DEFAULT_SORT_BY, required = false) String sortBy,
+            @RequestParam(defaultValue = AppConstants.DEFAULT_SORT_DIRECTION, required = false) String sortDir) {
         return orderService.findAllOrders(pageNo, pageSize, sortBy, sortDir);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<OrderResponse> getOrderById(@PathVariable String id) {
-        return orderService
-                .findOrderById(id)
-                .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+        return orderService.findOrderById(id).map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound()
+                .build());
     }
 
     @PostMapping
@@ -76,11 +70,10 @@ public class OrderController {
     public ResponseEntity<OrderResponse> deleteOrder(@PathVariable String id) {
         return orderService
                 .findOrderById(id)
-                .map(
-                        order -> {
-                            orderService.deleteOrderById(id);
-                            return ResponseEntity.ok(order);
-                        })
+                .map(order -> {
+                    orderService.deleteOrderById(id);
+                    return ResponseEntity.ok(order);
+                })
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 }

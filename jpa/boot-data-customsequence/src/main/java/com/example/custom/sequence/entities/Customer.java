@@ -31,16 +31,6 @@ public class Customer {
 
     public Customer() {}
 
-    public Customer(String id, String text, List<Order> orders) {
-        this.id = id;
-        this.text = text;
-        this.orders = orders;
-    }
-
-    public Customer(String text) {
-        this.text = text;
-    }
-
     public String getId() {
         return id;
     }

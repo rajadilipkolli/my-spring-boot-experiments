@@ -23,19 +23,15 @@ public class CustomerMapper {
 
     public CustomerResponse mapToResponse(Customer saved) {
         return new CustomerResponse(
-                saved.getId(),
-                saved.getText(),
-                orderMapper.mapToResponseListWithOutCustomer(saved.getOrders()));
+                saved.getId(), saved.getText(), orderMapper.mapToResponseListWithOutCustomer(saved.getOrders()));
     }
 
     public Customer mapToEntity(CustomerRequest customerRequest) {
-        Customer customer = new Customer(customerRequest.text());
+        Customer customer = new Customer().setText(customerRequest.text());
         if (customerRequest.orders() == null) {
             return customer;
         }
-        customerRequest
-                .orders()
-                .forEach(orderRequest -> customer.addOrder(orderMapper.mapToEntity(orderRequest)));
+        customerRequest.orders().forEach(orderRequest -> customer.addOrder(orderMapper.mapToEntity(orderRequest)));
         return customer;
     }
 
@@ -45,13 +41,9 @@ public class CustomerMapper {
             return;
         }
         List<Order> removedOrders = new ArrayList<>(foundCustomer.getOrders());
-        List<Order> ordersFromRequest =
-                customerRequest.orders().stream()
-                        .map(
-                                orderRequest ->
-                                        orderMapper.mapToEntityWithCustomer(
-                                                orderRequest, foundCustomer))
-                        .collect(Collectors.toList());
+        List<Order> ordersFromRequest = customerRequest.orders().stream()
+                .map(orderRequest -> orderMapper.mapToEntityWithCustomer(orderRequest, foundCustomer))
+                .collect(Collectors.toList());
         removedOrders.removeAll(ordersFromRequest);
 
         for (Order removedOrder : removedOrders) {
@@ -74,9 +66,7 @@ public class CustomerMapper {
                 }
             }
             Order mergedOrder = orderRepository.merge(existingOrder);
-            foundCustomer
-                    .getOrders()
-                    .set(foundCustomer.getOrders().indexOf(mergedOrder), mergedOrder);
+            foundCustomer.getOrders().set(foundCustomer.getOrders().indexOf(mergedOrder), mergedOrder);
         }
 
         for (Order newOrder : newOrders) {

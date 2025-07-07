@@ -37,11 +37,10 @@ class LazyConnectionDataSourceProxyConfig {
         listener.addListener(new DataSourceQueryCountListener());
 
         // Wrap with ProxyDataSource and LazyConnectionDataSourceProxy
-        DataSource loggingDataSource =
-                ProxyDataSourceBuilder.create(dataSource)
-                        .name(DATA_SOURCE_PROXY_NAME)
-                        .listener(listener)
-                        .build();
+        DataSource loggingDataSource = ProxyDataSourceBuilder.create(dataSource)
+                .name(DATA_SOURCE_PROXY_NAME)
+                .listener(listener)
+                .build();
 
         return new LazyConnectionDataSourceProxy(loggingDataSource);
     }

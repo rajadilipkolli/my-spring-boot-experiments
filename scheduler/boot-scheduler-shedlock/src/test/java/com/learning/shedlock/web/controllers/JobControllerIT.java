@@ -35,9 +35,9 @@ class JobControllerIT extends AbstractIntegrationTest {
         jobRepository.deleteAllInBatch();
 
         jobList = new ArrayList<>();
-        jobList.add(new Job(null, "First Job"));
-        jobList.add(new Job(null, "Second Job"));
-        jobList.add(new Job(null, "Third Job"));
+        jobList.add(new Job().setText("First Job"));
+        jobList.add(new Job().setText("Second Job"));
+        jobList.add(new Job().setText("Third Job"));
         jobList = jobRepository.saveAll(jobList);
     }
 
