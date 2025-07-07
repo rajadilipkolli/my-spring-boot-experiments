@@ -18,6 +18,10 @@ public class UserService {
 
     private final UserRepository userRepository;
 
+    public UserService(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
+
     @Transactional(readOnly = true)
     public PagedResult<User> findAllUsers(int pageNo, int pageSize, String sortBy, String sortDir) {
         Sort sort =

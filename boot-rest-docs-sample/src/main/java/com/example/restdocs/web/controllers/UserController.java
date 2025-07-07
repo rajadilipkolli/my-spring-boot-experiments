@@ -25,6 +25,10 @@ public class UserController {
 
     private final UserService userService;
 
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
+
     @GetMapping
     public PagedResult<User> getAllUsers(
             @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_NUMBER, required = false)
