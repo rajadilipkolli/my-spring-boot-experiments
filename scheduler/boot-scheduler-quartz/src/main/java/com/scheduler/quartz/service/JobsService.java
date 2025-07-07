@@ -22,12 +22,16 @@ import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
 import org.quartz.TriggerKey;
 import org.quartz.impl.matchers.GroupMatcher;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 @Service
 public class JobsService {
+
+    private static final Logger log = LoggerFactory.getLogger(JobsService.class);
 
     private final Scheduler scheduler;
     public static final String GROUP_NAME = "sample-group";
