@@ -4,6 +4,8 @@ import com.example.multitenancy.partition.dto.CustomerDTO;
 import com.example.multitenancy.partition.entities.Customer;
 import com.example.multitenancy.partition.services.CustomerService;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -22,7 +24,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/customers")
 public class CustomerController {
 
+    private static final Logger log = LoggerFactory.getLogger(CustomerController.class);
+
     private final CustomerService customerService;
+
+    public CustomerController(CustomerService customerService) {
+        this.customerService = customerService;
+    }
 
     @GetMapping
     public List<Customer> getAllCustomers(@RequestParam String tenant) {

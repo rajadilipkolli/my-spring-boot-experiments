@@ -26,4 +26,8 @@ public class TenantIdentifierResolver
     public void customize(Map<String, Object> hibernateProperties) {
         hibernateProperties.put(AvailableSettings.MULTI_TENANT_IDENTIFIER_RESOLVER, this);
     }
+
+    public void setCurrentTenant(String tenant) {
+        this.currentTenant = tenant;
+    }
 }
