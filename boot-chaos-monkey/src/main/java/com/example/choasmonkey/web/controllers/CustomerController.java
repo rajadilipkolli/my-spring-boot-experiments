@@ -26,6 +26,12 @@ public class CustomerController {
     private final CustomerService customerService;
     private final ObservationRegistry observationRegistry;
 
+    public CustomerController(
+            CustomerService customerService, ObservationRegistry observationRegistry) {
+        this.customerService = customerService;
+        this.observationRegistry = observationRegistry;
+    }
+
     @GetMapping
     public CustomerResponse getAllCustomers(
             @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_NUMBER, required = false)

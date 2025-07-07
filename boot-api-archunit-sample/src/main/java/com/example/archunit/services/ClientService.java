@@ -23,6 +23,11 @@ public class ClientService {
     private final ClientRepository clientRepository;
     private final ClientMapper clientMapper;
 
+    public ClientService(ClientRepository clientRepository, ClientMapper clientMapper) {
+        this.clientRepository = clientRepository;
+        this.clientMapper = clientMapper;
+    }
+
     public PagedResult<ClientResponse> findAllClients(FindClientsQuery findClientsQuery) {
 
         // create Pageable instance

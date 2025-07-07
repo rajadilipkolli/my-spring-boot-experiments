@@ -41,58 +41,61 @@ public class PostComment extends Auditable implements Serializable {
 
     public PostComment() {}
 
+    public PostComment(Long id, String title, String content, boolean published, LocalDateTime publishedAt, Post post) {
+        this.id = id;
+        this.title = title;
+        this.content = content;
+        this.published = published;
+        this.publishedAt = publishedAt;
+        this.post = post;
+    }
+
     public Long getId() {
         return id;
     }
 
-    public PostComment setId(Long id) {
+    public void setId(Long id) {
         this.id = id;
-        return this;
     }
 
     public String getTitle() {
         return title;
     }
 
-    public PostComment setTitle(String title) {
+    public void setTitle(String title) {
         this.title = title;
-        return this;
     }
 
     public String getContent() {
         return content;
     }
 
-    public PostComment setContent(String content) {
+    public void setContent(String content) {
         this.content = content;
-        return this;
     }
 
     public boolean isPublished() {
         return published;
     }
 
-    public PostComment setPublished(boolean published) {
+    public void setPublished(boolean published) {
         this.published = published;
-        return this;
     }
 
     public LocalDateTime getPublishedAt() {
         return publishedAt;
     }
 
-    public PostComment setPublishedAt(LocalDateTime publishedAt) {
+    public void setPublishedAt(LocalDateTime publishedAt) {
         this.publishedAt = publishedAt;
-        return this;
     }
 
     public Post getPost() {
         return post;
     }
 
-    public PostComment setPost(Post post) {
+    public void setPost(Post post) {
         this.post = post;
-        return this;
     }
 
     @Override

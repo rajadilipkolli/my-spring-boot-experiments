@@ -14,8 +14,14 @@ import org.springframework.stereotype.Component;
 @Component
 public class Initializer implements CommandLineRunner {
 
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Initializer.class);
     private final PostRepository postRepository;
     private final RestHandler restHandler;
+
+    public Initializer(PostRepository postRepository, RestHandler restHandler) {
+        this.postRepository = postRepository;
+        this.restHandler = restHandler;
+    }
 
     @Override
     public void run(String... args) {
