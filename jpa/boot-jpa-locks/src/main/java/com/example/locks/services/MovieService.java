@@ -24,6 +24,11 @@ public class MovieService {
     private final MovieRepository movieRepository;
     private final JpaLocksMapper jpaLocksMapper;
 
+    public MovieService(MovieRepository movieRepository, JpaLocksMapper jpaLocksMapper) {
+        this.movieRepository = movieRepository;
+        this.jpaLocksMapper = jpaLocksMapper;
+    }
+
     public PagedResult<MovieResponse> findAllMovies(FindMoviesQuery findMoviesQuery) {
 
         // create Pageable instance

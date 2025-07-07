@@ -26,6 +26,11 @@ public class ActorService {
 
     private final ActorRepository actorRepository;
 
+    public ActorService(JpaLocksMapper mapper, ActorRepository actorRepository) {
+        this.mapper = mapper;
+        this.actorRepository = actorRepository;
+    }
+
     public PagedResult<ActorResponse> findAllActors(FindActorsQuery findActorsQuery) {
 
         // create Pageable instance

@@ -28,6 +28,10 @@ public class ActorController {
 
     private final ActorService actorService;
 
+    public ActorController(ActorService actorService) {
+        this.actorService = actorService;
+    }
+
     @GetMapping
     public PagedResult<ActorResponse> getAllActors(
             @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_NUMBER, required = false) int pageNo,

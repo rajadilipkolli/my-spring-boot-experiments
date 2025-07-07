@@ -13,6 +13,10 @@ class Initializer implements CommandLineRunner {
 
     private final PostRepository postRepository;
 
+    public Initializer(PostRepository postRepository) {
+        this.postRepository = postRepository;
+    }
+
     @Override
     public void run(String... args) {
         log.info("Running Initializer.....");

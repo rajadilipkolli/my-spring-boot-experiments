@@ -28,6 +28,10 @@ public class MovieController {
 
     private final MovieService movieService;
 
+    public MovieController(MovieService movieService) {
+        this.movieService = movieService;
+    }
+
     @GetMapping
     public PagedResult<MovieResponse> getAllMovies(
             @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_NUMBER, required = false) int pageNo,
