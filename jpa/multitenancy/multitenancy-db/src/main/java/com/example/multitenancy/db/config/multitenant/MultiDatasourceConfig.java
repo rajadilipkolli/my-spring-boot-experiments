@@ -45,8 +45,7 @@ class MultiDatasourceConfig {
     @Bean
     SpringLiquibase primaryLiquibase(
             @Qualifier("primaryDataSource") DataSource primaryDataSource,
-            @Qualifier("primaryLiquibaseProperties")
-                    LiquibaseProperties primaryLiquibaseProperties) {
+            @Qualifier("primaryLiquibaseProperties") LiquibaseProperties primaryLiquibaseProperties) {
         return springLiquibase(primaryDataSource, primaryLiquibaseProperties);
     }
 
@@ -59,8 +58,7 @@ class MultiDatasourceConfig {
     @Bean
     @ConfigurationProperties("datasource.secondary.hikari")
     DataSource secondaryDataSource(
-            @Qualifier("secondaryDataSourceProperties")
-                    DataSourceProperties secondaryDataSourceProperties) {
+            @Qualifier("secondaryDataSourceProperties") DataSourceProperties secondaryDataSourceProperties) {
         return secondaryDataSourceProperties.initializeDataSourceBuilder().build();
     }
 
@@ -73,8 +71,7 @@ class MultiDatasourceConfig {
     @Bean
     SpringLiquibase secondaryLiquibase(
             @Qualifier("secondaryDataSource") DataSource secondaryDataSource,
-            @Qualifier("secondaryLiquibaseProperties")
-                    LiquibaseProperties secondaryLiquibaseProperties) {
+            @Qualifier("secondaryLiquibaseProperties") LiquibaseProperties secondaryLiquibaseProperties) {
         return springLiquibase(secondaryDataSource, secondaryLiquibaseProperties);
     }
 
@@ -85,8 +82,7 @@ class MultiDatasourceConfig {
         liquibase.setChangeLog(properties.getChangeLog());
         liquibase.setClearCheckSums(properties.isClearChecksums());
         if (!CollectionUtils.isEmpty(properties.getContexts())) {
-            liquibase.setContexts(
-                    StringUtils.collectionToCommaDelimitedString(properties.getContexts()));
+            liquibase.setContexts(StringUtils.collectionToCommaDelimitedString(properties.getContexts()));
         }
         liquibase.setDefaultSchema(properties.getDefaultSchema());
         liquibase.setLiquibaseSchema(properties.getLiquibaseSchema());
@@ -96,22 +92,23 @@ class MultiDatasourceConfig {
         liquibase.setDropFirst(properties.isDropFirst());
         liquibase.setShouldRun(properties.isEnabled());
         if (!CollectionUtils.isEmpty(properties.getLabelFilter())) {
-            liquibase.setLabelFilter(
-                    StringUtils.collectionToCommaDelimitedString(properties.getLabelFilter()));
+            liquibase.setLabelFilter(StringUtils.collectionToCommaDelimitedString(properties.getLabelFilter()));
         }
         liquibase.setChangeLogParameters(properties.getParameters());
         liquibase.setRollbackFile(properties.getRollbackFile());
         liquibase.setTestRollbackOnUpdate(properties.isTestRollbackOnUpdate());
         liquibase.setTag(properties.getTag());
         if (properties.getShowSummary() != null) {
-            liquibase.setShowSummary(UpdateSummaryEnum.valueOf(properties.getShowSummary().name()));
+            liquibase.setShowSummary(
+                    UpdateSummaryEnum.valueOf(properties.getShowSummary().name()));
         }
         if (properties.getShowSummaryOutput() != null) {
-            liquibase.setShowSummaryOutput(
-                    UpdateSummaryOutputEnum.valueOf(properties.getShowSummaryOutput().name()));
+            liquibase.setShowSummaryOutput(UpdateSummaryOutputEnum.valueOf(
+                    properties.getShowSummaryOutput().name()));
         }
         if (properties.getUiService() != null) {
-            liquibase.setUiService(UIServiceEnum.valueOf(properties.getUiService().name()));
+            liquibase.setUiService(
+                    UIServiceEnum.valueOf(properties.getUiService().name()));
         }
         return liquibase;
     }

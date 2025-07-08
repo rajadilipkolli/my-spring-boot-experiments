@@ -42,17 +42,14 @@ class CustomerController {
     ResponseEntity<Customer> getCustomerById(
             @PathVariable Long id, @RequestHeader(AppConstants.X_TENANT_ID) String tenantId) {
         log.info("fetching customer by id {} for tenant : {}", id, tenantId);
-        return customerService
-                .findCustomerById(id)
-                .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+        return customerService.findCustomerById(id).map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound()
+                .build());
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     Customer createCustomer(
-            @RequestBody @Validated Customer customer,
-            @RequestHeader(AppConstants.X_TENANT_ID) String tenantId) {
+            @RequestBody @Validated Customer customer, @RequestHeader(AppConstants.X_TENANT_ID) String tenantId) {
         log.info("creating customer by for tenant : {}", tenantId);
         return customerService.saveCustomer(customer);
     }
@@ -65,11 +62,10 @@ class CustomerController {
         log.info("updating customer for id {} in tenant : {}", id, tenantId);
         return customerService
                 .findCustomerById(id)
-                .map(
-                        customerObj -> {
-                            customer.setId(id);
-                            return ResponseEntity.ok(customerService.saveCustomer(customer));
-                        })
+                .map(customerObj -> {
+                    customer.setId(id);
+                    return ResponseEntity.ok(customerService.saveCustomer(customer));
+                })
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
@@ -79,11 +75,10 @@ class CustomerController {
         log.info("deleting customer by id {} for tenant : {}", id, tenantId);
         return customerService
                 .findCustomerById(id)
-                .map(
-                        customer -> {
-                            customerService.deleteCustomerById(id);
-                            return ResponseEntity.ok(customer);
-                        })
+                .map(customer -> {
+                    customerService.deleteCustomerById(id);
+                    return ResponseEntity.ok(customer);
+                })
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 }

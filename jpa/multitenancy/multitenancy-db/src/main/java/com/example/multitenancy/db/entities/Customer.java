@@ -17,29 +17,25 @@ public class Customer {
     private Long id;
 
     @Column(nullable = false)
-    @NotEmpty(message = "Text cannot be empty")
-    private String text;
+    @NotEmpty(message = "Text cannot be empty") private String text;
 
     public Customer() {}
-
-    public Customer(Long id, String text) {
-        this.id = id;
-        this.text = text;
-    }
 
     public Long getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public Customer setId(Long id) {
         this.id = id;
+        return this;
     }
 
     public String getText() {
         return text;
     }
 
-    public void setText(String text) {
+    public Customer setText(String text) {
         this.text = text;
+        return this;
     }
 }
