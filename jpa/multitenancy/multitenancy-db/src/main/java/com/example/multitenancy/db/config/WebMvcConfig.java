@@ -12,8 +12,7 @@ class WebMvcConfig implements WebMvcConfigurer {
     private final ApplicationProperties properties;
     private final MultiTenantInterceptor multiTenantInterceptor;
 
-    public WebMvcConfig(
-            ApplicationProperties properties, MultiTenantInterceptor multiTenantInterceptor) {
+    public WebMvcConfig(ApplicationProperties properties, MultiTenantInterceptor multiTenantInterceptor) {
         this.properties = properties;
         this.multiTenantInterceptor = multiTenantInterceptor;
     }

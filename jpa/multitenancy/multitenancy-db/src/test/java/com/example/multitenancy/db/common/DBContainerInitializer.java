@@ -7,8 +7,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.lifecycle.Startables;
 import org.testcontainers.utility.DockerImageName;
 
-public class DBContainerInitializer
-        implements ApplicationContextInitializer<ConfigurableApplicationContext> {
+public class DBContainerInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
     private static final PostgreSQLContainer<?> POSTGRE_SQL_CONTAINER =
             new PostgreSQLContainer<>(DockerImageName.parse("postgres").withTag("17.5-alpine"));

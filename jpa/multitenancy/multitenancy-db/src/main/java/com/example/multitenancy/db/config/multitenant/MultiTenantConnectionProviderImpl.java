@@ -18,8 +18,7 @@ class MultiTenantConnectionProviderImpl
 
     private final DataSource tenantRoutingDatasource;
 
-    public MultiTenantConnectionProviderImpl(
-            @Qualifier("tenantRoutingDatasource") DataSource tenantRoutingDatasource) {
+    public MultiTenantConnectionProviderImpl(@Qualifier("tenantRoutingDatasource") DataSource tenantRoutingDatasource) {
         this.tenantRoutingDatasource = tenantRoutingDatasource;
     }
 
@@ -39,8 +38,7 @@ class MultiTenantConnectionProviderImpl
     }
 
     @Override
-    public void releaseConnection(String tenantIdentifier, Connection connection)
-            throws SQLException {
+    public void releaseConnection(String tenantIdentifier, Connection connection) throws SQLException {
         connection.close();
     }
 

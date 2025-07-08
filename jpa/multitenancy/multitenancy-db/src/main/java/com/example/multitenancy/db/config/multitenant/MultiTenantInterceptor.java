@@ -19,8 +19,7 @@ public class MultiTenantInterceptor implements HandlerInterceptor {
     }
 
     @Override
-    public boolean preHandle(
-            HttpServletRequest request, HttpServletResponse response, Object handler)
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
             throws IOException {
         var tenant = request.getHeader(AppConstants.X_TENANT_ID);
         String path = request.getRequestURI().substring(request.getContextPath().length());
