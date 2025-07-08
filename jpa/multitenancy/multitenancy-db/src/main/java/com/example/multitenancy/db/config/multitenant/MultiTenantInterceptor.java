@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.util.List;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
-import org.springframework.lang.Nullable;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 @Configuration(proxyBeanMethods = false)
@@ -33,12 +32,6 @@ public class MultiTenantInterceptor implements HandlerInterceptor {
         }
         tenantIdentifierResolver.setCurrentTenant(tenant);
         return true;
-    }
-
-    @Override
-    public void afterCompletion(
-            HttpServletRequest request, HttpServletResponse response, Object handler, @Nullable Exception ex) {
-        tenantIdentifierResolver.clearCurrentTenant();
     }
 
     private List<Object> getValidTenants() {
