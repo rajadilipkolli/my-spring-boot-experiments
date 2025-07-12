@@ -51,20 +51,41 @@ import org.springframework.test.web.servlet.MockMvc;
 @AutoConfigureRestDocs
 class UserControllerTest {
 
-    @Autowired private MockMvc mockMvc;
+    @Autowired
+    private MockMvc mockMvc;
 
-    @MockitoBean private UserService userService;
+    @MockitoBean
+    private UserService userService;
 
-    @Autowired private ObjectMapper objectMapper;
+    @Autowired
+    private ObjectMapper objectMapper;
 
     private List<User> userList;
 
     @BeforeEach
     void setUp() {
         this.userList = new ArrayList<>();
-        userList.add(new User(1L, "First User", "Last Name", 30, Gender.MALE, "9848022334"));
-        userList.add(new User(2L, "Second User", "Last Name", 20, Gender.FEMALE, "9848022334"));
-        userList.add(new User(3L, "Third User", "Last Name", 30, Gender.MALE, "9848022334"));
+        userList.add(new User()
+                .setId(1L)
+                .setFirstName("First User")
+                .setLastName("Last Name")
+                .setAge(30)
+                .setGender(Gender.MALE)
+                .setPhoneNumber("9848022334"));
+        userList.add(new User()
+                .setId(2L)
+                .setFirstName("Second User")
+                .setLastName("Last Name")
+                .setAge(20)
+                .setGender(Gender.FEMALE)
+                .setPhoneNumber("9848022334"));
+        userList.add(new User()
+                .setId(3L)
+                .setFirstName("Third User")
+                .setLastName("Last Name")
+                .setAge(30)
+                .setGender(Gender.MALE)
+                .setPhoneNumber("9848022334"));
     }
 
     @Test
@@ -84,32 +105,35 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.isLast", is(true)))
                 .andExpect(jsonPath("$.hasNext", is(false)))
                 .andExpect(jsonPath("$.hasPrevious", is(false)))
-                .andDo(
-                        document(
-                                "find-all",
-                                preprocessResponse(prettyPrint()),
-                                queryParameters(
-                                        parameterWithName("pageNo")
-                                                .description(
-                                                        "Page you want to retrieve, 0 indexed and defaults to 0.")
-                                                .optional(),
-                                        parameterWithName("pageSize")
-                                                .description(
-                                                        "Size of the page you want to retrieve, defaults to 10.")
-                                                .optional(),
-                                        parameterWithName("sortBy")
-                                                .description("Property name for sorting")
-                                                .optional(),
-                                        parameterWithName("sortDir")
-                                                .description("Sort direction ('asc' or 'desc')")
-                                                .optional()),
-                                responseFields(getPaginatedResponse())));
+                .andDo(document(
+                        "find-all",
+                        preprocessResponse(prettyPrint()),
+                        queryParameters(
+                                parameterWithName("pageNo")
+                                        .description("Page you want to retrieve, 0 indexed and defaults to 0.")
+                                        .optional(),
+                                parameterWithName("pageSize")
+                                        .description("Size of the page you want to retrieve, defaults to 10.")
+                                        .optional(),
+                                parameterWithName("sortBy")
+                                        .description("Property name for sorting")
+                                        .optional(),
+                                parameterWithName("sortDir")
+                                        .description("Sort direction ('asc' or 'desc')")
+                                        .optional()),
+                        responseFields(getPaginatedResponse())));
     }
 
     @Test
     void shouldFindUserById() throws Exception {
         Long userId = 1L;
-        User user = new User(userId, "text 1", "Last Name", 30, Gender.MALE, "9848022334");
+        User user = new User()
+                .setId(userId)
+                .setFirstName("text 1")
+                .setLastName("Last Name")
+                .setAge(30)
+                .setGender(Gender.MALE)
+                .setPhoneNumber("9848022334");
         given(userService.findUserById(userId)).willReturn(Optional.of(user));
 
         this.mockMvc
@@ -120,14 +144,11 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.age", is(user.getAge())))
                 .andExpect(jsonPath("$.gender", is(user.getGender().name())))
                 .andExpect(jsonPath("$.phoneNumber", is(user.getPhoneNumber())))
-                .andDo(
-                        document(
-                                "find-by-id",
-                                preprocessResponse(prettyPrint()),
-                                pathParameters(
-                                        parameterWithName("id")
-                                                .description("The id of the user to retrieve")),
-                                responseFields(getUserFieldDescriptor())));
+                .andDo(document(
+                        "find-by-id",
+                        preprocessResponse(prettyPrint()),
+                        pathParameters(parameterWithName("id").description("The id of the user to retrieve")),
+                        responseFields(getUserFieldDescriptor())));
     }
 
     @Test
@@ -140,16 +161,19 @@ class UserControllerTest {
 
     @Test
     void shouldCreateNewUser() throws Exception {
-
-        User user = new User(34L, "some text", "Last Name", 30, Gender.MALE, "9848022334");
-        UserRequest userRequest =
-                new UserRequest("some text", "Last Name", 30, Gender.MALE, "9848022334");
+        User user = new User()
+                .setId(34L)
+                .setFirstName("some text")
+                .setLastName("Last Name")
+                .setAge(30)
+                .setGender(Gender.MALE)
+                .setPhoneNumber("9848022334");
+        UserRequest userRequest = new UserRequest("some text", "Last Name", 30, Gender.MALE, "9848022334");
         given(userService.saveUser(userRequest)).willReturn(user);
         this.mockMvc
-                .perform(
-                        post("/api/users")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(userRequest)))
+                .perform(post("/api/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(userRequest)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id", is(34)))
                 .andExpect(jsonPath("$.firstName", is(user.getFirstName())))
@@ -157,13 +181,12 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.age", is(user.getAge())))
                 .andExpect(jsonPath("$.gender", is(user.getGender().name())))
                 .andExpect(jsonPath("$.phoneNumber", is(user.getPhoneNumber())))
-                .andDo(
-                        document(
-                                "create-user",
-                                preprocessRequest(prettyPrint()),
-                                preprocessResponse(prettyPrint()),
-                                requestFields(getUserRequestFieldDescriptor()),
-                                responseFields(getUserFieldDescriptor())));
+                .andDo(document(
+                        "create-user",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        requestFields(getUserRequestFieldDescriptor()),
+                        responseFields(getUserFieldDescriptor())));
     }
 
     @Test
@@ -171,10 +194,9 @@ class UserControllerTest {
         UserRequest userRequest = new UserRequest(null, "Last Name", 90, Gender.MALE, "9848022334");
 
         this.mockMvc
-                .perform(
-                        post("/api/users")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(userRequest)))
+                .perform(post("/api/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(userRequest)))
                 .andExpect(status().isBadRequest())
                 .andExpect(header().string("Content-Type", is("application/problem+json")))
                 .andExpect(jsonPath("$.type", is("about:blank")))
@@ -191,54 +213,59 @@ class UserControllerTest {
     @Test
     void shouldUpdateUser() throws Exception {
         Long userId = 1L;
-        User user = new User(userId, "some text", "Last Name", 30, Gender.MALE, "9848022334");
-        UserRequest userRequest =
-                new UserRequest("some text", "Last Name", 30, Gender.MALE, "9848022334");
+        User user = new User()
+                .setId(userId)
+                .setFirstName("some text")
+                .setLastName("Last Name")
+                .setAge(30)
+                .setGender(Gender.MALE)
+                .setPhoneNumber("9848022334");
+        UserRequest userRequest = new UserRequest("some text", "Last Name", 30, Gender.MALE, "9848022334");
         given(userService.findUserById(userId)).willReturn(Optional.of(user));
         given(userService.updateUser(user, userRequest)).willReturn(user);
 
         this.mockMvc
-                .perform(
-                        put("/api/users/{id}", user.getId())
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(userRequest)))
+                .perform(put("/api/users/{id}", user.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(userRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.firstName", is(user.getFirstName())))
                 .andExpect(jsonPath("$.lastName", is(user.getLastName())))
                 .andExpect(jsonPath("$.age", is(user.getAge())))
                 .andExpect(jsonPath("$.gender", is(user.getGender().name())))
                 .andExpect(jsonPath("$.phoneNumber", is(user.getPhoneNumber())))
-                .andDo(
-                        document(
-                                "update-user",
-                                preprocessRequest(prettyPrint()),
-                                preprocessResponse(prettyPrint()),
-                                pathParameters(
-                                        parameterWithName("id")
-                                                .description("The id of the user to update")),
-                                requestFields(getUserRequestFieldDescriptor()),
-                                responseFields(getUserFieldDescriptor())));
+                .andDo(document(
+                        "update-user",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        pathParameters(parameterWithName("id").description("The id of the user to update")),
+                        requestFields(getUserRequestFieldDescriptor()),
+                        responseFields(getUserFieldDescriptor())));
     }
 
     @Test
     void shouldReturn404WhenUpdatingNonExistingUser() throws Exception {
         Long userId = 1L;
         given(userService.findUserById(userId)).willReturn(Optional.empty());
-        UserRequest userRequest =
-                new UserRequest("Updated text", "Last Name", 30, Gender.MALE, "9848022334");
+        UserRequest userRequest = new UserRequest("Updated text", "Last Name", 30, Gender.MALE, "9848022334");
 
         this.mockMvc
-                .perform(
-                        put("/api/users/{id}", userId)
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(userRequest)))
+                .perform(put("/api/users/{id}", userId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(userRequest)))
                 .andExpect(status().isNotFound());
     }
 
     @Test
     void shouldDeleteUser() throws Exception {
         Long userId = 1L;
-        User user = new User(userId, "Some text", "Last Name", 30, Gender.MALE, "9848022334");
+        User user = new User()
+                .setId(userId)
+                .setFirstName("Some text")
+                .setLastName("Last Name")
+                .setAge(30)
+                .setGender(Gender.MALE)
+                .setPhoneNumber("9848022334");
         given(userService.findUserById(userId)).willReturn(Optional.of(user));
         doNothing().when(userService).deleteUserById(user.getId());
 
@@ -250,14 +277,11 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.age", is(user.getAge())))
                 .andExpect(jsonPath("$.gender", is(user.getGender().name())))
                 .andExpect(jsonPath("$.phoneNumber", is(user.getPhoneNumber())))
-                .andDo(
-                        document(
-                                "delete-user",
-                                preprocessResponse(prettyPrint()),
-                                pathParameters(
-                                        parameterWithName("id")
-                                                .description("The id of the user to delete")),
-                                responseFields(getUserFieldDescriptor())));
+                .andDo(document(
+                        "delete-user",
+                        preprocessResponse(prettyPrint()),
+                        pathParameters(parameterWithName("id").description("The id of the user to delete")),
+                        responseFields(getUserFieldDescriptor())));
     }
 
     @Test
@@ -270,9 +294,7 @@ class UserControllerTest {
 
     private FieldDescriptor[] getUserFieldDescriptor() {
         return new FieldDescriptor[] {
-            fieldWithPath("age")
-                    .description("The age of the customer")
-                    .type(Integer.class.getSimpleName()),
+            fieldWithPath("age").description("The age of the customer").type(Integer.class.getSimpleName()),
             fieldWithPath("firstName")
                     .description("The first name of the customer")
                     .type(String.class.getSimpleName()),
@@ -328,33 +350,21 @@ class UserControllerTest {
             fieldWithPath("data[].lastName")
                     .description("Last name of the user")
                     .type(String.class.getSimpleName()),
-            fieldWithPath("data[].age")
-                    .description("Age of the user")
-                    .type(Integer.class.getSimpleName()),
-            fieldWithPath("data[].gender")
-                    .description("Gender of the user")
-                    .type(String.class.getSimpleName()),
+            fieldWithPath("data[].age").description("Age of the user").type(Integer.class.getSimpleName()),
+            fieldWithPath("data[].gender").description("Gender of the user").type(String.class.getSimpleName()),
             fieldWithPath("data[].phoneNumber")
                     .description("Phone number of the user")
                     .type(String.class.getSimpleName()),
-            fieldWithPath("totalElements")
-                    .description("Total count.")
-                    .type(Integer.class.getSimpleName()),
+            fieldWithPath("totalElements").description("Total count.").type(Integer.class.getSimpleName()),
             fieldWithPath("totalPages")
                     .description("Total pages with current page size.")
                     .type(Integer.class.getSimpleName()),
-            fieldWithPath("pageNumber")
-                    .description("Page number.")
-                    .type(Integer.class.getSimpleName()),
+            fieldWithPath("pageNumber").description("Page number.").type(Integer.class.getSimpleName()),
             fieldWithPath("isFirst")
                     .description("If this page is the first one.")
                     .type(Boolean.class.getSimpleName()),
-            fieldWithPath("isLast")
-                    .description("If this page is the last one.")
-                    .type(Boolean.class.getSimpleName()),
-            fieldWithPath("hasNext")
-                    .description("Does next page exists.")
-                    .type(Boolean.class.getSimpleName()),
+            fieldWithPath("isLast").description("If this page is the last one.").type(Boolean.class.getSimpleName()),
+            fieldWithPath("hasNext").description("Does next page exists.").type(Boolean.class.getSimpleName()),
             fieldWithPath("hasPrevious")
                     .description("Does previous page exists.")
                     .type(Boolean.class.getSimpleName())

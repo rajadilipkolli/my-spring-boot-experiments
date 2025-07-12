@@ -24,10 +24,9 @@ public class UserService {
 
     @Transactional(readOnly = true)
     public PagedResult<User> findAllUsers(int pageNo, int pageSize, String sortBy, String sortDir) {
-        Sort sort =
-                sortDir.equalsIgnoreCase(Sort.Direction.ASC.name())
-                        ? Sort.by(sortBy).ascending()
-                        : Sort.by(sortBy).descending();
+        Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name())
+                ? Sort.by(sortBy).ascending()
+                : Sort.by(sortBy).descending();
 
         // create Pageable instance
         Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
@@ -57,13 +56,13 @@ public class UserService {
     }
 
     private User mapUserRequestToUser(UserRequest userRequest) {
-        return new User(
-                null,
-                userRequest.firstName(),
-                userRequest.lastName(),
-                userRequest.age(),
-                userRequest.gender(),
-                userRequest.phoneNumber());
+        return new User()
+                .setFirstName(userRequest.firstName())
+                .setFirstName(userRequest.firstName())
+                .setLastName(userRequest.lastName())
+                .setAge(userRequest.age())
+                .setGender(userRequest.gender())
+                .setPhoneNumber(userRequest.phoneNumber());
     }
 
     void updateUserFromUserRequest(UserRequest userRequest, User user) {
