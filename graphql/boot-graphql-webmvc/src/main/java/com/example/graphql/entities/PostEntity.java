@@ -153,7 +153,10 @@ public class PostEntity extends Auditable implements Serializable {
     }
 
     public void addTag(TagEntity tagEntity) {
-        PostTagEntity postTagEntity = new PostTagEntity(this, tagEntity);
+        PostTagEntity postTagEntity = new PostTagEntity()
+                .setPostEntity(this)
+                .setTagEntity(tagEntity)
+                .setId(new PostTagId(this.getId(), tagEntity.getId()));
         if (null == tags) {
             tags = new ArrayList<>();
         }

@@ -3,8 +3,6 @@ package com.example.graphql.querydsl.mapper;
 import com.example.graphql.querydsl.entities.Post;
 import com.example.graphql.querydsl.entities.PostComment;
 import com.example.graphql.querydsl.entities.PostDetails;
-import com.example.graphql.querydsl.entities.PostTag;
-import com.example.graphql.querydsl.entities.PostTagId;
 import com.example.graphql.querydsl.entities.QTag;
 import com.example.graphql.querydsl.entities.Tag;
 import com.example.graphql.querydsl.model.request.CreatePostRequest;
@@ -51,11 +49,8 @@ class PostMapperHelper {
                 Predicate predicate = QTag.tag.name.equalsIgnoreCase(tagRequest.name());
                 Optional<Tag> tag = this.tagRepository.findOne(predicate);
                 if (tag.isPresent()) {
-                    PostTag postTag = new PostTag()
-                            .setPost(post)
-                            .setTag(tag.get())
-                            .setId(new PostTagId(post.getId(), tag.get().getId()));
-                    post.getTags().add(postTag);
+                    // Let the entity helper manage the composite key and bidirectional link
+                    post.addTag(tag.get());
                 } else {
                     post.addTag(tagRepository.save(
                             new Tag().setName(tagRequest.name().toLowerCase(Locale.ENGLISH))));

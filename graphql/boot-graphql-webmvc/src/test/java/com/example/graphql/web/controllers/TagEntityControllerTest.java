@@ -50,9 +50,9 @@ class TagEntityControllerTest {
     @BeforeEach
     void setUp() {
         this.tagEntityList = new ArrayList<>();
-        this.tagEntityList.add(new TagEntity(1L, "text 1", null));
-        this.tagEntityList.add(new TagEntity(2L, "text 2", null));
-        this.tagEntityList.add(new TagEntity(3L, "text 3", null));
+        this.tagEntityList.add(new TagEntity().setId(1L).setTagName("text 1"));
+        this.tagEntityList.add(new TagEntity().setId(2L).setTagName("text 2"));
+        this.tagEntityList.add(new TagEntity().setId(3L).setTagName("text 3"));
     }
 
     @Test
@@ -68,7 +68,7 @@ class TagEntityControllerTest {
     @Test
     void shouldFindTagById() throws Exception {
         Long tagId = 1L;
-        TagEntity tagEntity = new TagEntity(tagId, "text 1", null);
+        TagEntity tagEntity = new TagEntity().setId(1L).setTagName("text 1");
         given(tagService.findTagById(tagId)).willReturn(Optional.of(tagEntity));
 
         this.mockMvc
@@ -96,7 +96,7 @@ class TagEntityControllerTest {
     @Test
     void shouldCreateNewTag() throws Exception {
 
-        TagEntity tagEntity = new TagEntity(1L, "some text", null);
+        TagEntity tagEntity = new TagEntity().setId(1L).setTagName("some text");
         TagsRequest tagsRequest = new TagsRequest("some text", null);
         given(tagService.saveTag("some text", null)).willReturn(tagEntity);
 
@@ -131,7 +131,7 @@ class TagEntityControllerTest {
     @Test
     void shouldUpdateTag() throws Exception {
         Long tagId = 1L;
-        TagEntity tagEntity = new TagEntity(tagId, "Updated text", null);
+        TagEntity tagEntity = new TagEntity().setId(1L).setTagName("updated text");
         given(tagService.findTagById(tagId)).willReturn(Optional.of(tagEntity));
         given(tagService.saveTag(any(TagEntity.class))).willAnswer((invocation) -> invocation.getArgument(0));
 
@@ -147,7 +147,7 @@ class TagEntityControllerTest {
     void shouldReturn404WhenUpdatingNonExistingTag() throws Exception {
         Long tagId = 1L;
         given(tagService.findTagById(tagId)).willReturn(Optional.empty());
-        TagEntity tagEntity = new TagEntity(tagId, "Updated text", null);
+        TagEntity tagEntity = new TagEntity().setId(tagId).setTagName("Updated text");
 
         this.mockMvc
                 .perform(put("/api/tags/{id}", tagId)
@@ -165,7 +165,7 @@ class TagEntityControllerTest {
     @Test
     void shouldDeleteTag() throws Exception {
         Long tagId = 1L;
-        TagEntity tagEntity = new TagEntity(tagId, "Some text", null);
+        TagEntity tagEntity = new TagEntity().setId(tagId).setTagName("Some text");
         given(tagService.findTagById(tagId)).willReturn(Optional.of(tagEntity));
         doNothing().when(tagService).deleteTagById(tagEntity.getId());
 
