@@ -58,7 +58,6 @@ public class UserService {
     private User mapUserRequestToUser(UserRequest userRequest) {
         return new User()
                 .setFirstName(userRequest.firstName())
-                .setFirstName(userRequest.firstName())
                 .setLastName(userRequest.lastName())
                 .setAge(userRequest.age())
                 .setGender(userRequest.gender())
