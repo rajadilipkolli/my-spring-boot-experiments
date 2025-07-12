@@ -1,11 +1,14 @@
 package com.example.restdocs.config;
 
+import jakarta.validation.Valid;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
 
 @ConfigurationProperties("application")
 public class ApplicationProperties {
-    @NestedConfigurationProperty private Cors cors = new Cors();
+
+    @Valid @NestedConfigurationProperty
+    private Cors cors = new Cors();
 
     public Cors getCors() {
         return cors;

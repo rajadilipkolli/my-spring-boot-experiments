@@ -25,7 +25,8 @@ import org.springframework.http.MediaType;
 
 class UserControllerIT extends AbstractIntegrationTest {
 
-    @Autowired private UserRepository userRepository;
+    @Autowired
+    private UserRepository userRepository;
 
     private List<User> userList = null;
 
@@ -34,9 +35,24 @@ class UserControllerIT extends AbstractIntegrationTest {
         userRepository.deleteAllInBatch();
 
         userList = new ArrayList<>();
-        userList.add(new User(null, "First User", "Last Name", 30, Gender.MALE, "9848022334"));
-        userList.add(new User(null, "Second User", "Last Name", 20, Gender.FEMALE, "9848022334"));
-        userList.add(new User(null, "Third User", "Last Name", 30, Gender.MALE, "9848022334"));
+        userList.add(new User()
+                .setFirstName("First User")
+                .setLastName("Last Name")
+                .setAge(30)
+                .setGender(Gender.MALE)
+                .setPhoneNumber("9848022334"));
+        userList.add(new User()
+                .setFirstName("Second User")
+                .setLastName("Last Name")
+                .setAge(20)
+                .setGender(Gender.FEMALE)
+                .setPhoneNumber("9848022334"));
+        userList.add(new User()
+                .setFirstName("Third User")
+                .setLastName("Last Name")
+                .setAge(30)
+                .setGender(Gender.MALE)
+                .setPhoneNumber("9848022334"));
         userList = userRepository.saveAll(userList);
     }
 
@@ -73,13 +89,11 @@ class UserControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldCreateNewUser() throws Exception {
-        UserRequest userRequest =
-                new UserRequest("New User", "Last Name", 30, Gender.FEMALE, "9848022334");
+        UserRequest userRequest = new UserRequest("New User", "Last Name", 30, Gender.FEMALE, "9848022334");
         this.mockMvc
-                .perform(
-                        post("/api/users")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(userRequest)))
+                .perform(post("/api/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(userRequest)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id", notNullValue()))
                 .andExpect(jsonPath("$.firstName", is(userRequest.firstName())))
@@ -94,10 +108,9 @@ class UserControllerIT extends AbstractIntegrationTest {
         UserRequest userRequest = new UserRequest(null, "Last Name", 0, Gender.MALE, "9848022334");
 
         this.mockMvc
-                .perform(
-                        post("/api/users")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(userRequest)))
+                .perform(post("/api/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(userRequest)))
                 .andExpect(status().isBadRequest())
                 .andExpect(header().string("Content-Type", is("application/problem+json")))
                 .andExpect(jsonPath("$.type", is("about:blank")))
@@ -116,14 +129,12 @@ class UserControllerIT extends AbstractIntegrationTest {
     @Test
     void shouldUpdateUser() throws Exception {
         User user = userList.getFirst();
-        UserRequest userRequest =
-                new UserRequest("Updated User", "Last Name", 50, Gender.FEMALE, "9848022334");
+        UserRequest userRequest = new UserRequest("Updated User", "Last Name", 50, Gender.FEMALE, "9848022334");
 
         this.mockMvc
-                .perform(
-                        put("/api/users/{id}", user.getId())
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(userRequest)))
+                .perform(put("/api/users/{id}", user.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(userRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(user.getId()), Long.class))
                 .andExpect(jsonPath("$.firstName", is(userRequest.firstName())))
