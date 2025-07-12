@@ -28,12 +28,6 @@ public class PostTag {
     @Column(name = "created_on")
     private LocalDateTime createdOn = LocalDateTime.now();
 
-    public PostTag(Post post, Tag tag) {
-        this.post = post;
-        this.tag = tag;
-        this.id = new PostTagId(post.getId(), tag.getId());
-    }
-
     public PostTag() {
         // Default constructor for JPA
     }

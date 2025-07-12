@@ -112,7 +112,7 @@ public class Post {
     }
 
     public void addTag(Tag tag) {
-        PostTag postTag = new PostTag(this, tag);
+        PostTag postTag = new PostTag().setPost(this).setTag(tag).setId(new PostTagId(this.getId(), tag.getId()));
         this.tags.add(postTag);
     }
 

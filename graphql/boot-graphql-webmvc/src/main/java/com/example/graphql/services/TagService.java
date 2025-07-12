@@ -49,7 +49,7 @@ public class TagService {
     public TagEntity saveTag(String tagName, String tagDescription) {
         return this.tagRepository
                 .findByTagNameIgnoreCase(tagName)
-                .orElseGet(() -> saveTag(new TagEntity(null, tagName, tagDescription)));
+                .orElseGet(() -> saveTag(new TagEntity().setTagName(tagName).setTagDescription(tagDescription)));
     }
 
     public Optional<TagEntity> findTagByName(String tagName) {
