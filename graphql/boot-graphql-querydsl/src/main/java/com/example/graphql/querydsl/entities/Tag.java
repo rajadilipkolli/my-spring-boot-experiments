@@ -20,11 +20,6 @@ public class Tag {
     @Column(nullable = false)
     private String name;
 
-    public Tag(Long id, String name) {
-        this.id = id;
-        this.name = name;
-    }
-
     public Tag() {}
 
     public Tag setId(Long id) {

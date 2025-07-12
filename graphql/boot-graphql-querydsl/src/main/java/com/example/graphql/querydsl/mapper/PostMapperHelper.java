@@ -4,6 +4,7 @@ import com.example.graphql.querydsl.entities.Post;
 import com.example.graphql.querydsl.entities.PostComment;
 import com.example.graphql.querydsl.entities.PostDetails;
 import com.example.graphql.querydsl.entities.PostTag;
+import com.example.graphql.querydsl.entities.PostTagId;
 import com.example.graphql.querydsl.entities.QTag;
 import com.example.graphql.querydsl.entities.Tag;
 import com.example.graphql.querydsl.model.request.CreatePostRequest;
@@ -50,7 +51,10 @@ class PostMapperHelper {
                 Predicate predicate = QTag.tag.name.equalsIgnoreCase(tagRequest.name());
                 Optional<Tag> tag = this.tagRepository.findOne(predicate);
                 if (tag.isPresent()) {
-                    PostTag postTag = new PostTag(post, tag.get());
+                    PostTag postTag = new PostTag()
+                            .setPost(post)
+                            .setTag(tag.get())
+                            .setId(new PostTagId(post.getId(), tag.get().getId()));
                     post.getTags().add(postTag);
                 } else {
                     post.addTag(tagRepository.save(

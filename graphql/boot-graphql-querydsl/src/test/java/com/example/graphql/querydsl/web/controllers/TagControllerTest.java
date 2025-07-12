@@ -57,9 +57,9 @@ class TagControllerTest {
     @BeforeEach
     void setUp() {
         this.tagList = new ArrayList<>();
-        this.tagList.add(new Tag(1L, "text 1"));
-        this.tagList.add(new Tag(2L, "text 2"));
-        this.tagList.add(new Tag(3L, "text 3"));
+        this.tagList.add(new Tag().setId(1L).setName("text 1"));
+        this.tagList.add(new Tag().setId(2L).setName("text 2"));
+        this.tagList.add(new Tag().setId(3L).setName("text 3"));
     }
 
     @Test
