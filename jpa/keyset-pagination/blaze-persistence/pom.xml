@@ -347,11 +347,11 @@
                 <enabled>false</enabled>
             </snapshots>
         </repository>
-        <repository>
+        <!-- <repository>
             <id>sonatype-snapshots</id>
             <name>Sonatype Snapshots</name>
             <url>https://central.sonatype.com/repository/maven-snapshots/</url>
-        </repository>
+        </repository> -->
     </repositories>
     <pluginRepositories>
         <pluginRepository>
