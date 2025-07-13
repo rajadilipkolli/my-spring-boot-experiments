@@ -11,6 +11,7 @@ import org.jobrunr.scheduling.cron.Cron;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
@@ -21,9 +22,11 @@ public class Initializer implements CommandLineRunner {
     private static final Logger log = LoggerFactory.getLogger(Initializer.class);
 
     private final JobScheduler jobScheduler;
+    private final ServerProperties serverProperties;
 
-    public Initializer(JobScheduler jobScheduler) {
+    public Initializer(JobScheduler jobScheduler, ServerProperties serverProperties) {
         this.jobScheduler = jobScheduler;
+        this.serverProperties = serverProperties;
     }
 
     @Override
@@ -43,7 +46,10 @@ public class Initializer implements CommandLineRunner {
 
     @Job(name = "doSomeWork")
     public void doSomeWork() {
-        log.info("Hi, I am from BackgroundJob scheduling at {}", LocalDateTime.now());
+        log.info(
+                "Hi, I am from BackgroundJob scheduling at {} from :{}",
+                LocalDateTime.now(),
+                serverProperties.getPort());
     }
 
     @Job(name = "doFireAndForgetWork")

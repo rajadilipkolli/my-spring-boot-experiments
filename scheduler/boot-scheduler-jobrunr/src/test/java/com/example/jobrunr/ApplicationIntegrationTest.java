@@ -9,7 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 class ApplicationIntegrationTest extends AbstractIntegrationTest {
 
-    @Autowired private DataSource dataSource;
+    @Autowired
+    private DataSource dataSource;
 
     @Test
     void contextLoads() {
