@@ -27,9 +27,14 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 class OrderControllerIT extends AbstractIntegrationTest {
 
-    @Autowired private OrderRepository orderRepository;
-    @Autowired private TenantIdentifierResolver tenantIdentifierResolver;
-    @Autowired private JdbcTemplate jdbcTemplate;
+    @Autowired
+    private OrderRepository orderRepository;
+
+    @Autowired
+    private TenantIdentifierResolver tenantIdentifierResolver;
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     private List<Order> orderList;
 
@@ -39,12 +44,12 @@ class OrderControllerIT extends AbstractIntegrationTest {
         orderRepository.deleteAll();
 
         orderList = new ArrayList<>();
-        orderList.add(new Order(null, BigDecimal.valueOf(100.0), LocalDate.of(2025, 1, 1)));
-        orderList.add(new Order(null, BigDecimal.valueOf(200.0), LocalDate.of(2025, 6, 1)));
-        orderList.add(new Order(null, BigDecimal.valueOf(300.0), LocalDate.of(2025, 12, 31)));
-        orderList.add(new Order(null, BigDecimal.valueOf(150.0), LocalDate.of(2023, 1, 1)));
-        orderList.add(new Order(null, BigDecimal.valueOf(250.0), LocalDate.of(2024, 6, 1)));
-        orderList.add(new Order(null, BigDecimal.valueOf(350.0), LocalDate.of(2022, 12, 31)));
+        orderList.add(new Order().setAmount(BigDecimal.valueOf(100.0)).setOrderDate(LocalDate.of(2025, 1, 1)));
+        orderList.add(new Order().setAmount(BigDecimal.valueOf(200.0)).setOrderDate(LocalDate.of(2025, 6, 1)));
+        orderList.add(new Order().setAmount(BigDecimal.valueOf(300.0)).setOrderDate(LocalDate.of(2025, 12, 31)));
+        orderList.add(new Order().setAmount(BigDecimal.valueOf(150.0)).setOrderDate(LocalDate.of(2023, 1, 1)));
+        orderList.add(new Order().setAmount(BigDecimal.valueOf(250.0)).setOrderDate(LocalDate.of(2024, 6, 1)));
+        orderList.add(new Order().setAmount(BigDecimal.valueOf(350.0)).setOrderDate(LocalDate.of(2022, 12, 31)));
         orderList = orderRepository.saveAll(orderList);
     }
 
@@ -78,15 +83,13 @@ class OrderControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldCreateNewOrder() throws Exception {
-        OrderRequestDTO order =
-                new OrderRequestDTO(BigDecimal.valueOf(400.0), LocalDate.of(2025, 7, 1));
+        OrderRequestDTO order = new OrderRequestDTO(BigDecimal.valueOf(400.0), LocalDate.of(2025, 7, 1));
         long count = this.orderRepository.count();
         this.mockMvc
-                .perform(
-                        post("/api/orders")
-                                .param("tenant", "dbsystc")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(order)))
+                .perform(post("/api/orders")
+                        .param("tenant", "dbsystc")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(order)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id", notNullValue()))
                 .andExpect(jsonPath("$.amount").value(order.amount().doubleValue()))
@@ -99,11 +102,10 @@ class OrderControllerIT extends AbstractIntegrationTest {
         Order order = orderList.getFirst();
         order.setAmount(BigDecimal.valueOf(500.0));
         this.mockMvc
-                .perform(
-                        put("/api/orders/{id}", order.getId())
-                                .param("tenant", "dbsystc")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(order)))
+                .perform(put("/api/orders/{id}", order.getId())
+                        .param("tenant", "dbsystc")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(order)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.amount").value(order.getAmount().doubleValue()));
     }
@@ -128,10 +130,8 @@ class OrderControllerIT extends AbstractIntegrationTest {
         // Fixing the assertion to match the expected size of orders in 2025
         assertThat(ordersIn2025).hasSize(3);
         assertThat(ordersIn2025)
-                .allMatch(
-                        order ->
-                                order.getOrderDate().isAfter(LocalDate.of(2024, 12, 31))
-                                        && order.getOrderDate().isBefore(LocalDate.of(2026, 1, 1)));
+                .allMatch(order -> order.getOrderDate().isAfter(LocalDate.of(2024, 12, 31))
+                        && order.getOrderDate().isBefore(LocalDate.of(2026, 1, 1)));
     }
 
     @Test
@@ -140,44 +140,35 @@ class OrderControllerIT extends AbstractIntegrationTest {
         tenantIdentifierResolver.setCurrentTenant("dbsystc");
 
         // 1. Verify that the partitioned tables exist in the database
-        List<String> partitionTables =
-                jdbcTemplate.queryForList(
-                        "SELECT c.relname AS child_table "
-                                + "FROM pg_inherits i "
-                                + "JOIN pg_class p ON p.oid = i.inhparent "
-                                + "JOIN pg_class c ON c.oid = i.inhrelid "
-                                + "JOIN pg_namespace n ON n.oid = c.relnamespace "
-                                + "WHERE p.relname = 'orders' "
-                                + "ORDER BY c.relname",
-                        String.class);
+        List<String> partitionTables = jdbcTemplate.queryForList(
+                "SELECT c.relname AS child_table "
+                        + "FROM pg_inherits i "
+                        + "JOIN pg_class p ON p.oid = i.inhparent "
+                        + "JOIN pg_class c ON c.oid = i.inhrelid "
+                        + "JOIN pg_namespace n ON n.oid = c.relnamespace "
+                        + "WHERE p.relname = 'orders' "
+                        + "ORDER BY c.relname",
+                String.class);
 
         // Ensure that partition tables exist (e.g., orders_2022, orders_2023, orders_2024,
         // orders_2025)
         assertThat(partitionTables).isNotEmpty();
-        assertThat(partitionTables)
-                .contains("orders_2022", "orders_2023", "orders_2024", "orders_2025");
+        assertThat(partitionTables).contains("orders_2022", "orders_2023", "orders_2024", "orders_2025");
 
         // 2. Verify that orders are stored in the correct partitions based on order dates
-        Order order2025 =
-                orderList.stream()
-                        .filter(o -> o.getOrderDate().getYear() == 2025)
-                        .findFirst()
-                        .orElseThrow();
+        Order order2025 = orderList.stream()
+                .filter(o -> o.getOrderDate().getYear() == 2025)
+                .findFirst()
+                .orElseThrow();
 
         // Confirm the order exists within the 2025 partition
-        Integer countIn2025 =
-                jdbcTemplate.queryForObject(
-                        "SELECT COUNT(*) FROM orders_2025 WHERE id = ?",
-                        Integer.class,
-                        order2025.getId());
+        Integer countIn2025 = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM orders_2025 WHERE id = ?", Integer.class, order2025.getId());
         assertThat(countIn2025).isEqualTo(1);
 
         // Confirm the order does not exist in the 2024 partition
-        Integer countIn2024 =
-                jdbcTemplate.queryForObject(
-                        "SELECT COUNT(*) FROM orders_2024 WHERE id = ?",
-                        Integer.class,
-                        order2025.getId());
+        Integer countIn2024 = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM orders_2024 WHERE id = ?", Integer.class, order2025.getId());
         assertThat(countIn2024).isZero();
 
         // 3. Verify the overall order count within each partition matches the test data
@@ -195,8 +186,7 @@ class OrderControllerIT extends AbstractIntegrationTest {
      * @param expectedCount The expected number of orders in that partition.
      */
     private void verifyOrdersInPartition(int year, int expectedCount) {
-        Integer count =
-                jdbcTemplate.queryForObject("SELECT COUNT(*) FROM orders_" + year, Integer.class);
+        Integer count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM orders_" + year, Integer.class);
         assertThat(count).isEqualTo(expectedCount);
     }
 }

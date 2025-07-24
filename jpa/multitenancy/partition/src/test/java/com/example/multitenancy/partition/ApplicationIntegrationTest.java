@@ -31,11 +31,14 @@ class ApplicationIntegrationTest extends AbstractIntegrationTest {
     private static final String SUBSYSTEM_P = "dbsystp";
     private static final String SUBSYSTEM_C = "dbsystc";
 
-    @Autowired TransactionTemplate txTemplate;
+    @Autowired
+    TransactionTemplate txTemplate;
 
-    @Autowired TenantIdentifierResolver tenantIdentifierResolver;
+    @Autowired
+    TenantIdentifierResolver tenantIdentifierResolver;
 
-    @Autowired CustomerRepository customerRepository;
+    @Autowired
+    CustomerRepository customerRepository;
 
     @AfterEach
     void afterEach() {
@@ -49,43 +52,48 @@ class ApplicationIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     void sequenceCollision() throws Exception {
-        long count = this.customerRepository.count();
-        for (int i = 0; i < 153; i++) {
-            Customer customer = new Customer(null, RandomStringUtils.randomAlphanumeric(10), null);
+        tenantIdentifierResolver.setCurrentTenant(SUBSYSTEM_V);
+        long countV = this.customerRepository.count();
+        tenantIdentifierResolver.setCurrentTenant(SUBSYSTEM_P);
+        long countP = this.customerRepository.count();
+        tenantIdentifierResolver.setCurrentTenant(SUBSYSTEM_C);
+        long countC = this.customerRepository.count();
+        int total = 153;
+        int countPAdd = 0, countVAdd = 0, countCAdd = 0;
+        for (int i = 0; i < total; i++) {
+            Customer customer = new Customer();
+            customer.setText(RandomStringUtils.randomAlphanumeric(10));
             String tenant;
             if (i % 3 == 0) {
                 tenant = SUBSYSTEM_P;
+                countPAdd++;
             } else if ((i % 3 == 1)) {
                 tenant = SUBSYSTEM_V;
+                countVAdd++;
             } else {
                 tenant = SUBSYSTEM_C;
+                countCAdd++;
             }
-            String response =
-                    this.mockMvc
-                            .perform(
-                                    post("/api/customers")
-                                            .param("tenant", tenant)
-                                            .contentType(MediaType.APPLICATION_JSON)
-                                            .content(objectMapper.writeValueAsString(customer)))
-                            .andExpect(status().isCreated())
-                            .andExpect(jsonPath("$.text", is(customer.getText())))
-                            .andExpect(jsonPath("$.id", notNullValue()))
-                            .andExpect(jsonPath("$.tenant", is(tenant)))
-                            .andReturn()
-                            .getResponse()
-                            .getContentAsString(StandardCharsets.UTF_8);
+            String response = this.mockMvc
+                    .perform(post("/api/customers")
+                            .param("tenant", tenant)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(customer)))
+                    .andExpect(status().isCreated())
+                    .andExpect(jsonPath("$.text", is(customer.getText())))
+                    .andExpect(jsonPath("$.id", notNullValue()))
+                    .andExpect(jsonPath("$.tenant", is(tenant)))
+                    .andReturn()
+                    .getResponse()
+                    .getContentAsString(StandardCharsets.UTF_8);
             log.info("Response :{}", response);
         }
-        assertThat(this.customerRepository.countByTenant(SUBSYSTEM_V)).isEqualTo(count);
-        assertThat(this.customerRepository.countByTenant(SUBSYSTEM_P)).isEqualTo(count);
-        assertThat(this.customerRepository.countByTenant(SUBSYSTEM_C)).isEqualTo(count + 51);
-        // querying db also needs tenant to be set hence setting
         tenantIdentifierResolver.setCurrentTenant(SUBSYSTEM_V);
-        assertThat(this.customerRepository.countByTenant(SUBSYSTEM_V)).isEqualTo(count + 51);
+        assertThat(this.customerRepository.countByTenant(SUBSYSTEM_V)).isEqualTo(countV + countVAdd);
         tenantIdentifierResolver.setCurrentTenant(SUBSYSTEM_P);
-        assertThat(this.customerRepository.countByTenant(SUBSYSTEM_P)).isEqualTo(count + 51);
+        assertThat(this.customerRepository.countByTenant(SUBSYSTEM_P)).isEqualTo(countP + countPAdd);
         tenantIdentifierResolver.setCurrentTenant(SUBSYSTEM_C);
-        assertThat(this.customerRepository.countByTenant(SUBSYSTEM_C)).isEqualTo(count + 51);
+        assertThat(this.customerRepository.countByTenant(SUBSYSTEM_C)).isEqualTo(countC + countCAdd);
     }
 
     @Test
@@ -98,14 +106,10 @@ class ApplicationIntegrationTest extends AbstractIntegrationTest {
         assertThat(stoneCold.getTenant()).isEqualTo(SUBSYSTEM_V);
 
         tenantIdentifierResolver.setCurrentTenant(SUBSYSTEM_V);
-        assertThat(customerRepository.findAll())
-                .extracting(Customer::getText)
-                .containsExactly("Stonecold");
+        assertThat(customerRepository.findAll()).extracting(Customer::getText).containsExactly("Stonecold");
 
         tenantIdentifierResolver.setCurrentTenant(SUBSYSTEM_P);
-        assertThat(customerRepository.findAll())
-                .extracting(Customer::getText)
-                .containsExactly("Rock");
+        assertThat(customerRepository.findAll()).extracting(Customer::getText).containsExactly("Rock");
     }
 
     @Test
@@ -116,8 +120,7 @@ class ApplicationIntegrationTest extends AbstractIntegrationTest {
 
         tenantIdentifierResolver.setCurrentTenant(SUBSYSTEM_V);
         assertThat(customerRepository.findById(vRock.getId())).isPresent().isNotEmpty();
-        assertThat(customerRepository.findById(vRock.getId()).get().getTenant())
-                .isEqualTo(SUBSYSTEM_V);
+        assertThat(customerRepository.findById(vRock.getId()).get().getTenant()).isEqualTo(SUBSYSTEM_V);
         assertThat(customerRepository.findById(rock.getId())).isEmpty();
     }
 
@@ -150,13 +153,11 @@ class ApplicationIntegrationTest extends AbstractIntegrationTest {
 
         tenantIdentifierResolver.setCurrentTenant(schema);
 
-        var customerObj =
-                txTemplate.execute(
-                        tx -> {
-                            Customer customer = new Customer(null, name);
-                            return customerRepository.save(customer);
-                        });
-
+        var customerObj = txTemplate.execute(tx -> {
+            Customer customer = new Customer(null, name);
+            return customerRepository.save(customer);
+        });
+        assertThat(customerObj).isNotNull();
         assertThat(customerObj.getId()).isNotNull();
         assertThat(customerObj.getTenant()).isEqualTo(schema);
         return customerObj;

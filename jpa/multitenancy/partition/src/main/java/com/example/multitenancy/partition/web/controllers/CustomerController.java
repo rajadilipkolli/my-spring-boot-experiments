@@ -39,19 +39,15 @@ public class CustomerController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Customer> getCustomerById(
-            @PathVariable Long id, @RequestParam String tenant) {
+    public ResponseEntity<Customer> getCustomerById(@PathVariable Long id, @RequestParam String tenant) {
         log.info("fetching customer by id {} for tenant : {}", id, tenant);
-        return customerService
-                .findCustomerById(id)
-                .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+        return customerService.findCustomerById(id).map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound()
+                .build());
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Customer createCustomer(
-            @RequestBody @Validated CustomerDTO customerDTO, @RequestParam String tenant) {
+    public Customer createCustomer(@RequestBody @Validated CustomerDTO customerDTO, @RequestParam String tenant) {
         log.info("creating customer by for tenant : {}", tenant);
         return customerService.saveCustomer(customerDTO);
     }
@@ -62,25 +58,22 @@ public class CustomerController {
         log.info("updating customer for id {} in tenant : {}", id, tenant);
         return customerService
                 .findCustomerById(id)
-                .map(
-                        customerObj -> {
-                            customer.setId(id);
-                            return ResponseEntity.ok(customerService.saveCustomer(customer));
-                        })
+                .map(customerObj -> {
+                    customer.setId(id);
+                    return ResponseEntity.ok(customerService.saveCustomer(customer));
+                })
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Customer> deleteCustomer(
-            @PathVariable Long id, @RequestParam String tenant) {
+    public ResponseEntity<Customer> deleteCustomer(@PathVariable Long id, @RequestParam String tenant) {
         log.info("deleting customer by id {} for tenant : {}", id, tenant);
         return customerService
                 .findCustomerById(id)
-                .map(
-                        customer -> {
-                            customerService.deleteCustomerById(id);
-                            return ResponseEntity.ok(customer);
-                        })
+                .map(customer -> {
+                    customerService.deleteCustomerById(id);
+                    return ResponseEntity.ok(customer);
+                })
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 }

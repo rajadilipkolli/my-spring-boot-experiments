@@ -30,4 +30,8 @@ public class TenantIdentifierResolver
     public void setCurrentTenant(String tenant) {
         this.currentTenant = tenant;
     }
+
+    public void clearCurrentTenant() {
+        this.currentTenant = "unknown";
+    }
 }

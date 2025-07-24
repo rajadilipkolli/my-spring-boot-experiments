@@ -33,22 +33,29 @@ import org.springframework.test.web.servlet.MockMvc;
 @ActiveProfiles(PROFILE_TEST)
 class CustomerControllerTest {
 
-    @Autowired private MockMvc mockMvc;
+    @Autowired
+    private MockMvc mockMvc;
 
-    @MockitoBean private CustomerService customerService;
+    @MockitoBean
+    private CustomerService customerService;
 
-    @MockitoBean private TenantIdentifierResolver tenantIdentifierResolver;
+    @MockitoBean
+    private TenantIdentifierResolver tenantIdentifierResolver;
 
-    @Autowired private ObjectMapper objectMapper;
+    @Autowired
+    private ObjectMapper objectMapper;
 
     private List<Customer> customerList;
 
     @BeforeEach
     void setUp() {
         this.customerList = new ArrayList<>();
-        this.customerList.add(new Customer(1L, "text 1"));
-        this.customerList.add(new Customer(2L, "text 2"));
-        this.customerList.add(new Customer(3L, "text 3"));
+        Customer c1 = new Customer().setId(1L).setText("text 1");
+        this.customerList.add(c1);
+        Customer c2 = new Customer().setId(2L).setText("text 2");
+        this.customerList.add(c2);
+        Customer c3 = new Customer().setId(3L).setText("text 3");
+        this.customerList.add(c3);
     }
 
     @Test
@@ -64,7 +71,7 @@ class CustomerControllerTest {
     @Test
     void shouldFindCustomerById() throws Exception {
         Long customerId = 1L;
-        Customer customer = new Customer(customerId, "text 1");
+        Customer customer = new Customer().setId(customerId).setText("text 1");
         given(customerService.findCustomerById(customerId)).willReturn(Optional.of(customer));
 
         this.mockMvc
@@ -85,16 +92,15 @@ class CustomerControllerTest {
 
     @Test
     void shouldCreateNewCustomer() throws Exception {
-        Customer customer = new Customer(1L, "some text", "dbsystc");
+        Customer customer = new Customer().setId(1L).setText("some text").setTenant("dbsystc");
         given(customerService.saveCustomer(any(CustomerDTO.class))).willReturn(customer);
 
         CustomerDTO customerDTO = new CustomerDTO("some text");
         this.mockMvc
-                .perform(
-                        post("/api/customers")
-                                .param("tenant", "dbsystc")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(customerDTO)))
+                .perform(post("/api/customers")
+                        .param("tenant", "dbsystc")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(customerDTO)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.text", is(customerDTO.text())));
     }
@@ -104,15 +110,11 @@ class CustomerControllerTest {
         CustomerDTO customerDTO = new CustomerDTO(null);
 
         this.mockMvc
-                .perform(
-                        post("/api/customers")
-                                .param("tenant", "dbsystc")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(customerDTO)))
-                .andExpect(
-                        header().string(
-                                        HttpHeaders.CONTENT_TYPE,
-                                        is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
+                .perform(post("/api/customers")
+                        .param("tenant", "dbsystc")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(customerDTO)))
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                 .andExpect(jsonPath("$.type", is("about:blank")))
                 .andExpect(jsonPath("$.title", is("Constraint Violation")))
                 .andExpect(jsonPath("$.status", is(400)))
@@ -126,15 +128,13 @@ class CustomerControllerTest {
         long customerId = 1L;
         Customer customer = new Customer(customerId, "Updated text");
         given(customerService.findCustomerById(customerId)).willReturn(Optional.of(customer));
-        given(customerService.saveCustomer(any(Customer.class)))
-                .willAnswer((invocation) -> invocation.getArgument(0));
+        given(customerService.saveCustomer(any(Customer.class))).willAnswer((invocation) -> invocation.getArgument(0));
 
         this.mockMvc
-                .perform(
-                        put("/api/customers/{id}", customer.getId())
-                                .param("tenant", "dbsystc")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(customer)))
+                .perform(put("/api/customers/{id}", customer.getId())
+                        .param("tenant", "dbsystc")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(customer)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.text", is(customer.getText())));
     }
@@ -146,11 +146,10 @@ class CustomerControllerTest {
         Customer customer = new Customer(customerId, "Updated text");
 
         this.mockMvc
-                .perform(
-                        put("/api/customers/{id}", customerId)
-                                .param("tenant", "dbsystc")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(customer)))
+                .perform(put("/api/customers/{id}", customerId)
+                        .param("tenant", "dbsystc")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(customer)))
                 .andExpect(status().isNotFound());
     }
 
