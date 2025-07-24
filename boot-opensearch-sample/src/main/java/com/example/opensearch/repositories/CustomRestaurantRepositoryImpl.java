@@ -13,6 +13,8 @@ import org.opensearch.index.query.BoolQueryBuilder;
 import org.opensearch.index.query.MultiMatchQueryBuilder;
 import org.opensearch.index.query.Operator;
 import org.opensearch.index.query.QueryBuilders;
+import org.opensearch.script.Script;
+import org.opensearch.script.ScriptType;
 import org.opensearch.search.aggregations.AggregationBuilders;
 import org.opensearch.search.aggregations.BucketOrder;
 import org.opensearch.search.aggregations.bucket.range.DateRangeAggregationBuilder;
@@ -135,10 +137,15 @@ public class CustomRestaurantRepositoryImpl implements CustomRestaurantRepositor
 
     @Override
     public PagedResult<Restaurant> searchRestaurantIdRange(Long lowerLimit, Long upperLimit, Pageable pageable) {
-        Query query = new NativeSearchQuery(
-                QueryBuilders.rangeQuery("id").gte(lowerLimit).lte(upperLimit));
-        query.setPageable(pageable);
-
+        // Use script query to cast id to long for range filtering
+        NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
+        queryBuilder.withQuery(QueryBuilders.scriptQuery(new Script(
+                ScriptType.INLINE,
+                "painless",
+                "Long.parseLong(doc['id'].value) >= params.lower && Long.parseLong(doc['id'].value) <= params.upper",
+                Map.of("lower", lowerLimit, "upper", upperLimit))));
+        queryBuilder.withPageable(pageable);
+        NativeSearchQuery query = queryBuilder.build();
         return getResults(query);
     }
 

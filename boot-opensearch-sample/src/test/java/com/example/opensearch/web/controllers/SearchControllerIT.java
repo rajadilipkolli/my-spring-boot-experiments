@@ -34,26 +34,30 @@ class SearchControllerIT extends AbstractIntegrationTest {
         this.restaurantRepository.deleteAll();
         Grades grade = new Grades("A", LocalDateTime.of(2022, 1, 1, 1, 1, 1), 15);
         Grades grade1 = new Grades("B", LocalDateTime.of(2022, 3, 31, 23, 59, 59), 15);
-        Address address = new Address();
-        address.setLocation(new Point(-73.9, 40.8));
-        address.setZipcode(80986);
+        Address addressInRange = new Address();
+        addressInRange.setLocation(new Point(-73.9, 40.8));
+        addressInRange.setZipcode(80986);
 
-        // Restaurant with id in range 1-10
+        // Restaurant with id in range 1-10 and location that matches 'withInRange'
         Restaurant restaurantInRange = new Restaurant();
         restaurantInRange.setId("2");
         restaurantInRange.setName(RESTAURANT_NAME);
         restaurantInRange.setBorough(BOROUGH_NAME);
         restaurantInRange.setCuisine(CUISINE_NAME);
-        restaurantInRange.setAddress(address);
+        restaurantInRange.setAddress(addressInRange);
         restaurantInRange.setGrades(List.of(grade, grade1));
 
-        // Restaurant with id out of range
+        // Restaurant with id out of range and location that does NOT match 'withInRange'
+        Address addressOutOfRange = new Address();
+        addressOutOfRange.setLocation(new Point(-74.5, 41.2)); // Far enough to not match
+        addressOutOfRange.setZipcode(80986);
+
         Restaurant restaurantOutOfRange = new Restaurant();
         restaurantOutOfRange.setId("40363920");
         restaurantOutOfRange.setBorough(BOROUGH_NAME);
         restaurantOutOfRange.setCuisine("Chinese");
         restaurantOutOfRange.setName("Yono gardens");
-        restaurantOutOfRange.setAddress(address);
+        restaurantOutOfRange.setAddress(addressOutOfRange);
         restaurantOutOfRange.setGrades(List.of(grade, grade1));
 
         this.restaurantRepository.saveAll(List.of(restaurantInRange, restaurantOutOfRange));
