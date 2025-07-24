@@ -12,7 +12,7 @@ import org.springframework.data.elasticsearch.core.geo.GeoPoint;
 public interface CustomRestaurantRepository {
     SearchHitsIterator<Restaurant> searchWithin(GeoPoint geoPoint, Double distance, String unit);
 
-    PagedResult<Restaurant> findByBoroughOrCuisineOrName(String query, Boolean prefixPhraseEnabled, Pageable pageable);
+    PagedResult<Restaurant> findByBoroughOrCuisineOrName(String query, boolean prefixPhraseEnabled, Pageable pageable);
 
     PagedResult<Restaurant> termQueryForBorough(String queryTerm, Pageable pageable);
 

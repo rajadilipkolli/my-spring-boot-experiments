@@ -53,7 +53,7 @@ public class CustomRestaurantRepositoryImpl implements CustomRestaurantRepositor
 
     @Override
     public PagedResult<Restaurant> findByBoroughOrCuisineOrName(
-            String queryKeyWord, Boolean prefixPhraseEnabled, Pageable pageable) {
+            String queryKeyWord, boolean prefixPhraseEnabled, Pageable pageable) {
         MultiMatchQueryBuilder multiMatchQuery =
                 QueryBuilders.multiMatchQuery(queryKeyWord, "borough", "cuisine", "name");
         if (prefixPhraseEnabled) {

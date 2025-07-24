@@ -34,7 +34,7 @@ public class SearchController {
             @RequestParam String query,
             @RequestParam(defaultValue = "10") Integer limit,
             @RequestParam(defaultValue = "0") Integer offset,
-            @RequestParam(value = "prefix_phrase_enabled", defaultValue = "false") Boolean prefixPhraseEnabled) {
+            @RequestParam(value = "prefix_phrase_enabled", defaultValue = "false") boolean prefixPhraseEnabled) {
         return ResponseEntity.ok(searchService.multiSearchQuery(query, offset, limit, prefixPhraseEnabled));
     }
 

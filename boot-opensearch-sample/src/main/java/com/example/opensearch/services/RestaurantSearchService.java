@@ -37,7 +37,7 @@ public class RestaurantSearchService {
     }
 
     public PagedResult<Restaurant> multiSearchQuery(
-            String query, Integer offset, Integer limit, Boolean prefixPhraseEnabled) {
+            String query, Integer offset, Integer limit, boolean prefixPhraseEnabled) {
         Pageable pageable = PageRequest.of(offset, limit);
         return restaurantRepository.findByBoroughOrCuisineOrName(query, prefixPhraseEnabled, pageable);
     }
