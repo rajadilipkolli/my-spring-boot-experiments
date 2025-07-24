@@ -34,13 +34,8 @@ public class PostTag implements Serializable {
     private LocalDateTime createdOn = LocalDateTime.now();
 
     public PostTag() {
-        this.createdOn = LocalDateTime.now();
-    }
 
-    public PostTag(Post post, Tag tag) {
-        this.post = post;
-        this.tag = tag;
-        this.id = new PostTagId(post.getId(), tag.getId());
+        // No-args constructor for JPA
     }
 
     public PostTagId getId() {

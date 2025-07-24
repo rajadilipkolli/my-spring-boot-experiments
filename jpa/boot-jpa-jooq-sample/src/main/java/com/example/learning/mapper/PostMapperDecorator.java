@@ -3,6 +3,7 @@ package com.example.learning.mapper;
 import com.example.learning.entities.Post;
 import com.example.learning.entities.PostComment;
 import com.example.learning.entities.PostTag;
+import com.example.learning.entities.PostTagId;
 import com.example.learning.entities.Tag;
 import com.example.learning.model.request.PostCommentRequest;
 import com.example.learning.model.request.PostRequest;
@@ -75,7 +76,10 @@ public abstract class PostMapperDecorator implements PostMapper {
             } else {
                 tag.setId(existingTagMap.get(tag.getTagName()).getId());
                 Tag mergedTag = this.tagRepository.save(tag);
-                PostTag mergedPostTag = new PostTag(post, mergedTag);
+                PostTag mergedPostTag = new PostTag()
+                        .setPost(post)
+                        .setTag(mergedTag)
+                        .setId(new PostTagId(post.getId(), mergedTag.getId()));
                 post.getTags().set(post.getTags().indexOf(mergedPostTag), mergedPostTag);
             }
         }
