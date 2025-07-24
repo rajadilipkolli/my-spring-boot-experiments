@@ -39,18 +39,15 @@ public class RestaurantSearchService {
     public PagedResult<Restaurant> multiSearchQuery(
             String query, Integer offset, Integer limit, Boolean prefixPhraseEnabled) {
         Pageable pageable = PageRequest.of(offset, limit);
-        return restaurantRepository.findByBoroughOrCuisineOrName(
-                query, prefixPhraseEnabled, pageable);
+        return restaurantRepository.findByBoroughOrCuisineOrName(query, prefixPhraseEnabled, pageable);
     }
 
-    public PagedResult<Restaurant> termQueryForBorough(
-            String query, Integer offset, Integer limit) {
+    public PagedResult<Restaurant> termQueryForBorough(String query, Integer offset, Integer limit) {
         Pageable pageable = PageRequest.of(offset, limit);
         return restaurantRepository.termQueryForBorough(query, pageable);
     }
 
-    public PagedResult<Restaurant> termsQueryForBorough(
-            List<String> queries, Integer offset, Integer limit) {
+    public PagedResult<Restaurant> termsQueryForBorough(List<String> queries, Integer offset, Integer limit) {
         Pageable pageable = PageRequest.of(offset, limit);
         return restaurantRepository.termsQueryForBorough(queries, pageable);
     }
@@ -58,9 +55,7 @@ public class RestaurantSearchService {
     public PagedResult<Restaurant> queryBoolWithMust(
             String borough, String cuisine, String name, Integer offset, Integer limit) {
         Pageable pageable = PageRequest.of(offset, limit);
-        return new PagedResult<>(
-                restaurantRepository.findByBoroughAndCuisineAndName(
-                        borough, cuisine, name, pageable));
+        return new PagedResult<>(restaurantRepository.findByBoroughAndCuisineAndName(borough, cuisine, name, pageable));
     }
 
     public PagedResult<Restaurant> queryBoolWithShould(
@@ -69,14 +64,12 @@ public class RestaurantSearchService {
         return restaurantRepository.queryBoolWithShould(borough, cuisine, name, pageable);
     }
 
-    public PagedResult<Restaurant> wildcardSearch(
-            String queryKeyword, Integer offset, Integer limit) {
+    public PagedResult<Restaurant> wildcardSearch(String queryKeyword, Integer offset, Integer limit) {
         Pageable pageable = PageRequest.of(offset, limit);
         return restaurantRepository.wildcardSearch(queryKeyword, pageable);
     }
 
-    public PagedResult<Restaurant> regExpSearch(
-            String queryKeyword, Integer offset, Integer limit) {
+    public PagedResult<Restaurant> regExpSearch(String queryKeyword, Integer offset, Integer limit) {
         Pageable pageable = PageRequest.of(offset, limit);
         return restaurantRepository.regExpSearch(queryKeyword, pageable);
     }
@@ -93,8 +86,7 @@ public class RestaurantSearchService {
         return restaurantRepository.searchRestaurantIdRange(lowerLimit, upperLimit, pageable);
     }
 
-    public PagedResult<Restaurant> searchDateRange(
-            String fromDate, String toDate, Integer offset, Integer limit) {
+    public PagedResult<Restaurant> searchDateRange(String fromDate, String toDate, Integer offset, Integer limit) {
         Pageable pageable = PageRequest.of(offset, limit);
         return restaurantRepository.searchDateRange(fromDate, toDate, pageable);
     }
@@ -114,68 +106,51 @@ public class RestaurantSearchService {
         }
 
         SearchPage<Restaurant> searchPage =
-                restaurantRepository.aggregateSearch(
-                        searchKeyword, fieldNames, direction, limit, offset, sortFields);
+                restaurantRepository.aggregateSearch(searchKeyword, fieldNames, direction, limit, offset, sortFields);
 
         OpenSearchAggregations elasticsearchAggregations =
                 (OpenSearchAggregations) searchPage.getSearchHits().getAggregations();
         Map<String, Map<String, Long>> map = new HashMap<>();
         if (elasticsearchAggregations != null) {
-            map = aggregationFunction.apply(elasticsearchAggregations.aggregations().asMap());
+            map = aggregationFunction.apply(
+                    elasticsearchAggregations.aggregations().asMap());
         }
         return new PagedResult<>(searchPage, map);
     }
 
-    final Function<Map<String, Aggregation>, Map<String, Map<String, Long>>> aggregationFunction =
-            aggregationMap -> {
-                Map<String, Map<String, Long>> resultMap = new HashMap<>();
-                aggregationMap.forEach(
-                        (String aggregateKey, Aggregation aggregation) -> {
-                            Map<String, Long> countMap = new HashMap<>();
+    final Function<Map<String, Aggregation>, Map<String, Map<String, Long>>> aggregationFunction = aggregationMap -> {
+        Map<String, Map<String, Long>> resultMap = new HashMap<>();
+        aggregationMap.forEach((String aggregateKey, Aggregation aggregation) -> {
+            Map<String, Long> countMap = new HashMap<>();
 
-                            if (aggregation instanceof ParsedStringTerms parsedStringTerms) {
+            if (aggregation instanceof ParsedStringTerms parsedStringTerms) {
 
-                                countMap =
-                                        parsedStringTerms.getBuckets().stream()
-                                                .collect(
-                                                        Collectors.toMap(
-                                                                MultiBucketsAggregation.Bucket
-                                                                        ::getKeyAsString,
-                                                                MultiBucketsAggregation.Bucket
-                                                                        ::getDocCount));
-                            } else if (aggregation instanceof ParsedDateRange parsedDateRange) {
-                                countMap =
-                                        parsedDateRange.getBuckets().stream()
-                                                .filter(bucket -> bucket.getDocCount() != 0)
-                                                .collect(
-                                                        Collectors.toMap(
-                                                                bucket ->
-                                                                        bucket.getFromAsString()
-                                                                                + " - "
-                                                                                + bucket
-                                                                                        .getToAsString(),
-                                                                MultiBucketsAggregation.Bucket
-                                                                        ::getDocCount));
-                            }
-                            resultMap.put(aggregateKey, countMap);
-                        });
+                countMap = parsedStringTerms.getBuckets().stream()
+                        .collect(Collectors.toMap(
+                                MultiBucketsAggregation.Bucket::getKeyAsString,
+                                MultiBucketsAggregation.Bucket::getDocCount));
+            } else if (aggregation instanceof ParsedDateRange parsedDateRange) {
+                countMap = parsedDateRange.getBuckets().stream()
+                        .filter(bucket -> bucket.getDocCount() != 0)
+                        .collect(Collectors.toMap(
+                                bucket -> bucket.getFromAsString() + " - " + bucket.getToAsString(),
+                                MultiBucketsAggregation.Bucket::getDocCount));
+            }
+            resultMap.put(aggregateKey, countMap);
+        });
 
-                return resultMap;
-            };
+        return resultMap;
+    };
 
-    public List<ResultData> searchRestaurantsWithInRange(
-            Double lat, Double lon, Double distance, String unit) {
+    public List<ResultData> searchRestaurantsWithInRange(Double lat, Double lon, Double distance, String unit) {
         GeoPoint location = new GeoPoint(lat, lon);
         return this.restaurantRepository.searchWithin(location, distance, unit).stream()
-                .map(
-                        restaurantSearchHit -> {
-                            Double dist = (Double) restaurantSearchHit.getSortValues().getFirst();
-                            Restaurant eRestaurant = restaurantSearchHit.getContent();
-                            return new ResultData(
-                                    eRestaurant.getName(),
-                                    eRestaurant.getAddress().getLocation(),
-                                    dist);
-                        })
+                .map(restaurantSearchHit -> {
+                    Double dist = (Double) restaurantSearchHit.getSortValues().getFirst();
+                    Restaurant eRestaurant = restaurantSearchHit.getContent();
+                    return new ResultData(
+                            eRestaurant.getName(), eRestaurant.getAddress().getLocation(), dist);
+                })
                 .toList();
     }
 }

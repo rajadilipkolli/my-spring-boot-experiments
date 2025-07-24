@@ -47,8 +47,7 @@ public record PagedResult<T>(
                 searchPage.hasPrevious());
     }
 
-    public PagedResult(
-            SearchPage<Restaurant> searchPage, Map<String, Map<String, Long>> aggregationMap) {
+    public PagedResult(SearchPage<Restaurant> searchPage, Map<String, Map<String, Long>> aggregationMap) {
         this(
                 (List<T>) searchPage.getContent(),
                 searchPage.getTotalElements(),

@@ -15,6 +15,5 @@ public interface RestaurantRepository
 
     Page<Restaurant> findByBorough(String borough, Pageable pageable);
 
-    Page<Restaurant> findByBoroughAndCuisineAndName(
-            String borough, String cuisine, String name, Pageable pageable);
+    Page<Restaurant> findByBoroughAndCuisineAndName(String borough, String cuisine, String name, Pageable pageable);
 }

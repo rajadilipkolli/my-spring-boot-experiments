@@ -30,13 +30,7 @@ public class Restaurant {
 
     public Restaurant() {}
 
-    public Restaurant(
-            String id,
-            String name,
-            String borough,
-            String cuisine,
-            Address address,
-            List<Grades> grades) {
+    public Restaurant(String id, String name, String borough, String cuisine, Address address, List<Grades> grades) {
         this.id = id;
         this.name = name;
         this.borough = borough;
