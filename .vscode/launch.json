@@ -220,6 +220,26 @@
             "projectName": "boot-scheduler-jobrunr",
             "args": "--spring.profiles.active=local",
             "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-MultiTenancyPartitionApplication<multitenancy-partition>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.example.multitenancy.partition.MultiTenancyPartitionApplication",
+            "projectName": "multitenancy-partition",
+            "args": "--spring.profiles.active=local",
+            "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-TestMultiTenancyPartitionApplication<multitenancy-partition>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.example.multitenancy.partition.TestMultiTenancyPartitionApplication",
+            "projectName": "multitenancy-partition",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
         }
     ]
 }
