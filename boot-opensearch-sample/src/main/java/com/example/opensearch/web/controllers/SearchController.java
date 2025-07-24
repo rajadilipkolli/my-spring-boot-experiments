@@ -34,10 +34,8 @@ public class SearchController {
             @RequestParam String query,
             @RequestParam(defaultValue = "10") Integer limit,
             @RequestParam(defaultValue = "0") Integer offset,
-            @RequestParam(value = "prefix_phrase_enabled", defaultValue = "false")
-                    Boolean prefixPhraseEnabled) {
-        return ResponseEntity.ok(
-                searchService.multiSearchQuery(query, offset, limit, prefixPhraseEnabled));
+            @RequestParam(value = "prefix_phrase_enabled", defaultValue = "false") boolean prefixPhraseEnabled) {
+        return ResponseEntity.ok(searchService.multiSearchQuery(query, offset, limit, prefixPhraseEnabled));
     }
 
     @GetMapping("/search/term/borough")
@@ -63,8 +61,7 @@ public class SearchController {
             @RequestParam String name,
             @RequestParam(defaultValue = "10") Integer limit,
             @RequestParam(defaultValue = "0") Integer offset) {
-        return ResponseEntity.ok(
-                searchService.queryBoolWithMust(borough, cuisine, name, offset, limit));
+        return ResponseEntity.ok(searchService.queryBoolWithMust(borough, cuisine, name, offset, limit));
     }
 
     @GetMapping("/search/should/bool")
@@ -74,8 +71,7 @@ public class SearchController {
             @RequestParam String name,
             @RequestParam(defaultValue = "10") Integer limit,
             @RequestParam(defaultValue = "0") Integer offset) {
-        return ResponseEntity.ok(
-                searchService.queryBoolWithShould(borough, cuisine, name, offset, limit));
+        return ResponseEntity.ok(searchService.queryBoolWithShould(borough, cuisine, name, offset, limit));
     }
 
     @GetMapping("/search/wildcard/borough")
@@ -99,8 +95,7 @@ public class SearchController {
             @RequestParam String query,
             @RequestParam(defaultValue = "10") Integer limit,
             @RequestParam(defaultValue = "0") Integer offset) {
-        return ResponseEntity.ok(
-                searchService.searchSimpleQueryForBoroughAndCuisine(query, offset, limit));
+        return ResponseEntity.ok(searchService.searchSimpleQueryForBoroughAndCuisine(query, offset, limit));
     }
 
     @GetMapping("/search/restaurant/range")
@@ -109,8 +104,7 @@ public class SearchController {
             @RequestParam Long upperLimit,
             @RequestParam(defaultValue = "10") Integer limit,
             @RequestParam(defaultValue = "0") Integer offset) {
-        return ResponseEntity.ok(
-                searchService.searchRestaurantIdRange(lowerLimit, upperLimit, offset, limit));
+        return ResponseEntity.ok(searchService.searchRestaurantIdRange(lowerLimit, upperLimit, offset, limit));
     }
 
     @GetMapping("/search/date/range")
@@ -131,8 +125,7 @@ public class SearchController {
             @RequestParam(required = false, defaultValue = "DESC") String sortOrder,
             @RequestParam(required = false, defaultValue = "id") String... sortFields) {
         return ResponseEntity.ok(
-                searchService.aggregateSearch(
-                        searchKeyword, fieldNames, sortOrder, limit, offset, sortFields));
+                searchService.aggregateSearch(searchKeyword, fieldNames, sortOrder, limit, offset, sortFields));
     }
 
     @GetMapping("/search/restaurant/withInRange")
@@ -141,7 +134,6 @@ public class SearchController {
             @RequestParam Double lon,
             @RequestParam Double distance,
             @RequestParam(defaultValue = "km", required = false) String unit) {
-        return ResponseEntity.ok(
-                searchService.searchRestaurantsWithInRange(lat, lon, distance, unit));
+        return ResponseEntity.ok(searchService.searchRestaurantsWithInRange(lat, lon, distance, unit));
     }
 }

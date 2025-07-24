@@ -25,9 +25,11 @@ import org.springframework.data.domain.Sort;
 @ExtendWith(MockitoExtension.class)
 class RestaurantServiceTest {
 
-    @Mock private RestaurantRepository restaurantRepository;
+    @Mock
+    private RestaurantRepository restaurantRepository;
 
-    @InjectMocks private RestaurantService restaurantService;
+    @InjectMocks
+    private RestaurantService restaurantService;
 
     @Test
     void findAllRestaurants() {
@@ -37,8 +39,7 @@ class RestaurantServiceTest {
         given(restaurantRepository.findAll(pageable)).willReturn(restaurantPage);
 
         // when
-        PagedResult<Restaurant> pagedResult =
-                restaurantService.findAllRestaurants(0, 10, "id", "asc");
+        PagedResult<Restaurant> pagedResult = restaurantService.findAllRestaurants(0, 10, "id", "asc");
 
         // then
         assertThat(pagedResult).isNotNull();

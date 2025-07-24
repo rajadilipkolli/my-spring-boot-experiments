@@ -28,7 +28,8 @@ import org.springframework.http.MediaType;
 
 class RestaurantControllerIT extends AbstractIntegrationTest {
 
-    @Autowired private RestaurantRepository restaurantRepository;
+    @Autowired
+    private RestaurantRepository restaurantRepository;
 
     private List<Restaurant> restaurantList = null;
 
@@ -41,15 +42,9 @@ class RestaurantControllerIT extends AbstractIntegrationTest {
         address.setLocation(new Point(-73.9, 40.8));
         Grades grade = new Grades("A", LocalDateTime.of(2022, 1, 1, 1, 1, 1), 15);
         Grades grade1 = new Grades("B", LocalDateTime.of(2022, 3, 31, 23, 59, 59), 15);
-        this.restaurantList.add(
-                new Restaurant(
-                        "1", "text 1", "borough1", "cuisine1", address, List.of(grade, grade1)));
-        this.restaurantList.add(
-                new Restaurant(
-                        "2", "text 2", "borough2", "cuisine2", address, List.of(grade, grade1)));
-        this.restaurantList.add(
-                new Restaurant(
-                        "3", "text 3", "borough3", "cuisine3", address, List.of(grade, grade1)));
+        this.restaurantList.add(new Restaurant("1", "text 1", "borough1", "cuisine1", address, List.of(grade, grade1)));
+        this.restaurantList.add(new Restaurant("2", "text 2", "borough2", "cuisine2", address, List.of(grade, grade1)));
+        this.restaurantList.add(new Restaurant("3", "text 3", "borough3", "cuisine3", address, List.of(grade, grade1)));
         restaurantList = restaurantRepository.saveAll(restaurantList);
     }
 
@@ -89,13 +84,11 @@ class RestaurantControllerIT extends AbstractIntegrationTest {
         address.setStreet("street1");
         Grades grade = new Grades("1", LocalDateTime.now(), 5);
         RestaurantRequest restaurantRequest =
-                new RestaurantRequest(
-                        "New Restaurant", "borough1", "cuisine1", address, List.of(grade));
+                new RestaurantRequest("New Restaurant", "borough1", "cuisine1", address, List.of(grade));
         this.mockMvc
-                .perform(
-                        post("/api/restaurants")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(restaurantRequest)))
+                .perform(post("/api/restaurants")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(restaurantRequest)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id", notNullValue()))
                 .andExpect(jsonPath("$.name", is(restaurantRequest.name())));
@@ -106,10 +99,9 @@ class RestaurantControllerIT extends AbstractIntegrationTest {
         RestaurantRequest restaurant = new RestaurantRequest(null, null, null, null, null);
 
         this.mockMvc
-                .perform(
-                        post("/api/restaurants")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(restaurant)))
+                .perform(post("/api/restaurants")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(restaurant)))
                 .andExpect(status().isBadRequest())
                 .andExpect(header().string("Content-Type", is("application/problem+json")))
                 .andExpect(jsonPath("$.type", is("about:blank")))
@@ -133,10 +125,9 @@ class RestaurantControllerIT extends AbstractIntegrationTest {
         restaurant.setName("Updated Restaurant");
 
         this.mockMvc
-                .perform(
-                        put("/api/restaurants/{id}", restaurant.getId())
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(restaurant)))
+                .perform(put("/api/restaurants/{id}", restaurant.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(restaurant)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(restaurant.getId()), String.class))
                 .andExpect(jsonPath("$.name", is(restaurant.getName())));

@@ -15,7 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 class ApplicationIntegrationTest extends AbstractIntegrationTest {
 
-    @Autowired private RestClient restClient;
+    @Autowired
+    private RestClient restClient;
 
     @Test
     void restClientOpenSearchNodeVersion() throws IOException {

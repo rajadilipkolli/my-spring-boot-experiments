@@ -41,11 +41,14 @@ import org.springframework.test.web.servlet.MockMvc;
 @ActiveProfiles(PROFILE_TEST)
 class RestaurantControllerTest {
 
-    @Autowired private MockMvc mockMvc;
+    @Autowired
+    private MockMvc mockMvc;
 
-    @MockitoBean private RestaurantService restaurantService;
+    @MockitoBean
+    private RestaurantService restaurantService;
 
-    @Autowired private ObjectMapper objectMapper;
+    @Autowired
+    private ObjectMapper objectMapper;
 
     private List<Restaurant> restaurantList;
 
@@ -56,23 +59,16 @@ class RestaurantControllerTest {
         address.setLocation(new Point(-73.9, 40.8));
         Grades grade = new Grades("A", LocalDateTime.of(2022, 1, 1, 1, 1, 1), 15);
         Grades grade1 = new Grades("B", LocalDateTime.of(2022, 3, 31, 23, 59, 59), 15);
-        this.restaurantList.add(
-                new Restaurant(
-                        "1", "text 1", "borough1", "cuisine1", address, List.of(grade, grade1)));
-        this.restaurantList.add(
-                new Restaurant(
-                        "2", "text 2", "borough2", "cuisine2", address, List.of(grade, grade1)));
-        this.restaurantList.add(
-                new Restaurant(
-                        "3", "text 3", "borough3", "cuisine3", address, List.of(grade, grade1)));
+        this.restaurantList.add(new Restaurant("1", "text 1", "borough1", "cuisine1", address, List.of(grade, grade1)));
+        this.restaurantList.add(new Restaurant("2", "text 2", "borough2", "cuisine2", address, List.of(grade, grade1)));
+        this.restaurantList.add(new Restaurant("3", "text 3", "borough3", "cuisine3", address, List.of(grade, grade1)));
     }
 
     @Test
     void shouldFetchAllRestaurants() throws Exception {
         Page<Restaurant> page = new PageImpl<>(restaurantList);
         PagedResult<Restaurant> restaurantPagedResult = new PagedResult<>(page);
-        given(restaurantService.findAllRestaurants(0, 10, "id", "asc"))
-                .willReturn(restaurantPagedResult);
+        given(restaurantService.findAllRestaurants(0, 10, "id", "asc")).willReturn(restaurantPagedResult);
 
         this.mockMvc
                 .perform(get("/api/restaurants"))
@@ -91,15 +87,8 @@ class RestaurantControllerTest {
     void shouldFindRestaurantById() throws Exception {
         String restaurantId = "1";
         Restaurant restaurant =
-                new Restaurant(
-                        restaurantId,
-                        "text 1",
-                        "borough1",
-                        "cuisine1",
-                        new Address(),
-                        new ArrayList<>());
-        given(restaurantService.findRestaurantById(restaurantId))
-                .willReturn(Optional.of(restaurant));
+                new Restaurant(restaurantId, "text 1", "borough1", "cuisine1", new Address(), new ArrayList<>());
+        given(restaurantService.findRestaurantById(restaurantId)).willReturn(Optional.of(restaurant));
 
         this.mockMvc
                 .perform(get("/api/restaurants/{id}", restaurantId))
@@ -112,9 +101,7 @@ class RestaurantControllerTest {
         String restaurantId = "1";
         given(restaurantService.findRestaurantById(restaurantId)).willReturn(Optional.empty());
 
-        this.mockMvc
-                .perform(get("/api/restaurants/{id}", restaurantId))
-                .andExpect(status().isNotFound());
+        this.mockMvc.perform(get("/api/restaurants/{id}", restaurantId)).andExpect(status().isNotFound());
     }
 
     @Test
@@ -123,27 +110,23 @@ class RestaurantControllerTest {
                 .willAnswer((invocation) -> invocation.getArgument(0));
 
         Restaurant restaurant =
-                new Restaurant(
-                        "1", "some text", "borough1", "cuisine1", new Address(), new ArrayList<>());
+                new Restaurant("1", "some text", "borough1", "cuisine1", new Address(), new ArrayList<>());
         this.mockMvc
-                .perform(
-                        post("/api/restaurants")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(restaurant)))
+                .perform(post("/api/restaurants")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(restaurant)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.name", is(restaurant.getName())));
     }
 
     @Test
     void shouldReturn400WhenCreateNewRestaurantWithoutRequiredFields() throws Exception {
-        RestaurantRequest restaurant =
-                new RestaurantRequest(null, null, null, null, new ArrayList<>());
+        RestaurantRequest restaurant = new RestaurantRequest(null, null, null, null, new ArrayList<>());
 
         this.mockMvc
-                .perform(
-                        post("/api/restaurants")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(restaurant)))
+                .perform(post("/api/restaurants")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(restaurant)))
                 .andExpect(status().isBadRequest())
                 .andExpect(header().string("Content-Type", is("application/problem+json")))
                 .andExpect(jsonPath("$.type", is("about:blank")))
@@ -165,23 +148,15 @@ class RestaurantControllerTest {
     void shouldUpdateRestaurant() throws Exception {
         String restaurantId = "1";
         Restaurant restaurant =
-                new Restaurant(
-                        restaurantId,
-                        "Updated text",
-                        "borough1",
-                        "cuisine1",
-                        new Address(),
-                        new ArrayList<>());
-        given(restaurantService.findRestaurantById(restaurantId))
-                .willReturn(Optional.of(restaurant));
+                new Restaurant(restaurantId, "Updated text", "borough1", "cuisine1", new Address(), new ArrayList<>());
+        given(restaurantService.findRestaurantById(restaurantId)).willReturn(Optional.of(restaurant));
         given(restaurantService.saveRestaurant(any(Restaurant.class)))
                 .willAnswer((invocation) -> invocation.getArgument(0));
 
         this.mockMvc
-                .perform(
-                        put("/api/restaurants/{id}", restaurant.getId())
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(restaurant)))
+                .perform(put("/api/restaurants/{id}", restaurant.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(restaurant)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name", is(restaurant.getName())));
     }
@@ -191,19 +166,12 @@ class RestaurantControllerTest {
         String restaurantId = "1";
         given(restaurantService.findRestaurantById(restaurantId)).willReturn(Optional.empty());
         Restaurant restaurant =
-                new Restaurant(
-                        restaurantId,
-                        "Updated text",
-                        "borough1",
-                        "cuisine1",
-                        new Address(),
-                        new ArrayList<>());
+                new Restaurant(restaurantId, "Updated text", "borough1", "cuisine1", new Address(), new ArrayList<>());
 
         this.mockMvc
-                .perform(
-                        put("/api/restaurants/{id}", restaurantId)
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(restaurant)))
+                .perform(put("/api/restaurants/{id}", restaurantId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(restaurant)))
                 .andExpect(status().isNotFound());
     }
 
@@ -211,15 +179,8 @@ class RestaurantControllerTest {
     void shouldDeleteRestaurant() throws Exception {
         String restaurantId = "1";
         Restaurant restaurant =
-                new Restaurant(
-                        restaurantId,
-                        "Some text",
-                        "borough1",
-                        "cuisine1",
-                        new Address(),
-                        new ArrayList<>());
-        given(restaurantService.findRestaurantById(restaurantId))
-                .willReturn(Optional.of(restaurant));
+                new Restaurant(restaurantId, "Some text", "borough1", "cuisine1", new Address(), new ArrayList<>());
+        given(restaurantService.findRestaurantById(restaurantId)).willReturn(Optional.of(restaurant));
         doNothing().when(restaurantService).deleteRestaurantById(restaurant.getId());
 
         this.mockMvc
@@ -233,8 +194,6 @@ class RestaurantControllerTest {
         String restaurantId = "1";
         given(restaurantService.findRestaurantById(restaurantId)).willReturn(Optional.empty());
 
-        this.mockMvc
-                .perform(delete("/api/restaurants/{id}", restaurantId))
-                .andExpect(status().isNotFound());
+        this.mockMvc.perform(delete("/api/restaurants/{id}", restaurantId)).andExpect(status().isNotFound());
     }
 }

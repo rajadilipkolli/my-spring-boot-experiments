@@ -31,14 +31,10 @@ public class RestaurantController {
 
     @GetMapping
     public PagedResult<Restaurant> getAllRestaurants(
-            @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_NUMBER, required = false)
-                    int pageNo,
-            @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_SIZE, required = false)
-                    int pageSize,
-            @RequestParam(defaultValue = AppConstants.DEFAULT_SORT_BY, required = false)
-                    String sortBy,
-            @RequestParam(defaultValue = AppConstants.DEFAULT_SORT_DIRECTION, required = false)
-                    String sortDir) {
+            @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_NUMBER, required = false) int pageNo,
+            @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_SIZE, required = false) int pageSize,
+            @RequestParam(defaultValue = AppConstants.DEFAULT_SORT_BY, required = false) String sortBy,
+            @RequestParam(defaultValue = AppConstants.DEFAULT_SORT_DIRECTION, required = false) String sortDir) {
         return restaurantService.findAllRestaurants(pageNo, pageSize, sortBy, sortDir);
     }
 
@@ -52,8 +48,7 @@ public class RestaurantController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Restaurant createRestaurant(
-            @RequestBody @Validated RestaurantRequest restaurantRequest) {
+    public Restaurant createRestaurant(@RequestBody @Validated RestaurantRequest restaurantRequest) {
         return restaurantService.saveRestaurant(restaurantRequest.toRestaurant());
     }
 
@@ -62,12 +57,11 @@ public class RestaurantController {
             @PathVariable String id, @RequestBody RestaurantRequest restaurantRequest) {
         return restaurantService
                 .findRestaurantById(id)
-                .map(
-                        restaurantObj -> {
-                            Restaurant restaurant = restaurantRequest.toRestaurant();
-                            restaurant.setId(id);
-                            return ResponseEntity.ok(restaurantService.saveRestaurant(restaurant));
-                        })
+                .map(restaurantObj -> {
+                    Restaurant restaurant = restaurantRequest.toRestaurant();
+                    restaurant.setId(id);
+                    return ResponseEntity.ok(restaurantService.saveRestaurant(restaurant));
+                })
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
@@ -75,11 +69,10 @@ public class RestaurantController {
     public ResponseEntity<Restaurant> deleteRestaurant(@PathVariable String id) {
         return restaurantService
                 .findRestaurantById(id)
-                .map(
-                        restaurant -> {
-                            restaurantService.deleteRestaurantById(id);
-                            return ResponseEntity.ok(restaurant);
-                        })
+                .map(restaurant -> {
+                    restaurantService.deleteRestaurantById(id);
+                    return ResponseEntity.ok(restaurant);
+                })
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 }

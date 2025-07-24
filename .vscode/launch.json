@@ -210,6 +210,16 @@
             "projectName": "boot-jooq-r2dbc-sample",
             "args": "--spring.profiles.active=local",
             "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-JobRunrApplication<boot-scheduler-jobrunr>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.example.jobrunr.JobRunrApplication",
+            "projectName": "boot-scheduler-jobrunr",
+            "args": "--spring.profiles.active=local",
+            "envFile": "${workspaceFolder}/.env"
         }
     ]
 }
