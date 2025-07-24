@@ -18,8 +18,7 @@ public class Customer {
     private Long id;
 
     @Column(nullable = false)
-    @NotEmpty(message = "Text cannot be empty")
-    private String text;
+    @NotEmpty(message = "Text cannot be empty") private String text;
 
     @Column(nullable = false)
     @TenantId
@@ -32,33 +31,30 @@ public class Customer {
 
     public Customer() {}
 
-    public Customer(Long id, String text, String tenant) {
-        this.id = id;
-        this.text = text;
-        this.tenant = tenant;
-    }
-
     public Long getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public Customer setId(Long id) {
         this.id = id;
+        return this;
     }
 
     public String getText() {
         return text;
     }
 
-    public void setText(String text) {
+    public Customer setText(String text) {
         this.text = text;
+        return this;
     }
 
     public String getTenant() {
         return tenant;
     }
 
-    public void setTenant(String tenant) {
+    public Customer setTenant(String tenant) {
         this.tenant = tenant;
+        return this;
     }
 }

@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.HandlerInterceptor;
 
@@ -19,8 +20,7 @@ public class TenantInterceptor implements HandlerInterceptor {
     }
 
     @Override
-    public boolean preHandle(
-            HttpServletRequest request, HttpServletResponse response, Object handler)
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
             throws IOException {
         var tenant = request.getParameter("tenant");
         if (request.getServletPath().startsWith("/api/") && !StringUtils.hasText(tenant)) {
@@ -29,5 +29,11 @@ public class TenantInterceptor implements HandlerInterceptor {
         }
         tenantIdentifierResolver.setCurrentTenant(tenant);
         return true;
+    }
+
+    @Override
+    public void afterCompletion(
+            HttpServletRequest request, HttpServletResponse response, Object handler, @Nullable Exception ex) {
+        tenantIdentifierResolver.clearCurrentTenant();
     }
 }

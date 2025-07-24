@@ -25,33 +25,30 @@ public class Order {
 
     public Order() {}
 
-    public Order(Long id, BigDecimal amount, LocalDate orderDate) {
-        this.id = id;
-        this.amount = amount;
-        this.orderDate = orderDate;
-    }
-
     public Long getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public Order setId(Long id) {
         this.id = id;
+        return this;
     }
 
     public BigDecimal getAmount() {
         return amount;
     }
 
-    public void setAmount(BigDecimal amount) {
+    public Order setAmount(BigDecimal amount) {
         this.amount = amount;
+        return this;
     }
 
     public LocalDate getOrderDate() {
         return orderDate;
     }
 
-    public void setOrderDate(LocalDate orderDate) {
+    public Order setOrderDate(LocalDate orderDate) {
         this.orderDate = orderDate;
+        return this;
     }
 }

@@ -20,60 +20,50 @@ class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     ProblemDetail onException(MethodArgumentNotValidException methodArgumentNotValidException) {
         ProblemDetail problemDetail =
-                ProblemDetail.forStatusAndDetail(
-                        HttpStatus.BAD_REQUEST, "Invalid request content.");
+                ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Invalid request content.");
         problemDetail.setTitle("Constraint Violation");
-        List<ApiValidationError> validationErrorsList =
-                methodArgumentNotValidException.getAllErrors().stream()
-                        .map(
-                                objectError -> {
-                                    if (objectError instanceof FieldError fieldError) {
-                                        return new ApiValidationError(
-                                                fieldError.getObjectName(),
-                                                fieldError.getField(),
-                                                fieldError.getRejectedValue(),
-                                                Objects.requireNonNullElse(
-                                                        fieldError.getDefaultMessage(), ""));
-                                    } else {
-                                        return new ApiValidationError(
-                                                objectError.getObjectName(),
-                                                null,
-                                                null,
-                                                Objects.requireNonNullElse(
-                                                        objectError.getDefaultMessage(), ""));
-                                    }
-                                })
-                        .sorted(Comparator.comparing(ApiValidationError::field))
-                        .toList();
+        List<ApiValidationError> validationErrorsList = methodArgumentNotValidException.getAllErrors().stream()
+                .map(objectError -> {
+                    if (objectError instanceof FieldError fieldError) {
+                        return new ApiValidationError(
+                                fieldError.getObjectName(),
+                                fieldError.getField(),
+                                fieldError.getRejectedValue(),
+                                Objects.requireNonNullElse(fieldError.getDefaultMessage(), ""));
+                    } else {
+                        return new ApiValidationError(
+                                objectError.getObjectName(),
+                                null,
+                                null,
+                                Objects.requireNonNullElse(objectError.getDefaultMessage(), ""));
+                    }
+                })
+                .sorted(Comparator.comparing(ApiValidationError::field))
+                .toList();
         problemDetail.setProperty("violations", validationErrorsList);
         return problemDetail;
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
     public ProblemDetail onConstraintValidationException(ConstraintViolationException e) {
-        ProblemDetail problemDetail =
-                ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Validation error");
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Validation error");
         problemDetail.setTitle("Constraint Violation");
 
-        List<ApiValidationError> validationErrors =
-                e.getConstraintViolations().stream()
-                        .map(
-                                violation -> {
-                                    String propertyPath = violation.getPropertyPath().toString();
-                                    String field =
-                                            propertyPath.contains(".")
-                                                    ? propertyPath.substring(
-                                                            propertyPath.lastIndexOf('.') + 1)
-                                                    : propertyPath;
+        List<ApiValidationError> validationErrors = e.getConstraintViolations().stream()
+                .map(violation -> {
+                    String propertyPath = violation.getPropertyPath().toString();
+                    String field = propertyPath.contains(".")
+                            ? propertyPath.substring(propertyPath.lastIndexOf('.') + 1)
+                            : propertyPath;
 
-                                    return new ApiValidationError(
-                                            violation.getRootBeanClass().getSimpleName(),
-                                            field,
-                                            violation.getInvalidValue(),
-                                            violation.getMessage());
-                                })
-                        .sorted(Comparator.comparing(ApiValidationError::field))
-                        .toList();
+                    return new ApiValidationError(
+                            violation.getRootBeanClass().getSimpleName(),
+                            field,
+                            violation.getInvalidValue(),
+                            violation.getMessage());
+                })
+                .sorted(Comparator.comparing(ApiValidationError::field))
+                .toList();
 
         problemDetail.setProperty("violations", validationErrors);
         return problemDetail;

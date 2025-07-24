@@ -26,8 +26,11 @@ import org.springframework.http.MediaType;
 
 class CustomerControllerIT extends AbstractIntegrationTest {
 
-    @Autowired private CustomerRepository customerRepository;
-    @Autowired private TenantIdentifierResolver tenantIdentifierResolver;
+    @Autowired
+    private CustomerRepository customerRepository;
+
+    @Autowired
+    private TenantIdentifierResolver tenantIdentifierResolver;
 
     private List<Customer> customerList = null;
 
@@ -37,9 +40,9 @@ class CustomerControllerIT extends AbstractIntegrationTest {
         customerRepository.deleteAll();
 
         customerList = new ArrayList<>();
-        customerList.add(new Customer(null, "First Customer"));
-        customerList.add(new Customer(null, "Second Customer"));
-        customerList.add(new Customer(null, "Third Customer"));
+        customerList.add(new Customer().setText("First Customer"));
+        customerList.add(new Customer().setText("Second Customer"));
+        customerList.add(new Customer().setText("Third Customer"));
         customerList = customerRepository.saveAll(customerList);
     }
 
@@ -69,17 +72,18 @@ class CustomerControllerIT extends AbstractIntegrationTest {
     @Test
     void shouldCreateNewCustomer() throws Exception {
         CustomerDTO customerDTO = new CustomerDTO("New Customer");
+        tenantIdentifierResolver.setCurrentTenant("dbsystc");
         long count = this.customerRepository.countByTenant("dbsystc");
         this.mockMvc
-                .perform(
-                        post("/api/customers")
-                                .param("tenant", "dbsystc")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(customerDTO)))
+                .perform(post("/api/customers")
+                        .param("tenant", "dbsystc")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(customerDTO)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id", notNullValue()))
                 .andExpect(jsonPath("$.text", is(customerDTO.text())))
                 .andExpect(jsonPath("$.tenant", is("dbsystc")));
+        tenantIdentifierResolver.setCurrentTenant("dbsystc");
         assertThat(this.customerRepository.countByTenant("dbsystc")).isEqualTo(count + 1);
     }
 
@@ -88,16 +92,12 @@ class CustomerControllerIT extends AbstractIntegrationTest {
         CustomerDTO customerDTO = new CustomerDTO(null);
 
         this.mockMvc
-                .perform(
-                        post("/api/customers")
-                                .param("tenant", "dbsystc")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(customerDTO)))
+                .perform(post("/api/customers")
+                        .param("tenant", "dbsystc")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(customerDTO)))
                 .andExpect(status().isBadRequest())
-                .andExpect(
-                        header().string(
-                                        HttpHeaders.CONTENT_TYPE,
-                                        is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                 .andExpect(jsonPath("$.type", is("about:blank")))
                 .andExpect(jsonPath("$.title", is("Constraint Violation")))
                 .andExpect(jsonPath("$.status", is(400)))
@@ -112,11 +112,10 @@ class CustomerControllerIT extends AbstractIntegrationTest {
         customer.setText("Updated Customer");
 
         this.mockMvc
-                .perform(
-                        put("/api/customers/{id}", customer.getId())
-                                .param("tenant", "dbsystc")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(customer)))
+                .perform(put("/api/customers/{id}", customer.getId())
+                        .param("tenant", "dbsystc")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(customer)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.text", is(customer.getText())));
     }
@@ -124,11 +123,13 @@ class CustomerControllerIT extends AbstractIntegrationTest {
     @Test
     void shouldDeleteCustomer() throws Exception {
         Customer customer = customerList.getFirst();
+        tenantIdentifierResolver.setCurrentTenant("dbsystc");
         long count = this.customerRepository.countByTenant("dbsystc");
         this.mockMvc
                 .perform(delete("/api/customers/{id}", customer.getId()).param("tenant", "dbsystc"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.text", is(customer.getText())));
+        tenantIdentifierResolver.setCurrentTenant("dbsystc");
         assertThat(this.customerRepository.countByTenant("dbsystc")).isEqualTo(count - 1);
     }
 }
