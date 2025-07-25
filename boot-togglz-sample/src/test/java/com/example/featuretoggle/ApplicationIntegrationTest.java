@@ -22,12 +22,12 @@ class ApplicationIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     void shouldFindCustomerByIdWithEmptyData() throws Exception {
-        Customer customer = new Customer(null, "New Customer", "name 1", 1);
+        Customer customer =
+                new Customer().setText("New Customer").setName("name 1").setZipCode(12345);
         this.mockMvc
-                .perform(
-                        post("/api/customers")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(customer)))
+                .perform(post("/api/customers")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(customer)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.text", is(customer.getText())))
                 .andExpect(jsonPath("$.name", is(customer.getName())))

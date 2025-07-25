@@ -26,42 +26,39 @@ public class Customer {
 
     public Customer() {}
 
-    public Customer(Long id, String text, String name, Integer zipCode) {
-        this.id = id;
-        this.text = text;
-        this.name = name;
-        this.zipCode = zipCode;
-    }
-
     public Long getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public Customer setId(Long id) {
         this.id = id;
+        return this;
     }
 
     public String getText() {
         return text;
     }
 
-    public void setText(String text) {
+    public Customer setText(String text) {
         this.text = text;
+        return this;
     }
 
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
+    public Customer setName(String name) {
         this.name = name;
+        return this;
     }
 
     public Integer getZipCode() {
         return zipCode;
     }
 
-    public void setZipCode(Integer zipCode) {
+    public Customer setZipCode(Integer zipCode) {
         this.zipCode = zipCode;
+        return this;
     }
 }

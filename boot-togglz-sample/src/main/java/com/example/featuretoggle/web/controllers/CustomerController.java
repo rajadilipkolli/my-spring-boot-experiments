@@ -34,10 +34,8 @@ public class CustomerController {
 
     @GetMapping("/{id}")
     public ResponseEntity<CustomerDTO> getCustomerById(@PathVariable Long id) {
-        return customerService
-                .findCustomerById(id)
-                .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+        return customerService.findCustomerById(id).map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound()
+                .build());
     }
 
     @PostMapping
@@ -47,15 +45,13 @@ public class CustomerController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Customer> updateCustomer(
-            @PathVariable Long id, @RequestBody Customer customer) {
+    public ResponseEntity<Customer> updateCustomer(@PathVariable Long id, @RequestBody Customer customer) {
         return customerService
                 .findCustomerById(id)
-                .map(
-                        customerObj -> {
-                            customer.setId(id);
-                            return ResponseEntity.ok(customerService.saveCustomer(customer));
-                        })
+                .map(customerObj -> {
+                    customer.setId(id);
+                    return ResponseEntity.ok(customerService.saveCustomer(customer));
+                })
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
@@ -63,11 +59,10 @@ public class CustomerController {
     public ResponseEntity<CustomerDTO> deleteCustomer(@PathVariable Long id) {
         return customerService
                 .findCustomerById(id)
-                .map(
-                        customer -> {
-                            customerService.deleteCustomerById(id);
-                            return ResponseEntity.ok(customer);
-                        })
+                .map(customer -> {
+                    customerService.deleteCustomerById(id);
+                    return ResponseEntity.ok(customer);
+                })
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 }
