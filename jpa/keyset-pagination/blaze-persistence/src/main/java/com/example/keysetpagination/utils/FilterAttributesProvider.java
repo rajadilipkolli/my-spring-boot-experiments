@@ -15,8 +15,7 @@ public class FilterAttributesProvider {
     private final Map<Class<?>, Map<String, SerializableFormat<? extends Serializable>>> cache =
             new ConcurrentHashMap<>();
 
-    public Map<String, SerializableFormat<? extends Serializable>> getFilterAttributes(
-            Class<?> entityClass) {
+    public Map<String, SerializableFormat<? extends Serializable>> getFilterAttributes(Class<?> entityClass) {
         return cache.computeIfAbsent(entityClass, this::createDynamicFilterAttributes);
     }
 
@@ -38,7 +37,6 @@ public class FilterAttributesProvider {
     }
 
     private SerializableFormat<? extends Serializable> getFormatForType(Class<?> fieldType) {
-        return FormatUtils.getAvailableFormatters()
-                .get(fieldType); // Retrieve format based on the fieldType
+        return FormatUtils.getAvailableFormatters().get(fieldType); // Retrieve format based on the fieldType
     }
 }

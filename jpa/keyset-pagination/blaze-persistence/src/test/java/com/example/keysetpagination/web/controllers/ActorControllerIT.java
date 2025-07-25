@@ -3,6 +3,7 @@ package com.example.keysetpagination.web.controllers;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.matchesPattern;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -16,6 +17,7 @@ import com.example.keysetpagination.entities.Actor;
 import com.example.keysetpagination.model.request.ActorRequest;
 import com.example.keysetpagination.model.response.PagedResult;
 import com.example.keysetpagination.repositories.ActorRepository;
+import com.fasterxml.jackson.core.type.TypeReference;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,7 +29,8 @@ import org.springframework.http.MediaType;
 
 class ActorControllerIT extends AbstractIntegrationTest {
 
-    @Autowired private ActorRepository actorRepository;
+    @Autowired
+    private ActorRepository actorRepository;
 
     private List<Actor> actorList = null;
 
@@ -44,38 +47,37 @@ class ActorControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldFetchAllActors() throws Exception {
-        String contentAsString =
-                this.mockMvc
-                        .perform(get("/api/actors?pageNo=0&pageSize=2&sortDir=desc"))
-                        .andExpect(status().isOk())
-                        .andExpect(jsonPath("$.data.size()", is(2)))
-                        .andExpect(jsonPath("$.totalElements", is(3)))
-                        .andExpect(jsonPath("$.pageNumber", is(1)))
-                        .andExpect(jsonPath("$.totalPages", is(2)))
-                        .andExpect(jsonPath("$.isFirst", is(true)))
-                        .andExpect(jsonPath("$.isLast", is(false)))
-                        .andExpect(jsonPath("$.hasNext", is(true)))
-                        .andExpect(jsonPath("$.hasPrevious", is(false)))
-                        .andExpect(jsonPath("$.keySetPageResponse.maxResults", is(2)))
-                        .andExpect(jsonPath("$.keySetPageResponse.firstResult", is(0)))
-                        .andReturn()
-                        .getResponse()
-                        .getContentAsString();
+        String contentAsString = this.mockMvc
+                .perform(get("/api/actors?pageNo=0&pageSize=2&sortDir=desc"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.size()", is(2)))
+                .andExpect(jsonPath("$.totalElements", is(3)))
+                .andExpect(jsonPath("$.pageNumber", is(1)))
+                .andExpect(jsonPath("$.totalPages", is(2)))
+                .andExpect(jsonPath("$.isFirst", is(true)))
+                .andExpect(jsonPath("$.isLast", is(false)))
+                .andExpect(jsonPath("$.hasNext", is(true)))
+                .andExpect(jsonPath("$.hasPrevious", is(false)))
+                .andExpect(jsonPath("$.keySetPageResponse.maxResults", is(2)))
+                .andExpect(jsonPath("$.keySetPageResponse.firstResult", is(0)))
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
 
-        PagedResult<Actor> pagedResult = objectMapper.readValue(contentAsString, PagedResult.class);
+        PagedResult<Actor> pagedResult =
+                objectMapper.readValue(contentAsString, new TypeReference<PagedResult<Actor>>() {});
 
         this.mockMvc
-                .perform(
-                        get("/api/actors")
-                                .param("pageNo", "2")
-                                .param("pageSize", "2")
-                                .param("sortDir", "desc")
-                                .param(
-                                        "lowest",
-                                        String.valueOf(pagedResult.keySetPageResponse().lowest()))
-                                .param(
-                                        "highest",
-                                        String.valueOf(pagedResult.keySetPageResponse().highest())))
+                .perform(get("/api/actors")
+                        .param("pageNo", "2")
+                        .param("pageSize", "2")
+                        .param("sortDir", "desc")
+                        .param(
+                                "lowest",
+                                String.valueOf(pagedResult.keySetPageResponse().lowest()))
+                        .param(
+                                "highest",
+                                String.valueOf(pagedResult.keySetPageResponse().highest())))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.size()", is(1)))
                 .andExpect(jsonPath("$.totalElements", is(3)))
@@ -92,11 +94,10 @@ class ActorControllerIT extends AbstractIntegrationTest {
     @Test
     void shouldSearchAllActors() throws Exception {
         this.mockMvc
-                .perform(
-                        post("/api/actors/search?pageNo=0&pageSize=2&sortDir=desc")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(
-                                        """
+                .perform(post("/api/actors/search?pageNo=0&pageSize=2&sortDir=desc")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(
+                                """
                                         [
                                           {
                                             "queryOperator": "EQ",
@@ -114,7 +115,7 @@ class ActorControllerIT extends AbstractIntegrationTest {
                                           }
                                         ]
                                         """
-                                                .formatted(LocalDate.now())))
+                                        .formatted(LocalDate.now())))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.size()", is(2)))
                 .andExpect(jsonPath("$.totalElements", is(3)))
@@ -144,12 +145,11 @@ class ActorControllerIT extends AbstractIntegrationTest {
     void shouldCreateNewActor() throws Exception {
         ActorRequest actorRequest = new ActorRequest("New Actor");
         this.mockMvc
-                .perform(
-                        post("/api/actors")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(actorRequest)))
+                .perform(post("/api/actors")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(actorRequest)))
                 .andExpect(status().isCreated())
-                .andExpect(header().exists(HttpHeaders.LOCATION))
+                .andExpect(header().string(HttpHeaders.LOCATION, matchesPattern(".*/api/actors/\\d+")))
                 .andExpect(jsonPath("$.id", notNullValue()))
                 .andExpect(jsonPath("$.name", is(actorRequest.name())));
     }
@@ -159,12 +159,11 @@ class ActorControllerIT extends AbstractIntegrationTest {
         ActorRequest actorRequest = new ActorRequest(null);
 
         this.mockMvc
-                .perform(
-                        post("/api/actors")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(actorRequest)))
+                .perform(post("/api/actors")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(actorRequest)))
                 .andExpect(status().isBadRequest())
-                .andExpect(header().string("Content-Type", is("application/problem+json")))
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                 .andExpect(jsonPath("$.type", is("about:blank")))
                 .andExpect(jsonPath("$.title", is("Constraint Violation")))
                 .andExpect(jsonPath("$.status", is(400)))
@@ -182,10 +181,9 @@ class ActorControllerIT extends AbstractIntegrationTest {
         ActorRequest actorRequest = new ActorRequest("Updated Actor");
 
         this.mockMvc
-                .perform(
-                        put("/api/actors/{id}", actorId)
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(actorRequest)))
+                .perform(put("/api/actors/{id}", actorId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(actorRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(actorId), Long.class))
                 .andExpect(jsonPath("$.name", is(actorRequest.name())));
