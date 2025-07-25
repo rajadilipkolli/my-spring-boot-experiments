@@ -6,6 +6,8 @@ import org.springframework.boot.SpringApplication;
 public class TestTogglzApplication {
 
     public static void main(String[] args) {
-        SpringApplication.from(TogglzApplication::main).with(ContainerConfig.class).run(args);
+        SpringApplication.from(TogglzApplication::main)
+                .with(ContainerConfig.class)
+                .run(args);
     }
 }

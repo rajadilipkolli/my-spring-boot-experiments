@@ -38,23 +38,20 @@ public class CustomerService {
     @Transactional(readOnly = true)
     public Optional<CustomerDTO> findCustomerById(Long id) {
 
-        return customerRepository
-                .findById(id)
-                .map(
-                        cust -> {
-                            CustomerDTO customerDTO = new CustomerDTO();
-                            customerDTO.setId(cust.getId());
-                            if (featureManager.isActive(NAME)) {
-                                customerDTO.setName(cust.getName());
-                            }
-                            if (featureManager.isActive(TEXT)) {
-                                customerDTO.setText(cust.getText());
-                            }
-                            if (featureManager.isActive(ZIP)) {
-                                customerDTO.setZipCode(cust.getZipCode());
-                            }
-                            return customerDTO;
-                        });
+        return customerRepository.findById(id).map(cust -> {
+            CustomerDTO customerDTO = new CustomerDTO();
+            customerDTO.setId(cust.getId());
+            if (featureManager.isActive(NAME)) {
+                customerDTO.setName(cust.getName());
+            }
+            if (featureManager.isActive(TEXT)) {
+                customerDTO.setText(cust.getText());
+            }
+            if (featureManager.isActive(ZIP)) {
+                customerDTO.setZipCode(cust.getZipCode());
+            }
+            return customerDTO;
+        });
     }
 
     public Customer saveCustomer(Customer customer) {

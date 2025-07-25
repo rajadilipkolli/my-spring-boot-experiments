@@ -34,20 +34,26 @@ import org.springframework.test.web.servlet.MockMvc;
 @ActiveProfiles(PROFILE_TEST)
 class CustomerControllerTest {
 
-    @Autowired private MockMvc mockMvc;
+    @Autowired
+    private MockMvc mockMvc;
 
-    @MockitoBean private CustomerService customerService;
+    @MockitoBean
+    private CustomerService customerService;
 
-    @Autowired private ObjectMapper objectMapper;
+    @Autowired
+    private ObjectMapper objectMapper;
 
     private List<Customer> customerList;
 
     @BeforeEach
     void setUp() {
         this.customerList = new ArrayList<>();
-        this.customerList.add(new Customer(1L, "text 1", "name 1", 1));
-        this.customerList.add(new Customer(2L, "text 2", "name 2", 2));
-        this.customerList.add(new Customer(3L, "text 3", "name 3", 3));
+        this.customerList.add(
+                new Customer().setId(1L).setText("text 1").setName("name 1").setZipCode(1));
+        this.customerList.add(
+                new Customer().setId(2L).setText("text 2").setName("name 2").setZipCode(2));
+        this.customerList.add(
+                new Customer().setId(3L).setText("text 3").setName("name 3").setZipCode(3));
     }
 
     @Test
@@ -77,22 +83,19 @@ class CustomerControllerTest {
         Long customerId = 1L;
         given(customerService.findCustomerById(customerId)).willReturn(Optional.empty());
 
-        this.mockMvc
-                .perform(get("/api/customers/{id}", customerId))
-                .andExpect(status().isNotFound());
+        this.mockMvc.perform(get("/api/customers/{id}", customerId)).andExpect(status().isNotFound());
     }
 
     @Test
     void shouldCreateNewCustomer() throws Exception {
-        given(customerService.saveCustomer(any(Customer.class)))
-                .willAnswer((invocation) -> invocation.getArgument(0));
+        given(customerService.saveCustomer(any(Customer.class))).willAnswer((invocation) -> invocation.getArgument(0));
 
-        Customer customer = new Customer(1L, "some text", "name 1", 1);
+        Customer customer =
+                new Customer().setId(1L).setText("text 1").setName("name 1").setZipCode(1);
         this.mockMvc
-                .perform(
-                        post("/api/customers")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(customer)))
+                .perform(post("/api/customers")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(customer)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id", notNullValue()))
                 .andExpect(jsonPath("$.text", is(customer.getText())));
@@ -100,13 +103,12 @@ class CustomerControllerTest {
 
     @Test
     void shouldReturn400WhenCreateNewCustomerWithoutText() throws Exception {
-        Customer customer = new Customer(null, null, null, null);
+        Customer customer = new Customer();
 
         this.mockMvc
-                .perform(
-                        post("/api/customers")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(customer)))
+                .perform(post("/api/customers")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(customer)))
                 .andExpect(status().isBadRequest())
                 .andExpect(header().string("Content-Type", is("application/problem+json")))
                 .andExpect(header().string("Content-Type", is("application/problem+json")))
@@ -123,14 +125,12 @@ class CustomerControllerTest {
         Long customerId = 1L;
         CustomerDTO customer = new CustomerDTO(customerId, "Updated text", "name 1", 1);
         given(customerService.findCustomerById(customerId)).willReturn(Optional.of(customer));
-        given(customerService.saveCustomer(any(Customer.class)))
-                .willAnswer((invocation) -> invocation.getArgument(0));
+        given(customerService.saveCustomer(any(Customer.class))).willAnswer((invocation) -> invocation.getArgument(0));
 
         this.mockMvc
-                .perform(
-                        put("/api/customers/{id}", customer.getId())
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(customer)))
+                .perform(put("/api/customers/{id}", customer.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(customer)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.text", is(customer.getText())));
     }
@@ -139,13 +139,16 @@ class CustomerControllerTest {
     void shouldReturn404WhenUpdatingNonExistingCustomer() throws Exception {
         Long customerId = 1L;
         given(customerService.findCustomerById(customerId)).willReturn(Optional.empty());
-        Customer customer = new Customer(customerId, "Updated text", "name 1", 1);
+        Customer customer = new Customer()
+                .setId(customerId)
+                .setText("text 1")
+                .setName("name 1")
+                .setZipCode(1);
 
         this.mockMvc
-                .perform(
-                        put("/api/customers/{id}", customerId)
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(customer)))
+                .perform(put("/api/customers/{id}", customerId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(customer)))
                 .andExpect(status().isNotFound());
     }
 
@@ -167,8 +170,6 @@ class CustomerControllerTest {
         Long customerId = 1L;
         given(customerService.findCustomerById(customerId)).willReturn(Optional.empty());
 
-        this.mockMvc
-                .perform(delete("/api/customers/{id}", customerId))
-                .andExpect(status().isNotFound());
+        this.mockMvc.perform(delete("/api/customers/{id}", customerId)).andExpect(status().isNotFound());
     }
 }
