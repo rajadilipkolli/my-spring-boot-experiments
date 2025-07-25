@@ -16,6 +16,18 @@ jobs:
           keys:
             - m2-{{ checksum "pom.xml" }}
       - run:
+          name: Install Java
+          command: |
+            sudo apt-get update
+            sudo apt-get install -y openjdk-21-jdk
+            echo 'export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64' >> $BASH_ENV
+      - run:
+          name: Install Maven
+          command: |
+            wget https://archive.apache.org/dist/maven/maven-3/3.9.11/binaries/apache-maven-3.9.11-bin.tar.gz
+            tar xzf apache-maven-3.9.11-bin.tar.gz
+            echo 'export PATH=$PATH:$PWD/apache-maven-3.9.11/bin' >> $BASH_ENV
+      - run:
           name: Analyze on SonarCloud
           command: mvn verify sonar:sonar -Dsonar.projectKey=rajadilipkolli_my-spring-boot-experiments
       - save_cache:
