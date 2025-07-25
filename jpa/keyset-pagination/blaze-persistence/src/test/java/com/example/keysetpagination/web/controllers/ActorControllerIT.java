@@ -3,6 +3,7 @@ package com.example.keysetpagination.web.controllers;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.matchesPattern;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -16,6 +17,7 @@ import com.example.keysetpagination.entities.Actor;
 import com.example.keysetpagination.model.request.ActorRequest;
 import com.example.keysetpagination.model.response.PagedResult;
 import com.example.keysetpagination.repositories.ActorRepository;
+import com.fasterxml.jackson.core.type.TypeReference;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -62,7 +64,8 @@ class ActorControllerIT extends AbstractIntegrationTest {
                 .getResponse()
                 .getContentAsString();
 
-        PagedResult<Actor> pagedResult = objectMapper.readValue(contentAsString, PagedResult.class);
+        PagedResult<Actor> pagedResult =
+                objectMapper.readValue(contentAsString, new TypeReference<PagedResult<Actor>>() {});
 
         this.mockMvc
                 .perform(get("/api/actors")
@@ -146,7 +149,7 @@ class ActorControllerIT extends AbstractIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(actorRequest)))
                 .andExpect(status().isCreated())
-                .andExpect(header().exists(HttpHeaders.LOCATION))
+                .andExpect(header().string(HttpHeaders.LOCATION, matchesPattern(".*/api/actors/\\d+")))
                 .andExpect(jsonPath("$.id", notNullValue()))
                 .andExpect(jsonPath("$.name", is(actorRequest.name())));
     }
@@ -160,7 +163,7 @@ class ActorControllerIT extends AbstractIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(actorRequest)))
                 .andExpect(status().isBadRequest())
-                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is("application/problem+json")))
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                 .andExpect(jsonPath("$.type", is("about:blank")))
                 .andExpect(jsonPath("$.title", is("Constraint Violation")))
                 .andExpect(jsonPath("$.status", is(400)))

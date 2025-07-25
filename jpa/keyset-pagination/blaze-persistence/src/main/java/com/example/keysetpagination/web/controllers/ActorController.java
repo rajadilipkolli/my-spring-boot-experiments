@@ -71,7 +71,7 @@ public class ActorController {
     public ResponseEntity<ActorResponse> createActor(@RequestBody @Validated ActorRequest actorRequest) {
         ActorResponse response = actorService.saveActor(actorRequest);
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
-                .path("/api/actors/{id}")
+                .path("/{id}")
                 .buildAndExpand(response.id())
                 .toUri();
         return ResponseEntity.created(location).body(response);
