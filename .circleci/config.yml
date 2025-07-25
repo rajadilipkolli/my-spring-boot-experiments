@@ -4,20 +4,109 @@ executors:
   machine_executor_amd64:
     machine:
       image: ubuntu-2404:current
+    resource_class: medium
     environment:
       architecture: "amd64"
       platform: "linux/amd64"
+      MAVEN_OPTS: "-Xmx2g -XX:+UnlockExperimentalVMOptions -XX:+UseG1GC"
 
 jobs:
   build:
-    docker:
-      - image: 'cimg/openjdk:21.0.6'
+    executor: machine_executor_amd64
     steps:
       - checkout
+      
+      # Restore Maven dependencies cache
+      - restore_cache:
+          keys:
+            - maven-deps-v2-{{ checksum "pom.xml" }}
+            - maven-deps-v2-
+      
+      # Install Java with better error handling
+      - run:
+          name: Install Java 21
+          command: |
+            sudo apt-get update -y
+            sudo apt-get install -y openjdk-21-jdk
+            echo 'export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64' >> $BASH_ENV
+            echo 'export PATH=$JAVA_HOME/bin:$PATH' >> $BASH_ENV
+            source $BASH_ENV
+            java -version
+      
+      # Install Maven with version verification
+      - run:
+          name: Install Maven
+          command: |
+            MAVEN_VERSION=3.9.11
+            wget https://archive.apache.org/dist/maven/maven-3/${MAVEN_VERSION}/binaries/apache-maven-${MAVEN_VERSION}-bin.tar.gz
+            tar xzf apache-maven-${MAVEN_VERSION}-bin.tar.gz
+            echo "export PATH=\$PATH:\$PWD/apache-maven-${MAVEN_VERSION}/bin" >> $BASH_ENV
+            source $BASH_ENV
+            mvn -version
+      
+      # Validate project structure
+      - run:
+          name: Validate Project
+          command: |
+            source $BASH_ENV
+            mvn validate
+      
+      # Run tests with detailed reporting
+      - run:
+          name: Run Tests
+          command: |
+            source $BASH_ENV
+            mvn clean test -DfailIfNoTests=false
+          no_output_timeout: 20m
+      
+      # Store test results
+      - store_test_results:
+          path: target/surefire-reports
+      
+      # Store test artifacts
+      - store_artifacts:
+          path: target/surefire-reports
+          destination: test-reports
+      
+      # Run SonarCloud analysis
       - run:
           name: Analyze on SonarCloud
-          command: mvn verify sonar:sonar -Dsonar.projectKey=rajadilipkolli_my-spring-boot-experiments
-    executor: machine_executor_amd64
+          command: |
+            source $BASH_ENV
+            mvn verify sonar:sonar \
+              -Dsonar.projectKey=rajadilipkolli_my-spring-boot-experiments \
+              -Dsonar.organization=rajadilipkolli \
+              -Dsonar.host.url=https://sonarcloud.io
+          no_output_timeout: 45m
+      
+      # Save Maven dependencies cache
+      - save_cache:
+          paths:
+            - ~/.m2
+          key: maven-deps-v2-{{ checksum "pom.xml" }}
+      
+      # Store build artifacts
+      - store_artifacts:
+          path: target/*.jar
+          destination: build-artifacts
+      
+      # Persist workspace for potential deployment jobs
+      - persist_to_workspace:
+          root: .
+          paths:
+            - target/*.jar
+
+  # Optional: Add a deployment job (uncomment when needed)
+  # deploy:
+  #   executor: machine_executor_amd64
+  #   steps:
+  #     - attach_workspace:
+  #         at: .
+  #     - run:
+  #         name: Deploy Application
+  #         command: |
+  #           # Add your deployment commands here
+  #           echo "Deploying application..."
 
 workflows:
   main:
@@ -28,3 +117,13 @@ workflows:
             branches:
               only:
                 - main
+                - develop
+      
+      # Uncomment when deployment is needed
+      # - deploy:
+      #     requires:
+      #       - build
+      #     filters:
+      #       branches:
+      #         only:
+      #           - main
