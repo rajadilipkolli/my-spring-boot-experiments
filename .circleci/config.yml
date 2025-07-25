@@ -10,8 +10,6 @@ executors:
 
 jobs:
   build:
-    docker:
-      - image: 'cimg/openjdk:21.0.6'
     steps:
       - checkout
       - run:
@@ -28,3 +26,4 @@ workflows:
             branches:
               only:
                 - main
+                - develop
