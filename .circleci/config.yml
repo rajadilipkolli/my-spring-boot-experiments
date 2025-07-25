@@ -62,10 +62,7 @@ jobs:
           name: Analyze on SonarCloud
           command: |
             source $BASH_ENV
-            mvn -T 1C verify sonar:sonar \
-              -Dsonar.projectKey=rajadilipkolli_my-spring-boot-experiments \
-              -Dsonar.organization=rajadilipkolli \
-              -Dsonar.host.url=https://sonarcloud.io
+            mvn -T 1C verify sonar:sonar -Dsonar.projectKey=rajadilipkolli_my-spring-boot-experiments
           no_output_timeout: 45m
       
       # Save Maven dependencies cache
