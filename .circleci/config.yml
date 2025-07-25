@@ -4,7 +4,6 @@ executors:
   machine_executor_amd64:
     machine:
       image: ubuntu-2404:current
-    resource_class: medium
     environment:
       architecture: "amd64"
       platform: "linux/amd64"
