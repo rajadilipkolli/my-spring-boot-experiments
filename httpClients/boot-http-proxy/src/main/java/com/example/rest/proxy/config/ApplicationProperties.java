@@ -8,7 +8,8 @@ public class ApplicationProperties {
 
     private String postServiceUrl;
 
-    @NestedConfigurationProperty private Cors cors = new Cors();
+    @NestedConfigurationProperty
+    private Cors cors = new Cors();
 
     public String getPostServiceUrl() {
         return postServiceUrl;

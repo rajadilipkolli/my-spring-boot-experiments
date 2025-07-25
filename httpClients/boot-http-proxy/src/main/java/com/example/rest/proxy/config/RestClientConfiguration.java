@@ -58,28 +58,21 @@ class RestClientConfiguration {
         }
 
         return ClientHttpRequestFactoryBuilder.httpComponents()
-                .withHttpClientCustomizer(
-                        httpClientBuilder ->
-                                httpClientBuilder.setKeepAliveStrategy(
-                                        DefaultConnectionKeepAliveStrategy.INSTANCE))
-                .withConnectionManagerCustomizer(
-                        poolingHttpClientConnectionManagerBuilder -> {
-                            poolingHttpClientConnectionManagerBuilder.setMaxConnTotal(200);
-                            poolingHttpClientConnectionManagerBuilder.setMaxConnPerRoute(100);
-                            poolingHttpClientConnectionManagerBuilder.setTlsSocketStrategy(
-                                    new DefaultClientTlsStrategy(
-                                            sslContext,
-                                            HostnameVerificationPolicy.CLIENT,
-                                            isProdEnvironment()
-                                                    ? null
-                                                    : NoopHostnameVerifier.INSTANCE));
-                        })
-                .withDefaultRequestConfigCustomizer(
-                        (builder) -> {
-                            builder.setConnectionKeepAlive(TimeValue.ofSeconds(10));
-                            builder.setConnectionRequestTimeout(Timeout.ofSeconds(30));
-                            builder.setResponseTimeout(Timeout.ofSeconds(60));
-                        });
+                .withHttpClientCustomizer(httpClientBuilder ->
+                        httpClientBuilder.setKeepAliveStrategy(DefaultConnectionKeepAliveStrategy.INSTANCE))
+                .withConnectionManagerCustomizer(poolingHttpClientConnectionManagerBuilder -> {
+                    poolingHttpClientConnectionManagerBuilder.setMaxConnTotal(200);
+                    poolingHttpClientConnectionManagerBuilder.setMaxConnPerRoute(100);
+                    poolingHttpClientConnectionManagerBuilder.setTlsSocketStrategy(new DefaultClientTlsStrategy(
+                            sslContext,
+                            HostnameVerificationPolicy.CLIENT,
+                            isProdEnvironment() ? null : NoopHostnameVerifier.INSTANCE));
+                })
+                .withDefaultRequestConfigCustomizer((builder) -> {
+                    builder.setConnectionKeepAlive(TimeValue.ofSeconds(10));
+                    builder.setConnectionRequestTimeout(Timeout.ofSeconds(30));
+                    builder.setResponseTimeout(Timeout.ofSeconds(60));
+                });
     }
 
     private boolean isProdEnvironment() {
@@ -88,18 +81,15 @@ class RestClientConfiguration {
 
     @Bean
     RestClientCustomizer restClientCustomizer(
-            ObservationRegistry observationRegistry,
-            LogbookClientHttpRequestInterceptor interceptor) {
-        return restClientBuilder ->
-                restClientBuilder
-                        .defaultHeaders(
-                                httpHeaders -> {
-                                    httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-                                    httpHeaders.setAccept(List.of(MediaType.APPLICATION_JSON));
-                                })
-                        .baseUrl(applicationProperties.getPostServiceUrl())
-                        .observationRegistry(observationRegistry)
-                        .requestInterceptor(interceptor);
+            ObservationRegistry observationRegistry, LogbookClientHttpRequestInterceptor interceptor) {
+        return restClientBuilder -> restClientBuilder
+                .defaultHeaders(httpHeaders -> {
+                    httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+                    httpHeaders.setAccept(List.of(MediaType.APPLICATION_JSON));
+                })
+                .baseUrl(applicationProperties.getPostServiceUrl())
+                .observationRegistry(observationRegistry)
+                .requestInterceptor(interceptor);
     }
 
     @Bean

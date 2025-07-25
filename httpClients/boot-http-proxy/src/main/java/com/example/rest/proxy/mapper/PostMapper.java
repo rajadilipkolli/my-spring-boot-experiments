@@ -24,19 +24,16 @@ public class PostMapper {
         return postCommentList.stream().map(this::mapToCommentResponse).toList();
     }
 
-    public List<PostComment> mapToEntityList(
-            List<PostCommentDto> postCommentDtos, PostRepository postRepository) {
+    public List<PostComment> mapToEntityList(List<PostCommentDto> postCommentDtos, PostRepository postRepository) {
         return postCommentDtos.stream()
-                .map(
-                        postCommentDto -> {
-                            PostComment postComment = new PostComment();
-                            postComment.setBody(postCommentDto.body());
-                            postComment.setEmail(postCommentDto.email());
-                            postComment.setName(postCommentDto.name());
-                            postComment.setPost(
-                                    postRepository.getReferenceById(postCommentDto.postId()));
-                            return postComment;
-                        })
+                .map(postCommentDto -> {
+                    PostComment postComment = new PostComment();
+                    postComment.setBody(postCommentDto.body());
+                    postComment.setEmail(postCommentDto.email());
+                    postComment.setName(postCommentDto.name());
+                    postComment.setPost(postRepository.getReferenceById(postCommentDto.postId()));
+                    return postComment;
+                })
                 .toList();
     }
 

@@ -35,39 +35,44 @@ public class PostComment {
         return id;
     }
 
-    public void setId(Long id) {
+    public PostComment setId(Long id) {
         this.id = id;
+        return this;
     }
 
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
+    public PostComment setName(String name) {
         this.name = name;
+        return this;
     }
 
     public String getEmail() {
         return email;
     }
 
-    public void setEmail(String email) {
+    public PostComment setEmail(String email) {
         this.email = email;
+        return this;
     }
 
     public String getBody() {
         return body;
     }
 
-    public void setBody(String body) {
+    public PostComment setBody(String body) {
         this.body = body;
+        return this;
     }
 
     public Post getPost() {
         return post;
     }
 
-    public void setPost(Post post) {
+    public PostComment setPost(Post post) {
         this.post = post;
+        return this;
     }
 }

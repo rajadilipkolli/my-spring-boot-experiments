@@ -20,8 +20,7 @@ class Initializer implements CommandLineRunner {
     private final JsonPlaceholderService jsonPlaceholderService;
     private final PostRepository postRepository;
 
-    public Initializer(
-            JsonPlaceholderService jsonPlaceholderService, PostRepository postRepository) {
+    public Initializer(JsonPlaceholderService jsonPlaceholderService, PostRepository postRepository) {
         this.jsonPlaceholderService = jsonPlaceholderService;
         this.postRepository = postRepository;
     }

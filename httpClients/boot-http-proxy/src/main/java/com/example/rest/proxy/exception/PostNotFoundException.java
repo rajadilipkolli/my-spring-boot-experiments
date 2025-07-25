@@ -14,8 +14,7 @@ public class PostNotFoundException extends ErrorResponseException {
 
     private static ProblemDetail asProblemDetail(Long id) {
         ProblemDetail problemDetail =
-                ProblemDetail.forStatusAndDetail(
-                        HttpStatus.NOT_FOUND, "Post with Id '%d' not found".formatted(id));
+                ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, "Post with Id '%d' not found".formatted(id));
         problemDetail.setTitle("Post Not Found");
         problemDetail.setType(URI.create("http://api.posts.com/errors/not-found"));
         problemDetail.setProperty("errorCategory", "Generic");
