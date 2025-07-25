@@ -58,29 +58,12 @@ jobs:
             source $BASH_ENV
             mvn validate
       
-      # Run tests with detailed reporting
-      - run:
-          name: Run Tests
-          command: |
-            source $BASH_ENV
-            mvn clean test -DfailIfNoTests=false
-          no_output_timeout: 30m
-      
-      # Store test results
-      - store_test_results:
-          path: target/surefire-reports
-      
-      # Store test artifacts
-      - store_artifacts:
-          path: target/surefire-reports
-          destination: test-reports
-      
-      # Run SonarCloud analysis
+      # Run SonarCloud analysis in parallel for each module
       - run:
           name: Analyze on SonarCloud
           command: |
             source $BASH_ENV
-            mvn verify sonar:sonar \
+            mvn -T 1C verify sonar:sonar \
               -Dsonar.projectKey=rajadilipkolli_my-spring-boot-experiments \
               -Dsonar.organization=rajadilipkolli \
               -Dsonar.host.url=https://sonarcloud.io
