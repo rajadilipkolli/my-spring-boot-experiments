@@ -6,12 +6,12 @@ import com.example.bootbatchjpa.common.AbstractIntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.batch.core.ExitStatus;
-import org.springframework.batch.core.Job;
-import org.springframework.batch.core.JobExecution;
-import org.springframework.batch.core.JobInstance;
-import org.springframework.batch.core.JobParameters;
-import org.springframework.batch.core.JobParametersBuilder;
-import org.springframework.batch.test.JobLauncherTestUtils;
+import org.springframework.batch.core.job.Job;
+import org.springframework.batch.core.job.JobExecution;
+import org.springframework.batch.core.job.JobInstance;
+import org.springframework.batch.core.job.parameters.JobParameters;
+import org.springframework.batch.core.job.parameters.JobParametersBuilder;
+import org.springframework.batch.test.JobOperatorTestUtils;
 import org.springframework.batch.test.JobRepositoryTestUtils;
 import org.springframework.batch.test.context.SpringBatchTest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +22,7 @@ import org.springframework.test.annotation.DirtiesContext;
 class SpringBatchIntegrationTest extends AbstractIntegrationTest {
 
     @Autowired
-    private JobLauncherTestUtils jobLauncherTestUtils;
+    private JobOperatorTestUtils jobOperatorTestUtils;
 
     @Autowired
     private JobRepositoryTestUtils jobRepositoryTestUtils;
@@ -33,7 +33,7 @@ class SpringBatchIntegrationTest extends AbstractIntegrationTest {
     @BeforeEach
     void setup() {
         this.jobRepositoryTestUtils.removeJobExecutions();
-        this.jobLauncherTestUtils.setJob(this.jobUnderTest);
+        this.jobOperatorTestUtils.setJob(this.jobUnderTest);
     }
 
     @Test
@@ -41,7 +41,7 @@ class SpringBatchIntegrationTest extends AbstractIntegrationTest {
         // given
 
         // when
-        JobExecution jobExecution = jobLauncherTestUtils.launchJob(defaultJobParameters());
+        JobExecution jobExecution = jobOperatorTestUtils.startJob(defaultJobParameters());
         JobInstance actualJobInstance = jobExecution.getJobInstance();
         ExitStatus actualJobExitStatus = jobExecution.getExitStatus();
 
@@ -54,10 +54,10 @@ class SpringBatchIntegrationTest extends AbstractIntegrationTest {
     @Test
     void myJob() throws Exception {
         // given
-        JobParameters jobParameters = this.jobLauncherTestUtils.getUniqueJobParameters();
+        JobParameters jobParameters = this.jobOperatorTestUtils.getUniqueJobParameters();
 
         // when
-        JobExecution jobExecution = this.jobLauncherTestUtils.launchJob(jobParameters);
+        JobExecution jobExecution = this.jobOperatorTestUtils.startJob(jobParameters);
 
         // then
         assertThat(jobExecution.getExitStatus()).isEqualTo(ExitStatus.COMPLETED);
