@@ -1,3 +1,4 @@
+name: batch-boot-jpa
 services:
 
   postgresqldb:
