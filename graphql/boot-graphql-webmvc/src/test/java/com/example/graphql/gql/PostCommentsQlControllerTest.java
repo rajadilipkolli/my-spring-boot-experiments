@@ -55,7 +55,10 @@ class PostCommentsQlControllerTest {
         graphQlTester
                 .document(mutation)
                 .variable("addCommentToPostRequest", requestMap)
-                .execute();
+                .execute()
+                .path("addCommentToPost.title")
+                .entity(String.class)
+                .isEqualTo("Title");
 
         verify(postCommentService, times(1)).addCommentToPost(expectedRequest);
         verifyNoMoreInteractions(postCommentService);

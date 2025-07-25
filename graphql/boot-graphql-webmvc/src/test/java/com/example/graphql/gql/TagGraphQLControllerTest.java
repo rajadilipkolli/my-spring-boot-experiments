@@ -103,4 +103,86 @@ class TagGraphQLControllerTest {
         verify(tagService, times(1)).findTagByName("notfound");
         verifyNoMoreInteractions(tagService);
     }
+
+    @Test
+    void createTag() {
+        TagEntity tag = new TagEntity();
+        tag.setTagName("tag3");
+        tag.setTagDescription("desc3");
+        given(tagService.saveTag("tag3", "desc3")).willReturn(tag);
+
+        var mutation =
+                """
+            mutation {
+                createTag(tagName: \"tag3\", tagDescription: \"desc3\") {
+                    tagName
+                    tagDescription
+                }
+            }
+        """;
+        graphQlTester
+                .document(mutation)
+                .execute()
+                .path("createTag")
+                .entity(TagEntity.class)
+                .satisfies(created -> {
+                    assertThat(created.getTagName()).isEqualTo("tag3");
+                    assertThat(created.getTagDescription()).isEqualTo("desc3");
+                });
+
+        verify(tagService, times(1)).saveTag("tag3", "desc3");
+        verifyNoMoreInteractions(tagService);
+    }
+
+    @Test
+    void updateTagDescription() {
+        TagEntity tag = new TagEntity();
+        tag.setTagName("tag4");
+        tag.setTagDescription("newdesc");
+        given(tagService.updateTag("tag4", "newdesc")).willReturn(Optional.of(tag));
+
+        var mutation =
+                """
+            mutation {
+                updateTagDescription(tagName: \"tag4\", tagDescription: \"newdesc\") {
+                    tagName
+                    tagDescription
+                }
+            }
+        """;
+        graphQlTester
+                .document(mutation)
+                .execute()
+                .path("updateTagDescription")
+                .entity(TagEntity.class)
+                .satisfies(updated -> {
+                    assertThat(updated.getTagName()).isEqualTo("tag4");
+                    assertThat(updated.getTagDescription()).isEqualTo("newdesc");
+                });
+
+        verify(tagService, times(1)).updateTag("tag4", "newdesc");
+        verifyNoMoreInteractions(tagService);
+    }
+
+    @Test
+    void deleteTag() {
+        // deleteTag returns boolean true, just verify service call
+        var mutation =
+                """
+            mutation {
+                deleteTag(tagName: \"tag5\")
+            }
+        """;
+
+        // No need to stub, as deleteTagByName is void
+        graphQlTester
+                .document(mutation)
+                .execute()
+                .path("deleteTag")
+                .entity(Boolean.class)
+                .isEqualTo(true);
+
+        verify(tagService, times(1)).deleteTagByName("tag5");
+        verifyNoMoreInteractions(tagService);
+    }
 }

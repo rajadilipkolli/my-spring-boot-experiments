@@ -6,7 +6,6 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
 
 import com.example.graphql.config.graphql.GraphQlConfiguration;
 import com.example.graphql.entities.PostEntity;
@@ -58,15 +57,15 @@ class PostQlControllerTest {
         }
 
         public LocalDateTime getCreatedAt() {
-            return LocalDateTime.now();
+            return LocalDateTime.of(2024, 1, 1, 10, 0);
         }
 
-        public java.time.LocalDateTime getModifiedAt() {
-            return LocalDateTime.now();
+        public LocalDateTime getModifiedAt() {
+            return LocalDateTime.of(2024, 1, 1, 11, 0, 0);
         }
 
-        public java.time.LocalDateTime getPublishedAt() {
-            return LocalDateTime.now();
+        public LocalDateTime getPublishedAt() {
+            return LocalDateTime.of(2024, 1, 1, 12, 0, 0);
         }
 
         public PostDetailsInfo getDetails() {
@@ -118,12 +117,19 @@ class PostQlControllerTest {
         Map<String, String> detailsValues = new HashMap<>();
         detailsValues.put("detailsKey", "newPost");
         inputValues.put("details", detailsValues);
-        when(postService.createPost(any(NewPostRequest.class))).thenReturn(new PostEntity());
+        PostEntity expectedPost = new PostEntity();
+        expectedPost.setTitle("JunitTitle");
+        expectedPost.setId(2L);
+        expectedPost.setContent("JunitContent");
+        given(postService.createPost(any(NewPostRequest.class))).willReturn(expectedPost);
 
         graphQlTester
                 .documentName("createPost")
                 .variable("newPostRequest", inputValues)
-                .execute();
+                .execute()
+                .path("createPost.title")
+                .entity(String.class)
+                .isEqualTo("JunitTitle");
 
         verify(postService, times(1)).createPost(any(NewPostRequest.class));
         verifyNoMoreInteractions(postService);
