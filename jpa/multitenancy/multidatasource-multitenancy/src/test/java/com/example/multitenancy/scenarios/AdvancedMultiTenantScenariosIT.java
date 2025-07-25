@@ -556,11 +556,7 @@ class AdvancedMultiTenantScenariosIT extends AbstractIntegrationTest {
         private void verifyDataInTenant(String tenantName, String dataId) {
             if (isPrimaryTenant(tenantName)) {
                 List<PrimaryCustomer> customers = primaryCustomerRepository.findAll();
-                boolean found = customers.stream()
-                        .anyMatch(c -> c.getText() != null && c.getText().contains(dataId));
-                assertThat(found)
-                        .as("Data with ID " + dataId + " should exist in primary tenant " + tenantName)
-                        .isTrue();
+                assertThat(customers).anySatisfy(c -> assertThat(c.getText()).contains(dataId));
             } else {
                 List<SecondaryCustomer> customers = secondaryCustomerRepository.findAll();
                 boolean found = customers.stream()

@@ -24,14 +24,13 @@ class GlobalExceptionHandler {
                 ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Invalid request content.");
         problemDetail.setTitle("Constraint Violation");
         List<ApiValidationError> validationErrorsList = methodArgumentNotValidException.getAllErrors().stream()
-                .map(objectError -> {
-                    FieldError fieldError = (FieldError) objectError;
-                    return new ApiValidationError(
-                            fieldError.getObjectName(),
-                            fieldError.getField(),
-                            fieldError.getRejectedValue(),
-                            Objects.requireNonNull(fieldError.getDefaultMessage(), ""));
-                })
+                .filter(FieldError.class::isInstance)
+                .map(FieldError.class::cast)
+                .map(fieldError -> new ApiValidationError(
+                        fieldError.getObjectName(),
+                        fieldError.getField(),
+                        fieldError.getRejectedValue(),
+                        Objects.requireNonNull(fieldError.getDefaultMessage(), "")))
                 .sorted(Comparator.comparing(ApiValidationError::field))
                 .toList();
         problemDetail.setProperty("violations", validationErrorsList);

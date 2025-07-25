@@ -65,11 +65,9 @@ public class PrimaryCustomerController {
         log.info("updating customer for id {} in tenant : {}", id, tenantId);
         return primaryCustomerService
                 .findCustomerById(id)
-                .map(customerObj -> {
-                    PrimaryCustomer primaryCustomer = new PrimaryCustomer();
-                    primaryCustomer.setText(primaryCustomerRequest.text());
-                    primaryCustomer.setId(customerObj.getId());
-                    return ResponseEntity.ok(primaryCustomerService.saveCustomer(primaryCustomer));
+                .map(existing -> {
+                    existing.setText(primaryCustomerRequest.text());
+                    return ResponseEntity.ok(primaryCustomerService.saveCustomer(existing));
                 })
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
