@@ -15,9 +15,11 @@ services:
             - "4318:4318"     # OTLP HTTP
             - "9411:9411"     # Zipkin
         healthcheck:
+            test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3200/ready"]
             interval: 5s
-            retries: 10
-            test: wget --no-verbose --tries=1 --spider http://localhost:3200/status || exit 1
+            timeout: 30s
+            retries: 30
+            start_period: 90s
 
     loki:
         image: grafana/loki:3.5.3
