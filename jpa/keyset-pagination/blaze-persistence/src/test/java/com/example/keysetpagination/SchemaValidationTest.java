@@ -15,7 +15,8 @@ import org.springframework.context.annotation.Import;
 @Import({SpringBlazePersistenceConfiguration.class, ContainersConfig.class})
 class SchemaValidationTest {
 
-    @Autowired private DataSource dataSource;
+    @Autowired
+    private DataSource dataSource;
 
     @Test
     void validateJpaMappingsWithDbSchema() {

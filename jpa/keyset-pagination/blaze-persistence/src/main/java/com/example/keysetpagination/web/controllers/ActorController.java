@@ -35,60 +35,45 @@ public class ActorController {
 
     @GetMapping
     public PagedResult<ActorResponse> findAllActors(
-            @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_NUMBER, required = false)
-                    int pageNo,
-            @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_SIZE, required = false)
-                    int pageSize,
-            @RequestParam(defaultValue = AppConstants.DEFAULT_SORT_BY, required = false)
-                    String sortBy,
-            @RequestParam(defaultValue = AppConstants.DEFAULT_SORT_DIRECTION, required = false)
-                    String sortDir,
+            @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_NUMBER, required = false) int pageNo,
+            @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_SIZE, required = false) int pageSize,
+            @RequestParam(defaultValue = AppConstants.DEFAULT_SORT_BY, required = false) String sortBy,
+            @RequestParam(defaultValue = AppConstants.DEFAULT_SORT_DIRECTION, required = false) String sortDir,
             @RequestParam(required = false) Long lowest,
             @RequestParam(required = false) Long highest) {
 
-        FindActorsQuery findActorsQuery =
-                new FindActorsQuery(pageNo, pageSize, lowest, highest, sortBy, sortDir);
+        FindActorsQuery findActorsQuery = new FindActorsQuery(pageNo, pageSize, lowest, highest, sortBy, sortDir);
 
         return actorService.findAll(findActorsQuery);
     }
 
     @PostMapping("/search")
     public PagedResult<ActorResponse> searchActors(
-            @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_NUMBER, required = false)
-                    int pageNo,
-            @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_SIZE, required = false)
-                    int pageSize,
-            @RequestParam(defaultValue = AppConstants.DEFAULT_SORT_BY, required = false)
-                    String sortBy,
-            @RequestParam(defaultValue = AppConstants.DEFAULT_SORT_DIRECTION, required = false)
-                    String sortDir,
+            @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_NUMBER, required = false) int pageNo,
+            @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_SIZE, required = false) int pageSize,
+            @RequestParam(defaultValue = AppConstants.DEFAULT_SORT_BY, required = false) String sortBy,
+            @RequestParam(defaultValue = AppConstants.DEFAULT_SORT_DIRECTION, required = false) String sortDir,
             @RequestParam(required = false) Long lowest,
             @RequestParam(required = false) Long highest,
             @RequestBody SearchCriteria[] searchCriteria) {
 
-        FindActorsQuery findActorsQuery =
-                new FindActorsQuery(pageNo, pageSize, lowest, highest, sortBy, sortDir);
+        FindActorsQuery findActorsQuery = new FindActorsQuery(pageNo, pageSize, lowest, highest, sortBy, sortDir);
 
         return actorService.findAll(searchCriteria, findActorsQuery);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ActorResponse> getActorById(@PathVariable Long id) {
-        return actorService
-                .findActorById(id)
-                .map(ResponseEntity::ok)
-                .orElseThrow(() -> new ActorNotFoundException(id));
+        return actorService.findActorById(id).map(ResponseEntity::ok).orElseThrow(() -> new ActorNotFoundException(id));
     }
 
     @PostMapping
-    public ResponseEntity<ActorResponse> createActor(
-            @RequestBody @Validated ActorRequest actorRequest) {
+    public ResponseEntity<ActorResponse> createActor(@RequestBody @Validated ActorRequest actorRequest) {
         ActorResponse response = actorService.saveActor(actorRequest);
-        URI location =
-                ServletUriComponentsBuilder.fromCurrentRequest()
-                        .path("/api/actors/{id}")
-                        .buildAndExpand(response.id())
-                        .toUri();
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
+                .path("/api/actors/{id}")
+                .buildAndExpand(response.id())
+                .toUri();
         return ResponseEntity.created(location).body(response);
     }
 
@@ -102,11 +87,10 @@ public class ActorController {
     public ResponseEntity<ActorResponse> deleteActor(@PathVariable Long id) {
         return actorService
                 .findActorById(id)
-                .map(
-                        actor -> {
-                            actorService.deleteActorById(id);
-                            return ResponseEntity.ok(actor);
-                        })
+                .map(actor -> {
+                    actorService.deleteActorById(id);
+                    return ResponseEntity.ok(actor);
+                })
                 .orElseThrow(() -> new ActorNotFoundException(id));
     }
 }
