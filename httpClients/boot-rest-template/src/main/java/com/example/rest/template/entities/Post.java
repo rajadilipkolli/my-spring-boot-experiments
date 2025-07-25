@@ -33,43 +33,40 @@ public class Post {
 
     public Post() {}
 
-    public Post(Long id, String title, Long userId, String body) {
-        this.id = id;
-        this.title = title;
-        this.userId = userId;
-        this.body = body;
-    }
-
     public Long getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public Post setId(Long id) {
         this.id = id;
+        return this;
     }
 
     public String getTitle() {
         return title;
     }
 
-    public void setTitle(String title) {
+    public Post setTitle(String title) {
         this.title = title;
+        return this;
     }
 
     public Long getUserId() {
         return userId;
     }
 
-    public void setUserId(Long userId) {
+    public Post setUserId(Long userId) {
         this.userId = userId;
+        return this;
     }
 
     public String getBody() {
         return body;
     }
 
-    public void setBody(String body) {
+    public Post setBody(String body) {
         this.body = body;
+        return this;
     }
 
     @Override

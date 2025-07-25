@@ -73,31 +73,26 @@ public class RestTemplateConfiguration {
         } catch (KeyManagementException | NoSuchAlgorithmException | KeyStoreException e) {
             throw new RuntimeException("Failed to initialize SSL context", e);
         }
-        PoolingHttpClientConnectionManager poolingConnectionManager =
-                PoolingHttpClientConnectionManagerBuilder.create()
-                        .setTlsSocketStrategy(
-                                new DefaultClientTlsStrategy(
-                                        sslContext,
-                                        HostnameVerificationPolicy.CLIENT,
-                                        isProdEnvironment() ? null : NoopHostnameVerifier.INSTANCE))
-                        .setDefaultSocketConfig(
-                                SocketConfig.custom()
-                                        .setSoTimeout(Timeout.ofSeconds(SOCKET_TIMEOUT))
-                                        .build())
-                        .setDefaultConnectionConfig(
-                                ConnectionConfig.custom()
-                                        .setConnectTimeout(Timeout.ofSeconds(CONNECTION_TIMEOUT))
-                                        .build())
-                        // set a total amount of connections across all HTTP routes
-                        .setMaxConnTotal(MAX_TOTAL_CONNECTIONS)
-                        // set a maximum amount of connections for each HTTP route in pool
-                        .setMaxConnPerRoute(MAX_ROUTE_CONNECTIONS)
-                        .build();
+        PoolingHttpClientConnectionManager poolingConnectionManager = PoolingHttpClientConnectionManagerBuilder.create()
+                .setTlsSocketStrategy(new DefaultClientTlsStrategy(
+                        sslContext,
+                        HostnameVerificationPolicy.CLIENT,
+                        isProdEnvironment() ? null : NoopHostnameVerifier.INSTANCE))
+                .setDefaultSocketConfig(SocketConfig.custom()
+                        .setSoTimeout(Timeout.ofSeconds(SOCKET_TIMEOUT))
+                        .build())
+                .setDefaultConnectionConfig(ConnectionConfig.custom()
+                        .setConnectTimeout(Timeout.ofSeconds(CONNECTION_TIMEOUT))
+                        .build())
+                // set a total amount of connections across all HTTP routes
+                .setMaxConnTotal(MAX_TOTAL_CONNECTIONS)
+                // set a maximum amount of connections for each HTTP route in pool
+                .setMaxConnPerRoute(MAX_ROUTE_CONNECTIONS)
+                .build();
 
         // increase the amounts of connections if the host is localhost
         HttpHost localhost = new HttpHost("http://localhost", 8080);
-        poolingConnectionManager.setMaxPerRoute(
-                new HttpRoute(localhost), MAX_LOCALHOST_CONNECTIONS);
+        poolingConnectionManager.setMaxPerRoute(new HttpRoute(localhost), MAX_LOCALHOST_CONNECTIONS);
         return poolingConnectionManager;
     }
 
@@ -109,12 +104,11 @@ public class RestTemplateConfiguration {
     CloseableHttpClient httpClient(
             PoolingHttpClientConnectionManager poolingConnectionManager,
             ConnectionKeepAliveStrategy connectionKeepAliveStrategy) {
-        RequestConfig requestConfig =
-                RequestConfig.custom()
-                        .setConnectionKeepAlive(TimeValue.ofSeconds(CONNECTION_TIMEOUT))
-                        .setConnectionRequestTimeout(Timeout.ofSeconds(REQUEST_TIMEOUT))
-                        .setResponseTimeout(Timeout.ofSeconds(SOCKET_TIMEOUT))
-                        .build();
+        RequestConfig requestConfig = RequestConfig.custom()
+                .setConnectionKeepAlive(TimeValue.ofSeconds(CONNECTION_TIMEOUT))
+                .setConnectionRequestTimeout(Timeout.ofSeconds(REQUEST_TIMEOUT))
+                .setResponseTimeout(Timeout.ofSeconds(SOCKET_TIMEOUT))
+                .build();
 
         return HttpClients.custom()
                 .setDefaultRequestConfig(requestConfig)
@@ -142,23 +136,19 @@ public class RestTemplateConfiguration {
     }
 
     @Bean
-    RestTemplate restTemplate(
-            RestTemplateBuilder restTemplateBuilder, CloseableHttpClient httpClient) {
+    RestTemplate restTemplate(RestTemplateBuilder restTemplateBuilder, CloseableHttpClient httpClient) {
 
         return restTemplateBuilder
                 .connectTimeout(Duration.ofSeconds(60))
-                .defaultHeader(
-                        org.springframework.http.HttpHeaders.CONTENT_TYPE,
-                        MediaType.APPLICATION_JSON_VALUE)
+                .defaultHeader(org.springframework.http.HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .requestFactory(() -> new HttpComponentsClientHttpRequestFactory(httpClient))
-                .interceptors(
-                        ((request, body, execution) -> {
-                            // log the http request
-                            log.info("URI: {}", request.getURI());
-                            log.info("HTTP Method: {}", request.getMethod().name());
-                            log.info("HTTP Headers: {}", request.getHeaders());
-                            return execution.execute(request, body);
-                        }))
+                .interceptors(((request, body, execution) -> {
+                    // log the http request
+                    log.info("URI: {}", request.getURI());
+                    log.info("HTTP Method: {}", request.getMethod().name());
+                    log.info("HTTP Headers: {}", request.getHeaders());
+                    return execution.execute(request, body);
+                }))
                 .build();
     }
 

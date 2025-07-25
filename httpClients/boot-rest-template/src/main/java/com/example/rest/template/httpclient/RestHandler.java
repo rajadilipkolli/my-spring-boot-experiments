@@ -24,8 +24,7 @@ public class RestHandler {
         return get(applicationRestRequest, String.class).body();
     }
 
-    public <T> ApplicationRestResponse<T> get(
-            ApplicationRestRequest applicationRestRequest, Class<T> responseClass) {
+    public <T> ApplicationRestResponse<T> get(ApplicationRestRequest applicationRestRequest, Class<T> responseClass) {
 
         return this.restTemplateClient.get(applicationRestRequest, responseClass);
     }
@@ -35,9 +34,7 @@ public class RestHandler {
         return get(applicationRestRequest, responseClass).body();
     }
 
-    public <T> T getBody(
-            ApplicationRestRequest applicationRestRequest,
-            ParameterizedTypeReference<T> responseType) {
+    public <T> T getBody(ApplicationRestRequest applicationRestRequest, ParameterizedTypeReference<T> responseType) {
         return this.restTemplateClient.get(applicationRestRequest, responseType);
     }
 
@@ -46,8 +43,7 @@ public class RestHandler {
         return post(applicationRestRequest, String.class);
     }
 
-    public <T> ApplicationRestResponse<T> post(
-            ApplicationRestRequest applicationRestRequest, Class<T> responseClass) {
+    public <T> ApplicationRestResponse<T> post(ApplicationRestRequest applicationRestRequest, Class<T> responseClass) {
 
         return this.restTemplateClient.post(applicationRestRequest, responseClass);
     }
@@ -57,14 +53,12 @@ public class RestHandler {
         return put(applicationRestRequest, String.class);
     }
 
-    public <T> ApplicationRestResponse<T> put(
-            ApplicationRestRequest applicationRestRequest, Class<T> responseClass) {
+    public <T> ApplicationRestResponse<T> put(ApplicationRestRequest applicationRestRequest, Class<T> responseClass) {
 
         return this.restTemplateClient.put(applicationRestRequest, responseClass);
     }
 
-    public <T> ApplicationRestResponse<T> patch(
-            ApplicationRestRequest applicationRestRequest, Class<T> responseClass) {
+    public <T> ApplicationRestResponse<T> patch(ApplicationRestRequest applicationRestRequest, Class<T> responseClass) {
 
         return this.restTemplateClient.patch(applicationRestRequest, responseClass);
     }

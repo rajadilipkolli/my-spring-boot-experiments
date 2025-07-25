@@ -26,80 +26,60 @@ public class RestTemplateClientImpl implements RestTemplateClient {
     }
 
     @Override
-    public <T> ApplicationRestResponse<T> get(
-            ApplicationRestRequest applicationRestRequest, Class<T> responseType) {
+    public <T> ApplicationRestResponse<T> get(ApplicationRestRequest applicationRestRequest, Class<T> responseType) {
         return getApplicationRestResponse(applicationRestRequest, responseType, HttpMethod.GET);
     }
 
     @Override
-    public <T> T get(
-            ApplicationRestRequest applicationRestRequest,
-            ParameterizedTypeReference<T> responseType) {
+    public <T> T get(ApplicationRestRequest applicationRestRequest, ParameterizedTypeReference<T> responseType) {
         UrlAndHttpEntityRecord urlAndHttpEntityRecord = getUrlAndHttpEntity(applicationRestRequest);
         return callRestService(
-                        urlAndHttpEntityRecord.uri(),
-                        HttpMethod.GET,
-                        urlAndHttpEntityRecord.httpEntity(),
-                        responseType)
+                        urlAndHttpEntityRecord.uri(), HttpMethod.GET, urlAndHttpEntityRecord.httpEntity(), responseType)
                 .body();
     }
 
     @Override
-    public <T> ApplicationRestResponse<T> post(
-            ApplicationRestRequest applicationRestRequest, Class<T> responseType) {
+    public <T> ApplicationRestResponse<T> post(ApplicationRestRequest applicationRestRequest, Class<T> responseType) {
         return getApplicationRestResponse(applicationRestRequest, responseType, HttpMethod.POST);
     }
 
     @Override
-    public <T> ApplicationRestResponse<T> put(
-            ApplicationRestRequest applicationRestRequest, Class<T> responseType) {
+    public <T> ApplicationRestResponse<T> put(ApplicationRestRequest applicationRestRequest, Class<T> responseType) {
         return getApplicationRestResponse(applicationRestRequest, responseType, HttpMethod.PUT);
     }
 
     @Override
-    public <T> ApplicationRestResponse<T> patch(
-            ApplicationRestRequest applicationRestRequest, Class<T> responseType) {
+    public <T> ApplicationRestResponse<T> patch(ApplicationRestRequest applicationRestRequest, Class<T> responseType) {
         return getApplicationRestResponse(applicationRestRequest, responseType, HttpMethod.PATCH);
     }
 
     @Override
-    public <T> ApplicationRestResponse<T> delete(
-            ApplicationRestRequest applicationRestRequest, Class<T> responseType) {
+    public <T> ApplicationRestResponse<T> delete(ApplicationRestRequest applicationRestRequest, Class<T> responseType) {
         return getApplicationRestResponse(applicationRestRequest, responseType, HttpMethod.DELETE);
     }
 
     private <T> ApplicationRestResponse<T> getApplicationRestResponse(
-            ApplicationRestRequest applicationRestRequest,
-            Class<T> responseType,
-            HttpMethod httpMethod) {
+            ApplicationRestRequest applicationRestRequest, Class<T> responseType, HttpMethod httpMethod) {
         UrlAndHttpEntityRecord urlAndHttpEntityRecord = getUrlAndHttpEntity(applicationRestRequest);
         return callRestService(
-                urlAndHttpEntityRecord.uri(),
-                httpMethod,
-                urlAndHttpEntityRecord.httpEntity(),
-                responseType);
+                urlAndHttpEntityRecord.uri(), httpMethod, urlAndHttpEntityRecord.httpEntity(), responseType);
     }
 
-    private UrlAndHttpEntityRecord getUrlAndHttpEntity(
-            ApplicationRestRequest applicationRestRequest) {
+    private UrlAndHttpEntityRecord getUrlAndHttpEntity(ApplicationRestRequest applicationRestRequest) {
 
         URI uri = getUrlRequestBuilder(applicationRestRequest);
         applicationRestRequest
                 .getHeaders()
                 .putIfAbsent(HttpHeaders.CONTENT_TYPE, applicationRestRequest.getContentType());
-        HttpEntity<Object> httpEntity =
-                new HttpEntity<>(
-                        applicationRestRequest.getPayload(),
-                        convertToMultiMap(applicationRestRequest.getHeaders()));
+        HttpEntity<Object> httpEntity = new HttpEntity<>(
+                applicationRestRequest.getPayload(), convertToMultiMap(applicationRestRequest.getHeaders()));
 
         return new UrlAndHttpEntityRecord(uri, httpEntity);
     }
 
     private URI getUrlRequestBuilder(ApplicationRestRequest applicationRestRequest) {
-        UriComponentsBuilder builder =
-                UriComponentsBuilder.fromHttpUrl(applicationRestRequest.getHttpBaseUrl());
-        if (null != applicationRestRequest.getPath()
-                && !"/".equals(applicationRestRequest.getPath())) {
+        UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(applicationRestRequest.getHttpBaseUrl());
+        if (null != applicationRestRequest.getPath() && !"/".equals(applicationRestRequest.getPath())) {
             builder.path(applicationRestRequest.getPath());
         }
         if (!applicationRestRequest.getQueryParameters().isEmpty()) {
@@ -107,8 +87,8 @@ public class RestTemplateClientImpl implements RestTemplateClient {
         }
         UriComponents urlComponent;
         if (null != applicationRestRequest.getPathVariables()) {
-            urlComponent =
-                    builder.buildAndExpand(applicationRestRequest.getPathVariables()).encode();
+            urlComponent = builder.buildAndExpand(applicationRestRequest.getPathVariables())
+                    .encode();
         } else {
             urlComponent = builder.build(true);
         }
@@ -124,18 +104,13 @@ public class RestTemplateClientImpl implements RestTemplateClient {
 
     private <T, V> ApplicationRestResponse<T> callRestService(
             URI uri, HttpMethod httpMethod, HttpEntity<V> httpEntity, Class<T> responseClass) {
-        ResponseEntity<T> responseEntity =
-                this.restTemplate.exchange(uri, httpMethod, httpEntity, responseClass);
+        ResponseEntity<T> responseEntity = this.restTemplate.exchange(uri, httpMethod, httpEntity, responseClass);
         return getStandardResponse(responseEntity);
     }
 
     private <T, V> ApplicationRestResponse<T> callRestService(
-            URI uri,
-            HttpMethod httpMethod,
-            HttpEntity<V> httpEntity,
-            ParameterizedTypeReference<T> responseType) {
-        ResponseEntity<T> responseEntity =
-                this.restTemplate.exchange(uri, httpMethod, httpEntity, responseType);
+            URI uri, HttpMethod httpMethod, HttpEntity<V> httpEntity, ParameterizedTypeReference<T> responseType) {
+        ResponseEntity<T> responseEntity = this.restTemplate.exchange(uri, httpMethod, httpEntity, responseType);
         return getStandardResponse(responseEntity);
     }
 

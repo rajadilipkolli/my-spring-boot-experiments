@@ -19,10 +19,8 @@ public final class AppConstants {
     public static final int DEFAULT_KEEP_ALIVE_TIME = 20; // 20 sec
 
     // Timeouts
-    public static final int CONNECTION_TIMEOUT =
-            30; // 30 sec, the time for waiting until a connection is established
-    public static final int REQUEST_TIMEOUT =
-            30; // 30 sec, the time for waiting for a connection from connection pool
+    public static final int CONNECTION_TIMEOUT = 30; // 30 sec, the time for waiting until a connection is established
+    public static final int REQUEST_TIMEOUT = 30; // 30 sec, the time for waiting for a connection from connection pool
     public static final int SOCKET_TIMEOUT = 60; // 60 sec, the time for waiting for data
 
     // Idle connection monitor
