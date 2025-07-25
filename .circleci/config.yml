@@ -12,9 +12,16 @@ jobs:
   build:
     steps:
       - checkout
+      - restore_cache:
+          keys:
+            - m2-{{ checksum "pom.xml" }}
       - run:
           name: Analyze on SonarCloud
           command: mvn verify sonar:sonar -Dsonar.projectKey=rajadilipkolli_my-spring-boot-experiments
+      - save_cache:
+          paths:
+            - ~/.m2
+          key: m2-{{ checksum "pom.xml" }}
     executor: machine_executor_amd64
 
 workflows:
