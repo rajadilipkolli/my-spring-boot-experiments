@@ -49,7 +49,7 @@ class TagGraphQLControllerTest {
                 .execute()
                 .path("allTags[*].tagName")
                 .entityList(String.class)
-                .satisfies(names -> assertThat(names).contains("tag1", "tag2"));
+                .satisfies(names -> assertThat(names).containsExactlyInAnyOrder("tag1", "tag2"));
 
         verify(tagService, times(1)).findAllTags();
         verifyNoMoreInteractions(tagService);
