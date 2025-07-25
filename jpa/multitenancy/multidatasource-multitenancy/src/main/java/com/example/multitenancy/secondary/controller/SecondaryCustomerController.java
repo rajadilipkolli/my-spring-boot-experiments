@@ -33,8 +33,7 @@ public class SecondaryCustomerController {
     }
 
     @GetMapping
-    public List<SecondaryCustomer> getAllCustomers(
-            @RequestHeader(AppConstants.X_TENANT_ID) String tenantId) {
+    public List<SecondaryCustomer> getAllCustomers(@RequestHeader(AppConstants.X_TENANT_ID) String tenantId) {
         log.info("fetching all customer for tenant : {}", tenantId);
         return secondaryCustomerService.findAllCustomers();
     }
@@ -66,14 +65,12 @@ public class SecondaryCustomerController {
         log.info("updating customer for id {} in tenant : {}", id, tenantId);
         return secondaryCustomerService
                 .findCustomerById(id)
-                .map(
-                        customerObj -> {
-                            SecondaryCustomer secondaryCustomer = new SecondaryCustomer();
-                            secondaryCustomer.setId(id);
-                            secondaryCustomer.setName(secondaryCustomerRequest.name());
-                            return ResponseEntity.ok(
-                                    secondaryCustomerService.saveCustomer(secondaryCustomer));
-                        })
+                .map(customerObj -> {
+                    SecondaryCustomer secondaryCustomer = new SecondaryCustomer();
+                    secondaryCustomer.setId(id);
+                    secondaryCustomer.setName(secondaryCustomerRequest.name());
+                    return ResponseEntity.ok(secondaryCustomerService.saveCustomer(secondaryCustomer));
+                })
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
@@ -83,11 +80,10 @@ public class SecondaryCustomerController {
         log.info("deleting customer by id {} for tenant : {}", id, tenantId);
         return secondaryCustomerService
                 .findCustomerById(id)
-                .map(
-                        customer -> {
-                            secondaryCustomerService.deleteCustomerById(id);
-                            return ResponseEntity.ok(customer);
-                        })
+                .map(customer -> {
+                    secondaryCustomerService.deleteCustomerById(id);
+                    return ResponseEntity.ok(customer);
+                })
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 }

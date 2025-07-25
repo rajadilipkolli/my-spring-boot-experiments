@@ -43,16 +43,11 @@ public class SecondaryDataSourceConfiguration {
     LocalContainerEntityManagerFactoryBean secondaryEntityManagerFactory(
             EntityManagerFactoryBuilder builder,
             @Qualifier("tenantRoutingDatasource") DataSource tenantRoutingDatasource,
-            @Qualifier("multiTenantConnectionProviderImpl")
-                    MultiTenantConnectionProvider<String> multiTenantConnectionProvider,
-            @Qualifier("tenantIdentifierResolver")
-                    CurrentTenantIdentifierResolver<String> currentTenantIdentifierResolver) {
+            @Qualifier("multiTenantConnectionProviderImpl") MultiTenantConnectionProvider<String> multiTenantConnectionProvider,
+            @Qualifier("tenantIdentifierResolver") CurrentTenantIdentifierResolver<String> currentTenantIdentifierResolver) {
         Map<String, Object> hibernateProps = new HashMap<>();
-        hibernateProps.put(
-                AvailableSettings.MULTI_TENANT_CONNECTION_PROVIDER, multiTenantConnectionProvider);
-        hibernateProps.put(
-                AvailableSettings.MULTI_TENANT_IDENTIFIER_RESOLVER,
-                currentTenantIdentifierResolver);
+        hibernateProps.put(AvailableSettings.MULTI_TENANT_CONNECTION_PROVIDER, multiTenantConnectionProvider);
+        hibernateProps.put(AvailableSettings.MULTI_TENANT_IDENTIFIER_RESOLVER, currentTenantIdentifierResolver);
         hibernateProps.putAll(this.jpaProperties.getProperties());
         // needs to set tenantIdentifier for connecting to secondary datasource and fetching the
         // metadata
@@ -68,7 +63,6 @@ public class SecondaryDataSourceConfiguration {
     PlatformTransactionManager secondaryTransactionManager(
             final @Qualifier("secondaryEntityManagerFactory") LocalContainerEntityManagerFactoryBean
                             secondaryEntityManagerFactory) {
-        return new JpaTransactionManager(
-                Objects.requireNonNull(secondaryEntityManagerFactory.getObject()));
+        return new JpaTransactionManager(Objects.requireNonNull(secondaryEntityManagerFactory.getObject()));
     }
 }

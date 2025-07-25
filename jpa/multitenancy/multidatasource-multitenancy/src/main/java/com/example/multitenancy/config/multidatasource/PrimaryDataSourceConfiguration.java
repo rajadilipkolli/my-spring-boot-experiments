@@ -41,16 +41,11 @@ public class PrimaryDataSourceConfiguration {
     LocalContainerEntityManagerFactoryBean primaryEntityManagerFactory(
             EntityManagerFactoryBuilder builder,
             @Qualifier("tenantRoutingDatasource") DataSource tenantRoutingDatasource,
-            @Qualifier("multiTenantConnectionProviderImpl")
-                    MultiTenantConnectionProvider<String> multiTenantConnectionProvider,
-            @Qualifier("tenantIdentifierResolver")
-                    CurrentTenantIdentifierResolver<String> currentTenantIdentifierResolver) {
+            @Qualifier("multiTenantConnectionProviderImpl") MultiTenantConnectionProvider<String> multiTenantConnectionProvider,
+            @Qualifier("tenantIdentifierResolver") CurrentTenantIdentifierResolver<String> currentTenantIdentifierResolver) {
         Map<String, Object> hibernateProps = new HashMap<>();
-        hibernateProps.put(
-                AvailableSettings.MULTI_TENANT_CONNECTION_PROVIDER, multiTenantConnectionProvider);
-        hibernateProps.put(
-                AvailableSettings.MULTI_TENANT_IDENTIFIER_RESOLVER,
-                currentTenantIdentifierResolver);
+        hibernateProps.put(AvailableSettings.MULTI_TENANT_CONNECTION_PROVIDER, multiTenantConnectionProvider);
+        hibernateProps.put(AvailableSettings.MULTI_TENANT_IDENTIFIER_RESOLVER, currentTenantIdentifierResolver);
         hibernateProps.putAll(this.jpaProperties.getProperties());
         // needs to set tenantIdentifier for connecting to primary datasource and fetching the
         // metadata
@@ -66,7 +61,6 @@ public class PrimaryDataSourceConfiguration {
     PlatformTransactionManager primaryTransactionManager(
             final @Qualifier("primaryEntityManagerFactory") LocalContainerEntityManagerFactoryBean
                             primaryEntityManagerFactory) {
-        return new JpaTransactionManager(
-                Objects.requireNonNull(primaryEntityManagerFactory.getObject()));
+        return new JpaTransactionManager(Objects.requireNonNull(primaryEntityManagerFactory.getObject()));
     }
 }

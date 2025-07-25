@@ -19,8 +19,7 @@ public class MultiTenantConnectionProviderImpl
 
     private final DataSource tenantRoutingDatasource;
 
-    public MultiTenantConnectionProviderImpl(
-            @Qualifier("tenantRoutingDatasource") DataSource tenantRoutingDatasource) {
+    public MultiTenantConnectionProviderImpl(@Qualifier("tenantRoutingDatasource") DataSource tenantRoutingDatasource) {
         this.tenantRoutingDatasource = tenantRoutingDatasource;
     }
 
@@ -45,8 +44,7 @@ public class MultiTenantConnectionProviderImpl
     }
 
     @Override
-    public void releaseConnection(String tenantIdentifier, Connection connection)
-            throws SQLException {
+    public void releaseConnection(String tenantIdentifier, Connection connection) throws SQLException {
         if (DatabaseType.SCHEMA1.getSchemaName().equals(tenantIdentifier)
                 || DatabaseType.SCHEMA2.getSchemaName().equals(tenantIdentifier)) {
             connection.setSchema("public");

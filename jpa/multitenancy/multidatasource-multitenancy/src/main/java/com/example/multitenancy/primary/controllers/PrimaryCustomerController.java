@@ -33,8 +33,7 @@ public class PrimaryCustomerController {
     }
 
     @GetMapping
-    public List<PrimaryCustomer> getAllCustomers(
-            @RequestHeader(AppConstants.X_TENANT_ID) String tenantId) {
+    public List<PrimaryCustomer> getAllCustomers(@RequestHeader(AppConstants.X_TENANT_ID) String tenantId) {
         log.info("fetching all customer for tenant : {}", tenantId);
         return primaryCustomerService.findAllCustomers();
     }
@@ -66,14 +65,12 @@ public class PrimaryCustomerController {
         log.info("updating customer for id {} in tenant : {}", id, tenantId);
         return primaryCustomerService
                 .findCustomerById(id)
-                .map(
-                        customerObj -> {
-                            PrimaryCustomer primaryCustomer = new PrimaryCustomer();
-                            primaryCustomer.setText(primaryCustomerRequest.text());
-                            primaryCustomer.setId(customerObj.getId());
-                            return ResponseEntity.ok(
-                                    primaryCustomerService.saveCustomer(primaryCustomer));
-                        })
+                .map(customerObj -> {
+                    PrimaryCustomer primaryCustomer = new PrimaryCustomer();
+                    primaryCustomer.setText(primaryCustomerRequest.text());
+                    primaryCustomer.setId(customerObj.getId());
+                    return ResponseEntity.ok(primaryCustomerService.saveCustomer(primaryCustomer));
+                })
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
@@ -83,11 +80,10 @@ public class PrimaryCustomerController {
         log.info("deleting customer by id {} for tenant : {}", id, tenantId);
         return primaryCustomerService
                 .findCustomerById(id)
-                .map(
-                        customer -> {
-                            primaryCustomerService.deleteCustomerById(id);
-                            return ResponseEntity.ok(customer);
-                        })
+                .map(customer -> {
+                    primaryCustomerService.deleteCustomerById(id);
+                    return ResponseEntity.ok(customer);
+                })
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 }

@@ -54,9 +54,7 @@ class SecondaryCustomerControllerIT extends AbstractIntegrationTest {
                     .andExpect(jsonPath("$.type", is("about:blank")))
                     .andExpect(jsonPath("$.title", is("Bad Request")))
                     .andExpect(jsonPath("$.status", is(400)))
-                    .andExpect(
-                            jsonPath(
-                                    "$.detail", is("Required header 'X-tenantId' is not present.")))
+                    .andExpect(jsonPath("$.detail", is("Required header 'X-tenantId' is not present.")))
                     .andExpect(jsonPath("$.instance", is("/api/customers/secondary")));
         }
 
@@ -105,9 +103,7 @@ class SecondaryCustomerControllerIT extends AbstractIntegrationTest {
             SecondaryCustomer secondaryCustomer = secondaryCustomerList.getFirst();
             Long customerId = secondaryCustomer.getId();
 
-            mockMvc.perform(
-                            get("/api/customers/secondary/{id}", customerId)
-                                    .header("X-tenantId", "schema1"))
+            mockMvc.perform(get("/api/customers/secondary/{id}", customerId).header("X-tenantId", "schema1"))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.id", is(customerId.intValue())))
                     .andExpect(jsonPath("$.name", is(secondaryCustomer.getName())));
@@ -119,18 +115,14 @@ class SecondaryCustomerControllerIT extends AbstractIntegrationTest {
             SecondaryCustomer secondaryCustomer = secondaryCustomerList.getFirst();
             Long customerId = secondaryCustomer.getId();
 
-            mockMvc.perform(
-                            get("/api/customers/secondary/{id}", customerId)
-                                    .header("X-tenantId", "schema2"))
+            mockMvc.perform(get("/api/customers/secondary/{id}", customerId).header("X-tenantId", "schema2"))
                     .andExpect(status().isNotFound());
         }
 
         @Test
         @DisplayName("Should return 404 when customer ID does not exist")
         void shouldReturn404WhenCustomerDoesNotExist() throws Exception {
-            mockMvc.perform(
-                            get("/api/customers/secondary/{id}", 99999L)
-                                    .header("X-tenantId", "schema1"))
+            mockMvc.perform(get("/api/customers/secondary/{id}", 99999L).header("X-tenantId", "schema1"))
                     .andExpect(status().isNotFound());
         }
     }
@@ -144,11 +136,10 @@ class SecondaryCustomerControllerIT extends AbstractIntegrationTest {
         void shouldCreateNewCustomer() throws Exception {
             SecondaryCustomerRequest newCustomer = new SecondaryCustomerRequest("New Customer");
 
-            mockMvc.perform(
-                            post("/api/customers/secondary")
-                                    .header("X-tenantId", "schema1")
-                                    .contentType(MediaType.APPLICATION_JSON)
-                                    .content(objectMapper.writeValueAsString(newCustomer)))
+            mockMvc.perform(post("/api/customers/secondary")
+                            .header("X-tenantId", "schema1")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(newCustomer)))
                     .andExpect(status().isCreated())
                     .andExpect(jsonPath("$.name", is(newCustomer.name())))
                     .andExpect(jsonPath("$.id", notNullValue()));
@@ -159,11 +150,10 @@ class SecondaryCustomerControllerIT extends AbstractIntegrationTest {
         void shouldCreateCustomerInDifferentTenant() throws Exception {
             SecondaryCustomerRequest newCustomer = new SecondaryCustomerRequest("Schema2 Customer");
 
-            mockMvc.perform(
-                            post("/api/customers/secondary")
-                                    .header("X-tenantId", "schema2")
-                                    .contentType(MediaType.APPLICATION_JSON)
-                                    .content(objectMapper.writeValueAsString(newCustomer)))
+            mockMvc.perform(post("/api/customers/secondary")
+                            .header("X-tenantId", "schema2")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(newCustomer)))
                     .andExpect(status().isCreated())
                     .andExpect(jsonPath("$.name", is(newCustomer.name())))
                     .andExpect(jsonPath("$.id", notNullValue()));
@@ -184,11 +174,10 @@ class SecondaryCustomerControllerIT extends AbstractIntegrationTest {
         void shouldReturn400WhenCreateNewCustomerWithoutName() throws Exception {
             SecondaryCustomerRequest secondaryCustomer = new SecondaryCustomerRequest(null);
 
-            mockMvc.perform(
-                            post("/api/customers/secondary")
-                                    .header("X-tenantId", "schema1")
-                                    .contentType(MediaType.APPLICATION_JSON)
-                                    .content(objectMapper.writeValueAsString(secondaryCustomer)))
+            mockMvc.perform(post("/api/customers/secondary")
+                            .header("X-tenantId", "schema1")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(secondaryCustomer)))
                     .andExpect(status().isBadRequest())
                     .andExpect(header().string("Content-Type", is("application/problem+json")))
                     .andExpect(jsonPath("$.type", is("about:blank")))
@@ -206,11 +195,10 @@ class SecondaryCustomerControllerIT extends AbstractIntegrationTest {
         void shouldReturn400WhenCreateNewCustomerWithEmptyName() throws Exception {
             var secondaryCustomer = new SecondaryCustomerRequest("");
 
-            mockMvc.perform(
-                            post("/api/customers/secondary")
-                                    .header("X-tenantId", "schema1")
-                                    .contentType(MediaType.APPLICATION_JSON)
-                                    .content(objectMapper.writeValueAsString(secondaryCustomer)))
+            mockMvc.perform(post("/api/customers/secondary")
+                            .header("X-tenantId", "schema1")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(secondaryCustomer)))
                     .andExpect(status().isBadRequest())
                     .andExpect(header().string("Content-Type", is("application/problem+json")))
                     .andExpect(jsonPath("$.violations[0].field", is("name")))
@@ -222,11 +210,10 @@ class SecondaryCustomerControllerIT extends AbstractIntegrationTest {
         void shouldReturn400WhenCreateNewCustomerWithWhitespaceOnlyName() throws Exception {
             var secondaryCustomer = new SecondaryCustomerRequest("   ");
 
-            mockMvc.perform(
-                            post("/api/customers/secondary")
-                                    .header("X-tenantId", "schema1")
-                                    .contentType(MediaType.APPLICATION_JSON)
-                                    .content(objectMapper.writeValueAsString(secondaryCustomer)))
+            mockMvc.perform(post("/api/customers/secondary")
+                            .header("X-tenantId", "schema1")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(secondaryCustomer)))
                     .andExpect(status().isBadRequest())
                     .andExpect(header().string("Content-Type", is("application/problem+json")))
                     .andExpect(jsonPath("$.violations[0].field", is("name")))
@@ -244,11 +231,10 @@ class SecondaryCustomerControllerIT extends AbstractIntegrationTest {
             SecondaryCustomer secondaryCustomer = secondaryCustomerList.getFirst();
             var updateRequest = new SecondaryCustomerRequest("Updated Customer");
 
-            mockMvc.perform(
-                            put("/api/customers/secondary/{id}", secondaryCustomer.getId())
-                                    .header("X-tenantId", "schema1")
-                                    .contentType(MediaType.APPLICATION_JSON)
-                                    .content(objectMapper.writeValueAsString(updateRequest)))
+            mockMvc.perform(put("/api/customers/secondary/{id}", secondaryCustomer.getId())
+                            .header("X-tenantId", "schema1")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(updateRequest)))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.name", is(updateRequest.name())))
                     .andExpect(jsonPath("$.id", is(secondaryCustomer.getId().intValue())));
@@ -260,25 +246,22 @@ class SecondaryCustomerControllerIT extends AbstractIntegrationTest {
             SecondaryCustomer secondaryCustomer = secondaryCustomerList.getFirst();
             var updateRequest = new SecondaryCustomerRequest("Updated Customer");
 
-            mockMvc.perform(
-                            put("/api/customers/secondary/{id}", secondaryCustomer.getId())
-                                    .header("X-tenantId", "schema2")
-                                    .contentType(MediaType.APPLICATION_JSON)
-                                    .content(objectMapper.writeValueAsString(updateRequest)))
+            mockMvc.perform(put("/api/customers/secondary/{id}", secondaryCustomer.getId())
+                            .header("X-tenantId", "schema2")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(updateRequest)))
                     .andExpect(status().isNotFound());
         }
 
         @Test
         @DisplayName("Should return 404 when updating non-existent customer")
         void shouldReturn404WhenUpdatingNonExistentCustomer() throws Exception {
-            SecondaryCustomerRequest nonExistentCustomer =
-                    new SecondaryCustomerRequest("Non-existent");
+            SecondaryCustomerRequest nonExistentCustomer = new SecondaryCustomerRequest("Non-existent");
 
-            mockMvc.perform(
-                            put("/api/customers/secondary/{id}", 99999L)
-                                    .header("X-tenantId", "schema1")
-                                    .contentType(MediaType.APPLICATION_JSON)
-                                    .content(objectMapper.writeValueAsString(nonExistentCustomer)))
+            mockMvc.perform(put("/api/customers/secondary/{id}", 99999L)
+                            .header("X-tenantId", "schema1")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(nonExistentCustomer)))
                     .andExpect(status().isNotFound());
         }
 
@@ -288,11 +271,10 @@ class SecondaryCustomerControllerIT extends AbstractIntegrationTest {
             SecondaryCustomer secondaryCustomer = secondaryCustomerList.getFirst();
             var updateRequest = new SecondaryCustomerRequest(null);
 
-            mockMvc.perform(
-                            put("/api/customers/secondary/{id}", secondaryCustomer.getId())
-                                    .header("X-tenantId", "schema1")
-                                    .contentType(MediaType.APPLICATION_JSON)
-                                    .content(objectMapper.writeValueAsString(updateRequest)))
+            mockMvc.perform(put("/api/customers/secondary/{id}", secondaryCustomer.getId())
+                            .header("X-tenantId", "schema1")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(updateRequest)))
                     .andExpect(status().isBadRequest())
                     .andExpect(header().string("Content-Type", is("application/problem+json")));
         }
@@ -307,17 +289,15 @@ class SecondaryCustomerControllerIT extends AbstractIntegrationTest {
         void shouldDeleteCustomer() throws Exception {
             SecondaryCustomer secondaryCustomer = secondaryCustomerList.getFirst();
 
-            mockMvc.perform(
-                            delete("/api/customers/secondary/{id}", secondaryCustomer.getId())
-                                    .header("X-tenantId", "schema1"))
+            mockMvc.perform(delete("/api/customers/secondary/{id}", secondaryCustomer.getId())
+                            .header("X-tenantId", "schema1"))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.name", is(secondaryCustomer.getName())))
                     .andExpect(jsonPath("$.id", is(secondaryCustomer.getId().intValue())));
 
             // Verify customer is deleted
-            mockMvc.perform(
-                            get("/api/customers/secondary/{id}", secondaryCustomer.getId())
-                                    .header("X-tenantId", "schema1"))
+            mockMvc.perform(get("/api/customers/secondary/{id}", secondaryCustomer.getId())
+                            .header("X-tenantId", "schema1"))
                     .andExpect(status().isNotFound());
         }
 
@@ -326,24 +306,20 @@ class SecondaryCustomerControllerIT extends AbstractIntegrationTest {
         void shouldReturn404WhenDeletingCustomerFromWrongTenant() throws Exception {
             SecondaryCustomer secondaryCustomer = secondaryCustomerList.getFirst();
 
-            mockMvc.perform(
-                            delete("/api/customers/secondary/{id}", secondaryCustomer.getId())
-                                    .header("X-tenantId", "schema2"))
+            mockMvc.perform(delete("/api/customers/secondary/{id}", secondaryCustomer.getId())
+                            .header("X-tenantId", "schema2"))
                     .andExpect(status().isNotFound());
 
             // Verify customer still exists in correct tenant
-            mockMvc.perform(
-                            get("/api/customers/secondary/{id}", secondaryCustomer.getId())
-                                    .header("X-tenantId", "schema1"))
+            mockMvc.perform(get("/api/customers/secondary/{id}", secondaryCustomer.getId())
+                            .header("X-tenantId", "schema1"))
                     .andExpect(status().isOk());
         }
 
         @Test
         @DisplayName("Should return 404 when deleting non-existent customer")
         void shouldReturn404WhenDeletingNonExistentCustomer() throws Exception {
-            mockMvc.perform(
-                            delete("/api/customers/secondary/{id}", 99999L)
-                                    .header("X-tenantId", "schema1"))
+            mockMvc.perform(delete("/api/customers/secondary/{id}", 99999L).header("X-tenantId", "schema1"))
                     .andExpect(status().isNotFound());
         }
     }
@@ -357,21 +333,16 @@ class SecondaryCustomerControllerIT extends AbstractIntegrationTest {
         void shouldMaintainDataIsolationBetweenTenants() throws Exception {
             // Create customer in schema2
             SecondaryCustomer schema2Customer = new SecondaryCustomer().setName("Schema2 Customer");
-            String schema2Response =
-                    mockMvc.perform(
-                                    post("/api/customers/secondary")
-                                            .header("X-tenantId", "schema2")
-                                            .contentType(MediaType.APPLICATION_JSON)
-                                            .content(
-                                                    objectMapper.writeValueAsString(
-                                                            schema2Customer)))
-                            .andExpect(status().isCreated())
-                            .andReturn()
-                            .getResponse()
-                            .getContentAsString();
+            String schema2Response = mockMvc.perform(post("/api/customers/secondary")
+                            .header("X-tenantId", "schema2")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(schema2Customer)))
+                    .andExpect(status().isCreated())
+                    .andReturn()
+                    .getResponse()
+                    .getContentAsString();
 
-            SecondaryCustomer createdSchema2Customer =
-                    objectMapper.readValue(schema2Response, SecondaryCustomer.class);
+            SecondaryCustomer createdSchema2Customer = objectMapper.readValue(schema2Response, SecondaryCustomer.class);
 
             // Verify schema1 still has 3 customers
             mockMvc.perform(get("/api/customers/secondary").header("X-tenantId", "schema1"))
@@ -384,15 +355,13 @@ class SecondaryCustomerControllerIT extends AbstractIntegrationTest {
                     .andExpect(jsonPath("$.size()", is(1)));
 
             // Try to access schema2 customer from schema1 - should not be found
-            mockMvc.perform(
-                            get("/api/customers/secondary/{id}", createdSchema2Customer.getId())
-                                    .header("X-tenantId", "schema1"))
+            mockMvc.perform(get("/api/customers/secondary/{id}", createdSchema2Customer.getId())
+                            .header("X-tenantId", "schema1"))
                     .andExpect(status().isNotFound());
 
             // Access schema2 customer from schema2 - should be found
-            mockMvc.perform(
-                            get("/api/customers/secondary/{id}", createdSchema2Customer.getId())
-                                    .header("X-tenantId", "schema2"))
+            mockMvc.perform(get("/api/customers/secondary/{id}", createdSchema2Customer.getId())
+                            .header("X-tenantId", "schema2"))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.name", is("Schema2 Customer")));
         }
@@ -404,20 +373,18 @@ class SecondaryCustomerControllerIT extends AbstractIntegrationTest {
 
             // Create customer with same name in schema1
             SecondaryCustomer schema1Customer = new SecondaryCustomer().setName(customerName);
-            mockMvc.perform(
-                            post("/api/customers/secondary")
-                                    .header("X-tenantId", "schema1")
-                                    .contentType(MediaType.APPLICATION_JSON)
-                                    .content(objectMapper.writeValueAsString(schema1Customer)))
+            mockMvc.perform(post("/api/customers/secondary")
+                            .header("X-tenantId", "schema1")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(schema1Customer)))
                     .andExpect(status().isCreated());
 
             // Create customer with same name in schema2
             SecondaryCustomer schema2Customer = new SecondaryCustomer().setName(customerName);
-            mockMvc.perform(
-                            post("/api/customers/secondary")
-                                    .header("X-tenantId", "schema2")
-                                    .contentType(MediaType.APPLICATION_JSON)
-                                    .content(objectMapper.writeValueAsString(schema2Customer)))
+            mockMvc.perform(post("/api/customers/secondary")
+                            .header("X-tenantId", "schema2")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(schema2Customer)))
                     .andExpect(status().isCreated());
 
             // Verify both customers exist in their respective tenants
@@ -440,11 +407,10 @@ class SecondaryCustomerControllerIT extends AbstractIntegrationTest {
         void shouldHandleMalformedJsonGracefully() throws Exception {
             String malformedJson = "{ \"name\": \"Test\", \"invalid\": }";
 
-            mockMvc.perform(
-                            post("/api/customers/secondary")
-                                    .header("X-tenantId", "schema1")
-                                    .contentType(MediaType.APPLICATION_JSON)
-                                    .content(malformedJson))
+            mockMvc.perform(post("/api/customers/secondary")
+                            .header("X-tenantId", "schema1")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(malformedJson))
                     .andExpect(status().isBadRequest());
         }
 
@@ -457,23 +423,17 @@ class SecondaryCustomerControllerIT extends AbstractIntegrationTest {
             // This might pass or fail depending on database constraints
             // The test verifies the application handles it gracefully
             try {
-                mockMvc.perform(
-                                post("/api/customers/secondary")
-                                        .header("X-tenantId", "schema1")
-                                        .contentType(MediaType.APPLICATION_JSON)
-                                        .content(
-                                                objectMapper.writeValueAsString(
-                                                        customerWithLongName)))
+                mockMvc.perform(post("/api/customers/secondary")
+                                .header("X-tenantId", "schema1")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(customerWithLongName)))
                         .andExpect(status().isCreated());
             } catch (Exception e) {
                 // Expected to fail with very long names due to database constraints
-                mockMvc.perform(
-                                post("/api/customers/secondary")
-                                        .header("X-tenantId", "schema1")
-                                        .contentType(MediaType.APPLICATION_JSON)
-                                        .content(
-                                                objectMapper.writeValueAsString(
-                                                        customerWithLongName)))
+                mockMvc.perform(post("/api/customers/secondary")
+                                .header("X-tenantId", "schema1")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(customerWithLongName)))
                         .andExpect(status().is4xxClientError());
             }
         }
@@ -482,16 +442,12 @@ class SecondaryCustomerControllerIT extends AbstractIntegrationTest {
         @DisplayName("Should handle special characters in customer names")
         void shouldHandleSpecialCharactersInCustomerNames() throws Exception {
             String specialCharName = "Customer with émojis 🎉 and spéciál çhars";
-            SecondaryCustomer customerWithSpecialChars =
-                    new SecondaryCustomer().setName(specialCharName);
+            SecondaryCustomer customerWithSpecialChars = new SecondaryCustomer().setName(specialCharName);
 
-            mockMvc.perform(
-                            post("/api/customers/secondary")
-                                    .header("X-tenantId", "schema1")
-                                    .contentType(MediaType.APPLICATION_JSON)
-                                    .content(
-                                            objectMapper.writeValueAsString(
-                                                    customerWithSpecialChars)))
+            mockMvc.perform(post("/api/customers/secondary")
+                            .header("X-tenantId", "schema1")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(customerWithSpecialChars)))
                     .andExpect(status().isCreated())
                     .andExpect(jsonPath("$.name", is(specialCharName)));
         }
@@ -504,18 +460,16 @@ class SecondaryCustomerControllerIT extends AbstractIntegrationTest {
             SecondaryCustomer customer2 = new SecondaryCustomer().setName("Concurrent Customer 2");
 
             // Simulate near-concurrent requests
-            mockMvc.perform(
-                            post("/api/customers/secondary")
-                                    .header("X-tenantId", "schema1")
-                                    .contentType(MediaType.APPLICATION_JSON)
-                                    .content(objectMapper.writeValueAsString(customer1)))
+            mockMvc.perform(post("/api/customers/secondary")
+                            .header("X-tenantId", "schema1")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(customer1)))
                     .andExpect(status().isCreated());
 
-            mockMvc.perform(
-                            post("/api/customers/secondary")
-                                    .header("X-tenantId", "schema2")
-                                    .contentType(MediaType.APPLICATION_JSON)
-                                    .content(objectMapper.writeValueAsString(customer2)))
+            mockMvc.perform(post("/api/customers/secondary")
+                            .header("X-tenantId", "schema2")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(customer2)))
                     .andExpect(status().isCreated());
 
             // Verify data integrity
@@ -532,10 +486,8 @@ class SecondaryCustomerControllerIT extends AbstractIntegrationTest {
         @DisplayName("Should handle truly concurrent requests to different tenants")
         void shouldHandleTrulyConcurrentRequestsToDifferentTenants() throws Exception {
             // Prepare test data for concurrent access
-            SecondaryCustomer schema1Customer =
-                    new SecondaryCustomer().setName("Concurrent Schema1 Customer");
-            SecondaryCustomer schema2Customer =
-                    new SecondaryCustomer().setName("Concurrent Schema2 Customer");
+            SecondaryCustomer schema1Customer = new SecondaryCustomer().setName("Concurrent Schema1 Customer");
+            SecondaryCustomer schema2Customer = new SecondaryCustomer().setName("Concurrent Schema2 Customer");
 
             String schema1Json = objectMapper.writeValueAsString(schema1Customer);
             String schema2Json = objectMapper.writeValueAsString(schema2Customer);
@@ -546,42 +498,34 @@ class SecondaryCustomerControllerIT extends AbstractIntegrationTest {
             // Create completable futures for schema1 requests
             List<CompletableFuture<Void>> schema1Futures = new ArrayList<>();
             for (int i = 0; i < CONCURRENT_REQUESTS; i++) {
-                CompletableFuture<Void> future =
-                        CompletableFuture.runAsync(
-                                () -> {
-                                    try {
-                                        mockMvc.perform(
-                                                        post("/api/customers/secondary")
-                                                                .header("X-tenantId", "schema1")
-                                                                .contentType(
-                                                                        MediaType.APPLICATION_JSON)
-                                                                .content(schema1Json))
-                                                .andExpect(status().isCreated());
-                                    } catch (Exception e) {
-                                        throw new RuntimeException(e);
-                                    }
-                                });
+                CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
+                    try {
+                        mockMvc.perform(post("/api/customers/secondary")
+                                        .header("X-tenantId", "schema1")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(schema1Json))
+                                .andExpect(status().isCreated());
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                });
                 schema1Futures.add(future);
             }
 
             // Create completable futures for schema2 requests
             List<CompletableFuture<Void>> schema2Futures = new ArrayList<>();
             for (int i = 0; i < CONCURRENT_REQUESTS; i++) {
-                CompletableFuture<Void> future =
-                        CompletableFuture.runAsync(
-                                () -> {
-                                    try {
-                                        mockMvc.perform(
-                                                        post("/api/customers/secondary")
-                                                                .header("X-tenantId", "schema2")
-                                                                .contentType(
-                                                                        MediaType.APPLICATION_JSON)
-                                                                .content(schema2Json))
-                                                .andExpect(status().isCreated());
-                                    } catch (Exception e) {
-                                        throw new RuntimeException(e);
-                                    }
-                                });
+                CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
+                    try {
+                        mockMvc.perform(post("/api/customers/secondary")
+                                        .header("X-tenantId", "schema2")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(schema2Json))
+                                .andExpect(status().isCreated());
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                });
                 schema2Futures.add(future);
             }
 
@@ -597,10 +541,7 @@ class SecondaryCustomerControllerIT extends AbstractIntegrationTest {
             // Verify data integrity - each schema should have received its requests
             mockMvc.perform(get("/api/customers/secondary").header("X-tenantId", "schema1"))
                     .andExpect(status().isOk())
-                    .andExpect(
-                            jsonPath(
-                                    "$.size()",
-                                    is(3 + CONCURRENT_REQUESTS))); // 3 from setUp + new ones
+                    .andExpect(jsonPath("$.size()", is(3 + CONCURRENT_REQUESTS))); // 3 from setUp + new ones
 
             mockMvc.perform(get("/api/customers/secondary").header("X-tenantId", "schema2"))
                     .andExpect(status().isOk())
