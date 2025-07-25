@@ -1,3 +1,4 @@
+name: mongodb-elasticsearch-integration
 services:
   mongodb:
     hostname: mongodb
