@@ -17,8 +17,7 @@ public class ContainersConfiguration {
 
     @Bean
     OracleContainer oracleContainer() {
-        return new OracleContainer(
-                        DockerImageName.parse("gvenzl/oracle-free").withTag("23-slim-faststart"))
+        return new OracleContainer(DockerImageName.parse("gvenzl/oracle-free").withTag("23-slim-faststart"))
                 .withReuse(true);
     }
 

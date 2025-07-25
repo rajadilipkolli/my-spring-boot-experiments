@@ -25,8 +25,7 @@ public class MultiTenantInterceptor implements HandlerInterceptor {
     private List<String> validTenantsList = new ArrayList<>();
 
     @Override
-    public boolean preHandle(
-            HttpServletRequest request, HttpServletResponse response, Object handler)
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
             throws IOException {
         var tenant = request.getHeader(AppConstants.X_TENANT_ID);
         String path = request.getRequestURI().substring(request.getContextPath().length());
@@ -43,17 +42,15 @@ public class MultiTenantInterceptor implements HandlerInterceptor {
 
     @Override
     public void afterCompletion(
-            HttpServletRequest request,
-            HttpServletResponse response,
-            Object handler,
-            @Nullable Exception ex) {
+            HttpServletRequest request, HttpServletResponse response, Object handler, @Nullable Exception ex) {
         tenantIdentifierResolver.clearCurrentTenant();
     }
 
     private List<String> getValidTenants() {
         if (validTenantsList.isEmpty()) {
-            validTenantsList =
-                    Arrays.stream(DatabaseType.values()).map(DatabaseType::getSchemaName).toList();
+            validTenantsList = Arrays.stream(DatabaseType.values())
+                    .map(DatabaseType::getSchemaName)
+                    .toList();
         }
         return validTenantsList;
     }
