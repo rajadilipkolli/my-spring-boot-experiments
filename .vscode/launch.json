@@ -240,6 +240,16 @@
             "projectName": "multitenancy-partition",
             "args": "",
             "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-UltimateRedisApplication<boot-ultimate-redis>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.example.ultimateredis.UltimateRedisApplication",
+            "projectName": "boot-ultimate-redis",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
         }
     ]
 }

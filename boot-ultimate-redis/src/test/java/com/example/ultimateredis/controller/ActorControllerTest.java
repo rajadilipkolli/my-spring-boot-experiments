@@ -25,14 +25,8 @@ class ActorControllerTest extends AbstractIntegrationTest {
         actorRepository.deleteAll();
 
         // Create test actors
-        testActor1 = new Actor()
-                .setId(UUID.randomUUID().toString())
-                .setName("John Doe")
-                .setAge(30);
-        testActor2 = new Actor()
-                .setId(UUID.randomUUID().toString())
-                .setName("Jane Smith")
-                .setAge(25);
+        testActor1 = new Actor().setName("John Doe").setAge(30);
+        testActor2 = new Actor().setName("Jane Smith").setAge(25);
 
         actorRepository.save(testActor1);
         actorRepository.save(testActor2);
@@ -285,14 +279,8 @@ class ActorControllerTest extends AbstractIntegrationTest {
     @Test
     void shouldDeleteActorsByName() {
         // Create additional actors with the same name to test batch deletion
-        Actor duplicateNameActor1 = new Actor()
-                .setId(UUID.randomUUID().toString())
-                .setName(testActor2.getName())
-                .setAge(35);
-        Actor duplicateNameActor2 = new Actor()
-                .setId(UUID.randomUUID().toString())
-                .setName(testActor2.getName())
-                .setAge(40);
+        Actor duplicateNameActor1 = new Actor().setName(testActor2.getName()).setAge(35);
+        Actor duplicateNameActor2 = new Actor().setName(testActor2.getName()).setAge(40);
         actorRepository.save(duplicateNameActor1);
         actorRepository.save(duplicateNameActor2);
 

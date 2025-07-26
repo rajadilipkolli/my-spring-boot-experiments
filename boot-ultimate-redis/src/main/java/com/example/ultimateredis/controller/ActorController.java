@@ -8,7 +8,6 @@ import jakarta.validation.Valid;
 import java.net.URI;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -88,10 +87,7 @@ public class ActorController {
     public ResponseEntity<GenericResponse<List<Actor>>> createActors(@Valid @RequestBody List<ActorRequest> requests) {
         log.info("Creating multiple actors: {}", requests);
         List<Actor> actors = requests.stream()
-                .map(req -> new Actor()
-                        .setId(UUID.randomUUID().toString())
-                        .setName(req.name())
-                        .setAge(req.age()))
+                .map(req -> new Actor().setName(req.name()).setAge(req.age()))
                 .toList();
 
         List<Actor> savedActors = actorService.saveActors(actors);

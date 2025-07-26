@@ -22,7 +22,7 @@ public class RedisService {
     public void addRedis(AddRedisRequest request) {
         log.info("add redis {}", request);
         redisStringUtil.putValue(request.key(), request.value());
-        log.info("adding expiry for key {} as : {} minutes", request.key(), request.expireMinutes());
+        log.info("adding expiry for key {} as: {} minutes", request.key(), request.expireMinutes());
         redisStringUtil.setExpire(request.key(), request.expireMinutes(), TimeUnit.MINUTES);
     }
 
