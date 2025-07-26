@@ -27,8 +27,7 @@ public class RedisController {
     }
 
     @PostMapping("/add")
-    public ResponseEntity<GenericResponse<Boolean>> addRedisKeyValue(
-            @RequestBody AddRedisRequest redisRequest) {
+    public ResponseEntity<GenericResponse<Boolean>> addRedisKeyValue(@RequestBody AddRedisRequest redisRequest) {
 
         redisService.addRedis(redisRequest);
         return new ResponseEntity<>(new GenericResponse<>(Boolean.TRUE), HttpStatus.CREATED);
@@ -45,12 +44,9 @@ public class RedisController {
             summary = "Get keys by pattern",
             description =
                     "Retrieve Redis keys matching the specified pattern. Use with caution as patterns like '*' can impact performance.")
-    @Parameter(
-            name = "pattern",
-            description = "Redis key pattern (e.g., 'user:*', 'cache:session:*')")
+    @Parameter(name = "pattern", description = "Redis key pattern (e.g., 'user:*', 'cache:session:*')")
     @GetMapping("/keys")
-    public ResponseEntity<GenericResponse<Set<String>>> getKeysByPattern(
-            @RequestParam String pattern) {
+    public ResponseEntity<GenericResponse<Set<String>>> getKeysByPattern(@RequestParam String pattern) {
         if (pattern == null || pattern.trim().isEmpty()) {
             throw new IllegalArgumentException("Pattern cannot be null or empty");
         }
@@ -59,14 +55,12 @@ public class RedisController {
     }
 
     @DeleteMapping("/keys")
-    public ResponseEntity<GenericResponse<Boolean>> deleteKeysByPattern(
-            @RequestParam String pattern) {
+    public ResponseEntity<GenericResponse<Boolean>> deleteKeysByPattern(@RequestParam String pattern) {
         if (pattern == null || pattern.trim().isEmpty()) {
             throw new IllegalArgumentException("Pattern cannot be null or empty");
         }
         if ("*".equals(pattern.trim())) {
-            throw new IllegalArgumentException(
-                    "Deleting all keys is not allowed for safety reasons");
+            throw new IllegalArgumentException("Deleting all keys is not allowed for safety reasons");
         }
         redisService.deleteByPattern(pattern);
         return ResponseEntity.ok(new GenericResponse<>(Boolean.TRUE));

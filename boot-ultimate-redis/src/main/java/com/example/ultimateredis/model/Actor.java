@@ -8,42 +8,42 @@ import org.springframework.data.redis.core.index.Indexed;
 @RedisHash("actor")
 public class Actor {
 
-    @Id String id;
+    @Id
+    String id;
 
-    @Indexed String name;
+    @Indexed
+    String name;
 
-    @Indexed Integer age;
+    @Indexed
+    Integer age;
 
     public Actor() {}
-
-    public Actor(String id, String name, Integer age) {
-        this.id = id;
-        this.name = name;
-        this.age = age;
-    }
 
     public String getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public Actor setId(String id) {
         this.id = id;
+        return this;
     }
 
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
+    public Actor setName(String name) {
         this.name = name;
+        return this;
     }
 
     public Integer getAge() {
         return age;
     }
 
-    public void setAge(Integer age) {
+    public Actor setAge(Integer age) {
         this.age = age;
+        return this;
     }
 
     @Override

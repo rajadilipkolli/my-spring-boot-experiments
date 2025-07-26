@@ -30,14 +30,10 @@ public class RedisMetricsAspect {
     public Object measureRedisOperationTime(ProceedingJoinPoint joinPoint) throws Throwable {
         String methodName = joinPoint.getSignature().getName();
 
-        Timer timer =
-                timerCache.computeIfAbsent(
-                        methodName,
-                        m ->
-                                Timer.builder("redis.operation")
-                                        .tag("method", m)
-                                        .description("Time taken for Redis operations")
-                                        .register(meterRegistry));
+        Timer timer = timerCache.computeIfAbsent(methodName, m -> Timer.builder("redis.operation")
+                .tag("method", m)
+                .description("Time taken for Redis operations")
+                .register(meterRegistry));
 
         long start = System.nanoTime();
         boolean error = false;

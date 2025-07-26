@@ -25,8 +25,14 @@ class ActorControllerTest extends AbstractIntegrationTest {
         actorRepository.deleteAll();
 
         // Create test actors
-        testActor1 = new Actor(UUID.randomUUID().toString(), "John Doe", 30);
-        testActor2 = new Actor(UUID.randomUUID().toString(), "Jane Smith", 25);
+        testActor1 = new Actor()
+                .setId(UUID.randomUUID().toString())
+                .setName("John Doe")
+                .setAge(30);
+        testActor2 = new Actor()
+                .setId(UUID.randomUUID().toString())
+                .setName("Jane Smith")
+                .setAge(25);
 
         actorRepository.save(testActor1);
         actorRepository.save(testActor2);
@@ -42,16 +48,15 @@ class ActorControllerTest extends AbstractIntegrationTest {
                 .hasContentType(MediaType.APPLICATION_JSON)
                 .bodyJson()
                 .convertTo(GenericResponse.class)
-                .satisfies(
-                        response -> {
-                            @SuppressWarnings("unchecked")
-                            List<LinkedHashMap<String, Object>> actors =
-                                    (List<LinkedHashMap<String, Object>>) response.response();
-                            assertThat(actors).hasSize(2);
-                            assertThat(actors)
-                                    .extracting(map -> map.get("name"))
-                                    .contains(testActor1.getName(), testActor2.getName());
-                        });
+                .satisfies(response -> {
+                    @SuppressWarnings("unchecked")
+                    List<LinkedHashMap<String, Object>> actors =
+                            (List<LinkedHashMap<String, Object>>) response.response();
+                    assertThat(actors).hasSize(2);
+                    assertThat(actors)
+                            .extracting(map -> map.get("name"))
+                            .contains(testActor1.getName(), testActor2.getName());
+                });
     }
 
     @Test
@@ -64,14 +69,13 @@ class ActorControllerTest extends AbstractIntegrationTest {
                 .hasContentType(MediaType.APPLICATION_JSON)
                 .bodyJson()
                 .convertTo(GenericResponse.class)
-                .satisfies(
-                        response -> {
-                            @SuppressWarnings("unchecked")
-                            var responseMap = (LinkedHashMap<String, Object>) response.response();
-                            assertThat(responseMap.get("id")).isEqualTo(testActor1.getId());
-                            assertThat(responseMap.get("name")).isEqualTo(testActor1.getName());
-                            assertThat(responseMap.get("age")).isEqualTo(testActor1.getAge());
-                        });
+                .satisfies(response -> {
+                    @SuppressWarnings("unchecked")
+                    var responseMap = (LinkedHashMap<String, Object>) response.response();
+                    assertThat(responseMap.get("id")).isEqualTo(testActor1.getId());
+                    assertThat(responseMap.get("name")).isEqualTo(testActor1.getName());
+                    assertThat(responseMap.get("age")).isEqualTo(testActor1.getAge());
+                });
     }
 
     @Test
@@ -96,12 +100,11 @@ class ActorControllerTest extends AbstractIntegrationTest {
                 .hasContentType(MediaType.APPLICATION_JSON)
                 .bodyJson()
                 .convertTo(GenericResponse.class)
-                .satisfies(
-                        response -> {
-                            @SuppressWarnings("unchecked")
-                            var responseMap = (LinkedHashMap<String, Object>) response.response();
-                            assertThat(responseMap.get("name")).isEqualTo(testActor1.getName());
-                        });
+                .satisfies(response -> {
+                    @SuppressWarnings("unchecked")
+                    var responseMap = (LinkedHashMap<String, Object>) response.response();
+                    assertThat(responseMap.get("name")).isEqualTo(testActor1.getName());
+                });
     }
 
     @Test
@@ -128,13 +131,12 @@ class ActorControllerTest extends AbstractIntegrationTest {
                 .hasContentType(MediaType.APPLICATION_JSON)
                 .bodyJson()
                 .convertTo(GenericResponse.class)
-                .satisfies(
-                        response -> {
-                            @SuppressWarnings("unchecked")
-                            var responseMap = (LinkedHashMap<String, Object>) response.response();
-                            assertThat(responseMap.get("name")).isEqualTo(testActor1.getName());
-                            assertThat(responseMap.get("age")).isEqualTo(testActor1.getAge());
-                        });
+                .satisfies(response -> {
+                    @SuppressWarnings("unchecked")
+                    var responseMap = (LinkedHashMap<String, Object>) response.response();
+                    assertThat(responseMap.get("name")).isEqualTo(testActor1.getName());
+                    assertThat(responseMap.get("age")).isEqualTo(testActor1.getAge());
+                });
     }
 
     @Test
@@ -151,14 +153,13 @@ class ActorControllerTest extends AbstractIntegrationTest {
                 .hasContentType(MediaType.APPLICATION_JSON)
                 .bodyJson()
                 .convertTo(GenericResponse.class)
-                .satisfies(
-                        response -> {
-                            @SuppressWarnings("unchecked")
-                            var responseMap = (LinkedHashMap<String, Object>) response.response();
-                            assertThat(responseMap.get("id")).isNotNull();
-                            assertThat(responseMap.get("name")).isEqualTo(newActorRequest.name());
-                            assertThat(responseMap.get("age")).isEqualTo(newActorRequest.age());
-                        });
+                .satisfies(response -> {
+                    @SuppressWarnings("unchecked")
+                    var responseMap = (LinkedHashMap<String, Object>) response.response();
+                    assertThat(responseMap.get("id")).isNotNull();
+                    assertThat(responseMap.get("name")).isEqualTo(newActorRequest.name());
+                    assertThat(responseMap.get("age")).isEqualTo(newActorRequest.age());
+                });
     }
 
     @Test
@@ -190,16 +191,13 @@ class ActorControllerTest extends AbstractIntegrationTest {
                 .hasContentType(MediaType.APPLICATION_JSON)
                 .bodyJson()
                 .convertTo(GenericResponse.class)
-                .satisfies(
-                        response -> {
-                            @SuppressWarnings("unchecked")
-                            List<LinkedHashMap<String, Object>> createdActors =
-                                    (List<LinkedHashMap<String, Object>>) response.response();
-                            assertThat(createdActors).hasSize(2);
-                            assertThat(createdActors)
-                                    .extracting(map -> map.get("name"))
-                                    .contains("Actor 1", "Actor 2");
-                        });
+                .satisfies(response -> {
+                    @SuppressWarnings("unchecked")
+                    List<LinkedHashMap<String, Object>> createdActors =
+                            (List<LinkedHashMap<String, Object>>) response.response();
+                    assertThat(createdActors).hasSize(2);
+                    assertThat(createdActors).extracting(map -> map.get("name")).contains("Actor 1", "Actor 2");
+                });
     }
 
     @Test
@@ -231,14 +229,13 @@ class ActorControllerTest extends AbstractIntegrationTest {
                 .hasContentType(MediaType.APPLICATION_JSON)
                 .bodyJson()
                 .convertTo(GenericResponse.class)
-                .satisfies(
-                        response -> {
-                            @SuppressWarnings("unchecked")
-                            var responseMap = (LinkedHashMap<String, Object>) response.response();
-                            assertThat(responseMap.get("id")).isEqualTo(testActor1.getId());
-                            assertThat(responseMap.get("name")).isEqualTo(updateRequest.name());
-                            assertThat(responseMap.get("age")).isEqualTo(updateRequest.age());
-                        });
+                .satisfies(response -> {
+                    @SuppressWarnings("unchecked")
+                    var responseMap = (LinkedHashMap<String, Object>) response.response();
+                    assertThat(responseMap.get("id")).isEqualTo(testActor1.getId());
+                    assertThat(responseMap.get("name")).isEqualTo(updateRequest.name());
+                    assertThat(responseMap.get("age")).isEqualTo(updateRequest.age());
+                });
     }
 
     @Test
@@ -288,10 +285,14 @@ class ActorControllerTest extends AbstractIntegrationTest {
     @Test
     void shouldDeleteActorsByName() {
         // Create additional actors with the same name to test batch deletion
-        Actor duplicateNameActor1 =
-                new Actor(UUID.randomUUID().toString(), testActor2.getName(), 35);
-        Actor duplicateNameActor2 =
-                new Actor(UUID.randomUUID().toString(), testActor2.getName(), 40);
+        Actor duplicateNameActor1 = new Actor()
+                .setId(UUID.randomUUID().toString())
+                .setName(testActor2.getName())
+                .setAge(35);
+        Actor duplicateNameActor2 = new Actor()
+                .setId(UUID.randomUUID().toString())
+                .setName(testActor2.getName())
+                .setAge(40);
         actorRepository.save(duplicateNameActor1);
         actorRepository.save(duplicateNameActor2);
 
@@ -320,11 +321,7 @@ class ActorControllerTest extends AbstractIntegrationTest {
     void shouldDeleteAllActors() {
 
         // Delete all
-        this.mockMvcTester
-                .delete()
-                .uri("/api/actors")
-                .assertThat()
-                .hasStatus(HttpStatus.NO_CONTENT);
+        this.mockMvcTester.delete().uri("/api/actors").assertThat().hasStatus(HttpStatus.NO_CONTENT);
 
         // Verify all actors were deleted
         this.mockMvcTester
@@ -334,11 +331,10 @@ class ActorControllerTest extends AbstractIntegrationTest {
                 .hasStatusOk()
                 .bodyJson()
                 .convertTo(GenericResponse.class)
-                .satisfies(
-                        response -> {
-                            List<?> actors = (List<?>) response.response();
-                            assertThat(actors).isEmpty();
-                        });
+                .satisfies(response -> {
+                    List<?> actors = (List<?>) response.response();
+                    assertThat(actors).isEmpty();
+                });
     }
 
     @Test
@@ -357,8 +353,7 @@ class ActorControllerTest extends AbstractIntegrationTest {
 
     @Test
     void shouldFailCreateActorWithMalformedJson() {
-        String malformedJson =
-                "{\"name\":\"Broken JSON\", age:40}"; // Missing quotes around age field name
+        String malformedJson = "{\"name\":\"Broken JSON\", age:40}"; // Missing quotes around age field name
 
         this.mockMvcTester
                 .post()
@@ -403,12 +398,10 @@ class ActorControllerTest extends AbstractIntegrationTest {
                 .hasStatusOk()
                 .bodyJson()
                 .convertTo(GenericResponse.class)
-                .satisfies(
-                        response -> {
-                            @SuppressWarnings("unchecked")
-                            var responseMap =
-                                    (java.util.LinkedHashMap<String, Object>) response.response();
-                            assertThat(responseMap.get("name")).isEqualTo(specialName);
-                        });
+                .satisfies(response -> {
+                    @SuppressWarnings("unchecked")
+                    var responseMap = (java.util.LinkedHashMap<String, Object>) response.response();
+                    assertThat(responseMap.get("name")).isEqualTo(specialName);
+                });
     }
 }

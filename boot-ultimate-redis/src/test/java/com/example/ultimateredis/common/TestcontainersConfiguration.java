@@ -28,10 +28,9 @@ public class TestcontainersConfiguration {
     @Bean
     @Profile(AppConstants.PROFILE_CLUSTER)
     DynamicPropertyRegistrar dynamicPropertyRegistrar(RedisClusterContainer redisClusterContainer) {
-        List<String> list =
-                Arrays.stream(redisClusterContainer.getRedisURIs())
-                        .map(s -> s.substring(8))
-                        .toList();
+        List<String> list = Arrays.stream(redisClusterContainer.getRedisURIs())
+                .map(s -> s.substring(8))
+                .toList();
         return registry -> {
             registry.add("spring.data.redis.cluster.nodes", () -> list);
         };

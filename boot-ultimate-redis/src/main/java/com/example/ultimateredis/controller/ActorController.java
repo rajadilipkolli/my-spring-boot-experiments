@@ -71,30 +71,28 @@ public class ActorController {
     }
 
     @PostMapping
-    public ResponseEntity<GenericResponse<Actor>> createActor(
-            @Valid @RequestBody ActorRequest actorRequest) {
+    public ResponseEntity<GenericResponse<Actor>> createActor(@Valid @RequestBody ActorRequest actorRequest) {
         log.info("Creating actor: {}", actorRequest);
-        Actor actor =
-                new Actor(UUID.randomUUID().toString(), actorRequest.name(), actorRequest.age());
+        Actor actor = new Actor().setName(actorRequest.name()).setAge(actorRequest.age());
         Actor savedActor = actorService.saveActor(actor);
 
-        URI location =
-                ServletUriComponentsBuilder.fromCurrentRequest()
-                        .path("/{id}")
-                        .buildAndExpand(savedActor.getId())
-                        .toUri();
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(savedActor.getId())
+                .toUri();
 
         return ResponseEntity.created(location).body(new GenericResponse<>(savedActor));
     }
 
     @PostMapping("/batch")
-    public ResponseEntity<GenericResponse<List<Actor>>> createActors(
-            @Valid @RequestBody List<ActorRequest> requests) {
+    public ResponseEntity<GenericResponse<List<Actor>>> createActors(@Valid @RequestBody List<ActorRequest> requests) {
         log.info("Creating multiple actors: {}", requests);
-        List<Actor> actors =
-                requests.stream()
-                        .map(req -> new Actor(UUID.randomUUID().toString(), req.name(), req.age()))
-                        .toList();
+        List<Actor> actors = requests.stream()
+                .map(req -> new Actor()
+                        .setId(UUID.randomUUID().toString())
+                        .setName(req.name())
+                        .setAge(req.age()))
+                .toList();
 
         List<Actor> savedActors = actorService.saveActors(actors);
         return ResponseEntity.status(HttpStatus.CREATED).body(new GenericResponse<>(savedActors));

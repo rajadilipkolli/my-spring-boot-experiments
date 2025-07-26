@@ -20,19 +20,17 @@ class RedisHealthControllerTest extends AbstractIntegrationTest {
                 .hasContentType(MediaType.APPLICATION_JSON)
                 .bodyJson()
                 .convertTo(GenericResponse.class)
-                .satisfies(
-                        response -> {
-                            @SuppressWarnings("unchecked")
-                            Map<String, Object> healthStatus =
-                                    (Map<String, Object>) response.response();
-                            assertThat(healthStatus).containsKey("status");
-                            assertThat(healthStatus).containsKey("timestamp");
+                .satisfies(response -> {
+                    @SuppressWarnings("unchecked")
+                    Map<String, Object> healthStatus = (Map<String, Object>) response.response();
+                    assertThat(healthStatus).containsKey("status");
+                    assertThat(healthStatus).containsKey("timestamp");
 
-                            // In test environment with Redis running, status should be UP
-                            assertThat(healthStatus.get("status")).isEqualTo("UP");
+                    // In test environment with Redis running, status should be UP
+                    assertThat(healthStatus.get("status")).isEqualTo("UP");
 
-                            // Should have connection info
-                            assertThat(healthStatus).containsKey("connectionInfo");
-                        });
+                    // Should have connection info
+                    assertThat(healthStatus).containsKey("connectionInfo");
+                });
     }
 }

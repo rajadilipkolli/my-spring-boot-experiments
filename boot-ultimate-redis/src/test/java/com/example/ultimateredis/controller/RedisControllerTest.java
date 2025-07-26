@@ -81,13 +81,12 @@ class RedisControllerTest extends AbstractIntegrationTest {
                 .hasContentType(MediaType.APPLICATION_JSON)
                 .bodyJson()
                 .convertTo(GenericResponse.class)
-                .satisfies(
-                        response -> {
-                            @SuppressWarnings("unchecked")
-                            ArrayList<String> keys = (ArrayList<String>) response.response();
-                            assertThat(keys).containsAnyOf("test:key1", "test:key2");
-                            assertThat(keys.size()).isGreaterThanOrEqualTo(2);
-                        });
+                .satisfies(response -> {
+                    @SuppressWarnings("unchecked")
+                    ArrayList<String> keys = (ArrayList<String>) response.response();
+                    assertThat(keys).containsAnyOf("test:key1", "test:key2");
+                    assertThat(keys.size()).isGreaterThanOrEqualTo(2);
+                });
     }
 
     @Test
@@ -106,24 +105,19 @@ class RedisControllerTest extends AbstractIntegrationTest {
                 .satisfies(response -> assertThat(response.response()).isEqualTo(true));
 
         // Verify keys are deleted
-        await().atMost(Duration.ofSeconds(2))
-                .untilAsserted(
-                        () ->
-                                this.mockMvcTester
-                                        .get()
-                                        .uri("/v1/redis/keys")
-                                        .param("pattern", "test:*")
-                                        .assertThat()
-                                        .hasStatusOk()
-                                        .bodyJson()
-                                        .convertTo(GenericResponse.class)
-                                        .satisfies(
-                                                response -> {
-                                                    @SuppressWarnings("unchecked")
-                                                    ArrayList<String> keys =
-                                                            (ArrayList<String>) response.response();
-                                                    assertThat(keys).isEmpty();
-                                                }));
+        await().atMost(Duration.ofSeconds(2)).untilAsserted(() -> this.mockMvcTester
+                .get()
+                .uri("/v1/redis/keys")
+                .param("pattern", "test:*")
+                .assertThat()
+                .hasStatusOk()
+                .bodyJson()
+                .convertTo(GenericResponse.class)
+                .satisfies(response -> {
+                    @SuppressWarnings("unchecked")
+                    ArrayList<String> keys = (ArrayList<String>) response.response();
+                    assertThat(keys).isEmpty();
+                }));
     }
 
     @Test
@@ -132,19 +126,15 @@ class RedisControllerTest extends AbstractIntegrationTest {
         await().pollDelay(Duration.ofMinutes(1))
                 .pollInterval(Duration.ofSeconds(1))
                 .atMost(Duration.ofSeconds(70))
-                .untilAsserted(
-                        () ->
-                                this.mockMvcTester
-                                        .get()
-                                        .uri("/v1/redis")
-                                        .param("key", "junit")
-                                        .assertThat()
-                                        .hasStatusOk()
-                                        .hasContentType(MediaType.APPLICATION_JSON)
-                                        .bodyJson()
-                                        .convertTo(GenericResponse.class)
-                                        .satisfies(
-                                                response ->
-                                                        assertThat(response.response()).isNull()));
+                .untilAsserted(() -> this.mockMvcTester
+                        .get()
+                        .uri("/v1/redis")
+                        .param("key", "junit")
+                        .assertThat()
+                        .hasStatusOk()
+                        .hasContentType(MediaType.APPLICATION_JSON)
+                        .bodyJson()
+                        .convertTo(GenericResponse.class)
+                        .satisfies(response -> assertThat(response.response()).isNull()));
     }
 }
