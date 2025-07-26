@@ -7,7 +7,6 @@ public final class AppConstants {
     public static final String PROFILE_STANDALONE = "standalone";
 
     private AppConstants() {
-        throw new UnsupportedOperationException(
-                "This is a utility class and cannot be instantiated");
+        throw new UnsupportedOperationException("This is a utility class and cannot be instantiated");
     }
 }

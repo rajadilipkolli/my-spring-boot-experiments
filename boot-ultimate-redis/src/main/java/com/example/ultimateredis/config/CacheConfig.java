@@ -5,9 +5,9 @@ import io.lettuce.core.ReadFrom;
 import java.time.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.autoconfigure.cache.RedisCacheManagerBuilderCustomizer;
-import org.springframework.boot.autoconfigure.data.redis.LettuceClientConfigurationBuilderCustomizer;
+import org.springframework.boot.cache.autoconfigure.RedisCacheManagerBuilderCustomizer;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.data.redis.autoconfigure.LettuceClientConfigurationBuilderCustomizer;
 import org.springframework.cache.Cache;
 import org.springframework.cache.annotation.CachingConfigurer;
 import org.springframework.cache.annotation.EnableCaching;
@@ -37,7 +37,11 @@ public class CacheConfig implements CachingConfigurer {
             RedisTemplate<String, Object> redisTemplate) {
         return event -> {
             try {
-                redisTemplate.getConnectionFactory().getConnection().serverCommands().flushAll();
+                redisTemplate
+                        .getConnectionFactory()
+                        .getConnection()
+                        .serverCommands()
+                        .flushAll();
                 log.info("Redis cache flushed successfully during context refresh");
             } catch (Exception e) {
                 log.warn("Failed to flush Redis cache during migration: {}", e.getMessage());
@@ -52,25 +56,19 @@ public class CacheConfig implements CachingConfigurer {
         return builder -> {
             builder.cacheDefaults()
                     .disableCachingNullValues()
-                    .serializeValuesWith(
-                            RedisSerializationContext.SerializationPair.fromSerializer(
-                                    serializerGzip));
+                    .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(serializerGzip));
             cacheConfigurationProperties
                     .getCacheExpirations()
-                    .forEach(
-                            (cacheName, timeout) ->
-                                    builder.withCacheConfiguration(
-                                            cacheName,
-                                            RedisCacheConfiguration.defaultCacheConfig()
-                                                    .entryTtl(Duration.ofSeconds(timeout))));
+                    .forEach((cacheName, timeout) -> builder.withCacheConfiguration(
+                            cacheName,
+                            RedisCacheConfiguration.defaultCacheConfig().entryTtl(Duration.ofSeconds(timeout))));
         };
     }
 
     @Bean
     @Profile(AppConstants.PROFILE_SENTINEL)
     LettuceClientConfigurationBuilderCustomizer lettuceClientConfigurationBuilderCustomizer() {
-        return clientConfigurationBuilder ->
-                clientConfigurationBuilder.readFrom(ReadFrom.REPLICA_PREFERRED);
+        return clientConfigurationBuilder -> clientConfigurationBuilder.readFrom(ReadFrom.REPLICA_PREFERRED);
     }
 
     @Bean

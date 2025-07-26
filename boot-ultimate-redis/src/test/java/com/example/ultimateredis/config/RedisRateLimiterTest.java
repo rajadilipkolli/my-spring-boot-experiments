@@ -23,10 +23,14 @@ import org.springframework.data.redis.core.ValueOperations;
 @ExtendWith(MockitoExtension.class)
 class RedisRateLimiterTest {
 
-    @Mock private RedisTemplate<String, Object> redisTemplate;
+    @Mock
+    private RedisTemplate<String, Object> redisTemplate;
 
-    @Mock private RedisScriptExecutor scriptExecutor;
-    @Mock private ValueOperations<String, Object> valueOperations;
+    @Mock
+    private RedisScriptExecutor scriptExecutor;
+
+    @Mock
+    private ValueOperations<String, Object> valueOperations;
 
     private RedisRateLimiter rateLimiter;
 

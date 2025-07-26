@@ -12,8 +12,7 @@ public class RedisRateLimiter {
     private final RedisTemplate<String, Object> redisTemplate;
     private final RedisScriptExecutor scriptExecutor;
 
-    public RedisRateLimiter(
-            RedisTemplate<String, Object> redisTemplate, RedisScriptExecutor scriptExecutor) {
+    public RedisRateLimiter(RedisTemplate<String, Object> redisTemplate, RedisScriptExecutor scriptExecutor) {
         this.redisTemplate = redisTemplate;
         this.scriptExecutor = scriptExecutor;
     }
@@ -72,13 +71,7 @@ public class RedisRateLimiter {
 
         // Arguments: rate, capacity, current time, requested tokens
         return scriptExecutor.executeScript(
-                script,
-                Boolean.class,
-                keys,
-                tokensPerSecond,
-                burstCapacity,
-                currentMillis / 1000.0,
-                1);
+                script, Boolean.class, keys, tokensPerSecond, burstCapacity, currentMillis / 1000.0, 1);
     }
 
     /**
@@ -89,8 +82,7 @@ public class RedisRateLimiter {
      * @param windowDuration Time window duration
      * @return true if request is allowed, false if rate limit exceeded
      */
-    public boolean tryAcquireWithFixedWindow(
-            String key, int maxOperations, Duration windowDuration) {
+    public boolean tryAcquireWithFixedWindow(String key, int maxOperations, Duration windowDuration) {
         String windowKey = "rate-limiter:fixed:" + key;
 
         Long currentCount = redisTemplate.opsForValue().increment(windowKey, 1);

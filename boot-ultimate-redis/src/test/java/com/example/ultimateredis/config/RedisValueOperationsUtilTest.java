@@ -19,9 +19,11 @@ import org.springframework.data.redis.core.ValueOperations;
 @ExtendWith(MockitoExtension.class)
 class RedisValueOperationsUtilTest {
 
-    @Mock private RedisTemplate<String, String> redisTemplate;
+    @Mock
+    private RedisTemplate<String, String> redisTemplate;
 
-    @Mock private ValueOperations<String, String> valueOperations;
+    @Mock
+    private ValueOperations<String, String> valueOperations;
 
     private RedisValueOperationsUtil<String> redisValueOpsUtil;
 
