@@ -261,6 +261,16 @@
             "projectName": "boot-ultimate-redis",
             "args": "",
             "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-TogglzApplication<boot-togglz-sample>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.example.featuretoggle.TogglzApplication",
+            "projectName": "boot-togglz-sample",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
         }
     ]
 }

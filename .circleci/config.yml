@@ -70,17 +70,6 @@ jobs:
           paths:
             - ~/.m2
           key: maven-deps-v2-{{ checksum "pom.xml" }}
-      
-      # Store build artifacts
-      - store_artifacts:
-          path: target/*.jar
-          destination: build-artifacts
-      
-      # Persist workspace for potential deployment jobs
-      - persist_to_workspace:
-          root: .
-          paths:
-            - target/*.jar
 
   # Optional: Add a deployment job (uncomment when needed)
   # deploy:
