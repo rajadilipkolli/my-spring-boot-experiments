@@ -249,6 +249,17 @@
             "mainClass": "com.example.ultimateredis.UltimateRedisApplication",
             "projectName": "boot-ultimate-redis",
             "args": "",
+            "envFile": "${workspaceFolder}/.env",
+            "vmArgs": " -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=38709 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dspring.jmx.enabled=true -Djava.rmi.server.hostname=localhost -Dspring.application.admin.enabled=true -Dspring.boot.project.name=boot-ultimate-redis"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-TestUltimateRedisApplication<boot-ultimate-redis>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.example.ultimateredis.TestUltimateRedisApplication",
+            "projectName": "boot-ultimate-redis",
+            "args": "",
             "envFile": "${workspaceFolder}/.env"
         }
     ]

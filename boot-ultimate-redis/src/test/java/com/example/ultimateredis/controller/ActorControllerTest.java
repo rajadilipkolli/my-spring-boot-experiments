@@ -388,7 +388,7 @@ class ActorControllerTest extends AbstractIntegrationTest {
                 .convertTo(GenericResponse.class)
                 .satisfies(response -> {
                     @SuppressWarnings("unchecked")
-                    var responseMap = (java.util.LinkedHashMap<String, Object>) response.response();
+                    var responseMap = (LinkedHashMap<String, Object>) response.response();
                     assertThat(responseMap.get("name")).isEqualTo(specialName);
                 });
     }
