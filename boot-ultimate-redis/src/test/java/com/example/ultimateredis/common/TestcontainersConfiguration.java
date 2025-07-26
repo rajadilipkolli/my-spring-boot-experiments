@@ -3,6 +3,7 @@ package com.example.ultimateredis.common;
 import com.example.ultimateredis.utils.AppConstants;
 import com.redis.testcontainers.RedisClusterContainer;
 import com.redis.testcontainers.RedisContainer;
+import java.net.URI;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
@@ -29,7 +30,7 @@ public class TestcontainersConfiguration {
     @Profile(AppConstants.PROFILE_CLUSTER)
     DynamicPropertyRegistrar dynamicPropertyRegistrar(RedisClusterContainer redisClusterContainer) {
         List<String> list = Arrays.stream(redisClusterContainer.getRedisURIs())
-                .map(s -> s.substring(8))
+                .map(u -> URI.create(u).getAuthority()) // host:port
                 .toList();
         return registry -> {
             registry.add("spring.data.redis.cluster.nodes", () -> list);
