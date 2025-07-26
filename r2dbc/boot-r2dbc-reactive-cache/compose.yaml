@@ -12,7 +12,7 @@ services:
       - local_dev:/var/lib/postgresql/data
   redis:
     container_name: redis_movie_db
-    image: redis/redis-stack:7.4.0-v1
+    image: redis/redis-stack:7.4.0-v6
     ports:
       - "6379:6379"
       - "8001:8001"

@@ -41,6 +41,6 @@ public class TestcontainersConfiguration {
     @ServiceConnection("redis")
     @Profile(AppConstants.PROFILE_NOT_CLUSTER)
     RedisContainer redisContainer() {
-        return new RedisContainer(DockerImageName.parse("redis").withTag("8.0.2-alpine"));
+        return new RedisContainer(DockerImageName.parse("redis").withTag("8.0.3-alpine"));
     }
 }
