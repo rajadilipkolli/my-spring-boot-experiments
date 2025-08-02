@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.5.4</version>
+        <version>4.0.0-M1</version>
         <relativePath /> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.example.multitenancy.partition</groupId>
@@ -64,13 +64,13 @@
             <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-liquibase</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
             <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.liquibase</groupId>
-            <artifactId>liquibase-core</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springdoc</groupId>
@@ -114,8 +114,8 @@
                 </executions>
             </plugin>
             <plugin>
-                <groupId>org.hibernate.orm.tooling</groupId>
-                <artifactId>hibernate-enhance-maven-plugin</artifactId>
+                <groupId>org.hibernate.orm</groupId>
+                <artifactId>hibernate-maven-plugin</artifactId>
                 <version>${hibernate.version}</version>
                 <executions>
                     <execution>
@@ -221,7 +221,7 @@
                 <configuration>
                     <java>
                         <palantirJavaFormat>
-                            <version>2.58.0</version>
+                            <version>2.72.0</version>
                         </palantirJavaFormat>
                         <importOrder />
                         <removeUnusedImports />
