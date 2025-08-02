@@ -51,7 +51,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
         tenantIdentifierResolver.setCurrentTenant(tenantId);
         List<Customer> customers = new ArrayList<>();
         for (String name : customerNames) {
-            customers.add(new Customer(null, name));
+            customers.add(new Customer().setName(name));
         }
         return customerRepository.saveAll(customers);
     }

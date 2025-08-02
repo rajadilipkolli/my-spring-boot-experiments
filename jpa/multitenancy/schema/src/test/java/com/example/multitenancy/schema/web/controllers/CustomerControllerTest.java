@@ -49,9 +49,9 @@ class CustomerControllerTest {
     @BeforeEach
     void setUp() {
         this.customerList = new ArrayList<>();
-        this.customerList.add(new Customer(1L, "text 1"));
-        this.customerList.add(new Customer(2L, "text 2"));
-        this.customerList.add(new Customer(3L, "text 3"));
+        this.customerList.add(new Customer().setId(1L).setName("text 1"));
+        this.customerList.add(new Customer().setId(2L).setName("text 2"));
+        this.customerList.add(new Customer().setId(3L).setName("text 3"));
     }
 
     @Test
@@ -67,7 +67,7 @@ class CustomerControllerTest {
     @Test
     void shouldFindCustomerById() throws Exception {
         Long customerId = 1L;
-        Customer customer = new Customer(customerId, "text 1");
+        Customer customer = new Customer().setId(customerId).setName("text 1");
         given(customerService.findCustomerById(customerId)).willReturn(Optional.of(customer));
 
         this.mockMvc
@@ -88,7 +88,7 @@ class CustomerControllerTest {
 
     @Test
     void shouldCreateNewCustomer() throws Exception {
-        Customer customer = new Customer(1L, "some text");
+        Customer customer = new Customer().setId(1L).setName("some text");
         CustomerDto customerDto = new CustomerDto("some text");
         given(customerService.saveCustomer(any(CustomerDto.class))).willReturn(customer);
         this.mockMvc
@@ -102,8 +102,8 @@ class CustomerControllerTest {
     }
 
     @Test
-    void shouldReturn400WhenCreateNewCustomerWithoutText() throws Exception {
-        Customer customer = new Customer(null, null);
+    void shouldReturn400WhenCreateNewCustomerWithoutName() throws Exception {
+        Customer customer = new Customer();
 
         this.mockMvc
                 .perform(
@@ -129,7 +129,7 @@ class CustomerControllerTest {
     @Test
     void shouldUpdateCustomer() throws Exception {
         Long customerId = 1L;
-        Customer customer = new Customer(customerId, "Updated text");
+        Customer customer = new Customer().setId(customerId).setName("Updated text");
         CustomerDto customerDto = new CustomerDto("Updated text");
         given(customerService.updateCustomer(eq(customerId), any(CustomerDto.class)))
                 .willReturn(Optional.of(customer));
@@ -150,7 +150,7 @@ class CustomerControllerTest {
         Long customerId = 1L;
         given(customerService.updateCustomer(eq(customerId), any(CustomerDto.class)))
                 .willReturn(Optional.empty());
-        Customer customer = new Customer(customerId, "Updated text");
+        Customer customer = new Customer().setId(customerId).setName("Updated text");
 
         this.mockMvc
                 .perform(
@@ -164,7 +164,7 @@ class CustomerControllerTest {
     @Test
     void shouldDeleteCustomer() throws Exception {
         Long customerId = 1L;
-        Customer customer = new Customer(customerId, "Some text");
+        Customer customer = new Customer().setId(customerId).setName("Some text");
         given(customerService.findCustomerById(customerId)).willReturn(Optional.of(customer));
         doNothing().when(customerService).deleteCustomerById(customer.getId());
 

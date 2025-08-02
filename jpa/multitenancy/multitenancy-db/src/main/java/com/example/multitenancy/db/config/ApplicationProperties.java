@@ -8,7 +8,8 @@ import org.springframework.boot.context.properties.NestedConfigurationProperty;
 public class ApplicationProperties {
 
     @NestedConfigurationProperty
-    @Valid private Cors cors = new Cors();
+    @Valid
+    private Cors cors = new Cors();
 
     public Cors getCors() {
         return cors;
