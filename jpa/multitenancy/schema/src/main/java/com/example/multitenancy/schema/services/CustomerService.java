@@ -37,9 +37,7 @@ public class CustomerService {
 
     public Optional<Customer> updateCustomer(long id, CustomerDto customerDto) {
         final Function<Customer, Customer> customerResponseEntityFunction =
-                customerObj ->
-                        customerRepository.save(
-                                customerMapper.updateCustomerFromDto(customerDto, customerObj));
+                customerObj -> customerRepository.save(customerMapper.updateCustomerFromDto(customerDto, customerObj));
         return findCustomerById(id).map(customerResponseEntityFunction);
     }
 

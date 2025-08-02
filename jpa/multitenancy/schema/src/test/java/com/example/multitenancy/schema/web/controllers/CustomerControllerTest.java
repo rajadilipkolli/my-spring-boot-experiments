@@ -37,11 +37,17 @@ import org.springframework.test.web.servlet.MockMvc;
 @ActiveProfiles(PROFILE_TEST)
 class CustomerControllerTest {
 
-    @Autowired private MockMvc mockMvc;
-    @Autowired private ObjectMapper objectMapper;
+    @Autowired
+    private MockMvc mockMvc;
 
-    @MockitoBean private CustomerService customerService;
-    @MockitoBean private TenantIdentifierResolver tenantIdentifierResolver;
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @MockitoBean
+    private CustomerService customerService;
+
+    @MockitoBean
+    private TenantIdentifierResolver tenantIdentifierResolver;
 
     private List<Customer> customerList;
     private final String tenant = "test1";
@@ -92,11 +98,10 @@ class CustomerControllerTest {
         CustomerDto customerDto = new CustomerDto("some text");
         given(customerService.saveCustomer(any(CustomerDto.class))).willReturn(customer);
         this.mockMvc
-                .perform(
-                        post("/api/customers")
-                                .param("tenant", tenant)
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(customerDto)))
+                .perform(post("/api/customers")
+                        .param("tenant", tenant)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(customerDto)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.name", is(customerDto.name())));
     }
@@ -106,16 +111,12 @@ class CustomerControllerTest {
         Customer customer = new Customer();
 
         this.mockMvc
-                .perform(
-                        post("/api/customers")
-                                .param("tenant", tenant)
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(customer)))
+                .perform(post("/api/customers")
+                        .param("tenant", tenant)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(customer)))
                 .andExpect(status().isBadRequest())
-                .andExpect(
-                        header().string(
-                                        HttpHeaders.CONTENT_TYPE,
-                                        is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                 .andExpect(jsonPath("$.type", is("about:blank")))
                 .andExpect(jsonPath("$.title", is("Constraint Violation")))
                 .andExpect(jsonPath("$.status", is(400)))
@@ -135,11 +136,10 @@ class CustomerControllerTest {
                 .willReturn(Optional.of(customer));
 
         this.mockMvc
-                .perform(
-                        put("/api/customers/{id}", customer.getId())
-                                .param("tenant", tenant)
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(customerDto)))
+                .perform(put("/api/customers/{id}", customer.getId())
+                        .param("tenant", tenant)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(customerDto)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(1)))
                 .andExpect(jsonPath("$.name", is(customerDto.name())));
@@ -153,11 +153,10 @@ class CustomerControllerTest {
         Customer customer = new Customer().setId(customerId).setName("Updated text");
 
         this.mockMvc
-                .perform(
-                        put("/api/customers/{id}", customerId)
-                                .param("tenant", tenant)
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(customer)))
+                .perform(put("/api/customers/{id}", customerId)
+                        .param("tenant", tenant)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(customer)))
                 .andExpect(status().isNotFound());
     }
 
