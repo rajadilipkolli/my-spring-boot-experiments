@@ -1,7 +1,7 @@
 name: boot-ultimate-redis
 services:
   redis:
-    image: 'redis:8.0.3-alpine'
+    image: 'redis:8.2.0-alpine'
     container_name: redis-server
     ports:
       - '6379:6379'
