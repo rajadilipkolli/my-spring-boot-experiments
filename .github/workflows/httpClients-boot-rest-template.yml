@@ -20,7 +20,7 @@ jobs:
       run:
         working-directory: "httpClients/boot-rest-template"
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
 
