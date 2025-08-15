@@ -2,7 +2,7 @@ name: boot-graphql-webflux
 services:
 
   postgresqldb:
-    image: postgres:17.5-alpine
+    image: postgres:17.6-alpine
     environment:
       - POSTGRES_USER=appuser
       - POSTGRES_PASSWORD=secret
