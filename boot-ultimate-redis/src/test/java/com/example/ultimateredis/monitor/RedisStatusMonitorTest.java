@@ -17,11 +17,14 @@ import org.springframework.test.util.ReflectionTestUtils;
 @ExtendWith(MockitoExtension.class)
 class RedisStatusMonitorTest {
 
-    @Mock private RedisConnectionFactory redisConnectionFactory;
+    @Mock
+    private RedisConnectionFactory redisConnectionFactory;
 
-    @Mock private RedisConnection redisConnection;
+    @Mock
+    private RedisConnection redisConnection;
 
-    @InjectMocks private RedisStatusMonitor redisStatusMonitor;
+    @InjectMocks
+    private RedisStatusMonitor redisStatusMonitor;
 
     @BeforeEach
     void setUp() {

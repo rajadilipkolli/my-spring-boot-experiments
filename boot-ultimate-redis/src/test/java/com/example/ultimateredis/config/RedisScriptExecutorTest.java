@@ -21,11 +21,13 @@ import org.springframework.data.redis.core.script.RedisScript;
 @ExtendWith(MockitoExtension.class)
 class RedisScriptExecutorTest {
 
-    @Mock private RedisTemplate<String, Object> redisTemplate;
+    @Mock
+    private RedisTemplate<String, Object> redisTemplate;
 
     private RedisScriptExecutor scriptExecutor;
 
-    @Captor private ArgumentCaptor<RedisScript<Object>> scriptCaptor;
+    @Captor
+    private ArgumentCaptor<RedisScript<Object>> scriptCaptor;
 
     @BeforeEach
     void setUp() {

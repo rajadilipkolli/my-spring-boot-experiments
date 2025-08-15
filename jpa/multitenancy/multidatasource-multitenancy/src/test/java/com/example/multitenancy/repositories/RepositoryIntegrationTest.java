@@ -53,11 +53,10 @@ class RepositoryIntegrationTest extends AbstractIntegrationTest {
         @DisplayName("Should find all primary customers")
         void shouldFindAllPrimaryCustomers() {
             // Given
-            List<PrimaryCustomer> customers =
-                    List.of(
-                            new PrimaryCustomer().setText("Customer 1"),
-                            new PrimaryCustomer().setText("Customer 2"),
-                            new PrimaryCustomer().setText("Customer 3"));
+            List<PrimaryCustomer> customers = List.of(
+                    new PrimaryCustomer().setText("Customer 1"),
+                    new PrimaryCustomer().setText("Customer 2"),
+                    new PrimaryCustomer().setText("Customer 3"));
             primaryCustomerRepository.saveAll(customers);
 
             // When
@@ -93,35 +92,29 @@ class RepositoryIntegrationTest extends AbstractIntegrationTest {
         @DisplayName("Should support sorting")
         void shouldSupportSorting() {
             // Given
-            primaryCustomerRepository.saveAll(
-                    List.of(
-                            new PrimaryCustomer().setText("Charlie"),
-                            new PrimaryCustomer().setText("Alice"),
-                            new PrimaryCustomer().setText("Bob")));
+            primaryCustomerRepository.saveAll(List.of(
+                    new PrimaryCustomer().setText("Charlie"),
+                    new PrimaryCustomer().setText("Alice"),
+                    new PrimaryCustomer().setText("Bob")));
 
             // When
-            List<PrimaryCustomer> sortedCustomers =
-                    primaryCustomerRepository.findAll(Sort.by("text"));
+            List<PrimaryCustomer> sortedCustomers = primaryCustomerRepository.findAll(Sort.by("text"));
 
             // Then
-            assertThat(sortedCustomers)
-                    .extracting(PrimaryCustomer::getText)
-                    .containsExactly("Alice", "Bob", "Charlie");
+            assertThat(sortedCustomers).extracting(PrimaryCustomer::getText).containsExactly("Alice", "Bob", "Charlie");
         }
 
         @Test
         @DisplayName("Should delete primary customer")
         void shouldDeletePrimaryCustomer() {
             // Given
-            PrimaryCustomer customer =
-                    primaryCustomerRepository.save(new PrimaryCustomer().setText("To Delete"));
+            PrimaryCustomer customer = primaryCustomerRepository.save(new PrimaryCustomer().setText("To Delete"));
 
             // When
             primaryCustomerRepository.deleteById(customer.getId());
 
             // Then
-            Optional<PrimaryCustomer> deleted =
-                    primaryCustomerRepository.findById(customer.getId());
+            Optional<PrimaryCustomer> deleted = primaryCustomerRepository.findById(customer.getId());
             assertThat(deleted).isEmpty();
         }
 
@@ -129,11 +122,10 @@ class RepositoryIntegrationTest extends AbstractIntegrationTest {
         @DisplayName("Should delete all customers in batch")
         void shouldDeleteAllCustomersInBatch() {
             // Given
-            primaryCustomerRepository.saveAll(
-                    List.of(
-                            new PrimaryCustomer().setText("Customer 1"),
-                            new PrimaryCustomer().setText("Customer 2"),
-                            new PrimaryCustomer().setText("Customer 3")));
+            primaryCustomerRepository.saveAll(List.of(
+                    new PrimaryCustomer().setText("Customer 1"),
+                    new PrimaryCustomer().setText("Customer 2"),
+                    new PrimaryCustomer().setText("Customer 3")));
 
             // When
             primaryCustomerRepository.deleteAllInBatch();
@@ -148,9 +140,7 @@ class RepositoryIntegrationTest extends AbstractIntegrationTest {
         void shouldCountCustomersCorrectly() {
             // Given
             primaryCustomerRepository.saveAll(
-                    List.of(
-                            new PrimaryCustomer().setText("Customer 1"),
-                            new PrimaryCustomer().setText("Customer 2")));
+                    List.of(new PrimaryCustomer().setText("Customer 1"), new PrimaryCustomer().setText("Customer 2")));
 
             // When
             long count = primaryCustomerRepository.count();
@@ -163,8 +153,7 @@ class RepositoryIntegrationTest extends AbstractIntegrationTest {
         @DisplayName("Should check existence by ID")
         void shouldCheckExistenceById() {
             // Given
-            PrimaryCustomer customer =
-                    primaryCustomerRepository.save(new PrimaryCustomer().setText("Existence Test"));
+            PrimaryCustomer customer = primaryCustomerRepository.save(new PrimaryCustomer().setText("Existence Test"));
 
             // When/Then
             assertThat(primaryCustomerRepository.existsById(customer.getId())).isTrue();
@@ -205,11 +194,10 @@ class RepositoryIntegrationTest extends AbstractIntegrationTest {
         @DisplayName("Should find all secondary customers")
         void shouldFindAllSecondaryCustomers() {
             // Given
-            List<SecondaryCustomer> customers =
-                    List.of(
-                            new SecondaryCustomer().setName("Customer 1"),
-                            new SecondaryCustomer().setName("Customer 2"),
-                            new SecondaryCustomer().setName("Customer 3"));
+            List<SecondaryCustomer> customers = List.of(
+                    new SecondaryCustomer().setName("Customer 1"),
+                    new SecondaryCustomer().setName("Customer 2"),
+                    new SecondaryCustomer().setName("Customer 3"));
             secondaryCustomerRepository.saveAll(customers);
 
             // When
@@ -246,15 +234,13 @@ class RepositoryIntegrationTest extends AbstractIntegrationTest {
         @DisplayName("Should support sorting for secondary customers")
         void shouldSupportSortingForSecondaryCustomers() {
             // Given
-            secondaryCustomerRepository.saveAll(
-                    List.of(
-                            new SecondaryCustomer().setName("Zebra"),
-                            new SecondaryCustomer().setName("Alpha"),
-                            new SecondaryCustomer().setName("Beta")));
+            secondaryCustomerRepository.saveAll(List.of(
+                    new SecondaryCustomer().setName("Zebra"),
+                    new SecondaryCustomer().setName("Alpha"),
+                    new SecondaryCustomer().setName("Beta")));
 
             // When
-            List<SecondaryCustomer> sortedCustomers =
-                    secondaryCustomerRepository.findAll(Sort.by("name"));
+            List<SecondaryCustomer> sortedCustomers = secondaryCustomerRepository.findAll(Sort.by("name"));
 
             // Then
             assertThat(sortedCustomers)
@@ -266,15 +252,13 @@ class RepositoryIntegrationTest extends AbstractIntegrationTest {
         @DisplayName("Should delete secondary customer")
         void shouldDeleteSecondaryCustomer() {
             // Given
-            SecondaryCustomer customer =
-                    secondaryCustomerRepository.save(new SecondaryCustomer().setName("To Delete"));
+            SecondaryCustomer customer = secondaryCustomerRepository.save(new SecondaryCustomer().setName("To Delete"));
 
             // When
             secondaryCustomerRepository.deleteById(customer.getId());
 
             // Then
-            Optional<SecondaryCustomer> deleted =
-                    secondaryCustomerRepository.findById(customer.getId());
+            Optional<SecondaryCustomer> deleted = secondaryCustomerRepository.findById(customer.getId());
             assertThat(deleted).isEmpty();
         }
 
@@ -305,13 +289,11 @@ class RepositoryIntegrationTest extends AbstractIntegrationTest {
         void shouldHandleConcurrentOperationsAcrossSchemas() {
             // Given
             tenantIdentifierResolver.setCurrentTenant("schema1");
-            SecondaryCustomer schema1Customer =
-                    new SecondaryCustomer().setName("Schema1 Concurrent");
+            SecondaryCustomer schema1Customer = new SecondaryCustomer().setName("Schema1 Concurrent");
 
             tenantIdentifierResolver.setCurrentTenant("schema2");
             secondaryCustomerRepository.deleteAllInBatch();
-            SecondaryCustomer schema2Customer =
-                    new SecondaryCustomer().setName("Schema2 Concurrent");
+            SecondaryCustomer schema2Customer = new SecondaryCustomer().setName("Schema2 Concurrent");
 
             // When - Save in both schemas
             tenantIdentifierResolver.setCurrentTenant("schema1");
@@ -374,18 +356,14 @@ class RepositoryIntegrationTest extends AbstractIntegrationTest {
         void shouldHandleIdGenerationIndependently() {
             // Given
             tenantIdentifierResolver.setCurrentTenant("primary");
-            PrimaryCustomer primary1 =
-                    primaryCustomerRepository.save(new PrimaryCustomer().setText("Primary 1"));
-            PrimaryCustomer primary2 =
-                    primaryCustomerRepository.save(new PrimaryCustomer().setText("Primary 2"));
+            PrimaryCustomer primary1 = primaryCustomerRepository.save(new PrimaryCustomer().setText("Primary 1"));
+            PrimaryCustomer primary2 = primaryCustomerRepository.save(new PrimaryCustomer().setText("Primary 2"));
 
             tenantIdentifierResolver.setCurrentTenant("schema1");
             SecondaryCustomer secondary1 =
-                    secondaryCustomerRepository.save(
-                            new SecondaryCustomer().setName("Secondary 1"));
+                    secondaryCustomerRepository.save(new SecondaryCustomer().setName("Secondary 1"));
             SecondaryCustomer secondary2 =
-                    secondaryCustomerRepository.save(
-                            new SecondaryCustomer().setName("Secondary 2"));
+                    secondaryCustomerRepository.save(new SecondaryCustomer().setName("Secondary 2"));
 
             // Then - IDs should be properly generated for each datasource
             assertThat(primary1.getId()).isNotNull();
@@ -402,16 +380,14 @@ class RepositoryIntegrationTest extends AbstractIntegrationTest {
         @DisplayName("Should support bulk operations independently")
         void shouldSupportBulkOperationsIndependently() {
             // Given
-            List<PrimaryCustomer> primaryCustomers =
-                    List.of(
-                            new PrimaryCustomer().setText("Bulk Primary 1"),
-                            new PrimaryCustomer().setText("Bulk Primary 2"),
-                            new PrimaryCustomer().setText("Bulk Primary 3"));
+            List<PrimaryCustomer> primaryCustomers = List.of(
+                    new PrimaryCustomer().setText("Bulk Primary 1"),
+                    new PrimaryCustomer().setText("Bulk Primary 2"),
+                    new PrimaryCustomer().setText("Bulk Primary 3"));
 
-            List<SecondaryCustomer> secondaryCustomers =
-                    List.of(
-                            new SecondaryCustomer().setName("Bulk Secondary 1"),
-                            new SecondaryCustomer().setName("Bulk Secondary 2"));
+            List<SecondaryCustomer> secondaryCustomers = List.of(
+                    new SecondaryCustomer().setName("Bulk Secondary 1"),
+                    new SecondaryCustomer().setName("Bulk Secondary 2"));
 
             // When
             tenantIdentifierResolver.setCurrentTenant("primary");
@@ -434,16 +410,13 @@ class RepositoryIntegrationTest extends AbstractIntegrationTest {
             // Given - Setup data in both datasources
             tenantIdentifierResolver.setCurrentTenant("primary");
             primaryCustomerRepository.saveAll(
-                    List.of(
-                            new PrimaryCustomer().setText("Primary 1"),
-                            new PrimaryCustomer().setText("Primary 2")));
+                    List.of(new PrimaryCustomer().setText("Primary 1"), new PrimaryCustomer().setText("Primary 2")));
 
             tenantIdentifierResolver.setCurrentTenant("schema1");
-            secondaryCustomerRepository.saveAll(
-                    List.of(
-                            new SecondaryCustomer().setName("Secondary 1"),
-                            new SecondaryCustomer().setName("Secondary 2"),
-                            new SecondaryCustomer().setName("Secondary 3")));
+            secondaryCustomerRepository.saveAll(List.of(
+                    new SecondaryCustomer().setName("Secondary 1"),
+                    new SecondaryCustomer().setName("Secondary 2"),
+                    new SecondaryCustomer().setName("Secondary 3")));
 
             // When - Delete all from primary datasource only
             tenantIdentifierResolver.setCurrentTenant("primary");
@@ -498,12 +471,10 @@ class RepositoryIntegrationTest extends AbstractIntegrationTest {
             // Given/When - Rapidly switch between tenants and perform operations
             for (int i = 0; i < 10; i++) {
                 tenantIdentifierResolver.setCurrentTenant("schema1");
-                secondaryCustomerRepository.save(
-                        new SecondaryCustomer().setName("Schema1 Customer " + i));
+                secondaryCustomerRepository.save(new SecondaryCustomer().setName("Schema1 Customer " + i));
 
                 tenantIdentifierResolver.setCurrentTenant("schema2");
-                secondaryCustomerRepository.save(
-                        new SecondaryCustomer().setName("Schema2 Customer " + i));
+                secondaryCustomerRepository.save(new SecondaryCustomer().setName("Schema2 Customer " + i));
             }
 
             // Then

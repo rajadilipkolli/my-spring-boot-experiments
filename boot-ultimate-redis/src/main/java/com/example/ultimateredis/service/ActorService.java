@@ -46,7 +46,8 @@ public class ActorService {
 
     @Transactional
     public void deleteActorByName(String name) {
-        List<String> ids = actorRepository.findAllByName(name).stream().map(Actor::getId).toList();
+        List<String> ids =
+                actorRepository.findAllByName(name).stream().map(Actor::getId).toList();
         actorRepository.deleteAllById(ids);
     }
 

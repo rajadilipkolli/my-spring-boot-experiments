@@ -26,9 +26,11 @@ import org.springframework.data.domain.Sort;
 @ExtendWith(MockitoExtension.class)
 class PostServiceTest {
 
-    @Mock private PostRepository postRepository;
+    @Mock
+    private PostRepository postRepository;
 
-    @InjectMocks private PostService postService;
+    @InjectMocks
+    private PostService postService;
 
     @Test
     void findAllPosts() {

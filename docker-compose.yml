@@ -24,7 +24,7 @@ services:
       - MYSQL_DATABASE=mydatabase
 
   postgres:
-    image: postgres:17.5-alpine
+    image: postgres:17.6-alpine
     ports:
       - "5432:5432"
     volumes:
@@ -45,7 +45,7 @@ services:
       - PGADMIN_DEFAULT_PASSWORD=admin
 
   redis:
-    image: redis:8.0.3-alpine
+    image: redis:8.2.0-alpine
     ports:
       - "6379:6379"
     command: redis-server --save 60 1 --requirepass MDNcVb924a --loglevel warning

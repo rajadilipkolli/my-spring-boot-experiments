@@ -30,23 +30,17 @@ public class PostController {
 
     @GetMapping
     public PagedResult<Post> getAllPosts(
-            @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_NUMBER, required = false)
-                    int pageNo,
-            @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_SIZE, required = false)
-                    int pageSize,
-            @RequestParam(defaultValue = AppConstants.DEFAULT_SORT_BY, required = false)
-                    String sortBy,
-            @RequestParam(defaultValue = AppConstants.DEFAULT_SORT_DIRECTION, required = false)
-                    String sortDir) {
+            @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_NUMBER, required = false) int pageNo,
+            @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_SIZE, required = false) int pageSize,
+            @RequestParam(defaultValue = AppConstants.DEFAULT_SORT_BY, required = false) String sortBy,
+            @RequestParam(defaultValue = AppConstants.DEFAULT_SORT_DIRECTION, required = false) String sortDir) {
         return postService.findAllPosts(pageNo, pageSize, sortBy, sortDir);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<Post> getPostById(@PathVariable Long id) {
-        return postService
-                .findPostById(id)
-                .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+        return postService.findPostById(id).map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound()
+                .build());
     }
 
     @PostMapping
@@ -59,11 +53,10 @@ public class PostController {
     public ResponseEntity<Post> updatePost(@PathVariable Long id, @RequestBody Post post) {
         return postService
                 .findPostById(id)
-                .map(
-                        postObj -> {
-                            post.setId(id);
-                            return ResponseEntity.ok(postService.updatePost(post));
-                        })
+                .map(postObj -> {
+                    post.setId(id);
+                    return ResponseEntity.ok(postService.updatePost(post));
+                })
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
@@ -71,11 +64,10 @@ public class PostController {
     public ResponseEntity<Post> deletePost(@PathVariable Long id) {
         return postService
                 .findPostById(id)
-                .map(
-                        post -> {
-                            postService.deletePostById(id);
-                            return ResponseEntity.ok(post);
-                        })
+                .map(post -> {
+                    postService.deletePostById(id);
+                    return ResponseEntity.ok(post);
+                })
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 }

@@ -26,15 +26,11 @@ public class Initializer implements CommandLineRunner {
         log.info("Running Initializer.....");
 
         // Manually inserting all values from properties to db
-        togglzProperties
-                .getFeatures()
-                .forEach(
-                        (featureName, featureSpec) -> {
-                            FeatureState featureState =
-                                    new FeatureState(() -> featureName, featureSpec.isEnabled());
-                            featureState.setStrategyId(featureSpec.getStrategy());
-                            featureSpec.getParam().forEach(featureState::setParameter);
-                            jdbcStateRepository.setFeatureState(featureState);
-                        });
+        togglzProperties.getFeatures().forEach((featureName, featureSpec) -> {
+            FeatureState featureState = new FeatureState(() -> featureName, featureSpec.isEnabled());
+            featureState.setStrategyId(featureSpec.getStrategy());
+            featureSpec.getParam().forEach(featureState::setParameter);
+            jdbcStateRepository.setFeatureState(featureState);
+        });
     }
 }

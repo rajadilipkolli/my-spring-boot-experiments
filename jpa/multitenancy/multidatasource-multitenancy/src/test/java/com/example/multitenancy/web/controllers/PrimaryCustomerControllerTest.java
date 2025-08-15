@@ -37,20 +37,38 @@ import org.springframework.test.web.servlet.MockMvc;
 @ActiveProfiles(PROFILE_TEST)
 class PrimaryCustomerControllerTest {
 
-    @Autowired private MockMvc mockMvc;
-    @Autowired private ObjectMapper objectMapper;
+    @Autowired
+    private MockMvc mockMvc;
 
-    @MockitoBean private PrimaryCustomerService primaryCustomerService;
-    @MockitoBean private TenantIdentifierResolver tenantIdentifierResolver;
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @MockitoBean
+    private PrimaryCustomerService primaryCustomerService;
+
+    @MockitoBean
+    private TenantIdentifierResolver tenantIdentifierResolver;
 
     private List<PrimaryCustomer> primaryCustomerList;
 
     @BeforeEach
     void setUp() {
         this.primaryCustomerList = new ArrayList<>();
-        this.primaryCustomerList.add(new PrimaryCustomer(1L, "text 1", (short) 0, "dbsystc"));
-        this.primaryCustomerList.add(new PrimaryCustomer(2L, "text 2", (short) 0, "dbsystc"));
-        this.primaryCustomerList.add(new PrimaryCustomer(3L, "text 3", (short) 0, "dbsystc"));
+        this.primaryCustomerList.add(new PrimaryCustomer()
+                .setId(1L)
+                .setText("text 1")
+                .setVersion((short) 0)
+                .setTenant("dbsystc"));
+        this.primaryCustomerList.add(new PrimaryCustomer()
+                .setId(2L)
+                .setText("text 2")
+                .setVersion((short) 0)
+                .setTenant("dbsystc"));
+        this.primaryCustomerList.add(new PrimaryCustomer()
+                .setId(3L)
+                .setText("text 3")
+                .setVersion((short) 0)
+                .setTenant("dbsystc"));
     }
 
     @Test
@@ -66,15 +84,15 @@ class PrimaryCustomerControllerTest {
     @Test
     void shouldFindCustomerById() throws Exception {
         Long customerId = 1L;
-        PrimaryCustomer primaryCustomer =
-                new PrimaryCustomer(customerId, "text 1", (short) 0, "dbsystc");
-        given(primaryCustomerService.findCustomerById(customerId))
-                .willReturn(Optional.of(primaryCustomer));
+        PrimaryCustomer primaryCustomer = new PrimaryCustomer()
+                .setId(customerId)
+                .setText("text 1")
+                .setVersion((short) 0)
+                .setTenant("dbsystc");
+        given(primaryCustomerService.findCustomerById(customerId)).willReturn(Optional.of(primaryCustomer));
 
         this.mockMvc
-                .perform(
-                        get("/api/customers/primary/{id}", customerId)
-                                .header("X-tenantId", "primary"))
+                .perform(get("/api/customers/primary/{id}", customerId).header("X-tenantId", "primary"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.text", is(primaryCustomer.getText())));
     }
@@ -85,17 +103,18 @@ class PrimaryCustomerControllerTest {
         given(primaryCustomerService.findCustomerById(customerId)).willReturn(Optional.empty());
 
         this.mockMvc
-                .perform(
-                        get("/api/customers/primary/{id}", customerId)
-                                .header("X-tenantId", "primary"))
+                .perform(get("/api/customers/primary/{id}", customerId).header("X-tenantId", "primary"))
                 .andExpect(status().isNotFound());
     }
 
     @Test
     void shouldCreateNewCustomer() throws Exception {
 
-        PrimaryCustomer primaryCustomer =
-                new PrimaryCustomer(1L, "some text", (short) 0, "dbsystc");
+        PrimaryCustomer primaryCustomer = new PrimaryCustomer()
+                .setId(1L)
+                .setText("text 1")
+                .setVersion((short) 0)
+                .setTenant("dbsystc");
 
         given(primaryCustomerService.saveCustomer(any(PrimaryCustomerRequest.class)))
                 .willReturn(primaryCustomer);
@@ -103,11 +122,10 @@ class PrimaryCustomerControllerTest {
         PrimaryCustomerRequest request = new PrimaryCustomerRequest("some text");
 
         this.mockMvc
-                .perform(
-                        post("/api/customers/primary")
-                                .header("X-tenantId", "primary")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(request)))
+                .perform(post("/api/customers/primary")
+                        .header("X-tenantId", "primary")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id", notNullValue()))
                 .andExpect(jsonPath("$.text", is(primaryCustomer.getText())));
@@ -115,14 +133,13 @@ class PrimaryCustomerControllerTest {
 
     @Test
     void shouldReturn400WhenCreateNewCustomerWithoutText() throws Exception {
-        PrimaryCustomer primaryCustomer = new PrimaryCustomer(null, null, (short) 0, "dbsystc");
+        PrimaryCustomer primaryCustomer = new PrimaryCustomer().setTenant("dbsystc");
 
         this.mockMvc
-                .perform(
-                        post("/api/customers/primary")
-                                .header("X-tenantId", "primary")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(primaryCustomer)))
+                .perform(post("/api/customers/primary")
+                        .header("X-tenantId", "primary")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(primaryCustomer)))
                 .andExpect(status().isBadRequest())
                 .andExpect(header().string("Content-Type", is("application/problem+json")))
                 .andExpect(jsonPath("$.type", is("about:blank")))
@@ -139,19 +156,20 @@ class PrimaryCustomerControllerTest {
     @Test
     void shouldUpdateCustomer() throws Exception {
         Long customerId = 1L;
-        PrimaryCustomer primaryCustomer =
-                new PrimaryCustomer(customerId, "Updated text", (short) 0, "dbsystc");
-        given(primaryCustomerService.findCustomerById(customerId))
-                .willReturn(Optional.of(primaryCustomer));
+        PrimaryCustomer primaryCustomer = new PrimaryCustomer()
+                .setId(customerId)
+                .setText("text 1")
+                .setVersion((short) 0)
+                .setTenant("dbsystc");
+        given(primaryCustomerService.findCustomerById(customerId)).willReturn(Optional.of(primaryCustomer));
         given(primaryCustomerService.saveCustomer(any(PrimaryCustomer.class)))
                 .willAnswer((invocation) -> invocation.getArgument(0));
 
         this.mockMvc
-                .perform(
-                        put("/api/customers/primary/{id}", primaryCustomer.getId())
-                                .header("X-tenantId", "primary")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(primaryCustomer)))
+                .perform(put("/api/customers/primary/{id}", primaryCustomer.getId())
+                        .header("X-tenantId", "primary")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(primaryCustomer)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.text", is(primaryCustomer.getText())));
     }
@@ -160,31 +178,34 @@ class PrimaryCustomerControllerTest {
     void shouldReturn404WhenUpdatingNonExistingCustomer() throws Exception {
         Long customerId = 1L;
         given(primaryCustomerService.findCustomerById(customerId)).willReturn(Optional.empty());
-        PrimaryCustomer primaryCustomer =
-                new PrimaryCustomer(customerId, "Updated text", (short) 0, "dbsystc");
+        PrimaryCustomer primaryCustomer = new PrimaryCustomer()
+                .setId(customerId)
+                .setText("text 1")
+                .setVersion((short) 0)
+                .setTenant("dbsystc");
 
         this.mockMvc
-                .perform(
-                        put("/api/customers/primary/{id}", customerId)
-                                .header("X-tenantId", "primary")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(primaryCustomer)))
+                .perform(put("/api/customers/primary/{id}", customerId)
+                        .header("X-tenantId", "primary")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(primaryCustomer)))
                 .andExpect(status().isNotFound());
     }
 
     @Test
     void shouldDeleteCustomer() throws Exception {
         Long customerId = 1L;
-        PrimaryCustomer primaryCustomer =
-                new PrimaryCustomer(customerId, "Some text", (short) 0, "dbsystc");
-        given(primaryCustomerService.findCustomerById(customerId))
-                .willReturn(Optional.of(primaryCustomer));
+        PrimaryCustomer primaryCustomer = new PrimaryCustomer()
+                .setId(customerId)
+                .setText("text 1")
+                .setVersion((short) 0)
+                .setTenant("dbsystc");
+        given(primaryCustomerService.findCustomerById(customerId)).willReturn(Optional.of(primaryCustomer));
         doNothing().when(primaryCustomerService).deleteCustomerById(primaryCustomer.getId());
 
         this.mockMvc
-                .perform(
-                        delete("/api/customers/primary/{id}", primaryCustomer.getId())
-                                .header("X-tenantId", "primary"))
+                .perform(delete("/api/customers/primary/{id}", primaryCustomer.getId())
+                        .header("X-tenantId", "primary"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.text", is(primaryCustomer.getText())));
     }
@@ -195,9 +216,7 @@ class PrimaryCustomerControllerTest {
         given(primaryCustomerService.findCustomerById(customerId)).willReturn(Optional.empty());
 
         this.mockMvc
-                .perform(
-                        delete("/api/customers/primary/{id}", customerId)
-                                .header("X-tenantId", "primary"))
+                .perform(delete("/api/customers/primary/{id}", customerId).header("X-tenantId", "primary"))
                 .andExpect(status().isNotFound());
     }
 }

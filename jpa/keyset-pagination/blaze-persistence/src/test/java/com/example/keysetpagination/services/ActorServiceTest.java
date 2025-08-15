@@ -22,10 +22,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class ActorServiceTest {
 
-    @Mock private ActorRepository actorRepository;
-    @Mock private ActorMapper actorMapper;
+    @Mock
+    private ActorRepository actorRepository;
 
-    @InjectMocks private ActorService actorService;
+    @Mock
+    private ActorMapper actorMapper;
+
+    @InjectMocks
+    private ActorService actorService;
 
     @Test
     void findActorById() {

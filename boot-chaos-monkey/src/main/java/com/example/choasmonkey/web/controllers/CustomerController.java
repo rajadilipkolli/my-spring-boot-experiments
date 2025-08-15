@@ -26,22 +26,17 @@ public class CustomerController {
     private final CustomerService customerService;
     private final ObservationRegistry observationRegistry;
 
-    public CustomerController(
-            CustomerService customerService, ObservationRegistry observationRegistry) {
+    public CustomerController(CustomerService customerService, ObservationRegistry observationRegistry) {
         this.customerService = customerService;
         this.observationRegistry = observationRegistry;
     }
 
     @GetMapping
     public CustomerResponse getAllCustomers(
-            @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_NUMBER, required = false)
-                    int pageNo,
-            @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_SIZE, required = false)
-                    int pageSize,
-            @RequestParam(defaultValue = AppConstants.DEFAULT_SORT_BY, required = false)
-                    String sortBy,
-            @RequestParam(defaultValue = AppConstants.DEFAULT_SORT_DIRECTION, required = false)
-                    String sortDir) {
+            @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_NUMBER, required = false) int pageNo,
+            @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_SIZE, required = false) int pageSize,
+            @RequestParam(defaultValue = AppConstants.DEFAULT_SORT_BY, required = false) String sortBy,
+            @RequestParam(defaultValue = AppConstants.DEFAULT_SORT_DIRECTION, required = false) String sortDir) {
         return customerService.findAllCustomers(pageNo, pageSize, sortBy, sortDir);
     }
 
@@ -50,16 +45,13 @@ public class CustomerController {
 
         return observerRequest(
                 "customers.findById",
-                customerService
-                        .findCustomerById(id)
-                        .map(ResponseEntity::ok)
-                        .orElseGet(() -> ResponseEntity.notFound().build()));
+                customerService.findCustomerById(id).map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound()
+                        .build()));
     }
 
     private ResponseEntity<Customer> observerRequest(
             String metricName, ResponseEntity<Customer> customerResponseEntity) {
-        return Observation.createNotStarted(metricName, observationRegistry)
-                .observe(() -> customerResponseEntity);
+        return Observation.createNotStarted(metricName, observationRegistry).observe(() -> customerResponseEntity);
     }
 
     @PostMapping
@@ -68,27 +60,23 @@ public class CustomerController {
         Customer createdCustomer = customerService.saveCustomer(customer);
         return observerRequest(
                 "customers.create",
-                ResponseEntity.created(
-                                uriComponentsBuilder
-                                        .path("/api/customers/{id}")
-                                        .buildAndExpand(createdCustomer.getId())
-                                        .toUri())
+                ResponseEntity.created(uriComponentsBuilder
+                                .path("/api/customers/{id}")
+                                .buildAndExpand(createdCustomer.getId())
+                                .toUri())
                         .body(createdCustomer));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Customer> updateCustomer(
-            @PathVariable Long id, @RequestBody Customer customer) {
+    public ResponseEntity<Customer> updateCustomer(@PathVariable Long id, @RequestBody Customer customer) {
         return observerRequest(
                 "customers.update",
                 customerService
                         .findCustomerById(id)
-                        .map(
-                                customerObj -> {
-                                    customer.setId(id);
-                                    return ResponseEntity.ok(
-                                            customerService.saveCustomer(customer));
-                                })
+                        .map(customerObj -> {
+                            customer.setId(id);
+                            return ResponseEntity.ok(customerService.saveCustomer(customer));
+                        })
                         .orElseGet(() -> ResponseEntity.notFound().build()));
     }
 
@@ -98,11 +86,10 @@ public class CustomerController {
                 "customers.delete",
                 customerService
                         .findCustomerById(id)
-                        .map(
-                                customer -> {
-                                    customerService.deleteCustomerById(id);
-                                    return ResponseEntity.ok(customer);
-                                })
+                        .map(customer -> {
+                            customerService.deleteCustomerById(id);
+                            return ResponseEntity.ok(customer);
+                        })
                         .orElseGet(() -> ResponseEntity.notFound().build()));
     }
 }

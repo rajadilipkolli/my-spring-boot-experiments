@@ -15,7 +15,7 @@ public class ContainerConfiguration {
     @ServiceConnection
     @RestartScope
     RabbitMQContainer rabbitMQContainer() {
-        return new RabbitMQContainer(DockerImageName.parse("rabbitmq").withTag("4.1.2-management"));
+        return new RabbitMQContainer(DockerImageName.parse("rabbitmq").withTag("4.1.3-management"));
     }
 
     @Bean

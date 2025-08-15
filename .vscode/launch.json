@@ -244,6 +244,37 @@
         },
         {
             "type": "java",
+            "name": "Spring Boot-UltimateRedisApplication<boot-ultimate-redis>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.example.ultimateredis.UltimateRedisApplication",
+            "projectName": "boot-ultimate-redis",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env",
+            "vmArgs": " -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=38709 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dspring.jmx.enabled=true -Djava.rmi.server.hostname=localhost -Dspring.application.admin.enabled=true -Dspring.boot.project.name=boot-ultimate-redis"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-TestUltimateRedisApplication<boot-ultimate-redis>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.example.ultimateredis.TestUltimateRedisApplication",
+            "projectName": "boot-ultimate-redis",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-TogglzApplication<boot-togglz-sample>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.example.featuretoggle.TogglzApplication",
+            "projectName": "boot-togglz-sample",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
             "name": "Spring Boot-GrafanaLGTMApplication<boot-grafana-lgtm>",
             "request": "launch",
             "cwd": "${workspaceFolder}",

@@ -12,8 +12,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 class ApplicationIntegrationTest extends AbstractIntegrationTest {
 
     @Autowired
-    @Qualifier("tenantRoutingDatasource")
-    private DataSource tenantRoutingDatasource;
+    @Qualifier("tenantRoutingDatasource") private DataSource tenantRoutingDatasource;
 
     @Test
     void contextLoads() {

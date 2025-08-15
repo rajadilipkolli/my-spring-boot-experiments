@@ -37,20 +37,23 @@ import org.springframework.test.web.servlet.MockMvc;
 @ActiveProfiles(PROFILE_TEST)
 class PostControllerTest {
 
-    @Autowired private MockMvc mockMvc;
+    @Autowired
+    private MockMvc mockMvc;
 
-    @MockitoBean private PostService postService;
+    @MockitoBean
+    private PostService postService;
 
-    @Autowired private ObjectMapper objectMapper;
+    @Autowired
+    private ObjectMapper objectMapper;
 
     private List<Post> postList;
 
     @BeforeEach
     void setUp() {
         this.postList = new ArrayList<>();
-        this.postList.add(new Post(1L, "text 1", 1L, "First Body"));
-        this.postList.add(new Post(2L, "text 2", 1L, "Second Body"));
-        this.postList.add(new Post(3L, "text 3", 1L, "Third Body"));
+        postList.add(new Post().setId(1L).setTitle("First Post").setUserId(1L).setBody("First Body"));
+        postList.add(new Post().setId(2L).setTitle("Second Post").setUserId(1L).setBody("Second Body"));
+        postList.add(new Post().setId(3L).setTitle("Third Post").setUserId(1L).setBody("ThirdBody"));
     }
 
     @Test
@@ -75,7 +78,7 @@ class PostControllerTest {
     @Test
     void shouldFindPostById() throws Exception {
         Long postId = 1L;
-        Post post = new Post(postId, "text 1", 1L, "First Body");
+        Post post = new Post().setId(1L).setTitle("First Post").setUserId(1L).setBody("First Body");
         given(postService.findPostById(postId)).willReturn(Optional.of(post));
 
         this.mockMvc
@@ -94,15 +97,13 @@ class PostControllerTest {
 
     @Test
     void shouldCreateNewPost() throws Exception {
-        given(postService.savePost(any(Post.class)))
-                .willAnswer((invocation) -> invocation.getArgument(0));
+        given(postService.savePost(any(Post.class))).willAnswer((invocation) -> invocation.getArgument(0));
 
-        Post post = new Post(1L, "some text", 1L, "First Body");
+        Post post = new Post().setId(1L).setTitle("some text").setUserId(1L).setBody("First Body");
         this.mockMvc
-                .perform(
-                        post("/api/posts")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(post)))
+                .perform(post("/api/posts")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(post)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id", notNullValue()))
                 .andExpect(jsonPath("$.title", is(post.getTitle())));
@@ -110,13 +111,12 @@ class PostControllerTest {
 
     @Test
     void shouldReturn400WhenCreateNewPostWithoutTitleAndBody() throws Exception {
-        Post post = new Post(null, null, null, null);
+        Post post = new Post();
 
         this.mockMvc
-                .perform(
-                        post("/api/posts")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(post)))
+                .perform(post("/api/posts")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(post)))
                 .andExpect(status().isBadRequest())
                 .andExpect(header().string("Content-Type", is("application/problem+json")))
                 .andExpect(jsonPath("$.type", is("about:blank")))
@@ -135,16 +135,14 @@ class PostControllerTest {
     @Test
     void shouldUpdatePost() throws Exception {
         Long postId = 1L;
-        Post post = new Post(postId, "Updated text", 1L, "First Body");
+        Post post = new Post().setId(1L).setTitle("First Post").setUserId(1L).setBody("First Body");
         given(postService.findPostById(postId)).willReturn(Optional.of(post));
-        given(postService.updatePost(any(Post.class)))
-                .willAnswer((invocation) -> invocation.getArgument(0));
+        given(postService.updatePost(any(Post.class))).willAnswer((invocation) -> invocation.getArgument(0));
 
         this.mockMvc
-                .perform(
-                        put("/api/posts/{id}", post.getId())
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(post)))
+                .perform(put("/api/posts/{id}", post.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(post)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.title", is(post.getTitle())));
     }
@@ -153,20 +151,19 @@ class PostControllerTest {
     void shouldReturn404WhenUpdatingNonExistingPost() throws Exception {
         Long postId = 1L;
         given(postService.findPostById(postId)).willReturn(Optional.empty());
-        Post post = new Post(postId, "Updated text", 1L, "First Body");
+        Post post = new Post().setId(1L).setTitle("First Post").setUserId(1L).setBody("First Body");
 
         this.mockMvc
-                .perform(
-                        put("/api/posts/{id}", postId)
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(post)))
+                .perform(put("/api/posts/{id}", postId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(post)))
                 .andExpect(status().isNotFound());
     }
 
     @Test
     void shouldDeletePost() throws Exception {
         Long postId = 1L;
-        Post post = new Post(postId, "Some text", 1L, "First Body");
+        Post post = new Post().setId(1L).setTitle("First Post").setUserId(1L).setBody("First Body");
         given(postService.findPostById(postId)).willReturn(Optional.of(post));
         doNothing().when(postService).deletePostById(post.getId());
 

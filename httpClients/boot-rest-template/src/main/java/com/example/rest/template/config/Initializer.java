@@ -29,26 +29,25 @@ public class Initializer implements CommandLineRunner {
     public void run(String... args) {
         log.info("Running Initializer.....");
 
-        ApplicationRestResponse<Post> postApplicationRestResponse =
-                restHandler.get(
-                        ApplicationRestRequest.builder()
-                                .httpBaseUrl("https://jsonplaceholder.typicode.com/posts")
-                                .path("/{postId}")
-                                .pathVariables(Map.of("postId", 1))
-                                .build(),
-                        Post.class);
+        ApplicationRestResponse<Post> postApplicationRestResponse = restHandler.get(
+                ApplicationRestRequest.builder()
+                        .httpBaseUrl("https://jsonplaceholder.typicode.com/posts")
+                        .path("/{postId}")
+                        .pathVariables(Map.of("postId", 1))
+                        .build(),
+                Post.class);
 
         Post entity = postApplicationRestResponse.body();
         entity.setId(null);
         this.postRepository.save(entity);
 
-        List<Post> response =
-                restHandler.getBody(
-                        ApplicationRestRequest.builder()
-                                .httpBaseUrl("https://jsonplaceholder.typicode.com/posts")
-                                .build(),
-                        new ParameterizedTypeReference<List<Post>>() {});
-        List<Post> modifiedPostList = response.stream().peek(post -> post.setId(null)).toList();
+        List<Post> response = restHandler.getBody(
+                ApplicationRestRequest.builder()
+                        .httpBaseUrl("https://jsonplaceholder.typicode.com/posts")
+                        .build(),
+                new ParameterizedTypeReference<List<Post>>() {});
+        List<Post> modifiedPostList =
+                response.stream().peek(post -> post.setId(null)).toList();
         this.postRepository.saveAll(modifiedPostList);
     }
 }

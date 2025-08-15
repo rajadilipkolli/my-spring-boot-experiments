@@ -40,8 +40,7 @@ public class RedisScriptExecutor {
      * @param args Additional arguments to pass to the script
      * @return The result of script execution
      */
-    public <T> T executeScript(
-            String script, Class<T> returnType, List<String> keys, Object... args) {
+    public <T> T executeScript(String script, Class<T> returnType, List<String> keys, Object... args) {
         RedisScript<T> redisScript = new DefaultRedisScript<>(script, returnType);
         return redisTemplate.execute(redisScript, keys, args);
     }

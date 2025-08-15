@@ -24,20 +24,16 @@ public class Initializer implements CommandLineRunner {
     @Override
     public void run(String... args) {
         log.info("Running Initializer.....");
-        List<Actor> actorList =
-                LongStream.rangeClosed(1, 50)
-                        .mapToObj(
-                                actorId -> {
-                                    Actor actor =
-                                            new Actor().setName("Actor - %d".formatted(actorId));
-                                    if (actorId % 2 == 0) {
-                                        return actor.setCreatedOn(
-                                                LocalDate.now().minusDays(actorId));
-                                    } else {
-                                        return actor.setCreatedOn(LocalDate.now());
-                                    }
-                                })
-                        .toList();
+        List<Actor> actorList = LongStream.rangeClosed(1, 50)
+                .mapToObj(actorId -> {
+                    Actor actor = new Actor().setName("Actor - %d".formatted(actorId));
+                    if (actorId % 2 == 0) {
+                        return actor.setCreatedOn(LocalDate.now().minusDays(actorId));
+                    } else {
+                        return actor.setCreatedOn(LocalDate.now());
+                    }
+                })
+                .toList();
         actorRepository.saveAll(actorList);
     }
 }

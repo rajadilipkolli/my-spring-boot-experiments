@@ -24,73 +24,62 @@ public class Post {
     private Long id;
 
     @Column(nullable = false)
-    @NotEmpty(message = "Title cannot be empty")
-    private String title;
+    @NotEmpty(message = "Title cannot be empty") private String title;
 
     @Column(nullable = false)
-    @Positive(message = "UserId Should be positive Number")
-    private Long userId;
+    @Positive(message = "UserId Should be positive Number") private Long userId;
 
     @Column(nullable = false)
-    @NotEmpty(message = "Body cannot be empty")
-    private String body;
+    @NotEmpty(message = "Body cannot be empty") private String body;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "post", orphanRemoval = true)
     private List<PostComment> postComments = new ArrayList<>();
 
     public Post() {}
 
-    public Post(
-            Long id,
-            @NotEmpty(message = "Title cannot be empty") String title,
-            @Positive(message = "UserId Should be positive Number") Long userId,
-            @NotEmpty(message = "Body cannot be empty") String body,
-            List<PostComment> postComments) {
-        this.id = id;
-        this.title = title;
-        this.userId = userId;
-        this.body = body;
-        this.postComments = postComments;
-    }
-
     public Long getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public Post setId(Long id) {
         this.id = id;
+        return this;
     }
 
     public String getTitle() {
         return title;
     }
 
-    public void setTitle(String title) {
+    public Post setTitle(String title) {
         this.title = title;
+        return this;
     }
 
     public Long getUserId() {
         return userId;
     }
 
-    public void setUserId(Long userId) {
+    public Post setUserId(Long userId) {
         this.userId = userId;
+        return this;
     }
 
     public String getBody() {
         return body;
     }
 
-    public void setBody(String body) {
+    public Post setBody(String body) {
         this.body = body;
+        return this;
     }
 
     public List<PostComment> getPostComments() {
         return postComments;
     }
 
-    public void setPostComments(List<PostComment> postComments) {
+    public Post setPostComments(List<PostComment> postComments) {
         this.postComments = postComments;
+        return this;
     }
 
     @Override

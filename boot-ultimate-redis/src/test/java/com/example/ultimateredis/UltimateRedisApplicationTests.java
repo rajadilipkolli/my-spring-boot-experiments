@@ -17,15 +17,20 @@ import org.springframework.data.redis.core.RedisTemplate;
 
 class UltimateRedisApplicationTests extends AbstractIntegrationTest {
 
-    @Autowired private RedisTemplate<String, Object> redisTemplate;
+    @Autowired
+    private RedisTemplate<String, Object> redisTemplate;
 
-    @Autowired private RedisValueOperationsUtil<String> redisValueOpsUtil;
+    @Autowired
+    private RedisValueOperationsUtil<String> redisValueOpsUtil;
 
-    @Autowired private RedisService redisService;
+    @Autowired
+    private RedisService redisService;
 
-    @Autowired private RedisScriptExecutor scriptExecutor;
+    @Autowired
+    private RedisScriptExecutor scriptExecutor;
 
-    @Autowired private RedisRateLimiter rateLimiter;
+    @Autowired
+    private RedisRateLimiter rateLimiter;
 
     @BeforeEach
     void setUp() {
@@ -156,19 +161,18 @@ class UltimateRedisApplicationTests extends AbstractIntegrationTest {
         // Wait for token replenishment (1 second = 5 new tokens) using Awaitility
         await().atMost(Duration.ofSeconds(3))
                 .pollInterval(Duration.ofMillis(100))
-                .untilAsserted(
-                        () -> {
-                            int replenished = 0;
-                            // Try to acquire up to 5 tokens, but allow for the possibility that
-                            // tokens may not be replenished all at once
-                            for (int i = 0; i < 5; i++) {
-                                if (rateLimiter.tryAcquire(key, rate, capacity)) {
-                                    replenished++;
-                                }
-                            }
-                            // At least 1 token should be replenished (be tolerant to timing)
-                            assertThat(replenished).isGreaterThanOrEqualTo(1);
-                        });
+                .untilAsserted(() -> {
+                    int replenished = 0;
+                    // Try to acquire up to 5 tokens, but allow for the possibility that
+                    // tokens may not be replenished all at once
+                    for (int i = 0; i < 5; i++) {
+                        if (rateLimiter.tryAcquire(key, rate, capacity)) {
+                            replenished++;
+                        }
+                    }
+                    // At least 1 token should be replenished (be tolerant to timing)
+                    assertThat(replenished).isGreaterThanOrEqualTo(1);
+                });
         // After consuming replenished tokens, bucket should be empty again
         assertThat(rateLimiter.tryAcquire(key, rate, capacity)).isFalse();
     }
@@ -181,12 +185,16 @@ class UltimateRedisApplicationTests extends AbstractIntegrationTest {
         Duration window = Duration.ofMinutes(1);
 
         // Act & Assert - first three requests allowed
-        assertThat(rateLimiter.tryAcquireWithFixedWindow(key, maxOperations, window)).isTrue();
-        assertThat(rateLimiter.tryAcquireWithFixedWindow(key, maxOperations, window)).isTrue();
-        assertThat(rateLimiter.tryAcquireWithFixedWindow(key, maxOperations, window)).isTrue();
+        assertThat(rateLimiter.tryAcquireWithFixedWindow(key, maxOperations, window))
+                .isTrue();
+        assertThat(rateLimiter.tryAcquireWithFixedWindow(key, maxOperations, window))
+                .isTrue();
+        assertThat(rateLimiter.tryAcquireWithFixedWindow(key, maxOperations, window))
+                .isTrue();
 
         // 4th request should be denied
-        assertThat(rateLimiter.tryAcquireWithFixedWindow(key, maxOperations, window)).isFalse();
+        assertThat(rateLimiter.tryAcquireWithFixedWindow(key, maxOperations, window))
+                .isFalse();
     }
 
     @Test

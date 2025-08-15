@@ -143,26 +143,21 @@ class AdvancedMultiTenantScenariosIT extends AbstractIntegrationTest {
     @Test
     void testHttpRequestTenantIsolation() throws Exception {
         // Create data for different tenants via HTTP requests
-        String primaryCustomer =
-                objectMapper.writeValueAsString(
-                        new PrimaryCustomerRequest("Primary-HTTP-Customer"));
+        String primaryCustomer = objectMapper.writeValueAsString(new PrimaryCustomerRequest("Primary-HTTP-Customer"));
 
-        mockMvc.perform(
-                        post("/api/customers/primary")
-                                .header("X-TenantId", "primary")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(primaryCustomer))
+        mockMvc.perform(post("/api/customers/primary")
+                        .header("X-TenantId", "primary")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(primaryCustomer))
                 .andExpect(status().isCreated());
 
         String secondaryCustomer =
-                objectMapper.writeValueAsString(
-                        new SecondaryCustomerRequest("Schema1-HTTP-Customer"));
+                objectMapper.writeValueAsString(new SecondaryCustomerRequest("Schema1-HTTP-Customer"));
 
-        mockMvc.perform(
-                        post("/api/customers/secondary")
-                                .header("X-TenantId", "schema1")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(secondaryCustomer))
+        mockMvc.perform(post("/api/customers/secondary")
+                        .header("X-TenantId", "schema1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(secondaryCustomer))
                 .andExpect(status().isCreated());
 
         // Verify primary data
@@ -184,12 +179,11 @@ class AdvancedMultiTenantScenariosIT extends AbstractIntegrationTest {
         tenantIdentifierResolver.setCurrentTenant("primary");
 
         // Test that validation errors don't corrupt tenant context
-        assertThatThrownBy(
-                        () -> {
-                            PrimaryCustomer invalidCustomer = new PrimaryCustomer();
-                            invalidCustomer.setText(""); // Invalid empty text
-                            primaryCustomerRepository.saveAndFlush(invalidCustomer);
-                        })
+        assertThatThrownBy(() -> {
+                    PrimaryCustomer invalidCustomer = new PrimaryCustomer();
+                    invalidCustomer.setText(""); // Invalid empty text
+                    primaryCustomerRepository.saveAndFlush(invalidCustomer);
+                })
                 .isInstanceOf(DataIntegrityViolationException.class)
                 .hasMessageContaining("cannot insert NULL");
 
@@ -329,45 +323,36 @@ class AdvancedMultiTenantScenariosIT extends AbstractIntegrationTest {
                         final int threadIndex = i;
                         final String tenantName = tenant.getSchemaName();
 
-                        CompletableFuture<Void> future =
-                                CompletableFuture.runAsync(
-                                        () -> {
-                                            try {
-                                                // Wait for all threads to start simultaneously
-                                                startLatch.await();
+                        CompletableFuture<Void> future = CompletableFuture.runAsync(
+                                () -> {
+                                    try {
+                                        // Wait for all threads to start simultaneously
+                                        startLatch.await();
 
-                                                // Set tenant context for this thread
-                                                tenantIdentifierResolver.setCurrentTenant(
-                                                        tenantName);
+                                        // Set tenant context for this thread
+                                        tenantIdentifierResolver.setCurrentTenant(tenantName);
 
-                                                // Verify tenant context is correctly set
-                                                String currentTenant =
-                                                        tenantIdentifierResolver
-                                                                .resolveCurrentTenantIdentifier();
-                                                assertThat(currentTenant).isEqualTo(tenantName);
+                                        // Verify tenant context is correctly set
+                                        String currentTenant =
+                                                tenantIdentifierResolver.resolveCurrentTenantIdentifier();
+                                        assertThat(currentTenant).isEqualTo(tenantName);
 
-                                                // Perform tenant-specific operations
-                                                performTenantSpecificOperations(
-                                                        tenantName, threadIndex);
+                                        // Perform tenant-specific operations
+                                        performTenantSpecificOperations(tenantName, threadIndex);
 
-                                                // Verify data isolation
-                                                verifyTenantDataIsolation(tenantName, threadIndex);
+                                        // Verify data isolation
+                                        verifyTenantDataIsolation(tenantName, threadIndex);
 
-                                                successCounts.get(tenantName).incrementAndGet();
+                                        successCounts.get(tenantName).incrementAndGet();
 
-                                            } catch (Exception e) {
-                                                errors.get(tenantName)
-                                                        .add(
-                                                                "Thread "
-                                                                        + threadIndex
-                                                                        + ": "
-                                                                        + e.getMessage());
-                                                e.printStackTrace();
-                                            } finally {
-                                                completionLatch.countDown();
-                                            }
-                                        },
-                                        executorService);
+                                    } catch (Exception e) {
+                                        errors.get(tenantName).add("Thread " + threadIndex + ": " + e.getMessage());
+                                        e.printStackTrace();
+                                    } finally {
+                                        completionLatch.countDown();
+                                    }
+                                },
+                                executorService);
 
                         futures.add(future);
                     }
@@ -443,74 +428,64 @@ class AdvancedMultiTenantScenariosIT extends AbstractIntegrationTest {
             CountDownLatch completionLatch = new CountDownLatch(numberOfThreads);
 
             AtomicInteger totalOperations = new AtomicInteger(0);
-            ConcurrentHashMap<String, AtomicInteger> tenantOperationCounts =
-                    new ConcurrentHashMap<>();
+            ConcurrentHashMap<String, AtomicInteger> tenantOperationCounts = new ConcurrentHashMap<>();
             List<String> globalErrors = new ArrayList<>();
 
             try {
                 for (int threadId = 0; threadId < numberOfThreads; threadId++) {
                     final int currentThreadId = threadId;
 
-                    executorService.submit(
-                            () -> {
-                                try {
-                                    DatabaseType[] tenants = getValidTenants();
+                    executorService.submit(() -> {
+                        try {
+                            DatabaseType[] tenants = getValidTenants();
 
-                                    for (int op = 0; op < operationsPerThread; op++) {
-                                        // Randomly select a tenant for this operation
-                                        DatabaseType randomTenant = tenants[op % tenants.length];
-                                        String tenantName = randomTenant.getSchemaName();
+                            for (int op = 0; op < operationsPerThread; op++) {
+                                // Randomly select a tenant for this operation
+                                DatabaseType randomTenant = tenants[op % tenants.length];
+                                String tenantName = randomTenant.getSchemaName();
 
-                                        // Switch to tenant
-                                        tenantIdentifierResolver.setCurrentTenant(tenantName);
+                                // Switch to tenant
+                                tenantIdentifierResolver.setCurrentTenant(tenantName);
 
-                                        // Verify correct tenant is set
-                                        String currentTenant =
-                                                tenantIdentifierResolver
-                                                        .resolveCurrentTenantIdentifier();
-                                        if (!tenantName.equals(currentTenant)) {
-                                            synchronized (globalErrors) {
-                                                globalErrors.add(
-                                                        "Thread "
-                                                                + currentThreadId
-                                                                + " expected tenant "
-                                                                + tenantName
-                                                                + " but got "
-                                                                + currentTenant);
-                                            }
-                                            continue;
-                                        }
-
-                                        // Perform operation
-                                        String dataId = "thread-" + currentThreadId + "-op-" + op;
-                                        createTenantSpecificData(tenantName, dataId);
-
-                                        // Verify data was created in correct tenant
-                                        verifyDataInTenant(tenantName, dataId);
-
-                                        // Track operations per tenant
-                                        tenantOperationCounts
-                                                .computeIfAbsent(
-                                                        tenantName, k -> new AtomicInteger(0))
-                                                .incrementAndGet();
-                                        totalOperations.incrementAndGet();
-
-                                        // Small delay to increase chance of race conditions
-                                        Thread.sleep(1);
-                                    }
-                                } catch (Exception e) {
+                                // Verify correct tenant is set
+                                String currentTenant = tenantIdentifierResolver.resolveCurrentTenantIdentifier();
+                                if (!tenantName.equals(currentTenant)) {
                                     synchronized (globalErrors) {
-                                        globalErrors.add(
-                                                "Thread "
-                                                        + currentThreadId
-                                                        + " error: "
-                                                        + e.getMessage());
+                                        globalErrors.add("Thread "
+                                                + currentThreadId
+                                                + " expected tenant "
+                                                + tenantName
+                                                + " but got "
+                                                + currentTenant);
                                     }
-                                    e.printStackTrace();
-                                } finally {
-                                    completionLatch.countDown();
+                                    continue;
                                 }
-                            });
+
+                                // Perform operation
+                                String dataId = "thread-" + currentThreadId + "-op-" + op;
+                                createTenantSpecificData(tenantName, dataId);
+
+                                // Verify data was created in correct tenant
+                                verifyDataInTenant(tenantName, dataId);
+
+                                // Track operations per tenant
+                                tenantOperationCounts
+                                        .computeIfAbsent(tenantName, k -> new AtomicInteger(0))
+                                        .incrementAndGet();
+                                totalOperations.incrementAndGet();
+
+                                // Small delay to increase chance of race conditions
+                                Thread.sleep(1);
+                            }
+                        } catch (Exception e) {
+                            synchronized (globalErrors) {
+                                globalErrors.add("Thread " + currentThreadId + " error: " + e.getMessage());
+                            }
+                            e.printStackTrace();
+                        } finally {
+                            completionLatch.countDown();
+                        }
+                    });
                 }
 
                 // Wait for completion
@@ -543,8 +518,7 @@ class AdvancedMultiTenantScenariosIT extends AbstractIntegrationTest {
         }
 
         private void performTenantSpecificOperations(String tenantName, int threadIndex) {
-            String uniqueId =
-                    tenantName + "-thread-" + threadIndex + "-" + System.currentTimeMillis();
+            String uniqueId = tenantName + "-thread-" + threadIndex + "-" + System.currentTimeMillis();
             createTenantSpecificData(tenantName, uniqueId);
         }
 
@@ -582,27 +556,13 @@ class AdvancedMultiTenantScenariosIT extends AbstractIntegrationTest {
         private void verifyDataInTenant(String tenantName, String dataId) {
             if (isPrimaryTenant(tenantName)) {
                 List<PrimaryCustomer> customers = primaryCustomerRepository.findAll();
-                boolean found =
-                        customers.stream()
-                                .anyMatch(c -> c.getText() != null && c.getText().contains(dataId));
-                assertThat(found)
-                        .as(
-                                "Data with ID "
-                                        + dataId
-                                        + " should exist in primary tenant "
-                                        + tenantName)
-                        .isTrue();
+                assertThat(customers).anySatisfy(c -> assertThat(c.getText()).contains(dataId));
             } else {
                 List<SecondaryCustomer> customers = secondaryCustomerRepository.findAll();
-                boolean found =
-                        customers.stream()
-                                .anyMatch(c -> c.getName() != null && c.getName().contains(dataId));
+                boolean found = customers.stream()
+                        .anyMatch(c -> c.getName() != null && c.getName().contains(dataId));
                 assertThat(found)
-                        .as(
-                                "Data with ID "
-                                        + dataId
-                                        + " should exist in secondary tenant "
-                                        + tenantName)
+                        .as("Data with ID " + dataId + " should exist in secondary tenant " + tenantName)
                         .isTrue();
             }
         }

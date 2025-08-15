@@ -19,9 +19,11 @@ import org.springframework.aop.aspectj.annotation.AspectJProxyFactory;
 @ExtendWith(MockitoExtension.class)
 class RedisMetricsAspectTest {
 
-    @Mock private ProceedingJoinPoint joinPoint;
+    @Mock
+    private ProceedingJoinPoint joinPoint;
 
-    @Mock private Signature signature;
+    @Mock
+    private Signature signature;
 
     private MeterRegistry meterRegistry;
 
@@ -47,17 +49,19 @@ class RedisMetricsAspectTest {
 
         // Assert
         // Check timer was created
-        Timer timer = meterRegistry.find("redis.operation").tag("method", "testMethod").timer();
+        Timer timer = meterRegistry
+                .find("redis.operation")
+                .tag("method", "testMethod")
+                .timer();
         assert timer != null;
         assert timer.count() == 1;
 
         // Check operation counter was incremented
-        Counter counter =
-                meterRegistry
-                        .find("redis.operations")
-                        .tag("method", "testMethod")
-                        .tag("outcome", "success")
-                        .counter();
+        Counter counter = meterRegistry
+                .find("redis.operations")
+                .tag("method", "testMethod")
+                .tag("outcome", "success")
+                .counter();
         assert counter != null;
         assert counter.count() == 1;
 
@@ -80,17 +84,19 @@ class RedisMetricsAspectTest {
 
         // Assert
         // Check timer was created
-        Timer timer = meterRegistry.find("redis.operation").tag("method", "testMethod").timer();
+        Timer timer = meterRegistry
+                .find("redis.operation")
+                .tag("method", "testMethod")
+                .timer();
         assert timer != null;
         assert timer.count() == 1;
 
         // Check operation counter was incremented with failure outcome
-        Counter opsCounter =
-                meterRegistry
-                        .find("redis.operations")
-                        .tag("method", "testMethod")
-                        .tag("outcome", "failure")
-                        .counter();
+        Counter opsCounter = meterRegistry
+                .find("redis.operations")
+                .tag("method", "testMethod")
+                .tag("outcome", "failure")
+                .counter();
         assert opsCounter != null;
         assert opsCounter.count() == 1;
 
@@ -119,7 +125,8 @@ class RedisMetricsAspectTest {
         proxy.getValue("test-key");
 
         // There should be a timer recorded for this method call
-        Timer timer = meterRegistry.find("redis.operation").tag("method", "getValue").timer();
+        Timer timer =
+                meterRegistry.find("redis.operation").tag("method", "getValue").timer();
         assert timer != null;
         assert timer.count() == 1;
     } // Test implementation of RedisService for aspect testing

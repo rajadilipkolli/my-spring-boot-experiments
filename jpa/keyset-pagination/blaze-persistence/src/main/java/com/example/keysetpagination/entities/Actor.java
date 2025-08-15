@@ -26,12 +26,6 @@ public class Actor {
 
     public Actor() {}
 
-    public Actor(Long id, String name, LocalDate createdOn) {
-        this.id = id;
-        this.name = name;
-        this.createdOn = createdOn;
-    }
-
     public Actor setId(Long id) {
         this.id = id;
         return this;

@@ -45,9 +45,7 @@ class ErrorHandlingIT extends AbstractIntegrationTest {
                     .andExpect(jsonPath("$.type").value("about:blank"))
                     .andExpect(jsonPath("$.title").value("Bad Request"))
                     .andExpect(jsonPath("$.status").value(400))
-                    .andExpect(
-                            jsonPath("$.detail")
-                                    .value("Required header 'X-tenantId' is not present."));
+                    .andExpect(jsonPath("$.detail").value("Required header 'X-tenantId' is not present."));
 
             mockMvc.perform(get("/api/customers/secondary"))
                     .andExpect(status().isBadRequest())
@@ -55,9 +53,7 @@ class ErrorHandlingIT extends AbstractIntegrationTest {
                     .andExpect(jsonPath("$.type").value("about:blank"))
                     .andExpect(jsonPath("$.title").value("Bad Request"))
                     .andExpect(jsonPath("$.status").value(400))
-                    .andExpect(
-                            jsonPath("$.detail")
-                                    .value("Required header 'X-tenantId' is not present."));
+                    .andExpect(jsonPath("$.detail").value("Required header 'X-tenantId' is not present."));
         }
 
         @Test
@@ -102,11 +98,10 @@ class ErrorHandlingIT extends AbstractIntegrationTest {
             PrimaryCustomer invalidCustomer = new PrimaryCustomer().setText("");
 
             // When/Then
-            mockMvc.perform(
-                            post("/api/customers/primary")
-                                    .header("X-tenantId", "primary")
-                                    .contentType(MediaType.APPLICATION_JSON)
-                                    .content(objectMapper.writeValueAsString(invalidCustomer)))
+            mockMvc.perform(post("/api/customers/primary")
+                            .header("X-tenantId", "primary")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(invalidCustomer)))
                     .andExpect(status().isBadRequest())
                     .andExpect(header().string("Content-Type", "application/problem+json"))
                     .andExpect(jsonPath("$.type").value("about:blank"))
@@ -125,11 +120,10 @@ class ErrorHandlingIT extends AbstractIntegrationTest {
             SecondaryCustomer invalidCustomer = new SecondaryCustomer().setName("");
 
             // When/Then
-            mockMvc.perform(
-                            post("/api/customers/secondary")
-                                    .header("X-tenantId", "schema1")
-                                    .contentType(MediaType.APPLICATION_JSON)
-                                    .content(objectMapper.writeValueAsString(invalidCustomer)))
+            mockMvc.perform(post("/api/customers/secondary")
+                            .header("X-tenantId", "schema1")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(invalidCustomer)))
                     .andExpect(status().isBadRequest())
                     .andExpect(header().string("Content-Type", "application/problem+json"))
                     .andExpect(jsonPath("$.type").value("about:blank"))
@@ -148,11 +142,10 @@ class ErrorHandlingIT extends AbstractIntegrationTest {
             PrimaryCustomer nullTextCustomer = new PrimaryCustomer().setText(null);
 
             // When/Then
-            mockMvc.perform(
-                            post("/api/customers/primary")
-                                    .header("X-tenantId", "primary")
-                                    .contentType(MediaType.APPLICATION_JSON)
-                                    .content(objectMapper.writeValueAsString(nullTextCustomer)))
+            mockMvc.perform(post("/api/customers/primary")
+                            .header("X-tenantId", "primary")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(nullTextCustomer)))
                     .andExpect(status().isBadRequest())
                     .andExpect(header().string("Content-Type", "application/problem+json"))
                     .andExpect(jsonPath("$.violations[0].field").value("text"))
@@ -162,11 +155,10 @@ class ErrorHandlingIT extends AbstractIntegrationTest {
             SecondaryCustomer nullNameCustomer = new SecondaryCustomer().setName(null);
 
             // When/Then
-            mockMvc.perform(
-                            post("/api/customers/secondary")
-                                    .header("X-tenantId", "schema1")
-                                    .contentType(MediaType.APPLICATION_JSON)
-                                    .content(objectMapper.writeValueAsString(nullNameCustomer)))
+            mockMvc.perform(post("/api/customers/secondary")
+                            .header("X-tenantId", "schema1")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(nullNameCustomer)))
                     .andExpect(status().isBadRequest())
                     .andExpect(header().string("Content-Type", "application/problem+json"))
                     .andExpect(jsonPath("$.violations[0].field").value("name"))
@@ -180,11 +172,10 @@ class ErrorHandlingIT extends AbstractIntegrationTest {
             PrimaryCustomer whitespaceCustomer = new PrimaryCustomer().setText("   ");
 
             // When/Then
-            mockMvc.perform(
-                            post("/api/customers/primary")
-                                    .header("X-tenantId", "primary")
-                                    .contentType(MediaType.APPLICATION_JSON)
-                                    .content(objectMapper.writeValueAsString(whitespaceCustomer)))
+            mockMvc.perform(post("/api/customers/primary")
+                            .header("X-tenantId", "primary")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(whitespaceCustomer)))
                     .andExpect(status().isBadRequest())
                     .andExpect(header().string("Content-Type", "application/problem+json"))
                     .andExpect(jsonPath("$.violations[0].field").value("text"))
@@ -194,13 +185,10 @@ class ErrorHandlingIT extends AbstractIntegrationTest {
             SecondaryCustomer whitespaceSecondaryCustomer = new SecondaryCustomer().setName("   ");
 
             // When/Then
-            mockMvc.perform(
-                            post("/api/customers/secondary")
-                                    .header("X-tenantId", "schema1")
-                                    .contentType(MediaType.APPLICATION_JSON)
-                                    .content(
-                                            objectMapper.writeValueAsString(
-                                                    whitespaceSecondaryCustomer)))
+            mockMvc.perform(post("/api/customers/secondary")
+                            .header("X-tenantId", "schema1")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(whitespaceSecondaryCustomer)))
                     .andExpect(status().isBadRequest())
                     .andExpect(header().string("Content-Type", "application/problem+json"))
                     .andExpect(jsonPath("$.violations[0].field").value("name"))
@@ -216,9 +204,7 @@ class ErrorHandlingIT extends AbstractIntegrationTest {
         @DisplayName("Should return 404 for non-existent primary customer")
         void shouldReturn404ForNonExistentPrimaryCustomer() throws Exception {
             // When/Then
-            mockMvc.perform(
-                            get("/api/customers/primary/{id}", 99999L)
-                                    .header("X-tenantId", "primary"))
+            mockMvc.perform(get("/api/customers/primary/{id}", 99999L).header("X-tenantId", "primary"))
                     .andExpect(status().isNotFound());
         }
 
@@ -226,9 +212,7 @@ class ErrorHandlingIT extends AbstractIntegrationTest {
         @DisplayName("Should return 404 for non-existent secondary customer")
         void shouldReturn404ForNonExistentSecondaryCustomer() throws Exception {
             // When/Then
-            mockMvc.perform(
-                            get("/api/customers/secondary/{id}", 99999L)
-                                    .header("X-tenantId", "schema1"))
+            mockMvc.perform(get("/api/customers/secondary/{id}", 99999L).header("X-tenantId", "schema1"))
                     .andExpect(status().isNotFound());
         }
 
@@ -237,24 +221,19 @@ class ErrorHandlingIT extends AbstractIntegrationTest {
         void shouldReturn404WhenTryingToAccessCustomerFromWrongTenant() throws Exception {
             // Given - Create customer in schema1
             SecondaryCustomer customer = new SecondaryCustomer().setName("Test Customer");
-            MvcResult createResult =
-                    mockMvc.perform(
-                                    post("/api/customers/secondary")
-                                            .header("X-tenantId", "schema1")
-                                            .contentType(MediaType.APPLICATION_JSON)
-                                            .content(objectMapper.writeValueAsString(customer)))
-                            .andExpect(status().isCreated())
-                            .andReturn();
+            MvcResult createResult = mockMvc.perform(post("/api/customers/secondary")
+                            .header("X-tenantId", "schema1")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(customer)))
+                    .andExpect(status().isCreated())
+                    .andReturn();
 
             SecondaryCustomer savedCustomer =
-                    objectMapper.readValue(
-                            createResult.getResponse().getContentAsString(),
-                            SecondaryCustomer.class);
+                    objectMapper.readValue(createResult.getResponse().getContentAsString(), SecondaryCustomer.class);
 
             // When/Then - Try to access from schema2
-            mockMvc.perform(
-                            get("/api/customers/secondary/{id}", savedCustomer.getId())
-                                    .header("X-tenantId", "schema2"))
+            mockMvc.perform(get("/api/customers/secondary/{id}", savedCustomer.getId())
+                            .header("X-tenantId", "schema2"))
                     .andExpect(status().isNotFound());
         }
 
@@ -266,11 +245,10 @@ class ErrorHandlingIT extends AbstractIntegrationTest {
             nonExistentCustomer.setId(99999L);
 
             // When/Then
-            mockMvc.perform(
-                            put("/api/customers/primary/{id}", 99999L)
-                                    .header("X-tenantId", "primary")
-                                    .contentType(MediaType.APPLICATION_JSON)
-                                    .content(objectMapper.writeValueAsString(nonExistentCustomer)))
+            mockMvc.perform(put("/api/customers/primary/{id}", 99999L)
+                            .header("X-tenantId", "primary")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(nonExistentCustomer)))
                     .andExpect(status().isNotFound());
 
             // Given
@@ -278,13 +256,10 @@ class ErrorHandlingIT extends AbstractIntegrationTest {
                     new SecondaryCustomer().setId(99999L).setName("Non-existent");
 
             // When/Then
-            mockMvc.perform(
-                            put("/api/customers/secondary/{id}", 99999L)
-                                    .header("X-tenantId", "schema1")
-                                    .contentType(MediaType.APPLICATION_JSON)
-                                    .content(
-                                            objectMapper.writeValueAsString(
-                                                    nonExistentSecondaryCustomer)))
+            mockMvc.perform(put("/api/customers/secondary/{id}", 99999L)
+                            .header("X-tenantId", "schema1")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(nonExistentSecondaryCustomer)))
                     .andExpect(status().isNotFound());
         }
 
@@ -292,14 +267,10 @@ class ErrorHandlingIT extends AbstractIntegrationTest {
         @DisplayName("Should return 404 when deleting non-existent customer")
         void shouldReturn404WhenDeletingNonExistentCustomer() throws Exception {
             // When/Then
-            mockMvc.perform(
-                            delete("/api/customers/primary/{id}", 99999L)
-                                    .header("X-tenantId", "primary"))
+            mockMvc.perform(delete("/api/customers/primary/{id}", 99999L).header("X-tenantId", "primary"))
                     .andExpect(status().isNotFound());
 
-            mockMvc.perform(
-                            delete("/api/customers/secondary/{id}", 99999L)
-                                    .header("X-tenantId", "schema1"))
+            mockMvc.perform(delete("/api/customers/secondary/{id}", 99999L).header("X-tenantId", "schema1"))
                     .andExpect(status().isNotFound());
         }
     }
@@ -315,22 +286,20 @@ class ErrorHandlingIT extends AbstractIntegrationTest {
             String malformedJson = "{ \"text\": \"Test\", \"invalid\": }";
 
             // When/Then
-            mockMvc.perform(
-                            post("/api/customers/primary")
-                                    .header("X-tenantId", "primary")
-                                    .contentType(MediaType.APPLICATION_JSON)
-                                    .content(malformedJson))
+            mockMvc.perform(post("/api/customers/primary")
+                            .header("X-tenantId", "primary")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(malformedJson))
                     .andExpect(status().isBadRequest());
 
             // Given
             String malformedSecondaryJson = "{ \"name\": \"Test\", \"invalid\": }";
 
             // When/Then
-            mockMvc.perform(
-                            post("/api/customers/secondary")
-                                    .header("X-tenantId", "schema1")
-                                    .contentType(MediaType.APPLICATION_JSON)
-                                    .content(malformedSecondaryJson))
+            mockMvc.perform(post("/api/customers/secondary")
+                            .header("X-tenantId", "schema1")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(malformedSecondaryJson))
                     .andExpect(status().isBadRequest());
         }
 
@@ -341,10 +310,9 @@ class ErrorHandlingIT extends AbstractIntegrationTest {
             PrimaryCustomer customer = new PrimaryCustomer().setText("Test Customer");
 
             // When/Then
-            mockMvc.perform(
-                            post("/api/customers/primary")
-                                    .header("X-tenantId", "primary")
-                                    .content(objectMapper.writeValueAsString(customer)))
+            mockMvc.perform(post("/api/customers/primary")
+                            .header("X-tenantId", "primary")
+                            .content(objectMapper.writeValueAsString(customer)))
                     .andExpect(status().isUnsupportedMediaType());
         }
 
@@ -352,18 +320,16 @@ class ErrorHandlingIT extends AbstractIntegrationTest {
         @DisplayName("Should handle empty request body")
         void shouldHandleEmptyRequestBody() throws Exception {
             // When/Then
-            mockMvc.perform(
-                            post("/api/customers/primary")
-                                    .header("X-tenantId", "primary")
-                                    .contentType(MediaType.APPLICATION_JSON)
-                                    .content(""))
+            mockMvc.perform(post("/api/customers/primary")
+                            .header("X-tenantId", "primary")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(""))
                     .andExpect(status().isBadRequest());
 
-            mockMvc.perform(
-                            post("/api/customers/secondary")
-                                    .header("X-tenantId", "schema1")
-                                    .contentType(MediaType.APPLICATION_JSON)
-                                    .content(""))
+            mockMvc.perform(post("/api/customers/secondary")
+                            .header("X-tenantId", "schema1")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(""))
                     .andExpect(status().isBadRequest());
         }
 
@@ -374,11 +340,10 @@ class ErrorHandlingIT extends AbstractIntegrationTest {
             String invalidJson = "{";
 
             // When/Then
-            mockMvc.perform(
-                            post("/api/customers/primary")
-                                    .header("X-tenantId", "primary")
-                                    .contentType(MediaType.APPLICATION_JSON)
-                                    .content(invalidJson))
+            mockMvc.perform(post("/api/customers/primary")
+                            .header("X-tenantId", "primary")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(invalidJson))
                     .andExpect(status().isBadRequest());
         }
     }
@@ -392,30 +357,26 @@ class ErrorHandlingIT extends AbstractIntegrationTest {
         void shouldHandleMixedValidAndInvalidRequests() throws Exception {
             // Valid request
             PrimaryCustomer validCustomer = new PrimaryCustomer().setText("Valid Customer");
-            mockMvc.perform(
-                            post("/api/customers/primary")
-                                    .header("X-tenantId", "primary")
-                                    .contentType(MediaType.APPLICATION_JSON)
-                                    .content(objectMapper.writeValueAsString(validCustomer)))
+            mockMvc.perform(post("/api/customers/primary")
+                            .header("X-tenantId", "primary")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(validCustomer)))
                     .andExpect(status().isCreated());
 
             // Invalid request
             PrimaryCustomer invalidCustomer = new PrimaryCustomer().setText("");
-            mockMvc.perform(
-                            post("/api/customers/primary")
-                                    .header("X-tenantId", "primary")
-                                    .contentType(MediaType.APPLICATION_JSON)
-                                    .content(objectMapper.writeValueAsString(invalidCustomer)))
+            mockMvc.perform(post("/api/customers/primary")
+                            .header("X-tenantId", "primary")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(invalidCustomer)))
                     .andExpect(status().isBadRequest());
 
             // Another valid request
-            PrimaryCustomer anotherValidCustomer =
-                    new PrimaryCustomer().setText("Another Valid Customer");
-            mockMvc.perform(
-                            post("/api/customers/primary")
-                                    .header("X-tenantId", "primary")
-                                    .contentType(MediaType.APPLICATION_JSON)
-                                    .content(objectMapper.writeValueAsString(anotherValidCustomer)))
+            PrimaryCustomer anotherValidCustomer = new PrimaryCustomer().setText("Another Valid Customer");
+            mockMvc.perform(post("/api/customers/primary")
+                            .header("X-tenantId", "primary")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(anotherValidCustomer)))
                     .andExpect(status().isCreated());
 
             // Verify valid customers were saved
@@ -429,30 +390,26 @@ class ErrorHandlingIT extends AbstractIntegrationTest {
         void shouldHandleErrorsDuringTenantSwitching() throws Exception {
             // Valid operation in schema1
             SecondaryCustomer customer1 = new SecondaryCustomer().setName("Schema1 Customer");
-            mockMvc.perform(
-                            post("/api/customers/secondary")
-                                    .header("X-tenantId", "schema1")
-                                    .contentType(MediaType.APPLICATION_JSON)
-                                    .content(objectMapper.writeValueAsString(customer1)))
+            mockMvc.perform(post("/api/customers/secondary")
+                            .header("X-tenantId", "schema1")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(customer1)))
                     .andExpect(status().isCreated());
 
             // Invalid tenant
-            SecondaryCustomer customer2 =
-                    new SecondaryCustomer().setName("Invalid Tenant Customer");
-            mockMvc.perform(
-                            post("/api/customers/secondary")
-                                    .header("X-tenantId", "invalid_tenant")
-                                    .contentType(MediaType.APPLICATION_JSON)
-                                    .content(objectMapper.writeValueAsString(customer2)))
+            SecondaryCustomer customer2 = new SecondaryCustomer().setName("Invalid Tenant Customer");
+            mockMvc.perform(post("/api/customers/secondary")
+                            .header("X-tenantId", "invalid_tenant")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(customer2)))
                     .andExpect(status().isForbidden());
 
             // Valid operation in schema2
             SecondaryCustomer customer3 = new SecondaryCustomer().setName("Schema2 Customer");
-            mockMvc.perform(
-                            post("/api/customers/secondary")
-                                    .header("X-tenantId", "schema2")
-                                    .contentType(MediaType.APPLICATION_JSON)
-                                    .content(objectMapper.writeValueAsString(customer3)))
+            mockMvc.perform(post("/api/customers/secondary")
+                            .header("X-tenantId", "schema2")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(customer3)))
                     .andExpect(status().isCreated());
 
             // Verify data integrity
@@ -478,15 +435,11 @@ class ErrorHandlingIT extends AbstractIntegrationTest {
             PrimaryCustomerRequest specialCustomer = new PrimaryCustomerRequest(specialCharsText);
 
             // When/Then - Should handle gracefully
-            MvcResult result =
-                    mockMvc.perform(
-                                    post("/api/customers/primary")
-                                            .header("X-tenantId", "primary")
-                                            .contentType(MediaType.APPLICATION_JSON)
-                                            .content(
-                                                    objectMapper.writeValueAsString(
-                                                            specialCustomer)))
-                            .andReturn();
+            MvcResult result = mockMvc.perform(post("/api/customers/primary")
+                            .header("X-tenantId", "primary")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(specialCustomer)))
+                    .andReturn();
 
             // Should be 201 (created) but not 5xx
             int status = result.getResponse().getStatus();
@@ -497,31 +450,27 @@ class ErrorHandlingIT extends AbstractIntegrationTest {
         @DisplayName("Should handle null and undefined values gracefully")
         void shouldHandleNullAndUndefinedValuesGracefully() throws Exception {
             // Given
-            String jsonWithNulls =
-                    """
+            String jsonWithNulls = """
                     {"text": null}
                     """;
 
             // When/Then
-            mockMvc.perform(
-                            post("/api/customers/primary")
-                                    .header("X-tenantId", "primary")
-                                    .contentType(MediaType.APPLICATION_JSON)
-                                    .content(jsonWithNulls))
+            mockMvc.perform(post("/api/customers/primary")
+                            .header("X-tenantId", "primary")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(jsonWithNulls))
                     .andExpect(status().isBadRequest());
 
             // Given
-            String secondaryJsonWithNulls =
-                    """
+            String secondaryJsonWithNulls = """
                 {"name": null}
                 """;
 
             // When/Then
-            mockMvc.perform(
-                            post("/api/customers/secondary")
-                                    .header("X-tenantId", "schema1")
-                                    .contentType(MediaType.APPLICATION_JSON)
-                                    .content(secondaryJsonWithNulls))
+            mockMvc.perform(post("/api/customers/secondary")
+                            .header("X-tenantId", "schema1")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(secondaryJsonWithNulls))
                     .andExpect(status().isBadRequest());
         }
     }

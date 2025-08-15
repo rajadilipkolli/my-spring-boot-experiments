@@ -8,7 +8,6 @@ import jakarta.validation.Valid;
 import java.net.URI;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -71,30 +70,25 @@ public class ActorController {
     }
 
     @PostMapping
-    public ResponseEntity<GenericResponse<Actor>> createActor(
-            @Valid @RequestBody ActorRequest actorRequest) {
+    public ResponseEntity<GenericResponse<Actor>> createActor(@Valid @RequestBody ActorRequest actorRequest) {
         log.info("Creating actor: {}", actorRequest);
-        Actor actor =
-                new Actor(UUID.randomUUID().toString(), actorRequest.name(), actorRequest.age());
+        Actor actor = new Actor().setName(actorRequest.name()).setAge(actorRequest.age());
         Actor savedActor = actorService.saveActor(actor);
 
-        URI location =
-                ServletUriComponentsBuilder.fromCurrentRequest()
-                        .path("/{id}")
-                        .buildAndExpand(savedActor.getId())
-                        .toUri();
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(savedActor.getId())
+                .toUri();
 
         return ResponseEntity.created(location).body(new GenericResponse<>(savedActor));
     }
 
     @PostMapping("/batch")
-    public ResponseEntity<GenericResponse<List<Actor>>> createActors(
-            @Valid @RequestBody List<ActorRequest> requests) {
+    public ResponseEntity<GenericResponse<List<Actor>>> createActors(@Valid @RequestBody List<ActorRequest> requests) {
         log.info("Creating multiple actors: {}", requests);
-        List<Actor> actors =
-                requests.stream()
-                        .map(req -> new Actor(UUID.randomUUID().toString(), req.name(), req.age()))
-                        .toList();
+        List<Actor> actors = requests.stream()
+                .map(req -> new Actor().setName(req.name()).setAge(req.age()))
+                .toList();
 
         List<Actor> savedActors = actorService.saveActors(actors);
         return ResponseEntity.status(HttpStatus.CREATED).body(new GenericResponse<>(savedActors));

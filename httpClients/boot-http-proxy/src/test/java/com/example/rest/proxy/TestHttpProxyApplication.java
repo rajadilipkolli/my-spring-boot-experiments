@@ -6,6 +6,8 @@ import org.springframework.boot.SpringApplication;
 class TestHttpProxyApplication {
 
     public static void main(String[] args) {
-        SpringApplication.from(HttpProxyApplication::main).with(ContainersConfig.class).run(args);
+        SpringApplication.from(HttpProxyApplication::main)
+                .with(ContainersConfig.class)
+                .run(args);
     }
 }

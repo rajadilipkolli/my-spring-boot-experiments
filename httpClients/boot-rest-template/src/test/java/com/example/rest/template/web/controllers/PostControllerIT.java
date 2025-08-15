@@ -23,7 +23,8 @@ import org.springframework.http.MediaType;
 
 class PostControllerIT extends AbstractIntegrationTest {
 
-    @Autowired private PostRepository postRepository;
+    @Autowired
+    private PostRepository postRepository;
 
     private List<Post> postList = null;
 
@@ -32,9 +33,9 @@ class PostControllerIT extends AbstractIntegrationTest {
         postRepository.deleteAllInBatch();
 
         postList = new ArrayList<>();
-        postList.add(new Post(null, "First Post", 1L, "First Body"));
-        postList.add(new Post(null, "Second Post", 1L, "Second Body"));
-        postList.add(new Post(null, "Third Post", 1L, "ThirdBody"));
+        postList.add(new Post().setTitle("First Post").setUserId(1L).setBody("First Body"));
+        postList.add(new Post().setTitle("Second Post").setUserId(1L).setBody("Second Body"));
+        postList.add(new Post().setTitle("Third Post").setUserId(1L).setBody("ThirdBody"));
         postList = postRepository.saveAll(postList);
     }
 
@@ -69,12 +70,11 @@ class PostControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldCreateNewPost() throws Exception {
-        Post post = new Post(null, "New Post", 1L, "First Body");
+        Post post = new Post().setTitle("New Post").setUserId(1L).setBody("First Body");
         this.mockMvc
-                .perform(
-                        post("/api/posts")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(post)))
+                .perform(post("/api/posts")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(post)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id", notNullValue()))
                 .andExpect(jsonPath("$.title", is(post.getTitle())));
@@ -82,13 +82,12 @@ class PostControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldReturn400WhenCreateNewPostWithoutTitleAndBody() throws Exception {
-        Post post = new Post(null, null, 0L, null);
+        Post post = new Post().setUserId(0L);
 
         this.mockMvc
-                .perform(
-                        post("/api/posts")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(post)))
+                .perform(post("/api/posts")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(post)))
                 .andExpect(status().isBadRequest())
                 .andExpect(header().string("Content-Type", is("application/problem+json")))
                 .andExpect(jsonPath("$.type", is("about:blank")))
@@ -102,8 +101,7 @@ class PostControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.violations[1].field", is("title")))
                 .andExpect(jsonPath("$.violations[1].message", is("Title cannot be empty")))
                 .andExpect(jsonPath("$.violations[2].field", is("userId")))
-                .andExpect(
-                        jsonPath("$.violations[2].message", is("UserId Should be positive Number")))
+                .andExpect(jsonPath("$.violations[2].message", is("UserId Should be positive Number")))
                 .andReturn();
     }
 
@@ -113,10 +111,9 @@ class PostControllerIT extends AbstractIntegrationTest {
         post.setTitle("Updated Post Title");
 
         this.mockMvc
-                .perform(
-                        put("/api/posts/{id}", post.getId())
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(post)))
+                .perform(put("/api/posts/{id}", post.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(post)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(post.getId()), Long.class))
                 .andExpect(jsonPath("$.title", is(post.getTitle())));

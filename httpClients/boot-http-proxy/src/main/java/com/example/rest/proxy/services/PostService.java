@@ -42,12 +42,10 @@ public class PostService {
         this.postMapper = postMapper;
     }
 
-    public PagedResult<PostResponse> findAllPosts(
-            int pageNo, int pageSize, String sortBy, String sortDir) {
-        Sort sort =
-                sortDir.equalsIgnoreCase(Sort.Direction.ASC.name())
-                        ? Sort.by(sortBy).ascending()
-                        : Sort.by(sortBy).descending();
+    public PagedResult<PostResponse> findAllPosts(int pageNo, int pageSize, String sortBy, String sortDir) {
+        Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name())
+                ? Sort.by(sortBy).ascending()
+                : Sort.by(sortBy).descending();
 
         // create Pageable instance
         Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
@@ -68,15 +66,10 @@ public class PostService {
 
     @Transactional
     public Optional<PostResponse> findPostById(Long postId) {
-        Post post =
-                postRepository
-                        .findById(postId)
-                        .orElseGet(
-                                () -> {
-                                    Function<Long, Post> loadPostById =
-                                            jsonPlaceholderService::loadPostById;
-                                    return callService(postId, loadPostById.andThen(this::save));
-                                });
+        Post post = postRepository.findById(postId).orElseGet(() -> {
+            Function<Long, Post> loadPostById = jsonPlaceholderService::loadPostById;
+            return callService(postId, loadPostById.andThen(this::save));
+        });
 
         return Optional.of(postMapper.mapToPostResponse(post));
     }
@@ -84,8 +77,7 @@ public class PostService {
     public Optional<List<PostCommentDto>> findPostCommentsById(Long postId) {
         List<PostComment> postCommentList = postCommentRepository.findByPostId(postId);
         if (postCommentList.isEmpty()) {
-            Function<Long, List<PostCommentDto>> loadPostById =
-                    jsonPlaceholderService::loadPostCommentsById;
+            Function<Long, List<PostCommentDto>> loadPostById = jsonPlaceholderService::loadPostCommentsById;
             postCommentList = callService(postId, loadPostById.andThen(this::savePostComments));
         }
         return Optional.of(postMapper.mapToCommentResponseList(postCommentList));
@@ -93,8 +85,7 @@ public class PostService {
 
     @Transactional
     public List<PostComment> savePostComments(List<PostCommentDto> postCommentDtoList) {
-        return postCommentRepository.saveAll(
-                postMapper.mapToEntityList(postCommentDtoList, postRepository));
+        return postCommentRepository.saveAll(postMapper.mapToEntityList(postCommentDtoList, postRepository));
     }
 
     @Transactional

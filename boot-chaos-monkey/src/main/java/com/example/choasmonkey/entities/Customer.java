@@ -15,14 +15,10 @@ public class Customer {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "customer_id_generator")
-    @SequenceGenerator(
-            name = "customer_id_generator",
-            sequenceName = "customer_id_seq",
-            allocationSize = 100)
+    @SequenceGenerator(name = "customer_id_generator", sequenceName = "customer_id_seq", allocationSize = 100)
     private Long id;
 
-    @Column(nullable = false)
-    @NotEmpty(message = "Text cannot be empty")
+    @NotEmpty(message = "Text cannot be empty") @Column(nullable = false)
     private String text;
 
     public Customer() {}

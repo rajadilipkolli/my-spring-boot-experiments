@@ -18,12 +18,18 @@ import org.springframework.test.web.servlet.MockMvc;
 @AutoConfigureMockMvc
 public abstract class AbstractIntegrationTest {
 
-    @Autowired protected MockMvc mockMvc;
+    @Autowired
+    protected MockMvc mockMvc;
 
-    @Autowired protected ObjectMapper objectMapper;
+    @Autowired
+    protected ObjectMapper objectMapper;
 
-    @Autowired protected PrimaryCustomerRepository primaryCustomerRepository;
-    @Autowired protected SecondaryCustomerRepository secondaryCustomerRepository;
+    @Autowired
+    protected PrimaryCustomerRepository primaryCustomerRepository;
 
-    @Autowired protected TenantIdentifierResolver tenantIdentifierResolver;
+    @Autowired
+    protected SecondaryCustomerRepository secondaryCustomerRepository;
+
+    @Autowired
+    protected TenantIdentifierResolver tenantIdentifierResolver;
 }

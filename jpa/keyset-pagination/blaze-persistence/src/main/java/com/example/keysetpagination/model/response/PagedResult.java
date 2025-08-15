@@ -33,14 +33,6 @@ public record PagedResult<T>(
 
     public <R> PagedResult<R> toResponseRecord(List<R> data) {
         return new PagedResult<>(
-                data,
-                totalElements,
-                pageNumber,
-                totalPages,
-                isFirst,
-                isLast,
-                hasNext,
-                hasPrevious,
-                keySetPageResponse);
+                data, totalElements, pageNumber, totalPages, isFirst, isLast, hasNext, hasPrevious, keySetPageResponse);
     }
 }

@@ -13,6 +13,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Positive;
 import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
@@ -43,8 +45,8 @@ public interface CustomerAPI {
                         })
             })
     PagedResult<Customer> getAllCustomers(
-            @Parameter(name = "pageNo", in = ParameterIn.QUERY) int pageNo,
-            @Parameter(name = "pageSize", in = ParameterIn.QUERY) int pageSize,
+            @Parameter(name = "pageNo", in = ParameterIn.QUERY) @Min(0) int pageNo,
+            @Parameter(name = "pageSize", in = ParameterIn.QUERY) @Positive int pageSize,
             @Parameter(name = "sortBy", in = ParameterIn.QUERY) String sortBy,
             @Parameter(name = "sortDir", in = ParameterIn.QUERY) String sortDir);
 

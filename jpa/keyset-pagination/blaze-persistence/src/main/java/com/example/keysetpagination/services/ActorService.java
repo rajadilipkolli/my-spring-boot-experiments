@@ -38,10 +38,8 @@ public class ActorService {
         actorEntitySpecification = new EntitySpecification<>();
     }
 
-    public PagedResult<ActorResponse> findAll(
-            SearchCriteria[] searchCriteria, FindActorsQuery findActorsQuery) {
-        Specification<Actor> specification =
-                actorEntitySpecification.specificationBuilder(searchCriteria, Actor.class);
+    public PagedResult<ActorResponse> findAll(SearchCriteria[] searchCriteria, FindActorsQuery findActorsQuery) {
+        Specification<Actor> specification = actorEntitySpecification.specificationBuilder(searchCriteria, Actor.class);
         KeysetPageable keysetPageable = createPageable(findActorsQuery);
         return getActorResponsePagedResult(actorRepository.findAll(specification, keysetPageable));
     }
@@ -64,8 +62,7 @@ public class ActorService {
 
     @Transactional
     public ActorResponse updateActor(Long id, ActorRequest actorRequest) {
-        Actor actor =
-                actorRepository.findById(id).orElseThrow(() -> new ActorNotFoundException(id));
+        Actor actor = actorRepository.findById(id).orElseThrow(() -> new ActorNotFoundException(id));
 
         // Update the actor object with data from actorRequest
         actorMapper.mapActorWithRequest(actor, actorRequest);
@@ -81,10 +78,8 @@ public class ActorService {
         actorRepository.deleteById(id);
     }
 
-    private PagedResult<ActorResponse> getActorResponsePagedResult(
-            KeysetAwarePage<Actor> keysetAwarePage) {
-        List<ActorResponse> actorResponseList =
-                actorMapper.toResponseList(keysetAwarePage.getContent());
+    private PagedResult<ActorResponse> getActorResponsePagedResult(KeysetAwarePage<Actor> keysetAwarePage) {
+        List<ActorResponse> actorResponseList = actorMapper.toResponseList(keysetAwarePage.getContent());
         PagedResult<Actor> actorPagedResult = new PagedResult<>(keysetAwarePage);
 
         return actorPagedResult.toResponseRecord(actorResponseList);
@@ -92,18 +87,15 @@ public class ActorService {
 
     private KeysetPageable createPageable(FindActorsQuery findActorsQuery) {
         int pageNo = Math.max(findActorsQuery.pageNo() - 1, 0);
-        Sort sort =
-                Sort.by(
-                        findActorsQuery.sortDir().equalsIgnoreCase(Sort.Direction.ASC.name())
-                                ? Sort.Order.asc(findActorsQuery.sortBy())
-                                : Sort.Order.desc(findActorsQuery.sortBy()));
-        KeysetPage keysetPage =
-                new DefaultKeysetPage(
-                        findActorsQuery.pageNo() - 1,
-                        findActorsQuery.pageSize(),
-                        () -> new Serializable[] {findActorsQuery.lowest()},
-                        () -> new Serializable[] {findActorsQuery.highest()});
-        return new KeysetPageRequest(
-                keysetPage, PageRequest.of(pageNo, findActorsQuery.pageSize(), sort));
+        Sort sort = Sort.by(
+                findActorsQuery.sortDir().equalsIgnoreCase(Sort.Direction.ASC.name())
+                        ? Sort.Order.asc(findActorsQuery.sortBy())
+                        : Sort.Order.desc(findActorsQuery.sortBy()));
+        KeysetPage keysetPage = new DefaultKeysetPage(
+                findActorsQuery.pageNo() - 1,
+                findActorsQuery.pageSize(),
+                () -> new Serializable[] {findActorsQuery.lowest()},
+                () -> new Serializable[] {findActorsQuery.highest()});
+        return new KeysetPageRequest(keysetPage, PageRequest.of(pageNo, findActorsQuery.pageSize(), sort));
     }
 }

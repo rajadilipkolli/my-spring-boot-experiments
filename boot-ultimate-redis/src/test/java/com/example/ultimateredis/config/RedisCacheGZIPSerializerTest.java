@@ -58,9 +58,7 @@ class RedisCacheGZIPSerializerTest {
         // Assert
         // Check it doesn't have the GZIP marker
         assertThat(serialized.length >= GZIP_MARKER.length).isTrue();
-        assertThat(
-                        Arrays.equals(
-                                Arrays.copyOfRange(serialized, 0, GZIP_MARKER.length), GZIP_MARKER))
+        assertThat(Arrays.equals(Arrays.copyOfRange(serialized, 0, GZIP_MARKER.length), GZIP_MARKER))
                 .isFalse();
 
         // Check we can deserialize correctly
@@ -83,9 +81,7 @@ class RedisCacheGZIPSerializerTest {
         // Assert
         // Check it has the GZIP marker
         assertThat(serialized.length >= GZIP_MARKER.length).isTrue();
-        assertThat(
-                        Arrays.equals(
-                                Arrays.copyOfRange(serialized, 0, GZIP_MARKER.length), GZIP_MARKER))
+        assertThat(Arrays.equals(Arrays.copyOfRange(serialized, 0, GZIP_MARKER.length), GZIP_MARKER))
                 .isTrue();
 
         // Check we can deserialize correctly
