@@ -186,35 +186,6 @@ class JobsControllerIntTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void testDeprecatedRunJob() {
-        String requestBody =
-                """
-                {
-                    "jobName": "SampleJob",
-                    "jobId": "12345"
-                }
-            """;
-
-        mockMvcTester
-                .post()
-                .uri("/api/runJob")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(requestBody)
-                .accept(MediaType.APPLICATION_JSON)
-                .assertThat()
-                .hasStatusOk()
-                .hasContentType(MediaType.APPLICATION_JSON)
-                .bodyJson()
-                .convertTo(Message.class)
-                .satisfies(message -> {
-                    assertThat(message.getMsg())
-                            .contains(
-                                    "This endpoint is deprecated. Please use actuator endpoint: POST /actuator/quartz/jobs/");
-                    assertThat(message.isValid()).isTrue();
-                });
-    }
-
-    @Test
     void testDeleteJob() {
         String requestBody =
                 """

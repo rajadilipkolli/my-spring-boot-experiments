@@ -86,18 +86,6 @@ public class JobsController {
         return message;
     }
 
-    @Operation(summary = "Please use actuator endpoint: POST /actuator/quartz/jobs/{group}/{name}")
-    @Deprecated(since = "3.5.0", forRemoval = true)
-    @PostMapping(value = "/runJob")
-    public Message runJob(@RequestBody @Valid ScheduleJob job) {
-        log.warn(
-                "This endpoint is deprecated. Please use actuator endpoint: POST /actuator/quartz/jobs/{}/{}/trigger",
-                job.jobGroup(),
-                job.jobName());
-        return Message.failure("This endpoint is deprecated. Please use actuator endpoint: POST /actuator/quartz/jobs/"
-                + job.jobGroup() + "/" + job.jobName() + " , with body: {\"state\":\"running\"}");
-    }
-
     @DeleteMapping(value = "/deleteJob")
     public Message deleteJob(@RequestBody @Valid ScheduleJob job) {
         log.info("deleteJob params : {}", job);

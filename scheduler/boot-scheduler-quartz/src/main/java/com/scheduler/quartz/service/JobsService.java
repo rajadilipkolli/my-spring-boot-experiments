@@ -163,13 +163,6 @@ public class JobsService {
         log.info("Resumed job with key: {}", jobKey);
     }
 
-    @Deprecated(since = "3.5.0", forRemoval = true)
-    public void runJob(ScheduleJob job) throws SchedulerException {
-        throw new SchedulerException(
-                "This method is deprecated. Please use actuator endpoint: POST /actuator/quartz/jobs/" + job.jobGroup()
-                        + "/" + job.jobName() + "/trigger");
-    }
-
     public void deleteJob(ScheduleJob scheduleJob) throws SchedulerException {
         JobKey jobKey = JobKey.jobKey(scheduleJob.jobName(), scheduleJob.jobGroup());
         validateJobExists(jobKey);
