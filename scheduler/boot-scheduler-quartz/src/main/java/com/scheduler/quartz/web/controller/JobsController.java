@@ -5,7 +5,6 @@ import com.scheduler.quartz.model.response.JobStatus;
 import com.scheduler.quartz.model.response.ScheduleJob;
 import com.scheduler.quartz.service.JobsService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
 import java.util.List;
 import org.quartz.SchedulerException;
@@ -54,54 +53,40 @@ public class JobsController {
         return message;
     }
 
+    @Operation(summary = "Please use actuator endpoint: POST /actuator/quartz/jobs/{group}/{name}/pause")
+    @Deprecated(since = "3.5.0", forRemoval = true)
     @PostMapping(value = "/pauseJob")
     public Message pauseJob(@RequestBody @Valid ScheduleJob job) {
-        log.info("pauseJob params = {}", job);
-        Message message = Message.failure();
-        try {
-            jobsService.pauseJob(job);
-            message = Message.success();
-        } catch (Exception e) {
-            message.setMsg(e.getMessage());
-            log.error("pauseJob ex:", e);
-        }
-        return message;
+        log.warn(
+                "This endpoint is deprecated. Please use actuator endpoint: POST /actuator/quartz/jobs/{}/{}/pause",
+                job.jobGroup(),
+                job.jobName());
+        return Message.failure("This endpoint is deprecated. Please use actuator endpoint: POST /actuator/quartz/jobs/"
+                + job.jobGroup() + "/" + job.jobName() + "/pause");
     }
 
-    @Operation(summary = "Resume a scheduled job")
-    @ApiResponse(responseCode = "200", description = "Job resumed successfully")
-    @ApiResponse(responseCode = "400", description = "Invalid job parameters")
-    @ApiResponse(responseCode = "500", description = "Internal server error")
+    @Operation(summary = "Please use actuator endpoint: POST /actuator/quartz/jobs/{group}/{name}/resume")
+    @Deprecated(since = "3.5.0", forRemoval = true)
     @PostMapping(value = "/resumeJob")
     public Message resumeJob(@RequestBody @Valid ScheduleJob job) {
-        log.info("resumeJob params = {}", job);
-        Message message = Message.failure();
-        try {
-            jobsService.resumeJob(job);
-            message = Message.success();
-        } catch (Exception e) {
-            message.setMsg(e.getMessage());
-            log.error("resumeJob ex:", e);
-        }
-        return message;
+        log.warn(
+                "This endpoint is deprecated. Please use actuator endpoint: POST /actuator/quartz/jobs/{}/{}/resume",
+                job.jobGroup(),
+                job.jobName());
+        return Message.failure("This endpoint is deprecated. Please use actuator endpoint: POST /actuator/quartz/jobs/"
+                + job.jobGroup() + "/" + job.jobName() + "/resume");
     }
 
-    @Operation(summary = "Trigger immediate execution of a job")
-    @ApiResponse(responseCode = "200", description = "Job triggered successfully")
-    @ApiResponse(responseCode = "400", description = "Invalid job parameters")
-    @ApiResponse(responseCode = "500", description = "Internal server error")
+    @Operation(summary = "Please use actuator endpoint: POST /actuator/quartz/jobs/{group}/{name}/trigger")
+    @Deprecated(since = "3.5.0", forRemoval = true)
     @PostMapping(value = "/runJob")
     public Message runJob(@RequestBody @Valid ScheduleJob job) {
-        log.info("runJob params = {}", job);
-        Message message = Message.failure();
-        try {
-            jobsService.runJob(job);
-            message = Message.success();
-        } catch (Exception e) {
-            message.setMsg(e.getMessage());
-            log.error("runJob ex:", e);
-        }
-        return message;
+        log.warn(
+                "This endpoint is deprecated. Please use actuator endpoint: POST /actuator/quartz/jobs/{}/{}/trigger",
+                job.jobGroup(),
+                job.jobName());
+        return Message.failure("This endpoint is deprecated. Please use actuator endpoint: POST /actuator/quartz/jobs/"
+                + job.jobGroup() + "/" + job.jobName() + "/trigger");
     }
 
     @DeleteMapping(value = "/deleteJob")

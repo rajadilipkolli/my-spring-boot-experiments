@@ -149,25 +149,25 @@ public class JobsService {
         log.info("Scheduled job with key: {}", jobKey);
     }
 
+    @Deprecated(since = "3.5.0", forRemoval = true)
     public void pauseJob(ScheduleJob scheduleJob) throws SchedulerException {
-        JobKey jobKey = JobKey.jobKey(scheduleJob.jobName(), scheduleJob.jobGroup());
-        validateJobExists(jobKey);
-        scheduler.pauseJob(jobKey);
-        log.info("Paused job with key: {}", jobKey);
+        throw new SchedulerException(
+                "This method is deprecated. Please use actuator endpoint: POST /actuator/quartz/jobs/"
+                        + scheduleJob.jobGroup() + "/" + scheduleJob.jobName() + "/pause");
     }
 
+    @Deprecated(since = "3.5.0", forRemoval = true)
     public void resumeJob(ScheduleJob scheduleJob) throws SchedulerException {
-        JobKey jobKey = JobKey.jobKey(scheduleJob.jobName(), scheduleJob.jobGroup());
-        validateJobExists(jobKey);
-        scheduler.resumeJob(jobKey);
-        log.info("Resumed job with key: {}", jobKey);
+        throw new SchedulerException(
+                "This method is deprecated. Please use actuator endpoint: POST /actuator/quartz/jobs/"
+                        + scheduleJob.jobGroup() + "/" + scheduleJob.jobName() + "/resume");
     }
 
+    @Deprecated(since = "3.5.0", forRemoval = true)
     public void runJob(ScheduleJob job) throws SchedulerException {
-        JobKey jobKey = JobKey.jobKey(job.jobName(), job.jobGroup());
-        validateJobExists(jobKey);
-        scheduler.triggerJob(jobKey);
-        log.info("Triggered job with key: {}", jobKey);
+        throw new SchedulerException(
+                "This method is deprecated. Please use actuator endpoint: POST /actuator/quartz/jobs/" + job.jobGroup()
+                        + "/" + job.jobName() + "/trigger");
     }
 
     public void deleteJob(ScheduleJob scheduleJob) throws SchedulerException {

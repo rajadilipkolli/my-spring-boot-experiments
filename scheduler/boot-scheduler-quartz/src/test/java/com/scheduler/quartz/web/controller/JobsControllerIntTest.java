@@ -93,7 +93,7 @@ class JobsControllerIntTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void testPauseJob() {
+    void testDeprecatedPauseJob() {
         String requestBody =
                 """
                     {
@@ -110,37 +110,19 @@ class JobsControllerIntTest extends AbstractIntegrationTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .assertThat()
                 .hasStatusOk()
-                .hasContentType(MediaType.APPLICATION_JSON);
-    }
-
-    @Test
-    void testPauseJobWithInvalidJobName() {
-        String requestBody =
-                """
-                    {
-                        "jobName": "InvalidJob",
-                        "jobId": "12345"
-                    }
-                """;
-
-        mockMvcTester
-                .post()
-                .uri("/api/pauseJob")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(requestBody)
-                .accept(MediaType.APPLICATION_JSON)
-                .assertThat()
-                .hasStatusOk()
                 .hasContentType(MediaType.APPLICATION_JSON)
                 .bodyJson()
                 .convertTo(Message.class)
                 .satisfies(message -> {
-                    assertThat(message.getMsg()).isEqualTo("Job does not exist with key: DEFAULT.InvalidJob");
+                    assertThat(message.getMsg())
+                            .contains(
+                                    "This endpoint is deprecated. Please use actuator endpoint: POST /actuator/quartz/jobs/");
+                    assertThat(message.isValid()).isFalse();
                 });
     }
 
     @Test
-    void testResumeJob() {
+    void testDeprecatedResumeJob() {
         String requestBody =
                 """
                     {
@@ -156,36 +138,19 @@ class JobsControllerIntTest extends AbstractIntegrationTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .assertThat()
                 .hasStatusOk()
-                .hasContentType(MediaType.APPLICATION_JSON);
-    }
-
-    @Test
-    void testResumeJobWithInvalidJobName() {
-        String requestBody =
-                """
-                    {
-                        "jobName": "InvalidJob",
-                        "jobId": "12345"
-                    }
-                """;
-        mockMvcTester
-                .post()
-                .uri("/api/resumeJob")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(requestBody)
-                .accept(MediaType.APPLICATION_JSON)
-                .assertThat()
-                .hasStatusOk()
                 .hasContentType(MediaType.APPLICATION_JSON)
                 .bodyJson()
                 .convertTo(Message.class)
                 .satisfies(message -> {
-                    assertThat(message.getMsg()).isEqualTo("Job does not exist with key: DEFAULT.InvalidJob");
+                    assertThat(message.getMsg())
+                            .contains(
+                                    "This endpoint is deprecated. Please use actuator endpoint: POST /actuator/quartz/jobs/");
+                    assertThat(message.isValid()).isFalse();
                 });
     }
 
     @Test
-    void testRunJob() {
+    void testDeprecatedRunJob() {
         String requestBody =
                 """
                 {
@@ -202,32 +167,14 @@ class JobsControllerIntTest extends AbstractIntegrationTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .assertThat()
                 .hasStatusOk()
-                .hasContentType(MediaType.APPLICATION_JSON);
-    }
-
-    @Test
-    void testRunJobWithInvalidJobName() {
-        String requestBody =
-                """
-                {
-                    "jobName": "InvalidJob",
-                    "jobId": "12345"
-                }
-            """;
-
-        mockMvcTester
-                .post()
-                .uri("/api/runJob")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(requestBody)
-                .accept(MediaType.APPLICATION_JSON)
-                .assertThat()
-                .hasStatusOk()
                 .hasContentType(MediaType.APPLICATION_JSON)
                 .bodyJson()
                 .convertTo(Message.class)
                 .satisfies(message -> {
-                    assertThat(message.getMsg()).isEqualTo("Job does not exist with key: DEFAULT.InvalidJob");
+                    assertThat(message.getMsg())
+                            .contains(
+                                    "This endpoint is deprecated. Please use actuator endpoint: POST /actuator/quartz/jobs/");
+                    assertThat(message.isValid()).isFalse();
                 });
     }
 
