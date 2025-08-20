@@ -93,7 +93,7 @@ class JobsControllerIntTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void testDeprecatedPauseJob() {
+    void testPauseJob() {
         String requestBody =
                 """
                     {
@@ -110,23 +110,62 @@ class JobsControllerIntTest extends AbstractIntegrationTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .assertThat()
                 .hasStatusOk()
+                .hasContentType(MediaType.APPLICATION_JSON);
+    }
+
+    @Test
+    void testPauseJobWithInvalidJobName() {
+        String requestBody =
+                """
+                            {
+                                "jobName": "InvalidJob",
+                                "jobId": "12345"
+                            }
+                        """;
+
+        mockMvcTester
+                .post()
+                .uri("/api/pauseJob")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody)
+                .accept(MediaType.APPLICATION_JSON)
+                .assertThat()
+                .hasStatusOk()
                 .hasContentType(MediaType.APPLICATION_JSON)
                 .bodyJson()
                 .convertTo(Message.class)
                 .satisfies(message -> {
-                    assertThat(message.getMsg())
-                            .contains(
-                                    "This endpoint is deprecated. Please use actuator endpoint: POST /actuator/quartz/jobs/");
-                    assertThat(message.isValid()).isFalse();
+                    assertThat(message.getMsg()).isEqualTo("Job does not exist with key: DEFAULT.InvalidJob");
                 });
     }
 
     @Test
-    void testDeprecatedResumeJob() {
+    void testResumeJob() {
         String requestBody =
                 """
                     {
                         "jobName": "SampleJob",
+                        "jobId": "12345"
+                    }
+                """;
+
+        mockMvcTester
+                .post()
+                .uri("/api/resumeJob")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody)
+                .accept(MediaType.APPLICATION_JSON)
+                .assertThat()
+                .hasStatusOk()
+                .hasContentType(MediaType.APPLICATION_JSON);
+    }
+
+    @Test
+    void testResumeJobWithInvalidJobName() {
+        String requestBody =
+                """
+                    {
+                        "jobName": "InvalidJob",
                         "jobId": "12345"
                     }
                 """;
@@ -142,9 +181,9 @@ class JobsControllerIntTest extends AbstractIntegrationTest {
                 .bodyJson()
                 .convertTo(Message.class)
                 .satisfies(message -> {
-                    assertThat(message.getMsg())
-                            .contains(
-                                    "This endpoint is deprecated. Please use actuator endpoint: POST /actuator/quartz/jobs/");
+                    System.out.println("DEBUG: message.isValid() = " + message.isValid());
+                    System.out.println("DEBUG: message.getMsg() = " + message.getMsg());
+                    assertThat(message.getMsg()).isEqualTo("Job does not exist with key: DEFAULT.InvalidJob");
                     assertThat(message.isValid()).isFalse();
                 });
     }
@@ -174,7 +213,7 @@ class JobsControllerIntTest extends AbstractIntegrationTest {
                     assertThat(message.getMsg())
                             .contains(
                                     "This endpoint is deprecated. Please use actuator endpoint: POST /actuator/quartz/jobs/");
-                    assertThat(message.isValid()).isFalse();
+                    assertThat(message.isValid()).isTrue();
                 });
     }
 
