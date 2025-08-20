@@ -27,7 +27,7 @@
 	"forwardPorts": [8080],
 
 	// Use 'postCreateCommand' to run commands after the container is created.
-	"postCreateCommand": "./mvnw clean testCompile"
+	"postCreateCommand": "./mvnw -B -ntp clean test-compile"
 
 	// Configure tool-specific properties.
 	// "customizations": {},

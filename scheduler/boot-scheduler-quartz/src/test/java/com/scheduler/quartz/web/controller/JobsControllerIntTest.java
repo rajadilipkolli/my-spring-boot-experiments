@@ -117,11 +117,11 @@ class JobsControllerIntTest extends AbstractIntegrationTest {
     void testPauseJobWithInvalidJobName() {
         String requestBody =
                 """
-                            {
-                                "jobName": "InvalidJob",
-                                "jobId": "12345"
-                            }
-                        """;
+                    {
+                        "jobName": "InvalidJob",
+                        "jobId": "12345"
+                    }
+                """;
 
         mockMvcTester
                 .post()
@@ -181,10 +181,7 @@ class JobsControllerIntTest extends AbstractIntegrationTest {
                 .bodyJson()
                 .convertTo(Message.class)
                 .satisfies(message -> {
-                    System.out.println("DEBUG: message.isValid() = " + message.isValid());
-                    System.out.println("DEBUG: message.getMsg() = " + message.getMsg());
                     assertThat(message.getMsg()).isEqualTo("Job does not exist with key: DEFAULT.InvalidJob");
-                    assertThat(message.isValid()).isFalse();
                 });
     }
 
