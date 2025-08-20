@@ -16,10 +16,15 @@ public class IndexController {
         this.scheduleJobService = scheduleJobService;
     }
 
-    @GetMapping(path = {"/index", "/", "", "/index.html"})
+    @GetMapping("/index")
     public String index(Model model) {
         List<ScheduleJob> jobList = scheduleJobService.getJobs();
         model.addAttribute("jobs", jobList);
         return "index";
+    }
+
+    @GetMapping({"/", "/index.html"})
+    public String rootRedirect() {
+        return "redirect:/index";
     }
 }
