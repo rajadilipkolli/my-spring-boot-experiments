@@ -271,6 +271,16 @@
             "projectName": "boot-togglz-sample",
             "args": "",
             "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-QuartzApplication<boot-scheduler-quartz>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.scheduler.quartz.QuartzApplication",
+            "projectName": "boot-scheduler-quartz",
+            "args": "--spring.profiles.active=local",
+            "envFile": "${workspaceFolder}/.env"
         }
     ]
 }

@@ -163,13 +163,6 @@ public class JobsService {
         log.info("Resumed job with key: {}", jobKey);
     }
 
-    public void runJob(ScheduleJob job) throws SchedulerException {
-        JobKey jobKey = JobKey.jobKey(job.jobName(), job.jobGroup());
-        validateJobExists(jobKey);
-        scheduler.triggerJob(jobKey);
-        log.info("Triggered job with key: {}", jobKey);
-    }
-
     public void deleteJob(ScheduleJob scheduleJob) throws SchedulerException {
         JobKey jobKey = JobKey.jobKey(scheduleJob.jobName(), scheduleJob.jobGroup());
         validateJobExists(jobKey);

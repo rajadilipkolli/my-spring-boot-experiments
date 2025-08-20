@@ -1,22 +1,20 @@
 $(function() {
 
-	//run job once
+    //run job once (new actuator endpoint)
     $(".btnRun").click(function() {
-    	const jobId = $(this).parent().data("id");
+        const jobId = $(this).parent().data("id");
+        const jobName = $("#name_" + jobId).text().trim();
+        const jobGroup = $("#group_" + jobId).text().trim();
         $.ajax({
-            url: "/api/runJob?t=" + new Date().getTime(),
+            url: "/actuator/quartz/jobs/" + encodeURIComponent(jobGroup) + "/" + encodeURIComponent(jobName),
             type: "POST",
             contentType: "application/json",
-            data: JSON.stringify({
-                jobName: $("#name_"+jobId).text(),
-                jobGroup: $("#group_"+jobId).text()
-            }),
-            success: function(res) {
-                if (res.valid) {
-                	alert("run success!");  
-                } else {
-                	alert(res.msg); 
-                }
+            data: JSON.stringify({ state: "running" }),
+            success: function() {
+                alert("run success!");
+            },
+            error: function(xhr) {
+                alert("Error: " + xhr.responseText);
             }
         });
     });
@@ -37,7 +35,7 @@ $(function() {
                 	alert("pause success!");
                 	location.reload();
                 } else {
-                	alert(res.msg); 
+                	alert(res.msg);
                 }
             }
         });

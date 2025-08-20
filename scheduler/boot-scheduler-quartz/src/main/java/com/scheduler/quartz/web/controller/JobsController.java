@@ -86,24 +86,6 @@ public class JobsController {
         return message;
     }
 
-    @Operation(summary = "Trigger immediate execution of a job")
-    @ApiResponse(responseCode = "200", description = "Job triggered successfully")
-    @ApiResponse(responseCode = "400", description = "Invalid job parameters")
-    @ApiResponse(responseCode = "500", description = "Internal server error")
-    @PostMapping(value = "/runJob")
-    public Message runJob(@RequestBody @Valid ScheduleJob job) {
-        log.info("runJob params = {}", job);
-        Message message = Message.failure();
-        try {
-            jobsService.runJob(job);
-            message = Message.success();
-        } catch (Exception e) {
-            message.setMsg(e.getMessage());
-            log.error("runJob ex:", e);
-        }
-        return message;
-    }
-
     @DeleteMapping(value = "/deleteJob")
     public Message deleteJob(@RequestBody @Valid ScheduleJob job) {
         log.info("deleteJob params : {}", job);

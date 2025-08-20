@@ -148,6 +148,7 @@ class JobsControllerIntTest extends AbstractIntegrationTest {
                         "jobId": "12345"
                     }
                 """;
+
         mockMvcTester
                 .post()
                 .uri("/api/resumeJob")
@@ -171,53 +172,6 @@ class JobsControllerIntTest extends AbstractIntegrationTest {
         mockMvcTester
                 .post()
                 .uri("/api/resumeJob")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(requestBody)
-                .accept(MediaType.APPLICATION_JSON)
-                .assertThat()
-                .hasStatusOk()
-                .hasContentType(MediaType.APPLICATION_JSON)
-                .bodyJson()
-                .convertTo(Message.class)
-                .satisfies(message -> {
-                    assertThat(message.getMsg()).isEqualTo("Job does not exist with key: DEFAULT.InvalidJob");
-                });
-    }
-
-    @Test
-    void testRunJob() {
-        String requestBody =
-                """
-                {
-                    "jobName": "SampleJob",
-                    "jobId": "12345"
-                }
-            """;
-
-        mockMvcTester
-                .post()
-                .uri("/api/runJob")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(requestBody)
-                .accept(MediaType.APPLICATION_JSON)
-                .assertThat()
-                .hasStatusOk()
-                .hasContentType(MediaType.APPLICATION_JSON);
-    }
-
-    @Test
-    void testRunJobWithInvalidJobName() {
-        String requestBody =
-                """
-                {
-                    "jobName": "InvalidJob",
-                    "jobId": "12345"
-                }
-            """;
-
-        mockMvcTester
-                .post()
-                .uri("/api/runJob")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestBody)
                 .accept(MediaType.APPLICATION_JSON)
