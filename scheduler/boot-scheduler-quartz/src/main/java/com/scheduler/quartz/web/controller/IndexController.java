@@ -16,7 +16,7 @@ public class IndexController {
         this.scheduleJobService = scheduleJobService;
     }
 
-    @GetMapping("/index")
+    @GetMapping(path = {"/index", "/", "", "/index.html"})
     public String index(Model model) {
         List<ScheduleJob> jobList = scheduleJobService.getJobs();
         model.addAttribute("jobs", jobList);
