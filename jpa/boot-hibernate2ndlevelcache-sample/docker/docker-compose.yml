@@ -11,7 +11,7 @@ services:
       - "5432:5432"
   
   redis:
-    image: 'redis:8.2.0-alpine'
+    image: 'redis:8.2.1-alpine'
     ports:
       - '127.0.0.1:6379:6379/tcp'
     volumes:

@@ -22,4 +22,9 @@ public class IndexController {
         model.addAttribute("jobs", jobList);
         return "index";
     }
+
+    @GetMapping({"/", "/index.html"})
+    public String rootRedirect() {
+        return "redirect:/index";
+    }
 }
