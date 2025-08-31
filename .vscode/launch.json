@@ -116,7 +116,8 @@
             "mainClass": "com.example.bootbatchjpa.TestBatchApplication",
             "projectName": "batch-boot-jpa-sample",
             "args": "",
-            "envFile": "${workspaceFolder}/.env"
+            "envFile": "${workspaceFolder}/.env",
+            "vmArgs": " -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=42863 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dspring.jmx.enabled=true -Djava.rmi.server.hostname=localhost -Dspring.application.admin.enabled=true -Dspring.boot.project.name=batch-boot-jpa-sample"
         },
         {
             "type": "java",
@@ -269,6 +270,16 @@
             "cwd": "${workspaceFolder}",
             "mainClass": "com.example.featuretoggle.TogglzApplication",
             "projectName": "boot-togglz-sample",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-GrafanaLGTMApplication<boot-grafana-lgtm>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.learning.grafanalgtm.GrafanaLGTMApplication",
+            "projectName": "boot-grafana-lgtm",
             "args": "",
             "envFile": "${workspaceFolder}/.env"
         },
