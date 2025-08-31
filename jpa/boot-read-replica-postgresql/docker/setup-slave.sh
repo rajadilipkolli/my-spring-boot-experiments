@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e
+set -Eeuo pipefail
 
 export PGDATA=/var/lib/postgresql/data
 
