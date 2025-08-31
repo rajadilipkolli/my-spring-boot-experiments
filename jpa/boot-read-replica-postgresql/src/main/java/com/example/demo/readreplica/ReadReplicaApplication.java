@@ -10,7 +10,6 @@ public class ReadReplicaApplication {
     public static void main(String[] args) {
         // Set default timezone to UTC to avoid timezone conflicts
         TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
-        System.setProperty("user.timezone", "UTC");
         SpringApplication.run(ReadReplicaApplication.class, args);
     }
 }

@@ -5,7 +5,7 @@ spring:
       password: postgres_write
       username: postgres_write
       driverClassName: org.postgresql.Driver
-      url: jdbc:postgresql://localhost:5432/my_database?TimeZone=UTC&serverTimezone=UTC
+      url: jdbc:postgresql://localhost:5432/my_database?options=-c%20timezone=UTC 
       hikari:
         auto-commit: false
         pool-name: primaryHikariPool
@@ -17,7 +17,7 @@ spring:
       password: repl_password
       username: repl_user
       driverClassName: org.postgresql.Driver
-      url: jdbc:postgresql://localhost:15432/my_database?TimeZone=UTC&serverTimezone=UTC
+      url: jdbc:postgresql://localhost:15432/my_database?options=-c%20timezone=UTC 
       hikari:
         auto-commit: false
         poolName: replicaHikariPool
