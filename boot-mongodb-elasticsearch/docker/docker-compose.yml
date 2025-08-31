@@ -45,7 +45,7 @@ services:
       - ./elk/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
 
   kibana:
-    image: docker.elastic.co/kibana/kibana:9.1.2
+    image: docker.elastic.co/kibana/kibana:9.1.3
     restart: always
     ports:
       - "5601:5601"
