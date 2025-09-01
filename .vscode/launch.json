@@ -292,6 +292,16 @@
             "projectName": "boot-scheduler-quartz",
             "args": "--spring.profiles.active=local",
             "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-ReadReplicaApplication<boot-read-replica-postgresql>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.example.demo.readreplica.ReadReplicaApplication",
+            "projectName": "boot-read-replica-postgresql",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
         }
     ]
 }
