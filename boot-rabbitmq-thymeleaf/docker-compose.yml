@@ -1,7 +1,7 @@
 services:
   rabbitmq:
     container_name: rabbitmq
-    image: rabbitmq:4.1.3-management
+    image: rabbitmq:4.1.4-management
     expose:
       - "5672"
       - "15672"
