@@ -61,7 +61,7 @@ jobs:
 
       - if: ${{ github.ref == 'refs/heads/main' }}
         name: OCI image vulnerability scanning
-        uses: anchore/scan-action@v6
+        uses: anchore/scan-action@v7
         id: scan
         with:
           image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/boot-strategy-plugin:${{ env.VERSION }}
