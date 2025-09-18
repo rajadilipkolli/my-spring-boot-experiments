@@ -36,6 +36,10 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-jackson</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
 
@@ -108,7 +112,7 @@
                 <configuration>
                     <java>
                         <palantirJavaFormat>
-                            <version>2.58.0</version>
+                            <version>2.72.0</version>
                         </palantirJavaFormat>
                         <importOrder />
                         <removeUnusedImports />
