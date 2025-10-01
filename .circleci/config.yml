@@ -23,11 +23,11 @@ jobs:
       
       # Install Java with better error handling
       - run:
-          name: Install Java 21
+          name: Install Java 25
           command: |
             sudo apt-get update -y
-            sudo apt-get install -y openjdk-21-jdk
-            echo 'export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64' >> $BASH_ENV
+            sudo apt-get install -y openjdk-25-jdk
+            echo 'export JAVA_HOME=/usr/lib/jvm/java-25-openjdk-amd64' >> $BASH_ENV
             echo 'export PATH=$JAVA_HOME/bin:$PATH' >> $BASH_ENV
             source $BASH_ENV
             java -version
