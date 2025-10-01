@@ -1,5 +1,6 @@
 package com.example.multitenancy.schema.config;
 
+import java.net.URI;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -35,6 +36,7 @@ class GlobalExceptionHandler {
                 })
                 .sorted(Comparator.comparing(ApiValidationError::field))
                 .toList();
+        problemDetail.setType(URI.create("https://multitenancy-schema.com/errors/validation-error"));
         problemDetail.setProperty("violations", validationErrorsList);
         return problemDetail;
     }

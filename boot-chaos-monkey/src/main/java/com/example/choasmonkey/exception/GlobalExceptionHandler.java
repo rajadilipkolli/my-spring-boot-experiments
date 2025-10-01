@@ -1,5 +1,6 @@
 package com.example.choasmonkey.exception;
 
+import java.net.URI;
 import java.util.List;
 import java.util.Objects;
 import org.springframework.core.Ordered;
@@ -32,6 +33,7 @@ public class GlobalExceptionHandler {
                             Objects.requireNonNull(fieldError.getDefaultMessage()));
                 })
                 .toList();
+        problemDetail.setType(URI.create("https://chaos-monkey.com/errors/validation-error"));
         problemDetail.setProperty("violations", validationErrorsList);
         return problemDetail;
     }

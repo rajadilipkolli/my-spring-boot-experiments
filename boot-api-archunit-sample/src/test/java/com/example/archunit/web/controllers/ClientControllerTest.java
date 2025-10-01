@@ -23,7 +23,6 @@ import com.example.archunit.model.request.ClientRequest;
 import com.example.archunit.model.response.ClientResponse;
 import com.example.archunit.model.response.PagedResult;
 import com.example.archunit.services.ClientService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -38,6 +37,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import tools.jackson.databind.ObjectMapper;
 
 @WebMvcTest(controllers = ClientController.class)
 @ActiveProfiles(PROFILE_TEST)
@@ -137,14 +137,14 @@ class ClientControllerTest {
                         .content(objectMapper.writeValueAsString(clientRequest)))
                 .andExpect(status().isBadRequest())
                 .andExpect(header().string("Content-Type", is("application/problem+json")))
-                .andExpect(jsonPath("$.type", is("about:blank")))
+                .andExpect(jsonPath("$.type", is("https://archunit-sample.com/errors/validation-error")))
                 .andExpect(jsonPath("$.title", is("Constraint Violation")))
                 .andExpect(jsonPath("$.status", is(400)))
                 .andExpect(jsonPath("$.detail", is("Invalid request content.")))
                 .andExpect(jsonPath("$.instance", is("/api/clients")))
-                .andExpect(jsonPath("$.violations", hasSize(1)))
-                .andExpect(jsonPath("$.violations[0].field", is("text")))
-                .andExpect(jsonPath("$.violations[0].message", is("Text cannot be empty")))
+                .andExpect(jsonPath("$.properties.violations", hasSize(1)))
+                .andExpect(jsonPath("$.properties.violations[0].field", is("text")))
+                .andExpect(jsonPath("$.properties.violations[0].message", is("Text cannot be empty")))
                 .andReturn();
     }
 
