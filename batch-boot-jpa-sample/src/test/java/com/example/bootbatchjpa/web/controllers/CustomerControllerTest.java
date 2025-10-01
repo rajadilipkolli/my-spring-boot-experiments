@@ -116,15 +116,15 @@ class CustomerControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(customer)))
                 .andExpect(status().isBadRequest())
-                .andExpect(header().string("Content-Type", is("application/problem+json")))
+                .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                 .andExpect(jsonPath("$.type", is("https://boot-jpa.com/errors/validation")))
                 .andExpect(jsonPath("$.title", is("Constraint Violation")))
                 .andExpect(jsonPath("$.status", is(400)))
                 .andExpect(jsonPath("$.detail", is("Invalid request content.")))
                 .andExpect(jsonPath("$.instance", is("/api/customers")))
-                .andExpect(jsonPath("$.violations", hasSize(1)))
-                .andExpect(jsonPath("$.violations[0].field", is("name")))
-                .andExpect(jsonPath("$.violations[0].message", is("Name cannot be empty")))
+                .andExpect(jsonPath("$.properties.violations", hasSize(1)))
+                .andExpect(jsonPath("$.properties.violations[0].field", is("name")))
+                .andExpect(jsonPath("$.properties.violations[0].message", is("Name cannot be empty")))
                 .andReturn();
     }
 
