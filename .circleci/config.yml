@@ -11,17 +11,26 @@ executors:
 
 jobs:
   build:
-    docker:
-      - image: cimg/openjdk:25.0.0
+    executor: machine_executor_amd64
     steps:
       - checkout
-      - run: java --version
       
       # Restore Maven dependencies cache
       - restore_cache:
           keys:
             - maven-deps-v2-{{ checksum "pom.xml" }}
             - maven-deps-v2-
+      
+      # Install Java with better error handling
+      - run:
+          name: Install Java 21
+          command: |
+            sudo apt-get update -y
+            sudo apt-get install -y openjdk-21-jdk
+            echo 'export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64' >> $BASH_ENV
+            echo 'export PATH=$JAVA_HOME/bin:$PATH' >> $BASH_ENV
+            source $BASH_ENV
+            java -version
       
       # Install Maven with version verification
       - run:
