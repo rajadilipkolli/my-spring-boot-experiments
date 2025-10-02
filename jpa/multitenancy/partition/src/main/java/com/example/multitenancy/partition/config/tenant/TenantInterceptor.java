@@ -1,22 +1,27 @@
 package com.example.multitenancy.partition.config.tenant;
 
-import static org.springframework.http.HttpStatus.FORBIDDEN;
-
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.net.URI;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ProblemDetail;
 import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.HandlerInterceptor;
+import tools.jackson.databind.ObjectMapper;
 
 @Configuration(proxyBeanMethods = false)
 public class TenantInterceptor implements HandlerInterceptor {
 
     private final TenantIdentifierResolver tenantIdentifierResolver;
+    private final ObjectMapper objectMapper;
 
-    public TenantInterceptor(TenantIdentifierResolver tenantIdentifierResolver) {
+    public TenantInterceptor(TenantIdentifierResolver tenantIdentifierResolver, ObjectMapper objectMapper) {
         this.tenantIdentifierResolver = tenantIdentifierResolver;
+        this.objectMapper = objectMapper;
     }
 
     @Override
@@ -24,7 +29,16 @@ public class TenantInterceptor implements HandlerInterceptor {
             throws IOException {
         var tenant = request.getParameter("tenant");
         if (request.getServletPath().startsWith("/api/") && !StringUtils.hasText(tenant)) {
-            response.sendError(FORBIDDEN.value(), "Unknown user tenant");
+            ProblemDetail problemDetail =
+                    ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, "Unknown Database tenant");
+            problemDetail.setType(URI.create("https://multitenancy.com/errors/tenant-error"));
+            problemDetail.setTitle("Invalid Tenant");
+            problemDetail.setInstance(URI.create(request.getRequestURI()));
+
+            response.setContentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE);
+            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            response.getWriter().write(objectMapper.writeValueAsString(problemDetail));
+            response.getWriter().flush();
             return false;
         }
         tenantIdentifierResolver.setCurrentTenant(tenant);
