@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
@@ -68,6 +69,15 @@ class GlobalExceptionHandler {
                 .toList();
         problemDetail.setType(URI.create("https://multitenancy.com/errors/validation-error"));
         problemDetail.setProperty("violations", validationErrors);
+        return problemDetail;
+    }
+
+    @ExceptionHandler(MissingRequestHeaderException.class)
+    public ProblemDetail onMissingRequestHeaderException(MissingRequestHeaderException e) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+                HttpStatus.BAD_REQUEST, "Required header '" + e.getHeaderName() + "' is not present.");
+        problemDetail.setTitle("Header Violation");
+        problemDetail.setType(URI.create("https://multitenancy.com/errors/header-error"));
         return problemDetail;
     }
 

@@ -57,13 +57,13 @@ class CustomerControllerIT extends AbstractIntegrationTest {
     }
 
     @Test
-    void shouldFetchAllCustomersWhenHeaderNotSet() throws Exception {
+    void shouldNotFetchAllCustomersWhenHeaderNotSet() throws Exception {
         this.mockMvc
                 .perform(get("/api/customers"))
                 .andExpect(status().isBadRequest())
                 .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
-                .andExpect(jsonPath("$.type", is("https://multitenancy.com/errors/validation-error")))
-                .andExpect(jsonPath("$.title", is("Constraint Violation")))
+                .andExpect(jsonPath("$.type", is("https://multitenancy.com/errors/header-error")))
+                .andExpect(jsonPath("$.title", is("Header Violation")))
                 .andExpect(jsonPath("$.status", is(400)))
                 .andExpect(jsonPath("$.detail", is("Required header 'X-tenantId' is not present.")))
                 .andExpect(jsonPath("$.instance", is("/api/customers")));
