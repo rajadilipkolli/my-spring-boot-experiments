@@ -30,7 +30,7 @@ public class MultiTenantInterceptor implements HandlerInterceptor {
         var tenant = request.getHeader(AppConstants.X_TENANT_ID);
         String path = request.getRequestURI().substring(request.getContextPath().length());
         if (null != tenant && path.startsWith("/api/") && !getValidTenants().contains(tenant)) {
-            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+            response.setContentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE);
             response.setStatus(HttpServletResponse.SC_FORBIDDEN);
             response.getWriter().write("{\"error\": \"Unknown Database tenant\"}");
             response.getWriter().flush();

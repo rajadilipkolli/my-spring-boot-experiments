@@ -4,6 +4,7 @@ import static com.example.multitenancy.utils.AppConstants.PROFILE_TEST;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
@@ -148,7 +149,9 @@ class PrimaryCustomerControllerTest {
                 .andExpect(jsonPath("$.detail", is("Invalid request content.")))
                 .andExpect(jsonPath("$.instance", is("/api/customers/primary")))
                 .andExpect(jsonPath("$.properties.violations", hasSize(1)))
+                .andExpect(jsonPath("$.properties.violations[0].object", is("primaryCustomerRequest")))
                 .andExpect(jsonPath("$.properties.violations[0].field", is("text")))
+                .andExpect(jsonPath("$.properties.violations[0].rejectedValue", is(nullValue())))
                 .andExpect(jsonPath("$.properties.violations[0].message", is("Text cannot be blank")))
                 .andReturn();
     }
