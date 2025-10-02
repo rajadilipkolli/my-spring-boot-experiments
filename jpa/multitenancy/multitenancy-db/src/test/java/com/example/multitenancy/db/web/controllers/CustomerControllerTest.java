@@ -3,6 +3,7 @@ package com.example.multitenancy.db.web.controllers;
 import static com.example.multitenancy.db.utils.AppConstants.PROFILE_TEST;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.Matchers.greaterThan;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
@@ -119,6 +120,10 @@ class CustomerControllerTest {
                 .andExpect(jsonPath("$.status", is(400)))
                 .andExpect(jsonPath("$.detail", is("Invalid request content.")))
                 .andExpect(jsonPath("$.instance", is("/api/customers")))
+                .andExpect(jsonPath("$.properties.violations").isArray())
+                .andExpect(jsonPath("$.properties.violations.length()").value(greaterThan(0)))
+                .andExpect(jsonPath("$.properties.violations[0].field").exists())
+                .andExpect(jsonPath("$.properties.violations[0].message").exists())
                 .andReturn();
     }
 
