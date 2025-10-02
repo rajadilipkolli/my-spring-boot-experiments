@@ -32,7 +32,18 @@ public class MultiTenantInterceptor implements HandlerInterceptor {
         if (null != tenant && path.startsWith("/api/") && !getValidTenants().contains(tenant)) {
             response.setContentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE);
             response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-            response.getWriter().write("{\"error\": \"Unknown Database tenant\"}");
+            response.getWriter()
+                    .write(
+                            """
+                {
+                    "type": "https://multitenancy.com/errors/tenant-error",
+                    "title": "Invalid Tenant",
+                    "status": 403,
+                    "detail": "Unknown Database tenant",
+                    "instance": "%s"
+                }
+                """
+                                    .formatted(request.getRequestURI()));
             response.getWriter().flush();
             return false;
         }

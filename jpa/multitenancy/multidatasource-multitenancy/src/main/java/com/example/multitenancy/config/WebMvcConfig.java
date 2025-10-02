@@ -1,8 +1,8 @@
 package com.example.multitenancy.config;
 
 import com.example.multitenancy.config.multitenant.MultiTenantInterceptor;
+import org.jspecify.annotations.NonNull;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.lang.NonNull;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;

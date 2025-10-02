@@ -62,7 +62,11 @@ class PrimaryCustomerControllerIT extends AbstractIntegrationTest {
             mockMvc.perform(get("/api/customers/primary").header("X-tenantId", "junk"))
                     .andExpect(status().isForbidden())
                     .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
-                    .andExpect(jsonPath("$.error", is("Unknown Database tenant")));
+                    .andExpect(jsonPath("$.type", is("https://multitenancy.com/errors/tenant-error")))
+                    .andExpect(jsonPath("$.title", is("Invalid Tenant")))
+                    .andExpect(jsonPath("$.status", is(403)))
+                    .andExpect(jsonPath("$.detail", is("Unknown Database tenant")))
+                    .andExpect(jsonPath("$.instance", is("/api/customers/primary")));
         }
 
         @Test
@@ -71,7 +75,11 @@ class PrimaryCustomerControllerIT extends AbstractIntegrationTest {
             mockMvc.perform(get("/api/customers/primary").header("X-tenantId", ""))
                     .andExpect(status().isForbidden())
                     .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
-                    .andExpect(jsonPath("$.error", is("Unknown Database tenant")));
+                    .andExpect(jsonPath("$.type", is("https://multitenancy.com/errors/tenant-error")))
+                    .andExpect(jsonPath("$.title", is("Invalid Tenant")))
+                    .andExpect(jsonPath("$.status", is(403)))
+                    .andExpect(jsonPath("$.detail", is("Unknown Database tenant")))
+                    .andExpect(jsonPath("$.instance", is("/api/customers/primary")));
         }
     }
 
