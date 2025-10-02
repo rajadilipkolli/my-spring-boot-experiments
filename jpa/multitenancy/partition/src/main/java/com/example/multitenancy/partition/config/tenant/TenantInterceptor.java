@@ -29,14 +29,14 @@ public class TenantInterceptor implements HandlerInterceptor {
             throws IOException {
         var tenant = request.getParameter("tenant");
         if (request.getServletPath().startsWith("/api/") && !StringUtils.hasText(tenant)) {
-            ProblemDetail problemDetail =
-                    ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, "Unknown Database tenant");
-            problemDetail.setType(URI.create("https://multitenancy.com/errors/tenant-error"));
-            problemDetail.setTitle("Invalid Tenant");
+            ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+                    HttpStatus.BAD_REQUEST, "Required parameter 'tenant' is not present.");
+            problemDetail.setType(URI.create("https://multitenancy.com/errors/validation-error"));
+            problemDetail.setTitle("Validation Error");
             problemDetail.setInstance(URI.create(request.getRequestURI()));
 
             response.setContentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE);
-            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().write(objectMapper.writeValueAsString(problemDetail));
             response.getWriter().flush();
             return false;
