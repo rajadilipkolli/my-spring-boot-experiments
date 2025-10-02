@@ -84,6 +84,32 @@ class CustomerControllerIT extends AbstractIntegrationTest {
     }
 
     @Test
+    @DisplayName("Should return 400 Bad Request when tenant parameter is empty")
+    void shouldReturn400WhenTenantParameterIsEmpty() throws Exception {
+        mockMvc.perform(get("/api/customers").param("tenant", ""))
+                .andExpect(status().isBadRequest())
+                .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
+                .andExpect(jsonPath("$.type", is("https://multitenancy.com/errors/validation-error")))
+                .andExpect(jsonPath("$.title", is("Validation Error")))
+                .andExpect(jsonPath("$.status", is(400)))
+                .andExpect(jsonPath("$.detail", is("Required parameter 'tenant' is not present.")))
+                .andExpect(jsonPath("$.instance", is("/api/customers")));
+    }
+
+    @Test
+    @DisplayName("Should return 400 Bad Request when tenant parameter is blank (whitespace)")
+    void shouldReturn400WhenTenantParameterIsBlank() throws Exception {
+        mockMvc.perform(get("/api/customers").param("tenant", "   "))
+                .andExpect(status().isBadRequest())
+                .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
+                .andExpect(jsonPath("$.type", is("https://multitenancy.com/errors/validation-error")))
+                .andExpect(jsonPath("$.title", is("Validation Error")))
+                .andExpect(jsonPath("$.status", is(400)))
+                .andExpect(jsonPath("$.detail", is("Required parameter 'tenant' is not present.")))
+                .andExpect(jsonPath("$.instance", is("/api/customers")));
+    }
+
+    @Test
     void shouldCreateNewCustomer() throws Exception {
         CustomerDTO customerDTO = new CustomerDTO("New Customer");
         tenantIdentifierResolver.setCurrentTenant("dbsystc");

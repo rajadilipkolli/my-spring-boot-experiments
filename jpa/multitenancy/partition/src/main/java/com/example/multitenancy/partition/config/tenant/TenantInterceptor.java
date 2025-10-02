@@ -28,7 +28,8 @@ public class TenantInterceptor implements HandlerInterceptor {
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
             throws IOException {
         var tenant = request.getParameter("tenant");
-        if (request.getServletPath().startsWith("/api/") && !StringUtils.hasText(tenant)) {
+        String path = request.getRequestURI().substring(request.getContextPath().length());
+        if (path.startsWith("/api/") && !StringUtils.hasText(tenant)) {
             ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
                     HttpStatus.BAD_REQUEST, "Required parameter 'tenant' is not present.");
             problemDetail.setType(URI.create("https://multitenancy.com/errors/validation-error"));
