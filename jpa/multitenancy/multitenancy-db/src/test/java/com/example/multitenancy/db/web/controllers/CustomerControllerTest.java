@@ -3,6 +3,7 @@ package com.example.multitenancy.db.web.controllers;
 import static com.example.multitenancy.db.utils.AppConstants.PROFILE_TEST;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.Matchers.greaterThan;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
@@ -17,7 +18,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.example.multitenancy.db.config.multitenant.TenantIdentifierResolver;
 import com.example.multitenancy.db.entities.Customer;
 import com.example.multitenancy.db.services.CustomerService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -29,6 +29,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import tools.jackson.databind.ObjectMapper;
 
 @WebMvcTest(controllers = CustomerController.class)
 @ActiveProfiles(PROFILE_TEST)
@@ -113,12 +114,16 @@ class CustomerControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(customer)))
                 .andExpect(status().isBadRequest())
-                .andExpect(header().string("Content-Type", is("application/problem+json")))
-                .andExpect(jsonPath("$.type", is("about:blank")))
-                .andExpect(jsonPath("$.title", is("Bad Request")))
+                .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
+                .andExpect(jsonPath("$.type", is("https://multitenancy.com/errors/validation-error")))
+                .andExpect(jsonPath("$.title", is("Constraint Violation")))
                 .andExpect(jsonPath("$.status", is(400)))
                 .andExpect(jsonPath("$.detail", is("Invalid request content.")))
                 .andExpect(jsonPath("$.instance", is("/api/customers")))
+                .andExpect(jsonPath("$.properties.violations").isArray())
+                .andExpect(jsonPath("$.properties.violations.length()").value(greaterThan(0)))
+                .andExpect(jsonPath("$.properties.violations[0].field").exists())
+                .andExpect(jsonPath("$.properties.violations[0].message").exists())
                 .andReturn();
     }
 

@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -80,6 +81,32 @@ class CustomerControllerTest {
                 .perform(get("/api/customers/{id}", customerId).param("tenant", "dbsystc"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.text", is(customer.getText())));
+    }
+
+    @Test
+    @DisplayName("Should return 400 Bad Request when tenant parameter is empty")
+    void shouldReturn400WhenTenantParameterIsEmpty() throws Exception {
+        mockMvc.perform(get("/api/customers").param("tenant", ""))
+                .andExpect(status().isBadRequest())
+                .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
+                .andExpect(jsonPath("$.type", is("https://multitenancy.com/errors/validation-error")))
+                .andExpect(jsonPath("$.title", is("Validation Error")))
+                .andExpect(jsonPath("$.status", is(400)))
+                .andExpect(jsonPath("$.detail", is("Required parameter 'tenant' is not present.")))
+                .andExpect(jsonPath("$.instance", is("/api/customers")));
+    }
+
+    @Test
+    @DisplayName("Should return 400 Bad Request when tenant parameter is blank (whitespace)")
+    void shouldReturn400WhenTenantParameterIsBlank() throws Exception {
+        mockMvc.perform(get("/api/customers").param("tenant", "   "))
+                .andExpect(status().isBadRequest())
+                .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
+                .andExpect(jsonPath("$.type", is("https://multitenancy.com/errors/validation-error")))
+                .andExpect(jsonPath("$.title", is("Validation Error")))
+                .andExpect(jsonPath("$.status", is(400)))
+                .andExpect(jsonPath("$.detail", is("Required parameter 'tenant' is not present.")))
+                .andExpect(jsonPath("$.instance", is("/api/customers")));
     }
 
     @Test

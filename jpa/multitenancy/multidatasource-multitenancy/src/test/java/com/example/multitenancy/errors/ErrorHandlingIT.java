@@ -1,6 +1,7 @@
 package com.example.multitenancy.errors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.CoreMatchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -41,17 +42,17 @@ class ErrorHandlingIT extends AbstractIntegrationTest {
             // When/Then
             mockMvc.perform(get("/api/customers/primary"))
                     .andExpect(status().isBadRequest())
-                    .andExpect(header().string("Content-Type", "application/problem+json"))
-                    .andExpect(jsonPath("$.type").value("about:blank"))
-                    .andExpect(jsonPath("$.title").value("Bad Request"))
+                    .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
+                    .andExpect(jsonPath("$.type", is("https://multitenancy.com/errors/header-error")))
+                    .andExpect(jsonPath("$.title", is("Header Violation")))
                     .andExpect(jsonPath("$.status").value(400))
                     .andExpect(jsonPath("$.detail").value("Required header 'X-tenantId' is not present."));
 
             mockMvc.perform(get("/api/customers/secondary"))
                     .andExpect(status().isBadRequest())
-                    .andExpect(header().string("Content-Type", "application/problem+json"))
-                    .andExpect(jsonPath("$.type").value("about:blank"))
-                    .andExpect(jsonPath("$.title").value("Bad Request"))
+                    .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
+                    .andExpect(jsonPath("$.type", is("https://multitenancy.com/errors/header-error")))
+                    .andExpect(jsonPath("$.title", is("Header Violation")))
                     .andExpect(jsonPath("$.status").value(400))
                     .andExpect(jsonPath("$.detail").value("Required header 'X-tenantId' is not present."));
         }
@@ -62,13 +63,21 @@ class ErrorHandlingIT extends AbstractIntegrationTest {
             // When/Then
             mockMvc.perform(get("/api/customers/primary").header("X-tenantId", "invalid_tenant"))
                     .andExpect(status().isForbidden())
-                    .andExpect(header().string("Content-Type", "application/json"))
-                    .andExpect(jsonPath("$.error").value("Unknown Database tenant"));
+                    .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
+                    .andExpect(jsonPath("$.type", is("https://multitenancy.com/errors/tenant-error")))
+                    .andExpect(jsonPath("$.title", is("Invalid Tenant")))
+                    .andExpect(jsonPath("$.status", is(403)))
+                    .andExpect(jsonPath("$.detail", is("Unknown Database tenant")))
+                    .andExpect(jsonPath("$.instance", is("/api/customers/primary")));
 
             mockMvc.perform(get("/api/customers/secondary").header("X-tenantId", "invalid_tenant"))
                     .andExpect(status().isForbidden())
-                    .andExpect(header().string("Content-Type", "application/json"))
-                    .andExpect(jsonPath("$.error").value("Unknown Database tenant"));
+                    .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
+                    .andExpect(jsonPath("$.type", is("https://multitenancy.com/errors/tenant-error")))
+                    .andExpect(jsonPath("$.title", is("Invalid Tenant")))
+                    .andExpect(jsonPath("$.status", is(403)))
+                    .andExpect(jsonPath("$.detail", is("Unknown Database tenant")))
+                    .andExpect(jsonPath("$.instance", is("/api/customers/secondary")));
         }
 
         @Test
@@ -77,13 +86,21 @@ class ErrorHandlingIT extends AbstractIntegrationTest {
             // When/Then
             mockMvc.perform(get("/api/customers/primary").header("X-tenantId", ""))
                     .andExpect(status().isForbidden())
-                    .andExpect(header().string("Content-Type", "application/json"))
-                    .andExpect(jsonPath("$.error").value("Unknown Database tenant"));
+                    .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
+                    .andExpect(jsonPath("$.type", is("https://multitenancy.com/errors/tenant-error")))
+                    .andExpect(jsonPath("$.title", is("Invalid Tenant")))
+                    .andExpect(jsonPath("$.status", is(403)))
+                    .andExpect(jsonPath("$.detail", is("Unknown Database tenant")))
+                    .andExpect(jsonPath("$.instance", is("/api/customers/primary")));
 
             mockMvc.perform(get("/api/customers/secondary").header("X-tenantId", ""))
                     .andExpect(status().isForbidden())
-                    .andExpect(header().string("Content-Type", "application/json"))
-                    .andExpect(jsonPath("$.error").value("Unknown Database tenant"));
+                    .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
+                    .andExpect(jsonPath("$.type", is("https://multitenancy.com/errors/tenant-error")))
+                    .andExpect(jsonPath("$.title", is("Invalid Tenant")))
+                    .andExpect(jsonPath("$.status", is(403)))
+                    .andExpect(jsonPath("$.detail", is("Unknown Database tenant")))
+                    .andExpect(jsonPath("$.instance", is("/api/customers/secondary")));
         }
     }
 
@@ -103,14 +120,14 @@ class ErrorHandlingIT extends AbstractIntegrationTest {
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(invalidCustomer)))
                     .andExpect(status().isBadRequest())
-                    .andExpect(header().string("Content-Type", "application/problem+json"))
-                    .andExpect(jsonPath("$.type").value("about:blank"))
-                    .andExpect(jsonPath("$.title").value("Constraint Violation"))
+                    .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
+                    .andExpect(jsonPath("$.type", is("https://multitenancy.com/errors/validation-error")))
+                    .andExpect(jsonPath("$.title", is("Constraint Violation")))
                     .andExpect(jsonPath("$.status").value(400))
                     .andExpect(jsonPath("$.detail").value("Invalid request content."))
-                    .andExpect(jsonPath("$.violations").isArray())
-                    .andExpect(jsonPath("$.violations[0].field").value("text"))
-                    .andExpect(jsonPath("$.violations[0].message").value("Text cannot be blank"));
+                    .andExpect(jsonPath("$.properties.violations").isArray())
+                    .andExpect(jsonPath("$.properties.violations[0].field").value("text"))
+                    .andExpect(jsonPath("$.properties.violations[0].message").value("Text cannot be blank"));
         }
 
         @Test
@@ -125,14 +142,14 @@ class ErrorHandlingIT extends AbstractIntegrationTest {
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(invalidCustomer)))
                     .andExpect(status().isBadRequest())
-                    .andExpect(header().string("Content-Type", "application/problem+json"))
-                    .andExpect(jsonPath("$.type").value("about:blank"))
-                    .andExpect(jsonPath("$.title").value("Constraint Violation"))
+                    .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
+                    .andExpect(jsonPath("$.type", is("https://multitenancy.com/errors/validation-error")))
+                    .andExpect(jsonPath("$.title", is("Constraint Violation")))
                     .andExpect(jsonPath("$.status").value(400))
                     .andExpect(jsonPath("$.detail").value("Invalid request content."))
-                    .andExpect(jsonPath("$.violations").isArray())
-                    .andExpect(jsonPath("$.violations[0].field").value("name"))
-                    .andExpect(jsonPath("$.violations[0].message").value("Name cannot be blank"));
+                    .andExpect(jsonPath("$.properties.violations").isArray())
+                    .andExpect(jsonPath("$.properties.violations[0].field").value("name"))
+                    .andExpect(jsonPath("$.properties.violations[0].message").value("Name cannot be blank"));
         }
 
         @Test
@@ -147,9 +164,9 @@ class ErrorHandlingIT extends AbstractIntegrationTest {
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(nullTextCustomer)))
                     .andExpect(status().isBadRequest())
-                    .andExpect(header().string("Content-Type", "application/problem+json"))
-                    .andExpect(jsonPath("$.violations[0].field").value("text"))
-                    .andExpect(jsonPath("$.violations[0].message").value("Text cannot be blank"));
+                    .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
+                    .andExpect(jsonPath("$.properties.violations[0].field").value("text"))
+                    .andExpect(jsonPath("$.properties.violations[0].message").value("Text cannot be blank"));
 
             // Given
             SecondaryCustomer nullNameCustomer = new SecondaryCustomer().setName(null);
@@ -160,9 +177,9 @@ class ErrorHandlingIT extends AbstractIntegrationTest {
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(nullNameCustomer)))
                     .andExpect(status().isBadRequest())
-                    .andExpect(header().string("Content-Type", "application/problem+json"))
-                    .andExpect(jsonPath("$.violations[0].field").value("name"))
-                    .andExpect(jsonPath("$.violations[0].message").value("Name cannot be blank"));
+                    .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
+                    .andExpect(jsonPath("$.properties.violations[0].field").value("name"))
+                    .andExpect(jsonPath("$.properties.violations[0].message").value("Name cannot be blank"));
         }
 
         @Test
@@ -177,9 +194,9 @@ class ErrorHandlingIT extends AbstractIntegrationTest {
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(whitespaceCustomer)))
                     .andExpect(status().isBadRequest())
-                    .andExpect(header().string("Content-Type", "application/problem+json"))
-                    .andExpect(jsonPath("$.violations[0].field").value("text"))
-                    .andExpect(jsonPath("$.violations[0].message").value("Text cannot be blank"));
+                    .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
+                    .andExpect(jsonPath("$.properties.violations[0].field").value("text"))
+                    .andExpect(jsonPath("$.properties.violations[0].message").value("Text cannot be blank"));
 
             // Given
             SecondaryCustomer whitespaceSecondaryCustomer = new SecondaryCustomer().setName("   ");
@@ -190,9 +207,9 @@ class ErrorHandlingIT extends AbstractIntegrationTest {
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(whitespaceSecondaryCustomer)))
                     .andExpect(status().isBadRequest())
-                    .andExpect(header().string("Content-Type", "application/problem+json"))
-                    .andExpect(jsonPath("$.violations[0].field").value("name"))
-                    .andExpect(jsonPath("$.violations[0].message").value("Name cannot be blank"));
+                    .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
+                    .andExpect(jsonPath("$.properties.violations[0].field").value("name"))
+                    .andExpect(jsonPath("$.properties.violations[0].message").value("Name cannot be blank"));
         }
     }
 
