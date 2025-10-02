@@ -30,7 +30,8 @@ public class TenantInterceptor implements HandlerInterceptor {
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
             throws IOException {
         var tenant = request.getParameter("tenant");
-        if (request.getRequestURI().startsWith("/api/")) {
+        String path = request.getRequestURI().substring(request.getContextPath().length());
+        if (path.startsWith("/api/")) {
             if (!StringUtils.hasText(tenant)) {
                 ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
                         HttpStatus.BAD_REQUEST, "Required parameter 'tenant' is not present.");
