@@ -1,5 +1,6 @@
 package com.example.plugin.strategyplugin;
 
+import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.example.plugin.strategyplugin.common.AbstractIntegrationTest;
@@ -13,7 +14,6 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.UUID;
-import org.awaitility.Awaitility;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
@@ -35,8 +35,6 @@ class LokiPushIntegrationTest extends AbstractIntegrationTest {
 
         // Call the application's /fetch endpoint with a unique type value to generate identifiable
         // logs.
-        // We intentionally ignore the HTTP status (could be 200 or 400) because the controller logs
-        // the incoming request in both cases and that log entry is what we verify in Loki.
         for (int i = 0; i < 5; i++) {
             this.mockMvcTester
                     .get()
@@ -48,13 +46,8 @@ class LokiPushIntegrationTest extends AbstractIntegrationTest {
         }
 
         // Build base URL for Loki queries from configured push URI
-        String base;
-        if (lokiPushUri.contains("/loki/api/v1/push")) {
-            base = lokiPushUri.substring(0, lokiPushUri.indexOf("/loki/api/v1/push"));
-        } else {
-            int idx = lokiPushUri.indexOf("/loki");
-            base = idx > 0 ? lokiPushUri.substring(0, idx) : lokiPushUri;
-        }
+        URI pushUri = URI.create(lokiPushUri);
+        String base = pushUri.getScheme() + "://" + pushUri.getAuthority();
 
         long startNs = (Instant.now().minusSeconds(60).toEpochMilli()) * 1_000_000L;
         long endNs = (Instant.now().plusSeconds(60).toEpochMilli()) * 1_000_000L;
@@ -68,8 +61,7 @@ class LokiPushIntegrationTest extends AbstractIntegrationTest {
                     String.format("{} |= \"%s\"", unique)
                 };
 
-        Awaitility.await()
-                .atMost(Duration.ofSeconds(60))
+        await().atMost(Duration.ofSeconds(60))
                 .pollInterval(Duration.ofSeconds(2))
                 .untilAsserted(
                         () -> {
