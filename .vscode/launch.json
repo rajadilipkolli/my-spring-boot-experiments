@@ -292,6 +292,16 @@
             "projectName": "boot-scheduler-quartz",
             "args": "--spring.profiles.active=local",
             "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-StrategyPluginApplication<boot-strategy-plugin>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.example.plugin.strategyplugin.StrategyPluginApplication",
+            "projectName": "boot-strategy-plugin",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
         }
     ]
 }

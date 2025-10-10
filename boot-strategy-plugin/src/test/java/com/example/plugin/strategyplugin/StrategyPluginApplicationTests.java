@@ -5,7 +5,6 @@ import static org.awaitility.Awaitility.await;
 
 import com.example.plugin.strategyplugin.common.AbstractIntegrationTest;
 import com.example.plugin.strategyplugin.domain.GenericDTO;
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -14,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 import org.springframework.web.client.RestClient;
+import tools.jackson.databind.JsonNode;
 
 class StrategyPluginApplicationTests extends AbstractIntegrationTest {
 
