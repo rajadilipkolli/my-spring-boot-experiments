@@ -15,7 +15,7 @@
     <description>Redis Implementation in Spring Boot</description>
 
     <properties>
-        <java.version>24</java.version>
+        <java.version>25</java.version>
         <spotless.version>3.0.0</spotless.version>
         <commons-io.version>2.20.0</commons-io.version>
         <springdoc-openapi.version>2.8.13</springdoc-openapi.version>
