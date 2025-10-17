@@ -22,7 +22,7 @@ jobs:
         working-directory: boot-rest-docs-sample
     strategy:
       matrix:
-        distribution: [ 'microsoft' ]
+        distribution: [ 'temurin' ]
         java: [ '25' ]
     steps:
       - uses: actions/checkout@v5
