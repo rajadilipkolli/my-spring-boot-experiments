@@ -80,42 +80,53 @@ public class SearchCriteria<T> implements ISearchCriteria<T> {
 
             // Switch for building predicates
             return switch (getQueryOperator()) {
-                case EQ -> combinePredicates(
-                        typedValues, value -> criteriaBuilder.equal(root.get(getField()), value), criteriaBuilder::and);
-                case NE -> combinePredicates(
-                        typedValues,
-                        value -> criteriaBuilder.notEqual(root.get(getField()), value),
-                        criteriaBuilder::and);
-                case GT -> combinePredicates(
-                        typedValues,
-                        value -> criteriaBuilder.greaterThan(root.get(getField()), (Comparable) value),
-                        criteriaBuilder::and);
-                case LT -> combinePredicates(
-                        typedValues,
-                        value -> criteriaBuilder.lessThan(root.get(getField()), (Comparable) value),
-                        criteriaBuilder::and);
-                case GTE -> combinePredicates(
-                        typedValues,
-                        value -> criteriaBuilder.greaterThanOrEqualTo(root.get(getField()), (Comparable) value),
-                        criteriaBuilder::and);
-                case LTE -> combinePredicates(
-                        typedValues,
-                        value -> criteriaBuilder.lessThanOrEqualTo(root.get(getField()), (Comparable) value),
-                        criteriaBuilder::and);
-                case LIKE, CONTAINS -> combinePredicates(
-                        typedValues,
-                        value -> criteriaBuilder.like(
-                                criteriaBuilder.lower(root.get(getField())),
-                                "%" + value.toString().toLowerCase() + "%"),
-                        criteriaBuilder::or);
-                case STARTS_WITH -> combinePredicates(
-                        typedValues,
-                        value -> criteriaBuilder.like(root.get(getField()), value + "%"),
-                        criteriaBuilder::and);
-                case ENDS_WITH -> combinePredicates(
-                        typedValues,
-                        value -> criteriaBuilder.like(root.get(getField()), "%" + value),
-                        criteriaBuilder::and);
+                case EQ ->
+                    combinePredicates(
+                            typedValues,
+                            value -> criteriaBuilder.equal(root.get(getField()), value),
+                            criteriaBuilder::and);
+                case NE ->
+                    combinePredicates(
+                            typedValues,
+                            value -> criteriaBuilder.notEqual(root.get(getField()), value),
+                            criteriaBuilder::and);
+                case GT ->
+                    combinePredicates(
+                            typedValues,
+                            value -> criteriaBuilder.greaterThan(root.get(getField()), (Comparable) value),
+                            criteriaBuilder::and);
+                case LT ->
+                    combinePredicates(
+                            typedValues,
+                            value -> criteriaBuilder.lessThan(root.get(getField()), (Comparable) value),
+                            criteriaBuilder::and);
+                case GTE ->
+                    combinePredicates(
+                            typedValues,
+                            value -> criteriaBuilder.greaterThanOrEqualTo(root.get(getField()), (Comparable) value),
+                            criteriaBuilder::and);
+                case LTE ->
+                    combinePredicates(
+                            typedValues,
+                            value -> criteriaBuilder.lessThanOrEqualTo(root.get(getField()), (Comparable) value),
+                            criteriaBuilder::and);
+                case LIKE, CONTAINS ->
+                    combinePredicates(
+                            typedValues,
+                            value -> criteriaBuilder.like(
+                                    criteriaBuilder.lower(root.get(getField())),
+                                    "%" + value.toString().toLowerCase() + "%"),
+                            criteriaBuilder::or);
+                case STARTS_WITH ->
+                    combinePredicates(
+                            typedValues,
+                            value -> criteriaBuilder.like(root.get(getField()), value + "%"),
+                            criteriaBuilder::and);
+                case ENDS_WITH ->
+                    combinePredicates(
+                            typedValues,
+                            value -> criteriaBuilder.like(root.get(getField()), "%" + value),
+                            criteriaBuilder::and);
                 case BETWEEN -> {
                     if (typedValues.size() != 2) {
                         throw new IllegalArgumentException("BETWEEN operator requires exactly two values");

@@ -15,7 +15,7 @@
     <description>Demo project for Spring Boot Grafana LGTM</description>
 
     <properties>
-        <java.version>21</java.version>
+        <java.version>25</java.version>
         <spotless.version>3.0.0</spotless.version>
     </properties>
 

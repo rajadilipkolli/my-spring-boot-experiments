@@ -14,9 +14,9 @@
     <version>0.0.1-SNAPSHOT</version>
 
     <properties>
-        <java.version>21</java.version>
-        <maven.compiler.source>21</maven.compiler.source>
-        <maven.compiler.target>21</maven.compiler.target>
+        <java.version>25</java.version>
+        <maven.compiler.source>25</maven.compiler.source>
+        <maven.compiler.target>25</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <spring-cloud.version>2025.0.0</spring-cloud.version>
         <openapi-generator.version>7.16.0</openapi-generator.version>
