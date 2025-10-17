@@ -15,7 +15,7 @@
     <description>Save and fetch json data in db using reactive postgresql</description>
 
     <properties>
-        <java.version>21</java.version>
+        <java.version>25</java.version>
         <spotless.version>3.0.0</spotless.version>
         <!-- test properties -->
         <jacoco-maven-plugin.version>0.8.14</jacoco-maven-plugin.version>

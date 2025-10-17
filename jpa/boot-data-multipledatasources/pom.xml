@@ -15,7 +15,7 @@
     <description>Demo project for using multiple datasource's in a Spring Boot Application</description>
 
     <properties>
-        <java.version>21</java.version>
+        <java.version>25</java.version>
 
         <spotless.version>3.0.0</spotless.version>
         <springdoc-openapi.version>2.8.13</springdoc-openapi.version>
@@ -214,7 +214,7 @@
                 <configuration>
                     <java>
                         <palantirJavaFormat>
-                            <version>2.58.0</version>
+                            <version>2.74.0</version>
                         </palantirJavaFormat>
                         <importOrder />
                         <removeUnusedImports />
