@@ -44,10 +44,15 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     ProblemDetail onException(Exception exception) {
         if (exception instanceof RestControllerException restControllerException) {
-            return ProblemDetail.forStatusAndDetail(
+            ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
                     restControllerException.getHttpStatus(), restControllerException.getMessage());
+            problemDetail.setType(URI.create("https://api.graphql-webmvc.com/errors/not-found"));
+            return problemDetail;
         } else {
-            return ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(500), exception.getMessage());
+            ProblemDetail problemDetail =
+                    ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(500), exception.getMessage());
+            problemDetail.setType(URI.create("https://api.graphql-webmvc.com/errors/internal-server-error"));
+            return problemDetail;
         }
     }
 
