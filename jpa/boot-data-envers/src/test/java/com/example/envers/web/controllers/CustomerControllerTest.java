@@ -23,7 +23,6 @@ import com.example.envers.model.request.CustomerRequest;
 import com.example.envers.model.response.CustomerResponse;
 import com.example.envers.model.response.PagedResult;
 import com.example.envers.services.CustomerService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -40,6 +39,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import tools.jackson.databind.ObjectMapper;
 
 @WebMvcTest(controllers = CustomerController.class)
 @ActiveProfiles(PROFILE_TEST)
@@ -108,7 +108,7 @@ class CustomerControllerTest {
             mockMvc.perform(get("/api/customers/{id}", customerId))
                     .andExpect(status().isNotFound())
                     .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
-                    .andExpect(jsonPath("$.type", is("http://api.boot-data-envers.com/errors/not-found")))
+                    .andExpect(jsonPath("$.type", is("https://api.boot-data-envers.com/errors/not-found")))
                     .andExpect(jsonPath("$.title", is("Not Found")))
                     .andExpect(jsonPath("$.status", is(404)))
                     .andExpect(jsonPath("$.detail").value("Customer with Id '%d' not found".formatted(customerId)));
@@ -143,15 +143,15 @@ class CustomerControllerTest {
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(customerRequest)))
                     .andExpect(status().isBadRequest())
-                    .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is("application/problem+json")))
-                    .andExpect(jsonPath("$.type", is("about:blank")))
+                    .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
+                    .andExpect(jsonPath("$.type", is("https://api.boot-data-envers.com/errors/validation")))
                     .andExpect(jsonPath("$.title", is("Constraint Violation")))
                     .andExpect(jsonPath("$.status", is(400)))
                     .andExpect(jsonPath("$.detail", is("Invalid request content.")))
                     .andExpect(jsonPath("$.instance", is("/api/customers")))
-                    .andExpect(jsonPath("$.violations", hasSize(1)))
-                    .andExpect(jsonPath("$.violations[0].field", is("name")))
-                    .andExpect(jsonPath("$.violations[0].message", is("Name cannot be empty")))
+                    .andExpect(jsonPath("$.properties.violations", hasSize(1)))
+                    .andExpect(jsonPath("$.properties.violations[0].field", is("name")))
+                    .andExpect(jsonPath("$.properties.violations[0].message", is("Name cannot be empty")))
                     .andReturn();
         }
     }
@@ -188,7 +188,7 @@ class CustomerControllerTest {
                             .content(objectMapper.writeValueAsString(customerRequest)))
                     .andExpect(status().isNotFound())
                     .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
-                    .andExpect(jsonPath("$.type", is("http://api.boot-data-envers.com/errors/not-found")))
+                    .andExpect(jsonPath("$.type", is("https://api.boot-data-envers.com/errors/not-found")))
                     .andExpect(jsonPath("$.title", is("Not Found")))
                     .andExpect(jsonPath("$.status", is(404)))
                     .andExpect(jsonPath("$.detail").value("Customer with Id '%d' not found".formatted(customerId)));
@@ -218,7 +218,7 @@ class CustomerControllerTest {
 
             mockMvc.perform(delete("/api/customers/{id}", customerId))
                     .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
-                    .andExpect(jsonPath("$.type", is("http://api.boot-data-envers.com/errors/not-found")))
+                    .andExpect(jsonPath("$.type", is("https://api.boot-data-envers.com/errors/not-found")))
                     .andExpect(jsonPath("$.title", is("Not Found")))
                     .andExpect(jsonPath("$.status", is(404)))
                     .andExpect(jsonPath("$.detail").value("Customer with Id '%d' not found".formatted(customerId)));
