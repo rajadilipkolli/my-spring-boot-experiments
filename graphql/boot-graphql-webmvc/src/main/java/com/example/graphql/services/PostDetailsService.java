@@ -17,23 +17,23 @@ import org.springframework.transaction.annotation.Transactional;
 public class PostDetailsService {
 
     private final PostDetailsRepository postDetailsRepository;
-    private final ConversionService myConversionService;
+    private final ConversionService appConversionService;
 
-    public PostDetailsService(PostDetailsRepository postDetailsRepository, ConversionService myConversionService) {
+    public PostDetailsService(PostDetailsRepository postDetailsRepository, ConversionService appConversionService) {
         this.postDetailsRepository = postDetailsRepository;
-        this.myConversionService = myConversionService;
+        this.appConversionService = appConversionService;
     }
 
     public List<PostDetailsResponse> findAllPostDetails() {
         return postDetailsRepository.findAllDetails().stream()
-                .map(postDetailsInfo -> myConversionService.convert(postDetailsInfo, PostDetailsResponse.class))
+                .map(postDetailsInfo -> appConversionService.convert(postDetailsInfo, PostDetailsResponse.class))
                 .toList();
     }
 
     public Optional<PostDetailsResponse> findPostDetailsById(Long id) {
         return postDetailsRepository
                 .findByDetailsId(id)
-                .map(postDetailsInfo -> myConversionService.convert(postDetailsInfo, PostDetailsResponse.class));
+                .map(postDetailsInfo -> appConversionService.convert(postDetailsInfo, PostDetailsResponse.class));
     }
 
     public Optional<PostDetailsEntity> findDetailsById(Long id) {

@@ -11,7 +11,7 @@ import org.springframework.core.convert.converter.Converter;
 @Mapper(config = MapperSpringConfig.class)
 public interface PostEntityToPostResponse extends Converter<PostEntity, PostResponse> {
 
-    PostResponse covert(PostEntity postEntity);
+    PostResponse convert(PostEntity postEntity);
 
     @Mapping(target = "tagName", source = "tagEntity.tagName")
     TagResponse postTagEntityToTagResponse(PostTagEntity postTagEntity);
