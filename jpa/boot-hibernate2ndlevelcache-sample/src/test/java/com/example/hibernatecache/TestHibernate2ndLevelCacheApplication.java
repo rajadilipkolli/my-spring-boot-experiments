@@ -5,7 +5,7 @@ import org.springframework.boot.SpringApplication;
 
 public class TestHibernate2ndLevelCacheApplication {
 
-    public static void main(String[] args) {
+    static void main(String[] args) {
         SpringApplication.from(Hibernate2ndLevelCacheApplication::main)
                 .with(ContainersConfig.class)
                 .withAdditionalProfiles("local")

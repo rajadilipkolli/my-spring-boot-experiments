@@ -23,7 +23,6 @@ import com.example.hibernatecache.model.request.OrderItemRequest;
 import com.example.hibernatecache.model.response.OrderItemResponse;
 import com.example.hibernatecache.model.response.PagedResult;
 import com.example.hibernatecache.services.OrderItemService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -39,6 +38,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import tools.jackson.databind.ObjectMapper;
 
 @WebMvcTest(controllers = OrderItemController.class)
 @ActiveProfiles(PROFILE_TEST)
@@ -131,7 +131,8 @@ class OrderItemControllerTest {
                 .perform(get("/api/order/items/{id}", orderItemId))
                 .andExpect(status().isNotFound())
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
-                .andExpect(jsonPath("$.type", is("http://api.boot-hibernate2ndlevelcache-sample.com/errors/not-found")))
+                .andExpect(
+                        jsonPath("$.type", is("https://api.boot-hibernate2ndlevelcache-sample.com/errors/not-found")))
                 .andExpect(jsonPath("$.title", is("Not Found")))
                 .andExpect(jsonPath("$.status", is(404)))
                 .andExpect(jsonPath("$.detail").value("OrderItem with Id '%d' not found".formatted(orderItemId)));
@@ -148,14 +149,15 @@ class OrderItemControllerTest {
                         .content(objectMapper.writeValueAsString(orderItemRequest)))
                 .andExpect(status().isBadRequest())
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
-                .andExpect(jsonPath("$.type", is("about:blank")))
+                .andExpect(
+                        jsonPath("$.type", is("https://api.boot-hibernate2ndlevelcache-sample.com/errors/validation")))
                 .andExpect(jsonPath("$.title", is("Constraint Violation")))
                 .andExpect(jsonPath("$.status", is(400)))
                 .andExpect(jsonPath("$.detail", is("Invalid request content.")))
                 .andExpect(jsonPath("$.instance", is("/api/order/items/1")))
-                .andExpect(jsonPath("$.violations", hasSize(1)))
-                .andExpect(jsonPath("$.violations[0].field", is("price")))
-                .andExpect(jsonPath("$.violations[0].message", is("Price must be greater than zero")));
+                .andExpect(jsonPath("$.properties.violations", hasSize(1)))
+                .andExpect(jsonPath("$.properties.violations[0].field", is("price")))
+                .andExpect(jsonPath("$.properties.violations[0].message", is("Price must be greater than zero")));
     }
 
     @Test
@@ -188,13 +190,15 @@ class OrderItemControllerTest {
                         .content(objectMapper.writeValueAsString(orderItemRequest)))
                 .andExpect(status().isBadRequest())
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
-                .andExpect(jsonPath("$.type", is("about:blank")))
+                .andExpect(
+                        jsonPath("$.type", is("https://api.boot-hibernate2ndlevelcache-sample.com/errors/validation")))
                 .andExpect(jsonPath("$.title", is("Constraint Violation")))
                 .andExpect(jsonPath("$.status", is(400)))
-                .andExpect(jsonPath("$.violations", hasSize(3)))
-                .andExpect(jsonPath("$.violations[*].field", containsInAnyOrder("price", "quantity", "itemCode")))
+                .andExpect(jsonPath("$.properties.violations", hasSize(3)))
                 .andExpect(jsonPath(
-                        "$.violations[*].message",
+                        "$.properties.violations[*].field", containsInAnyOrder("price", "quantity", "itemCode")))
+                .andExpect(jsonPath(
+                        "$.properties.violations[*].message",
                         containsInAnyOrder(
                                 "Price must be greater than zero",
                                 "Quantity must be positive",
@@ -225,7 +229,8 @@ class OrderItemControllerTest {
         this.mockMvc
                 .perform(delete("/api/order/items/{id}", orderItemId))
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
-                .andExpect(jsonPath("$.type", is("http://api.boot-hibernate2ndlevelcache-sample.com/errors/not-found")))
+                .andExpect(
+                        jsonPath("$.type", is("https://api.boot-hibernate2ndlevelcache-sample.com/errors/not-found")))
                 .andExpect(jsonPath("$.title", is("Not Found")))
                 .andExpect(jsonPath("$.status", is(404)))
                 .andExpect(jsonPath("$.detail").value("OrderItem with Id '%d' not found".formatted(orderItemId)));

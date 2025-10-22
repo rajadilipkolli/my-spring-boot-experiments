@@ -118,7 +118,8 @@ class OrderItemControllerIT extends AbstractIntegrationTest {
                         .content(objectMapper.writeValueAsString(orderItemRequest)))
                 .andExpect(status().isNotFound())
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
-                .andExpect(jsonPath("$.type", is("http://api.boot-hibernate2ndlevelcache-sample.com/errors/not-found")))
+                .andExpect(
+                        jsonPath("$.type", is("https://api.boot-hibernate2ndlevelcache-sample.com/errors/not-found")))
                 .andExpect(jsonPath("$.title", is("Not Found")))
                 .andExpect(jsonPath("$.status", is(404)))
                 .andExpect(jsonPath("$.detail").value("OrderItem with Id '%d' not found".formatted(orderItemId)));

@@ -28,7 +28,6 @@ import com.example.hibernatecache.model.response.OrderResponse;
 import com.example.hibernatecache.model.response.PagedResult;
 import com.example.hibernatecache.services.OrderItemService;
 import com.example.hibernatecache.services.OrderService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -44,6 +43,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import tools.jackson.databind.ObjectMapper;
 
 @WebMvcTest(controllers = OrderController.class)
 @ActiveProfiles(PROFILE_TEST)
@@ -138,7 +138,8 @@ class OrderControllerTest {
                 .perform(get("/api/orders/{id}", orderId))
                 .andExpect(status().isNotFound())
                 .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
-                .andExpect(jsonPath("$.type", is("http://api.boot-hibernate2ndlevelcache-sample.com/errors/not-found")))
+                .andExpect(
+                        jsonPath("$.type", is("https://api.boot-hibernate2ndlevelcache-sample.com/errors/not-found")))
                 .andExpect(jsonPath("$.title", is("Not Found")))
                 .andExpect(jsonPath("$.status", is(404)))
                 .andExpect(jsonPath("$.detail").value("Order with Id '%d' not found".formatted(orderId)));
@@ -170,17 +171,18 @@ class OrderControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(orderRequest)))
                 .andExpect(status().isBadRequest())
-                .andExpect(header().string("Content-Type", is("application/problem+json")))
-                .andExpect(jsonPath("$.type", is("about:blank")))
+                .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
+                .andExpect(
+                        jsonPath("$.type", is("https://api.boot-hibernate2ndlevelcache-sample.com/errors/validation")))
                 .andExpect(jsonPath("$.title", is("Constraint Violation")))
                 .andExpect(jsonPath("$.status", is(400)))
                 .andExpect(jsonPath("$.detail", is("Invalid request content.")))
                 .andExpect(jsonPath("$.instance", is("/api/orders")))
-                .andExpect(jsonPath("$.violations", hasSize(2)))
-                .andExpect(jsonPath("$.violations[0].field", is("name")))
-                .andExpect(jsonPath("$.violations[0].message", is("Name cannot be blank")))
-                .andExpect(jsonPath("$.violations[1].field", is("orderItems")))
-                .andExpect(jsonPath("$.violations[1].message", is("OrderItems are required")))
+                .andExpect(jsonPath("$.properties.violations", hasSize(2)))
+                .andExpect(jsonPath("$.properties.violations[0].field", is("name")))
+                .andExpect(jsonPath("$.properties.violations[0].message", is("Name cannot be blank")))
+                .andExpect(jsonPath("$.properties.violations[1].field", is("orderItems")))
+                .andExpect(jsonPath("$.properties.violations[1].message", is("OrderItems are required")))
                 .andReturn();
     }
 
@@ -194,11 +196,11 @@ class OrderControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(orderRequest)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.violations", hasSize(2)))
-                .andExpect(jsonPath("$.violations[0].field", is("orderItems[0].price")))
-                .andExpect(jsonPath("$.violations[0].message", is("Price must be greater than zero")))
-                .andExpect(jsonPath("$.violations[1].field", is("orderItems[0].quantity")))
-                .andExpect(jsonPath("$.violations[1].message", is("Quantity must be positive")));
+                .andExpect(jsonPath("$.properties.violations", hasSize(2)))
+                .andExpect(jsonPath("$.properties.violations[0].field", is("orderItems[0].price")))
+                .andExpect(jsonPath("$.properties.violations[0].message", is("Price must be greater than zero")))
+                .andExpect(jsonPath("$.properties.violations[1].field", is("orderItems[0].quantity")))
+                .andExpect(jsonPath("$.properties.violations[1].message", is("Quantity must be positive")));
     }
 
     @Test
@@ -236,7 +238,8 @@ class OrderControllerTest {
                         .content(objectMapper.writeValueAsString(orderRequest)))
                 .andExpect(status().isNotFound())
                 .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
-                .andExpect(jsonPath("$.type", is("http://api.boot-hibernate2ndlevelcache-sample.com/errors/not-found")))
+                .andExpect(
+                        jsonPath("$.type", is("https://api.boot-hibernate2ndlevelcache-sample.com/errors/not-found")))
                 .andExpect(jsonPath("$.title", is("Not Found")))
                 .andExpect(jsonPath("$.status", is(404)))
                 .andExpect(jsonPath("$.detail").value("Order with Id '%d' not found".formatted(orderId)));
@@ -264,7 +267,8 @@ class OrderControllerTest {
         this.mockMvc
                 .perform(delete("/api/orders/{id}", orderId))
                 .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
-                .andExpect(jsonPath("$.type", is("http://api.boot-hibernate2ndlevelcache-sample.com/errors/not-found")))
+                .andExpect(
+                        jsonPath("$.type", is("https://api.boot-hibernate2ndlevelcache-sample.com/errors/not-found")))
                 .andExpect(jsonPath("$.title", is("Not Found")))
                 .andExpect(jsonPath("$.status", is(404)))
                 .andExpect(jsonPath("$.detail").value("Order with Id '%d' not found".formatted(orderId)));
