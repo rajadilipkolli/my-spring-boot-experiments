@@ -17,7 +17,7 @@ public class ContainersConfiguration {
 
     @Bean
     MySQLContainer<?> mySQLContainer() {
-        return new MySQLContainer<>(DockerImageName.parse("mysql").withTag("9.2"));
+        return new MySQLContainer<>(DockerImageName.parse("mysql").withTag("9.5"));
     }
 
     @Bean
