@@ -3,6 +3,7 @@ package com.example.graphql.services;
 import com.example.graphql.config.logging.Loggable;
 import com.example.graphql.entities.PostDetailsEntity;
 import com.example.graphql.model.request.PostDetailsRequest;
+import com.example.graphql.model.response.PostDetailsResponse;
 import com.example.graphql.projections.PostDetailsInfo;
 import com.example.graphql.repositories.PostDetailsRepository;
 import java.util.List;
@@ -21,12 +22,14 @@ public class PostDetailsService {
         this.postDetailsRepository = postDetailsRepository;
     }
 
-    public List<PostDetailsInfo> findAllPostDetails() {
-        return postDetailsRepository.findAllDetails();
+    public List<PostDetailsResponse> findAllPostDetails() {
+        return postDetailsRepository.findAllDetails().stream()
+                .map(this::toResponse)
+                .toList();
     }
 
-    public Optional<PostDetailsInfo> findPostDetailsById(Long id) {
-        return postDetailsRepository.findByDetailsId(id);
+    public Optional<PostDetailsResponse> findPostDetailsById(Long id) {
+        return postDetailsRepository.findByDetailsId(id).map(this::toResponse);
     }
 
     public Optional<PostDetailsEntity> findDetailsById(Long id) {
@@ -34,10 +37,15 @@ public class PostDetailsService {
     }
 
     @Transactional
-    public Optional<PostDetailsInfo> updatePostDetails(
+    public Optional<PostDetailsResponse> updatePostDetails(
             PostDetailsEntity postDetailsObj, PostDetailsRequest postDetailsRequest) {
         postDetailsObj.setDetailsKey(postDetailsRequest.detailsKey());
         PostDetailsEntity persistedDetails = postDetailsRepository.save(postDetailsObj);
         return findPostDetailsById(persistedDetails.getId());
+    }
+
+    private PostDetailsResponse toResponse(PostDetailsInfo info) {
+        // PostDetailsInfo projection may not expose createdAt/createdBy exactly; adapt as needed
+        return new PostDetailsResponse(info.getDetailsKey(), info.getCreatedAt(), info.getCreatedBy());
     }
 }

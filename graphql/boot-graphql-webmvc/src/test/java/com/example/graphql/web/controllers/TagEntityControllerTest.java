@@ -125,6 +125,8 @@ class TagEntityControllerTest {
                 .andExpect(jsonPath("$.properties.violations", hasSize(1)))
                 .andExpect(jsonPath("$.properties.violations[0].field", is("tagName")))
                 .andExpect(jsonPath("$.properties.violations[0].message", is("TagName must not be blank")))
+                .andExpect(jsonPath("$.properties.violations[0].object", is("tagsRequest")))
+                .andExpect(jsonPath("$.properties.violations[0].rejectedValue").exists())
                 .andReturn();
     }
 
