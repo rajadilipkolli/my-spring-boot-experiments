@@ -1,9 +1,0 @@
-package com.example.graphql.mapper;
-
-import com.example.graphql.entities.PostDetailsEntity;
-import com.example.graphql.model.response.PostDetailsResponse;
-import org.mapstruct.Mapper;
-import org.springframework.core.convert.converter.Converter;
-
-@Mapper(config = MapperSpringConfig.class)
-public interface PostDetailsEntityToResponseMapper extends Converter<PostDetailsEntity, PostDetailsResponse> {}
