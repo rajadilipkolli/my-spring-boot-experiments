@@ -19,7 +19,6 @@ import com.example.graphql.model.request.NewPostRequest;
 import com.example.graphql.model.request.PostDetailsRequest;
 import com.example.graphql.model.response.PostResponse;
 import com.example.graphql.services.PostService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -32,6 +31,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import tools.jackson.databind.ObjectMapper;
 
 @WebMvcTest(controllers = PostController.class)
 @ActiveProfiles(PROFILE_TEST)
