@@ -10,9 +10,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.example.graphql.entities.PostDetailsEntity;
 import com.example.graphql.model.request.PostDetailsRequest;
-import com.example.graphql.projections.PostDetailsInfo;
+import com.example.graphql.model.response.PostDetailsResponse;
 import com.example.graphql.services.PostDetailsService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +24,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import tools.jackson.databind.ObjectMapper;
 
 @WebMvcTest(controllers = PostDetailsController.class)
 @ActiveProfiles(PROFILE_TEST)
@@ -109,37 +109,7 @@ class PostDetailsEntityControllerTest {
                 .andExpect(status().isNotFound());
     }
 
-    private PostDetailsInfo getPostDetails() {
-        return new PostDetailsInfo() {
-            @Override
-            public Long getId() {
-                return 10L;
-            }
-
-            @Override
-            public String getDetailsKey() {
-                return "junitDetailsKey";
-            }
-
-            @Override
-            public String getCreatedBy() {
-                return "junit";
-            }
-
-            @Override
-            public LocalDateTime getCreatedAt() {
-                return LocalDateTime.now();
-            }
-
-            @Override
-            public LocalDateTime getModifiedAt() {
-                return LocalDateTime.now();
-            }
-
-            @Override
-            public Long postId() {
-                return 1L;
-            }
-        };
+    private PostDetailsResponse getPostDetails() {
+        return new PostDetailsResponse("junitDetailsKey", LocalDateTime.now(), "junit");
     }
 }

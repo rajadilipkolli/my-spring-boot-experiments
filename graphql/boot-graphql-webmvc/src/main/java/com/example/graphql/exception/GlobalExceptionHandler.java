@@ -1,5 +1,6 @@
 package com.example.graphql.exception;
 
+import java.net.URI;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -24,6 +25,7 @@ public class GlobalExceptionHandler {
         ProblemDetail problemDetail =
                 ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(400), "Invalid request content.");
         problemDetail.setTitle("Constraint Violation");
+        problemDetail.setType(URI.create("https://api.graphql-webmvc.com/errors/validation"));
         List<ApiValidationError> validationErrorsList = methodArgumentNotValidException.getAllErrors().stream()
                 .map(objectError -> {
                     FieldError fieldError = (FieldError) objectError;
@@ -42,10 +44,15 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     ProblemDetail onException(Exception exception) {
         if (exception instanceof RestControllerException restControllerException) {
-            return ProblemDetail.forStatusAndDetail(
+            ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
                     restControllerException.getHttpStatus(), restControllerException.getMessage());
+            problemDetail.setType(URI.create("https://api.graphql-webmvc.com/errors/not-found"));
+            return problemDetail;
         } else {
-            return ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(500), exception.getMessage());
+            ProblemDetail problemDetail =
+                    ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(500), exception.getMessage());
+            problemDetail.setType(URI.create("https://api.graphql-webmvc.com/errors/internal-server-error"));
+            return problemDetail;
         }
     }
 

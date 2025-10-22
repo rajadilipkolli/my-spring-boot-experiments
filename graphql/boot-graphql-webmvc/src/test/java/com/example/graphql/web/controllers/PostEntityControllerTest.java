@@ -19,7 +19,6 @@ import com.example.graphql.model.request.NewPostRequest;
 import com.example.graphql.model.request.PostDetailsRequest;
 import com.example.graphql.model.response.PostResponse;
 import com.example.graphql.services.PostService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -32,6 +31,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import tools.jackson.databind.ObjectMapper;
 
 @WebMvcTest(controllers = PostController.class)
 @ActiveProfiles(PROFILE_TEST)
@@ -92,7 +92,7 @@ class PostEntityControllerTest {
                 .perform(get("/api/posts/{id}", postId))
                 .andExpect(status().isNotFound())
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
-                .andExpect(jsonPath("$.type", is("about:blank")))
+                .andExpect(jsonPath("$.type", is("https://api.graphql-webmvc.com/errors/not-found")))
                 .andExpect(jsonPath("$.title", is("Not Found")))
                 .andExpect(jsonPath("$.status", is(404)))
                 .andExpect(jsonPath("$.detail", is("Post: 1 was not found.")))
@@ -127,17 +127,17 @@ class PostEntityControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(post)))
                 .andExpect(status().isBadRequest())
-                .andExpect(header().string("Content-Type", is("application/problem+json")))
-                .andExpect(jsonPath("$.type", is("about:blank")))
+                .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
+                .andExpect(jsonPath("$.type", is("https://api.graphql-webmvc.com/errors/validation")))
                 .andExpect(jsonPath("$.title", is("Constraint Violation")))
                 .andExpect(jsonPath("$.status", is(400)))
-                .andExpect(jsonPath("$.violations", hasSize(3)))
-                .andExpect(jsonPath("$.violations[0].field", is("content")))
-                .andExpect(jsonPath("$.violations[0].message", is("PostContent must not be blank")))
-                .andExpect(jsonPath("$.violations[1].field", is("email")))
-                .andExpect(jsonPath("$.violations[1].message", is("Email must not be blank")))
-                .andExpect(jsonPath("$.violations[2].field", is("title")))
-                .andExpect(jsonPath("$.violations[2].message", is("PostTitle must not be blank")))
+                .andExpect(jsonPath("$.properties.violations", hasSize(3)))
+                .andExpect(jsonPath("$.properties.violations[0].field", is("content")))
+                .andExpect(jsonPath("$.properties.violations[0].message", is("PostContent must not be blank")))
+                .andExpect(jsonPath("$.properties.violations[1].field", is("email")))
+                .andExpect(jsonPath("$.properties.violations[1].message", is("Email must not be blank")))
+                .andExpect(jsonPath("$.properties.violations[2].field", is("title")))
+                .andExpect(jsonPath("$.properties.violations[2].message", is("PostTitle must not be blank")))
                 .andReturn();
     }
 
@@ -175,7 +175,7 @@ class PostEntityControllerTest {
                         .content(objectMapper.writeValueAsString(postEntity)))
                 .andExpect(status().isNotFound())
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
-                .andExpect(jsonPath("$.type", is("about:blank")))
+                .andExpect(jsonPath("$.type", is("https://api.graphql-webmvc.com/errors/not-found")))
                 .andExpect(jsonPath("$.title", is("Not Found")))
                 .andExpect(jsonPath("$.status", is(404)))
                 .andExpect(jsonPath("$.detail", is("Post: 1 was not found.")))
@@ -201,7 +201,7 @@ class PostEntityControllerTest {
                 .perform(delete("/api/posts/{id}", postId))
                 .andExpect(status().isNotFound())
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
-                .andExpect(jsonPath("$.type", is("about:blank")))
+                .andExpect(jsonPath("$.type", is("https://api.graphql-webmvc.com/errors/not-found")))
                 .andExpect(jsonPath("$.title", is("Not Found")))
                 .andExpect(jsonPath("$.status", is(404)))
                 .andExpect(jsonPath("$.detail", is("Post: 1 was not found.")))

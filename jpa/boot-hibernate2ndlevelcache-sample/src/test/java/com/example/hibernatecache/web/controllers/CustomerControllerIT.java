@@ -166,16 +166,18 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                         .content(objectMapper.writeValueAsString(customerRequest)))
                 .andExpect(status().isBadRequest())
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
-                .andExpect(jsonPath("$.type", is("about:blank")))
+                .andExpect(
+                        jsonPath("$.type", is("https://api.boot-hibernate2ndlevelcache-sample.com/errors/validation")))
                 .andExpect(jsonPath("$.title", is("Constraint Violation")))
                 .andExpect(jsonPath("$.status", is(400)))
                 .andExpect(jsonPath("$.detail", is("Invalid request content.")))
                 .andExpect(jsonPath("$.instance", is("/api/customers")))
-                .andExpect(jsonPath("$.violations", hasSize(2)))
-                .andExpect(jsonPath("$.violations[0].field", is("email")))
-                .andExpect(jsonPath("$.violations[0].message", is("Email value must be a well-formed email address")))
-                .andExpect(jsonPath("$.violations[1].field", is("firstName")))
-                .andExpect(jsonPath("$.violations[1].message", is("FirstName must not be blank")))
+                .andExpect(jsonPath("$.properties.violations", hasSize(2)))
+                .andExpect(jsonPath("$.properties.violations[0].field", is("email")))
+                .andExpect(jsonPath(
+                        "$.properties.violations[0].message", is("Email value must be a well-formed email address")))
+                .andExpect(jsonPath("$.properties.violations[1].field", is("firstName")))
+                .andExpect(jsonPath("$.properties.violations[1].message", is("FirstName must not be blank")))
                 .andReturn();
     }
 

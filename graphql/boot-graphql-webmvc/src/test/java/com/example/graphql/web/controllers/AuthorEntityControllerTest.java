@@ -18,7 +18,6 @@ import com.example.graphql.entities.AuthorEntity;
 import com.example.graphql.model.request.AuthorRequest;
 import com.example.graphql.model.response.AuthorResponse;
 import com.example.graphql.services.AuthorService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,6 +31,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import tools.jackson.databind.ObjectMapper;
 
 @WebMvcTest(controllers = AuthorController.class)
 @ActiveProfiles(PROFILE_TEST)
@@ -97,7 +97,7 @@ class AuthorEntityControllerTest {
                 .perform(get("/api/authors/{id}", authorId))
                 .andExpect(status().isNotFound())
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
-                .andExpect(jsonPath("$.type", is("about:blank")))
+                .andExpect(jsonPath("$.type", is("https://api.graphql-webmvc.com/errors/not-found")))
                 .andExpect(jsonPath("$.title", is("Not Found")))
                 .andExpect(jsonPath("$.status", is(404)))
                 .andExpect(jsonPath("$.detail", is("Author: 1 was not found.")))
@@ -133,19 +133,19 @@ class AuthorEntityControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(authorRequest)))
                 .andExpect(status().isBadRequest())
-                .andExpect(header().string("Content-Type", is("application/problem+json")))
-                .andExpect(jsonPath("$.type", is("about:blank")))
+                .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
+                .andExpect(jsonPath("$.type", is("https://api.graphql-webmvc.com/errors/validation")))
                 .andExpect(jsonPath("$.title", is("Constraint Violation")))
                 .andExpect(jsonPath("$.status", is(400)))
                 .andExpect(jsonPath("$.detail", is("Invalid request content.")))
                 .andExpect(jsonPath("$.instance", is("/api/authors")))
-                .andExpect(jsonPath("$.violations", hasSize(3)))
-                .andExpect(jsonPath("$.violations[0].field", is("email")))
-                .andExpect(jsonPath("$.violations[0].message", is("Email Cant be Blank")))
-                .andExpect(jsonPath("$.violations[1].field", is("firstName")))
-                .andExpect(jsonPath("$.violations[1].message", is("FirstName Cant be Blank")))
-                .andExpect(jsonPath("$.violations[2].field", is("lastName")))
-                .andExpect(jsonPath("$.violations[2].message", is("LastName Cant be Blank")))
+                .andExpect(jsonPath("$.properties.violations", hasSize(3)))
+                .andExpect(jsonPath("$.properties.violations[0].field", is("email")))
+                .andExpect(jsonPath("$.properties.violations[0].message", is("Email Cant be Blank")))
+                .andExpect(jsonPath("$.properties.violations[1].field", is("firstName")))
+                .andExpect(jsonPath("$.properties.violations[1].message", is("FirstName Cant be Blank")))
+                .andExpect(jsonPath("$.properties.violations[2].field", is("lastName")))
+                .andExpect(jsonPath("$.properties.violations[2].message", is("LastName Cant be Blank")))
                 .andReturn();
     }
 
@@ -186,7 +186,7 @@ class AuthorEntityControllerTest {
                         .content(objectMapper.writeValueAsString(authorRequest)))
                 .andExpect(status().isNotFound())
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
-                .andExpect(jsonPath("$.type", is("about:blank")))
+                .andExpect(jsonPath("$.type", is("https://api.graphql-webmvc.com/errors/not-found")))
                 .andExpect(jsonPath("$.title", is("Not Found")))
                 .andExpect(jsonPath("$.status", is(404)))
                 .andExpect(jsonPath("$.detail", is("Author: 100 was not found.")))
@@ -216,7 +216,7 @@ class AuthorEntityControllerTest {
                 .perform(delete("/api/authors/{id}", authorId))
                 .andExpect(status().isNotFound())
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
-                .andExpect(jsonPath("$.type", is("about:blank")))
+                .andExpect(jsonPath("$.type", is("https://api.graphql-webmvc.com/errors/not-found")))
                 .andExpect(jsonPath("$.title", is("Not Found")))
                 .andExpect(jsonPath("$.status", is(404)))
                 .andExpect(jsonPath("$.detail", is("Author: 1 was not found.")))
