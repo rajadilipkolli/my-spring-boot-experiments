@@ -18,7 +18,6 @@ import com.example.graphql.entities.PostCommentEntity;
 import com.example.graphql.model.request.PostCommentRequest;
 import com.example.graphql.model.response.PostCommentResponse;
 import com.example.graphql.services.PostCommentService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -32,6 +31,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import tools.jackson.databind.ObjectMapper;
 
 @WebMvcTest(controllers = PostCommentController.class)
 @ActiveProfiles(PROFILE_TEST)
