@@ -23,7 +23,6 @@ import com.example.locks.model.response.MovieResponse;
 import com.example.locks.model.response.PagedResult;
 import com.example.locks.services.MovieService;
 import com.example.locks.utils.AppConstants;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -40,6 +39,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import tools.jackson.databind.ObjectMapper;
 
 @WebMvcTest(controllers = MovieController.class)
 @ActiveProfiles(AppConstants.PROFILE_TEST)
@@ -114,7 +114,7 @@ class MovieControllerTest {
                 .perform(get("/api/movies/{id}", movieId))
                 .andExpect(status().isNotFound())
                 .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
-                .andExpect(jsonPath("$.type", is("http://api.boot-jpa-locks.com/errors/not-found")))
+                .andExpect(jsonPath("$.type", is("https://api.boot-jpa-locks.com/errors/not-found")))
                 .andExpect(jsonPath("$.title", is("Not Found")))
                 .andExpect(jsonPath("$.status", is(404)))
                 .andExpect(jsonPath("$.detail").value("Movie with Id '%d' not found".formatted(movieId)));
@@ -161,15 +161,15 @@ class MovieControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(movieRequest)))
                 .andExpect(status().isBadRequest())
-                .andExpect(header().string("Content-Type", is("application/problem+json")))
-                .andExpect(jsonPath("$.type", is("about:blank")))
+                .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
+                .andExpect(jsonPath("$.type", is("https://api.boot-jpa-locks.com/errors/constraint-violation")))
                 .andExpect(jsonPath("$.title", is("Constraint Violation")))
                 .andExpect(jsonPath("$.status", is(400)))
                 .andExpect(jsonPath("$.detail", is("Invalid request content.")))
                 .andExpect(jsonPath("$.instance", is("/api/movies")))
-                .andExpect(jsonPath("$.violations", hasSize(1)))
-                .andExpect(jsonPath("$.violations[0].field", is("movieTitle")))
-                .andExpect(jsonPath("$.violations[0].message", is("MovieTitle cant be Blank")))
+                .andExpect(jsonPath("$.properties.violations", hasSize(1)))
+                .andExpect(jsonPath("$.properties.violations[0].field", is("movieTitle")))
+                .andExpect(jsonPath("$.properties.violations[0].message", is("MovieTitle cant be Blank")))
                 .andReturn();
     }
 
@@ -224,7 +224,7 @@ class MovieControllerTest {
                         .content(objectMapper.writeValueAsString(movieRequest)))
                 .andExpect(status().isNotFound())
                 .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
-                .andExpect(jsonPath("$.type", is("http://api.boot-jpa-locks.com/errors/not-found")))
+                .andExpect(jsonPath("$.type", is("https://api.boot-jpa-locks.com/errors/not-found")))
                 .andExpect(jsonPath("$.title", is("Not Found")))
                 .andExpect(jsonPath("$.status", is(404)))
                 .andExpect(jsonPath("$.detail").value("Movie with Id '%d' not found".formatted(movieId)));
@@ -259,7 +259,7 @@ class MovieControllerTest {
         this.mockMvc
                 .perform(delete("/api/movies/{id}", movieId))
                 .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
-                .andExpect(jsonPath("$.type", is("http://api.boot-jpa-locks.com/errors/not-found")))
+                .andExpect(jsonPath("$.type", is("https://api.boot-jpa-locks.com/errors/not-found")))
                 .andExpect(jsonPath("$.title", is("Not Found")))
                 .andExpect(jsonPath("$.status", is(404)))
                 .andExpect(jsonPath("$.detail").value("Movie with Id '%d' not found".formatted(movieId)));
