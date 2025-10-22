@@ -51,7 +51,7 @@ public class GlobalExceptionHandler {
             ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
                     resourceNotFoundException.getHttpStatus(), resourceNotFoundException.getMessage());
             problemDetail.setTitle("Not Found");
-            problemDetail.setType(URI.create("http://api.boot-jndi-sample.com/errors/not-found"));
+            problemDetail.setType(URI.create("https://api.boot-jndi-sample.com/errors/not-found"));
             problemDetail.setProperty("errorCategory", "Generic");
             problemDetail.setProperty("timestamp", Instant.now());
             return problemDetail;

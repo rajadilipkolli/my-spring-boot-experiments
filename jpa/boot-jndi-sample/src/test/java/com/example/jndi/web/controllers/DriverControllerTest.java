@@ -104,7 +104,7 @@ class DriverControllerTest {
                 .perform(get("/api/drivers/{id}", driverId))
                 .andExpect(status().isNotFound())
                 .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
-                .andExpect(jsonPath("$.type", is("http://api.boot-jndi-sample.com/errors/not-found")))
+                .andExpect(jsonPath("$.type", is("https://api.boot-jndi-sample.com/errors/not-found")))
                 .andExpect(jsonPath("$.title", is("Not Found")))
                 .andExpect(jsonPath("$.status", is(404)))
                 .andExpect(jsonPath("$.detail").value("Driver with Id '%d' not found".formatted(driverId)));
@@ -178,7 +178,7 @@ class DriverControllerTest {
                         .content(objectMapper.writeValueAsString(driverRequest)))
                 .andExpect(status().isNotFound())
                 .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
-                .andExpect(jsonPath("$.type", is("http://api.boot-jndi-sample.com/errors/not-found")))
+                .andExpect(jsonPath("$.type", is("https://api.boot-jndi-sample.com/errors/not-found")))
                 .andExpect(jsonPath("$.title", is("Not Found")))
                 .andExpect(jsonPath("$.status", is(404)))
                 .andExpect(jsonPath("$.detail").value("Driver with Id '%d' not found".formatted(driverId)));
@@ -205,7 +205,7 @@ class DriverControllerTest {
         this.mockMvc
                 .perform(delete("/api/drivers/{id}", driverId))
                 .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
-                .andExpect(jsonPath("$.type", is("http://api.boot-jndi-sample.com/errors/not-found")))
+                .andExpect(jsonPath("$.type", is("https://api.boot-jndi-sample.com/errors/not-found")))
                 .andExpect(jsonPath("$.title", is("Not Found")))
                 .andExpect(jsonPath("$.status", is(404)))
                 .andExpect(jsonPath("$.detail").value("Driver with Id '%d' not found".formatted(driverId)));
