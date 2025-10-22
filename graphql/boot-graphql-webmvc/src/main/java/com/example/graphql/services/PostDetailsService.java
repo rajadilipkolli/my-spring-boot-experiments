@@ -45,6 +45,6 @@ public class PostDetailsService {
             PostDetailsEntity postDetailsObj, PostDetailsRequest postDetailsRequest) {
         postDetailsObj.setDetailsKey(postDetailsRequest.detailsKey());
         PostDetailsEntity persistedDetails = postDetailsRepository.save(postDetailsObj);
-        return findPostDetailsById(persistedDetails.getId());
+        return Optional.ofNullable(appConversionService.convert(persistedDetails, PostDetailsResponse.class));
     }
 }
