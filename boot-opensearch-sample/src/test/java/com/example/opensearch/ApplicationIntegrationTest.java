@@ -24,7 +24,7 @@ class ApplicationIntegrationTest extends AbstractIntegrationTest {
         final Response response = restClient.performRequest(request);
         try (InputStream input = response.getEntity().getContent()) {
             JsonNode result = new ObjectMapper().readTree(input);
-            assertThat(result.path("version").path("number").asText()).isEqualTo("3.2.0");
+            assertThat(result.path("version").path("number").asText()).isEqualTo("3.3.1");
         }
     }
 }
