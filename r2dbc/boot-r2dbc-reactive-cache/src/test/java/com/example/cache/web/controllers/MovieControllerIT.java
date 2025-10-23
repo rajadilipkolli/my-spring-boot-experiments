@@ -127,7 +127,7 @@ class MovieControllerIT extends AbstractIntegrationTest {
                 .expectBody()
                 .json(
                         """
-                        {"type":"about:blank","title":"Constraint Violation","status":400,"detail":"Invalid request content.","instance":"/api/movies","violations":[{"object":"movieRequest","field":"title","rejectedValue":null,"message":"Title cannot be blank"}]}
+                        {"type":"https://api.boot-reactive-cache.com/errors/constraint-violation"","title":"Constraint Violation","status":400,"detail":"Invalid request content.","instance":"/api/movies","properties.violations":[{"object":"movieRequest","field":"title","rejectedValue":null,"message":"Title cannot be blank"}]}
                         """,
                         true);
     }
