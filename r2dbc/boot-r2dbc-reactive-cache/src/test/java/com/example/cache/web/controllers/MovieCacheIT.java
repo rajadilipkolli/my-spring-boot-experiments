@@ -97,14 +97,29 @@ class MovieCacheIT extends AbstractIntegrationTest {
 
         // populate cache via service
         movieService.findMovieById(saved.id()).block(Duration.ofSeconds(5));
-        // wait for cache
-        Movie cached = reactiveRedisTemplate.opsForValue().get(key).block(Duration.ofSeconds(5));
+        // wait for cache to be populated
+        Movie cached = waitForValue(key, Duration.ofSeconds(5));
         assertThat(cached).isNotNull();
 
         // delete and ensure cache key removed
         movieService.deleteMovieById(saved.id()).block(Duration.ofSeconds(5));
-        Movie afterDelete = reactiveRedisTemplate.opsForValue().get(key).block(Duration.ofSeconds(5));
-        assertThat(afterDelete).isNull();
+        boolean evicted = waitUntilAbsent(key, Duration.ofSeconds(5));
+        assertThat(evicted).isTrue();
+    }
+
+    private boolean waitUntilAbsent(String key, Duration timeout) {
+        long deadline = System.nanoTime() + timeout.toNanos();
+        while (System.nanoTime() < deadline) {
+            Movie v = reactiveRedisTemplate.opsForValue().get(key).block(Duration.ofSeconds(1));
+            if (v == null) return true;
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                break;
+            }
+        }
+        return false;
     }
 
     // Helper: poll Redis for a value until present or timeout
