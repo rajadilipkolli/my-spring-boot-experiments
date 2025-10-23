@@ -80,7 +80,9 @@ class MovieControllerIT extends AbstractIntegrationTest {
                 .expectBody()
                 .json(
                         """
-                        {"type":"https://api.boot-reactive-cache.com/errors/not-found","title":"Not Found","status":404,"detail":"Movie with Id '10000' not found","instance":"/api/movies/10000","errorCategory":"Generic"}
+                        {"type":"https://api.boot-reactive-cache.com/errors/not-found","title":"Not Found",
+                        "status":404,"detail":"Movie with Id '10000' not found","instance":"/api/movies/10000",
+                        "properties":{"errorCategory":"Generic"}}
                         """);
     }
 
@@ -127,7 +129,11 @@ class MovieControllerIT extends AbstractIntegrationTest {
                 .expectBody()
                 .json(
                         """
-                        {"type":"about:blank","title":"Constraint Violation","status":400,"detail":"Invalid request content.","instance":"/api/movies","violations":[{"object":"movieRequest","field":"title","rejectedValue":null,"message":"Title cannot be blank"}]}
+                        {"type":"https://api.boot-reactive-cache.com/errors/constraint-violation",
+                        "title":"Constraint Violation","status":400,"detail":"Invalid request content.",
+                        "instance":"/api/movies",
+                        "properties":{"violations":[{"object":"movieRequest","field":"title","rejectedValue":null,
+                        "message":"Title cannot be blank"}]}}
                         """,
                         true);
     }
@@ -188,7 +194,9 @@ class MovieControllerIT extends AbstractIntegrationTest {
                 .expectBody()
                 .json(
                         """
-                        {"type":"https://api.boot-reactive-cache.com/errors/not-found","title":"Not Found","status":404,"detail":"Movie with Id '10000' not found","instance":"/api/movies/10000","errorCategory":"Generic"}
+                        {"type":"https://api.boot-reactive-cache.com/errors/not-found","title":"Not Found","status":404,
+                        "detail":"Movie with Id '10000' not found","instance":"/api/movies/10000",
+                        "properties":{"errorCategory":"Generic"}}
                         """);
     }
 }

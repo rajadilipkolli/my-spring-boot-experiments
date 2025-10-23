@@ -27,6 +27,7 @@ public class GlobalExceptionHandler {
         ProblemDetail problemDetail =
                 ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(400), "Invalid request content.");
         problemDetail.setTitle("Constraint Violation");
+        problemDetail.setType(URI.create("https://api.boot-reactive-cache.com/errors/constraint-violation"));
         List<ApiValidationError> validationErrorsList = webExchangeBindException.getAllErrors().stream()
                 .map(objectError -> {
                     FieldError fieldError = (FieldError) objectError;
