@@ -11,6 +11,7 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.BodyInserters;
 import reactor.core.publisher.Flux;
@@ -43,8 +44,10 @@ class ReactivePostControllerIT extends AbstractIntegrationTest {
                                                 .title("title 3")
                                                 .content("content 3")
                                                 .build()))
-                        .flatMap(reactivePostRepository::save)
-                        .thenMany(reactivePostRepository.findAll());
+                        // use concatMap to preserve insertion order when saving
+                        .concatMap(reactivePostRepository::save)
+                        // fetch all posts ordered by id ascending to match DB insertion order
+                        .thenMany(reactivePostRepository.findAll(Sort.by("id").ascending()));
     }
 
     @Test
@@ -150,7 +153,7 @@ class ReactivePostControllerIT extends AbstractIntegrationTest {
                 .contentType(MediaType.APPLICATION_PROBLEM_JSON)
                 .expectBody()
                 .jsonPath("$.type")
-                .isEqualTo("about:blank")
+                .isEqualTo("https://r2dbc.com/validation-error")
                 .jsonPath("$.title")
                 .isEqualTo("Constraint Violation")
                 .jsonPath("$.status")
@@ -159,25 +162,25 @@ class ReactivePostControllerIT extends AbstractIntegrationTest {
                 .isEqualTo("Invalid request content.")
                 .jsonPath("$.instance")
                 .isEqualTo("/api/posts/")
-                .jsonPath("$.violations")
+                .jsonPath("$.properties.violations")
                 .isArray()
-                .jsonPath("$.violations")
+                .jsonPath("$.properties.violations")
                 .value(hasSize(2)) // Use .value() with hasSize()
-                .jsonPath("$.violations[0].object")
+                .jsonPath("$.properties.violations[0].object")
                 .isEqualTo("reactivePostRequest")
-                .jsonPath("$.violations[0].field")
+                .jsonPath("$.properties.violations[0].field")
                 .isEqualTo("content")
-                .jsonPath("$.violations[0].rejectedValue")
+                .jsonPath("$.properties.violations[0].rejectedValue")
                 .isEmpty()
-                .jsonPath("$.violations[0].message")
+                .jsonPath("$.properties.violations[0].message")
                 .isEqualTo("Content must not be blank")
-                .jsonPath("$.violations[1].object")
+                .jsonPath("$.properties.violations[1].object")
                 .isEqualTo("reactivePostRequest")
-                .jsonPath("$.violations[1].field")
+                .jsonPath("$.properties.violations[1].field")
                 .isEqualTo("title")
-                .jsonPath("$.violations[1].rejectedValue")
+                .jsonPath("$.properties.violations[1].rejectedValue")
                 .isEmpty()
-                .jsonPath("$.violations[1].message")
+                .jsonPath("$.properties.violations[1].message")
                 .isEqualTo("Title must not be blank");
     }
 
