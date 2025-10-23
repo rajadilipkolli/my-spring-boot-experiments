@@ -194,7 +194,7 @@ class ReactiveCommentsControllerTest {
                 .contentType(MediaType.APPLICATION_PROBLEM_JSON)
                 .expectBody()
                 .jsonPath("$.type")
-                .isEqualTo("https://r2dbc.com/validation-error")
+                .isEqualTo("https://api.boot-r2dbc.com/validation-error")
                 .jsonPath("$.title")
                 .isEqualTo("Constraint Violation")
                 .jsonPath("$.status")

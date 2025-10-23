@@ -30,6 +30,12 @@ class MovieCacheIT extends AbstractIntegrationTest {
     @BeforeEach
     void setUp() {
         // Ensure DB and Redis are clean before each test
+        // 1) Clear Redis DB (fastest for test env)
+        reactiveRedisTemplate
+                .execute(conn -> conn.serverCommands().flushDb())
+                .then()
+                .block(Duration.ofSeconds(5));
+        // 2) Also clear backing store
         movieService.deleteAll().block(Duration.ofSeconds(10));
     }
 

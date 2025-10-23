@@ -26,7 +26,7 @@ public class GlobalExceptionHandler {
                 ProblemDetail.forStatusAndDetail(
                         HttpStatusCode.valueOf(400), "Invalid request content.");
         problemDetail.setTitle("Constraint Violation");
-        problemDetail.setType(URI.create("https://r2dbc.com/validation-error"));
+        problemDetail.setType(URI.create("https://api.boot-r2dbc.com/validation-error"));
         List<ApiValidationError> validationErrorsList =
                 webExchangeBindException.getAllErrors().stream()
                         .map(
