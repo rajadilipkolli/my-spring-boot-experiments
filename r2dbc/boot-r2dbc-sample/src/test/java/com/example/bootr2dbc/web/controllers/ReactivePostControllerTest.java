@@ -15,7 +15,7 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
+import org.springframework.boot.webflux.test.autoconfigure.WebFluxTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -181,25 +181,25 @@ class ReactivePostControllerTest {
                 .isEqualTo("Invalid request content.")
                 .jsonPath("$.instance")
                 .isEqualTo("/api/posts/")
-                .jsonPath("$.properties.violations")
+                .jsonPath("$.violations")
                 .isArray()
-                .jsonPath("$.properties.violations")
+                .jsonPath("$.violations")
                 .value(hasSize(2)) // Use .value() with hasSize()
-                .jsonPath("$.properties.violations[0].object")
+                .jsonPath("$.violations[0].object")
                 .isEqualTo("reactivePostRequest")
-                .jsonPath("$.properties.violations[0].field")
+                .jsonPath("$.violations[0].field")
                 .isEqualTo("content")
-                .jsonPath("$.properties.violations[0].rejectedValue")
+                .jsonPath("$.violations[0].rejectedValue")
                 .isEmpty()
-                .jsonPath("$.properties.violations[0].message")
+                .jsonPath("$.violations[0].message")
                 .isEqualTo("Content must not be blank")
-                .jsonPath("$.properties.violations[1].object")
+                .jsonPath("$.violations[1].object")
                 .isEqualTo("reactivePostRequest")
-                .jsonPath("$.properties.violations[1].field")
+                .jsonPath("$.violations[1].field")
                 .isEqualTo("title")
-                .jsonPath("$.properties.violations[1].rejectedValue")
+                .jsonPath("$.violations[1].rejectedValue")
                 .isEmpty()
-                .jsonPath("$.properties.violations[1].message")
+                .jsonPath("$.violations[1].message")
                 .isEqualTo("Title must not be blank");
     }
 

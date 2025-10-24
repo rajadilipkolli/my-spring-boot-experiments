@@ -131,9 +131,9 @@ class MovieControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.status", is(400)))
                 .andExpect(jsonPath("$.detail", is("Invalid request content.")))
                 .andExpect(jsonPath("$.instance", is("/api/movies")))
-                .andExpect(jsonPath("$.properties.violations", hasSize(1)))
-                .andExpect(jsonPath("$.properties.violations[0].field", is("movieTitle")))
-                .andExpect(jsonPath("$.properties.violations[0].message", is("MovieTitle cant be Blank")))
+                .andExpect(jsonPath("$.violations", hasSize(1)))
+                .andExpect(jsonPath("$.violations[0].field", is("movieTitle")))
+                .andExpect(jsonPath("$.violations[0].message", is("MovieTitle cant be Blank")))
                 .andReturn();
     }
 
