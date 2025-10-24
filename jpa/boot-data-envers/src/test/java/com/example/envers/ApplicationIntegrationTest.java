@@ -4,20 +4,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.example.envers.common.AbstractIntegrationTest;
 import com.example.envers.entities.Customer;
-import com.example.envers.repositories.CustomerRepository;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.history.Revision;
 import org.springframework.data.history.RevisionMetadata.RevisionType;
 import org.springframework.data.history.Revisions;
 
 class ApplicationIntegrationTest extends AbstractIntegrationTest {
-
-    @Autowired
-    private CustomerRepository customerRepository;
 
     @Test
     void initialRevision() {

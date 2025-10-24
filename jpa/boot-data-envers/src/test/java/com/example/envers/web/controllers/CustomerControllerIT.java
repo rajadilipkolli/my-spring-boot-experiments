@@ -1,37 +1,31 @@
 package com.example.envers.web.controllers;
 
-import static io.restassured.RestAssured.given;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasSize;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import com.example.envers.common.AbstractIntegrationTest;
 import com.example.envers.entities.Customer;
 import com.example.envers.model.request.CustomerRequest;
-import com.example.envers.repositories.CustomerRepository;
-import io.restassured.RestAssured;
-import io.restassured.http.ContentType;
+import com.example.envers.model.response.CustomerResponse;
+import com.example.envers.model.response.PagedResult;
+import com.example.envers.model.response.RevisionResult;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.http.HttpHeaders;
-import org.apache.http.HttpStatus;
+import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ProblemDetail;
 
 class CustomerControllerIT extends AbstractIntegrationTest {
-
-    @Autowired
-    private CustomerRepository customerRepository;
 
     private List<Customer> customerList = null;
 
     @BeforeEach
     void setUp() {
-        RestAssured.port = localServerPort;
         customerRepository.deleteAllInBatch();
 
         customerList = new ArrayList<>();
@@ -43,18 +37,26 @@ class CustomerControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldFetchAllCustomers() {
-        given().when()
-                .get("/api/customers")
-                .then()
-                .statusCode(HttpStatus.SC_OK)
-                .body("data.size()", equalTo(customerList.size()))
-                .body("totalElements", equalTo(3))
-                .body("pageNumber", equalTo(1))
-                .body("totalPages", equalTo(1))
-                .body("isFirst", equalTo(true))
-                .body("isLast", equalTo(true))
-                .body("hasNext", equalTo(false))
-                .body("hasPrevious", equalTo(false));
+        mockMvcTester
+                .get()
+                .uri("/api/customers")
+                .exchange()
+                .assertThat()
+                .hasContentType(MediaType.APPLICATION_JSON)
+                .hasStatus(HttpStatus.OK)
+                .bodyJson()
+                .convertTo(PagedResult.class)
+                .satisfies(pagedResult -> {
+                    assertThat(pagedResult).isNotNull();
+                    assertThat(pagedResult.data()).isNotNull().isNotEmpty().hasSize(customerList.size());
+                    assertThat(pagedResult.totalElements()).isEqualTo(3);
+                    assertThat(pagedResult.pageNumber()).isEqualTo(1);
+                    assertThat(pagedResult.totalPages()).isEqualTo(1);
+                    assertThat(pagedResult.isFirst()).isTrue();
+                    assertThat(pagedResult.isLast()).isTrue();
+                    assertThat(pagedResult.hasNext()).isFalse();
+                    assertThat(pagedResult.hasPrevious()).isFalse();
+                });
     }
 
     @Nested
@@ -66,15 +68,21 @@ class CustomerControllerIT extends AbstractIntegrationTest {
             Customer customer = customerList.getFirst();
             Long customerId = customer.getId();
 
-            given().pathParam("id", customerId)
-                    .when()
-                    .get("/api/customers/{id}")
-                    .then()
-                    .statusCode(HttpStatus.SC_OK)
-                    .contentType(ContentType.JSON)
-                    .body("id", equalTo(customer.getId().intValue()))
-                    .body("name", equalTo(customer.getName()))
-                    .body("address", equalTo(customer.getAddress()));
+            mockMvcTester
+                    .get()
+                    .uri("/api/customers/{id}", customer.getId())
+                    .exchange()
+                    .assertThat()
+                    .hasStatus(HttpStatus.OK)
+                    .hasContentType(MediaType.APPLICATION_JSON)
+                    .bodyJson()
+                    .convertTo(CustomerResponse.class)
+                    .satisfies(customerResponse -> {
+                        assertThat(customerResponse).isNotNull();
+                        assertThat(customerResponse.id()).isEqualTo(customerId);
+                        assertThat(customerResponse.name()).isEqualTo(customer.getName());
+                        assertThat(customerResponse.address()).isEqualTo(customer.getAddress());
+                    });
         }
 
         @Test
@@ -82,18 +90,23 @@ class CustomerControllerIT extends AbstractIntegrationTest {
             Customer customer = customerList.getFirst();
             Long customerId = customer.getId();
 
-            given().pathParam("id", customerId)
-                    .when()
-                    .get("/api/customers/{id}/revisions")
-                    .then()
-                    .statusCode(HttpStatus.SC_OK)
-                    .contentType(ContentType.JSON)
-                    .body("size()", equalTo(1))
-                    .body("[0].entity.id", equalTo(customer.getId().intValue()))
-                    .body("[0].entity.name", equalTo(customer.getName()))
-                    .body("[0].entity.address", equalTo(customer.getAddress()))
-                    .body("[0].revisionNumber", notNullValue())
-                    .body("[0].revisionType", equalTo("INSERT"));
+            mockMvcTester
+                    .get()
+                    .uri("/api/customers/{id}/revisions", customerId)
+                    .exchange()
+                    .assertThat()
+                    .hasStatus(HttpStatus.OK)
+                    .hasContentType(MediaType.APPLICATION_JSON)
+                    .bodyJson()
+                    .convertTo(RevisionResult[].class)
+                    .satisfies(revisionResults -> {
+                        assertThat(revisionResults).isNotNull().hasSize(1);
+                        assertThat(revisionResults[0].entity().getId()).isEqualTo(customerId);
+                        assertThat(revisionResults[0].entity().getName()).isEqualTo(customer.getName());
+                        assertThat(revisionResults[0].entity().getAddress()).isEqualTo(customer.getAddress());
+                        assertThat(revisionResults[0].revisionNumber()).isNotNull();
+                        assertThat(revisionResults[0].revisionType()).isEqualTo("INSERT");
+                    });
         }
 
         @Test
@@ -102,29 +115,42 @@ class CustomerControllerIT extends AbstractIntegrationTest {
             customerRepository.saveAndFlush(customer.setAddress("newAddress"));
             Long customerId = customer.getId();
 
-            given().pathParam("id", customerId)
-                    .queryParam("page", 0)
-                    .queryParam("size", 10)
-                    .queryParam("sort", "revision_Number,desc")
-                    .when()
-                    .get("/api/customers/{id}/history")
-                    .then()
-                    .statusCode(HttpStatus.SC_OK)
-                    .contentType(ContentType.JSON)
-                    .body("data.size()", equalTo(2))
-                    .body("totalElements", equalTo(2))
-                    .body("pageNumber", equalTo(1))
-                    .body("totalPages", equalTo(1))
-                    .body("isFirst", equalTo(true))
-                    .body("isLast", equalTo(true))
-                    .body("hasNext", equalTo(false))
-                    .body("hasPrevious", equalTo(false))
-                    .body("data[0].entity.id", equalTo(customer.getId().intValue()))
-                    .body("data[0].entity.name", equalTo(customer.getName()))
-                    .body("data[0].entity.address", equalTo(customer.getAddress()))
-                    .body("data[0].revisionNumber", notNullValue())
-                    .body("data[0].revisionType", equalTo("UPDATE"))
-                    .body("data[0].revisionInstant", notNullValue());
+            mockMvcTester
+                    .get()
+                    .uri("/api/customers/{id}/history", customerId)
+                    .param("page", "0")
+                    .param("size", "10")
+                    .param("sort", "revision_Number,desc")
+                    .exchange()
+                    .assertThat()
+                    .hasStatus(HttpStatus.OK)
+                    .hasContentType(MediaType.APPLICATION_JSON)
+                    .bodyJson()
+                    .convertTo(PagedResult.class)
+                    .satisfies(pagedResult -> {
+                        assertThat(pagedResult).isNotNull();
+                        assertThat(pagedResult.data()).isNotNull().isNotEmpty().hasSize(2);
+                        assertThat(pagedResult.totalElements()).isEqualTo(2);
+                        assertThat(pagedResult.pageNumber()).isEqualTo(1);
+                        assertThat(pagedResult.totalPages()).isEqualTo(1);
+                        assertThat(pagedResult.isFirst()).isTrue();
+                        assertThat(pagedResult.isLast()).isTrue();
+                        assertThat(pagedResult.hasNext()).isFalse();
+                        assertThat(pagedResult.hasPrevious()).isFalse();
+                        @SuppressWarnings("unchecked")
+                        Map<String, Object> firstMap =
+                                (Map<String, Object>) pagedResult.data().getFirst();
+                        assertThat(firstMap.get("revisionNumber")).isNotNull();
+                        assertThat(firstMap.get("revisionType")).isEqualTo("UPDATE");
+                        assertThat(firstMap.get("revisionInstant")).isNotNull();
+                        @SuppressWarnings("unchecked")
+                        Map<String, Object> entityMap = (Map<String, Object>) firstMap.get("entity");
+                        // entity.id is an integer in the JSON
+                        Number idNum = (Number) entityMap.get("id");
+                        assertThat(idNum.longValue()).isEqualTo(customerId.longValue());
+                        assertThat(entityMap.get("name")).isEqualTo(customer.getName());
+                        assertThat(entityMap.get("address")).isEqualTo(customer.getAddress());
+                    });
         }
 
         @Test
@@ -132,57 +158,89 @@ class CustomerControllerIT extends AbstractIntegrationTest {
             Customer customer = customerList.getFirst();
             Long customerId = customer.getId() + 10_000;
 
-            given().pathParam("id", customerId)
-                    .queryParam("page", 0)
-                    .queryParam("size", 10)
-                    .queryParam("sort", "revision_Number,desc")
-                    .when()
-                    .get("/api/customers/{id}/history")
-                    .then()
-                    .statusCode(HttpStatus.SC_NOT_FOUND)
-                    .contentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE)
-                    .body("type", equalTo("https://api.boot-data-envers.com/errors/not-found"))
-                    .body("title", equalTo("Not Found"))
-                    .body("status", equalTo(404))
-                    .body("detail", equalTo("Customer with Id '%d' not found".formatted(customerId)));
+            mockMvcTester
+                    .get()
+                    .uri("/api/customers/{id}/history", customerId)
+                    .param("page", "0")
+                    .param("size", "10")
+                    .param("sort", "revision_Number,desc")
+                    .exchange()
+                    .assertThat()
+                    .hasStatus(HttpStatus.NOT_FOUND)
+                    .hasContentType(MediaType.APPLICATION_PROBLEM_JSON)
+                    .bodyJson()
+                    .convertTo(ProblemDetail.class)
+                    .satisfies(problemDetail -> {
+                        assertThat(problemDetail).isNotNull();
+                        assertThat(problemDetail.getType()).isNotNull();
+                        assertThat(problemDetail.getType().toString())
+                                .isEqualTo("https://api.boot-data-envers.com/errors/not-found");
+                        assertThat(problemDetail.getTitle()).isEqualTo("Not Found");
+                        assertThat(problemDetail.getStatus()).isEqualTo(404);
+                        assertThat(problemDetail.getDetail())
+                                .isEqualTo("Customer with Id '%d' not found".formatted(customerId));
+                    });
         }
     }
 
     @Test
     void shouldCreateNewCustomer() {
         CustomerRequest customerRequest = new CustomerRequest("New Customer", "Junit Address");
-        given().contentType(ContentType.JSON)
-                .body(customerRequest)
-                .when()
-                .post("/api/customers")
-                .then()
-                .statusCode(HttpStatus.SC_CREATED)
-                .header(HttpHeaders.LOCATION, notNullValue())
-                .contentType(ContentType.JSON)
-                .body("id", notNullValue())
-                .body("name", equalTo(customerRequest.name()))
-                .body("address", equalTo(customerRequest.address()));
+
+        mockMvcTester
+                .post()
+                .uri("/api/customers")
+                .content(jsonMapper.writeValueAsString(customerRequest))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .assertThat()
+                .hasStatus(HttpStatus.CREATED)
+                .hasContentType(MediaType.APPLICATION_JSON)
+                .containsHeader(HttpHeaders.LOCATION)
+                .bodyJson()
+                .convertTo(CustomerResponse.class)
+                .satisfies(customerResponse -> {
+                    assertThat(customerResponse).isNotNull();
+                    assertThat(customerResponse.id()).isNotNull();
+                    assertThat(customerResponse.name()).isEqualTo(customerRequest.name());
+                    assertThat(customerResponse.address()).isEqualTo(customerRequest.address());
+                });
     }
 
     @Test
     void shouldReturn400WhenCreateNewCustomerWithoutName() {
         CustomerRequest customerRequest = new CustomerRequest(null, null);
 
-        given().contentType(ContentType.JSON)
-                .body(customerRequest)
-                .when()
-                .post("/api/customers")
-                .then()
-                .statusCode(HttpStatus.SC_BAD_REQUEST)
-                .contentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE)
-                .body("type", equalTo("https://api.boot-data-envers.com/errors/validation"))
-                .body("title", equalTo("Constraint Violation"))
-                .body("status", equalTo(400))
-                .body("detail", equalTo("Invalid request content."))
-                .body("instance", equalTo("/api/customers"))
-                .body("properties.violations", hasSize(1))
-                .body("properties.violations[0].field", equalTo("name"))
-                .body("properties.violations[0].message", equalTo("Name cannot be empty"));
+        mockMvcTester
+                .post()
+                .uri("/api/customers")
+                .content(jsonMapper.writeValueAsString(customerRequest))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_PROBLEM_JSON)
+                .exchange()
+                .assertThat()
+                .hasStatus(HttpStatus.BAD_REQUEST)
+                .hasContentType(MediaType.APPLICATION_PROBLEM_JSON)
+                .bodyJson()
+                .convertTo(ProblemDetail.class)
+                .satisfies(problem -> {
+                    assertThat(problem.getType()).isNotNull();
+                    assertThat(problem.getType().toString())
+                            .isEqualTo("https://api.boot-data-envers.com/errors/validation");
+                    assertThat(problem.getTitle()).isEqualTo("Constraint Violation");
+                    assertThat(problem.getStatus()).isEqualTo(400);
+                    assertThat(problem.getDetail()).isEqualTo("Invalid request content.");
+                    assertThat(problem.getInstance()).isNotNull();
+                    assertThat(problem.getInstance().toString()).isEqualTo("/api/customers");
+
+                    @SuppressWarnings("unchecked")
+                    var violations = (java.util.List<Map<String, Object>>)
+                            problem.getProperties().get("violations");
+                    assertThat(violations).isNotNull().hasSize(1);
+                    assertThat(violations.getFirst().get("field")).isEqualTo("name");
+                    assertThat(violations.getFirst().get("message")).isEqualTo("Name cannot be empty");
+                });
     }
 
     @Test
@@ -190,31 +248,43 @@ class CustomerControllerIT extends AbstractIntegrationTest {
         Long customerId = customerList.getFirst().getId();
         CustomerRequest customerRequest = new CustomerRequest("Updated Customer", "Junit Address");
 
-        given().pathParam("id", customerId)
-                .contentType(ContentType.JSON)
-                .body(customerRequest)
-                .when()
-                .put("/api/customers/{id}")
-                .then()
-                .statusCode(HttpStatus.SC_OK)
-                .contentType(ContentType.JSON)
-                .body("id", equalTo(customerId.intValue()))
-                .body("name", equalTo(customerRequest.name()))
-                .body("address", equalTo("Junit Address"));
+        mockMvcTester
+                .put()
+                .uri("/api/customers/{id}", customerId)
+                .content(jsonMapper.writeValueAsString(customerRequest))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .assertThat()
+                .hasStatus(HttpStatus.OK)
+                .hasContentType(MediaType.APPLICATION_JSON)
+                .bodyJson()
+                .convertTo(CustomerResponse.class)
+                .satisfies(customer -> {
+                    assertThat(customer.name()).isEqualTo("Updated Customer");
+                    assertThat(customer.address()).isEqualTo("Junit Address");
+                    assertThat(customer.id()).isEqualTo(customerId);
+                });
     }
 
     @Test
     void shouldDeleteCustomer() {
         Customer customer = customerList.getFirst();
 
-        given().pathParam("id", customer.getId())
-                .when()
-                .delete("/api/customers/{id}")
-                .then()
-                .statusCode(HttpStatus.SC_OK)
-                .contentType(ContentType.JSON)
-                .body("id", equalTo(customer.getId().intValue()))
-                .body("name", equalTo(customer.getName()))
-                .body("address", equalTo(customer.getAddress()));
+        mockMvcTester
+                .delete()
+                .uri("/api/customers/{id}", customer.getId())
+                .exchange()
+                .assertThat()
+                .hasStatus(HttpStatus.OK)
+                .hasContentType(MediaType.APPLICATION_JSON)
+                .bodyJson()
+                .convertTo(CustomerResponse.class)
+                .satisfies(customerResponse -> {
+                    assertThat(customerResponse).isNotNull();
+                    assertThat(customerResponse.id()).isEqualTo(customer.getId());
+                    assertThat(customerResponse.name()).isEqualTo(customer.getName());
+                    assertThat(customerResponse.address()).isEqualTo(customer.getAddress());
+                });
     }
 }
