@@ -7,7 +7,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.5.5</version>
+        <version>4.0.0-RC1</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.example.restdocs</groupId>
@@ -20,15 +20,15 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-        <java.version>21</java.version>
-        <springdoc-openapi.version>2.8.11</springdoc-openapi.version>
+        <java.version>25</java.version>
+        <springdoc-openapi.version>3.0.0-M1</springdoc-openapi.version>
    
         <project.testresult.directory>${project.build.directory}/test-results</project.testresult.directory>
-        <spotless.version>2.46.1</spotless.version>
-        <dependency-check-maven.version>12.1.3</dependency-check-maven.version>
+        <spotless.version>3.0.0</spotless.version>
+        <dependency-check-maven.version>12.1.8</dependency-check-maven.version>
         <properties-maven-plugin.version>1.2.1</properties-maven-plugin.version>
         <sonar-maven-plugin.version>5.2.0.4988</sonar-maven-plugin.version>
-        <jacoco-maven-plugin.version>0.8.13</jacoco-maven-plugin.version>
+        <jacoco-maven-plugin.version>0.8.14</jacoco-maven-plugin.version>
         <jacoco.minimum.coverage>0.80</jacoco.minimum.coverage>
         <jacoco.utReportFolder>${project.build.directory}/jacoco/test</jacoco.utReportFolder>
         <jacoco.utReportFile>${jacoco.utReportFolder}/test.exec</jacoco.utReportFile>
@@ -49,7 +49,7 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
+            <artifactId>spring-boot-starter-webmvc</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -77,8 +77,8 @@
             <scope>runtime</scope>
         </dependency>
         <dependency>
-            <groupId>org.flywaydb</groupId>
-            <artifactId>flyway-core</artifactId>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-flyway</artifactId>
         </dependency>
         <dependency>
             <groupId>org.flywaydb</groupId>
@@ -92,12 +92,17 @@
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
+            <artifactId>spring-boot-starter-webmvc-test</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-testcontainers</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-restdocs</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -107,12 +112,12 @@
         </dependency>
         <dependency>
             <groupId>org.testcontainers</groupId>
-            <artifactId>junit-jupiter</artifactId>
+            <artifactId>testcontainers-junit-jupiter</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.testcontainers</groupId>
-            <artifactId>postgresql</artifactId>
+            <artifactId>testcontainers-postgresql</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -191,7 +196,7 @@
                     <dependency>
                         <groupId>org.asciidoctor</groupId>
                         <artifactId>asciidoctorj-pdf</artifactId>
-                        <version>2.3.19</version>
+                        <version>2.3.21</version>
                     </dependency>
                 </dependencies>
             </plugin>
@@ -263,7 +268,7 @@
                 <configuration>
                     <java>
                         <palantirJavaFormat>
-                            <version>2.67.0</version>
+                            <version>2.74.0</version>
                         </palantirJavaFormat>
                         <importOrder />
                         <removeUnusedImports />

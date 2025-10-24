@@ -38,6 +38,7 @@ public class GlobalExceptionHandler {
                 })
                 .sorted(Comparator.comparing(ApiValidationError::field))
                 .toList();
+        problemDetail.setType(URI.create("https://archunit-sample.com/errors/validation-error"));
         problemDetail.setProperty("violations", validationErrorsList);
         return problemDetail;
     }

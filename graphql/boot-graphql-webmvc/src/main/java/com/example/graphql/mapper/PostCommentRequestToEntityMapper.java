@@ -16,7 +16,7 @@ public interface PostCommentRequestToEntityMapper {
     @Mapping(
             target = "publishedAt",
             expression = "java(postCommentRequest.published() ? java.time.OffsetDateTime.now() : null)")
-    PostCommentEntity covert(PostCommentRequest postCommentRequest, @Context PostRepository postRepository);
+    PostCommentEntity convert(PostCommentRequest postCommentRequest, @Context PostRepository postRepository);
 
     @AfterMapping
     default void afterMapping(

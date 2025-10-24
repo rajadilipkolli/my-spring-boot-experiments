@@ -5,7 +5,7 @@ import io.netty.handler.timeout.ReadTimeoutHandler;
 import io.netty.handler.timeout.WriteTimeoutHandler;
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
-import org.springframework.boot.web.reactive.function.client.WebClientCustomizer;
+import org.springframework.boot.webclient.WebClientCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;

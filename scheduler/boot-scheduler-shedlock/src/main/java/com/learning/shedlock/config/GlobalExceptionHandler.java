@@ -27,6 +27,7 @@ public class GlobalExceptionHandler {
         ProblemDetail problemDetail =
                 ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(400), "Invalid request content.");
         problemDetail.setTitle("Constraint Violation");
+        problemDetail.setType(URI.create("http://api.boot-shedlock-sample.com/errors/validation-error"));
         List<ApiValidationError> validationErrorsList = methodArgumentNotValidException.getAllErrors().stream()
                 .map(objectError -> {
                     FieldError fieldError = (FieldError) objectError;

@@ -3,8 +3,13 @@ package com.example.multitenancy.web.controllers;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.example.multitenancy.common.AbstractIntegrationTest;
 import com.example.multitenancy.secondary.entities.SecondaryCustomer;
@@ -50,9 +55,9 @@ class SecondaryCustomerControllerIT extends AbstractIntegrationTest {
         void shouldFailWhenHeaderNotSetForFetchAllCustomers() throws Exception {
             mockMvc.perform(get("/api/customers/secondary"))
                     .andExpect(status().isBadRequest())
-                    .andExpect(header().string("Content-Type", is("application/problem+json")))
-                    .andExpect(jsonPath("$.type", is("about:blank")))
-                    .andExpect(jsonPath("$.title", is("Bad Request")))
+                    .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
+                    .andExpect(jsonPath("$.type", is("https://multitenancy.com/errors/header-error")))
+                    .andExpect(jsonPath("$.title", is("Header Violation")))
                     .andExpect(jsonPath("$.status", is(400)))
                     .andExpect(jsonPath("$.detail", is("Required header 'X-tenantId' is not present.")))
                     .andExpect(jsonPath("$.instance", is("/api/customers/secondary")));
@@ -63,8 +68,12 @@ class SecondaryCustomerControllerIT extends AbstractIntegrationTest {
         void shouldFailWhenWrongHeaderSetForFetchAllCustomers() throws Exception {
             mockMvc.perform(get("/api/customers/secondary").header("X-tenantId", "junk"))
                     .andExpect(status().isForbidden())
-                    .andExpect(header().string("Content-Type", is("application/json")))
-                    .andExpect(jsonPath("$.error", is("Unknown Database tenant")));
+                    .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
+                    .andExpect(jsonPath("$.type", is("https://multitenancy.com/errors/tenant-error")))
+                    .andExpect(jsonPath("$.title", is("Invalid Tenant")))
+                    .andExpect(jsonPath("$.status", is(403)))
+                    .andExpect(jsonPath("$.detail", is("Unknown Database tenant")))
+                    .andExpect(jsonPath("$.instance", is("/api/customers/secondary")));
         }
 
         @Test
@@ -72,8 +81,12 @@ class SecondaryCustomerControllerIT extends AbstractIntegrationTest {
         void shouldFailWhenEmptyHeaderSetForFetchAllCustomers() throws Exception {
             mockMvc.perform(get("/api/customers/secondary").header("X-tenantId", ""))
                     .andExpect(status().isForbidden())
-                    .andExpect(header().string("Content-Type", is("application/json")))
-                    .andExpect(jsonPath("$.error", is("Unknown Database tenant")));
+                    .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
+                    .andExpect(jsonPath("$.type", is("https://multitenancy.com/errors/tenant-error")))
+                    .andExpect(jsonPath("$.title", is("Invalid Tenant")))
+                    .andExpect(jsonPath("$.status", is(403)))
+                    .andExpect(jsonPath("$.detail", is("Unknown Database tenant")))
+                    .andExpect(jsonPath("$.instance", is("/api/customers/secondary")));
         }
     }
 
@@ -179,8 +192,8 @@ class SecondaryCustomerControllerIT extends AbstractIntegrationTest {
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(secondaryCustomer)))
                     .andExpect(status().isBadRequest())
-                    .andExpect(header().string("Content-Type", is("application/problem+json")))
-                    .andExpect(jsonPath("$.type", is("about:blank")))
+                    .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
+                    .andExpect(jsonPath("$.type", is("https://multitenancy.com/errors/validation-error")))
                     .andExpect(jsonPath("$.title", is("Constraint Violation")))
                     .andExpect(jsonPath("$.status", is(400)))
                     .andExpect(jsonPath("$.detail", is("Invalid request content.")))
@@ -200,7 +213,7 @@ class SecondaryCustomerControllerIT extends AbstractIntegrationTest {
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(secondaryCustomer)))
                     .andExpect(status().isBadRequest())
-                    .andExpect(header().string("Content-Type", is("application/problem+json")))
+                    .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                     .andExpect(jsonPath("$.violations[0].field", is("name")))
                     .andExpect(jsonPath("$.violations[0].message", is("Name cannot be blank")));
         }
@@ -215,7 +228,7 @@ class SecondaryCustomerControllerIT extends AbstractIntegrationTest {
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(secondaryCustomer)))
                     .andExpect(status().isBadRequest())
-                    .andExpect(header().string("Content-Type", is("application/problem+json")))
+                    .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                     .andExpect(jsonPath("$.violations[0].field", is("name")))
                     .andExpect(jsonPath("$.violations[0].message", is("Name cannot be blank")));
         }
@@ -276,7 +289,7 @@ class SecondaryCustomerControllerIT extends AbstractIntegrationTest {
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(updateRequest)))
                     .andExpect(status().isBadRequest())
-                    .andExpect(header().string("Content-Type", is("application/problem+json")));
+                    .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)));
         }
     }
 

@@ -78,7 +78,8 @@ public class RestTemplateClientImpl implements RestTemplateClient {
     }
 
     private URI getUrlRequestBuilder(ApplicationRestRequest applicationRestRequest) {
-        UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(applicationRestRequest.getHttpBaseUrl());
+        UriComponentsBuilder builder =
+                UriComponentsBuilder.fromUri(URI.create(applicationRestRequest.getHttpBaseUrl()));
         if (null != applicationRestRequest.getPath() && !"/".equals(applicationRestRequest.getPath())) {
             builder.path(applicationRestRequest.getPath());
         }

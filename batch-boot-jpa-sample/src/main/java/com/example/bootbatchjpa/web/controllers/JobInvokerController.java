@@ -33,8 +33,8 @@ class JobInvokerController {
                 .addLong("minId", minId)
                 .addLong("maxId", maxId)
                 .toJobParameters();
-        JobExecution jobExecution = this.jobOperator.run(this.allCustomersJob, jobParameters);
+        JobExecution jobExecution = this.jobOperator.start(this.allCustomersJob, jobParameters);
 
-        return "Batch job has been invoked as " + jobExecution.getJobId();
+        return "Batch job has been invoked as " + jobExecution.getJobInstanceId();
     }
 }

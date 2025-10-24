@@ -3,16 +3,16 @@ package com.example.multitenancy.common;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.test.context.DynamicPropertyRegistrar;
-import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.oracle.OracleContainer;
+import org.testcontainers.postgresql.PostgreSQLContainer;
 import org.testcontainers.utility.DockerImageName;
 
 @TestConfiguration(proxyBeanMethods = false)
 public class ContainersConfiguration {
 
     @Bean
-    PostgreSQLContainer<?> postgreSQLContainer() {
-        return new PostgreSQLContainer<>(DockerImageName.parse("postgres").withTag("17.5-alpine"));
+    PostgreSQLContainer postgreSQLContainer() {
+        return new PostgreSQLContainer(DockerImageName.parse("postgres").withTag("18.0-alpine"));
     }
 
     @Bean
@@ -23,7 +23,7 @@ public class ContainersConfiguration {
 
     @Bean
     DynamicPropertyRegistrar databaseProperties(
-            OracleContainer oracleContainer, PostgreSQLContainer<?> postgreSQLContainer) {
+            OracleContainer oracleContainer, PostgreSQLContainer postgreSQLContainer) {
         return (propertyRegistry) -> {
             // Connect our Spring application to our Testcontainers instances
             propertyRegistry.add("datasource.primary.url", oracleContainer::getJdbcUrl);

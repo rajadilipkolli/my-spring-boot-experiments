@@ -2,13 +2,13 @@ package com.example.jndi.common;
 
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.postgresql.PostgreSQLContainer;
 import org.testcontainers.utility.DockerImageName;
 
 public class ContainersConfig {
 
-    private static final PostgreSQLContainer<?> postgreSQLContainer =
-            new PostgreSQLContainer<>(DockerImageName.parse("postgres").withTag("17.5-alpine"));
+    private static final PostgreSQLContainer postgreSQLContainer =
+            new PostgreSQLContainer(DockerImageName.parse("postgres").withTag("18.0-alpine"));
 
     static {
         postgreSQLContainer.start();

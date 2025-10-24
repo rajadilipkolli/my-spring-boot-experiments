@@ -15,6 +15,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,16 +26,19 @@ public class PostCommentService {
 
     private final PostCommentRepository postCommentRepository;
     private final PostRepository postRepository;
+    private final ConversionService appConversionService;
     private final PostCommentEntityToResponseMapper postCommentEntityToResponseMapper;
     private final PostCommentRequestToEntityMapper postCommentRequestToEntityMapper;
 
     public PostCommentService(
             PostCommentRepository postCommentRepository,
             PostRepository postRepository,
+            ConversionService appConversionService,
             PostCommentEntityToResponseMapper postCommentEntityToResponseMapper,
             PostCommentRequestToEntityMapper postCommentRequestToEntityMapper) {
         this.postCommentRepository = postCommentRepository;
         this.postRepository = postRepository;
+        this.appConversionService = appConversionService;
         this.postCommentEntityToResponseMapper = postCommentEntityToResponseMapper;
         this.postCommentRequestToEntityMapper = postCommentRequestToEntityMapper;
     }
@@ -42,13 +46,15 @@ public class PostCommentService {
     public List<PostCommentResponse> findAllPostComments() {
         List<CompletableFuture<PostCommentResponse>> completableFutureList = postCommentRepository.findAll().stream()
                 .map(postCommentEntity -> CompletableFuture.supplyAsync(
-                        () -> postCommentEntityToResponseMapper.convert(postCommentEntity)))
+                        () -> appConversionService.convert(postCommentEntity, PostCommentResponse.class)))
                 .toList();
         return completableFutureList.stream().map(CompletableFuture::join).toList();
     }
 
     public Optional<PostCommentResponse> findPostCommentById(Long id) {
-        return this.postCommentRepository.findById(id).map(postCommentEntityToResponseMapper::convert);
+        return this.postCommentRepository
+                .findById(id)
+                .map(postCommentEntity -> appConversionService.convert(postCommentEntity, PostCommentResponse.class));
     }
 
     public Optional<PostCommentEntity> findCommentById(Long commentId) {
@@ -58,7 +64,7 @@ public class PostCommentService {
     @Transactional
     public PostCommentResponse addCommentToPost(PostCommentRequest postCommentRequest) {
         PostCommentEntity postCommentEntity =
-                postCommentRequestToEntityMapper.covert(postCommentRequest, postRepository);
+                postCommentRequestToEntityMapper.convert(postCommentRequest, postRepository);
         return saveAndConvert(postCommentEntity);
     }
 
@@ -69,7 +75,7 @@ public class PostCommentService {
 
     public Map<Long, List<PostCommentResponse>> getCommentsByPostIdIn(List<Long> postIds) {
         return this.postCommentRepository.findByPostEntity_IdIn(postIds).stream()
-                .map(postCommentEntityToResponseMapper::convert)
+                .map(postCommentEntity -> appConversionService.convert(postCommentEntity, PostCommentResponse.class))
                 .filter(Objects::nonNull)
                 .collect(Collectors.groupingBy(PostCommentResponse::postId));
     }
@@ -87,6 +93,6 @@ public class PostCommentService {
 
     private PostCommentResponse saveAndConvert(PostCommentEntity postCommentEntity) {
         PostCommentEntity persistedPostComment = postCommentRepository.save(postCommentEntity);
-        return postCommentEntityToResponseMapper.convert(persistedPostComment);
+        return appConversionService.convert(persistedPostComment, PostCommentResponse.class);
     }
 }

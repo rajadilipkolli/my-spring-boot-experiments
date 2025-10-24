@@ -5,7 +5,6 @@ import static org.hamcrest.Matchers.is;
 
 import com.example.rest.webclient.common.AbstractIntegrationTest;
 import com.example.rest.webclient.model.PostDto;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import java.util.List;
 import org.junit.jupiter.api.AfterEach;
@@ -34,7 +33,7 @@ class PostControllerIT extends AbstractIntegrationTest {
     }
 
     @Test
-    void findAllPosts() throws JsonProcessingException {
+    void findAllPosts() {
         // Prepare mock data
         List<PostDto> mockPosts =
                 List.of(
@@ -73,7 +72,7 @@ class PostControllerIT extends AbstractIntegrationTest {
     }
 
     @Test
-    void shouldFindPostById() throws JsonProcessingException {
+    void shouldFindPostById() {
         Long postId = 1L;
         PostDto post = new PostDto(postId, "text 1", 1L, "First Body");
 

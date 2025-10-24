@@ -29,15 +29,14 @@ import com.example.restdocs.entities.User;
 import com.example.restdocs.model.request.UserRequest;
 import com.example.restdocs.model.response.PagedResult;
 import com.example.restdocs.services.UserService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.restdocs.test.autoconfigure.AutoConfigureRestDocs;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.http.MediaType;
@@ -45,6 +44,7 @@ import org.springframework.restdocs.payload.FieldDescriptor;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import tools.jackson.databind.json.JsonMapper;
 
 @WebMvcTest(controllers = UserController.class)
 @ActiveProfiles(PROFILE_TEST)
@@ -58,7 +58,7 @@ class UserControllerTest {
     private UserService userService;
 
     @Autowired
-    private ObjectMapper objectMapper;
+    private JsonMapper jsonMapper;
 
     private List<User> userList;
 
@@ -173,7 +173,7 @@ class UserControllerTest {
         this.mockMvc
                 .perform(post("/api/users")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(userRequest)))
+                        .content(jsonMapper.writeValueAsString(userRequest)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id", is(34)))
                 .andExpect(jsonPath("$.firstName", is(user.getFirstName())))
@@ -196,10 +196,10 @@ class UserControllerTest {
         this.mockMvc
                 .perform(post("/api/users")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(userRequest)))
+                        .content(jsonMapper.writeValueAsString(userRequest)))
                 .andExpect(status().isBadRequest())
-                .andExpect(header().string("Content-Type", is("application/problem+json")))
-                .andExpect(jsonPath("$.type", is("about:blank")))
+                .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
+                .andExpect(jsonPath("$.type", is("https://api.restdocs.com/errors/constraint-violation")))
                 .andExpect(jsonPath("$.title", is("Constraint Violation")))
                 .andExpect(jsonPath("$.status", is(400)))
                 .andExpect(jsonPath("$.detail", is("Invalid request content.")))
@@ -227,7 +227,7 @@ class UserControllerTest {
         this.mockMvc
                 .perform(put("/api/users/{id}", user.getId())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(userRequest)))
+                        .content(jsonMapper.writeValueAsString(userRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.firstName", is(user.getFirstName())))
                 .andExpect(jsonPath("$.lastName", is(user.getLastName())))
@@ -252,7 +252,7 @@ class UserControllerTest {
         this.mockMvc
                 .perform(put("/api/users/{id}", userId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(userRequest)))
+                        .content(jsonMapper.writeValueAsString(userRequest)))
                 .andExpect(status().isNotFound());
     }
 

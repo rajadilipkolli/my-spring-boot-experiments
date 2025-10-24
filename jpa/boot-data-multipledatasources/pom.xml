@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.5.5</version>
+        <version>4.0.0-RC1</version>
         <relativePath /> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.example</groupId>
@@ -15,13 +15,13 @@
     <description>Demo project for using multiple datasource's in a Spring Boot Application</description>
 
     <properties>
-        <java.version>21</java.version>
+        <java.version>25</java.version>
 
-        <spotless.version>2.46.1</spotless.version>
-        <springdoc-openapi.version>2.8.11</springdoc-openapi.version>
+        <spotless.version>3.0.0</spotless.version>
+        <springdoc-openapi.version>3.0.0-M1</springdoc-openapi.version>
 
         <project.testresult.directory>${project.build.directory}/test-results</project.testresult.directory>
-        <jacoco-maven-plugin.version>0.8.13</jacoco-maven-plugin.version>
+        <jacoco-maven-plugin.version>0.8.14</jacoco-maven-plugin.version>
         <jacoco.minimum.coverage>0.80</jacoco.minimum.coverage>
         <jacoco.utReportFolder>${project.build.directory}/jacoco/test</jacoco.utReportFolder>
         <jacoco.utReportFile>${jacoco.utReportFolder}/test.exec</jacoco.utReportFile>
@@ -44,7 +44,7 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
+            <artifactId>spring-boot-starter-webmvc</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -70,16 +70,16 @@
 
         <!-- Database migrations flyway for mysql and liquibase for postgres-->
         <dependency>
-            <groupId>org.flywaydb</groupId>
-            <artifactId>flyway-core</artifactId>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-flyway</artifactId>
         </dependency>
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-mysql</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.liquibase</groupId>
-            <artifactId>liquibase-core</artifactId>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-liquibase</artifactId>
         </dependency>
 
          <!-- ESAPI for validation -->
@@ -92,7 +92,7 @@
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
+            <artifactId>spring-boot-starter-webmvc-test</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -102,17 +102,17 @@
         </dependency>
         <dependency>
             <groupId>org.testcontainers</groupId>
-            <artifactId>junit-jupiter</artifactId>
+            <artifactId>testcontainers-junit-jupiter</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.testcontainers</groupId>
-            <artifactId>mysql</artifactId>
+            <artifactId>testcontainers-mysql</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.testcontainers</groupId>
-            <artifactId>postgresql</artifactId>
+            <artifactId>testcontainers-postgresql</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -214,7 +214,7 @@
                 <configuration>
                     <java>
                         <palantirJavaFormat>
-                            <version>2.58.0</version>
+                            <version>2.74.0</version>
                         </palantirJavaFormat>
                         <importOrder />
                         <removeUnusedImports />

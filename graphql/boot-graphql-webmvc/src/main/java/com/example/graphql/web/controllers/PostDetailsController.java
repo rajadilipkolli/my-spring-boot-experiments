@@ -2,7 +2,7 @@ package com.example.graphql.web.controllers;
 
 import com.example.graphql.config.logging.Loggable;
 import com.example.graphql.model.request.PostDetailsRequest;
-import com.example.graphql.projections.PostDetailsInfo;
+import com.example.graphql.model.response.PostDetailsResponse;
 import com.example.graphql.services.PostDetailsService;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
@@ -25,12 +25,12 @@ public class PostDetailsController {
     }
 
     @GetMapping
-    public List<PostDetailsInfo> getAllPostDetails() {
+    public List<PostDetailsResponse> getAllPostDetails() {
         return postDetailsService.findAllPostDetails();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<PostDetailsInfo> getPostDetailsById(@PathVariable Long id) {
+    public ResponseEntity<PostDetailsResponse> getPostDetailsById(@PathVariable Long id) {
         return postDetailsService
                 .findPostDetailsById(id)
                 .map(ResponseEntity::ok)
@@ -38,7 +38,7 @@ public class PostDetailsController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<PostDetailsInfo> updatePostDetails(
+    public ResponseEntity<PostDetailsResponse> updatePostDetails(
             @PathVariable Long id, @RequestBody PostDetailsRequest postDetailsEntity) {
         return postDetailsService
                 .findDetailsById(id)

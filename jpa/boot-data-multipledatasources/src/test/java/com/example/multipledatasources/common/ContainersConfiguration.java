@@ -3,8 +3,8 @@ package com.example.multipledatasources.common;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.test.context.DynamicPropertyRegistrar;
-import org.testcontainers.containers.MySQLContainer;
-import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.mysql.MySQLContainer;
+import org.testcontainers.postgresql.PostgreSQLContainer;
 import org.testcontainers.utility.DockerImageName;
 
 /**
@@ -16,18 +16,18 @@ import org.testcontainers.utility.DockerImageName;
 public class ContainersConfiguration {
 
     @Bean
-    MySQLContainer<?> mySQLContainer() {
-        return new MySQLContainer<>(DockerImageName.parse("mysql").withTag("9.2"));
+    MySQLContainer mySQLContainer() {
+        return new MySQLContainer(DockerImageName.parse("mysql").withTag("9.5"));
     }
 
     @Bean
-    PostgreSQLContainer<?> postgreSQLContainer() {
-        return new PostgreSQLContainer<>(DockerImageName.parse("postgres").withTag("17.5-alpine"));
+    PostgreSQLContainer postgreSQLContainer() {
+        return new PostgreSQLContainer(DockerImageName.parse("postgres").withTag("18.0-alpine"));
     }
 
     @Bean
     DynamicPropertyRegistrar databaseProperties(
-            MySQLContainer<?> mySQLContainer, PostgreSQLContainer<?> postgreSQLContainer) {
+            MySQLContainer mySQLContainer, PostgreSQLContainer postgreSQLContainer) {
         return (properties) -> {
             // Connect our Spring application to our Testcontainers instances
             properties.add("app.datasource.cardholder.url", mySQLContainer::getJdbcUrl);

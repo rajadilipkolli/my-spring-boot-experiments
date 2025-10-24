@@ -141,7 +141,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                     .then()
                     .statusCode(HttpStatus.SC_NOT_FOUND)
                     .contentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE)
-                    .body("type", equalTo("http://api.boot-data-envers.com/errors/not-found"))
+                    .body("type", equalTo("https://api.boot-data-envers.com/errors/not-found"))
                     .body("title", equalTo("Not Found"))
                     .body("status", equalTo(404))
                     .body("detail", equalTo("Customer with Id '%d' not found".formatted(customerId)));
@@ -175,14 +175,14 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                 .then()
                 .statusCode(HttpStatus.SC_BAD_REQUEST)
                 .contentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE)
-                .body("type", equalTo("about:blank"))
+                .body("type", equalTo("https://api.boot-data-envers.com/errors/validation"))
                 .body("title", equalTo("Constraint Violation"))
                 .body("status", equalTo(400))
                 .body("detail", equalTo("Invalid request content."))
                 .body("instance", equalTo("/api/customers"))
-                .body("violations", hasSize(1))
-                .body("violations[0].field", equalTo("name"))
-                .body("violations[0].message", equalTo("Name cannot be empty"));
+                .body("properties.violations", hasSize(1))
+                .body("properties.violations[0].field", equalTo("name"))
+                .body("properties.violations[0].message", equalTo("Name cannot be empty"));
     }
 
     @Test

@@ -126,7 +126,7 @@ class MovieControllerIT extends AbstractIntegrationTest {
                         .content(objectMapper.writeValueAsString(movieRequest)))
                 .andExpect(status().isBadRequest())
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
-                .andExpect(jsonPath("$.type", is("about:blank")))
+                .andExpect(jsonPath("$.type", is("https://api.boot-jpa-locks.com/errors/constraint-violation")))
                 .andExpect(jsonPath("$.title", is("Constraint Violation")))
                 .andExpect(jsonPath("$.status", is(400)))
                 .andExpect(jsonPath("$.detail", is("Invalid request content.")))

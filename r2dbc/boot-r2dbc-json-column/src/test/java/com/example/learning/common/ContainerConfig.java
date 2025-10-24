@@ -14,13 +14,13 @@ public class ContainerConfig {
     @Bean
     @ServiceConnection
     PostgreSQLContainer<?> postgreSQLContainer() {
-        return new PostgreSQLContainer<>(DockerImageName.parse("postgres").withTag("17.6-alpine")).withReuse(true);
+        return new PostgreSQLContainer<>(DockerImageName.parse("postgres").withTag("18.0-alpine")).withReuse(true);
     }
 
     @Bean
     @ServiceConnection
     LgtmStackContainer lgtmContainer() {
-        return new LgtmStackContainer(DockerImageName.parse("grafana/otel-lgtm:0.11.8"))
+        return new LgtmStackContainer(DockerImageName.parse("grafana/otel-lgtm:0.11.14"))
                 .withStartupTimeout(Duration.ofMinutes(2))
                 .withReuse(true);
     }

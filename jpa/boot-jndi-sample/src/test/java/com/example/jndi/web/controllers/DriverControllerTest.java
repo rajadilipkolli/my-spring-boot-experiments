@@ -23,14 +23,13 @@ import com.example.jndi.model.request.DriverRequest;
 import com.example.jndi.model.response.DriverResponse;
 import com.example.jndi.model.response.PagedResult;
 import com.example.jndi.services.DriverService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.http.HttpHeaders;
@@ -38,6 +37,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import tools.jackson.databind.ObjectMapper;
 
 @WebMvcTest(controllers = DriverController.class)
 @ActiveProfiles(PROFILE_TEST)
@@ -104,7 +104,7 @@ class DriverControllerTest {
                 .perform(get("/api/drivers/{id}", driverId))
                 .andExpect(status().isNotFound())
                 .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
-                .andExpect(jsonPath("$.type", is("http://api.boot-jndi-sample.com/errors/not-found")))
+                .andExpect(jsonPath("$.type", is("https://api.boot-jndi-sample.com/errors/not-found")))
                 .andExpect(jsonPath("$.title", is("Not Found")))
                 .andExpect(jsonPath("$.status", is(404)))
                 .andExpect(jsonPath("$.detail").value("Driver with Id '%d' not found".formatted(driverId)));
@@ -136,8 +136,8 @@ class DriverControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(driverRequest)))
                 .andExpect(status().isBadRequest())
-                .andExpect(header().string("Content-Type", is("application/problem+json")))
-                .andExpect(jsonPath("$.type", is("about:blank")))
+                .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
+                .andExpect(jsonPath("$.type", is("https://api.boot-jndi-sample.com/errors/constraint-violation")))
                 .andExpect(jsonPath("$.title", is("Constraint Violation")))
                 .andExpect(jsonPath("$.status", is(400)))
                 .andExpect(jsonPath("$.detail", is("Invalid request content.")))
@@ -178,7 +178,7 @@ class DriverControllerTest {
                         .content(objectMapper.writeValueAsString(driverRequest)))
                 .andExpect(status().isNotFound())
                 .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
-                .andExpect(jsonPath("$.type", is("http://api.boot-jndi-sample.com/errors/not-found")))
+                .andExpect(jsonPath("$.type", is("https://api.boot-jndi-sample.com/errors/not-found")))
                 .andExpect(jsonPath("$.title", is("Not Found")))
                 .andExpect(jsonPath("$.status", is(404)))
                 .andExpect(jsonPath("$.detail").value("Driver with Id '%d' not found".formatted(driverId)));
@@ -205,7 +205,7 @@ class DriverControllerTest {
         this.mockMvc
                 .perform(delete("/api/drivers/{id}", driverId))
                 .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
-                .andExpect(jsonPath("$.type", is("http://api.boot-jndi-sample.com/errors/not-found")))
+                .andExpect(jsonPath("$.type", is("https://api.boot-jndi-sample.com/errors/not-found")))
                 .andExpect(jsonPath("$.title", is("Not Found")))
                 .andExpect(jsonPath("$.status", is(404)))
                 .andExpect(jsonPath("$.detail").value("Driver with Id '%d' not found".formatted(driverId)));

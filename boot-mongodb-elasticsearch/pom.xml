@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
@@ -18,15 +19,15 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-        <java.version>21</java.version>
-        <springdoc-openapi.version>2.8.11</springdoc-openapi.version>
+        <java.version>25</java.version>
+        <springdoc-openapi.version>2.8.13</springdoc-openapi.version>
 
         <project.testresult.directory>${project.build.directory}/test-results</project.testresult.directory>
-        <spotless.version>2.46.1</spotless.version>
-        <dependency-check-maven.version>12.1.3</dependency-check-maven.version>
+        <spotless.version>3.0.0</spotless.version>
+        <dependency-check-maven.version>12.1.8</dependency-check-maven.version>
         <properties-maven-plugin.version>1.2.1</properties-maven-plugin.version>
         <sonar-maven-plugin.version>5.2.0.4988</sonar-maven-plugin.version>
-        <jacoco-maven-plugin.version>0.8.13</jacoco-maven-plugin.version>
+        <jacoco-maven-plugin.version>0.8.14</jacoco-maven-plugin.version>
         <jacoco.minimum.coverage>0.80</jacoco.minimum.coverage>
         <jacoco.utReportFolder>${project.build.directory}/jacoco/test</jacoco.utReportFolder>
         <jacoco.utReportFile>${jacoco.utReportFolder}/test.exec</jacoco.utReportFile>
@@ -221,7 +222,7 @@
                 <configuration>
                     <java>
                         <googleJavaFormat>
-                            <version>1.25.2</version>
+                            <version>1.28.0</version>
                             <style>AOSP</style>
                         </googleJavaFormat>
                     </java>
@@ -273,7 +274,8 @@
                             <destFile>${jacoco.utReportFile}</destFile>
                         </configuration>
                     </execution>
-                    <!-- Ensures that the code coverage report for unit tests is created after unit tests have been run -->
+                    <!-- Ensures that the code coverage report for unit tests is created after unit
+                    tests have been run -->
                     <execution>
                         <id>post-unit-test</id>
                         <phase>test</phase>
@@ -295,7 +297,8 @@
                             <destFile>${jacoco.itReportFile}</destFile>
                         </configuration>
                     </execution>
-                    <!-- Ensures that the code coverage report for integration tests is created after integration tests have been run -->
+                    <!-- Ensures that the code coverage report for integration tests is created
+                    after integration tests have been run -->
                     <execution>
                         <id>post-integration-tests</id>
                         <phase>post-integration-test</phase>

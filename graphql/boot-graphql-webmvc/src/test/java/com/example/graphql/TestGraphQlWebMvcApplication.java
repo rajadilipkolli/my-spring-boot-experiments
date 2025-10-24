@@ -9,7 +9,7 @@ import org.springframework.boot.testcontainers.context.ImportTestcontainers;
 @ImportTestcontainers(TestContainersConfig.class)
 public class TestGraphQlWebMvcApplication {
 
-    public static void main(String[] args) {
+    static void main(String[] args) {
         SpringApplication.from(GraphQlWebMvcApplication::main)
                 .with(TestGraphQlWebMvcApplication.class)
                 .run(args);
