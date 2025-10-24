@@ -26,7 +26,7 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -133,14 +133,13 @@ class PostCommentEntityControllerTest {
                 .andExpect(jsonPath("$.type", is("https://api.graphql-webmvc.com/errors/validation")))
                 .andExpect(jsonPath("$.title", is("Constraint Violation")))
                 .andExpect(jsonPath("$.status", is(400)))
-                .andExpect(jsonPath("$.properties.violations", hasSize(3)))
-                .andExpect(jsonPath("$.properties.violations[0].field", is("content")))
-                .andExpect(jsonPath("$.properties.violations[0].message", is("CommentContent must not be blank")))
-                .andExpect(jsonPath("$.properties.violations[1].field", is("postId")))
-                .andExpect(jsonPath(
-                        "$.properties.violations[1].message", is("PostId must must not be blank and greater than 0")))
-                .andExpect(jsonPath("$.properties.violations[2].field", is("title")))
-                .andExpect(jsonPath("$.properties.violations[2].message", is("CommentTitle must not be blank")))
+                .andExpect(jsonPath("$.violations", hasSize(3)))
+                .andExpect(jsonPath("$.violations[0].field", is("content")))
+                .andExpect(jsonPath("$.violations[0].message", is("CommentContent must not be blank")))
+                .andExpect(jsonPath("$.violations[1].field", is("postId")))
+                .andExpect(jsonPath("$.violations[1].message", is("PostId must must not be blank and greater than 0")))
+                .andExpect(jsonPath("$.violations[2].field", is("title")))
+                .andExpect(jsonPath("$.violations[2].message", is("CommentTitle must not be blank")))
                 .andReturn();
     }
 
