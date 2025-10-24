@@ -10,11 +10,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.poc.boot.rabbitmq.model.Order;
 import com.poc.boot.rabbitmq.service.OrderMessageSender;
 import com.poc.boot.rabbitmq.util.MockObjectCreator;
-import java.io.Serial;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -48,10 +46,7 @@ class MessageControllerTest {
 
     @Test
     void handleMessageThrowsException() throws Exception {
-        willThrow(
-                        new JsonProcessingException("Exception") {
-                            @Serial private static final long serialVersionUID = 1L;
-                        })
+        willThrow(new RuntimeException("Exception") {})
                 .given(this.orderMessageSender)
                 .sendOrder(any(Order.class));
 
@@ -63,7 +58,9 @@ class MessageControllerTest {
                 .andExpect(status().isInternalServerError())
                 .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON))
                 .andExpect(jsonPath("$.title").value("Internal Server Error"))
-                .andExpect(jsonPath("$.type").value("about:blank"))
+                .andExpect(
+                        jsonPath("$.type")
+                                .value("https://api.boot-rabbitmq-thymeleaf.com/errors/exception"))
                 .andExpect(jsonPath("$.status").value(500))
                 .andExpect(
                         jsonPath("$.detail")

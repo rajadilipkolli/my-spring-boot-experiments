@@ -11,12 +11,10 @@ import org.springframework.amqp.core.ExchangeBuilder;
 import org.springframework.amqp.core.FanoutExchange;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.core.QueueBuilder;
-import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
-import org.springframework.amqp.support.converter.MessageConverter;
-import org.springframework.boot.autoconfigure.amqp.RabbitTemplateCustomizer;
+import org.springframework.boot.amqp.autoconfigure.RabbitTemplateCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.messaging.converter.MappingJackson2MessageConverter;
+import org.springframework.messaging.converter.JacksonJsonMessageConverter;
 import org.springframework.messaging.handler.annotation.support.DefaultMessageHandlerMethodFactory;
 import org.springframework.messaging.handler.annotation.support.MessageHandlerMethodFactory;
 import org.springframework.util.Assert;
@@ -115,21 +113,16 @@ public class RabbitMQConfig {
     }
 
     @Bean
-    MessageConverter producerJackson2MessageConverter() {
-        return new Jackson2JsonMessageConverter();
-    }
-
-    @Bean
-    MappingJackson2MessageConverter consumerJackson2MessageConverter() {
-        return new MappingJackson2MessageConverter();
+    JacksonJsonMessageConverter consumerJacksonMessageConverter() {
+        return new JacksonJsonMessageConverter();
     }
 
     @Bean
     MessageHandlerMethodFactory messageHandlerMethodFactory(
-            MappingJackson2MessageConverter consumerJackson2MessageConverter) {
+            JacksonJsonMessageConverter consumerJacksonMessageConverter) {
         DefaultMessageHandlerMethodFactory messageHandlerMethodFactory =
                 new DefaultMessageHandlerMethodFactory();
-        messageHandlerMethodFactory.setMessageConverter(consumerJackson2MessageConverter);
+        messageHandlerMethodFactory.setMessageConverter(consumerJacksonMessageConverter);
         return messageHandlerMethodFactory;
     }
 }

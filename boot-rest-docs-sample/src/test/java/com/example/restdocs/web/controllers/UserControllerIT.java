@@ -93,7 +93,7 @@ class UserControllerIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(post("/api/users")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(userRequest)))
+                        .content(jsonMapper.writeValueAsString(userRequest)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id", notNullValue()))
                 .andExpect(jsonPath("$.firstName", is(userRequest.firstName())))
@@ -110,19 +110,19 @@ class UserControllerIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(post("/api/users")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(userRequest)))
+                        .content(jsonMapper.writeValueAsString(userRequest)))
                 .andExpect(status().isBadRequest())
-                .andExpect(header().string("Content-Type", is("application/problem+json")))
-                .andExpect(jsonPath("$.type", is("about:blank")))
+                .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
+                .andExpect(jsonPath("$.type", is("https://api.restdocs.com/errors/constraint-violation")))
                 .andExpect(jsonPath("$.title", is("Constraint Violation")))
                 .andExpect(jsonPath("$.status", is(400)))
                 .andExpect(jsonPath("$.detail", is("Invalid request content.")))
                 .andExpect(jsonPath("$.instance", is("/api/users")))
-                .andExpect(jsonPath("$.violations", hasSize(2)))
-                .andExpect(jsonPath("$.violations[0].field", is("age")))
-                .andExpect(jsonPath("$.violations[0].message", is("Age must be greater than 0")))
-                .andExpect(jsonPath("$.violations[1].field", is("firstName")))
-                .andExpect(jsonPath("$.violations[1].message", is("FirstName can't be blank")))
+                .andExpect(jsonPath("$.properties.violations", hasSize(2)))
+                .andExpect(jsonPath("$.properties.violations[0].field", is("age")))
+                .andExpect(jsonPath("$.properties.violations[0].message", is("Age must be greater than 0")))
+                .andExpect(jsonPath("$.properties.violations[1].field", is("firstName")))
+                .andExpect(jsonPath("$.properties.violations[1].message", is("FirstName can't be blank")))
                 .andReturn();
     }
 
@@ -134,7 +134,7 @@ class UserControllerIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(put("/api/users/{id}", user.getId())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(userRequest)))
+                        .content(jsonMapper.writeValueAsString(userRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(user.getId()), Long.class))
                 .andExpect(jsonPath("$.firstName", is(userRequest.firstName())))

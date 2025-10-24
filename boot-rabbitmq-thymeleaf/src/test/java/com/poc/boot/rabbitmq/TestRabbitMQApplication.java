@@ -5,7 +5,7 @@ import org.springframework.boot.SpringApplication;
 
 public class TestRabbitMQApplication {
 
-    public static void main(String[] args) {
+    static void main(String[] args) {
         SpringApplication.from(RabbitMQApplication::main).with(ContainerConfiguration.class).run();
     }
 }

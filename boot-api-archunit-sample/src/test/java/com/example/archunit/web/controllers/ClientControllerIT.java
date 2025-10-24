@@ -74,7 +74,7 @@ class ClientControllerIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(post("/api/clients")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(clientRequest)))
+                        .content(jsonMapper.writeValueAsString(clientRequest)))
                 .andExpect(status().isCreated())
                 .andExpect(header().exists(HttpHeaders.LOCATION))
                 .andExpect(jsonPath("$.id", notNullValue()))
@@ -88,7 +88,7 @@ class ClientControllerIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(post("/api/clients")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(clientRequest)))
+                        .content(jsonMapper.writeValueAsString(clientRequest)))
                 .andExpect(status().isBadRequest())
                 .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                 .andExpect(jsonPath("$.type", is("https://archunit-sample.com/errors/validation-error")))
@@ -110,7 +110,7 @@ class ClientControllerIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(put("/api/clients/{id}", clientId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(clientRequest)))
+                        .content(jsonMapper.writeValueAsString(clientRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(clientId), Long.class))
                 .andExpect(jsonPath("$.text", is(clientRequest.text())));
