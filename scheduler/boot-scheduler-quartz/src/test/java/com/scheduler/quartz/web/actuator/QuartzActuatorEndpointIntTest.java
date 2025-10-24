@@ -2,11 +2,11 @@ package com.scheduler.quartz.web.actuator;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.scheduler.quartz.common.AbstractIntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
+import tools.jackson.databind.JsonNode;
 
 class QuartzActuatorEndpointIntTest extends AbstractIntegrationTest {
 
