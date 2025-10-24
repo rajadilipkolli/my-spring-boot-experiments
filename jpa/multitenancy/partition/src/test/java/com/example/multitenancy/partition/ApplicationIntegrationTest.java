@@ -13,6 +13,7 @@ import com.example.multitenancy.partition.config.tenant.TenantIdentifierResolver
 import com.example.multitenancy.partition.entities.Customer;
 import com.example.multitenancy.partition.repositories.CustomerRepository;
 import java.nio.charset.StandardCharsets;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -21,7 +22,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.http.MediaType;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.testcontainers.shaded.org.apache.commons.lang3.RandomStringUtils;
 
 class ApplicationIntegrationTest extends AbstractIntegrationTest {
 

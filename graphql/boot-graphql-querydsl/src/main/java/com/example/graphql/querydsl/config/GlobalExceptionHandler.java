@@ -27,6 +27,7 @@ class GlobalExceptionHandler {
         ProblemDetail problemDetail =
                 ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(400), "Invalid request content.");
         problemDetail.setTitle("Constraint Violation");
+        problemDetail.setType(URI.create("https://api.graphql-webmvc.com/errors/validation"));
         List<ApiValidationError> validationErrorsList = methodArgumentNotValidException.getAllErrors().stream()
                 .map(objectError -> {
                     FieldError fieldError = (FieldError) objectError;

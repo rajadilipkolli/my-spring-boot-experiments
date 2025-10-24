@@ -85,7 +85,7 @@ class PostControllerIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(post("/api/posts")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(postRequest)))
+                        .content(jsonMapper.writeValueAsString(postRequest)))
                 .andExpect(status().isCreated())
                 .andExpect(header().exists(HttpHeaders.LOCATION))
                 .andExpect(jsonPath("$.id", notNullValue()))
@@ -107,10 +107,10 @@ class PostControllerIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(post("/api/posts")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(createPostRequest)))
+                        .content(jsonMapper.writeValueAsString(createPostRequest)))
                 .andExpect(status().isBadRequest())
-                .andExpect(header().string("Content-Type", is("application/problem+json")))
-                .andExpect(jsonPath("$.type", is("about:blank")))
+                .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
+                .andExpect(jsonPath("$.type", is("https://api.graphql-webmvc.com/errors/validation")))
                 .andExpect(jsonPath("$.title", is("Constraint Violation")))
                 .andExpect(jsonPath("$.status", is(400)))
                 .andExpect(jsonPath("$.detail", is("Invalid request content.")))
@@ -133,7 +133,7 @@ class PostControllerIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(put("/api/posts/{id}", postId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(updatePostRequest)))
+                        .content(jsonMapper.writeValueAsString(updatePostRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(postId), Long.class))
                 .andExpect(jsonPath("$.title", is(updatePostRequest.title())))

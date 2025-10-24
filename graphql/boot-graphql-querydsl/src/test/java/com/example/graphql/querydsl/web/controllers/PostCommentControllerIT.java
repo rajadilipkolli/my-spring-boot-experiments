@@ -87,7 +87,7 @@ class PostCommentControllerIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(post("/api/posts/comments")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(createPostCommentRequest)))
+                        .content(jsonMapper.writeValueAsString(createPostCommentRequest)))
                 .andExpect(status().isCreated())
                 .andExpect(header().exists(HttpHeaders.LOCATION))
                 .andExpect(jsonPath("$.id", notNullValue()))
@@ -101,10 +101,10 @@ class PostCommentControllerIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(post("/api/posts/comments")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(postCommentRequest)))
+                        .content(jsonMapper.writeValueAsString(postCommentRequest)))
                 .andExpect(status().isBadRequest())
-                .andExpect(header().string("Content-Type", is("application/problem+json")))
-                .andExpect(jsonPath("$.type", is("about:blank")))
+                .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
+                .andExpect(jsonPath("$.type", is("https://api.graphql-webmvc.com/errors/validation")))
                 .andExpect(jsonPath("$.title", is("Constraint Violation")))
                 .andExpect(jsonPath("$.status", is(400)))
                 .andExpect(jsonPath("$.detail", is("Invalid request content.")))
@@ -125,7 +125,7 @@ class PostCommentControllerIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(put("/api/posts/comments/{id}", postCommentId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(postCommentRequest)))
+                        .content(jsonMapper.writeValueAsString(postCommentRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(postCommentId), Long.class))
                 .andExpect(jsonPath("$.review", is(postCommentRequest.review())));

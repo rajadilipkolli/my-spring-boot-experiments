@@ -118,11 +118,11 @@ class UserControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.status", is(400)))
                 .andExpect(jsonPath("$.detail", is("Invalid request content.")))
                 .andExpect(jsonPath("$.instance", is("/api/users")))
-                .andExpect(jsonPath("$.properties.violations", hasSize(2)))
-                .andExpect(jsonPath("$.properties.violations[0].field", is("age")))
-                .andExpect(jsonPath("$.properties.violations[0].message", is("Age must be greater than 0")))
-                .andExpect(jsonPath("$.properties.violations[1].field", is("firstName")))
-                .andExpect(jsonPath("$.properties.violations[1].message", is("FirstName can't be blank")))
+                .andExpect(jsonPath("$.violations", hasSize(2)))
+                .andExpect(jsonPath("$.violations[0].field", is("age")))
+                .andExpect(jsonPath("$.violations[0].message", is("Age must be greater than 0")))
+                .andExpect(jsonPath("$.violations[1].field", is("firstName")))
+                .andExpect(jsonPath("$.violations[1].message", is("FirstName can't be blank")))
                 .andReturn();
     }
 
