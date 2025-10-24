@@ -25,7 +25,7 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
@@ -139,13 +139,13 @@ class AuthorEntityControllerTest {
                 .andExpect(jsonPath("$.status", is(400)))
                 .andExpect(jsonPath("$.detail", is("Invalid request content.")))
                 .andExpect(jsonPath("$.instance", is("/api/authors")))
-                .andExpect(jsonPath("$.properties.violations", hasSize(3)))
-                .andExpect(jsonPath("$.properties.violations[0].field", is("email")))
-                .andExpect(jsonPath("$.properties.violations[0].message", is("Email Cant be Blank")))
-                .andExpect(jsonPath("$.properties.violations[1].field", is("firstName")))
-                .andExpect(jsonPath("$.properties.violations[1].message", is("FirstName Cant be Blank")))
-                .andExpect(jsonPath("$.properties.violations[2].field", is("lastName")))
-                .andExpect(jsonPath("$.properties.violations[2].message", is("LastName Cant be Blank")))
+                .andExpect(jsonPath("$.violations", hasSize(3)))
+                .andExpect(jsonPath("$.violations[0].field", is("email")))
+                .andExpect(jsonPath("$.violations[0].message", is("Email Cant be Blank")))
+                .andExpect(jsonPath("$.violations[1].field", is("firstName")))
+                .andExpect(jsonPath("$.violations[1].message", is("FirstName Cant be Blank")))
+                .andExpect(jsonPath("$.violations[2].field", is("lastName")))
+                .andExpect(jsonPath("$.violations[2].message", is("LastName Cant be Blank")))
                 .andReturn();
     }
 

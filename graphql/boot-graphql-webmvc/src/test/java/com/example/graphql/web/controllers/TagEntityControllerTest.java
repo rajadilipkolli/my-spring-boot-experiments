@@ -24,7 +24,7 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
@@ -122,10 +122,10 @@ class TagEntityControllerTest {
                 .andExpect(jsonPath("$.type", is("https://api.graphql-webmvc.com/errors/validation")))
                 .andExpect(jsonPath("$.title", is("Constraint Violation")))
                 .andExpect(jsonPath("$.status", is(400)))
-                .andExpect(jsonPath("$.properties.violations", hasSize(1)))
-                .andExpect(jsonPath("$.properties.violations[0].field", is("tagName")))
-                .andExpect(jsonPath("$.properties.violations[0].message", is("TagName must not be blank")))
-                .andExpect(jsonPath("$.properties.violations[0].object", is("tagsRequest")))
+                .andExpect(jsonPath("$.violations", hasSize(1)))
+                .andExpect(jsonPath("$.violations[0].field", is("tagName")))
+                .andExpect(jsonPath("$.violations[0].message", is("TagName must not be blank")))
+                .andExpect(jsonPath("$.violations[0].object", is("tagsRequest")))
                 .andReturn();
     }
 
