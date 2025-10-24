@@ -5,7 +5,6 @@ import com.example.graphql.querydsl.entities.QPost;
 import com.querydsl.core.types.dsl.StringExpression;
 import com.querydsl.core.types.dsl.StringPath;
 import java.util.List;
-import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
@@ -24,8 +23,10 @@ public interface PostRepository
         bindings.excluding(root.id);
     }
 
-    @EntityGraph(attributePaths = {"details", "comments"})
-    List<Post> findByDetails_CreatedByEqualsIgnoreCase(String createdBy);
+    // Use explicit JPQL to avoid ambiguity in derived query parsing for nested properties
+    @Query("select distinct p from Post p left join fetch p.details d "
+            + "left join fetch p.comments c where lower(d.createdBy) = lower(:createdBy)")
+    List<Post> findByDetailsCreatedByEqualsIgnoreCase(@Param("createdBy") String createdBy);
 
     @Query("select p from Post p left join fetch p.tags where p in :posts ORDER BY p.id")
     List<Post> findAllPostsWithTags(@Param("posts") List<Post> posts);

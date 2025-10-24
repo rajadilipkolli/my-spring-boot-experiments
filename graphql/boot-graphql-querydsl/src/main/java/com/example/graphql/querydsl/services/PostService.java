@@ -76,7 +76,7 @@ public class PostService {
     }
 
     public List<PostResponse> getPostsByUserName(String name) {
-        List<Post> posts = postRepository.findByDetails_CreatedByEqualsIgnoreCase(name);
+        List<Post> posts = postRepository.findByDetailsCreatedByEqualsIgnoreCase(name);
         if (posts.isEmpty()) {
             throw new PostNotFoundException(name);
         } else {
