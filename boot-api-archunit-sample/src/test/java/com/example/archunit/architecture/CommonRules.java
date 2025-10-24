@@ -169,6 +169,9 @@ public class CommonRules {
                 .that()
                 .areDeclaredInClassesThat()
                 .resideInAPackage(packageName)
+                // exclude compiler-generated synthetic methods (e.g., lambda$...) from this rule
+                .and()
+                .doNotHaveModifier(JavaModifier.SYNTHETIC)
                 .should()
                 .notBePrivate()
                 .because("Private methods are not allowed in %s".formatted(packageName));
@@ -179,6 +182,8 @@ public class CommonRules {
                 .that()
                 .areDeclaredInClassesThat()
                 .resideInAPackage(packageName)
+                .and()
+                .doNotHaveModifier(JavaModifier.SYNTHETIC)
                 .should()
                 .notBePublic()
                 .because("Public methods are not allowed in %s".formatted(packageName));
@@ -189,6 +194,8 @@ public class CommonRules {
                 .that()
                 .areDeclaredInClassesThat()
                 .resideInAPackage(packageName)
+                .and()
+                .doNotHaveModifier(JavaModifier.SYNTHETIC)
                 .should()
                 .notBeStatic()
                 .because("Static methods are not allowed in %s".formatted(packageName));
