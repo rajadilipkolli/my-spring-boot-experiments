@@ -198,9 +198,9 @@ class SecondaryCustomerControllerIT extends AbstractIntegrationTest {
                     .andExpect(jsonPath("$.status", is(400)))
                     .andExpect(jsonPath("$.detail", is("Invalid request content.")))
                     .andExpect(jsonPath("$.instance", is("/api/customers/secondary")))
-                    .andExpect(jsonPath("$.properties.violations", hasSize(1)))
-                    .andExpect(jsonPath("$.properties.violations[0].field", is("name")))
-                    .andExpect(jsonPath("$.properties.violations[0].message", is("Name cannot be blank")));
+                    .andExpect(jsonPath("$.violations", hasSize(1)))
+                    .andExpect(jsonPath("$.violations[0].field", is("name")))
+                    .andExpect(jsonPath("$.violations[0].message", is("Name cannot be blank")));
         }
 
         @Test
@@ -214,8 +214,8 @@ class SecondaryCustomerControllerIT extends AbstractIntegrationTest {
                             .content(objectMapper.writeValueAsString(secondaryCustomer)))
                     .andExpect(status().isBadRequest())
                     .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
-                    .andExpect(jsonPath("$.properties.violations[0].field", is("name")))
-                    .andExpect(jsonPath("$.properties.violations[0].message", is("Name cannot be blank")));
+                    .andExpect(jsonPath("$.violations[0].field", is("name")))
+                    .andExpect(jsonPath("$.violations[0].message", is("Name cannot be blank")));
         }
 
         @Test
@@ -229,8 +229,8 @@ class SecondaryCustomerControllerIT extends AbstractIntegrationTest {
                             .content(objectMapper.writeValueAsString(secondaryCustomer)))
                     .andExpect(status().isBadRequest())
                     .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
-                    .andExpect(jsonPath("$.properties.violations[0].field", is("name")))
-                    .andExpect(jsonPath("$.properties.violations[0].message", is("Name cannot be blank")));
+                    .andExpect(jsonPath("$.violations[0].field", is("name")))
+                    .andExpect(jsonPath("$.violations[0].message", is("Name cannot be blank")));
         }
     }
 
