@@ -30,7 +30,7 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.http.HttpHeaders;
@@ -155,9 +155,9 @@ class OrderItemControllerTest {
                 .andExpect(jsonPath("$.status", is(400)))
                 .andExpect(jsonPath("$.detail", is("Invalid request content.")))
                 .andExpect(jsonPath("$.instance", is("/api/order/items/1")))
-                .andExpect(jsonPath("$.properties.violations", hasSize(1)))
-                .andExpect(jsonPath("$.properties.violations[0].field", is("price")))
-                .andExpect(jsonPath("$.properties.violations[0].message", is("Price must be greater than zero")));
+                .andExpect(jsonPath("$.violations", hasSize(1)))
+                .andExpect(jsonPath("$.violations[0].field", is("price")))
+                .andExpect(jsonPath("$.violations[0].message", is("Price must be greater than zero")));
     }
 
     @Test
@@ -194,11 +194,10 @@ class OrderItemControllerTest {
                         jsonPath("$.type", is("https://api.boot-hibernate2ndlevelcache-sample.com/errors/validation")))
                 .andExpect(jsonPath("$.title", is("Constraint Violation")))
                 .andExpect(jsonPath("$.status", is(400)))
-                .andExpect(jsonPath("$.properties.violations", hasSize(3)))
+                .andExpect(jsonPath("$.violations", hasSize(3)))
+                .andExpect(jsonPath("$.violations[*].field", containsInAnyOrder("price", "quantity", "itemCode")))
                 .andExpect(jsonPath(
-                        "$.properties.violations[*].field", containsInAnyOrder("price", "quantity", "itemCode")))
-                .andExpect(jsonPath(
-                        "$.properties.violations[*].message",
+                        "$.violations[*].message",
                         containsInAnyOrder(
                                 "Price must be greater than zero",
                                 "Quantity must be positive",

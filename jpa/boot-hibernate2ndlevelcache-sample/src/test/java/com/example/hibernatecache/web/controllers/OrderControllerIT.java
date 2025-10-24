@@ -146,15 +146,15 @@ class OrderControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.status", is(400)))
                 .andExpect(jsonPath("$.detail", is("Invalid request content.")))
                 .andExpect(jsonPath("$.instance", is("/api/orders")))
-                .andExpect(jsonPath("$.properties.violations", hasSize(4)))
-                .andExpect(jsonPath("$.properties.violations[0].field", is("name")))
-                .andExpect(jsonPath("$.properties.violations[0].message", is("Name cannot be blank")))
-                .andExpect(jsonPath("$.properties.violations[1].field", is("orderItems[0].itemCode")))
-                .andExpect(jsonPath("$.properties.violations[1].message", is("ItemCode cannot be Blank")))
-                .andExpect(jsonPath("$.properties.violations[2].field", is("orderItems[0].price")))
-                .andExpect(jsonPath("$.properties.violations[2].message", is("Price is required")))
-                .andExpect(jsonPath("$.properties.violations[3].field", is("orderItems[0].quantity")))
-                .andExpect(jsonPath("$.properties.violations[3].message", is("Quantity is required")));
+                .andExpect(jsonPath("$.violations", hasSize(4)))
+                .andExpect(jsonPath("$.violations[0].field", is("name")))
+                .andExpect(jsonPath("$.violations[0].message", is("Name cannot be blank")))
+                .andExpect(jsonPath("$.violations[1].field", is("orderItems[0].itemCode")))
+                .andExpect(jsonPath("$.violations[1].message", is("ItemCode cannot be Blank")))
+                .andExpect(jsonPath("$.violations[2].field", is("orderItems[0].price")))
+                .andExpect(jsonPath("$.violations[2].message", is("Price is required")))
+                .andExpect(jsonPath("$.violations[3].field", is("orderItems[0].quantity")))
+                .andExpect(jsonPath("$.violations[3].message", is("Quantity is required")));
     }
 
     @Test

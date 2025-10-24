@@ -35,7 +35,7 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.http.HttpHeaders;
@@ -178,11 +178,11 @@ class OrderControllerTest {
                 .andExpect(jsonPath("$.status", is(400)))
                 .andExpect(jsonPath("$.detail", is("Invalid request content.")))
                 .andExpect(jsonPath("$.instance", is("/api/orders")))
-                .andExpect(jsonPath("$.properties.violations", hasSize(2)))
-                .andExpect(jsonPath("$.properties.violations[0].field", is("name")))
-                .andExpect(jsonPath("$.properties.violations[0].message", is("Name cannot be blank")))
-                .andExpect(jsonPath("$.properties.violations[1].field", is("orderItems")))
-                .andExpect(jsonPath("$.properties.violations[1].message", is("OrderItems are required")))
+                .andExpect(jsonPath("$.violations", hasSize(2)))
+                .andExpect(jsonPath("$.violations[0].field", is("name")))
+                .andExpect(jsonPath("$.violations[0].message", is("Name cannot be blank")))
+                .andExpect(jsonPath("$.violations[1].field", is("orderItems")))
+                .andExpect(jsonPath("$.violations[1].message", is("OrderItems are required")))
                 .andReturn();
     }
 
@@ -196,11 +196,11 @@ class OrderControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(orderRequest)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.properties.violations", hasSize(2)))
-                .andExpect(jsonPath("$.properties.violations[0].field", is("orderItems[0].price")))
-                .andExpect(jsonPath("$.properties.violations[0].message", is("Price must be greater than zero")))
-                .andExpect(jsonPath("$.properties.violations[1].field", is("orderItems[0].quantity")))
-                .andExpect(jsonPath("$.properties.violations[1].message", is("Quantity must be positive")));
+                .andExpect(jsonPath("$.violations", hasSize(2)))
+                .andExpect(jsonPath("$.violations[0].field", is("orderItems[0].price")))
+                .andExpect(jsonPath("$.violations[0].message", is("Price must be greater than zero")))
+                .andExpect(jsonPath("$.violations[1].field", is("orderItems[0].quantity")))
+                .andExpect(jsonPath("$.violations[1].message", is("Quantity must be positive")));
     }
 
     @Test

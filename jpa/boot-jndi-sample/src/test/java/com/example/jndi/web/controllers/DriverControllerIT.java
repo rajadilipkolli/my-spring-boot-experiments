@@ -96,9 +96,9 @@ class DriverControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.status", is(400)))
                 .andExpect(jsonPath("$.detail", is("Invalid request content.")))
                 .andExpect(jsonPath("$.instance", is("/api/drivers")))
-                .andExpect(jsonPath("$.properties.violations", hasSize(1)))
-                .andExpect(jsonPath("$.properties.violations[0].field", is("text")))
-                .andExpect(jsonPath("$.properties.violations[0].message", is("Text cannot be empty")))
+                .andExpect(jsonPath("$.violations", hasSize(1)))
+                .andExpect(jsonPath("$.violations[0].field", is("text")))
+                .andExpect(jsonPath("$.violations[0].message", is("Text cannot be empty")))
                 .andReturn();
     }
 
