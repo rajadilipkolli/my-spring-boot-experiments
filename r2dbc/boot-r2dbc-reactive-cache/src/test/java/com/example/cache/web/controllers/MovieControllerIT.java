@@ -82,7 +82,7 @@ class MovieControllerIT extends AbstractIntegrationTest {
                         """
                         {"type":"https://api.boot-reactive-cache.com/errors/not-found","title":"Not Found",
                         "status":404,"detail":"Movie with Id '10000' not found","instance":"/api/movies/10000",
-                        "properties":{"errorCategory":"Generic"}}
+                        "errorCategory":"Generic"}
                         """);
     }
 
@@ -132,8 +132,8 @@ class MovieControllerIT extends AbstractIntegrationTest {
                         {"type":"https://api.boot-reactive-cache.com/errors/constraint-violation",
                         "title":"Constraint Violation","status":400,"detail":"Invalid request content.",
                         "instance":"/api/movies",
-                        "properties":{"violations":[{"object":"movieRequest","field":"title","rejectedValue":null,
-                        "message":"Title cannot be blank"}]}}
+                        "violations":[{"object":"movieRequest","field":"title","rejectedValue":null,
+                        "message":"Title cannot be blank"}]}
                         """,
                         true);
     }
@@ -196,7 +196,7 @@ class MovieControllerIT extends AbstractIntegrationTest {
                         """
                         {"type":"https://api.boot-reactive-cache.com/errors/not-found","title":"Not Found","status":404,
                         "detail":"Movie with Id '10000' not found","instance":"/api/movies/10000",
-                        "properties":{"errorCategory":"Generic"}}
+                        "errorCategory":"Generic"}
                         """);
     }
 }

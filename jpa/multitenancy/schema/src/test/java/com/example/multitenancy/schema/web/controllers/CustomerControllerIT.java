@@ -363,9 +363,9 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                     .andExpect(jsonPath("$.status", is(400)))
                     .andExpect(jsonPath("$.detail", is("Invalid request content.")))
                     .andExpect(jsonPath("$.instance", is("/api/customers")))
-                    .andExpect(jsonPath("$.properties.violations", hasSize(1)))
-                    .andExpect(jsonPath("$.properties.violations[0].field", is("name")))
-                    .andExpect(jsonPath("$.properties.violations[0].message", is("Name cannot be Blank")));
+                    .andExpect(jsonPath("$.violations", hasSize(1)))
+                    .andExpect(jsonPath("$.violations[0].field", is("name")))
+                    .andExpect(jsonPath("$.violations[0].message", is("Name cannot be Blank")));
         }
 
         @Test
@@ -379,8 +379,8 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                             .content(objectMapper.writeValueAsString(invalidCustomer)))
                     .andExpect(status().isBadRequest())
                     .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
-                    .andExpect(jsonPath("$.properties.violations[0].field", is("name")))
-                    .andExpect(jsonPath("$.properties.violations[0].message", is("Name cannot be Blank")));
+                    .andExpect(jsonPath("$.violations[0].field", is("name")))
+                    .andExpect(jsonPath("$.violations[0].message", is("Name cannot be Blank")));
         }
 
         @Test
@@ -688,7 +688,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(emptyNameUpdate)))
                     .andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.properties.violations[0].field", is("name")));
+                    .andExpect(jsonPath("$.violations[0].field", is("name")));
 
             // Test with whitespace-only name (should fail validation)
             CustomerDto whitespaceCustomer = new CustomerDto("   ");
