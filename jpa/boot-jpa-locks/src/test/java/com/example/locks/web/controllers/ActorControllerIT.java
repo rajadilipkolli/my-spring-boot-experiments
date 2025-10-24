@@ -99,9 +99,9 @@ class ActorControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.status", is(400)))
                 .andExpect(jsonPath("$.detail", is("Invalid request content.")))
                 .andExpect(jsonPath("$.instance", is("/api/actors")))
-                .andExpect(jsonPath("$.properties.violations", hasSize(1)))
-                .andExpect(jsonPath("$.properties.violations[0].field", is("actorName")))
-                .andExpect(jsonPath("$.properties.violations[0].message", is("ActorName cant be Blank")))
+                .andExpect(jsonPath("$.violations", hasSize(1)))
+                .andExpect(jsonPath("$.violations[0].field", is("actorName")))
+                .andExpect(jsonPath("$.violations[0].message", is("ActorName cant be Blank")))
                 .andReturn();
     }
 
