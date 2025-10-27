@@ -1,16 +1,14 @@
 package com.example.restclient.bootrestclient.config;
 
 import java.util.List;
-import org.springframework.boot.web.client.RestClientCustomizer;
+import org.springframework.boot.restclient.RestClientCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
-import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 
 @Configuration(proxyBeanMethods = false)
-@EnableRetry
 public class RestClientConfiguration {
 
     @Bean

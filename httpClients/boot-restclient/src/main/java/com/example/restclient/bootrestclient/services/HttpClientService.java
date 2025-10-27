@@ -4,12 +4,11 @@ import com.example.restclient.bootrestclient.exception.MyCustomClientException;
 import java.net.URI;
 import java.util.Map;
 import java.util.function.Function;
+import org.jspecify.annotations.Nullable;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatusCode;
-import org.springframework.lang.Nullable;
-import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Retryable;
+import org.springframework.resilience.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.client.HttpServerErrorException;
@@ -18,9 +17,10 @@ import org.springframework.web.util.UriBuilder;
 
 @Service
 @Retryable(
-        retryFor = {HttpServerErrorException.class},
+        includes = {HttpServerErrorException.class},
         maxAttempts = 2,
-        backoff = @Backoff(delay = 5000))
+        jitter = 5000L,
+        multiplier = 2)
 public class HttpClientService {
 
     private final RestClient restClient;
