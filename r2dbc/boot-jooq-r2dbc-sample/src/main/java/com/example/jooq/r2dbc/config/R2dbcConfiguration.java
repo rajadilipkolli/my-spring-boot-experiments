@@ -1,6 +1,6 @@
 package com.example.jooq.r2dbc.config;
 
-import org.springframework.boot.autoconfigure.r2dbc.ProxyConnectionFactoryCustomizer;
+import org.springframework.boot.r2dbc.autoconfigure.ProxyConnectionFactoryCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.domain.ReactiveAuditorAware;

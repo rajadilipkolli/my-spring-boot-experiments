@@ -5,10 +5,12 @@ import org.springframework.boot.restclient.RestClientCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
+import org.springframework.resilience.annotation.EnableResilientMethods;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 
 @Configuration(proxyBeanMethods = false)
+@EnableResilientMethods
 public class RestClientConfiguration {
 
     @Bean

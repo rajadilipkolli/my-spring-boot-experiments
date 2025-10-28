@@ -5,7 +5,7 @@ import org.springframework.boot.SpringApplication;
 
 class TestJooqR2dbcApplication {
 
-    public static void main(String[] args) {
+    static void main(String[] args) {
         SpringApplication.from(JooqR2dbcApplication::main).with(ContainerConfig.class).run(args);
     }
 }
