@@ -125,7 +125,7 @@ public class PostHandler {
                     return existingPost;
                 }))
                 .flatMap(this.postRepository::save)
-                .flatMap(post -> noContent().build())
+                .flatMap(_ -> noContent().build())
                 .onErrorResume(IllegalArgumentException.class, e -> {
                     log.error("Error updating post: {}", e.getMessage());
                     return ServerResponse.badRequest().bodyValue(e.getMessage());

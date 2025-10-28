@@ -5,14 +5,14 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 
 import com.example.learning.repository.PostRepository;
 import com.example.learning.repository.TagRepository;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.instancio.junit.InstancioExtension;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
+import tools.jackson.databind.json.JsonMapper;
 
 @ActiveProfiles({PROFILE_TEST})
 @SpringBootTest(
@@ -26,7 +26,7 @@ public abstract class AbstractIntegrationTest {
     protected MockMvcTester mockMvcTester;
 
     @Autowired
-    protected ObjectMapper objectMapper;
+    protected JsonMapper jsonMapper;
 
     @Autowired
     protected PostRepository postRepository;
