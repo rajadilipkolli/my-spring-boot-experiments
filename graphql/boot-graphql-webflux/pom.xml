@@ -17,7 +17,7 @@
 
 	<properties>
 		<java.version>25</java.version>
-		<springdoc-openapi.version>3.0.0-M1</springdoc-openapi.version>
+		<springdoc-openapi.version>3.0.0-RC1</springdoc-openapi.version>
 
 		<project.testresult.directory>${project.build.directory}/test-results</project.testresult.directory>
 		<spotless.version>3.0.0</spotless.version>

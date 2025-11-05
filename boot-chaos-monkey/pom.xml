@@ -20,7 +20,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
         <java.version>25</java.version>
-        <springdoc-openapi.version>3.0.0-M1</springdoc-openapi.version>
+        <springdoc-openapi.version>3.0.0-RC1</springdoc-openapi.version>
 
         <gatling.version>3.14.7</gatling.version>
         <gatling-maven-plugin.version>4.20.8</gatling-maven-plugin.version>

@@ -18,7 +18,7 @@
         <java.version>25</java.version>
         <spotless.version>3.0.0</spotless.version>
         <commons-io.version>2.20.0</commons-io.version>
-        <springdoc-openapi.version>3.0.0-M1</springdoc-openapi.version>
+        <springdoc-openapi.version>3.0.0-RC1</springdoc-openapi.version>
 
         <properties-maven-plugin.version>1.2.1</properties-maven-plugin.version>
         <sonar-maven-plugin.version>5.2.0.4988</sonar-maven-plugin.version>
