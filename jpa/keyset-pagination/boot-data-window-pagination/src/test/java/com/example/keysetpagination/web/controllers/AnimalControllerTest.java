@@ -24,7 +24,6 @@ import com.example.keysetpagination.model.request.AnimalRequest;
 import com.example.keysetpagination.model.response.AnimalResponse;
 import com.example.keysetpagination.model.response.PagedResult;
 import com.example.keysetpagination.services.AnimalService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,7 +31,7 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -42,6 +41,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import tools.jackson.databind.json.JsonMapper;
 
 @WebMvcTest(controllers = AnimalController.class)
 @ActiveProfiles(PROFILE_TEST)
@@ -54,7 +54,7 @@ class AnimalControllerTest {
     private AnimalService animalService;
 
     @Autowired
-    private ObjectMapper objectMapper;
+    private JsonMapper jsonMapper;
 
     private List<Animal> animalList;
 
@@ -120,7 +120,7 @@ class AnimalControllerTest {
         mockMvc.perform(post("/api/animals/search")
                         .param("pageSize", "0") // Less than minimum value of 1
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(searchRequest)))
+                        .content(jsonMapper.writeValueAsString(searchRequest)))
                 .andExpect(status().isBadRequest())
                 .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                 .andExpect(jsonPath("$.type", is("https://api.boot-data-window-pagination.com/errors/validation")))
@@ -138,7 +138,7 @@ class AnimalControllerTest {
         mockMvc.perform(post("/api/animals/search")
                         .param("pageSize", "101") // Exceeds maximum value of 100
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(searchRequest)))
+                        .content(jsonMapper.writeValueAsString(searchRequest)))
                 .andExpect(status().isBadRequest())
                 .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                 .andExpect(jsonPath("$.type", is("https://api.boot-data-window-pagination.com/errors/validation")))
@@ -156,7 +156,7 @@ class AnimalControllerTest {
         mockMvc.perform(post("/api/animals/search")
                         .param("pageSize", "50") // Within valid range (1-100)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(searchRequest)))
+                        .content(jsonMapper.writeValueAsString(searchRequest)))
                 .andExpect(status().isOk());
     }
 
@@ -197,7 +197,7 @@ class AnimalControllerTest {
         this.mockMvc
                 .perform(post("/api/animals")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(animalRequest)))
+                        .content(jsonMapper.writeValueAsString(animalRequest)))
                 .andExpect(status().isCreated())
                 .andExpect(header().exists(HttpHeaders.LOCATION))
                 .andExpect(jsonPath("$.id", notNullValue()))
@@ -211,10 +211,10 @@ class AnimalControllerTest {
         this.mockMvc
                 .perform(post("/api/animals")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(animalRequest)))
+                        .content(jsonMapper.writeValueAsString(animalRequest)))
                 .andExpect(status().isBadRequest())
-                .andExpect(header().string("Content-Type", is("application/problem+json")))
-                .andExpect(jsonPath("$.type", is("about:blank")))
+                .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
+                .andExpect(jsonPath("$.type", is("https://api.boot-data-window-pagination.com/errors/validation")))
                 .andExpect(jsonPath("$.title", is("Constraint Violation")))
                 .andExpect(jsonPath("$.status", is(400)))
                 .andExpect(jsonPath("$.detail", is("Invalid request content.")))
@@ -239,7 +239,7 @@ class AnimalControllerTest {
         this.mockMvc
                 .perform(put("/api/animals/{id}", animalId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(animalRequest)))
+                        .content(jsonMapper.writeValueAsString(animalRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(animalId), Long.class))
                 .andExpect(jsonPath("$.name", is(animalResponse.name())));
@@ -255,7 +255,7 @@ class AnimalControllerTest {
         this.mockMvc
                 .perform(put("/api/animals/{id}", animalId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(animalRequest)))
+                        .content(jsonMapper.writeValueAsString(animalRequest)))
                 .andExpect(status().isNotFound())
                 .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                 .andExpect(jsonPath("$.type", is("https://api.boot-data-window-pagination.com/errors/not-found")))
