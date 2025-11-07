@@ -12,9 +12,9 @@ public class CustomWindow<T> implements Window<T> {
 
     private List<T> content;
     private ScrollPosition position;
-    private boolean hasNext;
+    private Boolean hasNext;
 
-    public CustomWindow(List<T> content, ScrollPosition position, boolean hasNext) {
+    public CustomWindow(List<T> content, ScrollPosition position, Boolean hasNext) {
         this.content = content;
         this.position = position;
         this.hasNext = hasNext;
@@ -39,7 +39,7 @@ public class CustomWindow<T> implements Window<T> {
 
     @Override
     public boolean hasNext() {
-        return hasNext;
+        return Boolean.TRUE.equals(hasNext);
     }
 
     @Override
