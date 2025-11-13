@@ -27,6 +27,9 @@ public class GlobalExceptionHandler {
         ProblemDetail problemDetail =
                 ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(400), "Invalid request content.");
         problemDetail.setTitle("Constraint Violation");
+        problemDetail.setType(URI.create("https://api.boot-jpa-locks.com/errors/constraint-violation"));
+        problemDetail.setProperty("errorCategory", "Validation");
+        problemDetail.setProperty("timestamp", Instant.now());
         List<ApiValidationError> validationErrorsList = methodArgumentNotValidException.getAllErrors().stream()
                 .map(objectError -> {
                     FieldError fieldError = (FieldError) objectError;
@@ -48,7 +51,7 @@ public class GlobalExceptionHandler {
             ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
                     resourceNotFoundException.getHttpStatus(), resourceNotFoundException.getMessage());
             problemDetail.setTitle("Not Found");
-            problemDetail.setType(URI.create("http://api.boot-jpa-locks.com/errors/not-found"));
+            problemDetail.setType(URI.create("https://api.boot-jpa-locks.com/errors/not-found"));
             problemDetail.setProperty("errorCategory", "Generic");
             problemDetail.setProperty("timestamp", Instant.now());
             return problemDetail;

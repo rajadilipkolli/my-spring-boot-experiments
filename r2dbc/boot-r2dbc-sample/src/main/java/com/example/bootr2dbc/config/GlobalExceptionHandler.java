@@ -1,5 +1,6 @@
 package com.example.bootr2dbc.config;
 
+import java.net.URI;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -25,6 +26,7 @@ public class GlobalExceptionHandler {
                 ProblemDetail.forStatusAndDetail(
                         HttpStatusCode.valueOf(400), "Invalid request content.");
         problemDetail.setTitle("Constraint Violation");
+        problemDetail.setType(URI.create("https://api.boot-r2dbc.com/errors/validation-error"));
         List<ApiValidationError> validationErrorsList =
                 webExchangeBindException.getAllErrors().stream()
                         .map(

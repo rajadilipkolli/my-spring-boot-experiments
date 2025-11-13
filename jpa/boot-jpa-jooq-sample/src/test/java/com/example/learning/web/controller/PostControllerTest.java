@@ -6,8 +6,6 @@ import com.example.learning.model.request.PostCommentRequest;
 import com.example.learning.model.request.PostRequest;
 import com.example.learning.model.request.TagRequest;
 import com.example.learning.service.PostService;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -15,12 +13,13 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
+import tools.jackson.databind.json.JsonMapper;
 
 @WebMvcTest(controllers = PostController.class)
 class PostControllerTest {
@@ -29,7 +28,7 @@ class PostControllerTest {
     private MockMvcTester mockMvcTester;
 
     @Autowired
-    private ObjectMapper objectMapper;
+    private JsonMapper jsonMapper;
 
     @MockitoBean
     @Qualifier("jpaPostService") private PostService jpaPostService;
@@ -54,14 +53,15 @@ class PostControllerTest {
                 .post()
                 .uri("/api/users/{user_name}/posts/", "testuser")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(invalidPost))
+                .content(jsonMapper.writeValueAsString(invalidPost))
                 .assertThat()
                 .hasStatus(HttpStatus.BAD_REQUEST)
                 .hasContentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE)
                 .bodyJson()
                 .convertTo(ProblemDetail.class)
                 .satisfies(problemDetail -> {
-                    assertThat(problemDetail.getType()).isEqualTo(URI.create("about:blank"));
+                    assertThat(problemDetail.getType())
+                            .isEqualTo(URI.create("https://api.boot-jpa-jooq.com/errors/validation-error"));
                     assertThat(problemDetail.getTitle()).isEqualTo("Constraint Violation");
                     assertThat(problemDetail.getStatus()).isEqualTo(400);
                     assertThat(problemDetail.getDetail()).isEqualTo("Invalid request content.");
@@ -114,7 +114,7 @@ class PostControllerTest {
     }
 
     @Test
-    void createPost_shouldReturnValidationErrors() throws JsonProcessingException {
+    void createPost_shouldReturnValidationErrors() {
         // Create a post with max length violations
         String exceededTitle = "a".repeat(256);
         String exceededContent = "a".repeat(10001);
@@ -131,14 +131,15 @@ class PostControllerTest {
                 .post()
                 .uri("/api/users/{user_name}/posts/", "testuser")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(postWithExceededLengths))
+                .content(jsonMapper.writeValueAsString(postWithExceededLengths))
                 .assertThat()
                 .hasStatus(HttpStatus.BAD_REQUEST)
                 .hasContentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE)
                 .bodyJson()
                 .convertTo(ProblemDetail.class)
                 .satisfies(problemDetail -> {
-                    assertThat(problemDetail.getType()).isEqualTo(URI.create("about:blank"));
+                    assertThat(problemDetail.getType())
+                            .isEqualTo(URI.create("https://api.boot-jpa-jooq.com/errors/validation-error"));
                     assertThat(problemDetail.getTitle()).isEqualTo("Constraint Violation");
                     assertThat(problemDetail.getStatus()).isEqualTo(400);
                     assertThat(problemDetail.getDetail()).isEqualTo("Invalid request content.");

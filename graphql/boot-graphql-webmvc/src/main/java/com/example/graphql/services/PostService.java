@@ -26,25 +26,25 @@ public class PostService {
     private final AuthorRepository authorRepository;
     private final TagRepository tagRepository;
 
-    private final ConversionService myConversionService;
+    private final ConversionService appConversionService;
     private final NewPostRequestToPostEntityMapper mapNewPostRequestToPostEntityMapper;
 
     public PostService(
             PostRepository postRepository,
             AuthorRepository authorRepository,
             TagRepository tagRepository,
-            ConversionService myConversionService,
+            ConversionService appConversionService,
             NewPostRequestToPostEntityMapper mapNewPostRequestToPostEntityMapper) {
         this.postRepository = postRepository;
         this.authorRepository = authorRepository;
         this.tagRepository = tagRepository;
-        this.myConversionService = myConversionService;
+        this.appConversionService = appConversionService;
         this.mapNewPostRequestToPostEntityMapper = mapNewPostRequestToPostEntityMapper;
     }
 
     public List<PostResponse> findAllPosts() {
         return postRepository.findAll().stream()
-                .map(post -> myConversionService.convert(post, PostResponse.class))
+                .map(post -> appConversionService.convert(post, PostResponse.class))
                 .toList();
     }
 
@@ -53,11 +53,11 @@ public class PostService {
     }
 
     public Optional<PostResponse> findPostById(Long id) {
-        return postRepository.findById(id).map(post -> myConversionService.convert(post, PostResponse.class));
+        return postRepository.findById(id).map(post -> appConversionService.convert(post, PostResponse.class));
     }
 
     public PostResponse savePost(NewPostRequest newPostRequest) {
-        return myConversionService.convert(createPost(newPostRequest), PostResponse.class);
+        return appConversionService.convert(createPost(newPostRequest), PostResponse.class);
     }
 
     @Transactional
@@ -83,7 +83,7 @@ public class PostService {
         return postRepository.findById(id).map(postEntity -> {
             mapNewPostRequestToPostEntityMapper.updatePostEntity(newPostRequest, postEntity, tagRepository);
             PostEntity updatedPostEntity = postRepository.save(postEntity);
-            return myConversionService.convert(updatedPostEntity, PostResponse.class);
+            return appConversionService.convert(updatedPostEntity, PostResponse.class);
         });
     }
 }

@@ -11,6 +11,7 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.BodyInserters;
 import reactor.core.publisher.Flux;
@@ -43,8 +44,10 @@ class ReactivePostControllerIT extends AbstractIntegrationTest {
                                                 .title("title 3")
                                                 .content("content 3")
                                                 .build()))
-                        .flatMap(reactivePostRepository::save)
-                        .thenMany(reactivePostRepository.findAll());
+                        // use concatMap to preserve insertion order when saving
+                        .concatMap(reactivePostRepository::save)
+                        // fetch all posts ordered by id ascending to match DB insertion order
+                        .thenMany(reactivePostRepository.findAll(Sort.by("id").ascending()));
     }
 
     @Test
@@ -150,7 +153,7 @@ class ReactivePostControllerIT extends AbstractIntegrationTest {
                 .contentType(MediaType.APPLICATION_PROBLEM_JSON)
                 .expectBody()
                 .jsonPath("$.type")
-                .isEqualTo("about:blank")
+                .isEqualTo("https://api.boot-r2dbc.com/errors/validation-error")
                 .jsonPath("$.title")
                 .isEqualTo("Constraint Violation")
                 .jsonPath("$.status")

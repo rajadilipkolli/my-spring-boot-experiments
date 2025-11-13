@@ -14,7 +14,7 @@ databaseChangeLog:
       changes:
         - createSequence:
             sequenceName: reactive_posts_seq
-            incrementBy: 50
+            incrementBy: 1
             startValue: 1
         - createTable:
             tableName: reactive_posts

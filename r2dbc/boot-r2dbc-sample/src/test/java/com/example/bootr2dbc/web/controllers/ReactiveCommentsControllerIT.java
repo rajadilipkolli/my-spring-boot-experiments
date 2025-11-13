@@ -204,7 +204,7 @@ class ReactiveCommentsControllerIT extends AbstractIntegrationTest {
                 .contentType(MediaType.APPLICATION_PROBLEM_JSON)
                 .expectBody()
                 .jsonPath("$.type")
-                .isEqualTo("about:blank")
+                .isEqualTo("https://api.boot-r2dbc.com/errors/validation-error")
                 .jsonPath("$.title")
                 .isEqualTo("Constraint Violation")
                 .jsonPath("$.status")

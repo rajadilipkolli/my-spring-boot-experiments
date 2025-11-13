@@ -29,7 +29,7 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.http.HttpHeaders;
@@ -37,7 +37,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 @WebMvcTest(controllers = ClientController.class)
 @ActiveProfiles(PROFILE_TEST)
@@ -50,7 +50,7 @@ class ClientControllerTest {
     private ClientService clientService;
 
     @Autowired
-    private ObjectMapper objectMapper;
+    private JsonMapper jsonMapper;
 
     private List<Client> clientList;
 
@@ -120,7 +120,7 @@ class ClientControllerTest {
         this.mockMvc
                 .perform(post("/api/clients")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(clientRequest)))
+                        .content(jsonMapper.writeValueAsString(clientRequest)))
                 .andExpect(status().isCreated())
                 .andExpect(header().exists(HttpHeaders.LOCATION))
                 .andExpect(jsonPath("$.id", notNullValue()))
@@ -134,7 +134,7 @@ class ClientControllerTest {
         this.mockMvc
                 .perform(post("/api/clients")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(clientRequest)))
+                        .content(jsonMapper.writeValueAsString(clientRequest)))
                 .andExpect(status().isBadRequest())
                 .andExpect(header().string("Content-Type", is("application/problem+json")))
                 .andExpect(jsonPath("$.type", is("https://archunit-sample.com/errors/validation-error")))
@@ -142,9 +142,9 @@ class ClientControllerTest {
                 .andExpect(jsonPath("$.status", is(400)))
                 .andExpect(jsonPath("$.detail", is("Invalid request content.")))
                 .andExpect(jsonPath("$.instance", is("/api/clients")))
-                .andExpect(jsonPath("$.properties.violations", hasSize(1)))
-                .andExpect(jsonPath("$.properties.violations[0].field", is("text")))
-                .andExpect(jsonPath("$.properties.violations[0].message", is("Text cannot be empty")))
+                .andExpect(jsonPath("$.violations", hasSize(1)))
+                .andExpect(jsonPath("$.violations[0].field", is("text")))
+                .andExpect(jsonPath("$.violations[0].message", is("Text cannot be empty")))
                 .andReturn();
     }
 
@@ -159,7 +159,7 @@ class ClientControllerTest {
         this.mockMvc
                 .perform(put("/api/clients/{id}", clientId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(clientRequest)))
+                        .content(jsonMapper.writeValueAsString(clientRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(clientId), Long.class))
                 .andExpect(jsonPath("$.text", is(client.text())));
@@ -175,7 +175,7 @@ class ClientControllerTest {
         this.mockMvc
                 .perform(put("/api/clients/{id}", clientId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(clientRequest)))
+                        .content(jsonMapper.writeValueAsString(clientRequest)))
                 .andExpect(status().isNotFound())
                 .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                 .andExpect(jsonPath("$.type", is("http://api.boot-api-archunit-sample.com/errors/not-found")))

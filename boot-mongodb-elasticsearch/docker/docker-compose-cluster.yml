@@ -2,7 +2,7 @@ services:
   mongo1:
     container_name: mongo1
     hostname: mongo1
-    image: mongo:8.0.15
+    image: mongo:8.2.1
     extra_hosts:
       - "host.docker.internal:host-gateway"
       - "docker.for.win.host.internal:host-gateway"
@@ -16,7 +16,7 @@ services:
   mongo2:
     container_name: mongo2
     hostname: mongo2
-    image: mongo:8.0.15
+    image: mongo:8.2.1
     extra_hosts:
       - "host.docker.internal:host-gateway"
       - "docker.for.win.host.internal:host-gateway"
@@ -30,7 +30,7 @@ services:
   mongo3:
     container_name: mongo3
     hostname: mongo3
-    image: mongo:8.0.15
+    image: mongo:8.2.1
     extra_hosts:
       - "host.docker.internal:host-gateway"
       - "docker.for.win.host.internal:host-gateway"
@@ -58,7 +58,7 @@ services:
     restart: unless-stopped
 
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:9.1.4
+    image: docker.elastic.co/elasticsearch/elasticsearch:9.2.1
     container_name: elasticsearch
     environment:
       - discovery.type=single-node
@@ -77,7 +77,7 @@ services:
       - ./elk/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
 
   kibana:
-    image: docker.elastic.co/kibana/kibana:9.1.4
+    image: docker.elastic.co/kibana/kibana:9.2.1
     restart: always
     ports:
       - "5601:5601"

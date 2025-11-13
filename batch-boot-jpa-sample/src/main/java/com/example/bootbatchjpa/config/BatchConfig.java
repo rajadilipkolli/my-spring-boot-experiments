@@ -3,7 +3,6 @@ package com.example.bootbatchjpa.config;
 import com.example.bootbatchjpa.entities.Customer;
 import com.example.bootbatchjpa.model.CustomerDTO;
 import jakarta.persistence.EntityManagerFactory;
-import jakarta.validation.ConstraintViolationException;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
@@ -18,19 +17,19 @@ import org.springframework.batch.core.job.Job;
 import org.springframework.batch.core.job.JobExecution;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.job.parameters.JobParameters;
-import org.springframework.batch.core.launch.support.RunIdIncrementer;
+import org.springframework.batch.core.job.parameters.RunIdIncrementer;
 import org.springframework.batch.core.listener.JobExecutionListener;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.Step;
 import org.springframework.batch.core.step.builder.StepBuilder;
-import org.springframework.batch.item.ItemProcessor;
-import org.springframework.batch.item.ItemWriter;
-import org.springframework.batch.item.database.JpaPagingItemReader;
-import org.springframework.batch.item.database.builder.JpaPagingItemReaderBuilder;
+import org.springframework.batch.infrastructure.item.ItemProcessor;
+import org.springframework.batch.infrastructure.item.ItemWriter;
+import org.springframework.batch.infrastructure.item.database.JpaPagingItemReader;
+import org.springframework.batch.infrastructure.item.database.builder.JpaPagingItemReaderBuilder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.dao.DataAccessException;
 
 @Configuration(proxyBeanMethods = false)
 @EnableBatchProcessing
@@ -46,20 +45,16 @@ class BatchConfig implements JobExecutionListener {
     }
 
     @Bean
-    Job allCustomersJob(
-            JpaPagingItemReader<Customer> jpaPagingItemReader,
-            JobRepository jobRepository,
-            PlatformTransactionManager transactionManager) {
+    Job allCustomersJob(JpaPagingItemReader<Customer> jpaPagingItemReader, JobRepository jobRepository) {
         Step step = new StepBuilder("all-customers-step", jobRepository)
                 .allowStartIfComplete(true)
-                .<Customer, CustomerDTO>chunk(10, transactionManager)
+                .<Customer, CustomerDTO>chunk(10)
                 .reader(jpaPagingItemReader)
                 .processor(getCustomerCustomerDTOItemProcessor())
                 .writer(getCustomerDTOItemWriter())
                 .faultTolerant() // tell to spring batch that this step can face errors
-                .skip(Exception.class) // skip all Exception
-                .noSkip(ConstraintViolationException.class) // but do not skip this one
-                .skipLimit(20) // the number of times you want to skip Exception.class
+                .skip(DataAccessException.class) // skip all DataAccessException
+                .skipLimit(20) // the number of times you want to skip DataAccessException.class
                 .build();
 
         return new JobBuilder("all-customers-job", jobRepository)

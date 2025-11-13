@@ -16,7 +16,7 @@ class JobInvokerControllerIT extends AbstractIntegrationTest {
                 .assertThat()
                 .hasStatusOk()
                 .hasContentType("text/plain;charset=UTF-8")
-                .hasBodyTextEqualTo("Batch job has been invoked as 1");
+                .hasBodyTextEqualTo("Batch job has been invoked as 2");
     }
 
     @Test

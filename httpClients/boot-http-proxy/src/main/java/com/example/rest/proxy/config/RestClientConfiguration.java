@@ -18,7 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.http.client.ClientHttpRequestFactoryBuilder;
 import org.springframework.boot.http.client.HttpComponentsClientHttpRequestFactoryBuilder;
-import org.springframework.boot.web.client.RestClientCustomizer;
+import org.springframework.boot.restclient.RestClientCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
@@ -26,7 +26,6 @@ import org.springframework.http.MediaType;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.support.RestClientAdapter;
 import org.springframework.web.service.invoker.HttpServiceProxyFactory;
-import org.zalando.logbook.spring.LogbookClientHttpRequestInterceptor;
 
 @Configuration(proxyBeanMethods = false)
 class RestClientConfiguration {
@@ -80,16 +79,17 @@ class RestClientConfiguration {
     }
 
     @Bean
-    RestClientCustomizer restClientCustomizer(
-            ObservationRegistry observationRegistry, LogbookClientHttpRequestInterceptor interceptor) {
+    RestClientCustomizer restClientCustomizer(ObservationRegistry observationRegistry
+            /** , LogbookClientHttpRequestInterceptor interceptor */
+            ) {
         return restClientBuilder -> restClientBuilder
                 .defaultHeaders(httpHeaders -> {
                     httpHeaders.setContentType(MediaType.APPLICATION_JSON);
                     httpHeaders.setAccept(List.of(MediaType.APPLICATION_JSON));
                 })
                 .baseUrl(applicationProperties.getPostServiceUrl())
-                .observationRegistry(observationRegistry)
-                .requestInterceptor(interceptor);
+                .observationRegistry(observationRegistry);
+        // .requestInterceptor(interceptor);
     }
 
     @Bean

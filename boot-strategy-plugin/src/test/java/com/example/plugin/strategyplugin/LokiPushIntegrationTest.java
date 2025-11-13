@@ -16,6 +16,7 @@ import java.time.Instant;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.MediaType;
 
 /**
@@ -27,6 +28,8 @@ class LokiPushIntegrationTest extends AbstractIntegrationTest {
     @Value("${loki.uri}")
     private String lokiPushUri; // expected to be something like http://host:3100/loki/api/v1/push
 
+    @LocalServerPort private int port;
+
     private final HttpClient http = HttpClient.newHttpClient();
 
     @Test
@@ -35,6 +38,8 @@ class LokiPushIntegrationTest extends AbstractIntegrationTest {
 
         // Call the application's /fetch endpoint with a unique type value to generate identifiable
         // logs.
+        // We intentionally ignore the HTTP status (could be 200 or 400) because the controller logs
+        // the incoming request in both cases and that log entry is what we verify in Loki.
         for (int i = 0; i < 5; i++) {
             this.mockMvcTester
                     .get()
@@ -46,8 +51,13 @@ class LokiPushIntegrationTest extends AbstractIntegrationTest {
         }
 
         // Build base URL for Loki queries from configured push URI
-        URI pushUri = URI.create(lokiPushUri);
-        String base = pushUri.getScheme() + "://" + pushUri.getAuthority();
+        String base;
+        if (lokiPushUri.contains("/loki/api/v1/push")) {
+            base = lokiPushUri.substring(0, lokiPushUri.indexOf("/loki/api/v1/push"));
+        } else {
+            int idx = lokiPushUri.indexOf("/loki");
+            base = idx > 0 ? lokiPushUri.substring(0, idx) : lokiPushUri;
+        }
 
         long startNs = (Instant.now().minusSeconds(60).toEpochMilli()) * 1_000_000L;
         long endNs = (Instant.now().plusSeconds(60).toEpochMilli()) * 1_000_000L;

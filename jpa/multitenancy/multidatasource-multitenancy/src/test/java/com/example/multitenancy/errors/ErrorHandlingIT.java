@@ -125,9 +125,9 @@ class ErrorHandlingIT extends AbstractIntegrationTest {
                     .andExpect(jsonPath("$.title", is("Constraint Violation")))
                     .andExpect(jsonPath("$.status").value(400))
                     .andExpect(jsonPath("$.detail").value("Invalid request content."))
-                    .andExpect(jsonPath("$.properties.violations").isArray())
-                    .andExpect(jsonPath("$.properties.violations[0].field").value("text"))
-                    .andExpect(jsonPath("$.properties.violations[0].message").value("Text cannot be blank"));
+                    .andExpect(jsonPath("$.violations").isArray())
+                    .andExpect(jsonPath("$.violations[0].field").value("text"))
+                    .andExpect(jsonPath("$.violations[0].message").value("Text cannot be blank"));
         }
 
         @Test
@@ -147,9 +147,9 @@ class ErrorHandlingIT extends AbstractIntegrationTest {
                     .andExpect(jsonPath("$.title", is("Constraint Violation")))
                     .andExpect(jsonPath("$.status").value(400))
                     .andExpect(jsonPath("$.detail").value("Invalid request content."))
-                    .andExpect(jsonPath("$.properties.violations").isArray())
-                    .andExpect(jsonPath("$.properties.violations[0].field").value("name"))
-                    .andExpect(jsonPath("$.properties.violations[0].message").value("Name cannot be blank"));
+                    .andExpect(jsonPath("$.violations").isArray())
+                    .andExpect(jsonPath("$.violations[0].field").value("name"))
+                    .andExpect(jsonPath("$.violations[0].message").value("Name cannot be blank"));
         }
 
         @Test
@@ -165,8 +165,8 @@ class ErrorHandlingIT extends AbstractIntegrationTest {
                             .content(objectMapper.writeValueAsString(nullTextCustomer)))
                     .andExpect(status().isBadRequest())
                     .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
-                    .andExpect(jsonPath("$.properties.violations[0].field").value("text"))
-                    .andExpect(jsonPath("$.properties.violations[0].message").value("Text cannot be blank"));
+                    .andExpect(jsonPath("$.violations[0].field").value("text"))
+                    .andExpect(jsonPath("$.violations[0].message").value("Text cannot be blank"));
 
             // Given
             SecondaryCustomer nullNameCustomer = new SecondaryCustomer().setName(null);
@@ -178,8 +178,8 @@ class ErrorHandlingIT extends AbstractIntegrationTest {
                             .content(objectMapper.writeValueAsString(nullNameCustomer)))
                     .andExpect(status().isBadRequest())
                     .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
-                    .andExpect(jsonPath("$.properties.violations[0].field").value("name"))
-                    .andExpect(jsonPath("$.properties.violations[0].message").value("Name cannot be blank"));
+                    .andExpect(jsonPath("$.violations[0].field").value("name"))
+                    .andExpect(jsonPath("$.violations[0].message").value("Name cannot be blank"));
         }
 
         @Test
@@ -195,8 +195,8 @@ class ErrorHandlingIT extends AbstractIntegrationTest {
                             .content(objectMapper.writeValueAsString(whitespaceCustomer)))
                     .andExpect(status().isBadRequest())
                     .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
-                    .andExpect(jsonPath("$.properties.violations[0].field").value("text"))
-                    .andExpect(jsonPath("$.properties.violations[0].message").value("Text cannot be blank"));
+                    .andExpect(jsonPath("$.violations[0].field").value("text"))
+                    .andExpect(jsonPath("$.violations[0].message").value("Text cannot be blank"));
 
             // Given
             SecondaryCustomer whitespaceSecondaryCustomer = new SecondaryCustomer().setName("   ");
@@ -208,8 +208,8 @@ class ErrorHandlingIT extends AbstractIntegrationTest {
                             .content(objectMapper.writeValueAsString(whitespaceSecondaryCustomer)))
                     .andExpect(status().isBadRequest())
                     .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
-                    .andExpect(jsonPath("$.properties.violations[0].field").value("name"))
-                    .andExpect(jsonPath("$.properties.violations[0].message").value("Name cannot be blank"));
+                    .andExpect(jsonPath("$.violations[0].field").value("name"))
+                    .andExpect(jsonPath("$.violations[0].message").value("Name cannot be blank"));
         }
     }
 

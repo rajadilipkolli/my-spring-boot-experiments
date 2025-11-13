@@ -5,7 +5,7 @@ import org.springframework.boot.SpringApplication;
 
 public class TestBatchApplication {
 
-    public static void main(String[] args) {
+    static void main(String[] args) {
         SpringApplication.from(BatchApplication::main)
                 .with(ContainersConfig.class)
                 .run(args);

@@ -9,16 +9,15 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 import com.example.restclient.bootrestclient.config.ClientLoggerRequestInterceptor;
 import com.example.restclient.bootrestclient.config.RestClientConfiguration;
 import com.example.restclient.bootrestclient.model.response.PostDto;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.client.RestClientTest;
+import org.springframework.boot.restclient.test.autoconfigure.RestClientTest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.client.MockRestServiceServer;
+import tools.jackson.databind.json.JsonMapper;
 
 @RestClientTest(
         components = {
@@ -33,13 +32,13 @@ class PostServiceTest {
     private MockRestServiceServer mockRestServiceServer;
 
     @Autowired
-    private ObjectMapper objectMapper;
+    private JsonMapper jsonMapper;
 
     @Autowired
     private PostService postService;
 
     @Test
-    void findPostById() throws JsonProcessingException {
+    void findPostById() {
 
         PostDto postDto = new PostDto(1000L, 583L, "JunitTitle", "Response from RestClientTest");
         this.mockRestServiceServer
@@ -48,7 +47,7 @@ class PostServiceTest {
                 .andExpect(header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(header("apiKey", "123456"))
-                .andRespond(withSuccess(objectMapper.writeValueAsString(postDto), MediaType.APPLICATION_JSON));
+                .andRespond(withSuccess(jsonMapper.writeValueAsString(postDto), MediaType.APPLICATION_JSON));
 
         Optional<PostDto> optionalPostDto = postService.findPostById(1L);
 

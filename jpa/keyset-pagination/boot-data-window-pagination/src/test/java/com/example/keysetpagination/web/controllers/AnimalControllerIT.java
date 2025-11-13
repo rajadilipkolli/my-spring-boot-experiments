@@ -102,9 +102,8 @@ class AnimalControllerIT extends AbstractIntegrationTest {
                 .getResponse()
                 .getContentAsString();
 
-        CustomWindow<Animal> window = objectMapper.readValue(
-                contentAsString,
-                objectMapper.getTypeFactory().constructParametricType(CustomWindow.class, Animal.class));
+        CustomWindow<Animal> window = jsonMapper.readValue(
+                contentAsString, jsonMapper.getTypeFactory().constructParametricType(CustomWindow.class, Animal.class));
         List<Animal> animalResponses = window.getContent();
         this.mockMvc
                 .perform(post("/api/animals/search")
@@ -210,7 +209,7 @@ class AnimalControllerIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(post("/api/animals")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(animalRequest)))
+                        .content(jsonMapper.writeValueAsString(animalRequest)))
                 .andExpect(status().isCreated())
                 .andExpect(header().exists(HttpHeaders.LOCATION))
                 .andExpect(jsonPath("$.id", notNullValue()))
@@ -226,10 +225,10 @@ class AnimalControllerIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(post("/api/animals")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(animalRequest)))
+                        .content(jsonMapper.writeValueAsString(animalRequest)))
                 .andExpect(status().isBadRequest())
-                .andExpect(header().string("Content-Type", is("application/problem+json")))
-                .andExpect(jsonPath("$.type", is("about:blank")))
+                .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
+                .andExpect(jsonPath("$.type", is("https://api.boot-data-window-pagination.com/errors/validation")))
                 .andExpect(jsonPath("$.title", is("Constraint Violation")))
                 .andExpect(jsonPath("$.status", is(400)))
                 .andExpect(jsonPath("$.detail", is("Invalid request content.")))
@@ -251,7 +250,7 @@ class AnimalControllerIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(put("/api/animals/{id}", animalId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(animalRequest)))
+                        .content(jsonMapper.writeValueAsString(animalRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(animalId), Long.class))
                 .andExpect(jsonPath("$.name", is(animalRequest.name())))
@@ -268,13 +267,13 @@ class AnimalControllerIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(put("/api/animals/{id}", animalId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(animalRequest)))
+                        .content(jsonMapper.writeValueAsString(animalRequest)))
                 .andExpect(status().isOk());
 
         this.mockMvc
                 .perform(put("/api/animals/{id}", animalId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(animalRequest)))
+                        .content(jsonMapper.writeValueAsString(animalRequest)))
                 .andExpect(status().isOk());
     }
 
@@ -285,7 +284,7 @@ class AnimalControllerIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(put("/api/animals/{id}", 999L)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(animalRequest)))
+                        .content(jsonMapper.writeValueAsString(animalRequest)))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.title", is("Not Found")))
                 .andExpect(jsonPath("$.status", is(404)));
@@ -683,9 +682,8 @@ class AnimalControllerIT extends AbstractIntegrationTest {
                 .getResponse()
                 .getContentAsString();
 
-        CustomWindow<Animal> window = objectMapper.readValue(
-                contentAsString,
-                objectMapper.getTypeFactory().constructParametricType(CustomWindow.class, Animal.class));
+        CustomWindow<Animal> window = jsonMapper.readValue(
+                contentAsString, jsonMapper.getTypeFactory().constructParametricType(CustomWindow.class, Animal.class));
         List<Animal> animalResponses = window.getContent();
 
         // Fetch the previous page using backward direction

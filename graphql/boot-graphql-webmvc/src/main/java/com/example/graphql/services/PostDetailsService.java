@@ -3,10 +3,11 @@ package com.example.graphql.services;
 import com.example.graphql.config.logging.Loggable;
 import com.example.graphql.entities.PostDetailsEntity;
 import com.example.graphql.model.request.PostDetailsRequest;
-import com.example.graphql.projections.PostDetailsInfo;
+import com.example.graphql.model.response.PostDetailsResponse;
 import com.example.graphql.repositories.PostDetailsRepository;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,17 +17,23 @@ import org.springframework.transaction.annotation.Transactional;
 public class PostDetailsService {
 
     private final PostDetailsRepository postDetailsRepository;
+    private final ConversionService appConversionService;
 
-    public PostDetailsService(PostDetailsRepository postDetailsRepository) {
+    public PostDetailsService(PostDetailsRepository postDetailsRepository, ConversionService appConversionService) {
         this.postDetailsRepository = postDetailsRepository;
+        this.appConversionService = appConversionService;
     }
 
-    public List<PostDetailsInfo> findAllPostDetails() {
-        return postDetailsRepository.findAllDetails();
+    public List<PostDetailsResponse> findAllPostDetails() {
+        return postDetailsRepository.findAllDetails().stream()
+                .map(postDetailsInfo -> appConversionService.convert(postDetailsInfo, PostDetailsResponse.class))
+                .toList();
     }
 
-    public Optional<PostDetailsInfo> findPostDetailsById(Long id) {
-        return postDetailsRepository.findByDetailsId(id);
+    public Optional<PostDetailsResponse> findPostDetailsById(Long id) {
+        return postDetailsRepository
+                .findByDetailsId(id)
+                .map(postDetailsInfo -> appConversionService.convert(postDetailsInfo, PostDetailsResponse.class));
     }
 
     public Optional<PostDetailsEntity> findDetailsById(Long id) {
@@ -34,10 +41,10 @@ public class PostDetailsService {
     }
 
     @Transactional
-    public Optional<PostDetailsInfo> updatePostDetails(
+    public Optional<PostDetailsResponse> updatePostDetails(
             PostDetailsEntity postDetailsObj, PostDetailsRequest postDetailsRequest) {
         postDetailsObj.setDetailsKey(postDetailsRequest.detailsKey());
         PostDetailsEntity persistedDetails = postDetailsRepository.save(postDetailsObj);
-        return findPostDetailsById(persistedDetails.getId());
+        return Optional.ofNullable(appConversionService.convert(persistedDetails, PostDetailsResponse.class));
     }
 }
