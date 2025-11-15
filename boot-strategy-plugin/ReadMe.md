@@ -25,5 +25,5 @@ docker-compose -f docker/docker-compose.yml up -d
 * Swagger UI: http://localhost:8080/swagger-ui.html
 * Actuator Endpoint: http://localhost:8080/actuator
 * Prometheus: http://localhost:9090/graph
-* Grafana: http://localhost:3000/ (user/password)
+* Grafana: http://localhost:3000/ (admin/admin)
 * Navigate to http://localhost:3100/metrics to view the metrics and http://localhost:3100/ready for readiness.

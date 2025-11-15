@@ -4,7 +4,6 @@ import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.example.plugin.strategyplugin.common.AbstractIntegrationTest;
-import com.fasterxml.jackson.databind.JsonNode;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.net.http.HttpClient;
@@ -18,6 +17,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.MediaType;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Integration test: call the application's /fetch endpoint (which produces logs) and then query
