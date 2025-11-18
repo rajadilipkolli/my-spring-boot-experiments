@@ -1,5 +1,6 @@
 package com.example.graphql.web.controllers;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -11,18 +12,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.example.graphql.common.AbstractIntegrationTest;
 import com.example.graphql.entities.TagEntity;
 import com.example.graphql.model.request.TagsRequest;
-import com.example.graphql.repositories.TagRepository;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 
 class TagEntityControllerIT extends AbstractIntegrationTest {
-
-    @Autowired
-    private TagRepository tagRepository;
 
     private List<TagEntity> tagEntityList = null;
 
@@ -86,5 +82,8 @@ class TagEntityControllerIT extends AbstractIntegrationTest {
         TagEntity tagEntity = tagEntityList.getFirst();
 
         this.mockMvc.perform(delete("/api/tags/{id}", tagEntity.getId())).andExpect(status().isAccepted());
+
+        // Verify entity was actually deleted
+        assertThat(tagRepository.findById(tagEntity.getId())).isEmpty();
     }
 }

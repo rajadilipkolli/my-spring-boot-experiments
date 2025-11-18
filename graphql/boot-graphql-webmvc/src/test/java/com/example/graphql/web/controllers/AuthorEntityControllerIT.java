@@ -14,18 +14,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.example.graphql.common.AbstractIntegrationTest;
 import com.example.graphql.entities.AuthorEntity;
 import com.example.graphql.model.request.AuthorRequest;
-import com.example.graphql.repositories.AuthorRepository;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 
 class AuthorEntityControllerIT extends AbstractIntegrationTest {
-
-    @Autowired
-    private AuthorRepository authorRepository;
 
     private List<AuthorEntity> authorEntityList = null;
 
@@ -84,6 +79,8 @@ class AuthorEntityControllerIT extends AbstractIntegrationTest {
                         .content(jsonMapper.writeValueAsString(authorRequest)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.firstName", is(authorRequest.firstName())))
+                .andExpect(jsonPath("$.middleName", is(authorRequest.middleName())))
+                .andExpect(jsonPath("$.lastName", is(authorRequest.lastName())))
                 .andExpect(jsonPath("$.registeredAt", notNullValue()));
     }
 

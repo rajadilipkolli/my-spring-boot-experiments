@@ -12,7 +12,6 @@ import com.example.graphql.repositories.TagRepository;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
@@ -44,11 +43,9 @@ public class PostService {
     }
 
     public List<PostResponse> findAllPosts() {
-        List<CompletableFuture<PostResponse>> completableFutureList = postRepository.findAll().stream()
-                .map(post ->
-                        CompletableFuture.supplyAsync(() -> appConversionService.convert(post, PostResponse.class)))
+        return postRepository.findAll().stream()
+                .map(post -> appConversionService.convert(post, PostResponse.class))
                 .toList();
-        return completableFutureList.stream().map(CompletableFuture::join).toList();
     }
 
     public List<PostInfo> findAllPostsByAuthorEmail(String emailId) {

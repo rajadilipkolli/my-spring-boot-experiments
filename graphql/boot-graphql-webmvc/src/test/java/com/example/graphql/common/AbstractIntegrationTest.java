@@ -4,6 +4,10 @@ import static com.example.graphql.utils.AppConstants.PROFILE_TEST;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 import com.example.graphql.TestGraphQlWebMvcApplication;
+import com.example.graphql.repositories.AuthorRepository;
+import com.example.graphql.repositories.PostRepository;
+import com.example.graphql.repositories.PostTagRepository;
+import com.example.graphql.repositories.TagRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.graphql.test.autoconfigure.tester.AutoConfigureHttpGraphQlTester;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -27,4 +31,16 @@ public abstract class AbstractIntegrationTest {
 
     @Autowired
     protected HttpGraphQlTester graphQlTester;
+
+    @Autowired
+    protected AuthorRepository authorRepository;
+
+    @Autowired
+    protected PostRepository postRepository;
+
+    @Autowired
+    protected PostTagRepository postTagRepository;
+
+    @Autowired
+    protected TagRepository tagRepository;
 }

@@ -16,27 +16,14 @@ import com.example.graphql.entities.TagEntity;
 import com.example.graphql.model.request.NewPostRequest;
 import com.example.graphql.model.request.PostDetailsRequest;
 import com.example.graphql.model.request.TagsRequest;
-import com.example.graphql.repositories.PostRepository;
-import com.example.graphql.repositories.PostTagRepository;
-import com.example.graphql.repositories.TagRepository;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 
 class PostEntityControllerIT extends AbstractIntegrationTest {
-
-    @Autowired
-    private PostRepository postRepository;
-
-    @Autowired
-    private PostTagRepository postTagRepository;
-
-    @Autowired
-    private TagRepository tagRepository;
 
     private List<PostEntity> postEntityList = null;
 

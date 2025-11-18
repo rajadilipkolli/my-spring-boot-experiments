@@ -15,19 +15,14 @@ import com.example.graphql.entities.PostCommentEntity;
 import com.example.graphql.entities.PostDetailsEntity;
 import com.example.graphql.entities.PostEntity;
 import com.example.graphql.model.request.PostCommentRequest;
-import com.example.graphql.repositories.PostRepository;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 
 class PostCommentEntityControllerIT extends AbstractIntegrationTest {
-
-    @Autowired
-    private PostRepository postRepository;
 
     private PostEntity postEntity;
 

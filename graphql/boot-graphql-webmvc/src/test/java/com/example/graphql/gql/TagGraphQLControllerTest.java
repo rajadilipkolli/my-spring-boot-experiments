@@ -7,7 +7,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import com.example.graphql.config.graphql.GraphQlConfiguration;
-import com.example.graphql.entities.TagEntity;
 import com.example.graphql.model.response.TagResponse;
 import com.example.graphql.services.TagService;
 import java.util.List;
@@ -120,10 +119,10 @@ class TagGraphQLControllerTest {
                 .document(mutation)
                 .execute()
                 .path("createTag")
-                .entity(TagEntity.class)
+                .entity(TagResponse.class)
                 .satisfies(created -> {
-                    assertThat(created.getTagName()).isEqualTo("tag3");
-                    assertThat(created.getTagDescription()).isEqualTo("desc3");
+                    assertThat(created.tagName()).isEqualTo("tag3");
+                    assertThat(created.tagDescription()).isEqualTo("desc3");
                 });
 
         verify(tagService, times(1)).saveTag("tag3", "desc3");
@@ -148,10 +147,10 @@ class TagGraphQLControllerTest {
                 .document(mutation)
                 .execute()
                 .path("updateTagDescription")
-                .entity(TagEntity.class)
+                .entity(TagResponse.class)
                 .satisfies(updated -> {
-                    assertThat(updated.getTagName()).isEqualTo("tag4");
-                    assertThat(updated.getTagDescription()).isEqualTo("newdesc");
+                    assertThat(updated.tagName()).isEqualTo("tag4");
+                    assertThat(updated.tagDescription()).isEqualTo("newdesc");
                 });
 
         verify(tagService, times(1)).updateTag("tag4", "newdesc");

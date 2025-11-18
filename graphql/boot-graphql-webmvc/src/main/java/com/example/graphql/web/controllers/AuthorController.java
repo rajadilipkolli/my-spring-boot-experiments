@@ -60,7 +60,7 @@ public class AuthorController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<@NonNull AuthorResponse> deleteAuthor(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteAuthor(@PathVariable Long id) {
         if (authorService.existsAuthorById(id)) {
             authorService.deleteAuthorById(id);
             return ResponseEntity.accepted().build();

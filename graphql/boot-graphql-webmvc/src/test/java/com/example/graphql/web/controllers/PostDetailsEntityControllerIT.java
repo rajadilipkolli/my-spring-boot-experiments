@@ -10,16 +10,11 @@ import com.example.graphql.common.AbstractIntegrationTest;
 import com.example.graphql.entities.PostDetailsEntity;
 import com.example.graphql.entities.PostEntity;
 import com.example.graphql.model.request.PostDetailsRequest;
-import com.example.graphql.repositories.PostRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 
 class PostDetailsEntityControllerIT extends AbstractIntegrationTest {
-
-    @Autowired
-    private PostRepository postRepository;
 
     private PostEntity post;
 

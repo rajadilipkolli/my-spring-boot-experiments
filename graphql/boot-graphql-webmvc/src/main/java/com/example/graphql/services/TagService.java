@@ -62,7 +62,11 @@ public class TagService {
     public TagResponse saveTag(String tagName, String tagDescription) {
         return this.tagRepository
                 .findByTagNameIgnoreCase(tagName)
-                .map(tagEntity -> appConversionService.convert(tagEntity, TagResponse.class))
+                .map(tagEntity -> {
+                    tagEntity.setTagDescription(tagDescription);
+                    TagEntity saved = tagRepository.save(tagEntity);
+                    return appConversionService.convert(saved, TagResponse.class);
+                })
                 .orElseGet(() -> saveTag(new TagEntity().setTagName(tagName).setTagDescription(tagDescription)));
     }
 
