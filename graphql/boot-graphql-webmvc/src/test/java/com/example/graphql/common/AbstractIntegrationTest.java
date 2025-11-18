@@ -5,6 +5,7 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 
 import com.example.graphql.TestGraphQlWebMvcApplication;
 import com.example.graphql.repositories.AuthorRepository;
+import com.example.graphql.repositories.PostCommentRepository;
 import com.example.graphql.repositories.PostRepository;
 import com.example.graphql.repositories.PostTagRepository;
 import com.example.graphql.repositories.TagRepository;
@@ -37,6 +38,9 @@ public abstract class AbstractIntegrationTest {
 
     @Autowired
     protected PostRepository postRepository;
+
+    @Autowired
+    protected PostCommentRepository postCommentRepository;
 
     @Autowired
     protected PostTagRepository postTagRepository;
