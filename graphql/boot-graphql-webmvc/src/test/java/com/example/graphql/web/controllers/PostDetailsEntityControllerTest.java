@@ -24,7 +24,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 @WebMvcTest(controllers = PostDetailsController.class)
 @ActiveProfiles(PROFILE_TEST)
@@ -37,7 +37,7 @@ class PostDetailsEntityControllerTest {
     private PostDetailsService postDetailsService;
 
     @Autowired
-    private ObjectMapper objectMapper;
+    private JsonMapper jsonMapper;
 
     private List<PostDetailsEntity> postDetailsList;
 
@@ -52,7 +52,7 @@ class PostDetailsEntityControllerTest {
         given(postDetailsService.findAllPostDetails()).willReturn(List.of(getPostDetails()));
 
         this.mockMvc
-                .perform(get("/api/postdetails"))
+                .perform(get("/api/post/details"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.size()", is(postDetailsList.size())));
     }
@@ -64,7 +64,7 @@ class PostDetailsEntityControllerTest {
         given(postDetailsService.findPostDetailsById(postDetailsId)).willReturn(Optional.of(getPostDetails()));
 
         this.mockMvc
-                .perform(get("/api/postdetails/{id}", postDetailsId))
+                .perform(get("/api/post/details/{id}", postDetailsId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.createdBy", is("junit")));
     }
@@ -74,7 +74,7 @@ class PostDetailsEntityControllerTest {
         Long postDetailsId = 1L;
         given(postDetailsService.findPostDetailsById(postDetailsId)).willReturn(Optional.empty());
 
-        this.mockMvc.perform(get("/api/postdetails/{id}", postDetailsId)).andExpect(status().isNotFound());
+        this.mockMvc.perform(get("/api/post/details/{id}", postDetailsId)).andExpect(status().isNotFound());
     }
 
     @Test
@@ -88,9 +88,9 @@ class PostDetailsEntityControllerTest {
                 .willReturn(Optional.of(getPostDetails()));
 
         this.mockMvc
-                .perform(put("/api/postdetails/{id}", postDetails.getId())
+                .perform(put("/api/post/details/{id}", postDetails.getId())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(postDetailsRequest)))
+                        .content(jsonMapper.writeValueAsString(postDetailsRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.detailsKey", is("junitDetailsKey")));
     }
@@ -103,9 +103,9 @@ class PostDetailsEntityControllerTest {
                 new PostDetailsEntity().setId(postDetailsId).setCreatedBy("Junit1");
 
         this.mockMvc
-                .perform(put("/api/postdetails/{id}", postDetailsId)
+                .perform(put("/api/post/details/{id}", postDetailsId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(postDetails)))
+                        .content(jsonMapper.writeValueAsString(postDetails)))
                 .andExpect(status().isNotFound());
     }
 

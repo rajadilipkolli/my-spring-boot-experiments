@@ -15,5 +15,7 @@ public interface PostEntityToPostResponse extends Converter<@NonNull PostEntity,
     PostResponse convert(PostEntity postEntity);
 
     @Mapping(target = "tagName", source = "tagEntity.tagName")
+    @Mapping(target = "tagDescription", source = "tagEntity.tagDescription")
+    @Mapping(target = "id", source = "tagEntity.id")
     TagResponse postTagEntityToTagResponse(PostTagEntity postTagEntity);
 }

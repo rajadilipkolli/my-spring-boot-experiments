@@ -1,3 +1,5 @@
 package com.example.graphql.model.response;
 
-public record TagResponse(String tagName) {}
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+public record TagResponse(@JsonIgnore Long id, String tagName, String tagDescription) {}

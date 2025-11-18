@@ -86,4 +86,8 @@ public class PostService {
             return appConversionService.convert(updatedPostEntity, PostResponse.class);
         });
     }
+
+    public boolean existsPostById(Long id) {
+        return postRepository.existsById(id);
+    }
 }

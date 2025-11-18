@@ -5,6 +5,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -17,6 +18,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.example.graphql.entities.TagEntity;
 import com.example.graphql.model.request.TagsRequest;
+import com.example.graphql.model.response.TagResponse;
 import com.example.graphql.services.TagService;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,7 +32,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 @WebMvcTest(controllers = TagController.class)
 @ActiveProfiles(PROFILE_TEST)
@@ -43,7 +45,7 @@ class TagEntityControllerTest {
     private TagService tagService;
 
     @Autowired
-    private ObjectMapper objectMapper;
+    private JsonMapper jsonMapper;
 
     private List<TagEntity> tagEntityList;
 
@@ -57,7 +59,10 @@ class TagEntityControllerTest {
 
     @Test
     void shouldFetchAllTags() throws Exception {
-        given(tagService.findAllTags()).willReturn(this.tagEntityList);
+        TagResponse tagResponse1 = new TagResponse(null, "tag1", "desc1");
+        TagResponse tagResponse2 = new TagResponse(null, "tag2", "desc2");
+        TagResponse tagResponse3 = new TagResponse(null, "tag3", "desc3");
+        given(tagService.findAllTags()).willReturn(List.of(tagResponse1, tagResponse2, tagResponse3));
 
         this.mockMvc
                 .perform(get("/api/tags"))
@@ -68,13 +73,13 @@ class TagEntityControllerTest {
     @Test
     void shouldFindTagById() throws Exception {
         Long tagId = 1L;
-        TagEntity tagEntity = new TagEntity().setId(1L).setTagName("text 1");
-        given(tagService.findTagById(tagId)).willReturn(Optional.of(tagEntity));
+        TagResponse tagResponse = new TagResponse(null, "tag1", "desc1");
+        given(tagService.findTagById(tagId)).willReturn(Optional.of(tagResponse));
 
         this.mockMvc
                 .perform(get("/api/tags/{id}", tagId))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.tagName", is(tagEntity.getTagName())));
+                .andExpect(jsonPath("$.tagName", is(tagResponse.tagName())));
     }
 
     @Test
@@ -96,17 +101,18 @@ class TagEntityControllerTest {
     @Test
     void shouldCreateNewTag() throws Exception {
 
-        TagEntity tagEntity = new TagEntity().setId(1L).setTagName("some text");
+        TagResponse tagEntity = new TagResponse(null, "some text", null);
         TagsRequest tagsRequest = new TagsRequest("some text", null);
         given(tagService.saveTag("some text", null)).willReturn(tagEntity);
 
         this.mockMvc
                 .perform(post("/api/tags")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(tagsRequest)))
+                        .content(jsonMapper.writeValueAsString(tagsRequest)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id", notNullValue()))
-                .andExpect(jsonPath("$.tagName", is(tagEntity.getTagName())));
+                .andExpect(header().string("Location", notNullValue()))
+                .andExpect(jsonPath("$.tagDescription", is(tagsRequest.tagDescription())))
+                .andExpect(jsonPath("$.tagName", is(tagsRequest.tagName())));
     }
 
     @Test
@@ -116,7 +122,7 @@ class TagEntityControllerTest {
         this.mockMvc
                 .perform(post("/api/tags")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(tag)))
+                        .content(jsonMapper.writeValueAsString(tag)))
                 .andExpect(status().isBadRequest())
                 .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                 .andExpect(jsonPath("$.type", is("https://api.graphql-webmvc.com/errors/validation")))
@@ -132,16 +138,17 @@ class TagEntityControllerTest {
     @Test
     void shouldUpdateTag() throws Exception {
         Long tagId = 1L;
-        TagEntity tagEntity = new TagEntity().setId(1L).setTagName("updated text");
-        given(tagService.findTagById(tagId)).willReturn(Optional.of(tagEntity));
-        given(tagService.saveTag(any(TagEntity.class))).willAnswer((invocation) -> invocation.getArgument(0));
+        TagResponse tagResponse = new TagResponse(null, "tag1", "desc1");
+        TagsRequest tagsRequest = new TagsRequest("tag1", "desc1");
+        given(tagService.findTagById(tagId)).willReturn(Optional.of(tagResponse));
+        given(tagService.updateTag(eq(tagId), any(TagsRequest.class))).willReturn(tagResponse);
 
         this.mockMvc
-                .perform(put("/api/tags/{id}", tagEntity.getId())
+                .perform(put("/api/tags/{id}", tagId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(tagEntity)))
+                        .content(jsonMapper.writeValueAsString(tagsRequest)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.tagName", is(tagEntity.getTagName())));
+                .andExpect(jsonPath("$.tagName", is(tagResponse.tagName())));
     }
 
     @Test
@@ -153,7 +160,7 @@ class TagEntityControllerTest {
         this.mockMvc
                 .perform(put("/api/tags/{id}", tagId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(tagEntity)))
+                        .content(jsonMapper.writeValueAsString(tagEntity)))
                 .andExpect(status().isNotFound())
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                 .andExpect(jsonPath("$.type", is("https://api.graphql-webmvc.com/errors/not-found")))
@@ -166,20 +173,16 @@ class TagEntityControllerTest {
     @Test
     void shouldDeleteTag() throws Exception {
         Long tagId = 1L;
-        TagEntity tagEntity = new TagEntity().setId(tagId).setTagName("Some text");
-        given(tagService.findTagById(tagId)).willReturn(Optional.of(tagEntity));
-        doNothing().when(tagService).deleteTagById(tagEntity.getId());
+        given(tagService.existsTagById(tagId)).willReturn(true);
+        doNothing().when(tagService).deleteTagById(tagId);
 
-        this.mockMvc
-                .perform(delete("/api/tags/{id}", tagEntity.getId()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.tagName", is(tagEntity.getTagName())));
+        this.mockMvc.perform(delete("/api/tags/{id}", tagId)).andExpect(status().isAccepted());
     }
 
     @Test
     void shouldReturn404WhenDeletingNonExistingTag() throws Exception {
         Long tagId = 1L;
-        given(tagService.findTagById(tagId)).willReturn(Optional.empty());
+        given(tagService.existsTagById(tagId)).willReturn(false);
 
         this.mockMvc
                 .perform(delete("/api/tags/{id}", tagId))
