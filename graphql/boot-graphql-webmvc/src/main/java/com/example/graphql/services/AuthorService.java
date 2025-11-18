@@ -9,12 +9,13 @@ import com.example.graphql.repositories.AuthorRepository;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@Transactional
+@Transactional(readOnly = true)
 @Loggable
 public class AuthorService {
 
@@ -33,9 +34,11 @@ public class AuthorService {
 
     @Transactional(readOnly = true)
     public List<AuthorResponse> findAllAuthors() {
-        return authorRepository.findAll().stream()
-                .map(authorEntity -> appConversionService.convert(authorEntity, AuthorResponse.class))
+        List<CompletableFuture<AuthorResponse>> completableFutureList = authorRepository.findAll().stream()
+                .map(authorEntity -> CompletableFuture.supplyAsync(
+                        () -> appConversionService.convert(authorEntity, AuthorResponse.class)))
                 .toList();
+        return completableFutureList.stream().map(CompletableFuture::join).toList();
     }
 
     @Transactional(readOnly = true)
@@ -54,7 +57,7 @@ public class AuthorService {
     public Optional<AuthorResponse> updateAuthor(AuthorRequest authorRequest, Long id) {
 
         return authorRepository.findById(id).map(authorEntity -> {
-            authorRequestToEntityMapper.upDateAuthorEntity(authorRequest, authorEntity);
+            authorRequestToEntityMapper.updateAuthorEntity(authorRequest, authorEntity);
             return appConversionService.convert(authorRepository.save(authorEntity), AuthorResponse.class);
         });
     }
@@ -68,5 +71,9 @@ public class AuthorService {
         return this.authorRepository
                 .findByEmailAllIgnoreCase(email)
                 .map(authorEntity -> appConversionService.convert(authorEntity, AuthorResponse.class));
+    }
+
+    public boolean existsAuthorById(Long id) {
+        return this.authorRepository.existsById(id);
     }
 }

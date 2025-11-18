@@ -6,6 +6,7 @@ import com.example.graphql.model.request.AuthorRequest;
 import com.example.graphql.model.response.AuthorResponse;
 import com.example.graphql.services.AuthorService;
 import java.util.List;
+import org.jspecify.annotations.NonNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -36,7 +37,7 @@ public class AuthorController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<AuthorResponse> getAuthorById(@PathVariable Long id) {
+    public ResponseEntity<@NonNull AuthorResponse> getAuthorById(@PathVariable Long id) {
         return authorService
                 .findAuthorById(id)
                 .map(ResponseEntity::ok)
@@ -50,7 +51,7 @@ public class AuthorController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<AuthorResponse> updateAuthor(
+    public ResponseEntity<@NonNull AuthorResponse> updateAuthor(
             @PathVariable Long id, @RequestBody AuthorRequest authorRequest) {
         return authorService
                 .updateAuthor(authorRequest, id)
@@ -59,13 +60,12 @@ public class AuthorController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<AuthorResponse> deleteAuthor(@PathVariable Long id) {
-        return authorService
-                .findAuthorById(id)
-                .map(author -> {
-                    authorService.deleteAuthorById(id);
-                    return ResponseEntity.ok(author);
-                })
-                .orElseThrow(() -> new AuthorNotFoundException(id));
+    public ResponseEntity<@NonNull AuthorResponse> deleteAuthor(@PathVariable Long id) {
+        if (authorService.existsAuthorById(id)) {
+            authorService.deleteAuthorById(id);
+            return ResponseEntity.accepted().build();
+        } else {
+            throw new AuthorNotFoundException(id);
+        }
     }
 }

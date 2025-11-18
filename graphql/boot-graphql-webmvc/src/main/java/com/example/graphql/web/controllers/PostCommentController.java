@@ -5,6 +5,7 @@ import com.example.graphql.model.request.PostCommentRequest;
 import com.example.graphql.model.response.PostCommentResponse;
 import com.example.graphql.services.PostCommentService;
 import java.util.List;
+import org.jspecify.annotations.NonNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -19,7 +20,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/postcomments")
+@RequestMapping("/api/post/comments")
 @Loggable
 public class PostCommentController {
 
@@ -35,7 +36,7 @@ public class PostCommentController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<PostCommentResponse> getPostCommentById(@PathVariable Long id) {
+    public ResponseEntity<@NonNull PostCommentResponse> getPostCommentById(@PathVariable Long id) {
         return postCommentService
                 .findPostCommentById(id)
                 .map(ResponseEntity::ok)
@@ -49,7 +50,7 @@ public class PostCommentController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<PostCommentResponse> updatePostComment(
+    public ResponseEntity<@NonNull PostCommentResponse> updatePostComment(
             @PathVariable Long id, @RequestBody PostCommentRequest postCommentRequest) {
         return postCommentService
                 .findCommentById(id)

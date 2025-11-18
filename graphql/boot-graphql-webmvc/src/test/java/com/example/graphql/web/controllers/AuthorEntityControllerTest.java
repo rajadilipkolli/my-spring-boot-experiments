@@ -31,7 +31,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 @WebMvcTest(controllers = AuthorController.class)
 @ActiveProfiles(PROFILE_TEST)
@@ -44,7 +44,7 @@ class AuthorEntityControllerTest {
     private AuthorService authorService;
 
     @Autowired
-    private ObjectMapper objectMapper;
+    private JsonMapper jsonMapper;
 
     private List<AuthorResponse> authorEntityList;
 
@@ -118,7 +118,7 @@ class AuthorEntityControllerTest {
         this.mockMvc
                 .perform(post("/api/authors")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(authorRequest)))
+                        .content(jsonMapper.writeValueAsString(authorRequest)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.registeredAt", notNullValue()))
                 .andExpect(jsonPath("$.firstName", is(authorRequest.firstName())));
@@ -131,7 +131,7 @@ class AuthorEntityControllerTest {
         this.mockMvc
                 .perform(post("/api/authors")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(authorRequest)))
+                        .content(jsonMapper.writeValueAsString(authorRequest)))
                 .andExpect(status().isBadRequest())
                 .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                 .andExpect(jsonPath("$.type", is("https://api.graphql-webmvc.com/errors/validation")))
@@ -168,7 +168,7 @@ class AuthorEntityControllerTest {
         this.mockMvc
                 .perform(put("/api/authors/{id}", authorEntity.getId())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(authorRequest)))
+                        .content(jsonMapper.writeValueAsString(authorRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.firstName", is(authorRequest.firstName())));
     }
@@ -183,7 +183,7 @@ class AuthorEntityControllerTest {
         this.mockMvc
                 .perform(put("/api/authors/{id}", authorId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(authorRequest)))
+                        .content(jsonMapper.writeValueAsString(authorRequest)))
                 .andExpect(status().isNotFound())
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                 .andExpect(jsonPath("$.type", is("https://api.graphql-webmvc.com/errors/not-found")))
@@ -196,21 +196,16 @@ class AuthorEntityControllerTest {
     @Test
     void shouldDeleteAuthor() throws Exception {
         Long authorId = 1L;
-        AuthorResponse authorResponse = new AuthorResponse(
-                1L, "First Author", "middleName", "lastName", 9848022338L, "junit1@email.com", LocalDateTime.now());
-        given(authorService.findAuthorById(authorId)).willReturn(Optional.of(authorResponse));
+        given(authorService.existsAuthorById(authorId)).willReturn(true);
         doNothing().when(authorService).deleteAuthorById(authorId);
 
-        this.mockMvc
-                .perform(delete("/api/authors/{id}", authorId))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.firstName", is(authorResponse.firstName())));
+        this.mockMvc.perform(delete("/api/authors/{id}", authorId)).andExpect(status().isAccepted());
     }
 
     @Test
     void shouldReturn404WhenDeletingNonExistingAuthor() throws Exception {
         Long authorId = 1L;
-        given(authorService.findAuthorById(authorId)).willReturn(Optional.empty());
+        given(authorService.existsAuthorById(authorId)).willReturn(false);
 
         this.mockMvc
                 .perform(delete("/api/authors/{id}", authorId))

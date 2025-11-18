@@ -97,7 +97,7 @@ class PostEntityControllerIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(post("/api/posts")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(newPostRequest)))
+                        .content(jsonMapper.writeValueAsString(newPostRequest)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.content", is(newPostRequest.content())))
                 .andExpect(jsonPath("$.createdAt", notNullValue()))
@@ -123,7 +123,7 @@ class PostEntityControllerIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(put("/api/posts/{id}", postEntityListFirst.getId())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(newPostRequest)))
+                        .content(jsonMapper.writeValueAsString(newPostRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.title", is(newPostRequest.title())))
                 .andExpect(jsonPath("$.content", is(newPostRequest.content())))

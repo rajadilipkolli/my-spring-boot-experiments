@@ -37,7 +37,10 @@ class PostDetailsEntityControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldFetchAllPostDetails() throws Exception {
-        this.mockMvc.perform(get("/api/postdetails")).andExpect(status().isOk()).andExpect(jsonPath("$.size()", is(1)));
+        this.mockMvc
+                .perform(get("/api/post/details"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.size()", is(1)));
     }
 
     @Test
@@ -45,7 +48,7 @@ class PostDetailsEntityControllerIT extends AbstractIntegrationTest {
         PostDetailsEntity postDetails = post.getDetails();
 
         this.mockMvc
-                .perform(get("/api/postdetails/{id}", post.getId()))
+                .perform(get("/api/post/details/{id}", post.getId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.createdBy", is(postDetails.getCreatedBy())));
     }
@@ -57,9 +60,9 @@ class PostDetailsEntityControllerIT extends AbstractIntegrationTest {
 
         Long postDetailsId = post.getId();
         this.mockMvc
-                .perform(put("/api/postdetails/{id}", postDetailsId)
+                .perform(put("/api/post/details/{id}", postDetailsId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(postDetailsRequest)))
+                        .content(jsonMapper.writeValueAsString(postDetailsRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.detailsKey", is("Updated PostDetails")));
     }

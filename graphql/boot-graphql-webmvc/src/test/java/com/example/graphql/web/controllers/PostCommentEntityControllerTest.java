@@ -31,7 +31,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 @WebMvcTest(controllers = PostCommentController.class)
 @ActiveProfiles(PROFILE_TEST)
@@ -44,7 +44,7 @@ class PostCommentEntityControllerTest {
     private PostCommentService postCommentService;
 
     @Autowired
-    private ObjectMapper objectMapper;
+    private JsonMapper jsonMapper;
 
     private List<PostCommentResponse> postCommentResponseList;
 
@@ -71,7 +71,7 @@ class PostCommentEntityControllerTest {
         given(postCommentService.findAllPostComments()).willReturn(this.postCommentResponseList);
 
         this.mockMvc
-                .perform(get("/api/postcomments"))
+                .perform(get("/api/post/comments"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.size()", is(postCommentResponseList.size())));
@@ -85,7 +85,7 @@ class PostCommentEntityControllerTest {
                 .willReturn(Optional.of(postCommentResponseList.getFirst()));
 
         this.mockMvc
-                .perform(get("/api/postcomments/{id}", postCommentId))
+                .perform(get("/api/post/comments/{id}", postCommentId))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.title", is(postCommentResponse.title())));
@@ -96,7 +96,7 @@ class PostCommentEntityControllerTest {
         Long postCommentId = 1L;
         given(postCommentService.findPostCommentById(postCommentId)).willReturn(Optional.empty());
 
-        this.mockMvc.perform(get("/api/postcomments/{id}", postCommentId)).andExpect(status().isNotFound());
+        this.mockMvc.perform(get("/api/post/comments/{id}", postCommentId)).andExpect(status().isNotFound());
     }
 
     @Test
@@ -109,9 +109,9 @@ class PostCommentEntityControllerTest {
         given(postCommentService.addCommentToPost(postCommentRequest)).willReturn(postCommentResponse);
 
         this.mockMvc
-                .perform(post("/api/postcomments")
+                .perform(post("/api/post/comments")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(postCommentRequest)))
+                        .content(jsonMapper.writeValueAsString(postCommentRequest)))
                 .andExpect(status().isCreated())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.postId", is(1)))
@@ -125,9 +125,9 @@ class PostCommentEntityControllerTest {
         PostCommentRequest postComment = new PostCommentRequest(null, null, null, null);
 
         this.mockMvc
-                .perform(post("/api/postcomments")
+                .perform(post("/api/post/comments")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(postComment)))
+                        .content(jsonMapper.writeValueAsString(postComment)))
                 .andExpect(status().isBadRequest())
                 .andExpect(header().string("Content-Type", is("application/problem+json")))
                 .andExpect(jsonPath("$.type", is("https://api.graphql-webmvc.com/errors/validation")))
@@ -156,9 +156,9 @@ class PostCommentEntityControllerTest {
                 .willReturn(postCommentResponse);
 
         this.mockMvc
-                .perform(put("/api/postcomments/{id}", postCommentId)
+                .perform(put("/api/post/comments/{id}", postCommentId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(postCommentRequest)))
+                        .content(jsonMapper.writeValueAsString(postCommentRequest)))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.title", is(postCommentResponse.title())));
@@ -172,9 +172,9 @@ class PostCommentEntityControllerTest {
                 new PostCommentEntity().setId(postCommentId).setTitle("Updated PostComment");
 
         this.mockMvc
-                .perform(put("/api/postcomments/{id}", postCommentId)
+                .perform(put("/api/post/comments/{id}", postCommentId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(postCommentEntity)))
+                        .content(jsonMapper.writeValueAsString(postCommentEntity)))
                 .andExpect(status().isNotFound());
     }
 
@@ -187,7 +187,7 @@ class PostCommentEntityControllerTest {
         doNothing().when(postCommentService).deletePostCommentById(postCommentId);
 
         this.mockMvc
-                .perform(delete("/api/postcomments/{id}", postCommentId))
+                .perform(delete("/api/post/comments/{id}", postCommentId))
                 .andExpect(status().isAccepted())
                 .andExpect(content().string(""));
     }
@@ -197,6 +197,6 @@ class PostCommentEntityControllerTest {
         Long postCommentId = 1L;
         given(postCommentService.findPostCommentById(postCommentId)).willReturn(Optional.empty());
 
-        this.mockMvc.perform(delete("/api/postcomments/{id}", postCommentId)).andExpect(status().isNotFound());
+        this.mockMvc.perform(delete("/api/post/comments/{id}", postCommentId)).andExpect(status().isNotFound());
     }
 }

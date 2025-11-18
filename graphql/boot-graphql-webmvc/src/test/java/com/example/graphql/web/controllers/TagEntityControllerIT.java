@@ -62,7 +62,7 @@ class TagEntityControllerIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(post("/api/tags")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(tagEntity)))
+                        .content(jsonMapper.writeValueAsString(tagEntity)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.tagName", is(tagEntity.tagName())))
                 .andExpect(jsonPath("$.tagDescription", is(tagEntity.tagDescription())));
@@ -76,7 +76,7 @@ class TagEntityControllerIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(put("/api/tags/{id}", tagEntity.getId())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(tagEntity)))
+                        .content(jsonMapper.writeValueAsString(tagEntity)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.tagName", is(tagEntity.getTagName())));
     }
@@ -85,9 +85,6 @@ class TagEntityControllerIT extends AbstractIntegrationTest {
     void shouldDeleteTag() throws Exception {
         TagEntity tagEntity = tagEntityList.getFirst();
 
-        this.mockMvc
-                .perform(delete("/api/tags/{id}", tagEntity.getId()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.tagName", is(tagEntity.getTagName())));
+        this.mockMvc.perform(delete("/api/tags/{id}", tagEntity.getId())).andExpect(status().isAccepted());
     }
 }

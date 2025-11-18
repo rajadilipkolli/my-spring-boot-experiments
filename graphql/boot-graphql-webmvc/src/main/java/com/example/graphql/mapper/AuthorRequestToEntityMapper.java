@@ -18,5 +18,5 @@ public interface AuthorRequestToEntityMapper extends Converter<@NonNull AuthorRe
     @Mapping(target = "id", ignore = true)
     AuthorEntity convert(AuthorRequest authorRequest);
 
-    void upDateAuthorEntity(AuthorRequest authorRequest, @MappingTarget AuthorEntity authorEntity);
+    void updateAuthorEntity(AuthorRequest authorRequest, @MappingTarget AuthorEntity authorEntity);
 }
