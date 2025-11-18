@@ -54,27 +54,28 @@ class TagEntityControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldCreateNewTag() throws Exception {
-        TagsRequest tagEntity = new TagsRequest("New Tag", null);
+        TagsRequest tagsRequest = new TagsRequest("New Tag", null);
         this.mockMvc
                 .perform(post("/api/tags")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonMapper.writeValueAsString(tagEntity)))
+                        .content(jsonMapper.writeValueAsString(tagsRequest)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.tagName", is(tagEntity.tagName())))
-                .andExpect(jsonPath("$.tagDescription", is(tagEntity.tagDescription())));
+                .andExpect(jsonPath("$.tagName", is(tagsRequest.tagName())))
+                .andExpect(jsonPath("$.tagDescription", is(tagsRequest.tagDescription())));
     }
 
     @Test
     void shouldUpdateTag() throws Exception {
         TagEntity tagEntity = tagEntityList.getFirst();
-        tagEntity.setTagName("Updated Tag");
+        TagsRequest tagsRequest = new TagsRequest(tagEntity.getTagName(), "Updated Tag");
 
         this.mockMvc
                 .perform(put("/api/tags/{id}", tagEntity.getId())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonMapper.writeValueAsString(tagEntity)))
+                        .content(jsonMapper.writeValueAsString(tagsRequest)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.tagName", is(tagEntity.getTagName())));
+                .andExpect(jsonPath("$.tagName", is(tagEntity.getTagName())))
+                .andExpect(jsonPath("$.tagDescription", is("Updated Tag")));
     }
 
     @Test

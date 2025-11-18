@@ -1,5 +1,6 @@
 package com.example.graphql.web.controllers;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -123,5 +124,7 @@ class PostEntityControllerIT extends AbstractIntegrationTest {
         PostEntity postEntity = postEntityList.getFirst();
 
         this.mockMvc.perform(delete("/api/posts/{id}", postEntity.getId())).andExpect(status().isAccepted());
+        // Verify entity was actually deleted
+        assertThat(postRepository.findById(postEntity.getId())).isEmpty();
     }
 }

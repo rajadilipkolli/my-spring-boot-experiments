@@ -1,5 +1,6 @@
 package com.example.graphql.web.controllers;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.Matchers.hasSize;
@@ -129,5 +130,8 @@ class AuthorEntityControllerIT extends AbstractIntegrationTest {
         AuthorEntity authorEntity = authorEntityList.getFirst();
 
         this.mockMvc.perform(delete("/api/authors/{id}", authorEntity.getId())).andExpect(status().isAccepted());
+
+        // Verify entity was actually deleted
+        assertThat(authorRepository.findById(authorEntity.getId())).isEmpty();
     }
 }
