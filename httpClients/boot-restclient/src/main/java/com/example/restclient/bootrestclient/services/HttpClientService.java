@@ -18,7 +18,7 @@ import org.springframework.web.util.UriBuilder;
 @Service
 @Retryable(
         includes = {HttpServerErrorException.class},
-        maxAttempts = 2,
+        maxRetries = 2,
         jitter = 5000L,
         multiplier = 2)
 public class HttpClientService {
