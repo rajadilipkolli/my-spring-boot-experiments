@@ -22,6 +22,7 @@
 
         <java.version>25</java.version>
         <springdoc-openapi.version>3.0.0-RC1</springdoc-openapi.version>
+        <datasource-micrometer-boot.version>2.0.0</datasource-micrometer-boot.version>
         <commons-io.version>2.21.0</commons-io.version>
         <org.mapstruct.version>1.6.3</org.mapstruct.version>
 
@@ -108,7 +109,7 @@
         <dependency>
             <groupId>net.ttddyy.observation</groupId>
             <artifactId>datasource-micrometer-spring-boot</artifactId>
-            <version>2.0.0</version>
+            <version>${datasource-micrometer-boot.version}</version>
         </dependency>
 
         <dependency>
