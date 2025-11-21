@@ -12,6 +12,6 @@ public class ContainersConfig {
     @Bean
     @ServiceConnection
     MariaDBContainer<?> mariaDbContainer() {
-        return new MariaDBContainer<>(DockerImageName.parse("mariadb").withTag("12.0"));
+        return new MariaDBContainer<>(DockerImageName.parse("mariadb").withTag("12.1"));
     }
 }
