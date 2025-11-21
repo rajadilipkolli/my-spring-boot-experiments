@@ -18,6 +18,7 @@
         <java.version>25</java.version>
         <spotless.version>3.1.0</spotless.version>
         <springdoc-openapi.version>3.0.0</springdoc-openapi.version>
+        <datasource-micrometer-boot.version>2.0.0</datasource-micrometer-boot.version>
 
         <project.testresult.directory>${project.build.directory}/test-results</project.testresult.directory>
         <junit.utReportFolder>${project.testresult.directory}/test</junit.utReportFolder>
@@ -62,7 +63,7 @@
         <dependency>
             <groupId>net.ttddyy.observation</groupId>
             <artifactId>datasource-micrometer-spring-boot</artifactId>
-            <version>2.0.0-RC1</version>
+            <version>${datasource-micrometer-boot.version}</version>
         </dependency>
 
         <dependency>
