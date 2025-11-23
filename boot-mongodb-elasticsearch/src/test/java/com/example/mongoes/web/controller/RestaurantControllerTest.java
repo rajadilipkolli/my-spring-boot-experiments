@@ -114,7 +114,7 @@ class RestaurantControllerTest {
                 .expectBody()
                 .json(
                         """
-                        {"title":"Bad Request","status":400,"detail":"Invalid request content.","instance":"/api/restaurant"}
+                        {"type":"https://api.mongoes.com/errors/validation-error","title":"Bad Request","status":400,"detail":"Invalid request content.","instance":"/api/restaurant"}
                   """);
     }
 
@@ -136,7 +136,7 @@ class RestaurantControllerTest {
                 .expectBody()
                 .json(
                         """
-                        {"title":"Bad Request","status":400,"detail":"Invalid request content.","instance":"/api/restaurant"}
+                        {"type":"https://api.mongoes.com/errors/validation-error","title":"Bad Request","status":400,"detail":"Invalid request content.","instance":"/api/restaurant"}
                   """);
     }
 
@@ -180,7 +180,7 @@ class RestaurantControllerTest {
                 .expectBody()
                 .json(
                         """
-                        {"title":"Bad Request","status":400,"detail":"Invalid request content.","instance":"/api/restaurant/1/grade"}
+                        {"type":"https://api.mongoes.com/errors/validation-error","title":"Bad Request","status":400,"detail":"Invalid request content.","instance":"/api/restaurant/1/grade"}
                   """);
     }
 
@@ -204,7 +204,7 @@ class RestaurantControllerTest {
                 .expectBody()
                 .json(
                         """
-                        {"title":"Bad Request","status":400,"detail":"Invalid request content.","instance":"/api/restaurant/1/grade"}
+                        {"type":"https://api.mongoes.com/errors/validation-error","title":"Bad Request","status":400,"detail":"Invalid request content.","instance":"/api/restaurant/1/grade"}
                   """);
     }
 
@@ -451,7 +451,7 @@ class RestaurantControllerTest {
                 .expectBody()
                 .json(
                         """
-                    {"title":"Bad Request","status":400,"detail":"Invalid request content.","instance":"/api/restaurant"}
+                    {"type":"https://api.mongoes.com/errors/validation-error","title":"Bad Request","status":400,"detail":"Invalid request content.","instance":"/api/restaurant"}
               """);
     }
 
