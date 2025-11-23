@@ -28,6 +28,7 @@ public class GlobalExceptionHandler {
             DuplicateRestaurantException ex) {
         ProblemDetail problemDetail =
                 ProblemDetail.forStatusAndDetail(ex.getHttpStatus(), ex.getMessage());
+        problemDetail.setType(URI.create("https://api.mongoes.com/errors/duplicate-restaurant"));
         return Mono.just(problemDetail);
     }
 
@@ -35,6 +36,7 @@ public class GlobalExceptionHandler {
     Mono<@NonNull ProblemDetail> handleRestaurantNotFoundException(RestaurantNotFoundException ex) {
         ProblemDetail problemDetail =
                 ProblemDetail.forStatusAndDetail(ex.getHttpStatus(), ex.getMessage());
+        problemDetail.setType(URI.create("https://api.mongoes.com/errors/restaurant-not-found"));
         return Mono.just(problemDetail);
     }
 
