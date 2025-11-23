@@ -1,8 +1,9 @@
 package com.example.mongoes.config;
 
+import org.jspecify.annotations.NonNull;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.geo.GeoModule;
+import org.springframework.data.geo.GeoJacksonModule;
 import org.springframework.web.reactive.config.CorsRegistry;
 import org.springframework.web.reactive.config.WebFluxConfigurer;
 
@@ -16,16 +17,16 @@ class WebFluxConfig implements WebFluxConfigurer {
     }
 
     @Override
-    public void addCorsMappings(CorsRegistry registry) {
+    public void addCorsMappings(@NonNull CorsRegistry registry) {
         registry.addMapping(properties.getCors().getPathPattern())
-                .allowedMethods(properties.getCors().getAllowedMethods())
-                .allowedHeaders(properties.getCors().getAllowedHeaders())
-                .allowedOriginPatterns(properties.getCors().getAllowedOriginPatterns())
+                .allowedMethods(properties.getCors().getAllowedMethods().split(","))
+                .allowedHeaders(properties.getCors().getAllowedHeaders().split(","))
+                .allowedOriginPatterns(properties.getCors().getAllowedOriginPatterns().split(","))
                 .allowCredentials(properties.getCors().isAllowCredentials());
     }
 
     @Bean
-    GeoModule jacksonGeoModule() {
-        return new GeoModule();
+    GeoJacksonModule geoJacksonModule() {
+        return new GeoJacksonModule();
     }
 }
