@@ -13,10 +13,10 @@ import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.boot.test.json.JsonContent;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.geo.Point;
-import org.springframework.data.web.config.SpringDataJacksonConfiguration;
+import org.springframework.data.web.config.SpringDataJackson3Configuration;
 
 @JsonTest
-@Import(SpringDataJacksonConfiguration.class)
+@Import(SpringDataJackson3Configuration.class)
 class RestaurantRequestTest {
 
     @Autowired private JacksonTester<RestaurantRequest> jacksonTester;

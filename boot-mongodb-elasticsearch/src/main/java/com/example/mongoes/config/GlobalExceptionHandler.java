@@ -3,6 +3,7 @@ package com.example.mongoes.config;
 import com.example.mongoes.web.exception.DuplicateRestaurantException;
 import com.example.mongoes.web.exception.RestaurantNotFoundException;
 import jakarta.validation.ConstraintViolationException;
+import java.net.URI;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -61,6 +62,7 @@ public class GlobalExceptionHandler {
         ProblemDetail problemDetail =
                 ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(400), "Validation failed");
         problemDetail.setTitle("Constraint Violation");
+        problemDetail.setType(URI.create("https://api.mongoes.com/errors/validation-error"));
         List<ApiValidationError> validationErrorsList =
                 ex.getConstraintViolations().stream()
                         .map(

@@ -310,7 +310,7 @@ class SearchControllerTest {
         private static final String MISSING_PARAMETER_ERROR_JSON =
                 """
             {
-                "type": "about:blank",
+                "type": "https://api.mongoes.com/errors/validation-error",
                 "title": "Bad Request",
                 "status": 400,
                 "detail": "Required query parameter '%s' is not present.",
@@ -348,7 +348,7 @@ class SearchControllerTest {
                     .isBadRequest()
                     .expectBody()
                     .jsonPath("$.type")
-                    .isEqualTo("about:blank")
+                    .isEqualTo("https://api.mongoes.com/errors/validation-error")
                     .jsonPath("$.title")
                     .isEqualTo("Constraint Violation")
                     .jsonPath("$.status")
@@ -432,7 +432,7 @@ class SearchControllerTest {
                     .json(
                             """
                                       {
-                                          "type": "about:blank",
+                                          "type": "https://api.mongoes.com/errors/validation-error",
                                           "title": "Bad Request",
                                           "status": 400,
                                           "detail": "Required query parameter 'distance' is not present.",
@@ -462,7 +462,7 @@ class SearchControllerTest {
                     .json(
                             """
                             {
-                             	"type": "about:blank",
+                             	"type": "https://api.mongoes.com/errors/validation-error",
                              	"title": "Constraint Violation",
                              	"status": 400,
                              	"detail": "Validation failed",
@@ -709,7 +709,7 @@ class SearchControllerTest {
                     .json(
                             """
                             {
-                                "type": "about:blank",
+                                "type": "https://api.mongoes.com/errors/validation-error",
                                 "title": "Bad Request",
                                 "status": 400,
                                 "detail": "Required query parameter 'lowerLimit' is not present.",
@@ -735,7 +735,7 @@ class SearchControllerTest {
                     .json(
                             """
                             {
-                                "type": "about:blank",
+                                "type": "https://api.mongoes.com/errors/validation-error",
                                 "title": "Bad Request",
                                 "status": 400,
                                 "detail": "Required query parameter 'upperLimit' is not present.",
@@ -762,7 +762,7 @@ class SearchControllerTest {
                     .json(
                             """
                             {
-                            	"type": "about:blank",
+                            	"type": "https://api.mongoes.com/errors/validation-error",
                             	"title": "Constraint Violation",
                             	"status": 400,
                             	"detail": "Validation failed",
@@ -797,7 +797,7 @@ class SearchControllerTest {
                     .json(
                             """
                             {
-                             	"type": "about:blank",
+                             	"type": "https://api.mongoes.com/errors/validation-error",
                              	"title": "Constraint Violation",
                              	"status": 400,
                              	"detail": "Validation failed",
@@ -832,7 +832,7 @@ class SearchControllerTest {
                     .json(
                             """
                             {
-                             	"type": "about:blank",
+                             	"type": "https://api.mongoes.com/errors/validation-error",
                              	"title": "Constraint Violation",
                              	"status": 400,
                              	"detail": "Validation failed",
@@ -867,7 +867,7 @@ class SearchControllerTest {
                     .json(
                             """
                             {
-                             	"type": "about:blank",
+                             	"type": "https://api.mongoes.com/errors/validation-error",
                              	"title": "Constraint Violation",
                              	"status": 400,
                              	"detail": "Validation failed",
