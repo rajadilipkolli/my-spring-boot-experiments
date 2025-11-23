@@ -18,7 +18,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
+import org.springframework.boot.webflux.test.autoconfigure.WebFluxTest;
 import org.springframework.data.geo.Point;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -79,7 +79,7 @@ class RestaurantControllerTest {
                 .json(
                         """
                         {
-                   	"type": "about:blank",
+                   	"type": "https://api.mongoes.com/errors/validation-error",
                    	"title": "Constraint Violation",
                    	"status": 400,
                    	"detail": "Validation failed",
@@ -114,7 +114,7 @@ class RestaurantControllerTest {
                 .expectBody()
                 .json(
                         """
-                        {"type":"about:blank","title":"Bad Request","status":400,"detail":"Invalid request content.","instance":"/api/restaurant"}
+                        {"type":"https://api.mongoes.com/errors/validation-error","title":"Bad Request","status":400,"detail":"Invalid request content.","instance":"/api/restaurant"}
                   """);
     }
 
@@ -136,7 +136,7 @@ class RestaurantControllerTest {
                 .expectBody()
                 .json(
                         """
-                        {"type":"about:blank","title":"Bad Request","status":400,"detail":"Invalid request content.","instance":"/api/restaurant"}
+                        {"type":"https://api.mongoes.com/errors/validation-error","title":"Bad Request","status":400,"detail":"Invalid request content.","instance":"/api/restaurant"}
                   """);
     }
 
@@ -180,7 +180,7 @@ class RestaurantControllerTest {
                 .expectBody()
                 .json(
                         """
-                        {"type":"about:blank","title":"Bad Request","status":400,"detail":"Invalid request content.","instance":"/api/restaurant/1/grade"}
+                        {"type":"https://api.mongoes.com/errors/validation-error","title":"Bad Request","status":400,"detail":"Invalid request content.","instance":"/api/restaurant/1/grade"}
                   """);
     }
 
@@ -204,7 +204,7 @@ class RestaurantControllerTest {
                 .expectBody()
                 .json(
                         """
-                        {"type":"about:blank","title":"Bad Request","status":400,"detail":"Invalid request content.","instance":"/api/restaurant/1/grade"}
+                        {"type":"https://api.mongoes.com/errors/validation-error","title":"Bad Request","status":400,"detail":"Invalid request content.","instance":"/api/restaurant/1/grade"}
                   """);
     }
 
@@ -281,7 +281,7 @@ class RestaurantControllerTest {
                 .expectBody()
                 .json(
                         """
-                  {"type":"about:blank","title":"Constraint Violation","status":400,"detail":"Validation failed","instance":"/api/restaurant/name/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","violations":[{"object":"RestaurantController","field":"findRestaurantByName.restaurantName","rejectedValue":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","message":"size must be between 0 and 255"}]}
+                  {"type":"https://api.mongoes.com/errors/validation-error","title":"Constraint Violation","status":400,"detail":"Validation failed","instance":"/api/restaurant/name/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","violations":[{"object":"RestaurantController","field":"findRestaurantByName.restaurantName","rejectedValue":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","message":"size must be between 0 and 255"}]}
                   """);
     }
 
@@ -316,7 +316,7 @@ class RestaurantControllerTest {
                 .isBadRequest()
                 .expectBody()
                 .jsonPath("$.type")
-                .isEqualTo("about:blank")
+                .isEqualTo("https://api.mongoes.com/errors/validation-error")
                 .jsonPath("$.title")
                 .isEqualTo("Constraint Violation")
                 .jsonPath("$.status")
@@ -451,7 +451,7 @@ class RestaurantControllerTest {
                 .expectBody()
                 .json(
                         """
-                    {"type":"about:blank","title":"Bad Request","status":400,"detail":"Invalid request content.","instance":"/api/restaurant"}
+                    {"type":"https://api.mongoes.com/errors/validation-error","title":"Bad Request","status":400,"detail":"Invalid request content.","instance":"/api/restaurant"}
               """);
     }
 
@@ -493,7 +493,7 @@ class RestaurantControllerTest {
                 .expectBody()
                 .json(
                         """
-                        {"type":"about:blank","title":"Constraint Violation","status":400,"detail":"Validation failed","instance":"/api/restaurant/1/grades","violations":[{"object":"RestaurantController","field":"updateGradesOfRestaurant.grades[0].date","rejectedValue":null,"message":"Date cannot be null"},{"object":"RestaurantController","field":"updateGradesOfRestaurant.grades[0].grade","rejectedValue":null,"message":"Grade cannot be blank"},{"object":"RestaurantController","field":"updateGradesOfRestaurant.grades[0].score","rejectedValue":null,"message":"Score cannot be null"}]}
+                        {"type":"https://api.mongoes.com/errors/validation-error","title":"Constraint Violation","status":400,"detail":"Validation failed","instance":"/api/restaurant/1/grades","violations":[{"object":"RestaurantController","field":"updateGradesOfRestaurant.grades[0].date","rejectedValue":null,"message":"Date cannot be null"},{"object":"RestaurantController","field":"updateGradesOfRestaurant.grades[0].grade","rejectedValue":null,"message":"Grade cannot be blank"},{"object":"RestaurantController","field":"updateGradesOfRestaurant.grades[0].score","rejectedValue":null,"message":"Score cannot be null"}]}
                         """);
     }
 

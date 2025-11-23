@@ -158,8 +158,8 @@ docker compose -f docker/docker-compose.yml up -d
 ## Configuration Properties
 Key application properties:
 ```properties
-spring.data.mongodb.database=mongoes
-spring.data.mongodb.uri=mongodb://localhost:27017/mongoes?replicaSet=rs0
+spring.mongodb.database=mongoes
+spring.mongodb.uri=mongodb://localhost:27017/mongoes?replicaSet=rs0&readPreference=primary&directConnection=true
 spring.elasticsearch.uris=localhost:9200
 spring.elasticsearch.socket-timeout=10s
 ```

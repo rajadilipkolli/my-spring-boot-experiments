@@ -72,7 +72,7 @@ class RestaurantControllerIntTest extends AbstractIntegrationTest {
                 .json(
                         """
                         {
-                        "type":"about:blank",
+                        "type":"https://api.mongoes.com/errors/duplicate-restaurant",
                         "title":"Conflict",
                         "status":409,
                         "detail":"Restaurant with name 'Restaurant2' already exists",
@@ -243,7 +243,7 @@ class RestaurantControllerIntTest extends AbstractIntegrationTest {
                 .json(
                         """
                         {
-                        "type":"about:blank",
+                        "type":"https://api.mongoes.com/errors/restaurant-not-found",
                         "title":"Not Found",
                         "status":404,
                         "detail":"Restaurant not found with id: 999999",
@@ -265,7 +265,7 @@ class RestaurantControllerIntTest extends AbstractIntegrationTest {
                 .json(
                         """
                         {
-                            "type":"about:blank",
+                            "type":"https://api.mongoes.com/errors/restaurant-not-found",
                             "title":"Not Found",
                             "status":404,
                             "detail":"Restaurant not found with name: Non Existent Restaurant",
