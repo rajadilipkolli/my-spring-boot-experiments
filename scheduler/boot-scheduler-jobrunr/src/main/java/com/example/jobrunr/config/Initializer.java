@@ -11,7 +11,7 @@ import org.jobrunr.scheduling.cron.Cron;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.boot.autoconfigure.web.ServerProperties;
+import org.springframework.boot.web.server.autoconfigure.ServerProperties;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
