@@ -6,8 +6,8 @@ import java.util.Properties;
 import org.hibernate.HibernateException;
 import org.hibernate.MappingException;
 import org.hibernate.engine.spi.SharedSessionContractImplementor;
+import org.hibernate.generator.GeneratorCreationContext;
 import org.hibernate.id.enhanced.SequenceStyleGenerator;
-import org.hibernate.id.factory.spi.CustomIdGeneratorCreationContext;
 import org.hibernate.service.ServiceRegistry;
 import org.hibernate.type.Type;
 import org.hibernate.type.spi.TypeConfiguration;
@@ -18,7 +18,7 @@ public class StringPrefixedNumberFormattedSequenceIdGenerator extends SequenceSt
     private final String numberFormat;
 
     public StringPrefixedNumberFormattedSequenceIdGenerator(
-            StringPrefixedSequence config, Member annotatedMember, CustomIdGeneratorCreationContext context) {
+            StringPrefixedSequence config, Member annotatedMember, GeneratorCreationContext context) {
         valuePrefix = config.valuePrefix();
         numberFormat = config.numberFormat();
     }

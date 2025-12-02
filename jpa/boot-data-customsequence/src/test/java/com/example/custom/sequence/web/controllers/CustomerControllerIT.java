@@ -99,7 +99,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                 .post()
                 .uri("/api/customers")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(customerRequest))
+                .content(jsonMapper.writeValueAsString(customerRequest))
                 .assertThat()
                 .hasStatus(HttpStatus.CREATED)
                 .hasContentType(MediaType.APPLICATION_JSON)
@@ -126,14 +126,15 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                 .post()
                 .uri("/api/customers")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(customerRequest))
+                .content(jsonMapper.writeValueAsString(customerRequest))
                 .assertThat()
                 .hasStatus(HttpStatus.BAD_REQUEST)
                 .hasContentType(MediaType.APPLICATION_PROBLEM_JSON)
                 .bodyJson()
                 .convertTo(ProblemDetail.class)
                 .satisfies(errorResponse -> {
-                    assertThat(errorResponse.getType().toString()).isEqualTo("about:blank");
+                    assertThat(errorResponse.getType().toString())
+                            .isEqualTo("https://custom-sequence.com/errors/validation-error");
                     assertThat(errorResponse.getTitle()).isEqualTo("Constraint Violation");
                     assertThat(errorResponse.getStatus()).isEqualTo(400);
                     assertThat(errorResponse.getDetail()).isEqualTo("Invalid request content.");
@@ -164,7 +165,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
         this.mockMvcTester
                 .put()
                 .uri("/api/customers/{id}", customer.getId())
-                .content(objectMapper.writeValueAsString(customerRequest))
+                .content(jsonMapper.writeValueAsString(customerRequest))
                 .contentType(MediaType.APPLICATION_JSON)
                 .assertThat()
                 .hasStatusOk()
@@ -195,7 +196,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                 .put()
                 .uri("/api/customers/{id}", customer.getId())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(customerRequest))
+                .content(jsonMapper.writeValueAsString(customerRequest))
                 .assertThat()
                 .hasContentType(MediaType.APPLICATION_JSON)
                 .hasStatusOk()
@@ -225,7 +226,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                 .put()
                 .uri("/api/customers/{id}", customer.getId())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(customerRequest))
+                .content(jsonMapper.writeValueAsString(customerRequest))
                 .assertThat()
                 .hasContentType(MediaType.APPLICATION_JSON)
                 .hasStatusOk()
