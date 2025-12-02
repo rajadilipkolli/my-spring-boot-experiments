@@ -8,9 +8,9 @@ import java.util.Arrays;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 import org.apache.commons.io.IOUtils;
+import org.jspecify.annotations.Nullable;
 import org.springframework.data.redis.serializer.JdkSerializationRedisSerializer;
 import org.springframework.data.redis.serializer.SerializationException;
-import org.springframework.lang.Nullable;
 
 public class RedisCacheGZIPSerializer extends JdkSerializationRedisSerializer {
 
@@ -22,7 +22,7 @@ public class RedisCacheGZIPSerializer extends JdkSerializationRedisSerializer {
 
     @Override
     @Nullable
-    public Object deserialize(@Nullable byte[] bytes) {
+    public Object deserialize(byte @Nullable [] bytes) {
         if (bytes == null || bytes.length == 0) {
             return null;
         }
@@ -40,16 +40,12 @@ public class RedisCacheGZIPSerializer extends JdkSerializationRedisSerializer {
     }
 
     @Override
-    @Nullable
-    public byte[] serialize(@Nullable Object o) {
+    public byte @Nullable [] serialize(@Nullable Object o) {
         if (o == null) {
             return new byte[0];
         }
 
         byte[] serialized = super.serialize(o);
-        if (serialized == null) {
-            return new byte[0];
-        }
 
         // Only compress if above threshold
         if (serialized.length > COMPRESSION_THRESHOLD) {
@@ -66,7 +62,7 @@ public class RedisCacheGZIPSerializer extends JdkSerializationRedisSerializer {
         }
     }
 
-    private byte[] compress(@Nullable byte[] data) {
+    private byte[] compress(byte @Nullable [] data) {
         if (data == null) {
             return new byte[0];
         }
@@ -83,7 +79,7 @@ public class RedisCacheGZIPSerializer extends JdkSerializationRedisSerializer {
         return byteArrayOutputStream.toByteArray();
     }
 
-    private byte[] decompress(@Nullable byte[] data) {
+    private byte[] decompress(byte @Nullable [] data) {
         if (data == null) {
             return new byte[0];
         }

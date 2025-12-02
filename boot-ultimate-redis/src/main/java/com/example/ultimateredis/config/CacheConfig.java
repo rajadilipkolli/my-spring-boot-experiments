@@ -3,6 +3,8 @@ package com.example.ultimateredis.config;
 import com.example.ultimateredis.utils.AppConstants;
 import io.lettuce.core.ReadFrom;
 import java.time.Duration;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.cache.autoconfigure.RedisCacheManagerBuilderCustomizer;
@@ -20,10 +22,10 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.GenericJacksonJsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
-import org.springframework.lang.Nullable;
+import tools.jackson.databind.json.JsonMapper;
 
 @Configuration(proxyBeanMethods = false)
 @EnableConfigurationProperties(CacheConfigurationProperties.class)
@@ -33,7 +35,7 @@ public class CacheConfig implements CachingConfigurer {
     private static final Logger log = LoggerFactory.getLogger(CacheConfig.class);
 
     @Bean
-    public ApplicationListener<ContextRefreshedEvent> redisCacheMigrationListener(
+    public ApplicationListener<@NonNull ContextRefreshedEvent> redisCacheMigrationListener(
             RedisTemplate<String, Object> redisTemplate) {
         return event -> {
             try {
@@ -72,13 +74,14 @@ public class CacheConfig implements CachingConfigurer {
     }
 
     @Bean
-    public RedisTemplate<String, Object> redisTemplate(LettuceConnectionFactory connectionFactory) {
+    public RedisTemplate<String, Object> redisTemplate(
+            LettuceConnectionFactory connectionFactory, JsonMapper jsonMapper) {
         RedisTemplate<String, Object> template = new RedisTemplate<>();
         template.setConnectionFactory(connectionFactory);
         template.setKeySerializer(new StringRedisSerializer());
-        template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
+        template.setValueSerializer(new GenericJacksonJsonRedisSerializer(jsonMapper));
         template.setHashKeySerializer(new StringRedisSerializer());
-        template.setHashValueSerializer(new GenericJackson2JsonRedisSerializer());
+        template.setHashValueSerializer(new GenericJacksonJsonRedisSerializer(jsonMapper));
         template.setEnableTransactionSupport(true);
         template.afterPropertiesSet();
         return template;
