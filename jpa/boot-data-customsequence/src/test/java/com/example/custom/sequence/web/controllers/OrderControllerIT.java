@@ -101,7 +101,7 @@ class OrderControllerIT extends AbstractIntegrationTest {
                 .post()
                 .uri("/api/orders")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(orderRequest))
+                .content(jsonMapper.writeValueAsString(orderRequest))
                 .assertThat()
                 .hasStatus(HttpStatus.CREATED)
                 .hasContentType(MediaType.APPLICATION_JSON)
@@ -121,14 +121,15 @@ class OrderControllerIT extends AbstractIntegrationTest {
                 .post()
                 .uri("/api/orders")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(orderRequest))
+                .content(jsonMapper.writeValueAsString(orderRequest))
                 .assertThat()
                 .hasStatus(HttpStatus.BAD_REQUEST)
                 .hasContentType(MediaType.APPLICATION_PROBLEM_JSON)
                 .bodyJson()
                 .convertTo(ProblemDetail.class)
                 .satisfies(problem -> {
-                    assertThat(problem.getType().toString()).isEqualTo("about:blank");
+                    assertThat(problem.getType().toString())
+                            .isEqualTo("https://custom-sequence.com/errors/validation-error");
                     assertThat(problem.getTitle()).isEqualTo("Constraint Violation");
                     assertThat(problem.getStatus()).isEqualTo(400);
                     assertThat(problem.getDetail()).isEqualTo("Invalid request content.");
@@ -155,7 +156,7 @@ class OrderControllerIT extends AbstractIntegrationTest {
                 .put()
                 .uri("/api/orders/{id}", order.getId())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(orderRequest))
+                .content(jsonMapper.writeValueAsString(orderRequest))
                 .assertThat()
                 .hasStatus(HttpStatus.OK)
                 .hasContentType(MediaType.APPLICATION_JSON)
@@ -176,7 +177,7 @@ class OrderControllerIT extends AbstractIntegrationTest {
                 .put()
                 .uri("/api/orders/{id}", order.getId())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(orderRequest))
+                .content(jsonMapper.writeValueAsString(orderRequest))
                 .assertThat()
                 .hasStatus(HttpStatus.NOT_FOUND);
     }
@@ -189,7 +190,7 @@ class OrderControllerIT extends AbstractIntegrationTest {
                 .put()
                 .uri("/api/orders/{id}", "NON_EXISTENT_ID")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(orderRequest))
+                .content(jsonMapper.writeValueAsString(orderRequest))
                 .assertThat()
                 .hasStatus(HttpStatus.NOT_FOUND);
     }
