@@ -3,6 +3,8 @@ package com.example.custom.sequence.common;
 import static com.example.custom.sequence.utils.AppConstants.PROFILE_TEST;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
+import com.example.custom.sequence.repositories.CustomerRepository;
+import com.example.custom.sequence.repositories.OrderRepository;
 import javax.sql.DataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -34,4 +36,10 @@ public abstract class AbstractIntegrationTest {
 
     @Autowired
     protected DataSource dataSource;
+
+    @Autowired
+    protected CustomerRepository customerRepository;
+
+    @Autowired
+    protected OrderRepository orderRepository;
 }

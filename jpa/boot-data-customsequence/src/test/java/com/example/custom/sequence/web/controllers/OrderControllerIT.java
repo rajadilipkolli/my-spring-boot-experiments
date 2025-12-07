@@ -8,25 +8,16 @@ import com.example.custom.sequence.entities.Order;
 import com.example.custom.sequence.model.request.OrderRequest;
 import com.example.custom.sequence.model.response.OrderResponse;
 import com.example.custom.sequence.model.response.PagedResult;
-import com.example.custom.sequence.repositories.CustomerRepository;
-import com.example.custom.sequence.repositories.OrderRepository;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Objects;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 
 class OrderControllerIT extends AbstractIntegrationTest {
-
-    @Autowired
-    private OrderRepository orderRepository;
-
-    @Autowired
-    private CustomerRepository customerRepository;
 
     private List<Order> orderList = null;
     private Customer customer;

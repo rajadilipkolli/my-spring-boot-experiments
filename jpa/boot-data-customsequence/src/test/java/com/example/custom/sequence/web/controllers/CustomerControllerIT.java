@@ -8,7 +8,6 @@ import com.example.custom.sequence.model.request.CustomerRequest;
 import com.example.custom.sequence.model.request.OrderRequest;
 import com.example.custom.sequence.model.response.CustomerResponse;
 import com.example.custom.sequence.model.response.PagedResult;
-import com.example.custom.sequence.repositories.CustomerRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.hypersistence.utils.jdbc.validator.SQLStatementCountValidator;
 import java.util.ArrayList;
@@ -17,15 +16,11 @@ import java.util.List;
 import java.util.Objects;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 
 class CustomerControllerIT extends AbstractIntegrationTest {
-
-    @Autowired
-    private CustomerRepository customerRepository;
 
     private List<Customer> customerList = null;
 
@@ -111,9 +106,9 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                     assertThat(customerResponse.orderResponses()).isEmpty();
                 });
 
-        SQLStatementCountValidator.assertSelectCount(0);
+        SQLStatementCountValidator.assertSelectCount(1); // 1 SELECT for sequence value
         SQLStatementCountValidator.assertInsertCount(1);
-        SQLStatementCountValidator.assertTotalCount(1);
+        SQLStatementCountValidator.assertTotalCount(2);
 
         assertThat(customerRepository.count()).isEqualTo(4);
     }
@@ -158,7 +153,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
     }
 
     @Test
-    void shouldUpdateCustomer() throws Exception {
+    void shouldUpdateCustomer() {
         Customer customer = customerList.getFirst();
         CustomerRequest customerRequest = new CustomerRequest("Updated Customer", null);
 
@@ -236,8 +231,8 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                     assertThat(customerResponse.text()).isEqualTo("Updated Customer1");
                     assertThat(customerResponse.orderResponses()).isNotEmpty().hasSize(2);
                 });
-        // select for customer
-        SQLStatementCountValidator.assertSelectCount(1);
+        // select for customer and 2 for orders sequence
+        SQLStatementCountValidator.assertSelectCount(2);
         // update for customer table
         SQLStatementCountValidator.assertUpdateCount(0);
         // bulk insert for orders
@@ -261,10 +256,10 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                 .satisfies(
                         customerResponse -> assertThat(customerResponse.text()).isEqualTo(customer.getText()));
 
-        // select for customer
+        // select for customer only
         SQLStatementCountValidator.assertSelectCount(1);
         SQLStatementCountValidator.assertUpdateCount(0);
-        SQLStatementCountValidator.assertInsertCount(0);
+        SQLStatementCountValidator.assertTotalCount(2);
         // delete for customer
         SQLStatementCountValidator.assertDeleteCount(1);
 
