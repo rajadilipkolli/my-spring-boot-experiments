@@ -38,13 +38,13 @@ class EntityCacheIT extends AbstractIntegrationTest {
         String response = this.mockMvc
                 .perform(post("/api/customers")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(customerRequest)))
+                        .content(jsonMapper.writeValueAsString(customerRequest)))
                 .andExpect(status().isCreated())
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
 
-        testCustomerId = objectMapper.readTree(response).path("customerId").asLong();
+        testCustomerId = jsonMapper.readTree(response).path("customerId").asLong();
 
         // Add an order with multiple items
         OrderRequest orderRequest = new OrderRequest(
@@ -57,13 +57,13 @@ class EntityCacheIT extends AbstractIntegrationTest {
         response = this.mockMvc
                 .perform(post("/api/orders")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(orderRequest)))
+                        .content(jsonMapper.writeValueAsString(orderRequest)))
                 .andExpect(status().isCreated())
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
 
-        testOrderId = objectMapper.readTree(response).path("orderId").asLong();
+        testOrderId = jsonMapper.readTree(response).path("orderId").asLong();
 
         // Reset SQL counter after setup
         SQLStatementCountValidator.reset();
@@ -152,7 +152,7 @@ class EntityCacheIT extends AbstractIntegrationTest {
 
         // Get first order item ID
         Long orderItemId =
-                objectMapper.readTree(response).get(0).path("orderItemId").asLong();
+                jsonMapper.readTree(response).get(0).path("orderItemId").asLong();
 
         SQLStatementCountValidator.reset();
 
@@ -171,7 +171,7 @@ class EntityCacheIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(put("/api/order/items/{id}", orderItemId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(updatedRequest)))
+                        .content(jsonMapper.writeValueAsString(updatedRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.itemCode", is("UPDATED-ITEM")));
 
@@ -199,13 +199,13 @@ class EntityCacheIT extends AbstractIntegrationTest {
         String response = this.mockMvc
                 .perform(post("/api/orders")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(orderRequest)))
+                        .content(jsonMapper.writeValueAsString(orderRequest)))
                 .andExpect(status().isCreated())
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
 
-        Long orderToDeleteId = objectMapper.readTree(response).path("orderId").asLong();
+        Long orderToDeleteId = jsonMapper.readTree(response).path("orderId").asLong();
 
         // -------------------- STEP 1: Verify there are 2 orders initially --------------------
         // Reset the SQL counter before our test
@@ -248,7 +248,7 @@ class EntityCacheIT extends AbstractIntegrationTest {
 
         // Get first order item ID
         Long orderItemId =
-                objectMapper.readTree(response).get(0).path("orderItemId").asLong();
+                jsonMapper.readTree(response).get(0).path("orderItemId").asLong();
 
         // Ensure items are in cache by making a second request - this should hit cache
         SQLStatementCountValidator.reset();

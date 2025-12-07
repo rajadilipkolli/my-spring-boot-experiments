@@ -97,7 +97,7 @@ class OrderItemControllerIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(put("/api/order/items/{id}", orderItemId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(orderItemRequest)))
+                        .content(jsonMapper.writeValueAsString(orderItemRequest)))
                 .andExpect(status().isOk())
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_JSON_VALUE)))
                 .andExpect(jsonPath("$.orderItemId", is(orderItemId), Long.class))
@@ -115,7 +115,7 @@ class OrderItemControllerIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(put("/api/order/items/{id}", orderItemId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(orderItemRequest)))
+                        .content(jsonMapper.writeValueAsString(orderItemRequest)))
                 .andExpect(status().isNotFound())
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                 .andExpect(

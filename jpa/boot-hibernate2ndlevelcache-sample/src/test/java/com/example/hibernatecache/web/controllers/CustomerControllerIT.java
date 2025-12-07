@@ -141,7 +141,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(post("/api/customers")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(customerRequest)))
+                        .content(jsonMapper.writeValueAsString(customerRequest)))
                 .andExpect(status().isCreated())
                 .andExpect(header().exists(HttpHeaders.LOCATION))
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_JSON_VALUE)))
@@ -163,7 +163,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(post("/api/customers")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(customerRequest)))
+                        .content(jsonMapper.writeValueAsString(customerRequest)))
                 .andExpect(status().isBadRequest())
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                 .andExpect(
@@ -189,7 +189,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(put("/api/customers/{id}", customer.getId())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(customerRequest)))
+                        .content(jsonMapper.writeValueAsString(customerRequest)))
                 .andExpect(status().isOk())
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_JSON_VALUE)))
                 .andExpect(jsonPath("$.customerId", is(customer.getId()), Long.class))

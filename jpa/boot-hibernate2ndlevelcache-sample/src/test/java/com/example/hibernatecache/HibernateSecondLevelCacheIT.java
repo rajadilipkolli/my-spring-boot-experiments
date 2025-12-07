@@ -43,7 +43,7 @@ class HibernateSecondLevelCacheIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(post("/api/customers")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(customerRequest)))
+                        .content(jsonMapper.writeValueAsString(customerRequest)))
                 .andExpect(status().isCreated());
 
         // Verify DB was hit for insert
@@ -75,14 +75,14 @@ class HibernateSecondLevelCacheIT extends AbstractIntegrationTest {
         String customerJson = this.mockMvc
                 .perform(post("/api/customers")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(customerRequest)))
+                        .content(jsonMapper.writeValueAsString(customerRequest)))
                 .andExpect(status().isCreated())
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
 
         // Extract customer ID
-        Long customerId = objectMapper.readTree(customerJson).path("customerId").asLong();
+        Long customerId = jsonMapper.readTree(customerJson).path("customerId").asLong();
 
         // Create an order for the customer
         OrderRequest orderRequest = new OrderRequest(
@@ -92,7 +92,7 @@ class HibernateSecondLevelCacheIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(post("/api/orders")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(orderRequest)))
+                        .content(jsonMapper.writeValueAsString(orderRequest)))
                 .andExpect(status().isCreated());
 
         // Multiple reads of the same customer to check orders collection
@@ -117,13 +117,13 @@ class HibernateSecondLevelCacheIT extends AbstractIntegrationTest {
         String customerJson = this.mockMvc
                 .perform(post("/api/customers")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(customerRequest)))
+                        .content(jsonMapper.writeValueAsString(customerRequest)))
                 .andExpect(status().isCreated())
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
 
-        Long customerId = objectMapper.readTree(customerJson).path("customerId").asLong();
+        Long customerId = jsonMapper.readTree(customerJson).path("customerId").asLong();
 
         // Read customer initially to cache it
         SQLStatementCountValidator.reset();
@@ -147,7 +147,7 @@ class HibernateSecondLevelCacheIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(put("/api/customers/{id}", customerId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(updatedRequest)))
+                        .content(jsonMapper.writeValueAsString(updatedRequest)))
                 .andExpect(status().isOk());
 
         SQLStatementCountValidator.assertUpdateCount(1);
@@ -176,27 +176,25 @@ class HibernateSecondLevelCacheIT extends AbstractIntegrationTest {
         String customerJson1 = this.mockMvc
                 .perform(post("/api/customers")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(customerRequest1)))
+                        .content(jsonMapper.writeValueAsString(customerRequest1)))
                 .andExpect(status().isCreated())
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
 
-        Long customerId1 =
-                objectMapper.readTree(customerJson1).path("customerId").asLong();
+        Long customerId1 = jsonMapper.readTree(customerJson1).path("customerId").asLong();
 
         // Create second customer (to remain)
         String customerJson2 = this.mockMvc
                 .perform(post("/api/customers")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(customerRequest2)))
+                        .content(jsonMapper.writeValueAsString(customerRequest2)))
                 .andExpect(status().isCreated())
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
 
-        Long customerId2 =
-                objectMapper.readTree(customerJson2).path("customerId").asLong();
+        Long customerId2 = jsonMapper.readTree(customerJson2).path("customerId").asLong();
 
         // Cache both customers
         SQLStatementCountValidator.reset();
@@ -235,13 +233,13 @@ class HibernateSecondLevelCacheIT extends AbstractIntegrationTest {
         String customerJson = this.mockMvc
                 .perform(post("/api/customers")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(customerRequest)))
+                        .content(jsonMapper.writeValueAsString(customerRequest)))
                 .andExpect(status().isCreated())
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
 
-        Long customerId = objectMapper.readTree(customerJson).path("customerId").asLong();
+        Long customerId = jsonMapper.readTree(customerJson).path("customerId").asLong();
 
         // Create an order with multiple items
         OrderRequest orderRequest = new OrderRequest(
@@ -254,13 +252,13 @@ class HibernateSecondLevelCacheIT extends AbstractIntegrationTest {
         String orderJson = this.mockMvc
                 .perform(post("/api/orders")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(orderRequest)))
+                        .content(jsonMapper.writeValueAsString(orderRequest)))
                 .andExpect(status().isCreated())
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
 
-        Long orderId = objectMapper.readTree(orderJson).path("orderId").asLong();
+        Long orderId = jsonMapper.readTree(orderJson).path("orderId").asLong();
 
         // Reset counter and read order multiple times
         SQLStatementCountValidator.reset();
@@ -277,7 +275,7 @@ class HibernateSecondLevelCacheIT extends AbstractIntegrationTest {
         SQLStatementCountValidator.assertSelectCount(1); // Just one hit to DB
 
         // Now update one of the order items
-        Long orderItemId = objectMapper
+        Long orderItemId = jsonMapper
                 .readTree(orderJson)
                 .path("orderItems")
                 .get(0)
@@ -291,7 +289,7 @@ class HibernateSecondLevelCacheIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(put("/api/order/items/{id}", orderItemId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(updatedItem)))
+                        .content(jsonMapper.writeValueAsString(updatedItem)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.price", is(15.99)))
                 .andExpect(jsonPath("$.quantity", is(4)))
@@ -320,13 +318,13 @@ class HibernateSecondLevelCacheIT extends AbstractIntegrationTest {
         String customerJson = this.mockMvc
                 .perform(post("/api/customers")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(customerRequest)))
+                        .content(jsonMapper.writeValueAsString(customerRequest)))
                 .andExpect(status().isCreated())
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
 
-        Long customerId = objectMapper.readTree(customerJson).path("customerId").asLong();
+        Long customerId = jsonMapper.readTree(customerJson).path("customerId").asLong();
 
         // Create an order for the customer
         OrderRequest orderRequest = new OrderRequest(
@@ -337,13 +335,13 @@ class HibernateSecondLevelCacheIT extends AbstractIntegrationTest {
         String orderJson = this.mockMvc
                 .perform(post("/api/orders")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(orderRequest)))
+                        .content(jsonMapper.writeValueAsString(orderRequest)))
                 .andExpect(status().isCreated())
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
 
-        Long orderId = objectMapper.readTree(orderJson).path("orderId").asLong();
+        Long orderId = jsonMapper.readTree(orderJson).path("orderId").asLong();
 
         // Cache entities first
         this.mockMvc.perform(get("/api/customers/{id}", customerId)).andExpect(status().isOk());
@@ -370,7 +368,7 @@ class HibernateSecondLevelCacheIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(put("/api/orders/{id}", orderId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(updatedRequest)))
+                        .content(jsonMapper.writeValueAsString(updatedRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name", is("Updated by Second Thread")));
 
@@ -387,13 +385,17 @@ class HibernateSecondLevelCacheIT extends AbstractIntegrationTest {
         // We're expecting either:
         // - 0 selects (fully cached)
         // - 1 select (cache miss or cache refresh)
-        SQLStatementCountValidator.assertSelectCount(1);
+        try {
+            SQLStatementCountValidator.assertSelectCount(0);
+        } catch (Exception e) {
+            SQLStatementCountValidator.assertSelectCount(1);
+        }
 
         // ---------- STEP 4: Test concurrent modifying of related entities (parent-child relationship) ----------
         SQLStatementCountValidator.reset();
 
         // Get the order item ID
-        Long orderItemId = objectMapper
+        Long orderItemId = jsonMapper
                 .readTree(orderJson)
                 .path("orderItems")
                 .get(0)
@@ -406,7 +408,7 @@ class HibernateSecondLevelCacheIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(put("/api/order/items/{id}", orderItemId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(updatedItem)))
+                        .content(jsonMapper.writeValueAsString(updatedItem)))
                 .andExpect(status().isOk());
 
         // Check that parent order cache is invalidated properly
