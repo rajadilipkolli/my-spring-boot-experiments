@@ -387,11 +387,7 @@ class HibernateSecondLevelCacheIT extends AbstractIntegrationTest {
         // We're expecting either:
         // - 0 selects (fully cached)
         // - 1 select (cache miss or cache refresh)
-        try {
-            SQLStatementCountValidator.assertSelectCount(0);
-        } catch (Exception e) {
-            SQLStatementCountValidator.assertSelectCount(1);
-        }
+        SQLStatementCountValidator.assertSelectCount(1);
 
         // ---------- STEP 4: Test concurrent modifying of related entities (parent-child relationship) ----------
         SQLStatementCountValidator.reset();
