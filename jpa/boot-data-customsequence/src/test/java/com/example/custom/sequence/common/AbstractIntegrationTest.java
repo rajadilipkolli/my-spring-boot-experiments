@@ -15,10 +15,7 @@ import tools.jackson.databind.json.JsonMapper;
 
 /**
  * Base class for integration tests providing test infrastructure including: -
- * Configured DataSource
- * using LazyConnectionDataSourceProxy - MockMvc for API testing - ObjectMapper
- * for JSON
- * serialization
+ * Configured DataSource using LazyConnectionDataSourceProxy - MockMvc for API testing - JsonMapper for JSON serialization
  *
  * <p>
  * Uses ContainersConfig for test container configuration.

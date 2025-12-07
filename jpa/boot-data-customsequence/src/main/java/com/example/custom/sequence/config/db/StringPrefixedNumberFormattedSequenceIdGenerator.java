@@ -13,6 +13,7 @@ public class StringPrefixedNumberFormattedSequenceIdGenerator implements BeforeE
     private final String valuePrefix;
     private final String numberFormat;
     private final String sequenceName;
+    private final String sequenceNextValSql;
 
     public StringPrefixedNumberFormattedSequenceIdGenerator(
             StringPrefixedSequence annotation, Member member, GeneratorCreationContext context) {
@@ -22,6 +23,9 @@ public class StringPrefixedNumberFormattedSequenceIdGenerator implements BeforeE
         // Derive sequence name from the declaring class (use lowercase + 's' + '_seq')
         String simpleName = member.getDeclaringClass().getSimpleName();
         this.sequenceName = simpleName.toLowerCase() + "s_seq";
+
+        var dialect = context.getDatabase().getDialect();
+        this.sequenceNextValSql = dialect.getSequenceSupport().getSequenceNextValString(sequenceName);
     }
 
     @Override
@@ -35,7 +39,7 @@ public class StringPrefixedNumberFormattedSequenceIdGenerator implements BeforeE
         // Fetch the next value from the database sequence
         Long nextValue = session.doReturningWork(connection -> {
             try (var stmt = connection.createStatement();
-                    var rs = stmt.executeQuery("SELECT NEXT VALUE FOR " + sequenceName)) {
+                    var rs = stmt.executeQuery(sequenceNextValSql)) {
                 if (rs.next()) {
                     return rs.getLong(1);
                 }
