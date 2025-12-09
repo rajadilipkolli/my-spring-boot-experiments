@@ -62,7 +62,7 @@ public class CustomRestaurantESRepositoryImpl implements CustomRestaurantESRepos
                                 QueryBuilders.multiMatch(
                                         builder -> {
                                             builder.query(queryKeyWord)
-                                                    .fields(BOROUGH, CUISINE, "name");
+                                                    .fields(BOROUGH, CUISINE, "restaurant_name");
                                             if (prefixPhraseEnabled) {
                                                 builder.type(TextQueryType.PhrasePrefix);
                                             }
@@ -143,7 +143,8 @@ public class CustomRestaurantESRepositoryImpl implements CustomRestaurantESRepos
                                                         QueryBuilders.match(
                                                                 matchBuilder ->
                                                                         matchBuilder
-                                                                                .field("name")
+                                                                                .field(
+                                                                                        "restaurant_name")
                                                                                 .query(name)))))
                         .build();
         query.setPageable(pageable);
@@ -163,6 +164,8 @@ public class CustomRestaurantESRepositoryImpl implements CustomRestaurantESRepos
                                                                 boroughBuilder ->
                                                                         boroughBuilder
                                                                                 .field(BOROUGH)
+                                                                                .caseInsensitive(
+                                                                                        true)
                                                                                 .value(
                                                                                         "*"
                                                                                                 + queryKeyword
@@ -171,6 +174,8 @@ public class CustomRestaurantESRepositoryImpl implements CustomRestaurantESRepos
                                                                 boroughBuilder ->
                                                                         boroughBuilder
                                                                                 .field(CUISINE)
+                                                                                .caseInsensitive(
+                                                                                        true)
                                                                                 .value(
                                                                                         "*"
                                                                                                 + queryKeyword
@@ -178,7 +183,10 @@ public class CustomRestaurantESRepositoryImpl implements CustomRestaurantESRepos
                                                         QueryBuilders.wildcard(
                                                                 boroughBuilder ->
                                                                         boroughBuilder
-                                                                                .field("name")
+                                                                                .field(
+                                                                                        "restaurant_name")
+                                                                                .caseInsensitive(
+                                                                                        true)
                                                                                 .value(
                                                                                         "*"
                                                                                                 + queryKeyword
