@@ -1,8 +1,8 @@
 package com.example.mongoes.web.api;
 
 import com.example.mongoes.document.Restaurant;
-import com.example.mongoes.model.response.AggregationSearchResponse;
 import com.example.mongoes.model.response.ResultData;
+import com.example.mongoes.model.response.SearchPageResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
@@ -94,7 +94,7 @@ public interface SearchApi {
                 @ApiResponse(responseCode = "400", description = "Invalid parameters provided")
             })
     @GetMapping("/search/multi")
-    Mono<ResponseEntity<SearchPage<Restaurant>>> searchMulti(
+    Mono<ResponseEntity<SearchPageResponse<Restaurant>>> searchMulti(
             @RequestParam @NotBlank(message = "Query cannot be blank") String query,
             @RequestParam(defaultValue = "10") @Min(1) @Max(100) Integer limit,
             @RequestParam(defaultValue = "0") @Min(0) Integer offset,
@@ -129,7 +129,7 @@ public interface SearchApi {
                 @ApiResponse(responseCode = "400", description = "Invalid parameters provided")
             })
     @GetMapping("/search/term/borough")
-    Mono<ResponseEntity<SearchPage<Restaurant>>> searchTermForBorough(
+    Mono<ResponseEntity<SearchPageResponse<Restaurant>>> searchTermForBorough(
             @RequestParam @NotBlank(message = "Query cannot be blank") String query,
             @RequestParam(defaultValue = "10") @Min(1) @Max(100) Integer limit,
             @RequestParam(defaultValue = "0") @Min(0) Integer offset);
@@ -162,7 +162,7 @@ public interface SearchApi {
                 @ApiResponse(responseCode = "400", description = "Invalid parameters provided")
             })
     @GetMapping("/search/terms")
-    Mono<ResponseEntity<SearchPage<Restaurant>>> searchTerms(
+    Mono<ResponseEntity<SearchPageResponse<Restaurant>>> searchTerms(
             @RequestParam("query") @NotEmpty(message = "Queries list cannot be empty") @Valid
                     List<@NotBlank(message = "Query term cannot be blank") String> queries,
             @RequestParam(defaultValue = "10") @Min(1) @Max(100) Integer limit,
@@ -241,7 +241,7 @@ public interface SearchApi {
                 @ApiResponse(responseCode = "400", description = "Invalid parameters provided")
             })
     @GetMapping("/search/should/bool")
-    Mono<ResponseEntity<SearchPage<Restaurant>>> searchBoolShould(
+    Mono<ResponseEntity<SearchPageResponse<Restaurant>>> searchBoolShould(
             @RequestParam String borough,
             @RequestParam String cuisine,
             @RequestParam String name,
@@ -259,7 +259,7 @@ public interface SearchApi {
                 @ApiResponse(responseCode = "400", description = "Invalid parameters provided")
             })
     @GetMapping("/search/wildcard")
-    Mono<ResponseEntity<SearchPage<Restaurant>>> searchWildcard(
+    Mono<ResponseEntity<SearchPageResponse<Restaurant>>> searchWildcard(
             @Parameter(description = "Wildcard pattern for search", example = "Man")
                     @RequestParam
                     @NotBlank(message = "Query cannot be blank")
@@ -279,7 +279,7 @@ public interface SearchApi {
                 @ApiResponse(responseCode = "400", description = "Invalid parameters provided")
             })
     @GetMapping("/search/regexp/borough")
-    Mono<ResponseEntity<SearchPage<Restaurant>>> searchRegularExpression(
+    Mono<ResponseEntity<SearchPageResponse<Restaurant>>> searchRegularExpression(
             @Parameter(description = "Regular expression pattern", example = "Man.*")
                     @RequestParam
                     @NotBlank(message = "Query cannot be blank")
@@ -306,7 +306,7 @@ public interface SearchApi {
                 @ApiResponse(responseCode = "400", description = "Invalid parameters provided")
             })
     @GetMapping("/search/simple")
-    Mono<ResponseEntity<SearchPage<Restaurant>>> searchSimpleQueryForBoroughAndCuisine(
+    Mono<ResponseEntity<SearchPageResponse<Restaurant>>> searchSimpleQueryForBoroughAndCuisine(
             @Parameter(description = "Search query string", example = "Manhattan AND Italian")
                     @RequestParam
                     @NotBlank(message = "Query cannot be blank")
@@ -332,7 +332,7 @@ public interface SearchApi {
                 @ApiResponse(responseCode = "400", description = "Invalid parameters provided")
             })
     @GetMapping("/search/restaurant/range")
-    Mono<ResponseEntity<SearchPage<Restaurant>>> searchRestaurantIdRange(
+    Mono<ResponseEntity<SearchPageResponse<Restaurant>>> searchRestaurantIdRange(
             @Parameter(description = "Lower limit of restaurant ID", example = "1000")
                     @RequestParam
                     @NotNull(message = "Lower limit is required")
@@ -364,7 +364,7 @@ public interface SearchApi {
                 @ApiResponse(responseCode = "400", description = "Invalid parameters provided")
             })
     @GetMapping("/search/date/range")
-    Mono<ResponseEntity<SearchPage<Restaurant>>> searchDateRange(
+    Mono<ResponseEntity<SearchPageResponse<Restaurant>>> searchDateRange(
             @Parameter(description = "Start date (ISO format)", example = "2024-01-01")
                     @RequestParam
                     @NotBlank(message = "From date is required")
@@ -401,11 +401,11 @@ public interface SearchApi {
                                         schema =
                                                 @Schema(
                                                         implementation =
-                                                                AggregationSearchResponse.class))),
+                                                                SearchPageResponse.class))),
                 @ApiResponse(responseCode = "400", description = "Invalid parameters provided")
             })
     @GetMapping("/search/aggregate")
-    Mono<ResponseEntity<AggregationSearchResponse>> aggregateSearch(
+    Mono<ResponseEntity<SearchPageResponse<Restaurant>>> aggregateSearch(
             @Parameter(description = "Search keyword", example = "Italian")
                     @RequestParam
                     @NotBlank(message = "Search keyword cannot be blank")

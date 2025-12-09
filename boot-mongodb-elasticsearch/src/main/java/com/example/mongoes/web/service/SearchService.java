@@ -1,8 +1,8 @@
 package com.example.mongoes.web.service;
 
 import com.example.mongoes.document.Restaurant;
-import com.example.mongoes.model.response.AggregationSearchResponse;
 import com.example.mongoes.model.response.ResultData;
+import com.example.mongoes.model.response.SearchPageResponse;
 import com.example.mongoes.repository.elasticsearch.RestaurantESRepository;
 import java.util.HashMap;
 import java.util.List;
@@ -11,8 +11,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.elasticsearch.client.elc.ElasticsearchAggregations;
-import org.springframework.data.elasticsearch.core.SearchHit;
-import org.springframework.data.elasticsearch.core.SearchPage;
 import org.springframework.data.elasticsearch.core.geo.GeoPoint;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -37,23 +35,28 @@ public class SearchService {
         return Mono.just(restaurantESRepository.findByBorough(query, pageable));
     }
 
-    public Mono<SearchPage<Restaurant>> multiSearchQuery(
+    public Mono<SearchPageResponse<Restaurant>> multiSearchQuery(
             String query, Integer offset, Integer limit, Boolean prefixPhraseEnabled) {
         Pageable pageable = PageRequest.of(offset, limit);
-        return restaurantESRepository.findByBoroughOrCuisineOrName(
-                query, prefixPhraseEnabled, pageable);
+        return restaurantESRepository
+                .findByBoroughOrCuisineOrName(query, prefixPhraseEnabled, pageable)
+                .map(SearchPageResponse::new);
     }
 
-    public Mono<SearchPage<Restaurant>> termQueryForBorough(
+    public Mono<SearchPageResponse<Restaurant>> termQueryForBorough(
             String query, Integer offset, Integer limit) {
         Pageable pageable = PageRequest.of(offset, limit);
-        return restaurantESRepository.termQueryForBorough(query, pageable);
+        return restaurantESRepository
+                .termQueryForBorough(query, pageable)
+                .map(SearchPageResponse::new);
     }
 
-    public Mono<SearchPage<Restaurant>> termsQueryForBorough(
+    public Mono<SearchPageResponse<Restaurant>> termsQueryForBorough(
             List<String> queries, Integer offset, Integer limit) {
         Pageable pageable = PageRequest.of(offset, limit);
-        return restaurantESRepository.termsQueryForBorough(queries, pageable);
+        return restaurantESRepository
+                .termsQueryForBorough(queries, pageable)
+                .map(SearchPageResponse::new);
     }
 
     public Mono<Flux<Restaurant>> queryBoolWithMust(
@@ -64,43 +67,55 @@ public class SearchService {
                         borough, cuisine, name, pageable));
     }
 
-    public Mono<SearchPage<Restaurant>> queryBoolWithShould(
+    public Mono<SearchPageResponse<Restaurant>> queryBoolWithShould(
             String borough, String cuisine, String name, Integer offset, Integer limit) {
         Pageable pageable = PageRequest.of(offset, limit);
-        return restaurantESRepository.queryBoolWithShould(borough, cuisine, name, pageable);
+        return restaurantESRepository
+                .queryBoolWithShould(borough, cuisine, name, pageable)
+                .map(SearchPageResponse::new);
     }
 
-    public Mono<SearchPage<Restaurant>> wildcardSearch(
+    public Mono<SearchPageResponse<Restaurant>> wildcardSearch(
             String queryKeyword, Integer offset, Integer limit) {
         Pageable pageable = PageRequest.of(offset, limit);
-        return restaurantESRepository.wildcardSearch(queryKeyword, pageable);
+        return restaurantESRepository
+                .wildcardSearch(queryKeyword, pageable)
+                .map(SearchPageResponse::new);
     }
 
-    public Mono<SearchPage<Restaurant>> regExpSearch(
+    public Mono<SearchPageResponse<Restaurant>> regExpSearch(
             String queryKeyword, Integer offset, Integer limit) {
         Pageable pageable = PageRequest.of(offset, limit);
-        return restaurantESRepository.regExpSearch(queryKeyword, pageable);
+        return restaurantESRepository
+                .regExpSearch(queryKeyword, pageable)
+                .map(SearchPageResponse::new);
     }
 
-    public Mono<SearchPage<Restaurant>> searchSimpleQueryForBoroughAndCuisine(
+    public Mono<SearchPageResponse<Restaurant>> searchSimpleQueryForBoroughAndCuisine(
             String queryKeyword, Integer offset, Integer limit) {
         Pageable pageable = PageRequest.of(offset, limit);
-        return restaurantESRepository.searchSimpleQueryForBoroughAndCuisine(queryKeyword, pageable);
+        return restaurantESRepository
+                .searchSimpleQueryForBoroughAndCuisine(queryKeyword, pageable)
+                .map(SearchPageResponse::new);
     }
 
-    public Mono<SearchPage<Restaurant>> searchRestaurantIdRange(
+    public Mono<SearchPageResponse<Restaurant>> searchRestaurantIdRange(
             Long lowerLimit, Long upperLimit, Integer offset, Integer limit) {
         Pageable pageable = PageRequest.of(offset, limit);
-        return restaurantESRepository.searchRestaurantIdRange(lowerLimit, upperLimit, pageable);
+        return restaurantESRepository
+                .searchRestaurantIdRange(lowerLimit, upperLimit, pageable)
+                .map(SearchPageResponse::new);
     }
 
-    public Mono<SearchPage<Restaurant>> searchDateRange(
+    public Mono<SearchPageResponse<Restaurant>> searchDateRange(
             String fromDate, String toDate, Integer offset, Integer limit) {
         Pageable pageable = PageRequest.of(offset, limit);
-        return restaurantESRepository.searchDateRange(fromDate, toDate, pageable);
+        return restaurantESRepository
+                .searchDateRange(fromDate, toDate, pageable)
+                .map(SearchPageResponse::new);
     }
 
-    public Mono<AggregationSearchResponse> aggregateSearch(
+    public Mono<SearchPageResponse<Restaurant>> aggregateSearch(
             String searchKeyword,
             List<String> fieldNames,
             String sortOrder,
@@ -121,20 +136,13 @@ public class SearchService {
                             ElasticsearchAggregations elasticsearchAggregations =
                                     (ElasticsearchAggregations)
                                             searchPage.getSearchHits().getAggregations();
-                            Map<String, Map<String, Long>> map = new HashMap<>();
+                            Map<String, Map<String, Long>> facets = new HashMap<>();
                             if (elasticsearchAggregations != null) {
-                                map =
+                                facets =
                                         aggregationProcessor.processAggregations(
                                                 elasticsearchAggregations.aggregationsAsMap());
                             }
-                            return new AggregationSearchResponse(
-                                    searchPage.getContent().stream()
-                                            .map(SearchHit::getContent)
-                                            .toList(),
-                                    map,
-                                    searchPage.getPageable(),
-                                    searchPage.getTotalPages(),
-                                    searchPage.getTotalElements());
+                            return new SearchPageResponse<>(searchPage, facets);
                         });
     }
 

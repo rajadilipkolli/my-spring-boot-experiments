@@ -7,16 +7,14 @@ import com.example.mongoes.common.AbstractIntegrationTest;
 import com.example.mongoes.document.Address;
 import com.example.mongoes.document.Grades;
 import com.example.mongoes.document.Restaurant;
-import com.example.mongoes.model.response.AggregationSearchResponse;
+import com.example.mongoes.model.response.SearchPageResponse;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.data.elasticsearch.core.SearchPage;
 import org.springframework.data.geo.Point;
 import org.springframework.http.MediaType;
 
@@ -76,7 +74,6 @@ class SearchControllerIntTest extends AbstractIntegrationTest {
     }
 
     @Test
-    @Disabled
     void searchMulti_ShouldReturnSearchPage() {
 
         webTestClient
@@ -91,12 +88,11 @@ class SearchControllerIntTest extends AbstractIntegrationTest {
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(new ParameterizedTypeReference<SearchPage<Restaurant>>() {});
+                .expectBody(new ParameterizedTypeReference<SearchPageResponse<Restaurant>>() {});
         //                .value(page -> assertThat(page.totalElements()).isEqualTo(1L));
     }
 
     @Test
-    @Disabled
     void searchTermForBorough_ShouldReturnSearchPage() {
 
         webTestClient
@@ -113,12 +109,11 @@ class SearchControllerIntTest extends AbstractIntegrationTest {
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(new ParameterizedTypeReference<SearchPage<Restaurant>>() {});
+                .expectBody(new ParameterizedTypeReference<SearchPageResponse<Restaurant>>() {});
         //                .value(page -> assertThat(page.totalElements()).isEqualTo(1L));
     }
 
     @Test
-    @Disabled
     void searchTerms_ShouldReturnSearchPage() {
 
         webTestClient
@@ -135,7 +130,7 @@ class SearchControllerIntTest extends AbstractIntegrationTest {
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(new ParameterizedTypeReference<SearchPage<Restaurant>>() {});
+                .expectBody(new ParameterizedTypeReference<SearchPageResponse<Restaurant>>() {});
         //                .value(page -> assertThat(page.totalElements()).isEqualTo(1L));
     }
 
@@ -191,7 +186,6 @@ class SearchControllerIntTest extends AbstractIntegrationTest {
     }
 
     @Test
-    @Disabled
     void searchBoolShould_ShouldReturnSearchPage() {
 
         webTestClient
@@ -210,12 +204,11 @@ class SearchControllerIntTest extends AbstractIntegrationTest {
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(SearchPage.class);
+                .expectBody(SearchPageResponse.class);
         //                .value(page -> assertThat(page.totalElements()).isEqualTo(1L));
     }
 
     @Test
-    @Disabled
     void searchWildcard_ShouldReturnSearchPage() {
 
         webTestClient
@@ -232,12 +225,11 @@ class SearchControllerIntTest extends AbstractIntegrationTest {
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(new ParameterizedTypeReference<SearchPage<Restaurant>>() {});
+                .expectBody(new ParameterizedTypeReference<SearchPageResponse<Restaurant>>() {});
         //                .value(page -> assertThat(page.totalElements()).isEqualTo(1L));
     }
 
     @Test
-    @Disabled
     void searchRegularExpression_ShouldReturnSearchPage() {
 
         webTestClient
@@ -254,12 +246,11 @@ class SearchControllerIntTest extends AbstractIntegrationTest {
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(new ParameterizedTypeReference<SearchPage<Restaurant>>() {});
+                .expectBody(new ParameterizedTypeReference<SearchPageResponse<Restaurant>>() {});
         //                .value(page -> assertThat(page.totalElements()).isEqualTo(1L));
     }
 
     @Test
-    @Disabled
     void searchSimpleQuery_ShouldReturnSearchPage() {
 
         webTestClient
@@ -276,12 +267,11 @@ class SearchControllerIntTest extends AbstractIntegrationTest {
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(new ParameterizedTypeReference<SearchPage<Restaurant>>() {});
+                .expectBody(new ParameterizedTypeReference<SearchPageResponse<Restaurant>>() {});
         //                .value(page -> assertThat(page.totalElements()).isEqualTo(1L));
     }
 
     @Test
-    @Disabled
     void searchRestaurantIdRange_ShouldReturnSearchPage() {
 
         webTestClient
@@ -297,12 +287,11 @@ class SearchControllerIntTest extends AbstractIntegrationTest {
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(new ParameterizedTypeReference<SearchPage<Restaurant>>() {});
+                .expectBody(new ParameterizedTypeReference<SearchPageResponse<Restaurant>>() {});
         //                .value(page -> assertThat(page.totalElements()).isEqualTo(1L));
     }
 
     @Test
-    @Disabled
     void searchDateRange_ShouldReturnSearchPage() {
 
         webTestClient
@@ -320,12 +309,11 @@ class SearchControllerIntTest extends AbstractIntegrationTest {
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(new ParameterizedTypeReference<SearchPage<Restaurant>>() {});
+                .expectBody(new ParameterizedTypeReference<SearchPageResponse<Restaurant>>() {});
         //                .value(page -> assertThat(page.totalElements()).isEqualTo(1L));
     }
 
     @Test
-    @Disabled
     void aggregateSearch_ShouldReturnAggregationResponse() {
 
         webTestClient
@@ -341,6 +329,6 @@ class SearchControllerIntTest extends AbstractIntegrationTest {
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(AggregationSearchResponse.class);
+                .expectBody(new ParameterizedTypeReference<SearchPageResponse<Restaurant>>() {});
     }
 }
