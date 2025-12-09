@@ -12,7 +12,6 @@ import static com.example.rest.template.utils.AppConstants.SOCKET_TIMEOUT;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
-import java.time.Duration;
 import java.util.Iterator;
 import java.util.List;
 import javax.net.ssl.SSLContext;
@@ -39,6 +38,7 @@ import org.springframework.boot.restclient.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.scheduling.TaskScheduler;
@@ -139,8 +139,7 @@ public class RestTemplateConfiguration {
     RestTemplate restTemplate(RestTemplateBuilder restTemplateBuilder, CloseableHttpClient httpClient) {
 
         return restTemplateBuilder
-                .connectTimeout(Duration.ofSeconds(60))
-                .defaultHeader(org.springframework.http.HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .requestFactory(() -> new HttpComponentsClientHttpRequestFactory(httpClient))
                 .interceptors(((request, body, execution) -> {
                     // log the http request
