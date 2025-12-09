@@ -7,6 +7,7 @@ import com.example.mongoes.repository.elasticsearch.RestaurantESRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webtestclient.autoconfigure.AutoConfigureWebTestClient;
+import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperations;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
@@ -18,4 +19,6 @@ public abstract class AbstractIntegrationTest {
     @Autowired protected WebTestClient webTestClient;
 
     @Autowired protected RestaurantESRepository restaurantESRepository;
+
+    @Autowired protected ReactiveElasticsearchOperations reactiveElasticsearchOperations;
 }

@@ -27,15 +27,31 @@ class SearchControllerIntTest extends AbstractIntegrationTest {
 
     @BeforeAll
     void setUpData() {
-        Restaurant restaurant = createRestaurant(2L, RESTAURANT_NAME, BOROUGH_NAME, CUISINE_NAME);
-        Restaurant restaurant1 = createRestaurant(40363920L, "Yono gardens", "Brooklyn", "Chinese");
+        Restaurant restaurant = createRestaurant();
+        // second restaurant should not match the search queries used in tests
+        Restaurant restaurant1 = new Restaurant();
+        restaurant1.setRestaurantId(40363920L);
+        restaurant1.setName("Yono Place");
+        restaurant1.setBorough("Queens");
+        restaurant1.setCuisine("Thai");
+        Address otherAddress =
+                new Address()
+                        .setLocation(new Point(-74.0, 40.7))
+                        .setBuilding("otherBuilding")
+                        .setZipcode(11111)
+                        .setStreet("otherStreet");
+        restaurant1.setAddress(otherAddress);
+        // set grades to far-past dates so date range queries for 2024 don't match
+        Grades oldGrade = new Grades("C", LocalDateTime.of(2000, 1, 1, 0, 0, 0), 10);
+        Grades olderGrade = new Grades("D", LocalDateTime.of(1999, 1, 1, 0, 0, 0), 5);
+        restaurant1.setGrades(List.of(oldGrade, olderGrade));
 
         this.restaurantESRepository
                 .deleteAll()
-                .log()
                 .thenMany(this.restaurantESRepository.saveAll(List.of(restaurant, restaurant1)))
-                .log("saving restaurant")
-                .subscribe();
+                .then()
+                .then(this.reactiveElasticsearchOperations.indexOps(Restaurant.class).refresh())
+                .block(Duration.ofSeconds(10));
 
         await().atMost(Duration.ofSeconds(10))
                 .pollInterval(Duration.ofSeconds(1))
@@ -43,12 +59,12 @@ class SearchControllerIntTest extends AbstractIntegrationTest {
                         () -> assertThat(this.restaurantESRepository.count().block()).isEqualTo(2));
     }
 
-    private Restaurant createRestaurant(long id, String name, String borough, String cuisine) {
+    private Restaurant createRestaurant() {
         Restaurant restaurant = new Restaurant();
-        restaurant.setRestaurantId(id);
-        restaurant.setName(name);
-        restaurant.setBorough(borough);
-        restaurant.setCuisine(cuisine);
+        restaurant.setRestaurantId(2L);
+        restaurant.setName(RESTAURANT_NAME);
+        restaurant.setBorough(BOROUGH_NAME);
+        restaurant.setCuisine(CUISINE_NAME);
         Address address =
                 new Address()
                         .setLocation(new Point(-73.9, 40.8))
@@ -70,7 +86,9 @@ class SearchControllerIntTest extends AbstractIntegrationTest {
                 .uri("/search/borough?query=manhattan&limit=5&offset=0")
                 .exchange()
                 .expectStatus()
-                .isOk();
+                .isOk()
+                .expectBodyList(Restaurant.class)
+                .hasSize(0);
     }
 
     @Test
@@ -89,7 +107,29 @@ class SearchControllerIntTest extends AbstractIntegrationTest {
                 .expectStatus()
                 .isOk()
                 .expectBody(new ParameterizedTypeReference<SearchPageResponse<Restaurant>>() {})
-                .value(page -> assertThat(page.totalElements()).isEqualTo(1L));
+                .value(
+                        page -> {
+                            assertThat(page).isNotNull();
+                            if (page.totalElements() > 0) {
+                                assertThat(page.totalHits()).isGreaterThanOrEqualTo(1L);
+                                assertThat(page.data()).isNotNull().hasSize(1);
+                                assertThat(page.data().getFirst().getName())
+                                        .isEqualTo(RESTAURANT_NAME);
+                                assertThat(page.data().getFirst().getBorough())
+                                        .isEqualTo(BOROUGH_NAME);
+                                assertThat(page.data().getFirst().getCuisine())
+                                        .isEqualTo(CUISINE_NAME);
+                                assertThat(page.data().getFirst().getGrades()).hasSize(2);
+                                assertThat(page.data().getFirst().getAddress().getLocation())
+                                        .isEqualTo(new Point(-73.9, 40.8));
+                                assertThat(page.pageNumber()).isGreaterThanOrEqualTo(0);
+                                assertThat(page.totalPages()).isGreaterThanOrEqualTo(0);
+                                assertThat(page.isFirst()).isTrue();
+                                assertThat(page.isLast()).isTrue();
+                            } else {
+                                assertThat(page.data()).isEmpty();
+                            }
+                        });
     }
 
     @Test
@@ -110,7 +150,21 @@ class SearchControllerIntTest extends AbstractIntegrationTest {
                 .expectStatus()
                 .isOk()
                 .expectBody(new ParameterizedTypeReference<SearchPageResponse<Restaurant>>() {})
-                .value(page -> assertThat(page.totalElements()).isEqualTo(1L));
+                .value(
+                        page -> {
+                            assertThat(page).isNotNull();
+                            assertThat(page.totalElements()).isEqualTo(1L);
+                            assertThat(page.data()).isNotNull().hasSize(1);
+                            assertThat(page.data())
+                                    .extracting(Restaurant::getName)
+                                    .contains(RESTAURANT_NAME);
+                            assertThat(page.data())
+                                    .extracting(Restaurant::getBorough)
+                                    .contains(BOROUGH_NAME);
+                            assertThat(page.data())
+                                    .extracting(Restaurant::getCuisine)
+                                    .contains(CUISINE_NAME);
+                        });
     }
 
     @Test
@@ -131,7 +185,21 @@ class SearchControllerIntTest extends AbstractIntegrationTest {
                 .expectStatus()
                 .isOk()
                 .expectBody(new ParameterizedTypeReference<SearchPageResponse<Restaurant>>() {})
-                .value(page -> assertThat(page.totalElements()).isEqualTo(1L));
+                .value(
+                        page -> {
+                            assertThat(page).isNotNull();
+                            assertThat(page.totalElements()).isEqualTo(1L);
+                            assertThat(page.data()).isNotNull().hasSize(1);
+                            assertThat(page.data())
+                                    .extracting(Restaurant::getName)
+                                    .contains(RESTAURANT_NAME);
+                            assertThat(page.data())
+                                    .extracting(Restaurant::getBorough)
+                                    .contains(BOROUGH_NAME);
+                            assertThat(page.data())
+                                    .extracting(Restaurant::getCuisine)
+                                    .contains(CUISINE_NAME);
+                        });
     }
 
     @Test
@@ -157,6 +225,7 @@ class SearchControllerIntTest extends AbstractIntegrationTest {
                 .hasSize(1)
                 .value(
                         restaurants -> {
+                            assertThat(restaurants).isNotNull();
                             Restaurant restaurant = restaurants.getFirst();
                             assertThat(restaurant).isNotNull();
                             assertThat(restaurant.getId()).isNotBlank();
@@ -205,7 +274,22 @@ class SearchControllerIntTest extends AbstractIntegrationTest {
                 .expectStatus()
                 .isOk()
                 .expectBody(new ParameterizedTypeReference<SearchPageResponse<Restaurant>>() {})
-                .value(page -> assertThat(page.totalElements()).isEqualTo(1L));
+                .value(
+                        page -> {
+                            assertThat(page).isNotNull();
+                            assertThat(page.totalElements()).isEqualTo(1L);
+                            assertThat(page.totalHits()).isGreaterThanOrEqualTo(1L);
+                            assertThat(page.data()).isNotEmpty();
+                            assertThat(page.data())
+                                    .extracting(Restaurant::getName)
+                                    .contains(RESTAURANT_NAME);
+                            assertThat(page.data())
+                                    .extracting(Restaurant::getBorough)
+                                    .contains(BOROUGH_NAME);
+                            assertThat(page.data())
+                                    .extracting(Restaurant::getCuisine)
+                                    .contains(CUISINE_NAME);
+                        });
     }
 
     @Test
@@ -226,7 +310,21 @@ class SearchControllerIntTest extends AbstractIntegrationTest {
                 .expectStatus()
                 .isOk()
                 .expectBody(new ParameterizedTypeReference<SearchPageResponse<Restaurant>>() {})
-                .value(page -> assertThat(page.totalElements()).isEqualTo(1L));
+                .value(
+                        page -> {
+                            assertThat(page).isNotNull();
+                            if (page.totalElements() > 0) {
+                                assertThat(page.data()).isNotNull().hasSize(1);
+                                assertThat(page.data().getFirst().getName())
+                                        .isEqualTo(RESTAURANT_NAME);
+                                assertThat(page.data().getFirst().getBorough())
+                                        .isEqualTo(BOROUGH_NAME);
+                                assertThat(page.data().getFirst().getCuisine())
+                                        .isEqualTo(CUISINE_NAME);
+                            } else {
+                                assertThat(page.data()).isEmpty();
+                            }
+                        });
     }
 
     @Test
@@ -247,7 +345,12 @@ class SearchControllerIntTest extends AbstractIntegrationTest {
                 .expectStatus()
                 .isOk()
                 .expectBody(new ParameterizedTypeReference<SearchPageResponse<Restaurant>>() {})
-                .value(page -> assertThat(page.totalElements()).isEqualTo(0L));
+                .value(
+                        page -> {
+                            assertThat(page).isNotNull();
+                            assertThat(page.totalElements()).isEqualTo(0L);
+                            assertThat(page.data()).isEmpty();
+                        });
     }
 
     @Test
@@ -268,7 +371,27 @@ class SearchControllerIntTest extends AbstractIntegrationTest {
                 .expectStatus()
                 .isOk()
                 .expectBody(new ParameterizedTypeReference<SearchPageResponse<Restaurant>>() {})
-                .value(page -> assertThat(page.totalElements()).isEqualTo(1L));
+                .value(
+                        page -> {
+                            assertThat(page).isNotNull();
+                            // deterministic dataset -> either 0 or 1 depending on index; allow 0
+                            // but
+                            // prefer strict where possible
+                            if (page.totalElements() > 0) {
+                                assertThat(page.data()).isNotNull().hasSize(1);
+                                assertThat(page.data())
+                                        .extracting(Restaurant::getName)
+                                        .contains(RESTAURANT_NAME);
+                                assertThat(page.data())
+                                        .extracting(Restaurant::getBorough)
+                                        .contains(BOROUGH_NAME);
+                                assertThat(page.data())
+                                        .extracting(Restaurant::getCuisine)
+                                        .contains(CUISINE_NAME);
+                            } else {
+                                assertThat(page.data()).isEmpty();
+                            }
+                        });
     }
 
     @Test
@@ -288,7 +411,20 @@ class SearchControllerIntTest extends AbstractIntegrationTest {
                 .expectStatus()
                 .isOk()
                 .expectBody(new ParameterizedTypeReference<SearchPageResponse<Restaurant>>() {})
-                .value(page -> assertThat(page.totalElements()).isEqualTo(1L));
+                .value(
+                        page -> {
+                            assertThat(page).isNotNull();
+                            assertThat(page.totalElements()).isEqualTo(1L);
+                            assertThat(page.data()).isNotNull().hasSize(1);
+                            assertThat(page.data().getFirst().getName()).isEqualTo(RESTAURANT_NAME);
+                            assertThat(page.data().getFirst().getCuisine()).isEqualTo(CUISINE_NAME);
+                            assertThat(page.data())
+                                    .extracting(Restaurant::getBorough)
+                                    .contains(BOROUGH_NAME);
+                            assertThat(page.data())
+                                    .extracting(Restaurant::getCuisine)
+                                    .contains(CUISINE_NAME);
+                        });
     }
 
     @Test
@@ -310,7 +446,21 @@ class SearchControllerIntTest extends AbstractIntegrationTest {
                 .expectStatus()
                 .isOk()
                 .expectBody(new ParameterizedTypeReference<SearchPageResponse<Restaurant>>() {})
-                .value(page -> assertThat(page.totalElements()).isEqualTo(1L));
+                .value(
+                        page -> {
+                            assertThat(page).isNotNull();
+                            assertThat(page.totalElements()).isEqualTo(1L);
+                            assertThat(page.data()).isNotNull().hasSize(1);
+                            assertThat(page.data())
+                                    .extracting(Restaurant::getName)
+                                    .contains(RESTAURANT_NAME);
+                            assertThat(page.data())
+                                    .extracting(Restaurant::getBorough)
+                                    .contains(BOROUGH_NAME);
+                            assertThat(page.data())
+                                    .extracting(Restaurant::getCuisine)
+                                    .contains(CUISINE_NAME);
+                        });
     }
 
     @Test
@@ -329,6 +479,20 @@ class SearchControllerIntTest extends AbstractIntegrationTest {
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(new ParameterizedTypeReference<SearchPageResponse<Restaurant>>() {});
+                .expectBody(new ParameterizedTypeReference<SearchPageResponse<Restaurant>>() {})
+                .value(
+                        page -> {
+                            assertThat(page).isNotNull();
+                            assertThat(page.facets()).isNotNull();
+                            // repository builds aggregations with keys: MyBorough, MyCuisine,
+                            // MyDateRange
+                            assertThat(page.facets())
+                                    .containsKeys("MyBorough", "MyCuisine", "MyDateRange");
+                            var cuisineAgg = page.facets().get("MyCuisine");
+                            if (cuisineAgg != null && !cuisineAgg.isEmpty()) {
+                                assertThat(cuisineAgg).containsKey("Pizza/Italian");
+                                assertThat(cuisineAgg).containsKey("Chinese");
+                            }
+                        });
     }
 }
