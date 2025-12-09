@@ -234,8 +234,8 @@ class SearchControllerTest {
                     .willReturn(
                             Mono.just(
                                     new SearchPageResponse<>(
-                                            List.of(), 0, Map.of(), 0, 0, 0, true, false, false,
-                                            false)));
+                                            List.of(), 0, 0.0, Map.of(), 0, 0, 0, true, false,
+                                            false, false)));
 
             webTestClient
                     .get()

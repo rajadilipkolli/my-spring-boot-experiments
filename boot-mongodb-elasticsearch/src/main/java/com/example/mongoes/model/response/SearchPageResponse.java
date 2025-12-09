@@ -11,6 +11,7 @@ import org.springframework.data.elasticsearch.core.SearchPage;
 public record SearchPageResponse<T>(
         List<T> data,
         long totalHits,
+        float maxScore,
         Map<String, Map<String, Long>> facets,
         long totalElements,
         int pageNumber,
@@ -23,6 +24,7 @@ public record SearchPageResponse<T>(
         this(
                 searchHits.getContent().stream().map(SearchHit::getContent).toList(),
                 searchHits.getSearchHits().getTotalHits(),
+                searchHits.getSearchHits().getMaxScore(),
                 null,
                 searchHits.getTotalElements(),
                 searchHits.getPageable().getPageNumber() + 1,
@@ -37,6 +39,7 @@ public record SearchPageResponse<T>(
         this(
                 searchPage.getContent().stream().map(SearchHit::getContent).toList(),
                 searchPage.getSearchHits().getTotalHits(),
+                searchPage.getSearchHits().getMaxScore(),
                 facets,
                 searchPage.getTotalElements(),
                 searchPage.getPageable().getPageNumber() + 1,

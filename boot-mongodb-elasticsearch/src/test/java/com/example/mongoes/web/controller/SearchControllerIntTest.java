@@ -88,8 +88,8 @@ class SearchControllerIntTest extends AbstractIntegrationTest {
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(new ParameterizedTypeReference<SearchPageResponse<Restaurant>>() {});
-        //                .value(page -> assertThat(page.totalElements()).isEqualTo(1L));
+                .expectBody(new ParameterizedTypeReference<SearchPageResponse<Restaurant>>() {})
+                .value(page -> assertThat(page.totalElements()).isEqualTo(1L));
     }
 
     @Test
@@ -109,8 +109,8 @@ class SearchControllerIntTest extends AbstractIntegrationTest {
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(new ParameterizedTypeReference<SearchPageResponse<Restaurant>>() {});
-        //                .value(page -> assertThat(page.totalElements()).isEqualTo(1L));
+                .expectBody(new ParameterizedTypeReference<SearchPageResponse<Restaurant>>() {})
+                .value(page -> assertThat(page.totalElements()).isEqualTo(1L));
     }
 
     @Test
@@ -130,8 +130,8 @@ class SearchControllerIntTest extends AbstractIntegrationTest {
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(new ParameterizedTypeReference<SearchPageResponse<Restaurant>>() {});
-        //                .value(page -> assertThat(page.totalElements()).isEqualTo(1L));
+                .expectBody(new ParameterizedTypeReference<SearchPageResponse<Restaurant>>() {})
+                .value(page -> assertThat(page.totalElements()).isEqualTo(1L));
     }
 
     @Test
@@ -204,8 +204,8 @@ class SearchControllerIntTest extends AbstractIntegrationTest {
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(SearchPageResponse.class);
-        //                .value(page -> assertThat(page.totalElements()).isEqualTo(1L));
+                .expectBody(SearchPageResponse.class)
+                .value(page -> assertThat(page.totalElements()).isEqualTo(1L));
     }
 
     @Test
@@ -225,8 +225,8 @@ class SearchControllerIntTest extends AbstractIntegrationTest {
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(new ParameterizedTypeReference<SearchPageResponse<Restaurant>>() {});
-        //                .value(page -> assertThat(page.totalElements()).isEqualTo(1L));
+                .expectBody(new ParameterizedTypeReference<SearchPageResponse<Restaurant>>() {})
+                .value(page -> assertThat(page.totalElements()).isEqualTo(1L));
     }
 
     @Test
@@ -246,8 +246,8 @@ class SearchControllerIntTest extends AbstractIntegrationTest {
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(new ParameterizedTypeReference<SearchPageResponse<Restaurant>>() {});
-        //                .value(page -> assertThat(page.totalElements()).isEqualTo(1L));
+                .expectBody(new ParameterizedTypeReference<SearchPageResponse<Restaurant>>() {})
+                .value(page -> assertThat(page.totalElements()).isEqualTo(0L));
     }
 
     @Test
@@ -267,8 +267,8 @@ class SearchControllerIntTest extends AbstractIntegrationTest {
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(new ParameterizedTypeReference<SearchPageResponse<Restaurant>>() {});
-        //                .value(page -> assertThat(page.totalElements()).isEqualTo(1L));
+                .expectBody(new ParameterizedTypeReference<SearchPageResponse<Restaurant>>() {})
+                .value(page -> assertThat(page.totalElements()).isEqualTo(1L));
     }
 
     @Test
@@ -287,8 +287,8 @@ class SearchControllerIntTest extends AbstractIntegrationTest {
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(new ParameterizedTypeReference<SearchPageResponse<Restaurant>>() {});
-        //                .value(page -> assertThat(page.totalElements()).isEqualTo(1L));
+                .expectBody(new ParameterizedTypeReference<SearchPageResponse<Restaurant>>() {})
+                .value(page -> assertThat(page.totalElements()).isEqualTo(1L));
     }
 
     @Test
@@ -309,8 +309,8 @@ class SearchControllerIntTest extends AbstractIntegrationTest {
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(new ParameterizedTypeReference<SearchPageResponse<Restaurant>>() {});
-        //                .value(page -> assertThat(page.totalElements()).isEqualTo(1L));
+                .expectBody(new ParameterizedTypeReference<SearchPageResponse<Restaurant>>() {})
+                .value(page -> assertThat(page.totalElements()).isEqualTo(1L));
     }
 
     @Test
