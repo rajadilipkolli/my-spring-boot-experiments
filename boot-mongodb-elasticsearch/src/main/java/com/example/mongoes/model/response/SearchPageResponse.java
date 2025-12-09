@@ -20,9 +20,13 @@ public record SearchPageResponse<T>(
         @JsonProperty("isLast") boolean isLast,
         @JsonProperty("hasNext") boolean hasNext,
         @JsonProperty("hasPrevious") boolean hasPrevious) {
+    private static <T> List<T> extractContent(SearchPage<T> searchPage) {
+        return searchPage.getContent().stream().map(SearchHit::getContent).toList();
+    }
+
     public SearchPageResponse(SearchPage<T> searchHits) {
         this(
-                searchHits.getContent().stream().map(SearchHit::getContent).toList(),
+                extractContent(searchHits),
                 searchHits.getSearchHits().getTotalHits(),
                 searchHits.getSearchHits().getMaxScore(),
                 null,
@@ -37,7 +41,7 @@ public record SearchPageResponse<T>(
 
     public SearchPageResponse(SearchPage<T> searchPage, Map<String, Map<String, Long>> facets) {
         this(
-                searchPage.getContent().stream().map(SearchHit::getContent).toList(),
+                extractContent(searchPage),
                 searchPage.getSearchHits().getTotalHits(),
                 searchPage.getSearchHits().getMaxScore(),
                 facets,

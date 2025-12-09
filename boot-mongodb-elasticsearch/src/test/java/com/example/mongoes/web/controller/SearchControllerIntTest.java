@@ -204,7 +204,7 @@ class SearchControllerIntTest extends AbstractIntegrationTest {
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(SearchPageResponse.class)
+                .expectBody(new ParameterizedTypeReference<SearchPageResponse<Restaurant>>() {})
                 .value(page -> assertThat(page.totalElements()).isEqualTo(1L));
     }
 

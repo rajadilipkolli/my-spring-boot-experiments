@@ -19,7 +19,6 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
 import java.util.List;
-import org.springframework.data.elasticsearch.core.SearchPage;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -90,7 +89,12 @@ public interface SearchApi {
                 @ApiResponse(
                         responseCode = "200",
                         description = "Successfully retrieved restaurants",
-                        content = @Content(schema = @Schema(implementation = SearchPage.class))),
+                        content =
+                                @Content(
+                                        schema =
+                                                @Schema(
+                                                        implementation =
+                                                                SearchPageResponse.class))),
                 @ApiResponse(responseCode = "400", description = "Invalid parameters provided")
             })
     @GetMapping("/search/multi")
@@ -125,7 +129,12 @@ public interface SearchApi {
                 @ApiResponse(
                         responseCode = "200",
                         description = "Successfully retrieved restaurants",
-                        content = @Content(schema = @Schema(implementation = SearchPage.class))),
+                        content =
+                                @Content(
+                                        schema =
+                                                @Schema(
+                                                        implementation =
+                                                                SearchPageResponse.class))),
                 @ApiResponse(responseCode = "400", description = "Invalid parameters provided")
             })
     @GetMapping("/search/term/borough")
@@ -158,7 +167,12 @@ public interface SearchApi {
                 @ApiResponse(
                         responseCode = "200",
                         description = "Successfully retrieved restaurants",
-                        content = @Content(schema = @Schema(implementation = SearchPage.class))),
+                        content =
+                                @Content(
+                                        schema =
+                                                @Schema(
+                                                        implementation =
+                                                                SearchPageResponse.class))),
                 @ApiResponse(responseCode = "400", description = "Invalid parameters provided")
             })
     @GetMapping("/search/terms")
@@ -237,7 +251,12 @@ public interface SearchApi {
                 @ApiResponse(
                         responseCode = "200",
                         description = "Successfully retrieved restaurants",
-                        content = @Content(schema = @Schema(implementation = SearchPage.class))),
+                        content =
+                                @Content(
+                                        schema =
+                                                @Schema(
+                                                        implementation =
+                                                                SearchPageResponse.class))),
                 @ApiResponse(responseCode = "400", description = "Invalid parameters provided")
             })
     @GetMapping("/search/should/bool")
@@ -255,7 +274,12 @@ public interface SearchApi {
                 @ApiResponse(
                         responseCode = "200",
                         description = "Successfully retrieved restaurants",
-                        content = @Content(schema = @Schema(implementation = SearchPage.class))),
+                        content =
+                                @Content(
+                                        schema =
+                                                @Schema(
+                                                        implementation =
+                                                                SearchPageResponse.class))),
                 @ApiResponse(responseCode = "400", description = "Invalid parameters provided")
             })
     @GetMapping("/search/wildcard")
@@ -275,7 +299,12 @@ public interface SearchApi {
                 @ApiResponse(
                         responseCode = "200",
                         description = "Successfully retrieved restaurants",
-                        content = @Content(schema = @Schema(implementation = SearchPage.class))),
+                        content =
+                                @Content(
+                                        schema =
+                                                @Schema(
+                                                        implementation =
+                                                                SearchPageResponse.class))),
                 @ApiResponse(responseCode = "400", description = "Invalid parameters provided")
             })
     @GetMapping("/search/regexp/borough")
@@ -302,7 +331,12 @@ public interface SearchApi {
                 @ApiResponse(
                         responseCode = "200",
                         description = "Successfully retrieved restaurants",
-                        content = @Content(schema = @Schema(implementation = SearchPage.class))),
+                        content =
+                                @Content(
+                                        schema =
+                                                @Schema(
+                                                        implementation =
+                                                                SearchPageResponse.class))),
                 @ApiResponse(responseCode = "400", description = "Invalid parameters provided")
             })
     @GetMapping("/search/simple")
@@ -328,7 +362,12 @@ public interface SearchApi {
                 @ApiResponse(
                         responseCode = "200",
                         description = "Successfully retrieved restaurants",
-                        content = @Content(schema = @Schema(implementation = SearchPage.class))),
+                        content =
+                                @Content(
+                                        schema =
+                                                @Schema(
+                                                        implementation =
+                                                                SearchPageResponse.class))),
                 @ApiResponse(responseCode = "400", description = "Invalid parameters provided")
             })
     @GetMapping("/search/restaurant/range")
@@ -360,7 +399,12 @@ public interface SearchApi {
                 @ApiResponse(
                         responseCode = "200",
                         description = "Successfully retrieved restaurants",
-                        content = @Content(schema = @Schema(implementation = SearchPage.class))),
+                        content =
+                                @Content(
+                                        schema =
+                                                @Schema(
+                                                        implementation =
+                                                                SearchPageResponse.class))),
                 @ApiResponse(responseCode = "400", description = "Invalid parameters provided")
             })
     @GetMapping("/search/date/range")
