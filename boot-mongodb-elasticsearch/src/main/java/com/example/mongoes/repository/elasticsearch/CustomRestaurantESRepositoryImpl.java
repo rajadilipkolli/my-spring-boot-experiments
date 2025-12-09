@@ -8,6 +8,7 @@ import co.elastic.clients.elasticsearch._types.query_dsl.Operator;
 import co.elastic.clients.elasticsearch._types.query_dsl.QueryBuilders;
 import co.elastic.clients.elasticsearch._types.query_dsl.TextQueryType;
 import com.example.mongoes.document.Restaurant;
+import com.example.mongoes.utils.AppConstants;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.data.domain.PageRequest;
@@ -27,8 +28,6 @@ import reactor.core.publisher.Mono;
 
 public class CustomRestaurantESRepositoryImpl implements CustomRestaurantESRepository {
 
-    private static final String BOROUGH = "borough";
-    private static final String CUISINE = "cuisine";
     private static final int PAGE_SIZE = 1_000;
     private final ReactiveElasticsearchOperations reactiveElasticsearchOperations;
 
@@ -62,7 +61,10 @@ public class CustomRestaurantESRepositoryImpl implements CustomRestaurantESRepos
                                 QueryBuilders.multiMatch(
                                         builder -> {
                                             builder.query(queryKeyWord)
-                                                    .fields(BOROUGH, CUISINE, "restaurant_name");
+                                                    .fields(
+                                                            AppConstants.BOROUGH,
+                                                            AppConstants.CUISINE,
+                                                            AppConstants.NAME);
                                             if (prefixPhraseEnabled) {
                                                 builder.type(TextQueryType.PhrasePrefix);
                                             }
@@ -83,7 +85,7 @@ public class CustomRestaurantESRepositoryImpl implements CustomRestaurantESRepos
                                 QueryBuilders.term(
                                         builder ->
                                                 builder.value(queryTerm)
-                                                        .field(BOROUGH)
+                                                        .field(AppConstants.BOROUGH)
                                                         .caseInsensitive(true)))
                         .build();
         query.setPageable(pageable);
@@ -99,7 +101,7 @@ public class CustomRestaurantESRepositoryImpl implements CustomRestaurantESRepos
                         .withQuery(
                                 QueryBuilders.terms(
                                         builder -> {
-                                            builder.field(BOROUGH);
+                                            builder.field(AppConstants.BOROUGH);
                                             builder.terms(
                                                     termsBuilder ->
                                                             termsBuilder.value(
@@ -130,12 +132,16 @@ public class CustomRestaurantESRepositoryImpl implements CustomRestaurantESRepos
                                                         QueryBuilders.match(
                                                                 matchBuilder ->
                                                                         matchBuilder
-                                                                                .field(BOROUGH)
+                                                                                .field(
+                                                                                        AppConstants
+                                                                                                .BOROUGH)
                                                                                 .query(borough)),
                                                         QueryBuilders.wildcard(
                                                                 wildcardBuilder ->
                                                                         wildcardBuilder
-                                                                                .field(CUISINE)
+                                                                                .field(
+                                                                                        AppConstants
+                                                                                                .CUISINE)
                                                                                 .value(
                                                                                         "*"
                                                                                                 + cuisine
@@ -144,7 +150,8 @@ public class CustomRestaurantESRepositoryImpl implements CustomRestaurantESRepos
                                                                 matchBuilder ->
                                                                         matchBuilder
                                                                                 .field(
-                                                                                        "restaurant_name")
+                                                                                        AppConstants
+                                                                                                .NAME)
                                                                                 .query(name)))))
                         .build();
         query.setPageable(pageable);
@@ -163,17 +170,9 @@ public class CustomRestaurantESRepositoryImpl implements CustomRestaurantESRepos
                                                         QueryBuilders.wildcard(
                                                                 boroughBuilder ->
                                                                         boroughBuilder
-                                                                                .field(BOROUGH)
-                                                                                .caseInsensitive(
-                                                                                        true)
-                                                                                .value(
-                                                                                        "*"
-                                                                                                + queryKeyword
-                                                                                                + "*")),
-                                                        QueryBuilders.wildcard(
-                                                                boroughBuilder ->
-                                                                        boroughBuilder
-                                                                                .field(CUISINE)
+                                                                                .field(
+                                                                                        AppConstants
+                                                                                                .BOROUGH)
                                                                                 .caseInsensitive(
                                                                                         true)
                                                                                 .value(
@@ -184,7 +183,20 @@ public class CustomRestaurantESRepositoryImpl implements CustomRestaurantESRepos
                                                                 boroughBuilder ->
                                                                         boroughBuilder
                                                                                 .field(
-                                                                                        "restaurant_name")
+                                                                                        AppConstants
+                                                                                                .CUISINE)
+                                                                                .caseInsensitive(
+                                                                                        true)
+                                                                                .value(
+                                                                                        "*"
+                                                                                                + queryKeyword
+                                                                                                + "*")),
+                                                        QueryBuilders.wildcard(
+                                                                boroughBuilder ->
+                                                                        boroughBuilder
+                                                                                .field(
+                                                                                        AppConstants
+                                                                                                .NAME)
                                                                                 .caseInsensitive(
                                                                                         true)
                                                                                 .value(
@@ -206,7 +218,7 @@ public class CustomRestaurantESRepositoryImpl implements CustomRestaurantESRepos
                                         reqExBuilder ->
                                                 reqExBuilder
                                                         .caseInsensitive(true)
-                                                        .field(BOROUGH)
+                                                        .field(AppConstants.BOROUGH)
                                                         .value(reqEx)))
                         .build();
         query.setPageable(pageable);
@@ -223,9 +235,9 @@ public class CustomRestaurantESRepositoryImpl implements CustomRestaurantESRepos
                                 QueryBuilders.simpleQueryString(
                                         builder ->
                                                 builder.query(queryKeyword)
-                                                        .fields(BOROUGH)
+                                                        .fields(AppConstants.BOROUGH)
                                                         .boost(1.0F)
-                                                        .fields(CUISINE)
+                                                        .fields(AppConstants.CUISINE)
                                                         .boost(2.0F)))
                         .build();
 
@@ -244,7 +256,9 @@ public class CustomRestaurantESRepositoryImpl implements CustomRestaurantESRepos
                                         rangeBuilder ->
                                                 rangeBuilder.term(
                                                         builder ->
-                                                                builder.field("restaurant_id")
+                                                                builder.field(
+                                                                                AppConstants
+                                                                                        .RESTAURANT_ID)
                                                                         .lte(
                                                                                 String.valueOf(
                                                                                         upperLimit))
@@ -375,10 +389,12 @@ public class CustomRestaurantESRepositoryImpl implements CustomRestaurantESRepos
             Integer offset,
             String[] sortFields) {
         Aggregation cuisineTermsBuilder =
-                AggregationBuilders.terms(builder -> builder.field(CUISINE).size(PAGE_SIZE));
+                AggregationBuilders.terms(
+                        builder -> builder.field(AppConstants.CUISINE).size(PAGE_SIZE));
         // .order(BucketOrder.count(false));
         Aggregation boroughTermsBuilder =
-                AggregationBuilders.terms(builder -> builder.field(CUISINE).size(PAGE_SIZE));
+                AggregationBuilders.terms(
+                        builder -> builder.field(AppConstants.CUISINE).size(PAGE_SIZE));
         // .order(BucketOrder.count(false));
         Aggregation dateRangeBuilder =
                 AggregationBuilders.dateRange(

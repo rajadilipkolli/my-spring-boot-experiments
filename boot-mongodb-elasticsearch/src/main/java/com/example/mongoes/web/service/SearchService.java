@@ -4,6 +4,7 @@ import com.example.mongoes.document.Restaurant;
 import com.example.mongoes.model.response.ResultData;
 import com.example.mongoes.model.response.SearchPageResponse;
 import com.example.mongoes.repository.elasticsearch.RestaurantESRepository;
+import com.example.mongoes.utils.AppConstants;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,13 +32,15 @@ public class SearchService {
     }
 
     public Mono<Flux<Restaurant>> searchMatchBorough(String query, Integer offset, Integer limit) {
-        Pageable pageable = PageRequest.of(offset, limit, Sort.by("restaurant_id").ascending());
+        Pageable pageable =
+                PageRequest.of(offset, limit, Sort.by(AppConstants.RESTAURANT_ID).ascending());
         return Mono.just(restaurantESRepository.findByBorough(query, pageable));
     }
 
     public Mono<SearchPageResponse<Restaurant>> multiSearchQuery(
             String query, Integer offset, Integer limit, Boolean prefixPhraseEnabled) {
-        Pageable pageable = PageRequest.of(offset, limit, Sort.by("restaurant_id").ascending());
+        Pageable pageable =
+                PageRequest.of(offset, limit, Sort.by(AppConstants.RESTAURANT_ID).ascending());
         return restaurantESRepository
                 .findByBoroughOrCuisineOrName(query, prefixPhraseEnabled, pageable)
                 .map(SearchPageResponse::new);
@@ -45,7 +48,8 @@ public class SearchService {
 
     public Mono<SearchPageResponse<Restaurant>> termQueryForBorough(
             String query, Integer offset, Integer limit) {
-        Pageable pageable = PageRequest.of(offset, limit, Sort.by("restaurant_id").ascending());
+        Pageable pageable =
+                PageRequest.of(offset, limit, Sort.by(AppConstants.RESTAURANT_ID).ascending());
         return restaurantESRepository
                 .termQueryForBorough(query, pageable)
                 .map(SearchPageResponse::new);
@@ -53,7 +57,8 @@ public class SearchService {
 
     public Mono<SearchPageResponse<Restaurant>> termsQueryForBorough(
             List<String> queries, Integer offset, Integer limit) {
-        Pageable pageable = PageRequest.of(offset, limit, Sort.by("restaurant_id").ascending());
+        Pageable pageable =
+                PageRequest.of(offset, limit, Sort.by(AppConstants.RESTAURANT_ID).ascending());
         return restaurantESRepository
                 .termsQueryForBorough(queries, pageable)
                 .map(SearchPageResponse::new);
@@ -61,7 +66,8 @@ public class SearchService {
 
     public Mono<Flux<Restaurant>> queryBoolWithMust(
             String borough, String cuisine, String name, Integer offset, Integer limit) {
-        Pageable pageable = PageRequest.of(offset, limit, Sort.by("restaurant_id").ascending());
+        Pageable pageable =
+                PageRequest.of(offset, limit, Sort.by(AppConstants.RESTAURANT_ID).ascending());
         return Mono.just(
                 restaurantESRepository.findByBoroughAndCuisineAndName(
                         borough, cuisine, name, pageable));
@@ -69,7 +75,8 @@ public class SearchService {
 
     public Mono<SearchPageResponse<Restaurant>> queryBoolWithShould(
             String borough, String cuisine, String name, Integer offset, Integer limit) {
-        Pageable pageable = PageRequest.of(offset, limit, Sort.by("restaurant_id").ascending());
+        Pageable pageable =
+                PageRequest.of(offset, limit, Sort.by(AppConstants.RESTAURANT_ID).ascending());
         return restaurantESRepository
                 .queryBoolWithShould(borough, cuisine, name, pageable)
                 .map(SearchPageResponse::new);
@@ -77,7 +84,8 @@ public class SearchService {
 
     public Mono<SearchPageResponse<Restaurant>> wildcardSearch(
             String queryKeyword, Integer offset, Integer limit) {
-        Pageable pageable = PageRequest.of(offset, limit, Sort.by("restaurant_id").ascending());
+        Pageable pageable =
+                PageRequest.of(offset, limit, Sort.by(AppConstants.RESTAURANT_ID).ascending());
         return restaurantESRepository
                 .wildcardSearch(queryKeyword, pageable)
                 .map(SearchPageResponse::new);
@@ -85,7 +93,8 @@ public class SearchService {
 
     public Mono<SearchPageResponse<Restaurant>> regExpSearch(
             String queryKeyword, Integer offset, Integer limit) {
-        Pageable pageable = PageRequest.of(offset, limit, Sort.by("restaurant_id").ascending());
+        Pageable pageable =
+                PageRequest.of(offset, limit, Sort.by(AppConstants.RESTAURANT_ID).ascending());
         return restaurantESRepository
                 .regExpSearch(queryKeyword, pageable)
                 .map(SearchPageResponse::new);
@@ -93,7 +102,8 @@ public class SearchService {
 
     public Mono<SearchPageResponse<Restaurant>> searchSimpleQueryForBoroughAndCuisine(
             String queryKeyword, Integer offset, Integer limit) {
-        Pageable pageable = PageRequest.of(offset, limit, Sort.by("restaurant_id").ascending());
+        Pageable pageable =
+                PageRequest.of(offset, limit, Sort.by(AppConstants.RESTAURANT_ID).ascending());
         return restaurantESRepository
                 .searchSimpleQueryForBoroughAndCuisine(queryKeyword, pageable)
                 .map(SearchPageResponse::new);
@@ -101,7 +111,8 @@ public class SearchService {
 
     public Mono<SearchPageResponse<Restaurant>> searchRestaurantIdRange(
             Long lowerLimit, Long upperLimit, Integer offset, Integer limit) {
-        Pageable pageable = PageRequest.of(offset, limit, Sort.by("restaurant_id").ascending());
+        Pageable pageable =
+                PageRequest.of(offset, limit, Sort.by(AppConstants.RESTAURANT_ID).ascending());
         return restaurantESRepository
                 .searchRestaurantIdRange(lowerLimit, upperLimit, pageable)
                 .map(SearchPageResponse::new);
@@ -109,7 +120,8 @@ public class SearchService {
 
     public Mono<SearchPageResponse<Restaurant>> searchDateRange(
             String fromDate, String toDate, Integer offset, Integer limit) {
-        Pageable pageable = PageRequest.of(offset, limit, Sort.by("restaurant_id").ascending());
+        Pageable pageable =
+                PageRequest.of(offset, limit, Sort.by(AppConstants.RESTAURANT_ID).ascending());
         return restaurantESRepository
                 .searchDateRange(fromDate, toDate, pageable)
                 .map(SearchPageResponse::new);
