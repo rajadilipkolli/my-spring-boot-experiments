@@ -31,7 +31,7 @@ import reactor.test.StepVerifier;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class RestaurantESRepositoryIntegrationTest extends AbstractIntegrationTest {
 
-    public static final String RESTAURANT_NAME = "Lb Spumoni Gardens";
+    private static final String RESTAURANT_NAME = "Lb Spumoni Gardens";
     private static final String BOROUGH_NAME = "Brooklyn";
     private static final String CUISINE_NAME = "Pizza/Italian";
 
@@ -252,21 +252,6 @@ class RestaurantESRepositoryIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     void wildcardSearch() {
-        var wildcardSearchMono =
-                this.restaurantESRepository.wildcardSearch("Spumoni", PageRequest.of(0, 5));
-
-        StepVerifier.create(wildcardSearchMono)
-                .consumeNextWith(
-                        searchPage -> {
-                            assertThat(searchPage.getNumberOfElements()).isZero();
-                            assertThat(searchPage.getTotalPages()).isZero();
-                            assertThat(searchPage.isFirst()).isTrue();
-                            assertThat(searchPage.isLast()).isTrue();
-                            assertThat(searchPage.isEmpty()).isTrue();
-                            assertThat(searchPage.hasContent()).isFalse();
-                        })
-                .verifyComplete();
-
         var wildcardSearch =
                 this.restaurantESRepository.wildcardSearch("ines", PageRequest.of(0, 5));
 

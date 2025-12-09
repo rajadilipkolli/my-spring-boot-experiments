@@ -16,7 +16,7 @@ public class ContainersConfig {
     @Bean
     @RestartScope
     ElasticsearchContainer elasticsearchContainer() {
-        return new ElasticsearchContainer("docker.elastic.co/elasticsearch/elasticsearch:9.2.1")
+        return new ElasticsearchContainer("docker.elastic.co/elasticsearch/elasticsearch:9.2.2")
                 .withEnv(Map.of("xpack.security.enabled", "false"));
     }
 

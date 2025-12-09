@@ -2,7 +2,7 @@ package com.example.mongoes.web.controller;
 
 import static org.mockito.BDDMockito.given;
 
-import com.example.mongoes.model.response.AggregationSearchResponse;
+import com.example.mongoes.model.response.SearchPageResponse;
 import com.example.mongoes.web.service.SearchService;
 import java.util.List;
 import java.util.Map;
@@ -233,8 +233,9 @@ class SearchControllerTest {
                                     "test", List.of("name"), "DESC", 10, 0, "restaurant_id"))
                     .willReturn(
                             Mono.just(
-                                    new AggregationSearchResponse(
-                                            List.of(), Map.of(), null, 0, 0)));
+                                    new SearchPageResponse<>(
+                                            List.of(), 0, 0, Map.of(), 0, 0, 0, true, false, false,
+                                            false)));
 
             webTestClient
                     .get()
