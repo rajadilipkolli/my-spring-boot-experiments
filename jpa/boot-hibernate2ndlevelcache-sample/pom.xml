@@ -104,7 +104,7 @@
         <dependency>
             <groupId>io.hypersistence</groupId>
             <artifactId>hypersistence-utils-hibernate-71</artifactId>
-            <version>3.13.2</version>
+            <version>3.13.3</version>
         </dependency>
         <dependency>
             <groupId>net.ttddyy.observation</groupId>
