@@ -1,14 +1,17 @@
 package com.example.highrps.repository;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 public class EventDto implements Serializable {
 
-    public String id;
-    public Long value;
+    @Serial
+    private static final long serialVersionUID = 1L;
 
-    public EventDto() {
-    }
+    private String id;
+    private Long value;
+
+    public EventDto() {}
 
     public EventDto(String id, Long value) {
         this.id = id;

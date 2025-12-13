@@ -1,11 +1,9 @@
 package com.example.highrps.controller;
 
-import com.example.highrps.repository.EventDto;
-import com.example.highrps.service.KafkaProducerService;
 import com.example.highrps.StatsResponse;
+import com.example.highrps.repository.EventDto;
 import com.example.highrps.service.HelloService;
-import org.springframework.data.redis.core.RedisTemplate;
-import tools.jackson.databind.json.JsonMapper;
+import com.example.highrps.service.KafkaProducerService;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,8 +17,7 @@ public class HelloController {
     private final HelloService service;
     private final KafkaProducerService kafkaProducerService;
 
-    public HelloController(HelloService service, KafkaProducerService kafkaProducerService,
-                           RedisTemplate<String, String> redis, JsonMapper mapper) {
+    public HelloController(HelloService service, KafkaProducerService kafkaProducerService) {
         this.service = service;
         this.kafkaProducerService = kafkaProducerService;
     }

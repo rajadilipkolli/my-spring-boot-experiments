@@ -1,6 +1,5 @@
 package com.example.highrps;
 
-
 import com.example.highrps.repository.EventDto;
 import tools.jackson.databind.ObjectMapper;
 

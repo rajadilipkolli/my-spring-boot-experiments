@@ -2,33 +2,27 @@ package com.example.highrps.config;
 
 import com.example.highrps.repository.EventDto;
 import org.apache.kafka.common.serialization.Serdes;
-import org.apache.kafka.streams.StoreQueryParameters;
+import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.kstream.Consumed;
 import org.apache.kafka.streams.kstream.Grouped;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.KTable;
 import org.apache.kafka.streams.kstream.Materialized;
 import org.apache.kafka.streams.kstream.Produced;
-import org.apache.kafka.streams.StreamsBuilder;
-import org.apache.kafka.streams.state.QueryableStoreTypes;
-import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
 import org.apache.kafka.streams.state.Stores;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.kafka.annotation.EnableKafkaStreams;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.kafka.config.StreamsBuilderFactoryBean;
+import org.springframework.kafka.annotation.EnableKafkaStreams;
 import org.springframework.kafka.support.serializer.JacksonJsonSerde;
-import org.springframework.util.Assert;
-
-import java.util.Objects;
 
 @Configuration
 @EnableKafkaStreams
 public class StreamsTopology {
 
     private static final Logger log = LoggerFactory.getLogger(StreamsTopology.class);
+
     @Bean
     public KStream<String, EventDto> eventsStream(StreamsBuilder builder) {
         log.info("Building events stream topology");
@@ -37,27 +31,20 @@ public class StreamsTopology {
         KStream<String, EventDto> stream = builder.stream("events", Consumed.with(Serdes.String(), eventSerde));
 
         // Aggregate latest value per id into a persistent store named "stats-store"
-        KTable<String, Long> aggregates = stream
-                .mapValues(EventDto::getValue)
+        KTable<String, Long> aggregates = stream.mapValues(EventDto::getValue)
                 .groupByKey(Grouped.with(Serdes.String(), Serdes.Long()))
-                .reduce((oldV, newV) -> newV,
+                .reduce(
+                        (oldV, newV) -> newV,
                         Materialized.<String, Long>as(Stores.persistentKeyValueStore("stats-store"))
                                 .withKeySerde(Serdes.String())
                                 .withValueSerde(Serdes.Long()));
 
         // Publish aggregates as simple string values so downstream consumers use String deserializers
-        aggregates.toStream()
+        aggregates
+                .toStream()
                 .mapValues(Object::toString)
                 .to("stats-aggregates", Produced.with(Serdes.String(), Serdes.String()));
 
         return stream;
     }
-
-    // Expose the materialized aggregates as a KTable bean for interactive queries if needed
-    @Bean
-    public KTable<String, Long> aggregatesTable(StreamsBuilder builder) {
-        log.info("Exposing aggregates KTable backed by stats-store");
-        return builder.table("stats-store", Consumed.with(Serdes.String(), Serdes.Long()));
-    }
-
 }

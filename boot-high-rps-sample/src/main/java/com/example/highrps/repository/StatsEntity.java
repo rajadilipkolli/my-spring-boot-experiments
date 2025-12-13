@@ -20,7 +20,15 @@ public class StatsEntity {
         this.value = value;
     }
 
-    public String getId() { return id; }
-    public long getValue() { return value; }
-    public void setValue(long value) { this.value = value; }
+    public String getId() {
+        return id;
+    }
+
+    public long getValue() {
+        return value;
+    }
+
+    public void setValue(long value) {
+        this.value = value;
+    }
 }

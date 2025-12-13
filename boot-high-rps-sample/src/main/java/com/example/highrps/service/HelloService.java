@@ -6,8 +6,8 @@ import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StoreQueryParameters;
 import org.apache.kafka.streams.state.QueryableStoreTypes;
 import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
-import org.springframework.kafka.config.StreamsBuilderFactoryBean;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.kafka.config.StreamsBuilderFactoryBean;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
@@ -17,9 +17,13 @@ public class HelloService {
     private final RedisTemplate<String, String> redis;
     private final Cache<String, String> localCache;
     private final StreamsBuilderFactoryBean kafkaStreamsFactory;
-    private ReadOnlyKeyValueStore<String, Long> keyValueStore = null;
 
-    public HelloService(RedisTemplate<String, String> redis, Cache<String, String> localCache, StreamsBuilderFactoryBean kafkaStreamsFactory) {
+    private volatile ReadOnlyKeyValueStore<String, Long> keyValueStore = null;
+
+    public HelloService(
+            RedisTemplate<String, String> redis,
+            Cache<String, String> localCache,
+            StreamsBuilderFactoryBean kafkaStreamsFactory) {
         this.redis = redis;
         this.localCache = localCache;
         this.kafkaStreamsFactory = kafkaStreamsFactory;
@@ -45,9 +49,9 @@ public class HelloService {
 
         // 3) Fallback: interactive query against Kafka Streams `stats-store` (materialized KTable)
         try {
-            Long val = getKeyValueStore().get(id);
-            if (val != null) {
-                var resp = new StatsResponse(id, val);
+            Long aLong = getKeyValueStore().get(id);
+            if (aLong != null) {
+                var resp = new StatsResponse(id, aLong);
                 var json = StatsResponse.toJson(resp);
                 localCache.put(id, json);
                 return resp;
@@ -60,13 +64,18 @@ public class HelloService {
     }
 
     private ReadOnlyKeyValueStore<String, Long> getKeyValueStore() {
-        if (keyValueStore == null) {
-            KafkaStreams kafkaStreams = kafkaStreamsFactory.getKafkaStreams();
-            Assert.notNull(kafkaStreams, () -> "Kafka Streams not initialized yet");
-            this.keyValueStore = kafkaStreams
-                    .store(StoreQueryParameters.fromNameAndType("stats-store", QueryableStoreTypes.keyValueStore()));
+        ReadOnlyKeyValueStore<String, Long> store = keyValueStore;
+        if (store == null) {
+            synchronized (this) {
+                store = keyValueStore;
+                if (store == null) {
+                    KafkaStreams kafkaStreams = kafkaStreamsFactory.getKafkaStreams();
+                    Assert.notNull(kafkaStreams, () -> "Kafka Streams not initialized yet");
+                    keyValueStore = store = kafkaStreams.store(
+                            StoreQueryParameters.fromNameAndType("stats-store", QueryableStoreTypes.keyValueStore()));
+                }
+            }
         }
-        return keyValueStore;
+        return store;
     }
 }
-
