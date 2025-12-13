@@ -13,7 +13,7 @@ public class ContainerConfig {
     @Bean
     @ServiceConnection
     LgtmStackContainer lgtmContainer() {
-        return new LgtmStackContainer(DockerImageName.parse("grafana/otel-lgtm:0.11.16"))
+        return new LgtmStackContainer(DockerImageName.parse("grafana/otel-lgtm:0.13.0"))
                 .withStartupTimeout(Duration.ofMinutes(2));
     }
 }
