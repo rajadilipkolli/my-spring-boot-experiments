@@ -116,7 +116,7 @@
             <plugin>
                 <groupId>org.hibernate.orm</groupId>
                 <artifactId>hibernate-maven-plugin</artifactId>
-                <version>7.1.11.Final</version>
+                <version>7.2.0.Final</version>
                 <executions>
                     <execution>
                         <id>enhance</id>
