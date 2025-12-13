@@ -1,4 +1,4 @@
-package com.example.highrps.repository;
+package com.example.highrps.model;
 
 import java.io.Serial;
 import java.io.Serializable;

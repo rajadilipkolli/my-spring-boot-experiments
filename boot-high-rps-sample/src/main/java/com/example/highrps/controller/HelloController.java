@@ -1,7 +1,7 @@
 package com.example.highrps.controller;
 
-import com.example.highrps.StatsResponse;
-import com.example.highrps.repository.EventDto;
+import com.example.highrps.model.EventDto;
+import com.example.highrps.model.StatsResponse;
 import com.example.highrps.service.HelloService;
 import com.example.highrps.service.KafkaProducerService;
 import org.springframework.http.MediaType;

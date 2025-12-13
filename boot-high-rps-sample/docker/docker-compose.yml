@@ -32,7 +32,7 @@ services:
       - "5050:80"
     depends_on:
       postgresqldb:
-        condition: service_started
+        condition: service_healthy
     volumes:
       - ./docker_pgadmin_servers.json:/pgadmin4/servers.json
     entrypoint:

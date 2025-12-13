@@ -1,6 +1,6 @@
-package com.example.highrps;
+package com.example.highrps.config;
 
-import com.example.highrps.repository.EventDto;
+import com.example.highrps.model.EventDto;
 import com.example.highrps.repository.StatsEntity;
 import com.example.highrps.repository.StatsRepository;
 import java.util.List;

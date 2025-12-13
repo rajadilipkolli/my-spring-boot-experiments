@@ -1,6 +1,6 @@
 package com.example.highrps.config;
 
-import com.example.highrps.StatsResponse;
+import com.example.highrps.model.StatsResponse;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,8 +52,15 @@ public class AggregatesToRedisListener {
         String existing = redis.opsForValue().get(redisKey);
         var json = StatsResponse.toJson(new StatsResponse(key, value));
 
-        // Idempotent: if the existing value matches desired payload, skip write
-        if (json.equals(existing)) return;
+        // Idempotent: if the existing value matches desired value, skip write
+        if (existing != null) {
+            try {
+                StatsResponse existingStats = StatsResponse.fromJson(existing);
+                if (existingStats.value().equals(value)) return;
+            } catch (Exception e) {
+                log.warn("Failed to parse existing stats for key: {}, will overwrite", key, e);
+            }
+        }
 
         // Write to Redis
         redis.opsForValue().set(redisKey, json);
@@ -61,7 +68,8 @@ public class AggregatesToRedisListener {
         // Enqueue the same payload for asynchronous DB writes
         try {
             redis.opsForList().leftPush(queueKey, json);
-        } catch (Exception ignored) {
+        } catch (Exception e) {
+            log.error("Failed to enqueue payload for DB write, key: {}, may lose durability", key, e);
         }
     }
 

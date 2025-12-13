@@ -1,11 +1,12 @@
 package com.example.highrps.config;
 
-import com.example.highrps.repository.EventDto;
+import com.example.highrps.model.EventDto;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.kafka.autoconfigure.KafkaProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -65,11 +66,13 @@ public class KafkaConfig {
 
     // Application-level topics. Kafka Streams will create internal changelog topics automatically.
     @Bean
-    public KafkaAdmin.NewTopics eventsTopic() {
-        int partitions = 3; // Increase for production workloads
-        short replication = 1; // Increase to 3 for production
+    KafkaAdmin.NewTopics eventsTopic(
+            @Value("${app.kafka.events-topic.partitions:3}") int eventsPartitions,
+            @Value("${app.kafka.events-topic.replication-factor:1}") short eventsReplication,
+            @Value("${app.kafka.stats-aggregates-topic.partitions:3}") int statsPartitions,
+            @Value("${app.kafka.stats-aggregates-topic.replication-factor:1}") short statsReplication) {
         return new KafkaAdmin.NewTopics(
-                new NewTopic("events", partitions, replication),
-                new NewTopic("stats-aggregates", partitions, replication));
+                new NewTopic("events", eventsPartitions, eventsReplication),
+                new NewTopic("stats-aggregates", statsPartitions, statsReplication));
     }
 }

@@ -18,6 +18,10 @@ public class CacheConfig {
         return Caffeine.newBuilder()
                 .maximumSize(10_000)
                 .expireAfterWrite(Duration.ofMinutes(5))
+                .recordStats()
+                .removalListener((key, value, cause) -> {
+                    // Log or emit metrics for evictions
+                })
                 .build();
     }
 

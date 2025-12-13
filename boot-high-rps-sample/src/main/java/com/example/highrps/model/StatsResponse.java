@@ -1,15 +1,10 @@
-package com.example.highrps;
+package com.example.highrps.model;
 
-import com.example.highrps.repository.EventDto;
 import tools.jackson.databind.ObjectMapper;
 
 public record StatsResponse(String id, Long value) {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
-
-    public StatsResponse(EventDto eventDto) {
-        this(eventDto.getId(), eventDto.getValue());
-    }
 
     public static StatsResponse empty(String id) {
         return new StatsResponse(id, 0L);

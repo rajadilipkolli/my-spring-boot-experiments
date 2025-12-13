@@ -1,6 +1,6 @@
 package com.example.highrps.config;
 
-import com.example.highrps.repository.EventDto;
+import com.example.highrps.model.EventDto;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.kstream.Consumed;
@@ -24,7 +24,7 @@ public class StreamsTopology {
     private static final Logger log = LoggerFactory.getLogger(StreamsTopology.class);
 
     @Bean
-    public KStream<String, EventDto> eventsStream(StreamsBuilder builder) {
+    public KTable<String, Long> eventsStream(StreamsBuilder builder) {
         log.info("Building events stream topology");
         JacksonJsonSerde<EventDto> eventSerde = new JacksonJsonSerde<>(EventDto.class);
 
@@ -45,6 +45,6 @@ public class StreamsTopology {
                 .mapValues(Object::toString)
                 .to("stats-aggregates", Produced.with(Serdes.String(), Serdes.String()));
 
-        return stream;
+        return aggregates;
     }
 }

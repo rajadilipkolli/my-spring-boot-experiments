@@ -1,11 +1,13 @@
 package com.example.highrps.service;
 
-import com.example.highrps.StatsResponse;
+import com.example.highrps.model.StatsResponse;
 import com.github.benmanes.caffeine.cache.Cache;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StoreQueryParameters;
 import org.apache.kafka.streams.state.QueryableStoreTypes;
 import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.kafka.config.StreamsBuilderFactoryBean;
 import org.springframework.stereotype.Service;
@@ -13,6 +15,8 @@ import org.springframework.util.Assert;
 
 @Service
 public class HelloService {
+
+    private static final Logger log = LoggerFactory.getLogger(HelloService.class);
 
     private final RedisTemplate<String, String> redis;
     private final Cache<String, String> localCache;
@@ -58,6 +62,7 @@ public class HelloService {
             }
         } catch (Exception e) {
             // ignore and fall through to empty
+            log.error("Failed to query Kafka Streams store for id: {}", id, e);
         }
 
         return StatsResponse.empty(id);

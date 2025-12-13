@@ -1,6 +1,6 @@
 package com.example.highrps.service;
 
-import com.example.highrps.repository.EventDto;
+import com.example.highrps.model.EventDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
