@@ -1,4 +1,4 @@
-FROM eclipse-temurin:25-jre-jammy
+FROM eclipse-temurin:25.0.1_8-jre-jammy
 ARG JAR_FILE=target/boot-high-rps-sample-0.1.0-SNAPSHOT.jar
 COPY ${JAR_FILE} app.jar
 
