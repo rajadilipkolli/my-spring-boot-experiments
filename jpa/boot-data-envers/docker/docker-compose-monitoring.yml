@@ -30,7 +30,7 @@ services:
     command: --config.file=/etc/prometheus/prometheus.yml --log.level=debug
 
   alertmanager:
-    image: prom/alertmanager:v0.29.0
+    image: prom/alertmanager:v0.30.0
     ports:
       - "9093:9093"
     volumes:
