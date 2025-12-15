@@ -44,8 +44,9 @@ class GrafanaLGTMApplicationTest {
     @Test
     void prometheus() {
         // calling endpoint to load metrics using TestRestTemplate to avoid RestAssured Groovy-based NPE
-        var resp = testRestTemplate.getForEntity("/greetings", String.class);
+        var resp = testRestTemplate.getForEntity("/greetings?username=boot", String.class);
         assertThat(resp.getStatusCode().value()).isEqualTo(HttpStatus.SC_OK);
+        assertThat(resp.getHeaders().containsHeader("X-Trace-Id")).isTrue();
 
         RestAssured.port = lgtmContainer.getMappedPort(3000);
         given().contentType(ContentType.URLENC)

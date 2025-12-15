@@ -5,7 +5,7 @@ import org.springframework.boot.SpringApplication;
 
 public class TestGrafanaLGTMApplication {
 
-    static void main(String[] args) {
+    public static void main(String[] args) {
         SpringApplication.from(GrafanaLGTMApplication::main)
                 .with(ContainerConfig.class)
                 .run(args);
