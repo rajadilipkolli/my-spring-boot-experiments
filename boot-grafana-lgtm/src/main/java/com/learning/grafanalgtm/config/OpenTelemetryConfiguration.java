@@ -29,8 +29,8 @@ public class OpenTelemetryConfiguration {
     }
 
     @Bean
-    ProcessorMetrics processorMetrics() {
-        return new ProcessorMetrics(List.of(), new OpenTelemetryJvmCpuMeterConventions(Tags.empty()));
+    ProcessorMetrics processorMetrics(OpenTelemetryJvmCpuMeterConventions cpuConventions) {
+        return new ProcessorMetrics(List.of(), cpuConventions);
     }
 
     @Bean

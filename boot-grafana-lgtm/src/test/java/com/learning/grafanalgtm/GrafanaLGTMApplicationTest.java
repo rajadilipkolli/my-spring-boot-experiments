@@ -47,6 +47,7 @@ class GrafanaLGTMApplicationTest {
         var resp = testRestTemplate.getForEntity("/greetings?username=boot", String.class);
         assertThat(resp.getStatusCode().value()).isEqualTo(HttpStatus.SC_OK);
         assertThat(resp.getHeaders().containsHeader("X-Trace-Id")).isTrue();
+        assertThat(resp.getBody()).isEqualTo("Hello, boot!");
 
         RestAssured.port = lgtmContainer.getMappedPort(3000);
         given().contentType(ContentType.URLENC)
@@ -68,6 +69,8 @@ class GrafanaLGTMApplicationTest {
         // calling endpoint to load metrics using TestRestTemplate to avoid RestAssured Groovy-based NPE
         var resp = testRestTemplate.getForEntity("/greetings", String.class);
         assertThat(resp.getStatusCode().value()).isEqualTo(HttpStatus.SC_OK);
+        assertThat(resp.getHeaders().containsHeader("X-Trace-Id")).isTrue();
+        assertThat(resp.getBody()).isEqualTo("Hello, Guest!");
 
         RestAssured.port = lgtmContainer.getMappedPort(9090);
         given().contentType(ContentType.URLENC)
@@ -90,6 +93,8 @@ class GrafanaLGTMApplicationTest {
         // calling endpoint to load metrics using TestRestTemplate to avoid RestAssured Groovy-based NPE
         var resp = testRestTemplate.getForEntity("/greetings", String.class);
         assertThat(resp.getStatusCode().value()).isEqualTo(HttpStatus.SC_OK);
+        assertThat(resp.getHeaders().containsHeader("X-Trace-Id")).isTrue();
+        assertThat(resp.getBody()).isEqualTo("Hello, Guest!");
 
         RestAssured.port = lgtmContainer.getMappedPort(3000);
 
