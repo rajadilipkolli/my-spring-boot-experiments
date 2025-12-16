@@ -83,7 +83,7 @@
         <dependency>
             <groupId>io.hypersistence</groupId>
             <artifactId>hypersistence-utils-hibernate-71</artifactId>
-            <version>3.13.3</version>
+            <version>3.14.0</version>
         </dependency>
 
         <!-- end of database related dependencies -->
