@@ -72,7 +72,6 @@ class GrafanaLGTMApplicationTest {
 
     @Test
     void queryPrometheus() {
-        // calling endpoint to load metrics using TestRestTemplate to avoid RestAssured Groovy-based NPE
         when().get("/greetings")
                 .then()
                 .statusCode(HttpStatus.SC_OK)
@@ -98,7 +97,6 @@ class GrafanaLGTMApplicationTest {
 
     @Test
     void tempoQuery() {
-        // calling endpoint to load metrics using TestRestTemplate to avoid RestAssured Groovy-based NPE
         when().get("/greetings")
                 .then()
                 .statusCode(HttpStatus.SC_OK)

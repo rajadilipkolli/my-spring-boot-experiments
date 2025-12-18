@@ -3,6 +3,7 @@ package com.example.locks.web.controllers;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.matchesPattern;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -80,6 +81,7 @@ class ActorControllerIT extends AbstractIntegrationTest {
                         .content(objectMapper.writeValueAsString(actorRequest)))
                 .andExpect(status().isCreated())
                 .andExpect(header().exists(HttpHeaders.LOCATION))
+                .andExpect(header().string(HttpHeaders.LOCATION, matchesPattern(".*/api/actors/\\d+")))
                 .andExpect(jsonPath("$.actorId", notNullValue()))
                 .andExpect(jsonPath("$.actorName", is(actorRequest.actorName())));
     }
