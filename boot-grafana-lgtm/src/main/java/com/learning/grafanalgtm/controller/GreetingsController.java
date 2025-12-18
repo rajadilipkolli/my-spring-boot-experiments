@@ -21,8 +21,10 @@ public class GreetingsController {
 
     @Counted
     @GetMapping("/greetings")
-    public String greetings(@RequestParam(required = false) String username) {
+    public GenericResponse greetings(@RequestParam(required = false) String username) {
         LOGGER.info("Inside Greetings method");
-        return greetingsService.greetingByUser(username);
+        return new GenericResponse(greetingsService.greetingByUser(username));
     }
+
+    private record GenericResponse(String message) {}
 }
