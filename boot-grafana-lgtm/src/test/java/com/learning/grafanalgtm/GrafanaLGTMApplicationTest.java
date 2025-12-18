@@ -1,7 +1,7 @@
 package com.learning.grafanalgtm;
 
 import static io.restassured.RestAssured.given;
-import static org.assertj.core.api.Assertions.assertThat;
+import static io.restassured.RestAssured.when;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
@@ -12,26 +12,25 @@ import io.restassured.authentication.PreemptiveBasicAuthScheme;
 import io.restassured.http.ContentType;
 import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.resttestclient.TestRestTemplate;
-import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureTestRestTemplate;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.web.server.LocalServerPort;
 import org.testcontainers.grafana.LgtmStackContainer;
 
 @SpringBootTest(
         classes = {ContainerConfig.class},
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@AutoConfigureTestRestTemplate
 class GrafanaLGTMApplicationTest {
 
     @Autowired
     private LgtmStackContainer lgtmContainer;
 
-    @Autowired
-    private TestRestTemplate testRestTemplate;
+    @LocalServerPort
+    private int localServerPort;
 
     @BeforeAll
     void setUp() {
@@ -41,13 +40,20 @@ class GrafanaLGTMApplicationTest {
         RestAssured.authentication = authScheme;
     }
 
+    @BeforeEach
+    void setPort() {
+        RestAssured.port = localServerPort;
+    }
+
     @Test
     void prometheus() {
-        // calling endpoint to load metrics using TestRestTemplate to avoid RestAssured Groovy-based NPE
-        var resp = testRestTemplate.getForEntity("/greetings?username=boot", String.class);
-        assertThat(resp.getStatusCode().value()).isEqualTo(HttpStatus.SC_OK);
-        assertThat(resp.getHeaders().containsHeader("X-Trace-Id")).isTrue();
-        assertThat(resp.getBody()).isEqualTo("Hello, boot!");
+        // calling endpoint to load metrics
+        when().get("/greetings?username=boot")
+                .then()
+                .statusCode(HttpStatus.SC_OK)
+                .contentType(ContentType.JSON)
+                .header("X-Trace-Id", not(empty()))
+                .body("message", is("Hello, boot!"));
 
         RestAssured.port = lgtmContainer.getMappedPort(3000);
         given().contentType(ContentType.URLENC)
@@ -66,11 +72,12 @@ class GrafanaLGTMApplicationTest {
 
     @Test
     void queryPrometheus() {
-        // calling endpoint to load metrics using TestRestTemplate to avoid RestAssured Groovy-based NPE
-        var resp = testRestTemplate.getForEntity("/greetings", String.class);
-        assertThat(resp.getStatusCode().value()).isEqualTo(HttpStatus.SC_OK);
-        assertThat(resp.getHeaders().containsHeader("X-Trace-Id")).isTrue();
-        assertThat(resp.getBody()).isEqualTo("Hello, Guest!");
+        when().get("/greetings")
+                .then()
+                .statusCode(HttpStatus.SC_OK)
+                .contentType(ContentType.JSON)
+                .header("X-Trace-Id", not(empty()))
+                .body("message", is("Hello, Guest!"));
 
         RestAssured.port = lgtmContainer.getMappedPort(9090);
         given().contentType(ContentType.URLENC)
@@ -90,11 +97,12 @@ class GrafanaLGTMApplicationTest {
 
     @Test
     void tempoQuery() {
-        // calling endpoint to load metrics using TestRestTemplate to avoid RestAssured Groovy-based NPE
-        var resp = testRestTemplate.getForEntity("/greetings", String.class);
-        assertThat(resp.getStatusCode().value()).isEqualTo(HttpStatus.SC_OK);
-        assertThat(resp.getHeaders().containsHeader("X-Trace-Id")).isTrue();
-        assertThat(resp.getBody()).isEqualTo("Hello, Guest!");
+        when().get("/greetings")
+                .then()
+                .statusCode(HttpStatus.SC_OK)
+                .contentType(ContentType.JSON)
+                .header("X-Trace-Id", not(empty()))
+                .body("message", is("Hello, Guest!"));
 
         RestAssured.port = lgtmContainer.getMappedPort(3000);
 
