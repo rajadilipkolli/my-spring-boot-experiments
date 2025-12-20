@@ -18,9 +18,6 @@ management:
   tracing:
     sampling:
       probability: 1.0
-  otlp:
-    tracing:
-      endpoint: ${MANAGEMENT_OTLP_TRACING_ENDPOINT:http://localhost:4318/v1/traces}
   prometheus:
     metrics:
       export:
@@ -34,7 +31,23 @@ management:
       enabled: true
   observations.key-values:
     application: ${spring.application.name}
-
+  otlp:
+    metrics:
+      export:
+        url: ${MANAGEMENT_OTLP_METRICS_ENDPOINT:http://localhost:4318/v1/metrics}
+        step: 10s
+  opentelemetry:
+    tracing:
+      export:
+        otlp:
+          endpoint: ${MANAGEMENT_OTLP_TRACES_ENDPOINT:http://localhost:4318/v1/traces}
+    logging:
+      export:
+        otlp:
+          endpoint: ${MANAGEMENT_OTLP_LOGS_ENDPOINT:http://localhost:4318/v1/logs}
+  observations:
+    annotations:
+      enabled: true
 spring:
   application:
     name: strategy-plugin-service
@@ -49,4 +62,3 @@ server:
   port: 8080
   compression:
     enabled: true
-

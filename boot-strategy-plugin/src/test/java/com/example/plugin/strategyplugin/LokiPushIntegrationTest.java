@@ -66,9 +66,9 @@ class LokiPushIntegrationTest extends AbstractIntegrationTest {
         // unique token
         String[] logqlCandidates =
                 new String[] {
-                    String.format("{app=\"strategy-plugin-service\"} |= \"%s\"", unique),
-                    String.format("{agent=\"loki4j\"} |= \"%s\"", unique),
-                    String.format("{} |= \"%s\"", unique)
+                    "{app=\"strategy-plugin-service\"} |= \"%s\"".formatted(unique),
+                    "{agent=\"loki4j\"} |= \"%s\"".formatted(unique),
+                    "{} |= \"%s\"".formatted(unique)
                 };
 
         await().atMost(Duration.ofSeconds(60))
