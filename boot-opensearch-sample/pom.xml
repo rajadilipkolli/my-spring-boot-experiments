@@ -22,7 +22,7 @@
 
         <java.version>25</java.version>
         <springdoc-openapi.version>2.8.14</springdoc-openapi.version>
-        <opensearch.version>2.0.3</opensearch.version>
+        <opensearch.version>3.0.0</opensearch.version>
 
         <project.testresult.directory>${project.build.directory}/test-results</project.testresult.directory>
         <spotless.version>3.1.0</spotless.version>
