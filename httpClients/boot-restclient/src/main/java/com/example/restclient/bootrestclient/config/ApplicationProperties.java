@@ -1,5 +1,6 @@
 package com.example.restclient.bootrestclient.config;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
@@ -12,7 +13,7 @@ public class ApplicationProperties {
     @NotBlank(message = "External Call URL cant be Blank") private String externalCallUrl;
 
     @NestedConfigurationProperty
-    private Cors cors = new Cors();
+    @Valid private Cors cors = new Cors();
 
     public String getExternalCallUrl() {
         return externalCallUrl;

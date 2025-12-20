@@ -23,14 +23,13 @@ class RedisHealthControllerTest extends AbstractIntegrationTest {
                 .satisfies(response -> {
                     @SuppressWarnings("unchecked")
                     Map<String, Object> healthStatus = (Map<String, Object>) response.response();
-                    assertThat(healthStatus).containsKey("status");
-                    assertThat(healthStatus).containsKey("timestamp");
-
-                    // In test environment with Redis running, status should be UP
-                    assertThat(healthStatus.get("status")).isEqualTo("UP");
-
-                    // Should have connection info
-                    assertThat(healthStatus).containsKey("connectionInfo");
+                    assertThat(healthStatus)
+                            .containsKey("status")
+                            .containsKey("timestamp")
+                            // In test environment with Redis running, status should be UP
+                            .containsEntry("status", "UP")
+                            // Should have connection info
+                            .containsKey("connectionInfo");
                 });
     }
 }

@@ -32,17 +32,17 @@ class PostRepositoryTest {
     private PostRepository postRepository;
 
     @Test
-    void testDatabaseClientExisted() {
+    void databaseClientExisted() {
         assertThat(template).isNotNull();
     }
 
     @Test
-    void testPostRepositoryExisted() {
+    void postRepositoryExisted() {
         assertThat(postRepository).isNotNull();
     }
 
     @Test
-    void testQueryByExample() {
+    void queryByExample() {
         var post = Post.builder().title("r2dbc").build();
         var exampleMatcher = ExampleMatcher.matching()
                 .withMatcher("title", matcher -> matcher.ignoreCase().contains());
@@ -53,13 +53,13 @@ class PostRepositoryTest {
         StepVerifier.create(data)
                 .consumeNextWith(p -> {
                     log.debug("post data: {}", p.getContent());
-                    assertThat(p.getTotalElements()).isEqualTo(1);
+                    assertThat(p.getTotalElements()).isOne();
                 })
                 .verifyComplete();
     }
 
     @Test
-    void testInsertAndQuery() {
+    void insertAndQuery() {
         this.template
                 .insert(Post.builder()
                         .title("test title")
@@ -84,7 +84,7 @@ class PostRepositoryTest {
     }
 
     @Test
-    void testInsertAndCount() {
+    void insertAndCount() {
         this.template
                 .insert(Post.builder()
                         .title("test title")
@@ -96,13 +96,13 @@ class PostRepositoryTest {
                 .log()
                 .as(StepVerifier::create)
                 .consumeNextWith(p -> {
-                    assertThat(p).isEqualTo(1);
+                    assertThat(p).isOne();
                 })
                 .verifyComplete();
     }
 
     @Test
-    void testInsertAndFindByTitleLike() {
+    void insertAndFindByTitleLike() {
         var data = IntStream.range(1, 101)
                 .mapToObj(i -> Post.builder()
                         .title("test title#" + i)

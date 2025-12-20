@@ -40,7 +40,7 @@ class TagServiceTest {
         // then
         assertThat(optionalTag).isPresent();
         TagResponse tag = optionalTag.get();
-        assertThat(tag.id()).isEqualTo(1L);
+        assertThat(tag.id()).isOne();
         assertThat(tag.name()).isEqualTo("junitTest");
     }
 

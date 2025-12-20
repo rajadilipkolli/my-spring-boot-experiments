@@ -40,7 +40,7 @@ class CustomerServiceTest {
         // then
         assertThat(optionalCustomer).isPresent();
         CustomerResponse customer = optionalCustomer.get();
-        assertThat(customer.id()).isEqualTo(1L);
+        assertThat(customer.id()).isOne();
         assertThat(customer.name()).isEqualTo("junitTest");
         assertThat(customer.address()).isEqualTo("junitAddress");
     }

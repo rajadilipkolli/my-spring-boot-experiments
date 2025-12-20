@@ -7,6 +7,7 @@ import com.example.jooq.r2dbc.dbgen.tables.PostComments;
 import com.example.jooq.r2dbc.dbgen.tables.Posts;
 import com.example.jooq.r2dbc.dbgen.tables.PostsTags;
 import com.example.jooq.r2dbc.dbgen.tables.Tags;
+import java.io.Serial;
 import java.util.Arrays;
 import java.util.List;
 import org.jooq.Catalog;
@@ -17,7 +18,7 @@ import org.jooq.impl.SchemaImpl;
 @SuppressWarnings({"all", "unchecked", "rawtypes"})
 public class Public extends SchemaImpl {
 
-    private static final long serialVersionUID = 1L;
+    @Serial private static final long serialVersionUID = 1L;
 
     /** The reference instance of <code>public</code> */
     public static final Public PUBLIC = new Public();

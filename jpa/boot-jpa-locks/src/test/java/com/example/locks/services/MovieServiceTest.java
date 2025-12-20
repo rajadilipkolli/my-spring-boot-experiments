@@ -43,7 +43,7 @@ class MovieServiceTest {
         // then
         assertThat(optionalMovie).isPresent();
         MovieResponse movie = optionalMovie.get();
-        assertThat(movie.movieId()).isEqualTo(1L);
+        assertThat(movie.movieId()).isOne();
         assertThat(movie.movieTitle()).isEqualTo("junitTest");
     }
 

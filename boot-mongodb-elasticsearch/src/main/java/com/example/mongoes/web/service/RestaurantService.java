@@ -97,9 +97,8 @@ public class RestaurantService {
                         exists -> {
                             if (exists) {
                                 String errorMessage =
-                                        String.format(
-                                                "Restaurant with name '%s' already exists",
-                                                restaurantRequest.name());
+                                        "Restaurant with name '%s' already exists"
+                                                .formatted(restaurantRequest.name());
                                 return Mono.error(new DuplicateRestaurantException(errorMessage));
                             }
                             return restaurantRepository.save(restaurantRequest.toRestaurant());

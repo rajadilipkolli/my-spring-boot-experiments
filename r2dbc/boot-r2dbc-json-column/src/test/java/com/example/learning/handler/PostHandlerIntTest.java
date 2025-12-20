@@ -50,14 +50,14 @@ class PostHandlerIntTest extends AbstractIntegrationTest {
                 .expectBody(new ParameterizedTypeReference<PagedResult<Post>>() {})
                 .value(pagedResult -> {
                     assertThat(pagedResult.totalElements()).isEqualTo(20);
-                    assertThat(pagedResult.pageNumber()).isEqualTo(1);
+                    assertThat(pagedResult.pageNumber()).isOne();
                     assertThat(pagedResult.totalPages()).isEqualTo(2);
-                    assertThat(pagedResult.isFirst()).isEqualTo(true);
-                    assertThat(pagedResult.isLast()).isEqualTo(false);
-                    assertThat(pagedResult.hasNext()).isEqualTo(true);
-                    assertThat(pagedResult.hasPrevious()).isEqualTo(false);
+                    assertThat(pagedResult.isFirst()).isTrue();
+                    assertThat(pagedResult.isLast()).isFalse();
+                    assertThat(pagedResult.hasNext()).isTrue();
+                    assertThat(pagedResult.hasPrevious()).isFalse();
                     List<Post> posts = pagedResult.data();
-                    assertThat(posts).isNotNull().isNotEmpty().hasSize(10);
+                    assertThat(posts).isNotEmpty().hasSize(10);
                     // Verify content and order
                     assertThat(posts)
                             .extracting(Post::getTitle)
@@ -86,14 +86,14 @@ class PostHandlerIntTest extends AbstractIntegrationTest {
                 .expectBody(new ParameterizedTypeReference<PagedResult<Post>>() {})
                 .value(pagedResult -> {
                     assertThat(pagedResult.totalElements()).isEqualTo(20);
-                    assertThat(pagedResult.pageNumber()).isEqualTo(1);
+                    assertThat(pagedResult.pageNumber()).isOne();
                     assertThat(pagedResult.totalPages()).isEqualTo(4);
-                    assertThat(pagedResult.isFirst()).isEqualTo(true);
-                    assertThat(pagedResult.isLast()).isEqualTo(false);
-                    assertThat(pagedResult.hasNext()).isEqualTo(true);
-                    assertThat(pagedResult.hasPrevious()).isEqualTo(false);
+                    assertThat(pagedResult.isFirst()).isTrue();
+                    assertThat(pagedResult.isLast()).isFalse();
+                    assertThat(pagedResult.hasNext()).isTrue();
+                    assertThat(pagedResult.hasPrevious()).isFalse();
                     List<Post> posts = pagedResult.data();
-                    assertThat(posts).isNotNull().isNotEmpty().hasSize(5);
+                    assertThat(posts).isNotEmpty().hasSize(5);
                     // Verify content
                     assertThat(posts)
                             .extracting(Post::getTitle)
@@ -114,12 +114,12 @@ class PostHandlerIntTest extends AbstractIntegrationTest {
                     assertThat(pagedResult.totalElements()).isEqualTo(20);
                     assertThat(pagedResult.pageNumber()).isEqualTo(2);
                     assertThat(pagedResult.totalPages()).isEqualTo(3);
-                    assertThat(pagedResult.isFirst()).isEqualTo(false);
-                    assertThat(pagedResult.isLast()).isEqualTo(false);
-                    assertThat(pagedResult.hasNext()).isEqualTo(true);
-                    assertThat(pagedResult.hasPrevious()).isEqualTo(true);
+                    assertThat(pagedResult.isFirst()).isFalse();
+                    assertThat(pagedResult.isLast()).isFalse();
+                    assertThat(pagedResult.hasNext()).isTrue();
+                    assertThat(pagedResult.hasPrevious()).isTrue();
                     List<Post> posts = pagedResult.data();
-                    assertThat(posts).isNotNull().isNotEmpty().hasSize(8);
+                    assertThat(posts).isNotEmpty().hasSize(8);
                     // Verify content
                     assertThat(posts)
                             .extracting(Post::getTitle)
@@ -148,10 +148,10 @@ class PostHandlerIntTest extends AbstractIntegrationTest {
                     assertThat(pagedResult.totalElements()).isEqualTo(20);
                     assertThat(pagedResult.pageNumber()).isEqualTo(11);
                     assertThat(pagedResult.totalPages()).isEqualTo(2);
-                    assertThat(pagedResult.isFirst()).isEqualTo(false);
-                    assertThat(pagedResult.isLast()).isEqualTo(true);
-                    assertThat(pagedResult.hasNext()).isEqualTo(false);
-                    assertThat(pagedResult.hasPrevious()).isEqualTo(true);
+                    assertThat(pagedResult.isFirst()).isFalse();
+                    assertThat(pagedResult.isLast()).isTrue();
+                    assertThat(pagedResult.hasNext()).isFalse();
+                    assertThat(pagedResult.hasPrevious()).isTrue();
                     List<Post> posts = pagedResult.data();
                     assertThat(posts).isNull();
                 });

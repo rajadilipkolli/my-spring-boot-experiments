@@ -26,7 +26,7 @@ class WebRouterConfigIT extends AbstractIntegrationTest {
                 .is2xxSuccessful()
                 .expectBody()
                 .jsonPath("$[*].title")
-                .value((List<String> titles) -> assertThat(titles).containsAnyOf("jooq test"));
+                .value((List<String> titles) -> assertThat(titles).contains("jooq test"));
     }
 
     @Test
@@ -46,9 +46,9 @@ class WebRouterConfigIT extends AbstractIntegrationTest {
                 .value(
                         paginatedResult -> {
                             assertThat(paginatedResult.data()).isNotEmpty().hasSize(1);
-                            assertThat(paginatedResult.totalElements()).isEqualTo(1);
-                            assertThat(paginatedResult.pageNumber()).isEqualTo(1);
-                            assertThat(paginatedResult.totalPages()).isEqualTo(1);
+                            assertThat(paginatedResult.totalElements()).isOne();
+                            assertThat(paginatedResult.pageNumber()).isOne();
+                            assertThat(paginatedResult.totalPages()).isOne();
                             assertThat(paginatedResult.isFirst()).isTrue();
                             assertThat(paginatedResult.isLast()).isTrue();
                             assertThat(paginatedResult.hasNext()).isFalse();
@@ -81,7 +81,7 @@ class WebRouterConfigIT extends AbstractIntegrationTest {
         Long afterCount = tagRepository.count().block();
 
         // Use Assertions to verify the result
-        assertThat(afterCount - initialCount).isEqualTo(1);
+        assertThat(afterCount - initialCount).isOne();
 
         // Create the second post
         createPost = new CreatePostCommand("junitTitle1", "junitContent1", List.of("junitTag"));
@@ -101,6 +101,6 @@ class WebRouterConfigIT extends AbstractIntegrationTest {
         afterCount = tagRepository.count().block();
 
         // Use Assertions to verify the result that no newer one is created
-        assertThat(afterCount - initialCount).isEqualTo(1);
+        assertThat(afterCount - initialCount).isOne();
     }
 }

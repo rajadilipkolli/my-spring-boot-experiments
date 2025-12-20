@@ -66,9 +66,10 @@ class ActorControllerTest extends AbstractIntegrationTest {
                 .satisfies(response -> {
                     @SuppressWarnings("unchecked")
                     var responseMap = (LinkedHashMap<String, Object>) response.response();
-                    assertThat(responseMap.get("id")).isEqualTo(testActor1.getId());
-                    assertThat(responseMap.get("name")).isEqualTo(testActor1.getName());
-                    assertThat(responseMap.get("age")).isEqualTo(testActor1.getAge());
+                    assertThat(responseMap)
+                            .containsEntry("id", testActor1.getId())
+                            .containsEntry("name", testActor1.getName())
+                            .containsEntry("age", testActor1.getAge());
                 });
     }
 
@@ -97,7 +98,7 @@ class ActorControllerTest extends AbstractIntegrationTest {
                 .satisfies(response -> {
                     @SuppressWarnings("unchecked")
                     var responseMap = (LinkedHashMap<String, Object>) response.response();
-                    assertThat(responseMap.get("name")).isEqualTo(testActor1.getName());
+                    assertThat(responseMap).containsEntry("name", testActor1.getName());
                 });
     }
 
@@ -128,8 +129,9 @@ class ActorControllerTest extends AbstractIntegrationTest {
                 .satisfies(response -> {
                     @SuppressWarnings("unchecked")
                     var responseMap = (LinkedHashMap<String, Object>) response.response();
-                    assertThat(responseMap.get("name")).isEqualTo(testActor1.getName());
-                    assertThat(responseMap.get("age")).isEqualTo(testActor1.getAge());
+                    assertThat(responseMap)
+                            .containsEntry("name", testActor1.getName())
+                            .containsEntry("age", testActor1.getAge());
                 });
     }
 
@@ -151,8 +153,9 @@ class ActorControllerTest extends AbstractIntegrationTest {
                     @SuppressWarnings("unchecked")
                     var responseMap = (LinkedHashMap<String, Object>) response.response();
                     assertThat(responseMap.get("id")).isNotNull();
-                    assertThat(responseMap.get("name")).isEqualTo(newActorRequest.name());
-                    assertThat(responseMap.get("age")).isEqualTo(newActorRequest.age());
+                    assertThat(responseMap)
+                            .containsEntry("name", newActorRequest.name())
+                            .containsEntry("age", newActorRequest.age());
                 });
     }
 
@@ -226,9 +229,10 @@ class ActorControllerTest extends AbstractIntegrationTest {
                 .satisfies(response -> {
                     @SuppressWarnings("unchecked")
                     var responseMap = (LinkedHashMap<String, Object>) response.response();
-                    assertThat(responseMap.get("id")).isEqualTo(testActor1.getId());
-                    assertThat(responseMap.get("name")).isEqualTo(updateRequest.name());
-                    assertThat(responseMap.get("age")).isEqualTo(updateRequest.age());
+                    assertThat(responseMap)
+                            .containsEntry("id", testActor1.getId())
+                            .containsEntry("name", updateRequest.name())
+                            .containsEntry("age", updateRequest.age());
                 });
     }
 
@@ -389,7 +393,7 @@ class ActorControllerTest extends AbstractIntegrationTest {
                 .satisfies(response -> {
                     @SuppressWarnings("unchecked")
                     var responseMap = (LinkedHashMap<String, Object>) response.response();
-                    assertThat(responseMap.get("name")).isEqualTo(specialName);
+                    assertThat(responseMap).containsEntry("name", specialName);
                 });
     }
 }

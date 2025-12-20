@@ -127,9 +127,9 @@ class OrderControllerIT extends AbstractIntegrationTest {
         LocalDate endDate = LocalDate.of(2025, 12, 31);
         List<Order> ordersIn2025 = orderRepository.findByOrderDateBetween(startDate, endDate);
 
-        // Fixing the assertion to match the expected size of orders in 2025
-        assertThat(ordersIn2025).hasSize(3);
         assertThat(ordersIn2025)
+                // Fixing the assertion to match the expected size of orders in 2025
+                .hasSize(3)
                 .allMatch(order -> order.getOrderDate().isAfter(LocalDate.of(2024, 12, 31))
                         && order.getOrderDate().isBefore(LocalDate.of(2026, 1, 1)));
     }
@@ -150,9 +150,6 @@ class OrderControllerIT extends AbstractIntegrationTest {
                         + "ORDER BY c.relname",
                 String.class);
 
-        // Ensure that partition tables exist (e.g., orders_2022, orders_2023, orders_2024,
-        // orders_2025)
-        assertThat(partitionTables).isNotEmpty();
         assertThat(partitionTables).contains("orders_2022", "orders_2023", "orders_2024", "orders_2025");
 
         // 2. Verify that orders are stored in the correct partitions based on order dates
@@ -164,7 +161,7 @@ class OrderControllerIT extends AbstractIntegrationTest {
         // Confirm the order exists within the 2025 partition
         Integer countIn2025 = jdbcTemplate.queryForObject(
                 "SELECT COUNT(*) FROM orders_2025 WHERE id = ?", Integer.class, order2025.getId());
-        assertThat(countIn2025).isEqualTo(1);
+        assertThat(countIn2025).isOne();
 
         // Confirm the order does not exist in the 2024 partition
         Integer countIn2024 = jdbcTemplate.queryForObject(

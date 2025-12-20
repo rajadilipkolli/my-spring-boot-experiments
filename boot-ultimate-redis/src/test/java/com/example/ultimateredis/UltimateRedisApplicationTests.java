@@ -107,9 +107,10 @@ class UltimateRedisApplicationTests extends AbstractIntegrationTest {
         // Act - find by pattern
         var keys = redisValueOpsUtil.getKeysWithPattern("test:*");
 
-        // Assert
-        assertThat(keys).hasSize(3);
-        assertThat(keys).contains("test:1", "test:2", "test:3");
+        assertThat(keys)
+                // Assert
+                .hasSize(3)
+                .contains("test:1", "test:2", "test:3");
 
         // Act - delete by pattern
         redisValueOpsUtil.deleteByPattern("test:*");
@@ -135,16 +136,16 @@ class UltimateRedisApplicationTests extends AbstractIntegrationTest {
         Long sixthValue = scriptExecutor.incrementWithinRange(key, 1, 5);
 
         // Assert - wraps around after reaching max
-        assertThat(firstValue).isEqualTo(1L);
+        assertThat(firstValue).isOne();
         assertThat(secondValue).isEqualTo(2L);
         assertThat(thirdValue).isEqualTo(3L);
         assertThat(fourthValue).isEqualTo(4L);
-        assertThat(fifthValue).isEqualTo(1L); // Wrapped around to min value
+        assertThat(fifthValue).isOne(); // Wrapped around to min value
         assertThat(sixthValue).isEqualTo(2L);
     }
 
     @Test
-    void redisRateLimiter_tokenBucket_shouldReplenishTokensOverTime() throws InterruptedException {
+    void redisRateLimiter_tokenBucket_shouldReplenishTokensOverTime() throws Exception {
         // Arrange
         String key = "token-replenish-test";
         double rate = 5.0; // 5 tokens per second
@@ -171,7 +172,7 @@ class UltimateRedisApplicationTests extends AbstractIntegrationTest {
                         }
                     }
                     // At least 1 token should be replenished (be tolerant to timing)
-                    assertThat(replenished).isGreaterThanOrEqualTo(1);
+                    assertThat(replenished).isPositive();
                 });
         // After consuming replenished tokens, bucket should be empty again
         assertThat(rateLimiter.tryAcquire(key, rate, capacity)).isFalse();

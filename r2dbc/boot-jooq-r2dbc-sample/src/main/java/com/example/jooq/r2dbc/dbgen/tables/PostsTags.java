@@ -6,6 +6,7 @@ package com.example.jooq.r2dbc.dbgen.tables;
 import com.example.jooq.r2dbc.dbgen.Keys;
 import com.example.jooq.r2dbc.dbgen.Public;
 import com.example.jooq.r2dbc.dbgen.tables.records.PostsTagsRecord;
+import java.io.Serial;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -31,7 +32,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({"all", "unchecked", "rawtypes"})
 public class PostsTags extends TableImpl<PostsTagsRecord> {
 
-    private static final long serialVersionUID = 1L;
+    @Serial private static final long serialVersionUID = 1L;
 
     /** The reference instance of <code>public.posts_tags</code> */
     public static final PostsTags POSTS_TAGS = new PostsTags();

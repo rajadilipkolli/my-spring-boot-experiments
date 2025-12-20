@@ -1,7 +1,6 @@
 package com.example.keysetpagination.repository;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import com.example.keysetpagination.common.ContainersConfig;
 import jakarta.persistence.EntityManager;
@@ -33,14 +32,20 @@ class SchemaValidationTest {
                 + "FROM information_schema.columns " + "WHERE table_name = 'animals'");
 
         List<Object[]> columns = query.getResultList();
-        assertFalse(columns.isEmpty(), "Animals table should exist with columns");
+        assertThat(columns.isEmpty())
+                .as("Animals table should exist with columns")
+                .isFalse();
 
         // Verify specific column existence and types
         Map<String, String> columnTypes =
                 columns.stream().collect(Collectors.toMap(row -> (String) row[0], row -> (String) row[1]));
 
-        assertEquals("bigint", columnTypes.get("id"), "ID column should be bigint");
-        assertEquals("text", columnTypes.get("name"), "name column should be character varying");
-        assertEquals("smallint", columnTypes.get("version"), "version column should be bigint");
+        assertThat(columnTypes.get("id")).as("ID column should be bigint").isEqualTo("bigint");
+        assertThat(columnTypes.get("name"))
+                .as("name column should be character varying")
+                .isEqualTo("text");
+        assertThat(columnTypes.get("version"))
+                .as("version column should be bigint")
+                .isEqualTo("smallint");
     }
 }

@@ -4,6 +4,7 @@
 package com.example.jooq.r2dbc.dbgen.tables.records;
 
 import com.example.jooq.r2dbc.dbgen.tables.Tags;
+import java.io.Serial;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 import org.jooq.Field;
@@ -17,7 +18,7 @@ import org.jooq.impl.UpdatableRecordImpl;
 public class TagsRecord extends UpdatableRecordImpl<TagsRecord>
         implements Record3<UUID, String, OffsetDateTime> {
 
-    private static final long serialVersionUID = 1L;
+    @Serial private static final long serialVersionUID = 1L;
 
     /** Setter for <code>public.tags.id</code>. */
     public void setId(UUID value) {

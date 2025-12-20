@@ -86,7 +86,7 @@ class RedisValueOperationsUtilTest {
         Set<String> result = redisValueOpsUtil.getKeysWithPattern(pattern);
 
         // Assert
-        assertThat(result).isEqualTo(expectedKeys);
+        assertThat(result).hasSameElementsAs(expectedKeys);
         verify(redisTemplate).keys(pattern);
     }
 

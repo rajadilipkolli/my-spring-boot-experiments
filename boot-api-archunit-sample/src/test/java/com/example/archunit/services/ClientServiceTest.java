@@ -40,7 +40,7 @@ class ClientServiceTest {
         // then
         assertThat(optionalClient).isPresent();
         ClientResponse client = optionalClient.get();
-        assertThat(client.id()).isEqualTo(1L);
+        assertThat(client.id()).isOne();
         assertThat(client.text()).isEqualTo("junitTest");
     }
 

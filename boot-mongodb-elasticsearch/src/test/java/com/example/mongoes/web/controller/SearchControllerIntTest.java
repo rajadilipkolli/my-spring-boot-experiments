@@ -117,9 +117,9 @@ class SearchControllerIntTest extends AbstractIntegrationTest {
                         page -> {
                             assertThat(page).isNotNull();
                             // deterministic dataset -> expect exactly one matching document
-                            assertThat(page.totalElements()).isEqualTo(1L);
-                            assertThat(page.totalHits()).isGreaterThanOrEqualTo(1L);
-                            assertThat(page.data()).isNotNull().hasSize(1);
+                            assertThat(page.totalElements()).isOne();
+                            assertThat(page.totalHits()).isPositive();
+                            assertThat(page.data()).hasSize(1);
                             var first = page.data().getFirst();
                             assertThat(first.getName()).isEqualTo("Yono gardens");
                             assertThat(first.getBorough()).isEqualTo(BOROUGH_NAME);
@@ -128,8 +128,8 @@ class SearchControllerIntTest extends AbstractIntegrationTest {
                             assertThat(first.getAddress()).isNotNull();
                             assertThat(first.getAddress().getLocation())
                                     .isEqualTo(new Point(-74.0, 40.7));
-                            assertThat(page.pageNumber()).isEqualTo(1);
-                            assertThat(page.totalPages()).isEqualTo(1);
+                            assertThat(page.pageNumber()).isOne();
+                            assertThat(page.totalPages()).isOne();
                             assertThat(page.isFirst()).isTrue();
                             assertThat(page.isLast()).isTrue();
                             assertThat(page.hasNext()).isFalse();
@@ -159,13 +159,13 @@ class SearchControllerIntTest extends AbstractIntegrationTest {
                         page -> {
                             assertThat(page).isNotNull();
                             assertThat(page.totalElements()).isEqualTo(2L);
-                            assertThat(page.data()).isNotNull().hasSize(2);
+                            assertThat(page.data()).hasSize(2);
                             var termFirst = page.data().getFirst();
                             assertThat(termFirst.getName()).isEqualTo(RESTAURANT_NAME);
                             assertThat(termFirst.getBorough()).isEqualTo(BOROUGH_NAME);
                             assertThat(termFirst.getCuisine()).isEqualTo(CUISINE_NAME);
-                            assertThat(page.pageNumber()).isEqualTo(1);
-                            assertThat(page.totalPages()).isEqualTo(1);
+                            assertThat(page.pageNumber()).isOne();
+                            assertThat(page.totalPages()).isOne();
                             assertThat(page.isFirst()).isTrue();
                             assertThat(page.isLast()).isTrue();
                             assertThat(page.hasNext()).isFalse();
@@ -195,13 +195,13 @@ class SearchControllerIntTest extends AbstractIntegrationTest {
                         page -> {
                             assertThat(page).isNotNull();
                             assertThat(page.totalElements()).isEqualTo(2L);
-                            assertThat(page.data()).isNotNull().hasSize(2);
+                            assertThat(page.data()).hasSize(2);
                             var termsFirst = page.data().getFirst();
                             assertThat(termsFirst.getName()).isEqualTo(RESTAURANT_NAME);
                             assertThat(termsFirst.getBorough()).isEqualTo(BOROUGH_NAME);
                             assertThat(termsFirst.getCuisine()).isEqualTo(CUISINE_NAME);
-                            assertThat(page.pageNumber()).isEqualTo(1);
-                            assertThat(page.totalPages()).isEqualTo(1);
+                            assertThat(page.pageNumber()).isOne();
+                            assertThat(page.totalPages()).isOne();
                             assertThat(page.isFirst()).isTrue();
                             assertThat(page.isLast()).isTrue();
                             assertThat(page.hasNext()).isFalse();
@@ -232,7 +232,7 @@ class SearchControllerIntTest extends AbstractIntegrationTest {
                 .hasSize(1)
                 .value(
                         restaurants -> {
-                            assertThat(restaurants).isNotNull().hasSize(1);
+                            assertThat(restaurants).hasSize(1);
                             Restaurant restaurant = restaurants.getFirst();
                             assertThat(restaurant).isNotNull();
                             assertThat(restaurant.getId()).isNotBlank();
@@ -248,7 +248,7 @@ class SearchControllerIntTest extends AbstractIntegrationTest {
                             assertThat(restaurant.getAddress().getStreet())
                                     .isEqualTo("junitStreet");
                             assertThat(restaurant.getAddress().getZipcode()).isEqualTo(98765);
-                            assertThat(restaurant.getGrades()).isNotNull().hasSize(2);
+                            assertThat(restaurant.getGrades()).hasSize(2);
                             var g0 = restaurant.getGrades().getFirst();
                             assertThat(g0.getGrade()).isEqualTo("A");
                             assertThat(g0.getDate())
@@ -282,13 +282,13 @@ class SearchControllerIntTest extends AbstractIntegrationTest {
                             assertThat(page).isNotNull();
                             assertThat(page.totalElements()).isEqualTo(2L);
                             assertThat(page.totalHits()).isGreaterThanOrEqualTo(2L);
-                            assertThat(page.data()).isNotNull().hasSize(2);
+                            assertThat(page.data()).hasSize(2);
                             var shouldFirst = page.data().getFirst();
                             assertThat(shouldFirst.getName()).isEqualTo(RESTAURANT_NAME);
                             assertThat(shouldFirst.getBorough()).isEqualTo(BOROUGH_NAME);
                             assertThat(shouldFirst.getCuisine()).isEqualTo(CUISINE_NAME);
-                            assertThat(page.pageNumber()).isEqualTo(1);
-                            assertThat(page.totalPages()).isEqualTo(1);
+                            assertThat(page.pageNumber()).isOne();
+                            assertThat(page.totalPages()).isOne();
                             assertThat(page.isFirst()).isTrue();
                             assertThat(page.isLast()).isTrue();
                             assertThat(page.hasNext()).isFalse();
@@ -319,13 +319,13 @@ class SearchControllerIntTest extends AbstractIntegrationTest {
                             assertThat(page).isNotNull();
                             // expect exact match
                             assertThat(page.totalElements()).isEqualTo(2L);
-                            assertThat(page.data()).isNotNull().hasSize(2);
+                            assertThat(page.data()).hasSize(2);
                             var wcFirst = page.data().getFirst();
                             assertThat(wcFirst.getName()).isEqualTo(RESTAURANT_NAME);
                             assertThat(wcFirst.getBorough()).isEqualTo(BOROUGH_NAME);
                             assertThat(wcFirst.getCuisine()).isEqualTo(CUISINE_NAME);
-                            assertThat(page.pageNumber()).isEqualTo(1);
-                            assertThat(page.totalPages()).isEqualTo(1);
+                            assertThat(page.pageNumber()).isOne();
+                            assertThat(page.totalPages()).isOne();
                             assertThat(page.isFirst()).isTrue();
                             assertThat(page.isLast()).isTrue();
                             assertThat(page.hasNext()).isFalse();
@@ -354,7 +354,7 @@ class SearchControllerIntTest extends AbstractIntegrationTest {
                 .value(
                         page -> {
                             assertThat(page).isNotNull();
-                            assertThat(page.totalElements()).isEqualTo(0L);
+                            assertThat(page.totalElements()).isZero();
                             assertThat(page.data()).isEmpty();
                             assertThat(page.isFirst()).isTrue();
                             assertThat(page.isLast()).isTrue();
@@ -384,11 +384,11 @@ class SearchControllerIntTest extends AbstractIntegrationTest {
                 .value(
                         page -> {
                             assertThat(page).isNotNull();
-                            assertThat(page.totalElements()).isEqualTo(0L);
-                            assertThat(page.totalHits()).isEqualTo(0L);
-                            assertThat(page.data()).isNotNull().isEmpty();
-                            assertThat(page.pageNumber()).isEqualTo(1);
-                            assertThat(page.totalPages()).isEqualTo(0);
+                            assertThat(page.totalElements()).isZero();
+                            assertThat(page.totalHits()).isZero();
+                            assertThat(page.data()).isEmpty();
+                            assertThat(page.pageNumber()).isOne();
+                            assertThat(page.totalPages()).isZero();
                             assertThat(page.isFirst()).isTrue();
                             assertThat(page.isLast()).isTrue();
                             assertThat(page.hasNext()).isFalse();
@@ -416,14 +416,14 @@ class SearchControllerIntTest extends AbstractIntegrationTest {
                 .value(
                         page -> {
                             assertThat(page).isNotNull();
-                            assertThat(page.totalElements()).isEqualTo(1L);
-                            assertThat(page.data()).isNotNull().hasSize(1);
+                            assertThat(page.totalElements()).isOne();
+                            assertThat(page.data()).hasSize(1);
                             var rangeFirst = page.data().getFirst();
                             assertThat(rangeFirst.getName()).isEqualTo(RESTAURANT_NAME);
                             assertThat(rangeFirst.getCuisine()).isEqualTo(CUISINE_NAME);
                             assertThat(rangeFirst.getBorough()).isEqualTo(BOROUGH_NAME);
-                            assertThat(page.pageNumber()).isEqualTo(1);
-                            assertThat(page.totalPages()).isEqualTo(1);
+                            assertThat(page.pageNumber()).isOne();
+                            assertThat(page.totalPages()).isOne();
                             assertThat(page.isFirst()).isTrue();
                             assertThat(page.isLast()).isTrue();
                             assertThat(page.hasNext()).isFalse();
@@ -453,14 +453,14 @@ class SearchControllerIntTest extends AbstractIntegrationTest {
                 .value(
                         page -> {
                             assertThat(page).isNotNull();
-                            assertThat(page.totalElements()).isEqualTo(1L);
-                            assertThat(page.data()).isNotNull().hasSize(1);
+                            assertThat(page.totalElements()).isOne();
+                            assertThat(page.data()).hasSize(1);
                             var dateFirst = page.data().getFirst();
                             assertThat(dateFirst.getName()).isEqualTo(RESTAURANT_NAME);
                             assertThat(dateFirst.getBorough()).isEqualTo(BOROUGH_NAME);
                             assertThat(dateFirst.getCuisine()).isEqualTo(CUISINE_NAME);
-                            assertThat(page.pageNumber()).isEqualTo(1);
-                            assertThat(page.totalPages()).isEqualTo(1);
+                            assertThat(page.pageNumber()).isOne();
+                            assertThat(page.totalPages()).isOne();
                             assertThat(page.isFirst()).isTrue();
                             assertThat(page.isLast()).isTrue();
                             assertThat(page.hasNext()).isFalse();
@@ -496,13 +496,11 @@ class SearchControllerIntTest extends AbstractIntegrationTest {
                             assertThat(page.facets())
                                     .containsKeys("MyBorough", "MyCuisine", "MyDateRange");
                             var cuisineAgg = page.facets().get("MyCuisine");
-                            assertThat(cuisineAgg).isNotNull();
                             assertThat(cuisineAgg).containsKey("chinese");
-                            assertThat(cuisineAgg.get("chinese")).isGreaterThanOrEqualTo(1L);
+                            assertThat(cuisineAgg.get("chinese")).isPositive();
                             var boroughAgg = page.facets().get("MyBorough");
-                            assertThat(boroughAgg).isNotNull();
                             assertThat(boroughAgg).containsKey("chinese");
-                            assertThat(boroughAgg.get("chinese")).isGreaterThanOrEqualTo(1L);
+                            assertThat(boroughAgg.get("chinese")).isPositive();
                             assertThat(page.isFirst()).isTrue();
                             assertThat(page.isLast()).isTrue();
                             assertThat(page.hasNext()).isFalse();

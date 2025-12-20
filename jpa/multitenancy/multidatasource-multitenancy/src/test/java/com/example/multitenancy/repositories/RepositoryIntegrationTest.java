@@ -225,7 +225,7 @@ class RepositoryIntegrationTest extends AbstractIntegrationTest {
             // Then
             assertThat(page.getContent()).hasSize(3);
             assertThat(page.getTotalElements()).isEqualTo(8);
-            assertThat(page.getNumber()).isEqualTo(1);
+            assertThat(page.getNumber()).isOne();
             assertThat(page.hasNext()).isTrue();
             assertThat(page.hasPrevious()).isTrue();
         }
@@ -423,7 +423,7 @@ class RepositoryIntegrationTest extends AbstractIntegrationTest {
             primaryCustomerRepository.deleteAllInBatch();
 
             // Then - Primary should be empty, secondary should be unaffected
-            assertThat(primaryCustomerRepository.count()).isEqualTo(0);
+            assertThat(primaryCustomerRepository.count()).isZero();
 
             tenantIdentifierResolver.setCurrentTenant("schema1");
             assertThat(secondaryCustomerRepository.count()).isEqualTo(3);

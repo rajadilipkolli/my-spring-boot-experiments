@@ -41,7 +41,7 @@ class ActorServiceTest {
         // then
         assertThat(optionalActor).isPresent();
         ActorResponse actor = optionalActor.get();
-        assertThat(actor.id()).isEqualTo(1L);
+        assertThat(actor.id()).isOne();
         assertThat(actor.name()).isEqualTo("junitTest");
     }
 

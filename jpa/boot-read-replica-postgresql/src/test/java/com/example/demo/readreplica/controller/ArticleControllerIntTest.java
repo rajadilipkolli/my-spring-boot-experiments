@@ -41,14 +41,9 @@ class ArticleControllerIntTest {
                             assertThat(articleDTO.title())
                                     .isNotNull()
                                     .isEqualTo("Waiter! There is a bug in my JSoup!");
-                            assertThat(articleDTO.authored())
-                                    .isNotNull()
-                                    .isInstanceOf(LocalDateTime.class);
-                            assertThat(articleDTO.published())
-                                    .isNotNull()
-                                    .isInstanceOf(LocalDateTime.class);
+                            assertThat(articleDTO.authored()).isInstanceOf(LocalDateTime.class);
+                            assertThat(articleDTO.published()).isInstanceOf(LocalDateTime.class);
                             assertThat(articleDTO.commentDTOs())
-                                    .isNotNull()
                                     .hasSize(2)
                                     .hasOnlyElementsOfType(CommentDTO.class);
                         });
@@ -92,18 +87,13 @@ class ArticleControllerIntTest {
                 .satisfies(
                         response -> {
                             assertThat(response.title()).isNotNull().isEqualTo("junitTitle");
-                            assertThat(response.authored())
-                                    .isNotNull()
-                                    .isInstanceOf(LocalDateTime.class);
+                            assertThat(response.authored()).isInstanceOf(LocalDateTime.class);
                             assertThat(response.authored().toLocalDate())
                                     .isEqualTo(LocalDate.now().minusDays(1));
-                            assertThat(response.published())
-                                    .isNotNull()
-                                    .isInstanceOf(LocalDateTime.class);
+                            assertThat(response.published()).isInstanceOf(LocalDateTime.class);
                             assertThat(response.published().toLocalDate())
                                     .isEqualTo(LocalDate.now());
                             assertThat(response.commentDTOs())
-                                    .isNotNull()
                                     .hasSize(1)
                                     .hasOnlyElementsOfType(CommentDTO.class);
                         });

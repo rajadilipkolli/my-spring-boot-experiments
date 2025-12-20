@@ -152,10 +152,7 @@ class RestaurantControllerIntTest extends AbstractIntegrationTest {
                                         .expectStatus()
                                         .isOk()
                                         .expectBody(Long.class)
-                                        .value(
-                                                count ->
-                                                        assertThat(count)
-                                                                .isGreaterThanOrEqualTo(1)));
+                                        .value(count -> assertThat(count).isPositive()));
     }
 
     @Test
