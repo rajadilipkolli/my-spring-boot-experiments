@@ -10,11 +10,11 @@ import net.ttddyy.dsproxy.support.ProxyDataSource;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
+import org.jspecify.annotations.NonNull;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
-import org.springframework.lang.NonNull;
 import org.springframework.util.ReflectionUtils;
 
 @Configuration(proxyBeanMethods = false)

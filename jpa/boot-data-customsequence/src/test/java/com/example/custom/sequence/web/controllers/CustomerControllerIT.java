@@ -8,7 +8,6 @@ import com.example.custom.sequence.model.request.CustomerRequest;
 import com.example.custom.sequence.model.request.OrderRequest;
 import com.example.custom.sequence.model.response.CustomerResponse;
 import com.example.custom.sequence.model.response.PagedResult;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import io.hypersistence.utils.jdbc.validator.SQLStatementCountValidator;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -19,6 +18,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
+import tools.jackson.core.JacksonException;
 
 class CustomerControllerIT extends AbstractIntegrationTest {
 
@@ -114,7 +114,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
     }
 
     @Test
-    void shouldReturn400WhenCreateNewCustomerWithoutText() throws JsonProcessingException {
+    void shouldReturn400WhenCreateNewCustomerWithoutText() throws JacksonException {
         CustomerRequest customerRequest = new CustomerRequest(null, List.of(new OrderRequest("First Order", null)));
 
         this.mockMvcTester
