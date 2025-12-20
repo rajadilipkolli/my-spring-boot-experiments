@@ -1,20 +1,105 @@
 version: 2.1
 
+executors:
+  machine_executor_amd64:
+    machine:
+      image: ubuntu-2404:current
+    environment:
+      architecture: "amd64"
+      platform: "linux/amd64"
+      MAVEN_OPTS: "-Xmx2g -XX:+UnlockExperimentalVMOptions -XX:+UseG1GC"
+
 jobs:
   build:
-    docker:
-      - image: 'cimg/openjdk:25.0'
+    executor: machine_executor_amd64
     steps:
       - checkout
-      - setup_remote_docker:
-          version: 20.10.14
-      - run: java --version
+      
+      # Restore Maven dependencies cache
+      - restore_cache:
+          keys:
+            - maven-deps-v2-{{ checksum "pom.xml" }}
+            - maven-deps-v2-
+      
+      # Install Java with better error handling
+      - run:
+          name: Install Java 25
+          command: |
+            wget https://download.oracle.com/java/25/latest/jdk-25_linux-x64_bin.tar.gz
+            sudo mkdir -p /usr/lib/jvm
+            sudo tar -xvf jdk-25_linux-x64_bin.tar.gz -C /usr/lib/jvm
+            JDK_DIR=$(ls -d /usr/lib/jvm/jdk-25* | head -n 1)
+            echo "export JAVA_HOME=$JDK_DIR" >> $BASH_ENV
+            echo "export PATH=$JDK_DIR/bin:$PATH" >> $BASH_ENV
+            java -version
+      
+      # Install Maven with version verification
+      - run:
+          name: Install Maven
+          command: |
+            MAVEN_VERSION=3.9.12
+            wget https://archive.apache.org/dist/maven/maven-3/${MAVEN_VERSION}/binaries/apache-maven-${MAVEN_VERSION}-bin.tar.gz
+            tar xzf apache-maven-${MAVEN_VERSION}-bin.tar.gz
+            echo "export PATH=\$PATH:\$PWD/apache-maven-${MAVEN_VERSION}/bin" >> $BASH_ENV
+            source $BASH_ENV
+            mvn -version
+
+      # Start required Docker containers for tests
+      - run:
+          name: Start Docker containers for tests
+          command: |
+            docker-compose -f boot-strategy-plugin/docker-compose.yml -f jpa/boot-read-replica-postgresql/docker-compose.yaml up -d
+          no_output_timeout: 5m
+      
+      # Validate project structure
+      - run:
+          name: Validate Project
+          command: |
+            source $BASH_ENV
+            mvn validate
+      
+      # Run SonarCloud analysis in parallel for each module
       - run:
           name: Analyze on SonarCloud
-          command: mvn verify sonar:sonar -Dsonar.projectKey=rajadilipkolli_my-spring-boot-experiments
+          command: |
+            source $BASH_ENV
+            mvn -T 1C verify sonar:sonar -Dsonar.projectKey=rajadilipkolli_my-spring-boot-experiments
+          no_output_timeout: 45m
+      
+      # Save Maven dependencies cache
+      - save_cache:
+          paths:
+            - ~/.m2
+          key: maven-deps-v2-{{ checksum "pom.xml" }}
+
+  # Optional: Add a deployment job (uncomment when needed)
+  # deploy:
+  #   executor: machine_executor_amd64
+  #   steps:
+  #     - attach_workspace:
+  #         at: .
+  #     - run:
+  #         name: Deploy Application
+  #         command: |
+  #           # Add your deployment commands here
+  #           echo "Deploying application..."
 
 workflows:
   main:
     jobs:
       - build:
           context: SonarCloud
+          filters:
+            branches:
+              only:
+                - main
+                - develop
+      
+      # Uncomment when deployment is needed
+      # - deploy:
+      #     requires:
+      #       - build
+      #     filters:
+      #       branches:
+      #         only:
+      #           - main
