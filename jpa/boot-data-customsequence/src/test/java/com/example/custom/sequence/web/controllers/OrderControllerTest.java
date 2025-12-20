@@ -26,7 +26,7 @@ import com.example.custom.sequence.services.OrderService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -82,7 +82,7 @@ class OrderControllerTest {
                 .andExpect(jsonPath("$.hasPrevious", is(false)));
     }
 
-    private static @NotNull PagedResult<OrderResponse> getOrderResponsePagedResult() {
+    private static @NonNull PagedResult<OrderResponse> getOrderResponsePagedResult() {
         List<OrderResponse> orderResponseList = new ArrayList<>();
         orderResponseList.add(new OrderResponse("1", "text 1", new CustomerResponseWithOutOrder("1", "customer1")));
         orderResponseList.add(new OrderResponse("2", "text 2", new CustomerResponseWithOutOrder("1", "customer1")));

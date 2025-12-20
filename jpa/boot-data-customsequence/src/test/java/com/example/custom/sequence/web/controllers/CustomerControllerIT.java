@@ -139,7 +139,9 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                     assertThat(violations).isInstanceOf(List.class);
                     assertThat((List<?>) violations).hasSize(1);
                     assertThat(((List<?>) violations)).first().isInstanceOf(LinkedHashMap.class);
-                    LinkedHashMap<?, ?> violation = (LinkedHashMap<?, ?>) ((List<?>) violations).getFirst();
+                    @SuppressWarnings("unchecked")
+                    LinkedHashMap<String, Object> violation =
+                            (LinkedHashMap<String, Object>) ((List<?>) violations).getFirst();
                     assertThat(violation).containsEntry("field", "text");
                     assertThat(violation).containsEntry("message", "Text cannot be empty");
                 });

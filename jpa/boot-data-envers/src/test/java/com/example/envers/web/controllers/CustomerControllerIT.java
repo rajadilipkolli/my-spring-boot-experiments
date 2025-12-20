@@ -238,8 +238,9 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                     var violations = (java.util.List<Map<String, Object>>)
                             problem.getProperties().get("violations");
                     assertThat(violations).hasSize(1);
-                    assertThat(violations).first().containsEntry("field", "name");
-                    assertThat(violations).first().containsEntry("message", "Name cannot be empty");
+                    assertThat(violations.getFirst())
+                            .containsEntry("field", "name")
+                            .containsEntry("message", "Name cannot be empty");
                 });
     }
 
