@@ -3,12 +3,14 @@ package com.example.opensearch.common;
 import static com.example.opensearch.utils.AppConstants.PROFILE_TEST;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
+import com.example.opensearch.repositories.RestaurantRepository;
+import org.opensearch.client.RestClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 @ActiveProfiles({PROFILE_TEST})
 @SpringBootTest(webEnvironment = RANDOM_PORT, classes = ContainersConfig.class)
@@ -19,5 +21,11 @@ public abstract class AbstractIntegrationTest {
     protected MockMvc mockMvc;
 
     @Autowired
-    protected ObjectMapper objectMapper;
+    protected JsonMapper jsonMapper;
+
+    @Autowired
+    protected RestClient restClient;
+
+    @Autowired
+    protected RestaurantRepository restaurantRepository;
 }

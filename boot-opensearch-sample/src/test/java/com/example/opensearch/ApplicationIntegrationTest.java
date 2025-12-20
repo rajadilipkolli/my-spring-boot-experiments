@@ -10,13 +10,8 @@ import java.io.InputStream;
 import org.junit.jupiter.api.Test;
 import org.opensearch.client.Request;
 import org.opensearch.client.Response;
-import org.opensearch.client.RestClient;
-import org.springframework.beans.factory.annotation.Autowired;
 
 class ApplicationIntegrationTest extends AbstractIntegrationTest {
-
-    @Autowired
-    private RestClient restClient;
 
     @Test
     void restClientOpenSearchNodeVersion() throws IOException {
@@ -24,7 +19,7 @@ class ApplicationIntegrationTest extends AbstractIntegrationTest {
         final Response response = restClient.performRequest(request);
         try (InputStream input = response.getEntity().getContent()) {
             JsonNode result = new ObjectMapper().readTree(input);
-            assertThat(result.path("version").path("number").asText()).isEqualTo("3.4.0");
+            assertThat(result.path("version").path("number").asText()).isEqualTo("3.3.1");
         }
     }
 }
