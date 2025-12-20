@@ -1,7 +1,7 @@
 package com.example.plugin.strategyplugin;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.example.plugin.strategyplugin.common.AbstractIntegrationTest;
 import java.net.URI;
@@ -126,7 +126,7 @@ class LokiPushIntegrationTest extends AbstractIntegrationTest {
                                 if (found) break;
                             }
 
-                            assertTrue(found, "expected message not found yet in Loki");
+                            assertThat(found).as("expected message not found yet in Loki").isTrue();
                         });
     }
 }

@@ -48,10 +48,10 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                 .convertTo(PagedResult.class)
                 .satisfies(pagedResult -> {
                     assertThat(pagedResult).isNotNull();
-                    assertThat(pagedResult.data()).isNotNull().isNotEmpty().hasSize(customerList.size());
+                    assertThat(pagedResult.data()).isNotEmpty().hasSameSizeAs(customerList);
                     assertThat(pagedResult.totalElements()).isEqualTo(3);
-                    assertThat(pagedResult.pageNumber()).isEqualTo(1);
-                    assertThat(pagedResult.totalPages()).isEqualTo(1);
+                    assertThat(pagedResult.pageNumber()).isOne();
+                    assertThat(pagedResult.totalPages()).isOne();
                     assertThat(pagedResult.isFirst()).isTrue();
                     assertThat(pagedResult.isLast()).isTrue();
                     assertThat(pagedResult.hasNext()).isFalse();
@@ -100,7 +100,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                     .bodyJson()
                     .convertTo(RevisionResult[].class)
                     .satisfies(revisionResults -> {
-                        assertThat(revisionResults).isNotNull().hasSize(1);
+                        assertThat(revisionResults).hasSize(1);
                         assertThat(revisionResults[0].entity().getId()).isEqualTo(customerId);
                         assertThat(revisionResults[0].entity().getName()).isEqualTo(customer.getName());
                         assertThat(revisionResults[0].entity().getAddress()).isEqualTo(customer.getAddress());
@@ -129,10 +129,10 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                     .convertTo(PagedResult.class)
                     .satisfies(pagedResult -> {
                         assertThat(pagedResult).isNotNull();
-                        assertThat(pagedResult.data()).isNotNull().isNotEmpty().hasSize(2);
+                        assertThat(pagedResult.data()).isNotEmpty().hasSize(2);
                         assertThat(pagedResult.totalElements()).isEqualTo(2);
-                        assertThat(pagedResult.pageNumber()).isEqualTo(1);
-                        assertThat(pagedResult.totalPages()).isEqualTo(1);
+                        assertThat(pagedResult.pageNumber()).isOne();
+                        assertThat(pagedResult.totalPages()).isOne();
                         assertThat(pagedResult.isFirst()).isTrue();
                         assertThat(pagedResult.isLast()).isTrue();
                         assertThat(pagedResult.hasNext()).isFalse();
@@ -141,15 +141,16 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                         Map<String, Object> firstMap =
                                 (Map<String, Object>) pagedResult.data().getFirst();
                         assertThat(firstMap.get("revisionNumber")).isNotNull();
-                        assertThat(firstMap.get("revisionType")).isEqualTo("UPDATE");
+                        assertThat(firstMap).containsEntry("revisionType", "UPDATE");
                         assertThat(firstMap.get("revisionInstant")).isNotNull();
                         @SuppressWarnings("unchecked")
                         Map<String, Object> entityMap = (Map<String, Object>) firstMap.get("entity");
                         // entity.id is an integer in the JSON
                         Number idNum = (Number) entityMap.get("id");
                         assertThat(idNum.longValue()).isEqualTo(customerId.longValue());
-                        assertThat(entityMap.get("name")).isEqualTo(customer.getName());
-                        assertThat(entityMap.get("address")).isEqualTo(customer.getAddress());
+                        assertThat(entityMap)
+                                .containsEntry("name", customer.getName())
+                                .containsEntry("address", customer.getAddress());
                     });
         }
 
@@ -173,8 +174,8 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                     .satisfies(problemDetail -> {
                         assertThat(problemDetail).isNotNull();
                         assertThat(problemDetail.getType()).isNotNull();
-                        assertThat(problemDetail.getType().toString())
-                                .isEqualTo("https://api.boot-data-envers.com/errors/not-found");
+                        assertThat(problemDetail.getType())
+                                .hasToString("https://api.boot-data-envers.com/errors/not-found");
                         assertThat(problemDetail.getTitle()).isEqualTo("Not Found");
                         assertThat(problemDetail.getStatus()).isEqualTo(404);
                         assertThat(problemDetail.getDetail())
@@ -226,20 +227,19 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                 .convertTo(ProblemDetail.class)
                 .satisfies(problem -> {
                     assertThat(problem.getType()).isNotNull();
-                    assertThat(problem.getType().toString())
-                            .isEqualTo("https://api.boot-data-envers.com/errors/validation");
+                    assertThat(problem.getType()).hasToString("https://api.boot-data-envers.com/errors/validation");
                     assertThat(problem.getTitle()).isEqualTo("Constraint Violation");
                     assertThat(problem.getStatus()).isEqualTo(400);
                     assertThat(problem.getDetail()).isEqualTo("Invalid request content.");
                     assertThat(problem.getInstance()).isNotNull();
-                    assertThat(problem.getInstance().toString()).isEqualTo("/api/customers");
+                    assertThat(problem.getInstance()).hasToString("/api/customers");
 
                     @SuppressWarnings("unchecked")
                     var violations = (java.util.List<Map<String, Object>>)
                             problem.getProperties().get("violations");
-                    assertThat(violations).isNotNull().hasSize(1);
-                    assertThat(violations.getFirst().get("field")).isEqualTo("name");
-                    assertThat(violations.getFirst().get("message")).isEqualTo("Name cannot be empty");
+                    assertThat(violations).hasSize(1);
+                    assertThat(violations).first().containsEntry("field", "name");
+                    assertThat(violations).first().containsEntry("message", "Name cannot be empty");
                 });
     }
 

@@ -1,7 +1,6 @@
 package com.example.graphql.querydsl.repositories;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import com.example.graphql.querydsl.common.AbstractIntegrationTest;
 import com.example.graphql.querydsl.entities.Post;
@@ -17,7 +16,7 @@ class PostRepositoryIntTest extends AbstractIntegrationTest {
     @Test
     void findByDetailsCreatedByEqualsIgnoreCase_returnsPosts() {
         List<Post> posts = postRepository.findByDetailsCreatedByEqualsIgnoreCase("appUser");
-        assertFalse(posts.isEmpty(), "expected at least one post for appUser");
-        assertEquals("appUser", posts.getFirst().getDetails().getCreatedBy());
+        assertThat(posts.isEmpty()).as("expected at least one post for appUser").isFalse();
+        assertThat(posts.getFirst().getDetails().getCreatedBy()).isEqualTo("appUser");
     }
 }

@@ -56,8 +56,8 @@ class OrderControllerIT extends AbstractIntegrationTest {
                 .satisfies(pagedResult -> {
                     assertThat(pagedResult.data()).hasSize(3);
                     assertThat(pagedResult.totalElements()).isEqualTo(3);
-                    assertThat(pagedResult.pageNumber()).isEqualTo(1);
-                    assertThat(pagedResult.totalPages()).isEqualTo(1);
+                    assertThat(pagedResult.pageNumber()).isOne();
+                    assertThat(pagedResult.totalPages()).isOne();
                     assertThat(pagedResult.isFirst()).isTrue();
                     assertThat(pagedResult.isLast()).isTrue();
                     assertThat(pagedResult.hasNext()).isFalse();
@@ -99,7 +99,7 @@ class OrderControllerIT extends AbstractIntegrationTest {
                 .bodyJson()
                 .convertTo(OrderResponse.class)
                 .satisfies(orderResponse -> {
-                    assertThat(orderResponse.id()).isNotNull().hasSize(9);
+                    assertThat(orderResponse.id()).hasSize(9);
                     assertThat(orderResponse.text()).isEqualTo(orderRequest.text());
                 });
     }
@@ -119,22 +119,19 @@ class OrderControllerIT extends AbstractIntegrationTest {
                 .bodyJson()
                 .convertTo(ProblemDetail.class)
                 .satisfies(problem -> {
-                    assertThat(problem.getType().toString())
-                            .isEqualTo("https://custom-sequence.com/errors/validation-error");
+                    assertThat(problem.getType()).hasToString("https://custom-sequence.com/errors/validation-error");
                     assertThat(problem.getTitle()).isEqualTo("Constraint Violation");
                     assertThat(problem.getStatus()).isEqualTo(400);
                     assertThat(problem.getDetail()).isEqualTo("Invalid request content.");
-                    assertThat(Objects.requireNonNull(problem.getInstance()).toString())
-                            .isEqualTo("/api/orders");
+                    assertThat(Objects.requireNonNull(problem.getInstance())).hasToString("/api/orders");
                     assertThat(problem.getProperties()).hasSize(1);
                     Object violations = problem.getProperties().get("violations");
-                    assertThat(violations).isNotNull();
                     assertThat(violations).isInstanceOf(List.class);
                     assertThat((List<?>) violations).hasSize(1);
-                    assertThat(((List<?>) violations).getFirst()).isInstanceOf(LinkedHashMap.class);
+                    assertThat(((List<?>) violations)).first().isInstanceOf(LinkedHashMap.class);
                     LinkedHashMap<?, ?> violation = (LinkedHashMap<?, ?>) ((List<?>) violations).getFirst();
-                    assertThat(violation.get("field")).isEqualTo("text");
-                    assertThat(violation.get("message")).isEqualTo("Text cannot be empty");
+                    assertThat(violation).containsEntry("field", "text");
+                    assertThat(violation).containsEntry("message", "Text cannot be empty");
                 });
     }
 

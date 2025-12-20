@@ -37,7 +37,7 @@ class QuartzActuatorEndpointIntTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void testQuartzActuatorEndpoints() {
+    void quartzActuatorEndpoints() {
         // List all jobs
         mockMvcTester
                 .get()
@@ -56,7 +56,7 @@ class QuartzActuatorEndpointIntTest extends AbstractIntegrationTest {
                     assertThat(defaultGroup.has("jobs")).isTrue();
                     JsonNode jobsArray = defaultGroup.get("jobs");
                     assertThat(jobsArray.isArray()).isTrue();
-                    assertThat(jobsArray.size()).isEqualTo(1);
+                    assertThat(jobsArray.size()).isOne();
                     assertThat(jobsArray.get(0).asString()).isEqualTo("oddEvenJob");
                 });
 
@@ -86,7 +86,7 @@ class QuartzActuatorEndpointIntTest extends AbstractIntegrationTest {
                     assertThat(job.has("triggers")).isTrue();
                     JsonNode triggers = job.get("triggers");
                     assertThat(triggers.isArray()).isTrue();
-                    assertThat(triggers.size()).isGreaterThan(0);
+                    assertThat(triggers.size()).isPositive();
                     JsonNode trigger = triggers.get(0);
                     assertThat(trigger.has("group")).isTrue();
                     assertThat(trigger.get("group").asString()).isEqualTo("sample-group");
@@ -124,7 +124,7 @@ class QuartzActuatorEndpointIntTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void testQuartzActuatorEndpointsWithInvalidJob() {
+    void quartzActuatorEndpointsWithInvalidJob() {
 
         // Get non-existent job details should return 404
         mockMvcTester

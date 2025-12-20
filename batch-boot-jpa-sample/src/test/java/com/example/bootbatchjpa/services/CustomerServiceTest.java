@@ -45,12 +45,12 @@ class CustomerServiceTest {
         assertThat(pagedResult).isNotNull();
         assertThat(pagedResult.data()).isNotEmpty().hasSize(1);
         assertThat(pagedResult.hasNext()).isFalse();
-        assertThat(pagedResult.pageNumber()).isEqualTo(1);
-        assertThat(pagedResult.totalPages()).isEqualTo(1);
+        assertThat(pagedResult.pageNumber()).isOne();
+        assertThat(pagedResult.totalPages()).isOne();
         assertThat(pagedResult.isFirst()).isTrue();
         assertThat(pagedResult.isLast()).isTrue();
         assertThat(pagedResult.hasPrevious()).isFalse();
-        assertThat(pagedResult.totalElements()).isEqualTo(1);
+        assertThat(pagedResult.totalElements()).isOne();
     }
 
     @Test
@@ -62,7 +62,7 @@ class CustomerServiceTest {
         // then
         assertThat(optionalCustomer).isPresent();
         Customer customer = optionalCustomer.get();
-        assertThat(customer.getId()).isEqualTo(1L);
+        assertThat(customer.getId()).isOne();
         assertThat(customer.getName()).isEqualTo("junitName");
     }
 
@@ -74,7 +74,7 @@ class CustomerServiceTest {
         Customer persistedCustomer = customerService.saveCustomer(getCustomer());
         // then
         assertThat(persistedCustomer).isNotNull();
-        assertThat(persistedCustomer.getId()).isEqualTo(1L);
+        assertThat(persistedCustomer.getId()).isOne();
         assertThat(persistedCustomer.getName()).isEqualTo("junitName");
     }
 

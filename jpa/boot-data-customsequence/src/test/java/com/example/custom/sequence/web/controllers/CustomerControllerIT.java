@@ -18,7 +18,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
-import tools.jackson.core.JacksonException;
 
 class CustomerControllerIT extends AbstractIntegrationTest {
 
@@ -51,8 +50,8 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                 .satisfies(pagedResult -> {
                     assertThat(pagedResult.data()).hasSize(3);
                     assertThat(pagedResult.totalElements()).isEqualTo(3);
-                    assertThat(pagedResult.pageNumber()).isEqualTo(1);
-                    assertThat(pagedResult.totalPages()).isEqualTo(1);
+                    assertThat(pagedResult.pageNumber()).isOne();
+                    assertThat(pagedResult.totalPages()).isOne();
                     assertThat(pagedResult.isFirst()).isTrue();
                     assertThat(pagedResult.isLast()).isTrue();
                     assertThat(pagedResult.hasNext()).isFalse();
@@ -114,7 +113,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
     }
 
     @Test
-    void shouldReturn400WhenCreateNewCustomerWithoutText() throws JacksonException {
+    void shouldReturn400WhenCreateNewCustomerWithoutText() throws Exception {
         CustomerRequest customerRequest = new CustomerRequest(null, List.of(new OrderRequest("First Order", null)));
 
         this.mockMvcTester
@@ -128,23 +127,21 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                 .bodyJson()
                 .convertTo(ProblemDetail.class)
                 .satisfies(errorResponse -> {
-                    assertThat(errorResponse.getType().toString())
-                            .isEqualTo("https://custom-sequence.com/errors/validation-error");
+                    assertThat(errorResponse.getType())
+                            .hasToString("https://custom-sequence.com/errors/validation-error");
                     assertThat(errorResponse.getTitle()).isEqualTo("Constraint Violation");
                     assertThat(errorResponse.getStatus()).isEqualTo(400);
                     assertThat(errorResponse.getDetail()).isEqualTo("Invalid request content.");
-                    assertThat(Objects.requireNonNull(errorResponse.getInstance())
-                                    .toString())
-                            .isEqualTo("/api/customers");
+                    assertThat(Objects.requireNonNull(errorResponse.getInstance()))
+                            .hasToString("/api/customers");
                     assertThat(errorResponse.getProperties()).hasSize(1);
                     Object violations = errorResponse.getProperties().get("violations");
-                    assertThat(violations).isNotNull();
                     assertThat(violations).isInstanceOf(List.class);
                     assertThat((List<?>) violations).hasSize(1);
-                    assertThat(((List<?>) violations).getFirst()).isInstanceOf(LinkedHashMap.class);
+                    assertThat(((List<?>) violations)).first().isInstanceOf(LinkedHashMap.class);
                     LinkedHashMap<?, ?> violation = (LinkedHashMap<?, ?>) ((List<?>) violations).getFirst();
-                    assertThat(violation.get("field")).isEqualTo("text");
-                    assertThat(violation.get("message")).isEqualTo("Text cannot be empty");
+                    assertThat(violation).containsEntry("field", "text");
+                    assertThat(violation).containsEntry("message", "Text cannot be empty");
                 });
 
         SQLStatementCountValidator.assertTotalCount(0);

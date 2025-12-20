@@ -85,7 +85,7 @@ class RedisControllerTest extends AbstractIntegrationTest {
                     @SuppressWarnings("unchecked")
                     ArrayList<String> keys = (ArrayList<String>) response.response();
                     assertThat(keys).containsAnyOf("test:key1", "test:key2");
-                    assertThat(keys.size()).isGreaterThanOrEqualTo(2);
+                    assertThat(keys).size().isGreaterThanOrEqualTo(2);
                 });
     }
 

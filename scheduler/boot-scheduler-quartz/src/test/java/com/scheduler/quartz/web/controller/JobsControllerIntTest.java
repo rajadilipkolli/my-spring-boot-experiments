@@ -11,7 +11,7 @@ import org.springframework.http.MediaType;
 class JobsControllerIntTest extends AbstractIntegrationTest {
 
     @Test
-    void testGetJobs() {
+    void getJobs() {
         mockMvcTester
                 .get()
                 .uri("/api")
@@ -23,7 +23,7 @@ class JobsControllerIntTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void testGetJobsStatuses() {
+    void getJobsStatuses() {
         mockMvcTester
                 .get()
                 .uri("/api/statuses")
@@ -35,7 +35,7 @@ class JobsControllerIntTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void testSaveOrUpdate() {
+    void saveOrUpdate() {
         String requestBody =
                 """
                         {
@@ -59,13 +59,13 @@ class JobsControllerIntTest extends AbstractIntegrationTest {
                 .convertTo(Message.class)
                 .satisfies(message -> {
                     assertThat(message.getMsg()).isNull();
-                    assertThat(message.isValid()).isEqualTo(true);
+                    assertThat(message.isValid()).isTrue();
                     assertThat(message.getData()).isNull();
                 });
     }
 
     @Test
-    void testSaveOrUpdateWithInvalidCronExpression() {
+    void saveOrUpdateWithInvalidCronExpression() {
         String requestBody =
                 """
                     {
@@ -93,7 +93,7 @@ class JobsControllerIntTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void testPauseJob() {
+    void pauseJob() {
         String requestBody =
                 """
                     {
@@ -114,7 +114,7 @@ class JobsControllerIntTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void testPauseJobWithInvalidJobName() {
+    void pauseJobWithInvalidJobName() {
         String requestBody =
                 """
                     {
@@ -140,7 +140,7 @@ class JobsControllerIntTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void testResumeJob() {
+    void resumeJob() {
         String requestBody =
                 """
                     {
@@ -161,7 +161,7 @@ class JobsControllerIntTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void testResumeJobWithInvalidJobName() {
+    void resumeJobWithInvalidJobName() {
         String requestBody =
                 """
                     {
@@ -186,7 +186,7 @@ class JobsControllerIntTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void testDeleteJob() {
+    void deleteJob() {
         String requestBody =
                 """
                     {
@@ -207,7 +207,7 @@ class JobsControllerIntTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void testDeleteJobWithInvalidJobName() {
+    void deleteJobWithInvalidJobName() {
         String requestBody =
                 """
                     {

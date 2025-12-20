@@ -119,7 +119,7 @@ class ApplicationIntegrationTest extends AbstractIntegrationTest {
         final Customer vRock = createCustomer(SUBSYSTEM_V, "Rock");
 
         tenantIdentifierResolver.setCurrentTenant(SUBSYSTEM_V);
-        assertThat(customerRepository.findById(vRock.getId())).isPresent().isNotEmpty();
+        assertThat(customerRepository.findById(vRock.getId())).isPresent().isPresent();
         assertThat(customerRepository.findById(vRock.getId()).get().getTenant()).isEqualTo(SUBSYSTEM_V);
         assertThat(customerRepository.findById(rock.getId())).isEmpty();
     }

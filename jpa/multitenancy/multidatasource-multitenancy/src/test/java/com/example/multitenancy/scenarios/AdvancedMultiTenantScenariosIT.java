@@ -47,7 +47,7 @@ class AdvancedMultiTenantScenariosIT extends AbstractIntegrationTest {
     }
 
     @Test
-    void testTenantDataIsolation() {
+    void tenantDataIsolation() {
         // Create data for primary tenant
         tenantIdentifierResolver.setCurrentTenant("primary");
         createTestDataForTenant("Primary");
@@ -72,7 +72,7 @@ class AdvancedMultiTenantScenariosIT extends AbstractIntegrationTest {
     }
 
     @Test
-    void testTenantSwitchingInSequence() {
+    void tenantSwitchingInSequence() {
         // Test sequential tenant switching with verification
         String[] tenants = {"primary", "schema1", "schema2"};
 
@@ -96,7 +96,7 @@ class AdvancedMultiTenantScenariosIT extends AbstractIntegrationTest {
     }
 
     @Test
-    void testDataIsolationBetweenTenants() {
+    void dataIsolationBetweenTenants() {
         // Test that data operations in one tenant don't affect other tenants
         tenantIdentifierResolver.setCurrentTenant("primary");
         createTestDataForTenant("Primary");
@@ -127,12 +127,11 @@ class AdvancedMultiTenantScenariosIT extends AbstractIntegrationTest {
         // Switch back to primary and verify data is still intact
         tenantIdentifierResolver.setCurrentTenant("primary");
         List<PrimaryCustomer> primaryDataAfter = primaryCustomerRepository.findAll();
-        assertThat(primaryDataAfter).hasSize(2);
-        assertThat(primaryDataAfter).isNotEmpty();
+        assertThat(primaryDataAfter).hasSize(2).isNotEmpty();
         assertThat(primaryDataAfter.getFirst().getText()).startsWith("Primary");
 
         // Verify primary data is exactly the same as before the schema1 operations
-        assertThat(primaryDataAfter).hasSize(primaryDataBefore.size());
+        assertThat(primaryDataAfter).hasSameSizeAs(primaryDataBefore);
 
         // Switch to schema2 and verify it has no data from schema1 operations
         tenantIdentifierResolver.setCurrentTenant("schema2");
@@ -141,7 +140,7 @@ class AdvancedMultiTenantScenariosIT extends AbstractIntegrationTest {
     }
 
     @Test
-    void testHttpRequestTenantIsolation() throws Exception {
+    void httpRequestTenantIsolation() throws Exception {
         // Create data for different tenants via HTTP requests
         String primaryCustomer = objectMapper.writeValueAsString(new PrimaryCustomerRequest("Primary-HTTP-Customer"));
 
@@ -174,7 +173,7 @@ class AdvancedMultiTenantScenariosIT extends AbstractIntegrationTest {
     }
 
     @Test
-    void testErrorHandlingWithTenantContext() {
+    void errorHandlingWithTenantContext() {
         // Test that errors don't corrupt tenant context
         tenantIdentifierResolver.setCurrentTenant("primary");
 
@@ -197,7 +196,7 @@ class AdvancedMultiTenantScenariosIT extends AbstractIntegrationTest {
     }
 
     @Test
-    void testBulkOperationsWithTenantIsolation() {
+    void bulkOperationsWithTenantIsolation() {
         // Test bulk operations respect tenant boundaries
         tenantIdentifierResolver.setCurrentTenant("primary");
         for (int i = 1; i <= 5; i++) {
@@ -225,14 +224,14 @@ class AdvancedMultiTenantScenariosIT extends AbstractIntegrationTest {
         primaryCustomerRepository.deleteAll();
 
         // Verify primary data is gone but schema1 data remains
-        assertThat(primaryCustomerRepository.count()).isEqualTo(0);
+        assertThat(primaryCustomerRepository.count()).isZero();
 
         tenantIdentifierResolver.setCurrentTenant("schema1");
         assertThat(secondaryCustomerRepository.count()).isEqualTo(3);
     }
 
     @Test
-    void testTenantContextClearing() {
+    void tenantContextClearing() {
         // Test that clearing context works properly
         tenantIdentifierResolver.setCurrentTenant("primary");
         assertThat(tenantIdentifierResolver.resolveCurrentTenantIdentifier()).isEqualTo("primary");
@@ -506,7 +505,7 @@ class AdvancedMultiTenantScenariosIT extends AbstractIntegrationTest {
                     assertThat(tenantOperationCounts.get(tenantName))
                             .as("Tenant " + tenantName + " should have received operations")
                             .isNotNull()
-                            .satisfies(count -> assertThat(count.get()).isGreaterThan(0));
+                            .satisfies(count -> assertThat(count.get()).isPositive());
                 }
 
             } finally {

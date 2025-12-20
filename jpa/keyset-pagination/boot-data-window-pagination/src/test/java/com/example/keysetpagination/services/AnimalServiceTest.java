@@ -40,7 +40,7 @@ class AnimalServiceTest {
         Optional<AnimalResponse> optionalAnimal = animalService.findAnimalById(1L);
         // then
         assertThat(optionalAnimal).isPresent().hasValueSatisfying(animalResponse -> {
-            assertThat(animalResponse.id()).isEqualTo(1L);
+            assertThat(animalResponse.id()).isOne();
             assertThat(animalResponse.name()).isEqualTo("junitName");
             assertThat(animalResponse.type()).isEqualTo("junitType");
             assertThat(animalResponse.habitat()).isEqualTo("junitHabitat");

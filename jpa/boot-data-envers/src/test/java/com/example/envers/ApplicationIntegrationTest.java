@@ -42,7 +42,7 @@ class ApplicationIntegrationTest extends AbstractIntegrationTest {
                 .isPresent()
                 .hasValueSatisfying(rev -> {
                     assertThat(rev.getRevisionNumber()).isPresent();
-                    assertThat(rev.getRevisionNumber().get()).isGreaterThan(0);
+                    assertThat(rev.getRevisionNumber().get()).isPositive();
                 })
                 .hasValueSatisfying(rev -> assertThat(rev.getEntity())
                         .extracting(Customer::getName)

@@ -22,22 +22,22 @@ class ApplicationIntTest extends AbstractIntegrationTest {
                 .expectBody(new ParameterizedTypeReference<PagedResult<Post>>() {})
                 .value(pagedResult -> {
                     assertThat(pagedResult.totalElements()).isEqualTo(2);
-                    assertThat(pagedResult.pageNumber()).isEqualTo(1);
-                    assertThat(pagedResult.totalPages()).isEqualTo(1);
-                    assertThat(pagedResult.isFirst()).isEqualTo(true);
-                    assertThat(pagedResult.isLast()).isEqualTo(true);
-                    assertThat(pagedResult.hasNext()).isEqualTo(false);
-                    assertThat(pagedResult.hasPrevious()).isEqualTo(false);
+                    assertThat(pagedResult.pageNumber()).isOne();
+                    assertThat(pagedResult.totalPages()).isOne();
+                    assertThat(pagedResult.isFirst()).isTrue();
+                    assertThat(pagedResult.isLast()).isTrue();
+                    assertThat(pagedResult.hasNext()).isFalse();
+                    assertThat(pagedResult.hasPrevious()).isFalse();
                     List<Post> posts = pagedResult.data();
-                    assertThat(posts).isNotNull().isNotEmpty().hasSize(2);
+                    assertThat(posts).isNotEmpty().hasSize(2);
                     Post post1 = posts.get(0);
                     Post post2 = posts.get(1);
                     assertThat(post1.getTitle()).isNotNull();
                     assertThat(post1.getMetadata()).isNotNull();
-                    assertThat(post1.getComments()).isNotNull().isNotEmpty().hasSize(4);
+                    assertThat(post1.getComments()).isNotEmpty().hasSize(4);
                     assertThat(post2.getTitle()).isNotNull();
                     assertThat(post2.getMetadata()).isNotNull();
-                    assertThat(post2.getComments()).isNotNull().isEmpty();
+                    assertThat(post2.getComments()).isEmpty();
                 });
     }
 

@@ -12,7 +12,6 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.stream.IntStream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,7 +35,7 @@ class ActorServiceIntTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void testPessimisticWriteLock() {
+    void pessimisticWriteLock() {
 
         ActorResponse actorResponse = actorService.saveActor(new ActorRequest("Actor", null, "Indian"));
 
@@ -45,7 +44,7 @@ class ActorServiceIntTest extends AbstractIntegrationTest {
         Actor actor = optionalActor.get();
         Short version = actor.getVersion();
         assertThat(actor.getActorName()).isEqualTo("Actor");
-        assertThat(actor.getVersion()).isEqualTo((short) 0);
+        assertThat(actor.getVersion()).isZero();
 
         final List<String> actorNames = List.of("PK", "MB");
 
@@ -78,14 +77,14 @@ class ActorServiceIntTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void testPessimisticReadLock() throws ExecutionException, InterruptedException {
+    void pessimisticReadLock() throws Exception {
         ActorResponse actorResponse = actorService.saveActor(new ActorRequest("Actor", null, "Indian"));
 
         Optional<Actor> optionalActor = actorRepository.findById(actorResponse.actorId());
         assertThat(optionalActor).isPresent();
         Actor actor = optionalActor.get();
         assertThat(actor.getActorName()).isEqualTo("Actor");
-        assertThat(actor.getVersion()).isEqualTo((short) 0);
+        assertThat(actor.getVersion()).isZero();
         // Obtaining a pessimistic read lock concurrently by two requests on the same record
         List<CompletableFuture<Actor>> completableFutureList = IntStream.range(0, 2)
                 .boxed()
@@ -101,14 +100,14 @@ class ActorServiceIntTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void testUpdatePessimisticReadLock() {
+    void updatePessimisticReadLock() {
         ActorResponse actorResponse = actorService.saveActor(new ActorRequest("Actor", null, "Indian"));
 
         Optional<Actor> optionalActor = actorRepository.findById(actorResponse.actorId());
         assertThat(optionalActor).isPresent();
         Actor actor = optionalActor.get();
         assertThat(actor.getActorName()).isEqualTo("Actor");
-        assertThat(actor.getVersion()).isEqualTo((short) 0);
+        assertThat(actor.getVersion()).isZero();
         // Obtaining a pessimistic read lock and holding lock for 5 sec
         CompletableFuture.runAsync(() -> actorService.getActorWithPessimisticReadLock(actor.getActorId()));
         // As pessimistic read lock obtained on the record update can't be performed until the lock is released

@@ -1,7 +1,6 @@
 package com.example.ultimateredis.config;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
@@ -34,7 +33,7 @@ class RedisCacheGZIPSerializerTest {
         Object result = serializer.deserialize(null);
 
         // Assert
-        assertNull(result);
+        assertThat(result).isNull();
     }
 
     @Test
@@ -43,7 +42,7 @@ class RedisCacheGZIPSerializerTest {
         Object result = serializer.deserialize(new byte[0]);
 
         // Assert
-        assertNull(result);
+        assertThat(result).isNull();
     }
 
     @Test
@@ -57,7 +56,7 @@ class RedisCacheGZIPSerializerTest {
 
         // Assert
         // Check it doesn't have the GZIP marker
-        assertThat(serialized.length >= GZIP_MARKER.length).isTrue();
+        assertThat(serialized.length).isGreaterThanOrEqualTo(GZIP_MARKER.length);
         assertThat(Arrays.equals(Arrays.copyOfRange(serialized, 0, GZIP_MARKER.length), GZIP_MARKER))
                 .isFalse();
 
@@ -80,9 +79,8 @@ class RedisCacheGZIPSerializerTest {
 
         // Assert
         // Check it has the GZIP marker
-        assertThat(serialized.length >= GZIP_MARKER.length).isTrue();
-        assertThat(Arrays.equals(Arrays.copyOfRange(serialized, 0, GZIP_MARKER.length), GZIP_MARKER))
-                .isTrue();
+        assertThat(serialized.length).isGreaterThanOrEqualTo(GZIP_MARKER.length);
+        assertThat(Arrays).isEqualTo(Arrays.copyOfRange(serialized, 0, GZIP_MARKER.length));
 
         // Check we can deserialize correctly
         assertThat(deserialized).isEqualTo(largeString);

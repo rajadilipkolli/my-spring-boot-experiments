@@ -65,7 +65,7 @@ class PostRepositoryTest {
     }
 
     @Test
-    void testInsertPostViaR2dbcAndRetrieveViaDSLContext() {
+    void insertPostViaR2dbcAndRetrieveViaDSLContext() {
 
         Flux<PostResponse> postResponseFlux =
                 // Step 1: Insert a new post
@@ -110,7 +110,7 @@ class PostRepositoryTest {
                             assertPostComments(postResponse);
 
                             // Assertions for tags
-                            assertThat(postResponse.tags().getFirst()).isEqualTo("java");
+                            assertThat(postResponse.tags()).first().isEqualTo("java");
 
                             return true;
                         })
@@ -119,7 +119,7 @@ class PostRepositoryTest {
     }
 
     @Test
-    void testInsertPostOnlyViaR2dbcAndRetrieveViaDSLContext() {
+    void insertPostOnlyViaR2dbcAndRetrieveViaDSLContext() {
 
         Flux<PostResponse> postResponseFlux =
                 // Step 1: Insert a new post
@@ -143,7 +143,7 @@ class PostRepositoryTest {
     }
 
     @Test
-    void testUniqueTagNameConstraintViolation() {
+    void uniqueTagNameConstraintViolation() {
         // Create first tag
         Mono<Tags> firstTag = tagRepository.save(new Tags().setName("java"));
 
@@ -159,7 +159,7 @@ class PostRepositoryTest {
     }
 
     @Test
-    void testForeignKeyConstraintViolation() {
+    void foreignKeyConstraintViolation() {
         // Try to save comment with non-existent post ID
         Mono<Comment> invalidComment =
                 postCommentRepository.save(
@@ -178,7 +178,7 @@ class PostRepositoryTest {
     }
 
     @Test
-    void testOptimisticLockingOnConcurrentPostUpdates() {
+    void optimisticLockingOnConcurrentPostUpdates() {
         // Create initial post
         Mono<Post> initialPost =
                 postRepository.save(
@@ -210,7 +210,7 @@ class PostRepositoryTest {
 
     @ParameterizedTest
     @MethodSource("invalidPostProvider")
-    void testInsertPostWithInvalidDataShouldFail(
+    void insertPostWithInvalidDataShouldFail(
             String title, String content, Status status, String expectedError) {
         StepVerifier.create(
                         postRepository.save(
@@ -250,7 +250,6 @@ class PostRepositoryTest {
         PostCommentResponse postCommentResponse = postResponse.comments().getFirst();
         assertThat(postCommentResponse.id()).isInstanceOf(UUID.class);
         assertThat(postCommentResponse.createdAt())
-                .isNotNull()
                 .isInstanceOf(LocalDateTime.class)
                 .isCloseTo(LocalDateTime.now(), within(1, ChronoUnit.MINUTES));
         assertThat(postCommentResponse.content()).isEqualTo("test comments 2");
@@ -258,7 +257,6 @@ class PostRepositoryTest {
         PostCommentResponse last = postResponse.comments().getLast();
         assertThat(last.id()).isInstanceOf(UUID.class);
         assertThat(last.createdAt())
-                .isNotNull()
                 .isInstanceOf(LocalDateTime.class)
                 .isCloseTo(LocalDateTime.now(), within(1, ChronoUnit.MINUTES));
         assertThat(last.createdAt()).isNotNull();
