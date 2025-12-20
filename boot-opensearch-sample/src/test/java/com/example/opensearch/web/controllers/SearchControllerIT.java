@@ -10,20 +10,15 @@ import com.example.opensearch.common.AbstractIntegrationTest;
 import com.example.opensearch.entities.Address;
 import com.example.opensearch.entities.Grades;
 import com.example.opensearch.entities.Restaurant;
-import com.example.opensearch.repositories.RestaurantRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.geo.Point;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class SearchControllerIT extends AbstractIntegrationTest {
-
-    @Autowired
-    private RestaurantRepository restaurantRepository;
 
     private static final String RESTAURANT_NAME = "Lb Spumoni Gardens";
     private static final String BOROUGH_NAME = "Brooklyn";

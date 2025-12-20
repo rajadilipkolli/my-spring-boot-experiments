@@ -16,20 +16,15 @@ import com.example.opensearch.entities.Address;
 import com.example.opensearch.entities.Grades;
 import com.example.opensearch.entities.Restaurant;
 import com.example.opensearch.model.request.RestaurantRequest;
-import com.example.opensearch.repositories.RestaurantRepository;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.geo.Point;
 import org.springframework.http.MediaType;
 
 class RestaurantControllerIT extends AbstractIntegrationTest {
-
-    @Autowired
-    private RestaurantRepository restaurantRepository;
 
     private List<Restaurant> restaurantList = null;
 
@@ -88,7 +83,7 @@ class RestaurantControllerIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(post("/api/restaurants")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(restaurantRequest)))
+                        .content(jsonMapper.writeValueAsString(restaurantRequest)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id", notNullValue()))
                 .andExpect(jsonPath("$.name", is(restaurantRequest.name())));
@@ -101,10 +96,10 @@ class RestaurantControllerIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(post("/api/restaurants")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(restaurant)))
+                        .content(jsonMapper.writeValueAsString(restaurant)))
                 .andExpect(status().isBadRequest())
-                .andExpect(header().string("Content-Type", is("application/problem+json")))
-                .andExpect(jsonPath("$.type", is("about:blank")))
+                .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
+                .andExpect(jsonPath("$.type", is("https://api.boot-opensearch.com/errors/validation-error")))
                 .andExpect(jsonPath("$.title", is("Constraint Violation")))
                 .andExpect(jsonPath("$.status", is(400)))
                 .andExpect(jsonPath("$.detail", is("Invalid request content.")))
@@ -127,7 +122,7 @@ class RestaurantControllerIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(put("/api/restaurants/{id}", restaurant.getId())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(restaurant)))
+                        .content(jsonMapper.writeValueAsString(restaurant)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(restaurant.getId()), String.class))
                 .andExpect(jsonPath("$.name", is(restaurant.getName())));

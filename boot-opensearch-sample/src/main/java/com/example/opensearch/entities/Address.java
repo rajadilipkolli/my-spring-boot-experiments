@@ -1,9 +1,9 @@
 package com.example.opensearch.entities;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.GeoPointField;
 import org.springframework.data.geo.Point;
+import tools.jackson.databind.annotation.JsonDeserialize;
 
 public class Address {
 
