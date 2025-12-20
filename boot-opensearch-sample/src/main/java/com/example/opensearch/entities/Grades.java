@@ -1,10 +1,10 @@
 package com.example.opensearch.entities;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import java.time.LocalDateTime;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
+import tools.jackson.databind.annotation.JsonDeserialize;
+import tools.jackson.databind.ext.javatime.deser.LocalDateTimeDeserializer;
 
 public class Grades {
 
