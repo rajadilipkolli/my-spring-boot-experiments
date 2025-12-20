@@ -1,12 +1,25 @@
 version: 2.1
 
+executors:
+  machine_executor_amd64:
+    machine:
+      image: ubuntu-2404:current
+
 jobs:
   build:
-    docker:
-      - image: 'cimg/openjdk:25.0'
+    executor: machine_executor_amd64
     steps:
       - checkout
-      - setup_remote_docker
+      - run:
+          name: Install Java 25
+          command: |
+             wget https://download.oracle.com/java/25/latest/jdk-25_linux-x64_bin.tar.gz
+             sudo mkdir -p /usr/lib/jvm
+             sudo tar -xvf jdk-25_linux-x64_bin.tar.gz -C /usr/lib/jvm
+             JDK_DIR=$(ls -d /usr/lib/jvm/jdk-25* | head -n 1)
+             echo "export JAVA_HOME=$JDK_DIR" >> $BASH_ENV
+             echo "export PATH=$JDK_DIR/bin:$PATH" >> $BASH_ENV
+             java -version
       - run: java --version
       - run:
           name: Analyze on SonarCloud
