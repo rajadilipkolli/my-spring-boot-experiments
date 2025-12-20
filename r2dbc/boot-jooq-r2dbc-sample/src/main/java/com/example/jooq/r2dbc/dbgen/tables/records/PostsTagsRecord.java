@@ -4,6 +4,7 @@
 package com.example.jooq.r2dbc.dbgen.tables.records;
 
 import com.example.jooq.r2dbc.dbgen.tables.PostsTags;
+import java.io.Serial;
 import java.util.UUID;
 import org.jooq.Field;
 import org.jooq.Record2;
@@ -15,7 +16,7 @@ import org.jooq.impl.TableRecordImpl;
 public class PostsTagsRecord extends TableRecordImpl<PostsTagsRecord>
         implements Record2<UUID, UUID> {
 
-    private static final long serialVersionUID = 1L;
+    @Serial private static final long serialVersionUID = 1L;
 
     /** Setter for <code>public.posts_tags.post_id</code>. */
     public void setPostId(UUID value) {

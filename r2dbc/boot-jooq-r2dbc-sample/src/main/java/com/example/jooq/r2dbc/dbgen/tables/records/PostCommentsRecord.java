@@ -4,6 +4,7 @@
 package com.example.jooq.r2dbc.dbgen.tables.records;
 
 import com.example.jooq.r2dbc.dbgen.tables.PostComments;
+import java.io.Serial;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 import org.jooq.Field;
@@ -17,7 +18,7 @@ import org.jooq.impl.UpdatableRecordImpl;
 public class PostCommentsRecord extends UpdatableRecordImpl<PostCommentsRecord>
         implements Record4<UUID, String, OffsetDateTime, UUID> {
 
-    private static final long serialVersionUID = 1L;
+    @Serial private static final long serialVersionUID = 1L;
 
     /** Setter for <code>public.post_comments.id</code>. */
     public void setId(UUID value) {

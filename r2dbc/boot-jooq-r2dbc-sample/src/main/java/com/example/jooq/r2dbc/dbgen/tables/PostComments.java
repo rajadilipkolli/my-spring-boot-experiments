@@ -6,6 +6,7 @@ package com.example.jooq.r2dbc.dbgen.tables;
 import com.example.jooq.r2dbc.dbgen.Keys;
 import com.example.jooq.r2dbc.dbgen.Public;
 import com.example.jooq.r2dbc.dbgen.tables.records.PostCommentsRecord;
+import java.io.Serial;
 import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.List;
@@ -32,7 +33,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({"all", "unchecked", "rawtypes"})
 public class PostComments extends TableImpl<PostCommentsRecord> {
 
-    private static final long serialVersionUID = 1L;
+    @Serial private static final long serialVersionUID = 1L;
 
     /** The reference instance of <code>public.post_comments</code> */
     public static final PostComments POST_COMMENTS = new PostComments();

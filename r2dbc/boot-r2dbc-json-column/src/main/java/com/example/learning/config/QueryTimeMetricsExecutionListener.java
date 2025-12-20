@@ -1,7 +1,5 @@
 package com.example.learning.config;
 
-import static java.lang.String.format;
-
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
 import io.r2dbc.proxy.core.QueryExecutionInfo;
@@ -34,7 +32,7 @@ public class QueryTimeMetricsExecutionListener implements ProxyExecutionListener
             String queryType =
                     this.queryTypeDetector.detect(queryInfo.getQuery()).name().toLowerCase();
             String metricsName = this.metricNamePrefix + "query." + queryType;
-            String description = format("Time to execute %s queries", queryType);
+            String description = "Time to execute %s queries".formatted(queryType);
 
             Timer timer = Timer.builder(metricsName)
                     .description(description)

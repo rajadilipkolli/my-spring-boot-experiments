@@ -116,7 +116,7 @@ public class PostHandler {
         return this.postRepository
                 .findById(UUID.fromString(req.pathVariable("id")))
                 .switchIfEmpty(Mono.error(new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, String.format("Post not found with id: %s", req.pathVariable("id")))))
+                        HttpStatus.NOT_FOUND, "Post not found with id: %s".formatted(req.pathVariable("id")))))
                 .flatMap(existingPost -> req.bodyToMono(Post.class).map(updatedPost -> {
                     existingPost.setTitle(updatedPost.getTitle());
                     existingPost.setContent(updatedPost.getContent());
