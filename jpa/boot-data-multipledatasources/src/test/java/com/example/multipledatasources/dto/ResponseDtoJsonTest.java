@@ -31,8 +31,7 @@ class ResponseDtoJsonTest {
     @Test
     void deserialize() throws Exception {
 
-        String jsonContent =
-                """
+        String jsonContent = """
                 {
                   "memberId": "1",
                   "cardNumber": "1234-5678-9012-3456",

@@ -7,4 +7,5 @@ import java.time.LocalDate;
 
 public record OrderRequestDTO(
         @NotNull(message = "Amount cannot be null") @DecimalMin(value = "0.0", inclusive = true, message = "Amount must be positive") BigDecimal amount,
+
         @NotNull(message = "Order date cannot be null") LocalDate orderDate) {}

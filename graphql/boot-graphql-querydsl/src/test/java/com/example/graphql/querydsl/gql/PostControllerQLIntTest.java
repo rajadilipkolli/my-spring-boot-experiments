@@ -41,8 +41,7 @@ class PostControllerQLIntTest extends AbstractIntegrationTest {
     @Test
     void countPosts() {
         graphQlTester
-                .document(
-                        """
+                .document("""
                         query {
                           countPosts
                         }

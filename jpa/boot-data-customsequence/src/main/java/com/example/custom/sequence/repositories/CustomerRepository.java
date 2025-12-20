@@ -15,8 +15,7 @@ public interface CustomerRepository extends BaseJpaRepository<Customer, String> 
     @EntityGraph(attributePaths = "orders")
     Optional<Customer> findById(String id);
 
-    @Query(
-            """
+    @Query("""
                 select c
                 from Customer c
                 left join fetch c.orders

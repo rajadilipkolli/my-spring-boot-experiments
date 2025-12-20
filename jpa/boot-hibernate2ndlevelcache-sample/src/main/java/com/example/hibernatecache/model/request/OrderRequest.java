@@ -8,4 +8,5 @@ import java.util.List;
 public record OrderRequest(
         Long customerId,
         @NotBlank(message = "Name cannot be blank") String name,
+
         @Size(min = 1, message = "OrderItems are required") @Valid List<OrderItemRequest> orderItems) {}

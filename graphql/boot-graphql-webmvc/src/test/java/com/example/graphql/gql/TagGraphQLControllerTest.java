@@ -34,8 +34,7 @@ class TagGraphQLControllerTest {
         TagResponse tag2 = new TagResponse(null, "tag2", "desc2");
         given(tagService.findAllTags()).willReturn(List.of(tag1, tag2));
 
-        var query =
-                """
+        var query = """
                     query {
                         allTags {
                             tagName
@@ -58,8 +57,7 @@ class TagGraphQLControllerTest {
         TagResponse tag = new TagResponse(null, "tag1", "desc1");
         given(tagService.findTagByName("tag1")).willReturn(Optional.of(tag));
 
-        var query =
-                """
+        var query = """
             query findTagByName($tagName: String!) {
                 findTagByName(tagName: $tagName) {
                     tagName
@@ -82,8 +80,7 @@ class TagGraphQLControllerTest {
     void findTagByName_notFound() {
         given(tagService.findTagByName("notfound")).willReturn(Optional.empty());
 
-        var query =
-                """
+        var query = """
             query findTagByName($tagName: String!) {
                 findTagByName(tagName: $tagName) {
                     tagName
@@ -106,8 +103,7 @@ class TagGraphQLControllerTest {
         TagResponse tagResponse = new TagResponse(null, "tag3", "desc3");
         given(tagService.saveTag("tag3", "desc3")).willReturn(tagResponse);
 
-        var mutation =
-                """
+        var mutation = """
             mutation {
                 createTag(tagName: "tag3", tagDescription: "desc3") {
                     tagName
@@ -134,8 +130,7 @@ class TagGraphQLControllerTest {
         TagResponse tagResponse = new TagResponse(null, "tag4", "newdesc");
         given(tagService.updateTag("tag4", "newdesc")).willReturn(tagResponse);
 
-        var mutation =
-                """
+        var mutation = """
             mutation {
                 updateTagDescription(tagName: "tag4", tagDescription: "newdesc") {
                     tagName

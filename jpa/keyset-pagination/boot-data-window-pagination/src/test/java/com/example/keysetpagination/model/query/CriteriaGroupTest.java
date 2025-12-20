@@ -24,9 +24,7 @@ class CriteriaGroupTest {
         JsonContent<CriteriaGroup> result = this.json.write(criteriaGroup);
 
         assertThat(result).hasJsonPathStringValue("$.operator");
-        assertThat(result.getJson())
-                .isEqualToIgnoringWhitespace(
-                        """
+        assertThat(result.getJson()).isEqualToIgnoringWhitespace("""
                                 {"type":"group","operator":"AND","criteriaList":[{"type":"criteria","queryOperator":"EQ","field":"name","values":["Bird"]}]}
                                 """);
     }

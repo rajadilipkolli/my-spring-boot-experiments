@@ -20,8 +20,7 @@ class ApplicationIntegrationTest extends AbstractIntegrationTest {
     @Test
     void query_all_customers() {
         this.graphQlTester
-                .document(
-                        """
+                .document("""
                         query {
                           customers {
                             id
@@ -42,8 +41,7 @@ class ApplicationIntegrationTest extends AbstractIntegrationTest {
     @Test
     void query_customers_by_name() {
         this.graphQlTester
-                .document(
-                        """
+                .document("""
                         query ($name: String) {
                            customersByName(name: $name) {
                              id
@@ -62,8 +60,7 @@ class ApplicationIntegrationTest extends AbstractIntegrationTest {
     @Test
     void query_insert() {
         String randomString = RandomStringUtils.randomAlphabetic(5);
-        String query =
-                """
+        String query = """
                 mutation addCustomer($cname: String) {
                   addCustomer(name: $cname) {
                     id
@@ -86,8 +83,7 @@ class ApplicationIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     void query_insert_failure() {
-        String query =
-                """
+        String query = """
                 mutation addCustomer($cname: String) {
                   addCustomer(name: $cname) {
                     id
@@ -103,8 +99,7 @@ class ApplicationIntegrationTest extends AbstractIntegrationTest {
                 .expect(error -> error.getErrorType() == ValidationError)
                 .verify()
                 .path("$.data")
-                .matchesJson(
-                        """
+                .matchesJson("""
                         {
                             "addCustomer": null
                         }

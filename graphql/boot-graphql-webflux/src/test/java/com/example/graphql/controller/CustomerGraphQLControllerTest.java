@@ -32,8 +32,7 @@ class CustomerGraphQLControllerTest {
         given(customerGraphQLService.findAllOrdersByCustomers(List.of(customer)))
                 .willReturn(Mono.just(Map.of(customer, List.of(new Orders(2, 1)))));
         this.graphQlTester
-                .document(
-                        """
+                .document("""
             query {
               customers {
                 id

@@ -95,10 +95,7 @@ public interface CustomerAPI {
                             content =
                                     @Content(
                                             schema = @Schema(implementation = CustomerRequest.class),
-                                            examples = {
-                                                @ExampleObject(
-                                                        value =
-                                                                """
+                                            examples = {@ExampleObject(value = """
                                             {
                                               "text": "sample customer",
                                               "orders": [
@@ -108,8 +105,7 @@ public interface CustomerAPI {
                                                 }
                                               ]
                                             }
-                                            """)
-                                            })),
+                                            """)})),
             responses = {
                 @ApiResponse(
                         responseCode = "201",

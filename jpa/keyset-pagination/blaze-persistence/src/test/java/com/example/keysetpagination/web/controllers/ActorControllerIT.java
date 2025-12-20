@@ -96,8 +96,7 @@ class ActorControllerIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(post("/api/actors/search?pageNo=0&pageSize=2&sortDir=desc")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(
-                                """
+                        .content("""
                                         [
                                           {
                                             "queryOperator": "EQ",
@@ -114,8 +113,7 @@ class ActorControllerIT extends AbstractIntegrationTest {
                                             ]
                                           }
                                         ]
-                                        """
-                                        .formatted(LocalDate.now())))
+                                        """.formatted(LocalDate.now())))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.size()", is(2)))
                 .andExpect(jsonPath("$.totalElements", is(3)))

@@ -17,4 +17,6 @@ import org.springframework.validation.annotation.Validated;
  * @param connectionPoolSize Size of the R2DBC connection pool (1-100)
  */
 public record NotificationProperties(
-        @NotBlank String channelName, @NotNull Boolean listenerEnabled, @Min(1) @Max(100) Integer connectionPoolSize) {}
+        @NotBlank String channelName,
+        @NotNull Boolean listenerEnabled,
+        @Min(1) @Max(100) Integer connectionPoolSize) {}
