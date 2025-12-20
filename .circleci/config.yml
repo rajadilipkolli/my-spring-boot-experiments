@@ -6,8 +6,7 @@ jobs:
       - image: 'cimg/openjdk:25.0'
     steps:
       - checkout
-      - setup_remote_docker:
-          version: 20.10.14
+      - setup_remote_docker
       - run: java --version
       - run:
           name: Analyze on SonarCloud
