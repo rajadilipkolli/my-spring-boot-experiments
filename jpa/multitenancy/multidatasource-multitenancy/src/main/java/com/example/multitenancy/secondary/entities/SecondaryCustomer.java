@@ -58,10 +58,7 @@ public class SecondaryCustomer {
     @Override
     public final int hashCode() {
         return this instanceof HibernateProxy hp
-                ? hp
-                        .getHibernateLazyInitializer()
-                        .getPersistentClass()
-                        .hashCode()
+                ? hp.getHibernateLazyInitializer().getPersistentClass().hashCode()
                 : getClass().hashCode();
     }
 }
