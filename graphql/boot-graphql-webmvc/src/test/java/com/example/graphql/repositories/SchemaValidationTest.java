@@ -19,6 +19,6 @@ class SchemaValidationTest {
 
     @Test
     void contextLoads() {
-        assertThat(dataSource).isNotNull().isInstanceOf(HikariDataSource.class);
+        assertThat(dataSource).isInstanceOf(HikariDataSource.class);
     }
 }

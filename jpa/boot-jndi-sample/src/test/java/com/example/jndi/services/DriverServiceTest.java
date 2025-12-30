@@ -40,7 +40,7 @@ class DriverServiceTest {
         // then
         assertThat(optionalDriver).isPresent();
         DriverResponse driver = optionalDriver.get();
-        assertThat(driver.id()).isEqualTo(1L);
+        assertThat(driver.id()).isOne();
         assertThat(driver.text()).isEqualTo("junitTest");
     }
 

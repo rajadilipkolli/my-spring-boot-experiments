@@ -40,7 +40,7 @@ class JobServiceTest {
         // then
         assertThat(optionalJob).isPresent();
         JobResponse job = optionalJob.get();
-        assertThat(job.id()).isEqualTo(1L);
+        assertThat(job.id()).isOne();
         assertThat(job.text()).isEqualTo("junitTest");
     }
 

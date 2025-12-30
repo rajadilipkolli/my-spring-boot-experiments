@@ -4,6 +4,7 @@
 package com.example.jooq.r2dbc.dbgen.routines;
 
 import com.example.jooq.r2dbc.dbgen.Public;
+import java.io.Serial;
 import java.util.UUID;
 import org.jooq.Parameter;
 import org.jooq.impl.AbstractRoutine;
@@ -14,7 +15,7 @@ import org.jooq.impl.SQLDataType;
 @SuppressWarnings({"all", "unchecked", "rawtypes"})
 public class UuidGenerateV4 extends AbstractRoutine<UUID> {
 
-    private static final long serialVersionUID = 1L;
+    @Serial private static final long serialVersionUID = 1L;
 
     /** The parameter <code>public.uuid_generate_v4.RETURN_VALUE</code>. */
     public static final Parameter<UUID> RETURN_VALUE =

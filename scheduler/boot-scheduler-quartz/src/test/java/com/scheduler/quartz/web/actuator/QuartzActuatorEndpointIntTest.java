@@ -37,7 +37,7 @@ class QuartzActuatorEndpointIntTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void testQuartzActuatorEndpoints() {
+    void quartzActuatorEndpoints() {
         // List all jobs
         mockMvcTester
                 .get()
@@ -56,8 +56,8 @@ class QuartzActuatorEndpointIntTest extends AbstractIntegrationTest {
                     assertThat(defaultGroup.has("jobs")).isTrue();
                     JsonNode jobsArray = defaultGroup.get("jobs");
                     assertThat(jobsArray.isArray()).isTrue();
-                    assertThat(jobsArray.size()).isEqualTo(1);
-                    assertThat(jobsArray.get(0).asText()).isEqualTo("oddEvenJob");
+                    assertThat(jobsArray.size()).isOne();
+                    assertThat(jobsArray.get(0).asString()).isEqualTo("oddEvenJob");
                 });
 
         // Get specific job details
@@ -72,13 +72,13 @@ class QuartzActuatorEndpointIntTest extends AbstractIntegrationTest {
                 .convertTo(JsonNode.class)
                 .satisfies(job -> {
                     assertThat(job.has("group")).isTrue();
-                    assertThat(job.get("group").asText()).isEqualTo("sample-group");
+                    assertThat(job.get("group").asString()).isEqualTo("sample-group");
                     assertThat(job.has("name")).isTrue();
-                    assertThat(job.get("name").asText()).isEqualTo("oddEvenJob");
+                    assertThat(job.get("name").asString()).isEqualTo("oddEvenJob");
                     assertThat(job.has("description")).isTrue();
-                    assertThat(job.get("description").asText()).isEqualTo("Sample OddEvenJob");
+                    assertThat(job.get("description").asString()).isEqualTo("Sample OddEvenJob");
                     assertThat(job.has("className")).isTrue();
-                    assertThat(job.get("className").asText()).isEqualTo("com.scheduler.quartz.job.SampleJob");
+                    assertThat(job.get("className").asString()).isEqualTo("com.scheduler.quartz.job.SampleJob");
                     assertThat(job.has("durable")).isTrue();
                     assertThat(job.get("durable").asBoolean()).isTrue();
                     assertThat(job.has("requestRecovery")).isTrue();
@@ -86,12 +86,12 @@ class QuartzActuatorEndpointIntTest extends AbstractIntegrationTest {
                     assertThat(job.has("triggers")).isTrue();
                     JsonNode triggers = job.get("triggers");
                     assertThat(triggers.isArray()).isTrue();
-                    assertThat(triggers.size()).isGreaterThan(0);
+                    assertThat(triggers.size()).isPositive();
                     JsonNode trigger = triggers.get(0);
                     assertThat(trigger.has("group")).isTrue();
-                    assertThat(trigger.get("group").asText()).isEqualTo("sample-group");
+                    assertThat(trigger.get("group").asString()).isEqualTo("sample-group");
                     assertThat(trigger.has("name")).isTrue();
-                    assertThat(trigger.get("name").asText()).isEqualTo("sample-job-trigger");
+                    assertThat(trigger.get("name").asString()).isEqualTo("sample-job-trigger");
                     assertThat(trigger.has("nextFireTime")).isTrue();
                     assertThat(trigger.has("priority")).isTrue();
                 });
@@ -109,22 +109,22 @@ class QuartzActuatorEndpointIntTest extends AbstractIntegrationTest {
                 .convertTo(JsonNode.class)
                 .satisfies(jobs -> {
                     assertThat(jobs.has("group")).isTrue();
-                    String groupName = jobs.get("group").asText();
+                    String groupName = jobs.get("group").asString();
                     assertThat(groupName).isEqualTo("sample-group");
                     assertThat(jobs.has("name")).isTrue();
-                    String jobName = jobs.get("name").asText();
+                    String jobName = jobs.get("name").asString();
                     assertThat(jobName).isEqualTo("oddEvenJob");
                     assertThat(jobs.has("className")).isTrue();
-                    String className = jobs.get("className").asText();
+                    String className = jobs.get("className").asString();
                     assertThat(className).isEqualTo("com.scheduler.quartz.job.SampleJob");
                     assertThat(jobs.has("triggerTime")).isTrue();
-                    String triggerTime = jobs.get("triggerTime").asText();
+                    String triggerTime = jobs.get("triggerTime").asString();
                     assertThat(triggerTime).isNotEmpty();
                 });
     }
 
     @Test
-    void testQuartzActuatorEndpointsWithInvalidJob() {
+    void quartzActuatorEndpointsWithInvalidJob() {
 
         // Get non-existent job details should return 404
         mockMvcTester

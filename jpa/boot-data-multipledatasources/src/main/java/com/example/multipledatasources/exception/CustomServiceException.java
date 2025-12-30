@@ -1,9 +1,11 @@
 package com.example.multipledatasources.exception;
 
+import java.io.Serial;
 import org.springframework.http.HttpStatus;
 
 public class CustomServiceException extends RuntimeException {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     private final HttpStatus httpStatus;

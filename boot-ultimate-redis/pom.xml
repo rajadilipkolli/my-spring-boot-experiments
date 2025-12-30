@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>4.0.0-RC1</version>
+        <version>4.0.1</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.example</groupId>
@@ -16,12 +16,12 @@
 
     <properties>
         <java.version>25</java.version>
-        <spotless.version>3.0.0</spotless.version>
-        <commons-io.version>2.20.0</commons-io.version>
-        <springdoc-openapi.version>3.0.0-M1</springdoc-openapi.version>
+        <spotless.version>3.1.0</spotless.version>
+        <commons-io.version>2.21.0</commons-io.version>
+        <springdoc-openapi.version>3.0.0</springdoc-openapi.version>
 
         <properties-maven-plugin.version>1.2.1</properties-maven-plugin.version>
-        <sonar-maven-plugin.version>5.2.0.4988</sonar-maven-plugin.version>
+        <sonar-maven-plugin.version>5.5.0.6356</sonar-maven-plugin.version>
     </properties>
 
     <dependencies>

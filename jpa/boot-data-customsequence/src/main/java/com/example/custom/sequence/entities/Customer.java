@@ -4,8 +4,6 @@ import com.example.custom.sequence.config.db.StringPrefixedSequence;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
@@ -19,7 +17,6 @@ import org.hibernate.Hibernate;
 public class Customer {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "custom_seq")
     @StringPrefixedSequence(valuePrefix = "CUS", numberFormat = "%05d")
     private String id;
 

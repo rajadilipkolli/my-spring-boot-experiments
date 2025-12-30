@@ -1,11 +1,10 @@
 package com.example.graphql.gql;
 
-import com.example.graphql.entities.TagEntity;
 import com.example.graphql.exception.TagNotFoundException;
+import com.example.graphql.model.response.TagResponse;
 import com.example.graphql.services.TagService;
 import jakarta.validation.constraints.NotBlank;
 import java.util.List;
-import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.graphql.data.method.annotation.Argument;
@@ -27,23 +26,23 @@ public class TagGraphQLController {
     }
 
     @QueryMapping
-    public List<TagEntity> allTags() {
+    public List<TagResponse> allTags() {
         return this.tagService.findAllTags();
     }
 
     @QueryMapping
-    public TagEntity findTagByName(@Argument("tagName") String tagName) {
+    public TagResponse findTagByName(@Argument("tagName") String tagName) {
         return this.tagService.findTagByName(tagName).orElseThrow(() -> new TagNotFoundException(tagName));
     }
 
     @MutationMapping
-    public TagEntity createTag(
+    public TagResponse createTag(
             @NotBlank @Argument("tagName") String tagName, @Argument("tagDescription") String tagDescription) {
         return this.tagService.saveTag(tagName, tagDescription);
     }
 
     @MutationMapping
-    public Optional<TagEntity> updateTagDescription(
+    public TagResponse updateTagDescription(
             @NotBlank @Argument("tagName") String tagName,
             @NotBlank @Argument("tagDescription") String tagDescription) {
         return this.tagService.updateTag(tagName, tagDescription);

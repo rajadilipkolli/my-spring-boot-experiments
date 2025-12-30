@@ -50,7 +50,7 @@ class OrderServiceTest {
         // then
         assertThat(optionalOrder).isPresent();
         OrderResponse order = optionalOrder.get();
-        assertThat(order.orderId()).isEqualTo(1L);
+        assertThat(order.orderId()).isOne();
         assertThat(order.name()).isEqualTo("junitTest");
     }
 

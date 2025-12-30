@@ -13,6 +13,7 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import org.jspecify.annotations.Nullable;
 
 @Entity
 @Table(name = "authors")
@@ -117,7 +118,7 @@ public class AuthorEntity implements Serializable {
         return version;
     }
 
-    public AuthorEntity setPostEntities(List<PostEntity> postEntities) {
+    public AuthorEntity setPostEntities(@Nullable List<PostEntity> postEntities) {
         if (postEntities == null) {
             postEntities = new ArrayList<>();
         }

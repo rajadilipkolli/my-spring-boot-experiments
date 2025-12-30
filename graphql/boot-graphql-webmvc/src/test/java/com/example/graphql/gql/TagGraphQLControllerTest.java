@@ -7,7 +7,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import com.example.graphql.config.graphql.GraphQlConfiguration;
-import com.example.graphql.entities.TagEntity;
+import com.example.graphql.model.response.TagResponse;
 import com.example.graphql.services.TagService;
 import java.util.List;
 import java.util.Optional;
@@ -30,20 +30,17 @@ class TagGraphQLControllerTest {
 
     @Test
     void allTags() {
-        TagEntity tag1 = new TagEntity();
-        tag1.setTagName("tag1");
-        TagEntity tag2 = new TagEntity();
-        tag2.setTagName("tag2");
+        TagResponse tag1 = new TagResponse(null, "tag1", "desc1");
+        TagResponse tag2 = new TagResponse(null, "tag2", "desc2");
         given(tagService.findAllTags()).willReturn(List.of(tag1, tag2));
 
-        var query =
-                """
-            query {
-                allTags {
-                    tagName
-                }
-            }
-        """;
+        var query = """
+                    query {
+                        allTags {
+                            tagName
+                        }
+                    }
+                """;
         graphQlTester
                 .document(query)
                 .execute()
@@ -57,12 +54,10 @@ class TagGraphQLControllerTest {
 
     @Test
     void findTagByName_found() {
-        TagEntity tag = new TagEntity();
-        tag.setTagName("tag1");
+        TagResponse tag = new TagResponse(null, "tag1", "desc1");
         given(tagService.findTagByName("tag1")).willReturn(Optional.of(tag));
 
-        var query =
-                """
+        var query = """
             query findTagByName($tagName: String!) {
                 findTagByName(tagName: $tagName) {
                     tagName
@@ -85,8 +80,7 @@ class TagGraphQLControllerTest {
     void findTagByName_notFound() {
         given(tagService.findTagByName("notfound")).willReturn(Optional.empty());
 
-        var query =
-                """
+        var query = """
             query findTagByName($tagName: String!) {
                 findTagByName(tagName: $tagName) {
                     tagName
@@ -106,15 +100,12 @@ class TagGraphQLControllerTest {
 
     @Test
     void createTag() {
-        TagEntity tag = new TagEntity();
-        tag.setTagName("tag3");
-        tag.setTagDescription("desc3");
-        given(tagService.saveTag("tag3", "desc3")).willReturn(tag);
+        TagResponse tagResponse = new TagResponse(null, "tag3", "desc3");
+        given(tagService.saveTag("tag3", "desc3")).willReturn(tagResponse);
 
-        var mutation =
-                """
+        var mutation = """
             mutation {
-                createTag(tagName: \"tag3\", tagDescription: \"desc3\") {
+                createTag(tagName: "tag3", tagDescription: "desc3") {
                     tagName
                     tagDescription
                 }
@@ -124,10 +115,10 @@ class TagGraphQLControllerTest {
                 .document(mutation)
                 .execute()
                 .path("createTag")
-                .entity(TagEntity.class)
+                .entity(TagResponse.class)
                 .satisfies(created -> {
-                    assertThat(created.getTagName()).isEqualTo("tag3");
-                    assertThat(created.getTagDescription()).isEqualTo("desc3");
+                    assertThat(created.tagName()).isEqualTo("tag3");
+                    assertThat(created.tagDescription()).isEqualTo("desc3");
                 });
 
         verify(tagService, times(1)).saveTag("tag3", "desc3");
@@ -136,15 +127,12 @@ class TagGraphQLControllerTest {
 
     @Test
     void updateTagDescription() {
-        TagEntity tag = new TagEntity();
-        tag.setTagName("tag4");
-        tag.setTagDescription("newdesc");
-        given(tagService.updateTag("tag4", "newdesc")).willReturn(Optional.of(tag));
+        TagResponse tagResponse = new TagResponse(null, "tag4", "newdesc");
+        given(tagService.updateTag("tag4", "newdesc")).willReturn(tagResponse);
 
-        var mutation =
-                """
+        var mutation = """
             mutation {
-                updateTagDescription(tagName: \"tag4\", tagDescription: \"newdesc\") {
+                updateTagDescription(tagName: "tag4", tagDescription: "newdesc") {
                     tagName
                     tagDescription
                 }
@@ -154,10 +142,10 @@ class TagGraphQLControllerTest {
                 .document(mutation)
                 .execute()
                 .path("updateTagDescription")
-                .entity(TagEntity.class)
+                .entity(TagResponse.class)
                 .satisfies(updated -> {
-                    assertThat(updated.getTagName()).isEqualTo("tag4");
-                    assertThat(updated.getTagDescription()).isEqualTo("newdesc");
+                    assertThat(updated.tagName()).isEqualTo("tag4");
+                    assertThat(updated.tagDescription()).isEqualTo("newdesc");
                 });
 
         verify(tagService, times(1)).updateTag("tag4", "newdesc");
@@ -167,10 +155,9 @@ class TagGraphQLControllerTest {
     @Test
     void deleteTag() {
         // deleteTag returns boolean true, just verify service call
-        var mutation =
-                """
+        var mutation = """
             mutation {
-                deleteTag(tagName: \"tag5\")
+                deleteTag(tagName: "tag5")
             }
         """;
 

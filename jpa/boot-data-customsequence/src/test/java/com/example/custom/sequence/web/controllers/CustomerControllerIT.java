@@ -8,8 +8,6 @@ import com.example.custom.sequence.model.request.CustomerRequest;
 import com.example.custom.sequence.model.request.OrderRequest;
 import com.example.custom.sequence.model.response.CustomerResponse;
 import com.example.custom.sequence.model.response.PagedResult;
-import com.example.custom.sequence.repositories.CustomerRepository;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import io.hypersistence.utils.jdbc.validator.SQLStatementCountValidator;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -17,15 +15,11 @@ import java.util.List;
 import java.util.Objects;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 
 class CustomerControllerIT extends AbstractIntegrationTest {
-
-    @Autowired
-    private CustomerRepository customerRepository;
 
     private List<Customer> customerList = null;
 
@@ -56,8 +50,8 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                 .satisfies(pagedResult -> {
                     assertThat(pagedResult.data()).hasSize(3);
                     assertThat(pagedResult.totalElements()).isEqualTo(3);
-                    assertThat(pagedResult.pageNumber()).isEqualTo(1);
-                    assertThat(pagedResult.totalPages()).isEqualTo(1);
+                    assertThat(pagedResult.pageNumber()).isOne();
+                    assertThat(pagedResult.totalPages()).isOne();
                     assertThat(pagedResult.isFirst()).isTrue();
                     assertThat(pagedResult.isLast()).isTrue();
                     assertThat(pagedResult.hasNext()).isFalse();
@@ -99,7 +93,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                 .post()
                 .uri("/api/customers")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(customerRequest))
+                .content(jsonMapper.writeValueAsString(customerRequest))
                 .assertThat()
                 .hasStatus(HttpStatus.CREATED)
                 .hasContentType(MediaType.APPLICATION_JSON)
@@ -111,44 +105,45 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                     assertThat(customerResponse.orderResponses()).isEmpty();
                 });
 
-        SQLStatementCountValidator.assertSelectCount(0);
+        SQLStatementCountValidator.assertSelectCount(1); // 1 SELECT for sequence value
         SQLStatementCountValidator.assertInsertCount(1);
-        SQLStatementCountValidator.assertTotalCount(1);
+        SQLStatementCountValidator.assertTotalCount(2);
 
         assertThat(customerRepository.count()).isEqualTo(4);
     }
 
     @Test
-    void shouldReturn400WhenCreateNewCustomerWithoutText() throws JsonProcessingException {
+    void shouldReturn400WhenCreateNewCustomerWithoutText() throws Exception {
         CustomerRequest customerRequest = new CustomerRequest(null, List.of(new OrderRequest("First Order", null)));
 
         this.mockMvcTester
                 .post()
                 .uri("/api/customers")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(customerRequest))
+                .content(jsonMapper.writeValueAsString(customerRequest))
                 .assertThat()
                 .hasStatus(HttpStatus.BAD_REQUEST)
                 .hasContentType(MediaType.APPLICATION_PROBLEM_JSON)
                 .bodyJson()
                 .convertTo(ProblemDetail.class)
                 .satisfies(errorResponse -> {
-                    assertThat(errorResponse.getType().toString()).isEqualTo("about:blank");
+                    assertThat(errorResponse.getType())
+                            .hasToString("https://custom-sequence.com/errors/validation-error");
                     assertThat(errorResponse.getTitle()).isEqualTo("Constraint Violation");
                     assertThat(errorResponse.getStatus()).isEqualTo(400);
                     assertThat(errorResponse.getDetail()).isEqualTo("Invalid request content.");
-                    assertThat(Objects.requireNonNull(errorResponse.getInstance())
-                                    .toString())
-                            .isEqualTo("/api/customers");
+                    assertThat(Objects.requireNonNull(errorResponse.getInstance()))
+                            .hasToString("/api/customers");
                     assertThat(errorResponse.getProperties()).hasSize(1);
                     Object violations = errorResponse.getProperties().get("violations");
-                    assertThat(violations).isNotNull();
                     assertThat(violations).isInstanceOf(List.class);
                     assertThat((List<?>) violations).hasSize(1);
-                    assertThat(((List<?>) violations).getFirst()).isInstanceOf(LinkedHashMap.class);
-                    LinkedHashMap<?, ?> violation = (LinkedHashMap<?, ?>) ((List<?>) violations).getFirst();
-                    assertThat(violation.get("field")).isEqualTo("text");
-                    assertThat(violation.get("message")).isEqualTo("Text cannot be empty");
+                    assertThat(((List<?>) violations)).first().isInstanceOf(LinkedHashMap.class);
+                    @SuppressWarnings("unchecked")
+                    LinkedHashMap<String, Object> violation =
+                            (LinkedHashMap<String, Object>) ((List<?>) violations).getFirst();
+                    assertThat(violation).containsEntry("field", "text");
+                    assertThat(violation).containsEntry("message", "Text cannot be empty");
                 });
 
         SQLStatementCountValidator.assertTotalCount(0);
@@ -157,14 +152,14 @@ class CustomerControllerIT extends AbstractIntegrationTest {
     }
 
     @Test
-    void shouldUpdateCustomer() throws Exception {
+    void shouldUpdateCustomer() {
         Customer customer = customerList.getFirst();
         CustomerRequest customerRequest = new CustomerRequest("Updated Customer", null);
 
         this.mockMvcTester
                 .put()
                 .uri("/api/customers/{id}", customer.getId())
-                .content(objectMapper.writeValueAsString(customerRequest))
+                .content(jsonMapper.writeValueAsString(customerRequest))
                 .contentType(MediaType.APPLICATION_JSON)
                 .assertThat()
                 .hasStatusOk()
@@ -195,7 +190,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                 .put()
                 .uri("/api/customers/{id}", customer.getId())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(customerRequest))
+                .content(jsonMapper.writeValueAsString(customerRequest))
                 .assertThat()
                 .hasContentType(MediaType.APPLICATION_JSON)
                 .hasStatusOk()
@@ -225,7 +220,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                 .put()
                 .uri("/api/customers/{id}", customer.getId())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(customerRequest))
+                .content(jsonMapper.writeValueAsString(customerRequest))
                 .assertThat()
                 .hasContentType(MediaType.APPLICATION_JSON)
                 .hasStatusOk()
@@ -235,8 +230,8 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                     assertThat(customerResponse.text()).isEqualTo("Updated Customer1");
                     assertThat(customerResponse.orderResponses()).isNotEmpty().hasSize(2);
                 });
-        // select for customer
-        SQLStatementCountValidator.assertSelectCount(1);
+        // select for customer and 2 for orders sequence
+        SQLStatementCountValidator.assertSelectCount(2);
         // update for customer table
         SQLStatementCountValidator.assertUpdateCount(0);
         // bulk insert for orders
@@ -260,10 +255,10 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                 .satisfies(
                         customerResponse -> assertThat(customerResponse.text()).isEqualTo(customer.getText()));
 
-        // select for customer
+        // select for customer only
         SQLStatementCountValidator.assertSelectCount(1);
         SQLStatementCountValidator.assertUpdateCount(0);
-        SQLStatementCountValidator.assertInsertCount(0);
+        SQLStatementCountValidator.assertTotalCount(2);
         // delete for customer
         SQLStatementCountValidator.assertDeleteCount(1);
 

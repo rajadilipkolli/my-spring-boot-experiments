@@ -18,6 +18,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import org.hibernate.Hibernate;
+import org.jspecify.annotations.Nullable;
 
 @Entity
 @Table(name = "posts")
@@ -94,7 +95,7 @@ public class PostEntity extends Auditable implements Serializable {
         return publishedAt;
     }
 
-    public PostEntity setComments(List<PostCommentEntity> comments) {
+    public PostEntity setComments(@Nullable List<PostCommentEntity> comments) {
         if (comments == null) {
             comments = new ArrayList<>();
         }
@@ -106,7 +107,7 @@ public class PostEntity extends Auditable implements Serializable {
         return comments;
     }
 
-    public PostEntity setTags(List<PostTagEntity> tags) {
+    public PostEntity setTags(@Nullable List<PostTagEntity> tags) {
         if (tags == null) {
             tags = new ArrayList<>();
         }
@@ -137,7 +138,7 @@ public class PostEntity extends Auditable implements Serializable {
         comment.setPostEntity(null);
     }
 
-    public void setDetails(PostDetailsEntity details) {
+    public void setDetails(@Nullable PostDetailsEntity details) {
         if (details == null) {
             if (this.details != null) {
                 this.details.setPostEntity(null);

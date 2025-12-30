@@ -63,8 +63,7 @@ class AuthorEntityQueryTest {
                                 "junit2@email.com",
                                 LocalDateTime.now())));
 
-        var allAuthors =
-                """
+        var allAuthors = """
                 query authorEntities{
                     allAuthors{
                      id

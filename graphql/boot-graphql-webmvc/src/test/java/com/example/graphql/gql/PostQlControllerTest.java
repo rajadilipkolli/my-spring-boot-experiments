@@ -84,8 +84,7 @@ class PostQlControllerTest {
                         new TestPostInfo(1L, "Title1", "Content1", true),
                         new TestPostInfo(2L, "Title2", "Content2", false)));
 
-        var query =
-                """
+        var query = """
             query allPostsByEmail($email: String!) {
                 allPostsByEmail(email: $email) {
                     id

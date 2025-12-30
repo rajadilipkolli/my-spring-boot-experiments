@@ -10,7 +10,9 @@ import com.example.custom.sequence.entities.Customer;
 import com.example.custom.sequence.mapper.CustomerMapper;
 import com.example.custom.sequence.model.request.CustomerRequest;
 import com.example.custom.sequence.model.request.OrderRequest;
-import com.example.custom.sequence.model.response.*;
+import com.example.custom.sequence.model.response.CustomerResponse;
+import com.example.custom.sequence.model.response.OrderResponseWithOutCustomer;
+import com.example.custom.sequence.model.response.PagedResult;
 import com.example.custom.sequence.repositories.CustomerRepository;
 import java.util.List;
 import java.util.Optional;
@@ -50,12 +52,12 @@ class CustomerServiceTest {
         assertThat(pagedResult).isNotNull();
         assertThat(pagedResult.data()).isNotEmpty().hasSize(1);
         assertThat(pagedResult.hasNext()).isFalse();
-        assertThat(pagedResult.pageNumber()).isEqualTo(1);
-        assertThat(pagedResult.totalPages()).isEqualTo(1);
+        assertThat(pagedResult.pageNumber()).isOne();
+        assertThat(pagedResult.totalPages()).isOne();
         assertThat(pagedResult.isFirst()).isTrue();
         assertThat(pagedResult.isLast()).isTrue();
         assertThat(pagedResult.hasPrevious()).isFalse();
-        assertThat(pagedResult.totalElements()).isEqualTo(1);
+        assertThat(pagedResult.totalElements()).isOne();
     }
 
     @Test

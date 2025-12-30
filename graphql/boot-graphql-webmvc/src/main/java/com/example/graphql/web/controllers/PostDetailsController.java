@@ -5,6 +5,7 @@ import com.example.graphql.model.request.PostDetailsRequest;
 import com.example.graphql.model.response.PostDetailsResponse;
 import com.example.graphql.services.PostDetailsService;
 import java.util.List;
+import org.jspecify.annotations.NonNull;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -14,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/postdetails")
+@RequestMapping("/api/post/details")
 @Loggable
 public class PostDetailsController {
 
@@ -30,7 +31,7 @@ public class PostDetailsController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<PostDetailsResponse> getPostDetailsById(@PathVariable Long id) {
+    public ResponseEntity<@NonNull PostDetailsResponse> getPostDetailsById(@PathVariable Long id) {
         return postDetailsService
                 .findPostDetailsById(id)
                 .map(ResponseEntity::ok)
@@ -38,7 +39,7 @@ public class PostDetailsController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<PostDetailsResponse> updatePostDetails(
+    public ResponseEntity<@NonNull PostDetailsResponse> updatePostDetails(
             @PathVariable Long id, @RequestBody PostDetailsRequest postDetailsEntity) {
         return postDetailsService
                 .findDetailsById(id)

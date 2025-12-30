@@ -78,8 +78,7 @@ class MovieControllerIT extends AbstractIntegrationTest {
                 .expectHeader()
                 .contentType(MediaType.APPLICATION_PROBLEM_JSON)
                 .expectBody()
-                .json(
-                        """
+                .json("""
                         {"type":"https://api.boot-reactive-cache.com/errors/not-found","title":"Not Found",
                         "status":404,"detail":"Movie with Id '10000' not found","instance":"/api/movies/10000",
                         "errorCategory":"Generic"}
@@ -127,15 +126,13 @@ class MovieControllerIT extends AbstractIntegrationTest {
                 .expectHeader()
                 .contentType(MediaType.APPLICATION_PROBLEM_JSON)
                 .expectBody()
-                .json(
-                        """
+                .json("""
                         {"type":"https://api.boot-reactive-cache.com/errors/constraint-violation",
                         "title":"Constraint Violation","status":400,"detail":"Invalid request content.",
                         "instance":"/api/movies",
                         "violations":[{"object":"movieRequest","field":"title","rejectedValue":null,
                         "message":"Title cannot be blank"}]}
-                        """,
-                        true);
+                        """, true);
     }
 
     @Test
@@ -192,8 +189,7 @@ class MovieControllerIT extends AbstractIntegrationTest {
                 .expectHeader()
                 .contentType(MediaType.APPLICATION_PROBLEM_JSON)
                 .expectBody()
-                .json(
-                        """
+                .json("""
                         {"type":"https://api.boot-reactive-cache.com/errors/not-found","title":"Not Found","status":404,
                         "detail":"Movie with Id '10000' not found","instance":"/api/movies/10000",
                         "errorCategory":"Generic"}

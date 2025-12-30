@@ -25,8 +25,7 @@ public class LoggingAspect {
         this.env = env;
     }
 
-    @Pointcut(
-            """
+    @Pointcut("""
             within(@org.springframework.stereotype.Repository *)\
              || within(@org.springframework.stereotype.Service *)\
              || within(@org.springframework.web.bind.annotation.RestController *)\
@@ -35,8 +34,7 @@ public class LoggingAspect {
         // pointcut definition
     }
 
-    @Pointcut(
-            """
+    @Pointcut("""
             @within(com.example.featuretoggle.config.logging.Loggable) || \
             @annotation(com.example.featuretoggle.config.logging.Loggable)\
             """)

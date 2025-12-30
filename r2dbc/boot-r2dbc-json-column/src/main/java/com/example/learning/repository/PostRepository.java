@@ -18,8 +18,7 @@ public interface PostRepository extends R2dbcRepository<Post, UUID> {
 
     Flux<PostSummary> findByTitleLike(String title, Pageable pageable);
 
-    @Query(
-            """
+    @Query("""
             SELECT * FROM posts ORDER BY CASE WHEN :direction = 'ASC' THEN :sortBy END ASC,
             CASE WHEN :direction = 'DESC' THEN :sortBy END DESC
             LIMIT :size OFFSET :offset

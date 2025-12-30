@@ -3,7 +3,6 @@ package com.example.mongoes.model.request;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.example.mongoes.document.Address;
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -13,16 +12,16 @@ import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.boot.test.json.JsonContent;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.geo.Point;
-import org.springframework.data.web.config.SpringDataJacksonConfiguration;
+import org.springframework.data.web.config.SpringDataJackson3Configuration;
 
 @JsonTest
-@Import(SpringDataJacksonConfiguration.class)
+@Import(SpringDataJackson3Configuration.class)
 class RestaurantRequestTest {
 
     @Autowired private JacksonTester<RestaurantRequest> jacksonTester;
 
     @Test
-    void serializeInCorrectFormat() throws IOException {
+    void serializeInCorrectFormat() throws Exception {
         Address address = new Address();
         address.setLocation(new Point(-73.9, 40.8));
         RestaurantRequest restaurantRequest = getRestaurantRequest(address);
@@ -35,7 +34,7 @@ class RestaurantRequestTest {
     }
 
     @Test
-    void deserializeInCorrectFormat() throws IOException {
+    void deserializeInCorrectFormat() throws Exception {
         String jsonContent =
                 """
         {
@@ -66,7 +65,7 @@ class RestaurantRequestTest {
 
         RestaurantRequest restaurantRequest = jacksonTester.parseObject(jsonContent);
         assertThat(restaurantRequest).isNotNull();
-        assertThat(restaurantRequest.restaurantId()).isEqualTo(1L);
+        assertThat(restaurantRequest.restaurantId()).isOne();
         assertThat(restaurantRequest.name()).isEqualTo("junitRestaurant");
         assertThat(restaurantRequest.borough()).isEqualTo("junitBorough");
         assertThat(restaurantRequest.cuisine()).isEqualTo("junitCuisine");

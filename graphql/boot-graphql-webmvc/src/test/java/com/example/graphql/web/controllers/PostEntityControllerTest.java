@@ -31,7 +31,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 @WebMvcTest(controllers = PostController.class)
 @ActiveProfiles(PROFILE_TEST)
@@ -44,7 +44,7 @@ class PostEntityControllerTest {
     private PostService postService;
 
     @Autowired
-    private ObjectMapper objectMapper;
+    private JsonMapper jsonMapper;
 
     private List<PostEntity> postEntityList;
 
@@ -113,7 +113,7 @@ class PostEntityControllerTest {
         this.mockMvc
                 .perform(post("/api/posts")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(postEntity)))
+                        .content(jsonMapper.writeValueAsString(postEntity)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.content", is(postEntity.content())));
     }
@@ -125,7 +125,7 @@ class PostEntityControllerTest {
         this.mockMvc
                 .perform(post("/api/posts")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(post)))
+                        .content(jsonMapper.writeValueAsString(post)))
                 .andExpect(status().isBadRequest())
                 .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                 .andExpect(jsonPath("$.type", is("https://api.graphql-webmvc.com/errors/validation")))
@@ -158,7 +158,7 @@ class PostEntityControllerTest {
         this.mockMvc
                 .perform(put("/api/posts/{id}", postId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(postEntity)))
+                        .content(jsonMapper.writeValueAsString(postEntity)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", is(postEntity.content())));
     }
@@ -172,7 +172,7 @@ class PostEntityControllerTest {
         this.mockMvc
                 .perform(put("/api/posts/{id}", postId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(postEntity)))
+                        .content(jsonMapper.writeValueAsString(postEntity)))
                 .andExpect(status().isNotFound())
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                 .andExpect(jsonPath("$.type", is("https://api.graphql-webmvc.com/errors/not-found")))
@@ -185,17 +185,16 @@ class PostEntityControllerTest {
     @Test
     void shouldDeletePost() throws Exception {
         Long postId = 1L;
-        PostEntity postEntity = new PostEntity().setId(postId).setContent("First Post");
-        given(postService.findPostById(postId)).willReturn(Optional.of(postResponseList.getFirst()));
-        doNothing().when(postService).deletePostById(postEntity.getId());
+        given(postService.existsPostById(postId)).willReturn(true);
+        doNothing().when(postService).deletePostById(postId);
 
-        this.mockMvc.perform(delete("/api/posts/{id}", postEntity.getId())).andExpect(status().isAccepted());
+        this.mockMvc.perform(delete("/api/posts/{id}", postId)).andExpect(status().isAccepted());
     }
 
     @Test
     void shouldReturn404WhenDeletingNonExistingPost() throws Exception {
         Long postId = 1L;
-        given(postService.findPostById(postId)).willReturn(Optional.empty());
+        given(postService.existsPostById(postId)).willReturn(false);
 
         this.mockMvc
                 .perform(delete("/api/posts/{id}", postId))

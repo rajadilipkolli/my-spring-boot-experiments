@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@Transactional
+@Transactional(readOnly = true)
 @Loggable
 public class AuthorService {
 
@@ -31,42 +31,46 @@ public class AuthorService {
         this.authorRequestToEntityMapper = authorRequestToEntityMapper;
     }
 
-    @Transactional(readOnly = true)
     public List<AuthorResponse> findAllAuthors() {
         return authorRepository.findAll().stream()
-                .map(authorEntity -> appConversionService.convert(authorEntity, AuthorResponse.class))
+                .map(author -> appConversionService.convert(author, AuthorResponse.class))
                 .toList();
     }
 
-    @Transactional(readOnly = true)
     public Optional<AuthorResponse> findAuthorById(Long id) {
         return authorRepository
                 .findById(id)
                 .map(authorEntity -> appConversionService.convert(authorEntity, AuthorResponse.class));
     }
 
+    @Transactional
     public AuthorResponse saveAuthor(AuthorRequest authorRequest) {
         AuthorEntity authorEntity = this.appConversionService.convert(authorRequest, AuthorEntity.class);
         return this.appConversionService.convert(
                 authorRepository.save(Objects.requireNonNull(authorEntity)), AuthorResponse.class);
     }
 
+    @Transactional
     public Optional<AuthorResponse> updateAuthor(AuthorRequest authorRequest, Long id) {
 
         return authorRepository.findById(id).map(authorEntity -> {
-            authorRequestToEntityMapper.upDateAuthorEntity(authorRequest, authorEntity);
+            authorRequestToEntityMapper.updateAuthorEntity(authorRequest, authorEntity);
             return appConversionService.convert(authorRepository.save(authorEntity), AuthorResponse.class);
         });
     }
 
+    @Transactional
     public void deleteAuthorById(Long id) {
         authorRepository.deleteById(id);
     }
 
-    @Transactional(readOnly = true)
     public Optional<AuthorResponse> findAuthorByEmailId(String email) {
         return this.authorRepository
                 .findByEmailAllIgnoreCase(email)
                 .map(authorEntity -> appConversionService.convert(authorEntity, AuthorResponse.class));
+    }
+
+    public boolean existsAuthorById(Long id) {
+        return this.authorRepository.existsById(id);
     }
 }

@@ -8,25 +8,16 @@ import com.example.custom.sequence.entities.Order;
 import com.example.custom.sequence.model.request.OrderRequest;
 import com.example.custom.sequence.model.response.OrderResponse;
 import com.example.custom.sequence.model.response.PagedResult;
-import com.example.custom.sequence.repositories.CustomerRepository;
-import com.example.custom.sequence.repositories.OrderRepository;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Objects;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 
 class OrderControllerIT extends AbstractIntegrationTest {
-
-    @Autowired
-    private OrderRepository orderRepository;
-
-    @Autowired
-    private CustomerRepository customerRepository;
 
     private List<Order> orderList = null;
     private Customer customer;
@@ -65,8 +56,8 @@ class OrderControllerIT extends AbstractIntegrationTest {
                 .satisfies(pagedResult -> {
                     assertThat(pagedResult.data()).hasSize(3);
                     assertThat(pagedResult.totalElements()).isEqualTo(3);
-                    assertThat(pagedResult.pageNumber()).isEqualTo(1);
-                    assertThat(pagedResult.totalPages()).isEqualTo(1);
+                    assertThat(pagedResult.pageNumber()).isOne();
+                    assertThat(pagedResult.totalPages()).isOne();
                     assertThat(pagedResult.isFirst()).isTrue();
                     assertThat(pagedResult.isLast()).isTrue();
                     assertThat(pagedResult.hasNext()).isFalse();
@@ -101,14 +92,14 @@ class OrderControllerIT extends AbstractIntegrationTest {
                 .post()
                 .uri("/api/orders")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(orderRequest))
+                .content(jsonMapper.writeValueAsString(orderRequest))
                 .assertThat()
                 .hasStatus(HttpStatus.CREATED)
                 .hasContentType(MediaType.APPLICATION_JSON)
                 .bodyJson()
                 .convertTo(OrderResponse.class)
                 .satisfies(orderResponse -> {
-                    assertThat(orderResponse.id()).isNotNull().hasSize(9);
+                    assertThat(orderResponse.id()).hasSize(9);
                     assertThat(orderResponse.text()).isEqualTo(orderRequest.text());
                 });
     }
@@ -121,28 +112,28 @@ class OrderControllerIT extends AbstractIntegrationTest {
                 .post()
                 .uri("/api/orders")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(orderRequest))
+                .content(jsonMapper.writeValueAsString(orderRequest))
                 .assertThat()
                 .hasStatus(HttpStatus.BAD_REQUEST)
                 .hasContentType(MediaType.APPLICATION_PROBLEM_JSON)
                 .bodyJson()
                 .convertTo(ProblemDetail.class)
                 .satisfies(problem -> {
-                    assertThat(problem.getType().toString()).isEqualTo("about:blank");
+                    assertThat(problem.getType()).hasToString("https://custom-sequence.com/errors/validation-error");
                     assertThat(problem.getTitle()).isEqualTo("Constraint Violation");
                     assertThat(problem.getStatus()).isEqualTo(400);
                     assertThat(problem.getDetail()).isEqualTo("Invalid request content.");
-                    assertThat(Objects.requireNonNull(problem.getInstance()).toString())
-                            .isEqualTo("/api/orders");
+                    assertThat(Objects.requireNonNull(problem.getInstance())).hasToString("/api/orders");
                     assertThat(problem.getProperties()).hasSize(1);
                     Object violations = problem.getProperties().get("violations");
-                    assertThat(violations).isNotNull();
                     assertThat(violations).isInstanceOf(List.class);
                     assertThat((List<?>) violations).hasSize(1);
-                    assertThat(((List<?>) violations).getFirst()).isInstanceOf(LinkedHashMap.class);
-                    LinkedHashMap<?, ?> violation = (LinkedHashMap<?, ?>) ((List<?>) violations).getFirst();
-                    assertThat(violation.get("field")).isEqualTo("text");
-                    assertThat(violation.get("message")).isEqualTo("Text cannot be empty");
+                    assertThat(((List<?>) violations)).first().isInstanceOf(LinkedHashMap.class);
+                    @SuppressWarnings("unchecked")
+                    LinkedHashMap<String, Object> violation =
+                            (LinkedHashMap<String, Object>) ((List<?>) violations).getFirst();
+                    assertThat(violation).containsEntry("field", "text");
+                    assertThat(violation).containsEntry("message", "Text cannot be empty");
                 });
     }
 
@@ -155,7 +146,7 @@ class OrderControllerIT extends AbstractIntegrationTest {
                 .put()
                 .uri("/api/orders/{id}", order.getId())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(orderRequest))
+                .content(jsonMapper.writeValueAsString(orderRequest))
                 .assertThat()
                 .hasStatus(HttpStatus.OK)
                 .hasContentType(MediaType.APPLICATION_JSON)
@@ -176,7 +167,7 @@ class OrderControllerIT extends AbstractIntegrationTest {
                 .put()
                 .uri("/api/orders/{id}", order.getId())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(orderRequest))
+                .content(jsonMapper.writeValueAsString(orderRequest))
                 .assertThat()
                 .hasStatus(HttpStatus.NOT_FOUND);
     }
@@ -189,7 +180,7 @@ class OrderControllerIT extends AbstractIntegrationTest {
                 .put()
                 .uri("/api/orders/{id}", "NON_EXISTENT_ID")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(orderRequest))
+                .content(jsonMapper.writeValueAsString(orderRequest))
                 .assertThat()
                 .hasStatus(HttpStatus.NOT_FOUND);
     }

@@ -94,7 +94,7 @@ class ReadReplicaApplicationTests {
     void shouldInsertViaPrimary() {
         Object[] params = {4, "Junit", LocalDateTime.now(), null};
         int rowsAffected = primaryJdbcTemplate.update(insertSQL, params);
-        assertThat(rowsAffected).isEqualTo(1);
+        assertThat(rowsAffected).isOne();
         Integer noOfRows = primaryJdbcTemplate.queryForObject(countSQL, Integer.class);
         assertThat(noOfRows).isEqualTo(4);
         await().atMost(3, TimeUnit.SECONDS)
@@ -122,7 +122,7 @@ class ReadReplicaApplicationTests {
         String deleteSQL = "DELETE FROM articles WHERE id = ?";
         Object[] params = {4};
         int rowsAffected = primaryJdbcTemplate.update(deleteSQL, params);
-        assertThat(rowsAffected).isEqualTo(1);
+        assertThat(rowsAffected).isOne();
         await().atMost(3, TimeUnit.SECONDS)
                 .untilAsserted(
                         () -> {

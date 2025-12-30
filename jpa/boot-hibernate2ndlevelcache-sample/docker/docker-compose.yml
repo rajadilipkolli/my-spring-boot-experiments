@@ -2,7 +2,7 @@ version: '3.8'
 services:
 
   postgresqldb:
-    image: postgres:18.0-alpine
+    image: postgres:18.1-alpine
     environment:
       - POSTGRES_USER=appuser
       - POSTGRES_PASSWORD=secret
@@ -11,7 +11,7 @@ services:
       - "5432:5432"
   
   redis:
-    image: 'redis:8.2.2-alpine'
+    image: 'redis:8.4.0-alpine'
     ports:
       - '127.0.0.1:6379:6379/tcp'
     volumes:

@@ -3,6 +3,7 @@
  */
 package com.example.jooq.r2dbc.dbgen;
 
+import java.io.Serial;
 import java.util.Arrays;
 import java.util.List;
 import org.jooq.Constants;
@@ -13,7 +14,7 @@ import org.jooq.impl.CatalogImpl;
 @SuppressWarnings({"all", "unchecked", "rawtypes"})
 public class DefaultCatalog extends CatalogImpl {
 
-    private static final long serialVersionUID = 1L;
+    @Serial private static final long serialVersionUID = 1L;
 
     /** The reference instance of <code>DEFAULT_CATALOG</code> */
     public static final DefaultCatalog DEFAULT_CATALOG = new DefaultCatalog();

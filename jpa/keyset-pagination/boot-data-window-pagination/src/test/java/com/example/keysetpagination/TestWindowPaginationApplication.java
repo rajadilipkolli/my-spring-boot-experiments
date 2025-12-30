@@ -5,7 +5,7 @@ import org.springframework.boot.SpringApplication;
 
 public class TestWindowPaginationApplication {
 
-    public static void main(String[] args) {
+    static void main(String[] args) {
         SpringApplication.from(WindowPaginationApplication::main)
                 .withAdditionalProfiles("local")
                 .with(ContainersConfig.class)

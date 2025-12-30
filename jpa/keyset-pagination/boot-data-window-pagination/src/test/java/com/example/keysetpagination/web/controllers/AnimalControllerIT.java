@@ -78,8 +78,7 @@ class AnimalControllerIT extends AbstractIntegrationTest {
         String contentAsString = this.mockMvc
                 .perform(post("/api/animals/search")
                         .param("pageSize", "2")
-                        .content(
-                                """
+                        .content("""
                                 {
                                     "searchCriteriaList": [
                                         {
@@ -102,9 +101,8 @@ class AnimalControllerIT extends AbstractIntegrationTest {
                 .getResponse()
                 .getContentAsString();
 
-        CustomWindow<Animal> window = objectMapper.readValue(
-                contentAsString,
-                objectMapper.getTypeFactory().constructParametricType(CustomWindow.class, Animal.class));
+        CustomWindow<Animal> window = jsonMapper.readValue(
+                contentAsString, jsonMapper.getTypeFactory().constructParametricType(CustomWindow.class, Animal.class));
         List<Animal> animalResponses = window.getContent();
         this.mockMvc
                 .perform(post("/api/animals/search")
@@ -112,8 +110,7 @@ class AnimalControllerIT extends AbstractIntegrationTest {
                         .param(
                                 "scrollId",
                                 String.valueOf(animalResponses.getLast().getId()))
-                        .content(
-                                """
+                        .content("""
                                 {
                                     "searchCriteriaList": [
                                         {
@@ -141,11 +138,9 @@ class AnimalControllerIT extends AbstractIntegrationTest {
     @Test
     void shouldReturnResultForNotEqualType() throws Exception {
         this.mockMvc
-                .perform(
-                        post("/api/animals/search")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(
-                                        """
+                .perform(post("/api/animals/search")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
                                         {
                                         	"searchCriteriaList": [
                                         		{
@@ -169,11 +164,9 @@ class AnimalControllerIT extends AbstractIntegrationTest {
     @Test
     void shouldReturnEmptyResultForNonExistentType() throws Exception {
         this.mockMvc
-                .perform(
-                        post("/api/animals/search")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(
-                                        """
+                .perform(post("/api/animals/search")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
                                          {
                                         	"searchCriteriaList": [
                                         		{
@@ -210,7 +203,7 @@ class AnimalControllerIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(post("/api/animals")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(animalRequest)))
+                        .content(jsonMapper.writeValueAsString(animalRequest)))
                 .andExpect(status().isCreated())
                 .andExpect(header().exists(HttpHeaders.LOCATION))
                 .andExpect(jsonPath("$.id", notNullValue()))
@@ -226,10 +219,10 @@ class AnimalControllerIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(post("/api/animals")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(animalRequest)))
+                        .content(jsonMapper.writeValueAsString(animalRequest)))
                 .andExpect(status().isBadRequest())
-                .andExpect(header().string("Content-Type", is("application/problem+json")))
-                .andExpect(jsonPath("$.type", is("about:blank")))
+                .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
+                .andExpect(jsonPath("$.type", is("https://api.boot-data-window-pagination.com/errors/validation")))
                 .andExpect(jsonPath("$.title", is("Constraint Violation")))
                 .andExpect(jsonPath("$.status", is(400)))
                 .andExpect(jsonPath("$.detail", is("Invalid request content.")))
@@ -251,7 +244,7 @@ class AnimalControllerIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(put("/api/animals/{id}", animalId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(animalRequest)))
+                        .content(jsonMapper.writeValueAsString(animalRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(animalId), Long.class))
                 .andExpect(jsonPath("$.name", is(animalRequest.name())))
@@ -268,13 +261,13 @@ class AnimalControllerIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(put("/api/animals/{id}", animalId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(animalRequest)))
+                        .content(jsonMapper.writeValueAsString(animalRequest)))
                 .andExpect(status().isOk());
 
         this.mockMvc
                 .perform(put("/api/animals/{id}", animalId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(animalRequest)))
+                        .content(jsonMapper.writeValueAsString(animalRequest)))
                 .andExpect(status().isOk());
     }
 
@@ -285,7 +278,7 @@ class AnimalControllerIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(put("/api/animals/{id}", 999L)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(animalRequest)))
+                        .content(jsonMapper.writeValueAsString(animalRequest)))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.title", is("Not Found")))
                 .andExpect(jsonPath("$.status", is(404)));
@@ -310,11 +303,9 @@ class AnimalControllerIT extends AbstractIntegrationTest {
     void shouldReturnResultForEqualOperator() throws Exception {
         // Test for EQ operator
         this.mockMvc
-                .perform(
-                        post("/api/animals/search")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(
-                                        """
+                .perform(post("/api/animals/search")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
                                         {
                                         	"searchCriteriaList": [
                                         		{
@@ -337,11 +328,9 @@ class AnimalControllerIT extends AbstractIntegrationTest {
     void shouldReturnResultForNotEqualOperator() throws Exception {
         // Test for NE operator
         this.mockMvc
-                .perform(
-                        post("/api/animals/search")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(
-                                        """
+                .perform(post("/api/animals/search")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
                                         {
                                         	"searchCriteriaList": [
                                         		{
@@ -363,11 +352,9 @@ class AnimalControllerIT extends AbstractIntegrationTest {
     void shouldReturnResultForInOperator() throws Exception {
         // Test for IN operator
         this.mockMvc
-                .perform(
-                        post("/api/animals/search")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(
-                                        """
+                .perform(post("/api/animals/search")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
                                         {
                                         	"searchCriteriaList": [
                                         		{
@@ -390,11 +377,9 @@ class AnimalControllerIT extends AbstractIntegrationTest {
     void shouldReturnResultForNotInOperator() throws Exception {
         // Test for NOTIN operator
         this.mockMvc
-                .perform(
-                        post("/api/animals/search")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(
-                                        """
+                .perform(post("/api/animals/search")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
                                         {
                                         	"searchCriteriaList": [
                                         		{
@@ -417,11 +402,9 @@ class AnimalControllerIT extends AbstractIntegrationTest {
     void shouldReturnResultForLikeOperator() throws Exception {
         // Test for LIKE operator
         this.mockMvc
-                .perform(
-                        post("/api/animals/search")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(
-                                        """
+                .perform(post("/api/animals/search")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
                                         {
                                         	"searchCriteriaList": [
                                               {
@@ -442,11 +425,9 @@ class AnimalControllerIT extends AbstractIntegrationTest {
     void shouldReturnResultForContainsOperator() throws Exception {
         // Test for CONTAINS operator
         this.mockMvc
-                .perform(
-                        post("/api/animals/search")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(
-                                        """
+                .perform(post("/api/animals/search")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
                                         {
                                            "searchCriteriaList": [
                                               {
@@ -466,11 +447,9 @@ class AnimalControllerIT extends AbstractIntegrationTest {
     void shouldReturnResultForStartsWithOperator() throws Exception {
         // Test for STARTS_WITH operator
         this.mockMvc
-                .perform(
-                        post("/api/animals/search")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(
-                                        """
+                .perform(post("/api/animals/search")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
                                         {
                                           "searchCriteriaList": [
                                               {
@@ -497,11 +476,9 @@ class AnimalControllerIT extends AbstractIntegrationTest {
     void shouldReturnResultForEndsWithOperator() throws Exception {
         // Test for ENDS_WITH operator
         this.mockMvc
-                .perform(
-                        post("/api/animals/search")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(
-                                        """
+                .perform(post("/api/animals/search")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
                                         {
                                         	"searchCriteriaList": [
                                               {
@@ -527,8 +504,7 @@ class AnimalControllerIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(post("/api/animals/search")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(
-                                """
+                        .content("""
                                 {
                                     "searchCriteriaList": [
                                         {
@@ -541,8 +517,7 @@ class AnimalControllerIT extends AbstractIntegrationTest {
                                         }
                                     ]
                                 }
-                                """
-                                        .formatted(minId, maxId)))
+                                """.formatted(minId, maxId)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content.size()", is(5))) // Animals with IDs between minId and maxId
                 .andExpect(jsonPath("$.last", is(true)));
@@ -552,11 +527,9 @@ class AnimalControllerIT extends AbstractIntegrationTest {
     void shouldReturnResultForAndOperator() throws Exception {
         // Test for AND operator
         this.mockMvc
-                .perform(
-                        post("/api/animals/search")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(
-                                        """
+                .perform(post("/api/animals/search")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
                                         {
                                         	"searchCriteriaList": [
                                         		{
@@ -586,11 +559,9 @@ class AnimalControllerIT extends AbstractIntegrationTest {
     void shouldReturnResultForAndOperatorCriteriaGroup() throws Exception {
         // Test for AND operator
         this.mockMvc
-                .perform(
-                        post("/api/animals/search")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(
-                                        """
+                .perform(post("/api/animals/search")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
                                         {
                                           "searchCriteriaList": [
                                             {
@@ -636,11 +607,9 @@ class AnimalControllerIT extends AbstractIntegrationTest {
     void shouldReturnResultForOrOperator() throws Exception {
         // Test for OR operator
         this.mockMvc
-                .perform(
-                        post("/api/animals/search")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(
-                                        """
+                .perform(post("/api/animals/search")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
                                         {
                                            "searchCriteriaList": [
                                               {
@@ -660,12 +629,10 @@ class AnimalControllerIT extends AbstractIntegrationTest {
     void shouldFetchAnimalsWithBackwardDirectionUsingSearch() throws Exception {
         // Fetch the first page of animals
         String contentAsString = this.mockMvc
-                .perform(
-                        post("/api/animals/search")
-                                .param("pageSize", "2")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(
-                                        """
+                .perform(post("/api/animals/search")
+                        .param("pageSize", "2")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
                                 {
                                     "searchCriteriaList": [
                                       {
@@ -683,23 +650,19 @@ class AnimalControllerIT extends AbstractIntegrationTest {
                 .getResponse()
                 .getContentAsString();
 
-        CustomWindow<Animal> window = objectMapper.readValue(
-                contentAsString,
-                objectMapper.getTypeFactory().constructParametricType(CustomWindow.class, Animal.class));
+        CustomWindow<Animal> window = jsonMapper.readValue(
+                contentAsString, jsonMapper.getTypeFactory().constructParametricType(CustomWindow.class, Animal.class));
         List<Animal> animalResponses = window.getContent();
 
         // Fetch the previous page using backward direction
         this.mockMvc
-                .perform(
-                        post("/api/animals/search")
-                                .param("pageSize", "2")
-                                .param(
-                                        "scrollId",
-                                        String.valueOf(
-                                                animalResponses.getFirst().getId()))
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(
-                                        """
+                .perform(post("/api/animals/search")
+                        .param("pageSize", "2")
+                        .param(
+                                "scrollId",
+                                String.valueOf(animalResponses.getFirst().getId()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
                                 {
                                     "searchCriteriaList": [
                                       {

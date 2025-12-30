@@ -27,7 +27,7 @@ class ApplicationIntTest extends AbstractIntegrationTest {
                 .expectStatus()
                 .isOk()
                 .expectBody(Long.class)
-                .value(aLong -> assertThat(aLong).isEqualTo(1));
+                .value(aLong -> assertThat(aLong).isOne());
     }
 
     @Test

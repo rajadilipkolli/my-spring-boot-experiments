@@ -41,7 +41,7 @@ class PostCommentServiceTest {
         // then
         assertThat(optionalPostComment).isPresent();
         PostCommentResponse postComment = optionalPostComment.get();
-        assertThat(postComment.id()).isEqualTo(1L);
+        assertThat(postComment.id()).isOne();
         assertThat(postComment.review()).isEqualTo("junitTest");
     }
 

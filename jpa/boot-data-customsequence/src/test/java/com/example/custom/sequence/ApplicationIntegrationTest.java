@@ -10,6 +10,6 @@ class ApplicationIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     void contextLoads() {
-        assertThat(dataSource).isNotNull().isInstanceOf(LazyConnectionDataSourceProxy.class);
+        assertThat(dataSource).isInstanceOf(LazyConnectionDataSourceProxy.class);
     }
 }

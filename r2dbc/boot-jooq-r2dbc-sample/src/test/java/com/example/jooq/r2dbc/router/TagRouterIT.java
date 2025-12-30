@@ -20,9 +20,9 @@ class TagRouterIT extends AbstractIntegrationTest {
                 .value(
                         paginatedResult -> {
                             assertThat(paginatedResult.data()).isNotEmpty().hasSize(1);
-                            assertThat(paginatedResult.totalElements()).isEqualTo(1);
-                            assertThat(paginatedResult.pageNumber()).isEqualTo(1);
-                            assertThat(paginatedResult.totalPages()).isEqualTo(1);
+                            assertThat(paginatedResult.totalElements()).isOne();
+                            assertThat(paginatedResult.pageNumber()).isOne();
+                            assertThat(paginatedResult.totalPages()).isOne();
                             assertThat(paginatedResult.isFirst()).isTrue();
                             assertThat(paginatedResult.isLast()).isTrue();
                             assertThat(paginatedResult.hasNext()).isFalse();

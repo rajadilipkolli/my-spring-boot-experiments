@@ -5,7 +5,7 @@ import org.springframework.boot.SpringApplication;
 
 class TestJpaJooqApplication {
 
-    public static void main(String[] args) {
+    static void main(String[] args) {
         SpringApplication.from(JpaJooqApplication::main)
                 .with(SQLContainerConfig.class)
                 .run(args);

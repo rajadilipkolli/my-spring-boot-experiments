@@ -44,8 +44,7 @@ class PostCommentsQlControllerTest {
                 .build();
         given(postCommentService.addCommentToPost(expectedRequest)).willReturn(response);
 
-        var mutation =
-                """
+        var mutation = """
             mutation addCommentToPost($addCommentToPostRequest: AddCommentToPostRequest!) {
                 addCommentToPost(addCommentToPostRequest: $addCommentToPostRequest) {
                     title

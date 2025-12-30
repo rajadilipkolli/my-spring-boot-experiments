@@ -13,8 +13,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
@@ -43,8 +43,7 @@ class BootRestClientApplicationTests {
     @Test
     void findPostById() throws Exception {
         // Mock the external API response
-        String mockApiResponse =
-                """
+        String mockApiResponse = """
                 {
                   "userId": 1,
                   "id": 1,
@@ -77,8 +76,7 @@ class BootRestClientApplicationTests {
     @Test
     void createPost() throws Exception {
         // Mock the external API response
-        String mockApiResponse =
-                """
+        String mockApiResponse = """
                 {
                   "userId": 1,
                   "id": 101,
@@ -86,8 +84,7 @@ class BootRestClientApplicationTests {
                   "body": "quia et suscipit\\nsuscipit recusandae consequuntur expedita et cum\\nreprehenderit molestiae ut ut quas totam\\nnostrum rerum est autem sunt rem eveniet architecto"
                 }
                 """;
-        String mockApiRequest =
-                """
+        String mockApiRequest = """
                 {
                   "userId": 1,
                   "id": 1,

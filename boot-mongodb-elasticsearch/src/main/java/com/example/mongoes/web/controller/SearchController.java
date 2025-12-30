@@ -1,13 +1,12 @@
 package com.example.mongoes.web.controller;
 
 import com.example.mongoes.document.Restaurant;
-import com.example.mongoes.model.response.AggregationSearchResponse;
 import com.example.mongoes.model.response.ResultData;
+import com.example.mongoes.model.response.SearchPageResponse;
 import com.example.mongoes.web.api.SearchApi;
 import com.example.mongoes.web.service.SearchService;
 import io.micrometer.core.annotation.Timed;
 import java.util.List;
-import org.springframework.data.elasticsearch.core.SearchPage;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RestController;
@@ -32,7 +31,7 @@ class SearchController implements SearchApi {
     }
 
     @Override
-    public Mono<ResponseEntity<SearchPage<Restaurant>>> searchMulti(
+    public Mono<ResponseEntity<SearchPageResponse<Restaurant>>> searchMulti(
             String query, Integer limit, Integer offset, Boolean prefixPhraseEnabled) {
         return searchService
                 .multiSearchQuery(query, offset, limit, prefixPhraseEnabled)
@@ -40,13 +39,13 @@ class SearchController implements SearchApi {
     }
 
     @Override
-    public Mono<ResponseEntity<SearchPage<Restaurant>>> searchTermForBorough(
+    public Mono<ResponseEntity<SearchPageResponse<Restaurant>>> searchTermForBorough(
             String query, Integer limit, Integer offset) {
         return searchService.termQueryForBorough(query, offset, limit).map(ResponseEntity::ok);
     }
 
     @Override
-    public Mono<ResponseEntity<SearchPage<Restaurant>>> searchTerms(
+    public Mono<ResponseEntity<SearchPageResponse<Restaurant>>> searchTerms(
             List<String> queries, Integer limit, Integer offset) {
         return searchService.termsQueryForBorough(queries, offset, limit).map(ResponseEntity::ok);
     }
@@ -60,7 +59,7 @@ class SearchController implements SearchApi {
     }
 
     @Override
-    public Mono<ResponseEntity<SearchPage<Restaurant>>> searchBoolShould(
+    public Mono<ResponseEntity<SearchPageResponse<Restaurant>>> searchBoolShould(
             String borough, String cuisine, String name, Integer limit, Integer offset) {
         return searchService
                 .queryBoolWithShould(borough, cuisine, name, offset, limit)
@@ -68,27 +67,27 @@ class SearchController implements SearchApi {
     }
 
     @Override
-    public Mono<ResponseEntity<SearchPage<Restaurant>>> searchWildcard(
+    public Mono<ResponseEntity<SearchPageResponse<Restaurant>>> searchWildcard(
             String query, Integer limit, Integer offset) {
         return searchService.wildcardSearch(query, offset, limit).map(ResponseEntity::ok);
     }
 
     @Override
-    public Mono<ResponseEntity<SearchPage<Restaurant>>> searchRegularExpression(
+    public Mono<ResponseEntity<SearchPageResponse<Restaurant>>> searchRegularExpression(
             String query, Integer limit, Integer offset) {
         return searchService.regExpSearch(query, offset, limit).map(ResponseEntity::ok);
     }
 
     @Override
-    public Mono<ResponseEntity<SearchPage<Restaurant>>> searchSimpleQueryForBoroughAndCuisine(
-            String query, Integer limit, Integer offset) {
+    public Mono<ResponseEntity<SearchPageResponse<Restaurant>>>
+            searchSimpleQueryForBoroughAndCuisine(String query, Integer limit, Integer offset) {
         return searchService
                 .searchSimpleQueryForBoroughAndCuisine(query, offset, limit)
                 .map(ResponseEntity::ok);
     }
 
     @Override
-    public Mono<ResponseEntity<SearchPage<Restaurant>>> searchRestaurantIdRange(
+    public Mono<ResponseEntity<SearchPageResponse<Restaurant>>> searchRestaurantIdRange(
             Long lowerLimit, Long upperLimit, Integer limit, Integer offset) {
         return searchService
                 .searchRestaurantIdRange(lowerLimit, upperLimit, offset, limit)
@@ -96,7 +95,7 @@ class SearchController implements SearchApi {
     }
 
     @Override
-    public Mono<ResponseEntity<SearchPage<Restaurant>>> searchDateRange(
+    public Mono<ResponseEntity<SearchPageResponse<Restaurant>>> searchDateRange(
             String fromDate, String toDate, Integer limit, Integer offset) {
         return searchService
                 .searchDateRange(fromDate, toDate, offset, limit)
@@ -104,7 +103,7 @@ class SearchController implements SearchApi {
     }
 
     @Override
-    public Mono<ResponseEntity<AggregationSearchResponse>> aggregateSearch(
+    public Mono<ResponseEntity<SearchPageResponse<Restaurant>>> aggregateSearch(
             String searchKeyword,
             List<String> fieldNames,
             Integer limit,

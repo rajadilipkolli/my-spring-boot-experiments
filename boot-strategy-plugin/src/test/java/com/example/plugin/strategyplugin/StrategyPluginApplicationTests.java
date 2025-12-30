@@ -5,7 +5,6 @@ import static org.awaitility.Awaitility.await;
 
 import com.example.plugin.strategyplugin.common.AbstractIntegrationTest;
 import com.example.plugin.strategyplugin.domain.GenericDTO;
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -14,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 import org.springframework.web.client.RestClient;
+import tools.jackson.databind.JsonNode;
 
 class StrategyPluginApplicationTests extends AbstractIntegrationTest {
 
@@ -38,8 +38,8 @@ class StrategyPluginApplicationTests extends AbstractIntegrationTest {
                                     .isEqualTo("Plugin not found for type: xls");
                             assertThat(problemDetail.getTitle()).isEqualTo("Product Not Found");
                             assertThat(problemDetail.getStatus()).isEqualTo(400);
-                            assertThat(problemDetail.getType().toString())
-                                    .isEqualTo("https://api.service.com/errors/bad-request");
+                            assertThat(problemDetail.getType())
+                                    .hasToString("https://api.service.com/errors/bad-request");
                             assertThat(problemDetail.getInstance())
                                     .isNotNull()
                                     .extracting(Object::toString)
@@ -110,7 +110,7 @@ class StrategyPluginApplicationTests extends AbstractIntegrationTest {
         assertThat(labelsResponse).isNotNull();
         assertThat(labelsResponse.has("data")).isTrue();
         assertThat(labelsResponse.get("data").isArray()).isTrue();
-        assertThat(labelsResponse.get("data").size()).isGreaterThan(0);
+        assertThat(labelsResponse.get("data").size()).isPositive();
 
         // Query Loki for logs from our application
         long now = System.currentTimeMillis() * 1_000_000; // Convert to nanoseconds
@@ -157,7 +157,7 @@ class StrategyPluginApplicationTests extends AbstractIntegrationTest {
         JsonNode streams = data.get("result");
         assertThat(streams).isNotNull();
         assertThat(streams.isArray()).isTrue();
-        assertThat(streams.size()).isGreaterThan(0);
+        assertThat(streams.size()).isPositive();
 
         // Verify the first stream has entries
         JsonNode firstStream = streams.get(0);
@@ -166,7 +166,7 @@ class StrategyPluginApplicationTests extends AbstractIntegrationTest {
         JsonNode entries = firstStream.get("values");
         assertThat(entries).isNotNull();
         assertThat(entries.isArray()).isTrue();
-        assertThat(entries.size()).isGreaterThan(0);
+        assertThat(entries.size()).isPositive();
 
         // Verify we can find some test-related logs
         boolean foundTestLog = false;

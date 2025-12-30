@@ -23,21 +23,21 @@ import com.example.custom.sequence.model.response.CustomerResponseWithOutOrder;
 import com.example.custom.sequence.model.response.OrderResponse;
 import com.example.custom.sequence.model.response.PagedResult;
 import com.example.custom.sequence.services.OrderService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import tools.jackson.databind.ObjectMapper;
 
 @WebMvcTest(controllers = OrderController.class)
 @ActiveProfiles(PROFILE_TEST)
@@ -82,7 +82,7 @@ class OrderControllerTest {
                 .andExpect(jsonPath("$.hasPrevious", is(false)));
     }
 
-    private static @NotNull PagedResult<OrderResponse> getOrderResponsePagedResult() {
+    private static @NonNull PagedResult<OrderResponse> getOrderResponsePagedResult() {
         List<OrderResponse> orderResponseList = new ArrayList<>();
         orderResponseList.add(new OrderResponse("1", "text 1", new CustomerResponseWithOutOrder("1", "customer1")));
         orderResponseList.add(new OrderResponse("2", "text 2", new CustomerResponseWithOutOrder("1", "customer1")));
@@ -136,7 +136,7 @@ class OrderControllerTest {
                         .content(objectMapper.writeValueAsString(order)))
                 .andExpect(status().isBadRequest())
                 .andExpect(header().string("Content-Type", is("application/problem+json")))
-                .andExpect(jsonPath("$.type", is("about:blank")))
+                .andExpect(jsonPath("$.type", is("https://custom-sequence.com/errors/validation-error")))
                 .andExpect(jsonPath("$.title", is("Constraint Violation")))
                 .andExpect(jsonPath("$.status", is(400)))
                 .andExpect(jsonPath("$.detail", is("Invalid request content.")))

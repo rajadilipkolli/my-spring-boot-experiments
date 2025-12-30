@@ -10,14 +10,14 @@ import com.learning.grafanalgtm.common.ContainerConfig;
 import io.restassured.RestAssured;
 import io.restassured.authentication.PreemptiveBasicAuthScheme;
 import io.restassured.http.ContentType;
-import org.apache.http.HttpStatus;
+import org.apache.hc.core5.http.HttpStatus;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.web.server.test.LocalServerPort;
+import org.springframework.boot.test.web.server.LocalServerPort;
 import org.testcontainers.grafana.LgtmStackContainer;
 
 @SpringBootTest(
@@ -48,7 +48,12 @@ class GrafanaLGTMApplicationTest {
     @Test
     void prometheus() {
         // calling endpoint to load metrics
-        when().get("/greetings").then().statusCode(HttpStatus.SC_OK);
+        when().get("/greetings?username=boot")
+                .then()
+                .statusCode(HttpStatus.SC_OK)
+                .contentType(ContentType.JSON)
+                .header("X-Trace-Id", not(empty()))
+                .body("message", is("Hello, boot!"));
 
         RestAssured.port = lgtmContainer.getMappedPort(3000);
         given().contentType(ContentType.URLENC)
@@ -67,8 +72,12 @@ class GrafanaLGTMApplicationTest {
 
     @Test
     void queryPrometheus() {
-        // calling endpoint to load metrics
-        when().get("/greetings").then().statusCode(HttpStatus.SC_OK);
+        when().get("/greetings")
+                .then()
+                .statusCode(HttpStatus.SC_OK)
+                .contentType(ContentType.JSON)
+                .header("X-Trace-Id", not(empty()))
+                .body("message", is("Hello, Guest!"));
 
         RestAssured.port = lgtmContainer.getMappedPort(9090);
         given().contentType(ContentType.URLENC)
@@ -88,8 +97,12 @@ class GrafanaLGTMApplicationTest {
 
     @Test
     void tempoQuery() {
-        // calling endpoint to load metrics
-        when().get("/greetings").then().statusCode(HttpStatus.SC_OK);
+        when().get("/greetings")
+                .then()
+                .statusCode(HttpStatus.SC_OK)
+                .contentType(ContentType.JSON)
+                .header("X-Trace-Id", not(empty()))
+                .body("message", is("Hello, Guest!"));
 
         RestAssured.port = lgtmContainer.getMappedPort(3000);
 

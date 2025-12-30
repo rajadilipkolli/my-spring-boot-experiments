@@ -1,5 +1,6 @@
 package com.example.graphql.web.controllers;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -15,19 +16,14 @@ import com.example.graphql.entities.PostCommentEntity;
 import com.example.graphql.entities.PostDetailsEntity;
 import com.example.graphql.entities.PostEntity;
 import com.example.graphql.model.request.PostCommentRequest;
-import com.example.graphql.repositories.PostRepository;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 
 class PostCommentEntityControllerIT extends AbstractIntegrationTest {
-
-    @Autowired
-    private PostRepository postRepository;
 
     private PostEntity postEntity;
 
@@ -52,7 +48,7 @@ class PostCommentEntityControllerIT extends AbstractIntegrationTest {
     @Test
     void shouldFetchAllPostComments() throws Exception {
         this.mockMvc
-                .perform(get("/api/postcomments"))
+                .perform(get("/api/post/comments"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.size()", is(postEntity.getComments().size())));
@@ -64,7 +60,7 @@ class PostCommentEntityControllerIT extends AbstractIntegrationTest {
         Long postCommentId = postCommentEntity.getId();
 
         this.mockMvc
-                .perform(get("/api/postcomments/{id}", postCommentId))
+                .perform(get("/api/post/comments/{id}", postCommentId))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.title", is(postCommentEntity.getTitle())));
@@ -76,9 +72,9 @@ class PostCommentEntityControllerIT extends AbstractIntegrationTest {
                 new PostCommentRequest("First PostComment", "First Content", String.valueOf(postEntity.getId()), true);
 
         this.mockMvc
-                .perform(post("/api/postcomments")
+                .perform(post("/api/post/comments")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(postCommentRequest)))
+                        .content(jsonMapper.writeValueAsString(postCommentRequest)))
                 .andExpect(status().isCreated())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.postId", is(postEntity.getId()), Long.class))
@@ -99,9 +95,9 @@ class PostCommentEntityControllerIT extends AbstractIntegrationTest {
                 String.valueOf(postEntity.getId()),
                 postCommentEntity.isPublished());
         this.mockMvc
-                .perform(put("/api/postcomments/{id}", postCommentEntity.getId())
+                .perform(put("/api/post/comments/{id}", postCommentEntity.getId())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(postCommentRequest)))
+                        .content(jsonMapper.writeValueAsString(postCommentRequest)))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.title", is("Updated PostComment")));
@@ -112,7 +108,10 @@ class PostCommentEntityControllerIT extends AbstractIntegrationTest {
         PostCommentEntity postCommentEntity = postEntity.getComments().getFirst();
 
         this.mockMvc
-                .perform(delete("/api/postcomments/{id}", postCommentEntity.getId()))
+                .perform(delete("/api/post/comments/{id}", postCommentEntity.getId()))
                 .andExpect(status().isAccepted());
+
+        // Verify entity was actually deleted
+        assertThat(postCommentRepository.findById(postCommentEntity.getId())).isEmpty();
     }
 }

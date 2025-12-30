@@ -6,6 +6,7 @@ import com.example.graphql.model.request.NewPostRequest;
 import com.example.graphql.model.response.PostResponse;
 import com.example.graphql.services.PostService;
 import java.util.List;
+import org.jspecify.annotations.NonNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -36,7 +37,7 @@ public class PostController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<PostResponse> getPostById(@PathVariable Long id) {
+    public ResponseEntity<@NonNull PostResponse> getPostById(@PathVariable Long id) {
         return postService.findPostById(id).map(ResponseEntity::ok).orElseThrow(() -> new PostNotFoundException(id));
     }
 
@@ -47,7 +48,8 @@ public class PostController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<PostResponse> updatePost(@PathVariable Long id, @RequestBody NewPostRequest newPostRequest) {
+    public ResponseEntity<@NonNull PostResponse> updatePost(
+            @PathVariable Long id, @RequestBody NewPostRequest newPostRequest) {
         return postService
                 .updatePost(id, newPostRequest)
                 .map(ResponseEntity::ok)
@@ -56,12 +58,11 @@ public class PostController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Object> deletePost(@PathVariable Long id) {
-        return postService
-                .findPostById(id)
-                .map(post -> {
-                    postService.deletePostById(id);
-                    return ResponseEntity.accepted().build();
-                })
-                .orElseThrow(() -> new PostNotFoundException(id));
+        if (postService.existsPostById(id)) {
+            postService.deletePostById(id);
+            return ResponseEntity.accepted().build();
+        } else {
+            throw new PostNotFoundException(id);
+        }
     }
 }

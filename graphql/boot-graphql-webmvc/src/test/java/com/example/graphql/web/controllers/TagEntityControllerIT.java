@@ -1,5 +1,6 @@
 package com.example.graphql.web.controllers;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -11,18 +12,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.example.graphql.common.AbstractIntegrationTest;
 import com.example.graphql.entities.TagEntity;
 import com.example.graphql.model.request.TagsRequest;
-import com.example.graphql.repositories.TagRepository;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 
 class TagEntityControllerIT extends AbstractIntegrationTest {
-
-    @Autowired
-    private TagRepository tagRepository;
 
     private List<TagEntity> tagEntityList = null;
 
@@ -58,36 +54,37 @@ class TagEntityControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldCreateNewTag() throws Exception {
-        TagsRequest tagEntity = new TagsRequest("New Tag", null);
+        TagsRequest tagsRequest = new TagsRequest("New Tag", null);
         this.mockMvc
                 .perform(post("/api/tags")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(tagEntity)))
+                        .content(jsonMapper.writeValueAsString(tagsRequest)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.tagName", is(tagEntity.tagName())))
-                .andExpect(jsonPath("$.tagDescription", is(tagEntity.tagDescription())));
+                .andExpect(jsonPath("$.tagName", is(tagsRequest.tagName())))
+                .andExpect(jsonPath("$.tagDescription", is(tagsRequest.tagDescription())));
     }
 
     @Test
     void shouldUpdateTag() throws Exception {
         TagEntity tagEntity = tagEntityList.getFirst();
-        tagEntity.setTagName("Updated Tag");
+        TagsRequest tagsRequest = new TagsRequest(tagEntity.getTagName(), "Updated Tag");
 
         this.mockMvc
                 .perform(put("/api/tags/{id}", tagEntity.getId())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(tagEntity)))
+                        .content(jsonMapper.writeValueAsString(tagsRequest)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.tagName", is(tagEntity.getTagName())));
+                .andExpect(jsonPath("$.tagName", is(tagEntity.getTagName())))
+                .andExpect(jsonPath("$.tagDescription", is("Updated Tag")));
     }
 
     @Test
     void shouldDeleteTag() throws Exception {
         TagEntity tagEntity = tagEntityList.getFirst();
 
-        this.mockMvc
-                .perform(delete("/api/tags/{id}", tagEntity.getId()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.tagName", is(tagEntity.getTagName())));
+        this.mockMvc.perform(delete("/api/tags/{id}", tagEntity.getId())).andExpect(status().isAccepted());
+
+        // Verify entity was actually deleted
+        assertThat(tagRepository.findById(tagEntity.getId())).isEmpty();
     }
 }

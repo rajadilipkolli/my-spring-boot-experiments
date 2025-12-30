@@ -20,6 +20,7 @@
         <module>boot-api-archunit-sample</module>
         <module>boot-chaos-monkey</module>
         <module>boot-grafana-lgtm</module>
+        <module>boot-high-rps-sample</module>
         <module>boot-mongodb-elasticsearch</module>
         <module>boot-opensearch-sample</module>
         <module>boot-rabbitmq-thymeleaf</module>

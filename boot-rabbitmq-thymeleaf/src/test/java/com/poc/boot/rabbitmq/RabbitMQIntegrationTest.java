@@ -78,7 +78,7 @@ class RabbitMQIntegrationTest {
                 .untilAsserted(
                         () -> {
                             long afterCount = trackingStateRepository.countByStatus("failed");
-                            assertThat(afterCount).isEqualTo(1);
+                            assertThat(afterCount).isOne();
                             afterCount = trackingStateRepository.countByStatus("processed");
                             assertThat(afterCount).isEqualTo(count);
                         });

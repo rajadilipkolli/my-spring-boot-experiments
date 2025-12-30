@@ -21,7 +21,7 @@ public class EntitySpecification<T> {
 
     public Specification specificationBuilder(List<ISearchCriteria> searchCriteriaList, Class<T> entityClass) {
         validateMetadata(searchCriteriaList, entityClass);
-        Specification result = Specification.where(null);
+        Specification result = Specification.unrestricted();
         for (ISearchCriteria criteria : searchCriteriaList) {
             result = result.and(criteria.toSpecification());
         }

@@ -1,10 +1,9 @@
 package com.example.plugin.strategyplugin;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.example.plugin.strategyplugin.common.AbstractIntegrationTest;
-import com.fasterxml.jackson.databind.JsonNode;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.net.http.HttpClient;
@@ -18,6 +17,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.MediaType;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Integration test: call the application's /fetch endpoint (which produces logs) and then query
@@ -66,9 +66,9 @@ class LokiPushIntegrationTest extends AbstractIntegrationTest {
         // unique token
         String[] logqlCandidates =
                 new String[] {
-                    String.format("{app=\"strategy-plugin-service\"} |= \"%s\"", unique),
-                    String.format("{agent=\"loki4j\"} |= \"%s\"", unique),
-                    String.format("{} |= \"%s\"", unique)
+                    "{app=\"strategy-plugin-service\"} |= \"%s\"".formatted(unique),
+                    "{agent=\"loki4j\"} |= \"%s\"".formatted(unique),
+                    "{} |= \"%s\"".formatted(unique)
                 };
 
         await().atMost(Duration.ofSeconds(60))
@@ -126,7 +126,7 @@ class LokiPushIntegrationTest extends AbstractIntegrationTest {
                                 if (found) break;
                             }
 
-                            assertTrue(found, "expected message not found yet in Loki");
+                            assertThat(found).as("expected message not found yet in Loki").isTrue();
                         });
     }
 }

@@ -42,7 +42,7 @@ class PostServiceTest {
         // then
         assertThat(optionalPost).isPresent();
         PostResponse post = optionalPost.get();
-        assertThat(post.id()).isEqualTo(1L);
+        assertThat(post.id()).isOne();
         assertThat(post.title()).isEqualTo("junitTest");
     }
 
