@@ -119,7 +119,7 @@ services:
       - demo-network
 
   prometheus:
-    image: prom/prometheus:v3.8.1
+    image: prom/prometheus:v3.9.0
     volumes:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
     ports:
