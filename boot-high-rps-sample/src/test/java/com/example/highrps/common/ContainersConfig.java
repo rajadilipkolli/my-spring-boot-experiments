@@ -4,6 +4,7 @@ import com.redis.testcontainers.RedisContainer;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.context.annotation.Bean;
+import org.springframework.test.context.DynamicPropertyRegistrar;
 import org.testcontainers.kafka.KafkaContainer;
 import org.testcontainers.postgresql.PostgreSQLContainer;
 import org.testcontainers.utility.DockerImageName;
@@ -27,5 +28,13 @@ public class ContainersConfig {
     @ServiceConnection
     KafkaContainer kafkaContainer() {
         return new KafkaContainer(DockerImageName.parse("apache/kafka-native").withTag("4.1.1")).withReuse(true);
+    }
+
+    @Bean
+    DynamicPropertyRegistrar dynamicPropertyRegistrar(RedisContainer redisContainer) {
+        return registry -> {
+            registry.add("spring.data.redis.host", redisContainer::getHost);
+            registry.add("spring.data.redis.port", redisContainer::getFirstMappedPort);
+        };
     }
 }

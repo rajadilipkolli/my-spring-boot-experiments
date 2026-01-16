@@ -1,6 +1,6 @@
 package com.example.highrps.config;
 
-import com.example.highrps.model.StatsResponse;
+import com.example.highrps.model.response.PostResponse;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +29,7 @@ public class AggregatesToRedisListener {
     }
 
     @KafkaListener(
-            topics = "stats-aggregates",
+            topics = "posts-aggregates",
             groupId = "aggregates-redis-writer",
             containerFactory = "stringKafkaListenerContainerFactory")
     @RetryableTopic(
@@ -41,22 +41,17 @@ public class AggregatesToRedisListener {
         String key = record.key();
         String payload = record.value();
         if (key == null || payload == null || payload.isBlank()) return;
-        Long value;
-        try {
-            value = Long.parseLong(payload);
-        } catch (NumberFormatException nfe) {
-            return;
-        }
+        PostResponse value = PostResponse.fromJson(payload);
 
-        String redisKey = "stats:" + key;
+        String redisKey = "posts:" + key;
         String existing = redis.opsForValue().get(redisKey);
-        var json = StatsResponse.toJson(new StatsResponse(key, value));
+        var json = PostResponse.toJson(value);
 
         // Idempotent: if the existing value matches desired value, skip write
         if (existing != null) {
             try {
-                StatsResponse existingStats = StatsResponse.fromJson(existing);
-                if (existingStats.value().equals(value)) return;
+                PostResponse existingStats = PostResponse.fromJson(existing);
+                if (existingStats.equals(value)) return;
             } catch (Exception e) {
                 log.warn("Failed to parse existing stats for key: {}, will overwrite", key, e);
             }
@@ -77,7 +72,7 @@ public class AggregatesToRedisListener {
     public void dlt(ConsumerRecord<String, String> record, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
         log.error("Received dead-letter message : {} from topic {}", record.value(), topic);
         // Push failed message to a simple Redis DLQ list for later inspection
-        String dlqKey = "dlq:stats-aggregates";
+        String dlqKey = "dlq:posts-aggregates";
         try {
             String payload = record.value();
             redis.opsForList().leftPush(dlqKey, payload);

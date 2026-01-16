@@ -1,6 +1,6 @@
 package com.example.highrps.config;
 
-import com.example.highrps.model.EventDto;
+import com.example.highrps.model.request.NewPostRequest;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.kstream.Consumed;
@@ -24,26 +24,24 @@ public class StreamsTopology {
     private static final Logger log = LoggerFactory.getLogger(StreamsTopology.class);
 
     @Bean
-    public KTable<String, Long> eventsStream(StreamsBuilder builder) {
+    public KTable<String, NewPostRequest> eventsStream(StreamsBuilder kafkaStreamBuilder) {
         log.info("Building events stream topology");
-        JacksonJsonSerde<EventDto> eventSerde = new JacksonJsonSerde<>(EventDto.class);
+        JacksonJsonSerde<NewPostRequest> eventSerde = new JacksonJsonSerde<>(NewPostRequest.class);
 
-        KStream<String, EventDto> stream = builder.stream("events", Consumed.with(Serdes.String(), eventSerde));
+        KStream<String, NewPostRequest> postRequestKStream =
+                kafkaStreamBuilder.stream("events", Consumed.with(Serdes.String(), eventSerde));
 
-        // Aggregate latest value per id into a persistent store named "stats-store"
-        KTable<String, Long> aggregates = stream.mapValues(EventDto::getValue)
-                .groupByKey(Grouped.with(Serdes.String(), Serdes.Long()))
+        // Aggregate latest value per title into a persistent store named "posts-store"
+        KTable<String, NewPostRequest> aggregates = postRequestKStream
+                .groupByKey(Grouped.with(Serdes.String(), eventSerde))
                 .reduce(
                         (oldV, newV) -> newV,
-                        Materialized.<String, Long>as(Stores.persistentKeyValueStore("stats-store"))
+                        Materialized.<String, NewPostRequest>as(Stores.persistentKeyValueStore("posts-store"))
                                 .withKeySerde(Serdes.String())
-                                .withValueSerde(Serdes.Long()));
+                                .withValueSerde(eventSerde));
 
         // Publish aggregates as simple string values so downstream consumers use String deserializers
-        aggregates
-                .toStream()
-                .mapValues(Object::toString)
-                .to("stats-aggregates", Produced.with(Serdes.String(), Serdes.String()));
+        aggregates.toStream().to("posts-aggregates", Produced.with(Serdes.String(), eventSerde));
 
         return aggregates;
     }
