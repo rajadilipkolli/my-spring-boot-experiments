@@ -5,6 +5,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import java.io.Serializable;
@@ -17,7 +18,8 @@ import java.util.Objects;
 public class TagEntity implements Serializable {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "tags_seq")
+    @SequenceGenerator(name = "tags_seq", sequenceName = "tags_seq", allocationSize = 5)
     private Long id;
 
     @Column(nullable = false, unique = true, name = "tag_name")

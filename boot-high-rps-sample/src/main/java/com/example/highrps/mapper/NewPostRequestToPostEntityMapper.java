@@ -6,7 +6,6 @@ import com.example.highrps.entities.TagEntity;
 import com.example.highrps.model.request.NewPostRequest;
 import com.example.highrps.model.request.TagRequest;
 import com.example.highrps.repository.TagRepository;
-import java.util.List;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Context;
 import org.mapstruct.Mapper;
@@ -14,7 +13,6 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValueCheckStrategy;
-import org.springframework.util.CollectionUtils;
 
 // After Mapping will not be set if we use builder pattern, hence disabled it
 @Mapper(
@@ -36,44 +34,36 @@ public interface NewPostRequestToPostEntityMapper {
     @AfterMapping
     default void afterMapping(
             NewPostRequest newPostRequest, @MappingTarget PostEntity postEntity, @Context TagRepository tagRepository) {
-        if (!CollectionUtils.isEmpty(newPostRequest.tags())) {
-
-            List<TagEntity> tagEntitiesFromDb = postEntity.getTags().stream()
-                    .map(PostTagEntity::getTagEntity)
-                    .toList();
-
-            // Tag Entities To remove
-            tagEntitiesFromDb.stream()
-                    .filter(tagEntity -> !newPostRequest.tags().stream()
-                            .map(TagRequest::tagName)
-                            .toList()
-                            .contains(tagEntity.getTagName()))
-                    .forEach(postEntity::removeTag);
-
-            List<TagEntity> tagEntitiesToUpdate = tagEntitiesFromDb.stream()
-                    .filter(tagEntity -> newPostRequest.tags().stream()
-                            .map(TagRequest::tagName)
-                            .toList()
-                            .contains(tagEntity.getTagName()))
-                    .toList();
-
-            for (TagEntity tagEntity : tagEntitiesToUpdate) {
-                for (TagRequest tagRequest : newPostRequest.tags()) {
-                    if (tagEntity.getTagName().equalsIgnoreCase(tagRequest.tagName())) {
-                        tagEntity.setTagDescription(tagRequest.tagDescription());
-                        break;
-                    }
-                }
-            }
-
-            // new TagEntites to Insert
-            newPostRequest.tags().stream()
-                    .filter(tagsRequest -> !tagEntitiesToUpdate.stream()
-                            .map(TagEntity::getTagName)
-                            .toList()
-                            .contains(tagsRequest.tagName()))
-                    .forEach(tagsRequest -> postEntity.addTag(getTagEntity(tagRepository, tagsRequest)));
+        if (newPostRequest.tags() == null) {
+            return;
         }
+        var requestedByName = newPostRequest.tags().stream()
+                .collect(java.util.stream.Collectors.toMap(
+                        t -> t.tagName().toLowerCase(java.util.Locale.ROOT),
+                        java.util.function.Function.identity(),
+                        (a, b) -> a));
+
+        var existingByName = postEntity.getTags().stream()
+                .map(PostTagEntity::getTagEntity)
+                .collect(java.util.stream.Collectors.toMap(
+                        t -> t.getTagName().toLowerCase(java.util.Locale.ROOT),
+                        java.util.function.Function.identity(),
+                        (a, b) -> a));
+
+        existingByName.keySet().stream()
+                .filter(name -> !requestedByName.containsKey(name))
+                .forEach(name -> postEntity.removeTag(existingByName.get(name)));
+
+        existingByName.forEach((name, tagEntity) -> {
+            TagRequest req = requestedByName.get(name);
+            if (req != null && !java.util.Objects.equals(tagEntity.getTagDescription(), req.tagDescription())) {
+                tagEntity.setTagDescription(req.tagDescription());
+            }
+        });
+
+        requestedByName.keySet().stream()
+                .filter(name -> !existingByName.containsKey(name))
+                .forEach(name -> postEntity.addTag(getTagEntity(tagRepository, requestedByName.get(name))));
     }
 
     default TagEntity getTagEntity(TagRepository tagRepository, TagRequest tagsRequest) {

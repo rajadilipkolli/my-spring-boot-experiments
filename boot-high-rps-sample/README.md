@@ -13,7 +13,7 @@ Architecture mapping to this project
 - Controller: `PostController` — lightweight synchronous handlers running on virtual threads.
 - Producer: `KafkaProducerService` — publishes `EventDto` to topic `events`.
 - Streams: `StreamsTopology` — consumes `events`, reduces latest `value` per key, materializes persistent store `posts-store` (String), and emits `posts-aggregates` as strings.
-- Materializer: `AggregatesToRedisListener` — consumes `posts-aggregates` and writes JSON into `stats:{id}` Redis keys.
+- Materializer: `AggregatesToRedisListener` — consumes `posts-aggregates` and writes JSON into `posts:{id}` Redis keys.
 - API fallback: `PostService` — cache → Redis → Kafka Streams interactive query (`posts-store`).
 - DB writer: `ScheduledBatchProcessor` — pops from `events:queue` and persists to DB asynchronously.
 
@@ -26,14 +26,8 @@ Do we need 3 topics?
 Currently this module uses 2 application-level topics: `events` and `posts-aggregates`.
 Kafka Streams will create internal changelog topics for state stores automatically. The blueprint sometimes describes a third topic for pre-aggregation or durable event storage, but in practice the Streams changelog covers that need. If you want a dedicated changelog-like topic for manual inspection or a separate compaction policy, you can add it, but it's not required for correctness.
 
-What I changed/added
-- `StreamsTopology` — materializes `posts-store` (Long) and emits string aggregates to `posts-aggregates`.
-- `HelloService` — fallback uses interactive query against `posts-store` via `KafkaStreams`.
-- `EventDto` — numeric-friendly `@JsonCreator` added to tolerate numeric-only messages.
-- `HelloController` — publish endpoints now also push serialized events into Redis "events:queue" so `ScheduledBatchProcessor` can batch persist.
-
 Redis keys
-- `stats:{id}` — materialized JSON aggregate used by API reads.
+- `posts:{id}` — materialized JSON aggregate used by API reads.
 - `events:queue` — list used for batch DB writes (pushed on publish).
 
 Run & smoke test (local)
@@ -62,9 +56,9 @@ curl -X POST -H "Content-Type: application/json" -d '{"id":"user-123","value":42
 4. Verify Redis and API:
 
 ```powershell
-redis-cli GET stats:user-123
+redis-cli GET posts:user-123
 redis-cli LRANGE events:queue 0 -1
-curl http://localhost:8080/stats/user-123
+curl http://localhost:8080/posts/user-123
 ```
 
 Production tuning notes
@@ -79,4 +73,3 @@ Suggestions & next steps
 - Add observability: meters for `posts-store` misses, Streams state, Redis RTT, and batch processing throughput.
 - Harden error handling in Redis materializer (retry/backoff, DLQ monitoring).
 
-If you'd like, I can start the app and run an end-to-end test (publish → Streams → Redis → /stats) and capture logs and responses.

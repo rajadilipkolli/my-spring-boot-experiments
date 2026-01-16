@@ -65,10 +65,10 @@ public class KafkaConfig {
     KafkaAdmin.NewTopics eventsTopic(
             @Value("${app.kafka.events-topic.partitions:3}") int eventsPartitions,
             @Value("${app.kafka.events-topic.replication-factor:1}") short eventsReplication,
-            @Value("${app.kafka.posts-aggregates-topic.partitions:3}") int statsPartitions,
-            @Value("${app.kafka.posts-aggregates-topic.replication-factor:1}") short statsReplication) {
+            @Value("${app.kafka.posts-aggregates-topic.partitions:3}") int postsAggregatesPartitions,
+            @Value("${app.kafka.posts-aggregates-topic.replication-factor:1}") short postsAggregatesReplication) {
         return new KafkaAdmin.NewTopics(
                 new NewTopic("events", eventsPartitions, eventsReplication),
-                new NewTopic("posts-aggregates", statsPartitions, statsReplication));
+                new NewTopic("posts-aggregates", postsAggregatesPartitions, postsAggregatesReplication));
     }
 }

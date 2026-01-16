@@ -41,12 +41,7 @@ public class AggregatesToRedisListener {
         String key = record.key();
         String payload = record.value();
         if (key == null || payload == null || payload.isBlank()) return;
-        PostResponse value;
-        try {
-            value = PostResponse.fromJson(payload);
-        } catch (NumberFormatException nfe) {
-            return;
-        }
+        PostResponse value = PostResponse.fromJson(payload);
 
         String redisKey = "posts:" + key;
         String existing = redis.opsForValue().get(redisKey);
