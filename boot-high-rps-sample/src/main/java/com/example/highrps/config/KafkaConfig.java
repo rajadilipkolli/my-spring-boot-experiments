@@ -1,56 +1,51 @@
 package com.example.highrps.config;
 
-import com.example.highrps.model.EventDto;
+import com.example.highrps.model.request.NewPostRequest;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.kafka.autoconfigure.KafkaProperties;
+import org.springframework.boot.kafka.autoconfigure.KafkaConnectionDetails;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.*;
 import org.springframework.kafka.support.serializer.JacksonJsonDeserializer;
 
-@Configuration
+@Configuration(proxyBeanMethods = false)
 public class KafkaConfig {
 
-    private final KafkaProperties kafkaProperties;
-
-    public KafkaConfig(KafkaProperties kafkaProperties) {
-        this.kafkaProperties = kafkaProperties;
-    }
-
     @Bean
-    KafkaTemplate<String, EventDto> kafkaTemplate(ProducerFactory<String, EventDto> producerFactory) {
+    KafkaTemplate<String, NewPostRequest> kafkaTemplate(ProducerFactory<String, NewPostRequest> producerFactory) {
         return new KafkaTemplate<>(producerFactory);
     }
 
     @Bean
-    ConsumerFactory<String, EventDto> consumerFactory() {
+    ConsumerFactory<String, NewPostRequest> consumerFactory(KafkaConnectionDetails kafkaConnectionDetails) {
         Map<String, Object> cfg = new HashMap<>();
-        cfg.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaProperties.getBootstrapServers());
+        cfg.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaConnectionDetails.getBootstrapServers());
         cfg.put(ConsumerConfig.GROUP_ID_CONFIG, "writer");
         cfg.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         cfg.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JacksonJsonDeserializer.class);
         cfg.put(JacksonJsonDeserializer.TRUSTED_PACKAGES, "*");
         return new DefaultKafkaConsumerFactory<>(
-                cfg, new StringDeserializer(), new JacksonJsonDeserializer<>(EventDto.class));
+                cfg, new StringDeserializer(), new JacksonJsonDeserializer<>(NewPostRequest.class));
     }
 
     @Bean
-    ConcurrentKafkaListenerContainerFactory<String, EventDto> kafkaListenerContainerFactory() {
-        var f = new ConcurrentKafkaListenerContainerFactory<String, EventDto>();
-        f.setConsumerFactory(consumerFactory());
+    ConcurrentKafkaListenerContainerFactory<String, NewPostRequest> kafkaListenerContainerFactory(
+            ConsumerFactory<String, NewPostRequest> consumerFactory) {
+        var f = new ConcurrentKafkaListenerContainerFactory<String, NewPostRequest>();
+        f.setConsumerFactory(consumerFactory);
         return f;
     }
 
     @Bean
-    ConsumerFactory<String, String> stringConsumerFactory() {
+    ConsumerFactory<String, String> stringConsumerFactory(KafkaConnectionDetails KafkaConnectionDetails) {
         Map<String, Object> cfg = new HashMap<>();
-        cfg.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaProperties.getBootstrapServers());
+        cfg.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, KafkaConnectionDetails.getBootstrapServers());
         cfg.put(ConsumerConfig.GROUP_ID_CONFIG, "aggregates-redis-writer");
         cfg.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         cfg.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
@@ -58,9 +53,10 @@ public class KafkaConfig {
     }
 
     @Bean
-    ConcurrentKafkaListenerContainerFactory<String, String> stringKafkaListenerContainerFactory() {
+    ConcurrentKafkaListenerContainerFactory<String, String> stringKafkaListenerContainerFactory(
+            ConsumerFactory<String, String> stringConsumerFactory) {
         var f = new ConcurrentKafkaListenerContainerFactory<String, String>();
-        f.setConsumerFactory(stringConsumerFactory());
+        f.setConsumerFactory(stringConsumerFactory);
         return f;
     }
 

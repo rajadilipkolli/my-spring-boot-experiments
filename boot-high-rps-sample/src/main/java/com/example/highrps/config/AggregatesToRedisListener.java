@@ -1,6 +1,6 @@
 package com.example.highrps.config;
 
-import com.example.highrps.model.StatsResponse;
+import com.example.highrps.model.response.PostResponse;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,22 +41,22 @@ public class AggregatesToRedisListener {
         String key = record.key();
         String payload = record.value();
         if (key == null || payload == null || payload.isBlank()) return;
-        Long value;
+        PostResponse value;
         try {
-            value = Long.parseLong(payload);
+            value = PostResponse.fromJson(payload);
         } catch (NumberFormatException nfe) {
             return;
         }
 
-        String redisKey = "stats:" + key;
+        String redisKey = "posts:" + key;
         String existing = redis.opsForValue().get(redisKey);
-        var json = StatsResponse.toJson(new StatsResponse(key, value));
+        var json = PostResponse.toJson(value);
 
         // Idempotent: if the existing value matches desired value, skip write
         if (existing != null) {
             try {
-                StatsResponse existingStats = StatsResponse.fromJson(existing);
-                if (existingStats.value().equals(value)) return;
+                PostResponse existingStats = PostResponse.fromJson(existing);
+                if (PostResponse.toJson(existingStats).equals(value)) return;
             } catch (Exception e) {
                 log.warn("Failed to parse existing stats for key: {}, will overwrite", key, e);
             }
