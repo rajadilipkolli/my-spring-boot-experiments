@@ -36,7 +36,8 @@ class PostControllerIT extends AbstractIntegrationTest {
                 .uri("/api/posts/non-existent-title")
                 .exchange()
                 .assertThat()
-                .hasStatus(HttpStatus.NOT_FOUND);
+                .hasStatus(HttpStatus.NOT_FOUND)
+                .hasContentType(MediaType.APPLICATION_PROBLEM_JSON);
     }
 
     @Test
@@ -77,7 +78,13 @@ class PostControllerIT extends AbstractIntegrationTest {
                 .hasStatus(HttpStatus.NO_CONTENT);
 
         // 3) Subsequent GET should return 404
-        mockMvcTester.get().uri("/api/posts/" + title).exchange().assertThat().hasStatus(HttpStatus.NOT_FOUND);
+        mockMvcTester
+                .get()
+                .uri("/api/posts/" + title)
+                .exchange()
+                .assertThat()
+                .hasStatus(HttpStatus.NOT_FOUND)
+                .hasContentType(MediaType.APPLICATION_PROBLEM_JSON);
 
         // Also assert local cache and redis no longer have the key
         assertThat(localCache.getIfPresent(title)).isNull();

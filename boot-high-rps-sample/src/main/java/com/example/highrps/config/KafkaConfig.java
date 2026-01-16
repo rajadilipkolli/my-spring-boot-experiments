@@ -78,9 +78,17 @@ public class KafkaConfig {
             @Value("${app.kafka.events-topic.partitions:3}") int eventsPartitions,
             @Value("${app.kafka.events-topic.replication-factor:1}") short eventsReplication,
             @Value("${app.kafka.posts-aggregates-topic.partitions:3}") int postsAggregatesPartitions,
-            @Value("${app.kafka.posts-aggregates-topic.replication-factor:1}") short postsAggregatesReplication) {
-        return new KafkaAdmin.NewTopics(
-                new NewTopic("events", eventsPartitions, eventsReplication),
-                new NewTopic("posts-aggregates", postsAggregatesPartitions, postsAggregatesReplication));
+            @Value("${app.kafka.posts-aggregates-topic.replication-factor:1}") short postsAggregatesReplication,
+            @Value("${app.kafka.events-topic.tombstone-retention-ms:604800000}") long tombstoneRetentionMs) {
+
+        NewTopic events = new NewTopic("events", eventsPartitions, eventsReplication);
+        Map<String, String> eventsCfg = new HashMap<>();
+        eventsCfg.put("cleanup.policy", "compact,delete");
+        eventsCfg.put("delete.retention.ms", String.valueOf(tombstoneRetentionMs));
+        events.configs(eventsCfg);
+
+        NewTopic posts = new NewTopic("posts-aggregates", postsAggregatesPartitions, postsAggregatesReplication);
+
+        return new KafkaAdmin.NewTopics(events, posts);
     }
 }
