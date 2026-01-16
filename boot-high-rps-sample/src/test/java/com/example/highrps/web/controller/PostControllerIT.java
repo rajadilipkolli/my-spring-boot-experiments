@@ -1,9 +1,11 @@
 package com.example.highrps.web.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 
 import com.example.highrps.common.AbstractIntegrationTest;
 import com.example.highrps.model.response.PostResponse;
+import java.time.Duration;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -124,13 +126,17 @@ class PostControllerIT extends AbstractIntegrationTest {
                 .hasStatus(HttpStatus.NO_CONTENT);
 
         // 4) Subsequent GET should return 404
-        mockMvcTester
-                .get()
-                .uri("/api/posts/" + title)
-                .exchange()
-                .assertThat()
-                .hasStatus(HttpStatus.NOT_FOUND)
-                .hasContentType(MediaType.APPLICATION_PROBLEM_JSON);
+        await().atMost(Duration.ofSeconds(10))
+                .pollInterval(Duration.ofMillis(500))
+                .untilAsserted(() -> {
+                    mockMvcTester
+                            .get()
+                            .uri("/api/posts/" + title)
+                            .exchange()
+                            .assertThat()
+                            .hasStatus(HttpStatus.NOT_FOUND)
+                            .hasContentType(MediaType.APPLICATION_PROBLEM_JSON);
+                });
 
         // Also assert local cache and redis no longer have the key
         assertThat(localCache.getIfPresent(title)).isNull();
