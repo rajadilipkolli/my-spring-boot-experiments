@@ -16,10 +16,6 @@ public record PostResponse(
 
     public static final JsonMapper JSON_MAPPER = new JsonMapper();
 
-    public PostResponse() {
-        this(null, null, false, null, null, null, null, null);
-    }
-
     public static PostResponse fromJson(String cached) {
         return JSON_MAPPER.readValue(cached, PostResponse.class);
     }

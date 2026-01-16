@@ -47,20 +47,36 @@ public class AggregatesToRedisListener {
         if (record == null) return;
         String key = record.key();
         NewPostRequest payload = record.value();
-        if (key == null || payload == null) return;
+        String redisKey = "posts:" + key;
+        // If payload is null -> tombstone: remove Redis key and enqueue delete marker
+        if (payload == null) {
+            try {
+                redis.delete(redisKey);
+            } catch (Exception e) {
+                log.warn("Failed to delete redis key for tombstone: {}", redisKey, e);
+            }
+            try {
+                String tombstoneJson = "{\"title\":\"" + key + "\",\"__deleted\":true}";
+                redis.opsForList().leftPush(queueKey, tombstoneJson);
+            } catch (Exception e) {
+                log.error("Failed to enqueue tombstone marker for key: {}, may lose durability", key, e);
+            }
+            return;
+        }
 
         // Map NewPostRequest to PostResponse for Redis storage
         PostResponse value = mapper.mapToPostResponse(payload);
-
-        String redisKey = "posts:" + key;
-        String existing = redis.opsForValue().get(redisKey);
         var json = PostResponse.toJson(value);
+
+        String existing = redis.opsForValue().get(redisKey);
 
         // Idempotent: if the existing value matches desired value, skip write
         if (existing != null) {
             try {
                 PostResponse existingStats = PostResponse.fromJson(existing);
-                if (existingStats.equals(value)) return;
+                if (existingStats.equals(value)) {
+                    return;
+                }
             } catch (Exception e) {
                 log.warn("Failed to parse existing stats for key: {}, will overwrite", key, e);
             }
