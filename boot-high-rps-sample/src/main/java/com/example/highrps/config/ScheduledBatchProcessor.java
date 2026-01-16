@@ -24,7 +24,7 @@ public class ScheduledBatchProcessor {
     private final NewPostRequestToPostEntityMapper newPostRequestToPostEntityMapper;
     private final PostRepository postRepository;
     private final TagRepository tagRepository;
-    private final JsonMapper mapper;
+    private final JsonMapper jsonMapper;
 
     private final String queueKey;
     private final int batchSize;
@@ -34,14 +34,14 @@ public class ScheduledBatchProcessor {
             NewPostRequestToPostEntityMapper newPostRequestToPostEntityMapper,
             PostRepository postRepository,
             TagRepository tagRepository,
-            JsonMapper mapper,
+            JsonMapper jsonMapper,
             @Value("${app.batch.queue-key}") String queueKey,
             @Value("${app.batch.size}") int batchSize) {
         this.redis = redis;
         this.newPostRequestToPostEntityMapper = newPostRequestToPostEntityMapper;
         this.postRepository = postRepository;
         this.tagRepository = tagRepository;
-        this.mapper = mapper;
+        this.jsonMapper = jsonMapper;
         this.queueKey = queueKey;
         this.batchSize = batchSize;
     }
@@ -57,7 +57,7 @@ public class ScheduledBatchProcessor {
                 .filter(Objects::nonNull)
                 .map(s -> {
                     try {
-                        return mapper.readValue(s, NewPostRequest.class);
+                        return jsonMapper.readValue(s, NewPostRequest.class);
                     } catch (Exception e) {
                         log.warn("Failed to deserialize event: {}", s, e);
                         return null;

@@ -1,5 +1,7 @@
 package com.example.highrps.config;
 
+import com.example.highrps.mapper.PostRequestToResponseMapper;
+import com.example.highrps.model.request.NewPostRequest;
 import com.example.highrps.model.response.PostResponse;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.slf4j.Logger;
@@ -19,29 +21,36 @@ import org.springframework.stereotype.Component;
 public class AggregatesToRedisListener {
 
     private static final Logger log = LoggerFactory.getLogger(AggregatesToRedisListener.class);
+
     private final RedisTemplate<String, String> redis;
+    private final PostRequestToResponseMapper mapper;
     private final String queueKey;
 
     public AggregatesToRedisListener(
-            RedisTemplate<String, String> redis, @Value("${app.batch.queue-key:events:queue}") String queueKey) {
+            RedisTemplate<String, String> redis,
+            PostRequestToResponseMapper mapper,
+            @Value("${app.batch.queue-key:events:queue}") String queueKey) {
         this.redis = redis;
+        this.mapper = mapper;
         this.queueKey = queueKey;
     }
 
     @KafkaListener(
             topics = "posts-aggregates",
             groupId = "aggregates-redis-writer",
-            containerFactory = "stringKafkaListenerContainerFactory")
+            containerFactory = "newPostKafkaListenerContainerFactory")
     @RetryableTopic(
             attempts = "4",
             backOff = @BackOff(delay = 500, multiplier = 2.0),
             topicSuffixingStrategy = TopicSuffixingStrategy.SUFFIX_WITH_INDEX_VALUE)
-    public void handleAggregate(ConsumerRecord<String, String> record) {
+    public void handleAggregate(ConsumerRecord<String, NewPostRequest> record) {
         if (record == null) return;
         String key = record.key();
-        String payload = record.value();
-        if (key == null || payload == null || payload.isBlank()) return;
-        PostResponse value = PostResponse.fromJson(payload);
+        NewPostRequest payload = record.value();
+        if (key == null || payload == null) return;
+
+        // Map NewPostRequest to PostResponse for Redis storage
+        PostResponse value = mapper.mapToPostResponse(payload);
 
         String redisKey = "posts:" + key;
         String existing = redis.opsForValue().get(redisKey);
@@ -69,12 +78,12 @@ public class AggregatesToRedisListener {
     }
 
     @DltHandler
-    public void dlt(ConsumerRecord<String, String> record, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
+    public void dlt(ConsumerRecord<String, NewPostRequest> record, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
         log.error("Received dead-letter message : {} from topic {}", record.value(), topic);
         // Push failed message to a simple Redis DLQ list for later inspection
         String dlqKey = "dlq:posts-aggregates";
         try {
-            String payload = record.value();
+            String payload = PostResponse.toJson(mapper.mapToPostResponse(record.value()));
             redis.opsForList().leftPush(dlqKey, payload);
         } catch (Exception e) {
             log.warn("Failed to push to DLQ: {}", dlqKey, e);

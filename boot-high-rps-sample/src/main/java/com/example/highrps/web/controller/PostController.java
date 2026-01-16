@@ -1,5 +1,6 @@
 package com.example.highrps.web.controller;
 
+import com.example.highrps.exception.ResourceNotFoundException;
 import com.example.highrps.model.request.NewPostRequest;
 import com.example.highrps.model.response.PostResponse;
 import com.example.highrps.service.PostService;
@@ -23,6 +24,9 @@ public class PostController {
     @GetMapping("/posts/{title}")
     public ResponseEntity<PostResponse> getPostByTitle(@PathVariable String title) {
         PostResponse postResponse = postService.findPostByTitle(title);
+        if (postResponse == null) {
+            throw new ResourceNotFoundException("Post not found for title: " + title);
+        }
         return ResponseEntity.ok(postResponse);
     }
 
@@ -34,5 +38,11 @@ public class PostController {
                 .buildAndExpand(postResponse.title())
                 .toUri();
         return ResponseEntity.created(location).body(postResponse);
+    }
+
+    @DeleteMapping("/posts/{title}")
+    public ResponseEntity<Void> deletePost(@PathVariable String title) {
+        postService.deletePost(title);
+        return ResponseEntity.noContent().build();
     }
 }
