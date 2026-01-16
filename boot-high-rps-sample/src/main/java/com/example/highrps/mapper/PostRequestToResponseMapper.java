@@ -9,5 +9,5 @@ import org.mapstruct.NullValueCheckStrategy;
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING, nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
 public interface PostRequestToResponseMapper {
 
-    PostResponse toResponse(NewPostRequest newPostRequest);
+    PostResponse mapToPostResponse(NewPostRequest newPostRequest);
 }

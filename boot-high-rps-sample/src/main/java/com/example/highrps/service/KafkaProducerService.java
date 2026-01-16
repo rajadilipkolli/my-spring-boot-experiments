@@ -33,4 +33,15 @@ public class KafkaProducerService {
             }
         });
     }
+
+    public void publishDelete(String title) {
+        // Send a tombstone (null value) for the given key so Kafka Streams reduces it out
+        kafkaTemplate.send(eventsTopic, title, null).whenComplete((result, ex) -> {
+            if (ex != null) {
+                log.error("Failed to publish delete (tombstone) for id: {}", title, ex);
+            } else {
+                log.debug("Published delete (tombstone) for id: {}", title);
+            }
+        });
+    }
 }

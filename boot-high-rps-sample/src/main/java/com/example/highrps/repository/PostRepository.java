@@ -13,4 +13,8 @@ public interface PostRepository extends JpaRepository<PostEntity, Long> {
 
     @EntityGraph(attributePaths = {"tags", "details", "authorEntity", "tags.tagEntity"})
     Optional<PostEntity> findByTitle(String title);
+
+    boolean existsByTitle(String title);
+
+    void deleteByTitle(String title);
 }

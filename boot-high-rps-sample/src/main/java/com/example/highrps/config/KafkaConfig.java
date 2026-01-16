@@ -29,7 +29,7 @@ public class KafkaConfig {
         cfg.put(ConsumerConfig.GROUP_ID_CONFIG, "writer");
         cfg.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         cfg.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JacksonJsonDeserializer.class);
-        cfg.put(JacksonJsonDeserializer.TRUSTED_PACKAGES, "*");
+        cfg.put(JacksonJsonDeserializer.TRUSTED_PACKAGES, "com.example.highrps.model.request");
         return new DefaultKafkaConsumerFactory<>(
                 cfg, new StringDeserializer(), new JacksonJsonDeserializer<>(NewPostRequest.class));
     }
@@ -53,10 +53,22 @@ public class KafkaConfig {
     }
 
     @Bean
-    ConcurrentKafkaListenerContainerFactory<String, String> stringKafkaListenerContainerFactory(
-            ConsumerFactory<String, String> stringConsumerFactory) {
-        var f = new ConcurrentKafkaListenerContainerFactory<String, String>();
-        f.setConsumerFactory(stringConsumerFactory);
+    ConsumerFactory<String, NewPostRequest> newPostConsumerFactory(KafkaConnectionDetails kafkaConnectionDetails) {
+        Map<String, Object> cfg = new HashMap<>();
+        cfg.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaConnectionDetails.getBootstrapServers());
+        cfg.put(ConsumerConfig.GROUP_ID_CONFIG, "aggregates-redis-writer");
+        cfg.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+        cfg.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JacksonJsonDeserializer.class);
+        cfg.put(JacksonJsonDeserializer.TRUSTED_PACKAGES, "com.example.highrps.model.request");
+        return new DefaultKafkaConsumerFactory<>(
+                cfg, new StringDeserializer(), new JacksonJsonDeserializer<>(NewPostRequest.class));
+    }
+
+    @Bean
+    ConcurrentKafkaListenerContainerFactory<String, NewPostRequest> newPostKafkaListenerContainerFactory(
+            ConsumerFactory<String, NewPostRequest> newPostConsumerFactory) {
+        var f = new ConcurrentKafkaListenerContainerFactory<String, NewPostRequest>();
+        f.setConsumerFactory(newPostConsumerFactory);
         return f;
     }
 
@@ -66,9 +78,17 @@ public class KafkaConfig {
             @Value("${app.kafka.events-topic.partitions:3}") int eventsPartitions,
             @Value("${app.kafka.events-topic.replication-factor:1}") short eventsReplication,
             @Value("${app.kafka.posts-aggregates-topic.partitions:3}") int postsAggregatesPartitions,
-            @Value("${app.kafka.posts-aggregates-topic.replication-factor:1}") short postsAggregatesReplication) {
-        return new KafkaAdmin.NewTopics(
-                new NewTopic("events", eventsPartitions, eventsReplication),
-                new NewTopic("posts-aggregates", postsAggregatesPartitions, postsAggregatesReplication));
+            @Value("${app.kafka.posts-aggregates-topic.replication-factor:1}") short postsAggregatesReplication,
+            @Value("${app.kafka.events-topic.tombstone-retention-ms:604800000}") long tombstoneRetentionMs) {
+
+        NewTopic events = new NewTopic("events", eventsPartitions, eventsReplication);
+        Map<String, String> eventsCfg = new HashMap<>();
+        eventsCfg.put("cleanup.policy", "compact,delete");
+        eventsCfg.put("delete.retention.ms", String.valueOf(tombstoneRetentionMs));
+        events.configs(eventsCfg);
+
+        NewTopic posts = new NewTopic("posts-aggregates", postsAggregatesPartitions, postsAggregatesReplication);
+
+        return new KafkaAdmin.NewTopics(events, posts);
     }
 }

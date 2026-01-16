@@ -2,12 +2,13 @@ package com.example.highrps.common;
 
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
+import com.github.benmanes.caffeine.cache.Cache;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
-import tools.jackson.databind.json.JsonMapper;
 
 @ActiveProfiles({"test"})
 @SpringBootTest(webEnvironment = RANDOM_PORT, classes = ContainersConfig.class)
@@ -18,5 +19,8 @@ public abstract class AbstractIntegrationTest {
     protected MockMvcTester mockMvcTester;
 
     @Autowired
-    protected JsonMapper jsonMapper;
+    protected Cache<String, String> localCache;
+
+    @Autowired
+    protected RedisTemplate<String, String> redisTemplate;
 }
