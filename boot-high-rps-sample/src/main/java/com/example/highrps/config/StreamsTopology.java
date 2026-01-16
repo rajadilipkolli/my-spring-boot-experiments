@@ -31,17 +31,17 @@ public class StreamsTopology {
         KStream<String, NewPostRequest> postRequestKStream =
                 kafkaStreamBuilder.stream("events", Consumed.with(Serdes.String(), eventSerde));
 
-        // Aggregate latest value per title into a persistent store named "stats-store"
+        // Aggregate latest value per title into a persistent store named "posts-store"
         KTable<String, NewPostRequest> aggregates = postRequestKStream
                 .groupByKey(Grouped.with(Serdes.String(), eventSerde))
                 .reduce(
                         (oldV, newV) -> newV,
-                        Materialized.<String, NewPostRequest>as(Stores.persistentKeyValueStore("stats-store"))
+                        Materialized.<String, NewPostRequest>as(Stores.persistentKeyValueStore("posts-store"))
                                 .withKeySerde(Serdes.String())
                                 .withValueSerde(eventSerde));
 
         // Publish aggregates as simple string values so downstream consumers use String deserializers
-        aggregates.toStream().to("stats-aggregates", Produced.with(Serdes.String(), eventSerde));
+        aggregates.toStream().to("posts-aggregates", Produced.with(Serdes.String(), eventSerde));
 
         return aggregates;
     }

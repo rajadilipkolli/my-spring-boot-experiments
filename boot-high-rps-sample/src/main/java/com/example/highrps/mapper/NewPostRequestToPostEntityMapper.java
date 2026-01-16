@@ -4,7 +4,7 @@ import com.example.highrps.entities.PostEntity;
 import com.example.highrps.entities.PostTagEntity;
 import com.example.highrps.entities.TagEntity;
 import com.example.highrps.model.request.NewPostRequest;
-import com.example.highrps.model.request.TagsRequest;
+import com.example.highrps.model.request.TagRequest;
 import com.example.highrps.repository.TagRepository;
 import java.util.List;
 import org.mapstruct.AfterMapping;
@@ -45,22 +45,22 @@ public interface NewPostRequestToPostEntityMapper {
             // Tag Entities To remove
             tagEntitiesFromDb.stream()
                     .filter(tagEntity -> !newPostRequest.tags().stream()
-                            .map(TagsRequest::tagName)
+                            .map(TagRequest::tagName)
                             .toList()
                             .contains(tagEntity.getTagName()))
                     .forEach(postEntity::removeTag);
 
             List<TagEntity> tagEntitiesToUpdate = tagEntitiesFromDb.stream()
                     .filter(tagEntity -> newPostRequest.tags().stream()
-                            .map(TagsRequest::tagName)
+                            .map(TagRequest::tagName)
                             .toList()
                             .contains(tagEntity.getTagName()))
                     .toList();
 
             for (TagEntity tagEntity : tagEntitiesToUpdate) {
-                for (TagsRequest tagsRequest : newPostRequest.tags()) {
-                    if (tagEntity.getTagName().equalsIgnoreCase(tagsRequest.tagName())) {
-                        tagEntity.setTagDescription(tagsRequest.tagDescription());
+                for (TagRequest tagRequest : newPostRequest.tags()) {
+                    if (tagEntity.getTagName().equalsIgnoreCase(tagRequest.tagName())) {
+                        tagEntity.setTagDescription(tagRequest.tagDescription());
                         break;
                     }
                 }
@@ -76,7 +76,7 @@ public interface NewPostRequestToPostEntityMapper {
         }
     }
 
-    default TagEntity getTagEntity(TagRepository tagRepository, TagsRequest tagsRequest) {
+    default TagEntity getTagEntity(TagRepository tagRepository, TagRequest tagsRequest) {
         return tagRepository
                 .findByTagNameIgnoreCase(tagsRequest.tagName())
                 .orElseGet(() -> tagRepository.save(new TagEntity()

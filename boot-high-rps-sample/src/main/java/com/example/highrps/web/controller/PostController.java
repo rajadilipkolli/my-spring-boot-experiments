@@ -30,7 +30,7 @@ public class PostController {
     public ResponseEntity<PostResponse> createPost(@RequestBody @Valid NewPostRequest newPostRequest) {
         PostResponse postResponse = postService.savePost(newPostRequest);
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
-                .path("/{id}")
+                .path("/{title}")
                 .buildAndExpand(postResponse.title())
                 .toUri();
         return ResponseEntity.created(location).body(postResponse);

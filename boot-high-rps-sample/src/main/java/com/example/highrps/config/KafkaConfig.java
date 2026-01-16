@@ -43,9 +43,9 @@ public class KafkaConfig {
     }
 
     @Bean
-    ConsumerFactory<String, String> stringConsumerFactory(KafkaConnectionDetails KafkaConnectionDetails) {
+    ConsumerFactory<String, String> stringConsumerFactory(KafkaConnectionDetails kafkaConnectionDetails) {
         Map<String, Object> cfg = new HashMap<>();
-        cfg.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, KafkaConnectionDetails.getBootstrapServers());
+        cfg.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaConnectionDetails.getBootstrapServers());
         cfg.put(ConsumerConfig.GROUP_ID_CONFIG, "aggregates-redis-writer");
         cfg.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         cfg.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
@@ -65,10 +65,10 @@ public class KafkaConfig {
     KafkaAdmin.NewTopics eventsTopic(
             @Value("${app.kafka.events-topic.partitions:3}") int eventsPartitions,
             @Value("${app.kafka.events-topic.replication-factor:1}") short eventsReplication,
-            @Value("${app.kafka.stats-aggregates-topic.partitions:3}") int statsPartitions,
-            @Value("${app.kafka.stats-aggregates-topic.replication-factor:1}") short statsReplication) {
+            @Value("${app.kafka.posts-aggregates-topic.partitions:3}") int statsPartitions,
+            @Value("${app.kafka.posts-aggregates-topic.replication-factor:1}") short statsReplication) {
         return new KafkaAdmin.NewTopics(
                 new NewTopic("events", eventsPartitions, eventsReplication),
-                new NewTopic("stats-aggregates", statsPartitions, statsReplication));
+                new NewTopic("posts-aggregates", statsPartitions, statsReplication));
     }
 }

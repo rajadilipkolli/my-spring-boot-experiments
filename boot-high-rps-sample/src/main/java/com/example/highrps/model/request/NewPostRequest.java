@@ -1,5 +1,6 @@
 package com.example.highrps.model.request;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import java.io.Serializable;
 import java.util.List;
@@ -9,6 +10,6 @@ public record NewPostRequest(
         @NotBlank(message = "PostContent must not be blank") String content,
         @NotBlank(message = "Email must not be blank") String email,
         Boolean published,
-        PostDetailsRequest details,
-        List<TagsRequest> tags)
+        @Valid PostDetailsRequest details,
+        @Valid List<TagRequest> tags)
         implements Serializable {}

@@ -23,10 +23,17 @@ public class PostTagEntity implements Serializable {
     private TagEntity tagEntity;
 
     @Column(name = "created_on")
-    private LocalDateTime createdOn = LocalDateTime.now();
+    private LocalDateTime createdOn;
 
     public PostTagEntity() {
         this.createdOn = LocalDateTime.now();
+    }
+
+    public PostTagEntity(PostEntity postEntity, TagEntity tagEntity) {
+        this.postEntity = postEntity;
+        this.tagEntity = tagEntity;
+        this.createdOn = LocalDateTime.now();
+        this.id = new PostTagId(postEntity.getId(), tagEntity.getId());
     }
 
     public PostTagId getId() {

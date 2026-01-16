@@ -6,7 +6,6 @@ CREATE TABLE tags
     CONSTRAINT pk_tags PRIMARY KEY (id)
 );
 
-ALTER TABLE tags
-    ADD CONSTRAINT uc_tag_name UNIQUE (tag_name);
+CREATE UNIQUE INDEX uc_tag_name ON tags (LOWER(tag_name));
 
-create sequence IF NOT EXISTS tags_seq start with 1 increment by 50;
+create sequence IF NOT EXISTS tags_seq start with 1 increment by 5;

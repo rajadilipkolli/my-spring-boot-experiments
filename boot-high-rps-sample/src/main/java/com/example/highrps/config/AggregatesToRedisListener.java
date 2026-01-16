@@ -29,7 +29,7 @@ public class AggregatesToRedisListener {
     }
 
     @KafkaListener(
-            topics = "stats-aggregates",
+            topics = "posts-aggregates",
             groupId = "aggregates-redis-writer",
             containerFactory = "stringKafkaListenerContainerFactory")
     @RetryableTopic(
@@ -56,7 +56,7 @@ public class AggregatesToRedisListener {
         if (existing != null) {
             try {
                 PostResponse existingStats = PostResponse.fromJson(existing);
-                if (PostResponse.toJson(existingStats).equals(value)) return;
+                if (existingStats.equals(value)) return;
             } catch (Exception e) {
                 log.warn("Failed to parse existing stats for key: {}, will overwrite", key, e);
             }
@@ -77,7 +77,7 @@ public class AggregatesToRedisListener {
     public void dlt(ConsumerRecord<String, String> record, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
         log.error("Received dead-letter message : {} from topic {}", record.value(), topic);
         // Push failed message to a simple Redis DLQ list for later inspection
-        String dlqKey = "dlq:stats-aggregates";
+        String dlqKey = "dlq:posts-aggregates";
         try {
             String payload = record.value();
             redis.opsForList().leftPush(dlqKey, payload);

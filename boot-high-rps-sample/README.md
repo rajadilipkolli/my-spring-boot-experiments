@@ -10,25 +10,25 @@ Summary
 - PostgreSQL (or other DB) is used for async durability/writes and is not on the hot path.
 
 Architecture mapping to this project
-- Controller: `HelloController` — lightweight synchronous handlers running on virtual threads.
+- Controller: `PostController` — lightweight synchronous handlers running on virtual threads.
 - Producer: `KafkaProducerService` — publishes `EventDto` to topic `events`.
-- Streams: `StreamsTopology` — consumes `events`, reduces latest `value` per key, materializes persistent store `stats-store` (Long), and emits `stats-aggregates` as strings.
-- Materializer: `AggregatesToRedisListener` — consumes `stats-aggregates` and writes JSON into `stats:{id}` Redis keys.
-- API fallback: `HelloService` — cache → Redis → Kafka Streams interactive query (`stats-store`).
+- Streams: `StreamsTopology` — consumes `events`, reduces latest `value` per key, materializes persistent store `posts-store` (String), and emits `posts-aggregates` as strings.
+- Materializer: `AggregatesToRedisListener` — consumes `posts-aggregates` and writes JSON into `stats:{id}` Redis keys.
+- API fallback: `PostService` — cache → Redis → Kafka Streams interactive query (`posts-store`).
 - DB writer: `ScheduledBatchProcessor` — pops from `events:queue` and persists to DB asynchronously.
 
 Kafka topics used
 - `events` — raw events (EventDto JSON). Produced by APIs when publishing events.
-- `stats-aggregates` — string aggregates emitted by Kafka Streams. Consumed by Redis materializer.
+- `posts-aggregates` — string aggregates emitted by Kafka Streams. Consumed by Redis materializer.
 
 Do we need 3 topics?
 
-Currently this module uses 2 application-level topics: `events` and `stats-aggregates`.
+Currently this module uses 2 application-level topics: `events` and `posts-aggregates`.
 Kafka Streams will create internal changelog topics for state stores automatically. The blueprint sometimes describes a third topic for pre-aggregation or durable event storage, but in practice the Streams changelog covers that need. If you want a dedicated changelog-like topic for manual inspection or a separate compaction policy, you can add it, but it's not required for correctness.
 
 What I changed/added
-- `StreamsTopology` — materializes `stats-store` (Long) and emits string aggregates to `stats-aggregates`.
-- `HelloService` — fallback uses interactive query against `stats-store` via `KafkaStreams`.
+- `StreamsTopology` — materializes `posts-store` (Long) and emits string aggregates to `posts-aggregates`.
+- `HelloService` — fallback uses interactive query against `posts-store` via `KafkaStreams`.
 - `EventDto` — numeric-friendly `@JsonCreator` added to tolerate numeric-only messages.
 - `HelloController` — publish endpoints now also push serialized events into Redis "events:queue" so `ScheduledBatchProcessor` can batch persist.
 
@@ -75,8 +75,8 @@ Production tuning notes
 - JVM: prefer ZGC for low pause times; size heap conservatively.
 
 Suggestions & next steps
-- Add an HTTP readiness probe that confirms `stats-store` is queryable before serving interactive queries.
-- Add observability: meters for `stats-store` misses, Streams state, Redis RTT, and batch processing throughput.
+- Add an HTTP readiness probe that confirms `posts-store` is queryable before serving interactive queries.
+- Add observability: meters for `posts-store` misses, Streams state, Redis RTT, and batch processing throughput.
 - Harden error handling in Redis materializer (retry/backoff, DLQ monitoring).
 
 If you'd like, I can start the app and run an end-to-end test (publish → Streams → Redis → /stats) and capture logs and responses.

@@ -14,15 +14,17 @@ public record PostResponse(
         PostDetailsResponse details,
         List<TagResponse> tags) {
 
+    public static final JsonMapper JSON_MAPPER = new JsonMapper();
+
     public PostResponse() {
         this(null, null, false, null, null, null, null, null);
     }
 
     public static PostResponse fromJson(String cached) {
-        return new JsonMapper().readValue(cached, PostResponse.class);
+        return JSON_MAPPER.readValue(cached, PostResponse.class);
     }
 
     public static String toJson(PostResponse resp) {
-        return new JsonMapper().writeValueAsString(resp);
+        return JSON_MAPPER.writeValueAsString(resp);
     }
 }

@@ -25,7 +25,7 @@ public class CacheConfig {
                 .recordStats()
                 .removalListener((key, value, cause) -> {
                     // Log or emit metrics for evictions
-                    log.info("Removed key: {}, value: {}, cause: {}", key, value, cause);
+                    log.debug("Removed key: {}, cause: {}", key, cause);
                 })
                 .build();
     }

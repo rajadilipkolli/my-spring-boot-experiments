@@ -68,13 +68,14 @@ public class PostService {
             return PostResponse.fromJson(raw);
         }
 
-        // 3) Fallback: interactive query against Kafka Streams `stats-store` (materialized KTable)
+        // 3) Fallback: interactive query against Kafka Streams `posts-store` (materialized KTable)
         try {
-            NewPostRequest aLong = getKeyValueStore().get(title);
-            if (aLong != null) {
-                PostResponse response = postRequestToResponseMapper.toResponse(aLong);
+            NewPostRequest cachedRequest = getKeyValueStore().get(title);
+            if (cachedRequest != null) {
+                PostResponse response = postRequestToResponseMapper.toResponse(cachedRequest);
                 var json = PostResponse.toJson(response);
                 localCache.put(title, json);
+                redis.opsForValue().set("posts:" + title, json);
                 return response;
             }
         } catch (Exception e) {
@@ -85,6 +86,12 @@ public class PostService {
         return postRepository
                 .findByTitle(title)
                 .map(postEntityToPostResponse::convert)
+                .map(response -> {
+                    var json = PostResponse.toJson(response);
+                    localCache.put(title, json);
+                    redis.opsForValue().set("posts:" + title, json);
+                    return response;
+                })
                 .orElseGet(PostResponse::new);
     }
 
@@ -97,7 +104,7 @@ public class PostService {
                     KafkaStreams kafkaStreams = kafkaStreamsFactory.getKafkaStreams();
                     Assert.notNull(kafkaStreams, () -> "Kafka Streams not initialized yet");
                     keyValueStore = store = kafkaStreams.store(
-                            StoreQueryParameters.fromNameAndType("stats-store", QueryableStoreTypes.keyValueStore()));
+                            StoreQueryParameters.fromNameAndType("posts-store", QueryableStoreTypes.keyValueStore()));
                 }
             }
         }

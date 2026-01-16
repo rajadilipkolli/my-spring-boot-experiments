@@ -36,7 +36,7 @@ public class PostEntity extends Auditable implements Serializable {
     @OneToMany(mappedBy = "postEntity", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PostTagEntity> tags = new ArrayList<>();
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "author_id")
     private AuthorEntity authorEntity;
 
@@ -144,10 +144,7 @@ public class PostEntity extends Auditable implements Serializable {
     }
 
     public void addTag(TagEntity tagEntity) {
-        PostTagEntity postTagEntity = new PostTagEntity()
-                .setPostEntity(this)
-                .setTagEntity(tagEntity)
-                .setId(new PostTagId(this.getId(), tagEntity.getId()));
+        PostTagEntity postTagEntity = new PostTagEntity(this, tagEntity);
         if (null == tags) {
             tags = new ArrayList<>();
         }

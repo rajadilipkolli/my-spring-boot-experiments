@@ -49,7 +49,7 @@ public class ScheduledBatchProcessor {
     @Scheduled(fixedDelayString = "${app.batch.delay-ms}")
     public void processBatch() {
         List<String> items = redis.opsForList().rightPop(queueKey, batchSize);
-        if (items.isEmpty()) {
+        if (items == null || items.isEmpty()) {
             return;
         }
 
