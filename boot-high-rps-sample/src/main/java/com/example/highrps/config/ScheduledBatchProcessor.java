@@ -5,6 +5,7 @@ import com.example.highrps.model.request.NewPostRequest;
 import com.example.highrps.repository.PostRepository;
 import com.example.highrps.repository.TagRepository;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
@@ -53,25 +54,72 @@ public class ScheduledBatchProcessor {
             return;
         }
 
-        var entities = items.stream()
+        // Deduplicate by title, keeping the latest value in the batch
+        Map<String, Object> latestByTitle = items.stream()
                 .filter(Objects::nonNull)
                 .map(s -> {
                     try {
-                        return jsonMapper.readValue(s, NewPostRequest.class);
+                        // Attempt to parse tombstone marker first
+                        var node = jsonMapper.readTree(s);
+                        if (node.has("__deleted") && node.get("__deleted").asBoolean(false)) {
+                            // Represent tombstone with the raw title string
+                            return Map.<String, Object>of(node.get("title").asString(), Boolean.TRUE);
+                        }
+                        // Otherwise, parse as NewPostRequest
+                        NewPostRequest req = jsonMapper.readValue(s, NewPostRequest.class);
+                        return Map.<String, Object>of(req.title(), req);
                     } catch (Exception e) {
-                        log.warn("Failed to deserialize event: {}", s, e);
+                        log.warn("Failed to deserialize queued payload: {}", s, e);
                         return null;
                     }
                 })
                 .filter(Objects::nonNull)
-                .map(newPostRequest -> newPostRequestToPostEntityMapper.convert(newPostRequest, tagRepository))
+                .flatMap(m -> m.entrySet().stream())
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (older, newer) -> newer));
+
+        // Now separate deletes and upserts: if value is Boolean.TRUE => delete
+        var deletes = latestByTitle.entrySet().stream()
+                .filter(e -> Boolean.TRUE.equals(e.getValue()))
+                .map(Map.Entry::getKey)
+                .toList();
+
+        var upserts = latestByTitle.values().stream()
+                .filter(v -> v instanceof NewPostRequest)
+                .map(v -> (NewPostRequest) v)
+                .map(newPostRequest -> {
+                    try {
+                        return newPostRequestToPostEntityMapper.convert(newPostRequest, tagRepository);
+                    } catch (Exception e) {
+                        log.warn("Failed to map queued response to entity for title: {}", newPostRequest.title(), e);
+                        return null;
+                    }
+                })
+                .filter(Objects::nonNull)
                 .collect(Collectors.toList());
-        if (!entities.isEmpty()) {
+        if (!upserts.isEmpty()) {
             try {
-                postRepository.saveAll(entities);
+                postRepository.saveAll(upserts);
             } catch (Exception e) {
-                log.error("Failed to persist batch of {} entities, re-queuing", entities.size(), e);
+                log.error("Failed to persist batch of {} entities, re-queuing", upserts.size(), e);
                 // Re-queue items to avoid data loss
+                items.forEach(item -> redis.opsForList().leftPush(queueKey, item));
+                throw e;
+            }
+        }
+
+        if (!deletes.isEmpty()) {
+            try {
+                deletes.forEach(title -> {
+                    try {
+                        if (postRepository.existsByTitle(title)) {
+                            postRepository.deleteByTitle(title);
+                        }
+                    } catch (Exception e) {
+                        log.warn("Failed to delete DB entity for title: {}", title, e);
+                    }
+                });
+            } catch (Exception e) {
+                log.error("Failed to delete batch of {} entities, re-queuing", deletes.size(), e);
                 items.forEach(item -> redis.opsForList().leftPush(queueKey, item));
                 throw e;
             }

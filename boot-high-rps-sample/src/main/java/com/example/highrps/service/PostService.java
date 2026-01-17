@@ -1,11 +1,14 @@
 package com.example.highrps.service;
 
+import com.example.highrps.exception.ResourceNotFoundException;
 import com.example.highrps.mapper.PostEntityToPostResponse;
 import com.example.highrps.mapper.PostRequestToResponseMapper;
 import com.example.highrps.model.request.NewPostRequest;
 import com.example.highrps.model.response.PostResponse;
 import com.example.highrps.repository.PostRepository;
 import com.github.benmanes.caffeine.cache.Cache;
+import java.time.LocalDateTime;
+import java.util.concurrent.locks.ReentrantLock;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StoreQueryParameters;
 import org.apache.kafka.streams.state.QueryableStoreTypes;
@@ -32,6 +35,9 @@ public class PostService {
 
     private volatile ReadOnlyKeyValueStore<String, NewPostRequest> keyValueStore = null;
 
+    // Lock used to initialize the Kafka Streams read-only store instead of using synchronized
+    private final ReentrantLock keyValueStoreLock = new ReentrantLock();
+
     public PostService(
             KafkaProducerService kafkaProducerService,
             Cache<String, String> localCache,
@@ -50,11 +56,33 @@ public class PostService {
     }
 
     public PostResponse savePost(NewPostRequest newPostRequest) {
+        if (newPostRequest.published() != null && newPostRequest.published() && newPostRequest.publishedAt() == null) {
+            newPostRequest = newPostRequest.withPublishedAt(LocalDateTime.now());
+        }
         kafkaProducerService.publishEvent(newPostRequest);
         PostResponse postResponse = postRequestToResponseMapper.mapToPostResponse(newPostRequest);
         String json = PostResponse.toJson(postResponse);
         localCache.put(newPostRequest.title(), json);
-        redis.opsForValue().set("posts:" + newPostRequest.title(), json);
+        return postResponse;
+    }
+
+    public PostResponse updatePost(NewPostRequest newPostRequest) {
+        String title = newPostRequest.title();
+        if (newPostRequest.published() != null && newPostRequest.published() && newPostRequest.publishedAt() == null) {
+            newPostRequest = newPostRequest.withPublishedAt(LocalDateTime.now());
+        }
+        // Publish event first so Streams + Aggregates handle materialized view
+        kafkaProducerService.publishEvent(newPostRequest);
+
+        // Update local cache and redis to reflect new state immediately
+        PostResponse postResponse = postRequestToResponseMapper.mapToPostResponse(newPostRequest);
+        String json = PostResponse.toJson(postResponse);
+        try {
+            localCache.put(title, json);
+        } catch (Exception e) {
+            log.warn("Failed to update local cache for title: {}", title, e);
+        }
+
         return postResponse;
     }
 
@@ -68,7 +96,7 @@ public class PostService {
 
         // 2) Remove from Redis
         try {
-            redis.delete("posts:" + title);
+            redis.opsForValue().getAndDelete("posts:" + title);
         } catch (Exception e) {
             log.warn("Failed to delete redis key for title: {}", title, e);
         }
@@ -78,16 +106,6 @@ public class PostService {
             kafkaProducerService.publishDelete(title);
         } catch (Exception e) {
             log.warn("Failed to publish delete event for title: {}", title, e);
-        }
-
-        // 4) Remove from persistent storage (if present)
-        try {
-            if (postRepository.existsByTitle(title)) {
-                log.info("Deleting post entity from DB for title: {}", title);
-                postRepository.deleteByTitle(title);
-            }
-        } catch (Exception e) {
-            log.warn("Failed to query or delete DB entity for title: {}", title, e);
         }
     }
 
@@ -129,22 +147,23 @@ public class PostService {
                     redis.opsForValue().set("posts:" + title, json);
                     return response;
                 })
-                .orElse(null);
+                .orElseThrow(() -> new ResourceNotFoundException("Post not found for title: " + title));
     }
 
     private ReadOnlyKeyValueStore<String, NewPostRequest> getKeyValueStore() {
-        ReadOnlyKeyValueStore<String, NewPostRequest> store = keyValueStore;
-        if (store == null) {
-            synchronized (this) {
-                store = keyValueStore;
-                if (store == null) {
+        if (keyValueStore == null) {
+            keyValueStoreLock.lock();
+            try {
+                if (keyValueStore == null) {
                     KafkaStreams kafkaStreams = kafkaStreamsFactory.getKafkaStreams();
                     Assert.notNull(kafkaStreams, () -> "Kafka Streams not initialized yet");
-                    keyValueStore = store = kafkaStreams.store(
+                    keyValueStore = kafkaStreams.store(
                             StoreQueryParameters.fromNameAndType("posts-store", QueryableStoreTypes.keyValueStore()));
                 }
+            } finally {
+                keyValueStoreLock.unlock();
             }
         }
-        return store;
+        return keyValueStore;
     }
 }

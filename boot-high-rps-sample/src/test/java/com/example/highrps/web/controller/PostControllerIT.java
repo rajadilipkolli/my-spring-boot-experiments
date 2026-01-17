@@ -1,8 +1,11 @@
 package com.example.highrps.web.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 
 import com.example.highrps.common.AbstractIntegrationTest;
+import com.example.highrps.model.response.PostResponse;
+import java.time.Duration;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -61,15 +64,60 @@ class PostControllerIT extends AbstractIntegrationTest {
                 .hasStatus(HttpStatus.CREATED);
 
         // Ensure caches/redis are populated by hitting GET (which populates local cache and redis)
-        mockMvcTester.get().uri("/api/posts/" + title).exchange().assertThat().hasStatus(HttpStatus.OK);
+        mockMvcTester
+                .get()
+                .uri("/api/posts/" + title)
+                .exchange()
+                .assertThat()
+                .hasStatus(HttpStatus.OK)
+                .hasContentType(MediaType.APPLICATION_JSON)
+                .bodyJson()
+                .convertTo(PostResponse.class)
+                .satisfies(postResponse -> {
+                    assertThat(postResponse.title()).isEqualTo(title);
+                    assertThat(postResponse.content()).isEqualTo("Will be deleted");
+                    assertThat(postResponse.published()).isFalse();
+                    assertThat(postResponse.publishedAt()).isNull();
+                    assertThat(postResponse.tags()).isNull();
+                    assertThat(postResponse.details()).isNull();
+                });
 
         // Assert local cache and redis have the key
         String redisKey = "posts:" + title;
         String cached = localCache.getIfPresent(title);
         assertThat(cached).isNotNull();
-        assertThat(redisTemplate.opsForValue().get(redisKey)).isNotNull();
+        // as redis will take a short moment to be populated due to async nature, it should go through kafka and in
+        // AggregatesToRedisListener value is set
+        assertThat(redisTemplate.opsForValue().get(redisKey)).isNull();
 
-        // 2) Delete the post
+        // 2) Update the post via the new PUT endpoint to change content
+        mockMvcTester
+                .put()
+                .uri("/api/posts/" + title)
+                .content("""
+                        {
+                          "title": "delete-me",
+                          "content": "Updated content before delete",
+                          "email": "test@local.com"
+                        }
+                        """)
+                .contentType(MediaType.APPLICATION_JSON)
+                .exchange()
+                .assertThat()
+                .hasStatus(HttpStatus.OK)
+                .bodyJson()
+                .convertTo(PostResponse.class)
+                .satisfies(resp -> assertThat(resp.content()).isEqualTo("Updated content before delete"));
+
+        // Verify caches updated with new content
+        String cachedAfter = localCache.getIfPresent(title);
+        assertThat(cachedAfter).isNotNull();
+        assertThat(localCache.getIfPresent(title)).contains("Updated content before delete");
+        // as redis will take a short moment to be populated due to async nature, it should go through kafka and in
+        // AggregatesToRedisListener value is set
+        assertThat(redisTemplate.opsForValue().get(redisKey)).isNull();
+
+        // 3) Delete the post
         mockMvcTester
                 .delete()
                 .uri("/api/posts/" + title)
@@ -77,14 +125,18 @@ class PostControllerIT extends AbstractIntegrationTest {
                 .assertThat()
                 .hasStatus(HttpStatus.NO_CONTENT);
 
-        // 3) Subsequent GET should return 404
-        mockMvcTester
-                .get()
-                .uri("/api/posts/" + title)
-                .exchange()
-                .assertThat()
-                .hasStatus(HttpStatus.NOT_FOUND)
-                .hasContentType(MediaType.APPLICATION_PROBLEM_JSON);
+        // 4) Subsequent GET should return 404
+        await().atMost(Duration.ofSeconds(10))
+                .pollInterval(Duration.ofMillis(500))
+                .untilAsserted(() -> {
+                    mockMvcTester
+                            .get()
+                            .uri("/api/posts/" + title)
+                            .exchange()
+                            .assertThat()
+                            .hasStatus(HttpStatus.NOT_FOUND)
+                            .hasContentType(MediaType.APPLICATION_PROBLEM_JSON);
+                });
 
         // Also assert local cache and redis no longer have the key
         assertThat(localCache.getIfPresent(title)).isNull();

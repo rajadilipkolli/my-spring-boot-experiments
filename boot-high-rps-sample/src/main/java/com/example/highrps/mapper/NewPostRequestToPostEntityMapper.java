@@ -22,9 +22,6 @@ import org.mapstruct.NullValueCheckStrategy;
 public interface NewPostRequestToPostEntityMapper {
 
     @Mapping(target = "tags", ignore = true)
-    @Mapping(
-            target = "publishedAt",
-            expression = "java(newPostRequest.published() ? java.time.LocalDateTime.now() : null)")
     PostEntity convert(NewPostRequest newPostRequest, @Context TagRepository tagRepository);
 
     @Mapping(target = "tags", ignore = true)

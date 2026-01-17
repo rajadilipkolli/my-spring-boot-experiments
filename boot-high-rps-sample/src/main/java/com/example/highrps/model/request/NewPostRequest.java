@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import java.io.Serializable;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public record NewPostRequest(
@@ -13,6 +14,11 @@ public record NewPostRequest(
         @NotBlank(message = "Email must not be blank") @Email(message = "Provide valid email") String email,
 
         Boolean published,
+        LocalDateTime publishedAt,
         @Valid PostDetailsRequest details,
         @Valid List<TagRequest> tags)
-        implements Serializable {}
+        implements Serializable {
+    public NewPostRequest withPublishedAt(LocalDateTime now) {
+        return new NewPostRequest(this.title, this.content, this.email, this.published, now, this.details, this.tags);
+    }
+}
