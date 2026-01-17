@@ -3,11 +3,11 @@ name: boot-grafana-lgtm
 on:
   push:
     paths:
-      - "boot-grafana-lgtm/**"
+      - "observability/boot-grafana-lgtm/**"
     branches: [main]
   pull_request:
     paths:
-      - "boot-grafana-lgtm/**"
+      - "observability/boot-grafana-lgtm/**"
     types:
       - opened
       - synchronize
@@ -19,14 +19,14 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: boot-grafana-lgtm
+        working-directory: observability/boot-grafana-lgtm
     steps:
       - uses: actions/checkout@v6
         with:
           fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
 
       - name: Set up JDK
-        uses: actions/setup-java@v5.1.0
+        uses: actions/setup-java@v5
         with:
           java-version: 25
           distribution: "temurin"

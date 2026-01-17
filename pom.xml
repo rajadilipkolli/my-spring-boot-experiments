@@ -19,7 +19,6 @@
         <module>batch-boot-jpa-sample</module>
         <module>boot-api-archunit-sample</module>
         <module>boot-chaos-monkey</module>
-        <module>boot-grafana-lgtm</module>
         <module>boot-high-rps-sample</module>
         <module>boot-mongodb-elasticsearch</module>
         <module>boot-opensearch-sample</module>
@@ -50,6 +49,7 @@
         <module>jpa/multitenancy/multitenancy-db</module>
         <module>jpa/multitenancy/partition</module>
         <module>jpa/multitenancy/schema</module>
+        <module>observability/boot-grafana-lgtm</module>
         <module>r2dbc/boot-jooq-r2dbc-sample</module>
         <module>r2dbc/boot-r2dbc-json-column</module>
         <module>r2dbc/boot-r2dbc-notify-listen</module>
