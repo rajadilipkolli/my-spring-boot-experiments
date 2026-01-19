@@ -2,6 +2,7 @@ package com.example.multitenancy.schema.config.multitenancy;
 
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Supplier;
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.context.spi.CurrentTenantIdentifierResolver;
 import org.jspecify.annotations.Nullable;
@@ -12,20 +13,25 @@ import org.springframework.stereotype.Component;
 public class TenantIdentifierResolver
         implements CurrentTenantIdentifierResolver<String>, HibernatePropertiesCustomizer {
 
-    private static final ThreadLocal<String> currentTenant = new ThreadLocal<>();
+    private static final String UNKNOWN = "unknown";
+    private static final ScopedValue<String> CURRENT_TENANT = ScopedValue.newInstance();
 
-    public void setCurrentTenant(@Nullable String tenant) {
-        currentTenant.set(Objects.requireNonNullElse(tenant, "unknown"));
+    public void runWithTenant(@Nullable String tenant, Runnable action) {
+        ScopedValue.where(CURRENT_TENANT, normalize(tenant)).run(action);
     }
 
-    public void clearCurrentTenant() {
-        currentTenant.remove();
+    public <T> T withTenant(@Nullable String tenant, Supplier<T> supplier) {
+        return ScopedValue.where(CURRENT_TENANT, normalize(tenant)).call(supplier::get);
+    }
+
+    public <T, X extends Exception> T callWithTenant(
+            @Nullable String tenant, ScopedValue.CallableOp<? extends T, X> callable) throws X {
+        return ScopedValue.where(CURRENT_TENANT, normalize(tenant)).call(callable);
     }
 
     @Override
     public String resolveCurrentTenantIdentifier() {
-        String tenant = currentTenant.get();
-        return tenant != null ? tenant : "unknown";
+        return CURRENT_TENANT.isBound() ? CURRENT_TENANT.get() : UNKNOWN;
     }
 
     @Override
@@ -36,5 +42,9 @@ public class TenantIdentifierResolver
     @Override
     public void customize(Map<String, Object> hibernateProperties) {
         hibernateProperties.put(AvailableSettings.MULTI_TENANT_IDENTIFIER_RESOLVER, this);
+    }
+
+    private String normalize(@Nullable String tenant) {
+        return Objects.requireNonNullElse(tenant, UNKNOWN);
     }
 }

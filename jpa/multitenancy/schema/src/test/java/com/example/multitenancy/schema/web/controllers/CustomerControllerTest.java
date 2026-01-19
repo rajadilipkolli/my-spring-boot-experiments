@@ -59,6 +59,11 @@ class CustomerControllerTest {
         this.customerList.add(new Customer().setId(1L).setName("text 1"));
         this.customerList.add(new Customer().setId(2L).setName("text 2"));
         this.customerList.add(new Customer().setId(3L).setName("text 3"));
+
+        given(tenantIdentifierResolver.callWithTenant(any(), any())).willAnswer(invocation -> {
+            ScopedValue.CallableOp<?, ?> callable = invocation.getArgument(1);
+            return callable.call();
+        });
     }
 
     @Test

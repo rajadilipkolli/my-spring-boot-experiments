@@ -1,22 +1,23 @@
 package com.example.multitenancy.schema.config.multitenancy;
 
 import com.example.multitenancy.schema.utils.TenantNameType;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.URI;
 import java.util.List;
-import org.jspecify.annotations.Nullable;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
+import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
-import org.springframework.web.servlet.HandlerInterceptor;
+import org.springframework.web.filter.OncePerRequestFilter;
 import tools.jackson.databind.ObjectMapper;
 
-@Configuration(proxyBeanMethods = false)
-public class TenantInterceptor implements HandlerInterceptor {
+@Component
+public class TenantInterceptor extends OncePerRequestFilter {
 
     private final TenantIdentifierResolver tenantIdentifierResolver;
     private final ObjectMapper objectMapper;
@@ -27,48 +28,66 @@ public class TenantInterceptor implements HandlerInterceptor {
     }
 
     @Override
-    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
-            throws IOException {
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+            throws ServletException, IOException {
         var tenant = request.getParameter("tenant");
         String path = request.getRequestURI().substring(request.getContextPath().length());
         if (path.startsWith("/api/")) {
             if (!StringUtils.hasText(tenant)) {
-                ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
-                        HttpStatus.BAD_REQUEST, "Required parameter 'tenant' is not present.");
-                problemDetail.setType(URI.create("https://multitenancy.com/errors/validation-error"));
-                problemDetail.setTitle("Validation Error");
-                problemDetail.setInstance(URI.create(request.getRequestURI()));
-
-                response.setContentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE);
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                response.getWriter().write(objectMapper.writeValueAsString(problemDetail));
-                response.getWriter().flush();
-                return false;
+                writeProblem(
+                        response,
+                        request.getRequestURI(),
+                        HttpStatus.BAD_REQUEST,
+                        "Validation Error",
+                        "Required parameter 'tenant' is not present.",
+                        "https://multitenancy.com/errors/validation-error");
+                return;
             }
             if (!getValidTenants().contains(tenant)) {
-                ProblemDetail problemDetail =
-                        ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, "Unknown Database tenant");
-                problemDetail.setType(URI.create("https://multitenancy.com/errors/tenant-error"));
-                problemDetail.setTitle("Invalid Tenant");
-                problemDetail.setInstance(URI.create(request.getRequestURI()));
-
-                response.setContentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE);
-                response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-                response.getWriter().write(objectMapper.writeValueAsString(problemDetail));
-                response.getWriter().flush();
-                return false;
+                writeProblem(
+                        response,
+                        request.getRequestURI(),
+                        HttpStatus.FORBIDDEN,
+                        "Invalid Tenant",
+                        "Unknown Database tenant",
+                        "https://multitenancy.com/errors/tenant-error");
+                return;
             }
         }
 
-        tenantIdentifierResolver.setCurrentTenant(tenant);
-
-        return true;
+        try {
+            tenantIdentifierResolver.callWithTenant(tenant, () -> {
+                filterChain.doFilter(request, response);
+                return null;
+            });
+        } catch (Exception ex) {
+            if (ex instanceof ServletException servletException) {
+                throw servletException;
+            }
+            if (ex instanceof IOException ioException) {
+                throw ioException;
+            }
+            throw new ServletException(ex);
+        }
     }
 
-    @Override
-    public void afterCompletion(
-            HttpServletRequest request, HttpServletResponse response, Object handler, @Nullable Exception ex) {
-        tenantIdentifierResolver.clearCurrentTenant();
+    private void writeProblem(
+            HttpServletResponse response,
+            String requestUri,
+            HttpStatus status,
+            String title,
+            String detail,
+            String typeUrl)
+            throws IOException {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(status, detail);
+        problemDetail.setType(URI.create(typeUrl));
+        problemDetail.setTitle(title);
+        problemDetail.setInstance(URI.create(requestUri));
+
+        response.setContentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE);
+        response.setStatus(status.value());
+        response.getWriter().write(objectMapper.writeValueAsString(problemDetail));
+        response.getWriter().flush();
     }
 
     private List<String> getValidTenants() {
