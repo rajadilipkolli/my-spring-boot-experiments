@@ -1,7 +1,7 @@
 name: boot-strategy-plugin
 services:
     tempo:
-        image: grafana/tempo:2.9.0
+        image: grafana/tempo:2.9.1
         extra_hosts: ['host.docker.internal:host-gateway']
         container_name: tempo
         command: [ "-config.file=/etc/tempo.yaml" ]
