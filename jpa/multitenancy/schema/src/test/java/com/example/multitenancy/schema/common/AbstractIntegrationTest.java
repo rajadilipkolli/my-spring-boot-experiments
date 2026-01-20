@@ -4,7 +4,6 @@ import static com.example.multitenancy.schema.utils.AppConstants.PROFILE_TEST;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 import com.example.multitenancy.schema.config.TestContainersConfiguration;
-import com.example.multitenancy.schema.config.multitenancy.TenantIdentifierResolver;
 import com.example.multitenancy.schema.repositories.CustomerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -28,7 +27,4 @@ public abstract class AbstractIntegrationTest {
 
     @Autowired
     protected CustomerRepository customerRepository;
-
-    @Autowired
-    protected TenantIdentifierResolver tenantIdentifierResolver;
 }
