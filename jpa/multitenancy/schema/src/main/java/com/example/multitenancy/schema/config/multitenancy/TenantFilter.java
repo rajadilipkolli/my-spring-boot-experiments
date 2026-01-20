@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.URI;
+import java.util.Arrays;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -84,6 +85,8 @@ public class TenantFilter extends OncePerRequestFilter {
     }
 
     private List<String> getValidTenants() {
-        return List.of(TenantNameType.TEST1.getTenantName(), TenantNameType.TEST2.getTenantName());
+        return Arrays.stream(TenantNameType.values())
+                .map(TenantNameType::getTenantName)
+                .toList();
     }
 }

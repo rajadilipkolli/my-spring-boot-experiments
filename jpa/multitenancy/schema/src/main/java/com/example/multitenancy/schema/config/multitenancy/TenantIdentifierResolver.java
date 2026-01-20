@@ -16,7 +16,7 @@ public class TenantIdentifierResolver
 
     @Override
     public String resolveCurrentTenantIdentifier() {
-        return CURRENT_TENANT.isBound() ? CURRENT_TENANT.get() : UNKNOWN;
+        return CURRENT_TENANT.isBound() && CURRENT_TENANT.get() != null ? CURRENT_TENANT.get() : UNKNOWN;
     }
 
     @Override
