@@ -14,22 +14,22 @@ import org.springframework.http.ProblemDetail;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
-import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 @Component
-public class TenantInterceptor extends OncePerRequestFilter {
+public class TenantFilter extends OncePerRequestFilter {
 
-    private final TenantIdentifierResolver tenantIdentifierResolver;
-    private final ObjectMapper objectMapper;
+    private final JsonMapper jsonMapper;
 
-    public TenantInterceptor(TenantIdentifierResolver tenantIdentifierResolver, ObjectMapper objectMapper) {
-        this.tenantIdentifierResolver = tenantIdentifierResolver;
-        this.objectMapper = objectMapper;
+    public static final ScopedValue<String> CURRENT_TENANT = ScopedValue.newInstance();
+
+    public TenantFilter(JsonMapper jsonMapper) {
+        this.jsonMapper = jsonMapper;
     }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-            throws ServletException, IOException {
+            throws IOException {
         var tenant = request.getParameter("tenant");
         String path = request.getRequestURI().substring(request.getContextPath().length());
         if (path.startsWith("/api/")) {
@@ -55,20 +55,13 @@ public class TenantInterceptor extends OncePerRequestFilter {
             }
         }
 
-        try {
-            tenantIdentifierResolver.callWithTenant(tenant, () -> {
+        ScopedValue.where(CURRENT_TENANT, tenant).run(() -> {
+            try {
                 filterChain.doFilter(request, response);
-                return null;
-            });
-        } catch (Exception ex) {
-            if (ex instanceof ServletException servletException) {
-                throw servletException;
+            } catch (IOException | ServletException e) {
+                throw new RuntimeException(e);
             }
-            if (ex instanceof IOException ioException) {
-                throw ioException;
-            }
-            throw new ServletException(ex);
-        }
+        });
     }
 
     private void writeProblem(
@@ -86,7 +79,7 @@ public class TenantInterceptor extends OncePerRequestFilter {
 
         response.setContentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE);
         response.setStatus(status.value());
-        response.getWriter().write(objectMapper.writeValueAsString(problemDetail));
+        response.getWriter().write(jsonMapper.writeValueAsString(problemDetail));
         response.getWriter().flush();
     }
 

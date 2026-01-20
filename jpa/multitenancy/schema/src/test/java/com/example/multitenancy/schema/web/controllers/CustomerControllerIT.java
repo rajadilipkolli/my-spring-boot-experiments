@@ -12,10 +12,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.example.multitenancy.schema.common.AbstractIntegrationTest;
+import com.example.multitenancy.schema.config.multitenancy.TenantFilter;
 import com.example.multitenancy.schema.domain.request.CustomerDto;
 import com.example.multitenancy.schema.entities.Customer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -37,17 +39,18 @@ class CustomerControllerIT extends AbstractIntegrationTest {
     }
 
     private void cleanupTenant(String tenantId) {
-        tenantIdentifierResolver.runWithTenant(tenantId, customerRepository::deleteAll);
+        ScopedValue.where(TenantFilter.CURRENT_TENANT, tenantId).run(() -> {
+            customerRepository.deleteAll();
+        });
     }
 
     private List<Customer> createTestCustomersForTenant(String tenantId, String... customerNames) {
-        return tenantIdentifierResolver.withTenant(tenantId, () -> {
-            List<Customer> customers = new ArrayList<>();
-            for (String name : customerNames) {
-                customers.add(new Customer().setName(name));
-            }
-            return customerRepository.saveAll(customers);
-        });
+        List<Customer> customers = new ArrayList<>();
+        for (String name : customerNames) {
+            customers.add(new Customer().setName(name));
+        }
+        return ScopedValue.where(TenantFilter.CURRENT_TENANT, tenantId)
+                .call(() -> customerRepository.saveAll(customers));
     }
 
     @Nested
@@ -84,11 +87,11 @@ class CustomerControllerIT extends AbstractIntegrationTest {
         void shouldNotAllowCrossTenantAccess() throws Exception {
             // Create customer in tenant1
             List<Customer> tenant1Customers = createTestCustomersForTenant(TENANT_1, "Tenant1 Customer");
-            Customer tenant1Customer = tenant1Customers.get(0);
+            Customer tenant1Customer = tenant1Customers.getFirst();
 
             // Create customer in tenant2
             List<Customer> tenant2Customers = createTestCustomersForTenant(TENANT_2, "Tenant2 Customer");
-            Customer tenant2Customer = tenant2Customers.get(0);
+            Customer tenant2Customer = tenant2Customers.getFirst();
 
             // Tenant1 should be able to access its own customer
             mockMvc.perform(get("/api/customers/{id}", tenant1Customer.getId()).param("tenant", TENANT_1))
@@ -128,7 +131,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
         @DisplayName("Should find customer by ID for tenant1")
         void shouldFindCustomerByIdForTenant1() throws Exception {
             List<Customer> customers = createTestCustomersForTenant(TENANT_1, "Test Customer");
-            Customer customer = customers.get(0);
+            Customer customer = customers.getFirst();
 
             mockMvc.perform(get("/api/customers/{id}", customer.getId()).param("tenant", TENANT_1))
                     .andExpect(status().isOk())
@@ -149,7 +152,8 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                     .andExpect(jsonPath("$.name", is("New Customer")));
 
             // Verify customer was created in tenant1
-            List<Customer> customers = tenantIdentifierResolver.withTenant(TENANT_1, customerRepository::findAll);
+            List<Customer> customers =
+                    ScopedValue.where(TenantFilter.CURRENT_TENANT, TENANT_1).call(() -> customerRepository.findAll());
             assertThat(customers).hasSize(1);
             assertThat(customers.getFirst().getName()).isEqualTo("New Customer");
         }
@@ -169,9 +173,9 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                     .andExpect(jsonPath("$.name", is("Updated Customer")));
 
             // Verify customer was updated in tenant1
-            Customer updatedCustomer = tenantIdentifierResolver.withTenant(
-                    TENANT_1,
-                    () -> customerRepository.findById(customer.getId()).orElseThrow());
+            Customer updatedCustomer = ScopedValue.where(TenantFilter.CURRENT_TENANT, TENANT_1)
+                    .call(() -> customerRepository.findById(customer.getId()).orElseThrow());
+
             assertThat(updatedCustomer.getName()).isEqualTo("Updated Customer");
         }
 
@@ -179,16 +183,16 @@ class CustomerControllerIT extends AbstractIntegrationTest {
         @DisplayName("Should delete customer for tenant1")
         void shouldDeleteCustomerForTenant1() throws Exception {
             List<Customer> customers = createTestCustomersForTenant(TENANT_1, "Customer to Delete");
-            Customer customer = customers.get(0);
+            Customer customer = customers.getFirst();
 
             mockMvc.perform(delete("/api/customers/{id}", customer.getId()).param("tenant", TENANT_1))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.name", is("Customer to Delete")));
 
             // Verify customer was deleted from tenant1
-            assertThat(tenantIdentifierResolver.withTenant(
-                            TENANT_1, () -> customerRepository.findById(customer.getId())))
-                    .isEmpty();
+            Optional<Customer> customer1 = ScopedValue.where(TenantFilter.CURRENT_TENANT, TENANT_1)
+                    .call(() -> customerRepository.findById(customer.getId()));
+            assertThat(customer1).isEmpty();
         }
     }
 
@@ -210,7 +214,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
         @DisplayName("Should find customer by ID for tenant2")
         void shouldFindCustomerByIdForTenant2() throws Exception {
             List<Customer> customers = createTestCustomersForTenant(TENANT_2, "Tenant2 Test Customer");
-            Customer customer = customers.get(0);
+            Customer customer = customers.getFirst();
 
             mockMvc.perform(get("/api/customers/{id}", customer.getId()).param("tenant", TENANT_2))
                     .andExpect(status().isOk())
@@ -231,16 +235,17 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                     .andExpect(jsonPath("$.name", is("New Tenant2 Customer")));
 
             // Verify customer was created in tenant2
-            List<Customer> customers = tenantIdentifierResolver.withTenant(TENANT_2, customerRepository::findAll);
+            List<Customer> customers =
+                    ScopedValue.where(TenantFilter.CURRENT_TENANT, TENANT_2).call(() -> customerRepository.findAll());
             assertThat(customers).hasSize(1);
-            assertThat(customers.get(0).getName()).isEqualTo("New Tenant2 Customer");
+            assertThat(customers.getFirst().getName()).isEqualTo("New Tenant2 Customer");
         }
 
         @Test
         @DisplayName("Should update customer for tenant2")
         void shouldUpdateCustomerForTenant2() throws Exception {
             List<Customer> customers = createTestCustomersForTenant(TENANT_2, "Original Tenant2 Customer");
-            Customer customer = customers.get(0);
+            Customer customer = customers.getFirst();
             CustomerDto updateDto = new CustomerDto("Updated Tenant2 Customer");
 
             mockMvc.perform(put("/api/customers/{id}", customer.getId())
@@ -251,9 +256,8 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                     .andExpect(jsonPath("$.name", is("Updated Tenant2 Customer")));
 
             // Verify customer was updated in tenant2
-            Customer updatedCustomer = tenantIdentifierResolver.withTenant(
-                    TENANT_2,
-                    () -> customerRepository.findById(customer.getId()).orElseThrow());
+            Customer updatedCustomer = ScopedValue.where(TenantFilter.CURRENT_TENANT, TENANT_2)
+                    .call(() -> customerRepository.findById(customer.getId()).orElseThrow());
             assertThat(updatedCustomer.getName()).isEqualTo("Updated Tenant2 Customer");
         }
 
@@ -261,15 +265,15 @@ class CustomerControllerIT extends AbstractIntegrationTest {
         @DisplayName("Should delete customer for tenant2")
         void shouldDeleteCustomerForTenant2() throws Exception {
             List<Customer> customers = createTestCustomersForTenant(TENANT_2, "Tenant2 Customer to Delete");
-            Customer customer = customers.get(0);
+            Customer customer = customers.getFirst();
 
             mockMvc.perform(delete("/api/customers/{id}", customer.getId()).param("tenant", TENANT_2))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.name", is("Tenant2 Customer to Delete")));
 
             // Verify customer was deleted from tenant2
-            assertThat(tenantIdentifierResolver.withTenant(
-                            TENANT_2, () -> customerRepository.findById(customer.getId())))
+            assertThat(ScopedValue.where(TenantFilter.CURRENT_TENANT, TENANT_2)
+                            .call(() -> customerRepository.findById(customer.getId())))
                     .isEmpty();
         }
     }
