@@ -22,7 +22,7 @@ services:
             start_period: 30s
 
     loki:
-        image: grafana/loki:3.6.3
+        image: grafana/loki:3.6.4
         extra_hosts: ['host.docker.internal:host-gateway']
         container_name: loki
         command: [ "-config.file=/etc/loki/local-config.yaml" ]
