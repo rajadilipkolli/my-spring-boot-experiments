@@ -1,10 +1,10 @@
 package com.example.multitenancy.schema.config.multitenancy;
 
+import static com.example.multitenancy.schema.config.multitenancy.TenantFilter.CURRENT_TENANT;
+
 import java.util.Map;
-import java.util.Objects;
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.context.spi.CurrentTenantIdentifierResolver;
-import org.jspecify.annotations.Nullable;
 import org.springframework.boot.hibernate.autoconfigure.HibernatePropertiesCustomizer;
 import org.springframework.stereotype.Component;
 
@@ -12,20 +12,11 @@ import org.springframework.stereotype.Component;
 public class TenantIdentifierResolver
         implements CurrentTenantIdentifierResolver<String>, HibernatePropertiesCustomizer {
 
-    private static final ThreadLocal<String> currentTenant = new ThreadLocal<>();
-
-    public void setCurrentTenant(@Nullable String tenant) {
-        currentTenant.set(Objects.requireNonNullElse(tenant, "unknown"));
-    }
-
-    public void clearCurrentTenant() {
-        currentTenant.remove();
-    }
+    private static final String UNKNOWN = "unknown";
 
     @Override
     public String resolveCurrentTenantIdentifier() {
-        String tenant = currentTenant.get();
-        return tenant != null ? tenant : "unknown";
+        return CURRENT_TENANT.isBound() && CURRENT_TENANT.get() != null ? CURRENT_TENANT.get() : UNKNOWN;
     }
 
     @Override
