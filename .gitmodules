@@ -1,0 +1,3 @@
+[submodule "observability/elk"]
+	path = observability/elk
+	url = https://github.com/rajadilipkolli/aws-stack.git
