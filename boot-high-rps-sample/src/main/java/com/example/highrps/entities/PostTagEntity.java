@@ -14,12 +14,12 @@ public class PostTagEntity implements Serializable {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("postId")
-    @JoinColumn(name = "post_id")
+    @JoinColumn(name = "post_id", nullable = false)
     private PostEntity postEntity;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("tagId")
-    @JoinColumn(name = "tag_id")
+    @JoinColumn(name = "tag_id", nullable = false)
     private TagEntity tagEntity;
 
     @Column(name = "created_on")
