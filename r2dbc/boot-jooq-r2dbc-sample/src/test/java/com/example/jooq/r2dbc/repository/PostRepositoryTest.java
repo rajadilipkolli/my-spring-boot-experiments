@@ -181,28 +181,36 @@ class PostRepositoryTest {
     void optimisticLockingOnConcurrentPostUpdates() {
         // Create initial post
         Mono<Post> initialPost =
-                postRepository.save(
-                        new Post()
-                                .setTitle("original")
-                                .setContent("content")
-                                .setVersion((short) 1));
+                postRepository.save(new Post().setTitle("original").setContent("content"));
 
-        // Simulate concurrent updates
-        Mono<Post> update1 =
+        Mono<Post> testFlow =
                 initialPost.flatMap(
-                        post -> {
-                            post.setTitle("update1");
-                            return postRepository.save(post);
+                        saved -> {
+                            UUID id = saved.getId();
+
+                            // Load two independent instances (same version) to simulate concurrent
+                            // edits
+                            Mono<Post> p1 = postRepository.findById(id);
+                            Mono<Post> p2 = postRepository.findById(id);
+
+                            return Mono.zip(p1, p2)
+                                    .flatMap(
+                                            tuple -> {
+                                                Post post1 = tuple.getT1();
+                                                Post post2 = tuple.getT2();
+
+                                                post1.setTitle("update1");
+                                                post2.setTitle("update2");
+
+                                                // Persist first update (bumps version), then
+                                                // attempt stale update
+                                                return postRepository
+                                                        .save(post1)
+                                                        .then(postRepository.save(post2));
+                                            });
                         });
 
-        Mono<Post> update2 =
-                initialPost.flatMap(
-                        post -> {
-                            post.setTitle("update2");
-                            return postRepository.save(post);
-                        });
-
-        StepVerifier.create(update1.then(update2))
+        StepVerifier.create(testFlow)
                 .expectErrorMatches(
                         throwable -> throwable instanceof OptimisticLockingFailureException)
                 .verify();
