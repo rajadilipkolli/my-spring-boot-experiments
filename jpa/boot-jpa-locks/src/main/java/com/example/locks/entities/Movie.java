@@ -1,6 +1,7 @@
 package com.example.locks.entities;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -25,6 +26,7 @@ public class Movie {
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long movieId;
 
+    @Column(name = "movie_title", nullable = false)
     private String movieTitle;
 
     private LocalDate releaseDate;

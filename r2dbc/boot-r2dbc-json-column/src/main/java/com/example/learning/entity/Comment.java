@@ -31,7 +31,6 @@ public class Comment {
     private LocalDateTime updatedAt;
 
     @Version
-    @Column(nullable = false)
     private Short version;
 
     public UUID getId() {

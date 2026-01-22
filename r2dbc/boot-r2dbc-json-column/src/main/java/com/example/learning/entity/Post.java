@@ -41,7 +41,6 @@ public class Post {
     private LocalDateTime updatedAt;
 
     @Version
-    @Column(nullable = false)
     private Short version;
 
     @Transient

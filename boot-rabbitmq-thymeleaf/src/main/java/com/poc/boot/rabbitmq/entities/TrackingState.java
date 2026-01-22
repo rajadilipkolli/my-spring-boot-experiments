@@ -19,6 +19,8 @@ public class TrackingState {
     private String correlationId;
 
     private boolean ack;
+
+    @Column(nullable = false)
     private String status = "processed";
     private String cause;
 

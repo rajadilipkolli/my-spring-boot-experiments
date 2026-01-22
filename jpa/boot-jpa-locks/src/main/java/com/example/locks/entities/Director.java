@@ -1,5 +1,6 @@
 package com.example.locks.entities;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -17,6 +18,7 @@ public class Director {
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long directorId;
 
+    @Column(name = "director_name", nullable = false)
     private String directorName;
 
     private LocalDate dob;
