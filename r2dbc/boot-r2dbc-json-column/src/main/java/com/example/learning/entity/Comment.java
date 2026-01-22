@@ -30,8 +30,8 @@ public class Comment {
     @LastModifiedDate
     private LocalDateTime updatedAt;
 
-    @Column("version")
     @Version
+    @Column(nullable = false)
     private Short version;
 
     public UUID getId() {

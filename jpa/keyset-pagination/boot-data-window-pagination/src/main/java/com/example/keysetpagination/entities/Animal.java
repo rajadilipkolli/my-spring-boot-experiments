@@ -27,6 +27,7 @@ public class Animal extends Auditable {
     private String habitat;
 
     @Version
+    @Column(nullable = false)
     private Short version;
 
     public Animal() {}

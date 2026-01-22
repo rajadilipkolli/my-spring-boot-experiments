@@ -33,6 +33,7 @@ public class AuthorEntity implements Serializable {
     private LocalDateTime registeredAt;
 
     @Version
+    @Column(nullable = false)
     private Short version;
 
     @OneToMany(mappedBy = "authorEntity", cascade = CascadeType.ALL, orphanRemoval = true)
