@@ -18,7 +18,7 @@ public class PostDetailsEntity extends Auditable implements Serializable {
 
     @OneToOne(fetch = FetchType.LAZY)
     @MapsId
-    @JoinColumn(name = "id")
+    @JoinColumn(name = "id", nullable = false)
     private PostEntity postEntity;
 
     public PostDetailsEntity setId(Long id) {

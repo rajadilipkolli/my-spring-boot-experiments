@@ -23,7 +23,7 @@ public class PrimaryCustomer {
     private String text;
 
     @Version
-    @Column(name = "version")
+    @Column(nullable = false)
     private Short version = 0;
 
     @Column(nullable = false)

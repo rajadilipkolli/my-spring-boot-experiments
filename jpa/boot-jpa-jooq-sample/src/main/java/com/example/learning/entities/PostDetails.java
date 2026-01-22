@@ -24,12 +24,12 @@ public class PostDetails extends Auditable implements Serializable {
 
     private String detailsKey;
 
-    @Column(name = "created_by")
+    @Column(name = "created_by", nullable = false)
     private String createdBy;
 
     @OneToOne(fetch = FetchType.LAZY)
     @MapsId
-    @JoinColumn(name = "id")
+    @JoinColumn(name = "id", nullable = false)
     private Post post;
 
     public PostDetails() {}

@@ -36,7 +36,7 @@ public class Order {
     private BigDecimal price;
 
     @ManyToOne
-    @JoinColumn(name = "customer_id")
+    @JoinColumn(name = "customer_id", nullable = false)
     @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
     private Customer customer;
 

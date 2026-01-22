@@ -32,7 +32,7 @@ public class PostCommentEntity extends Auditable implements Serializable {
     private OffsetDateTime publishedAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "post_id")
+    @JoinColumn(name = "post_id", nullable = false)
     private PostEntity postEntity;
 
     public PostCommentEntity setId(Long id) {
