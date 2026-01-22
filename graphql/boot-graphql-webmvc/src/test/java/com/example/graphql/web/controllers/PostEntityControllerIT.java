@@ -11,6 +11,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.example.graphql.common.AbstractIntegrationTest;
+import com.example.graphql.entities.AuthorEntity;
 import com.example.graphql.entities.PostDetailsEntity;
 import com.example.graphql.entities.PostEntity;
 import com.example.graphql.entities.TagEntity;
@@ -31,7 +32,13 @@ class PostEntityControllerIT extends AbstractIntegrationTest {
     @BeforeEach
     void setUp() {
         postRepository.deleteAll();
+        authorRepository.deleteAll();
 
+        AuthorEntity authorEntity = new AuthorEntity()
+                .setFirstName("First Author")
+                .setLastName("lastName")
+                .setEmail("junit1@email.com")
+                .setMobile(9848022338L);
         postEntityList = new ArrayList<>();
         PostEntity firstPost = new PostEntity().setContent("First Post");
         firstPost.setDetails(new PostDetailsEntity().setDetailsKey("Junit1"));
@@ -44,7 +51,10 @@ class PostEntityControllerIT extends AbstractIntegrationTest {
         PostEntity thirdPost = new PostEntity().setContent("Third Post");
         thirdPost.setDetails(new PostDetailsEntity().setDetailsKey("Junit3"));
         postEntityList.add(thirdPost);
-        postEntityList = postRepository.saveAll(postEntityList);
+
+        postEntityList.forEach(authorEntity::addPost);
+        authorEntity = authorRepository.save(authorEntity);
+        postEntityList = authorEntity.getPostEntities();
     }
 
     @AfterEach
