@@ -39,8 +39,7 @@ public class Post {
     @LastModifiedDate
     private LocalDateTime updatedAt;
 
-    @Version
-    private Short version;
+    @Version private Short version;
 
     public Post() {}
 

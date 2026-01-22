@@ -22,6 +22,7 @@ public class TrackingState {
 
     @Column(nullable = false)
     private String status = "processed";
+
     private String cause;
 
     public TrackingState() {}
