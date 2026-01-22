@@ -2,10 +2,16 @@ package com.example.keysetpagination.repositories;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
-import jakarta.persistence.criteria.*;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Order;
+import jakarta.persistence.criteria.Path;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import org.jspecify.annotations.NonNull;
 import org.springframework.data.domain.KeysetScrollPosition;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.ScrollPosition;
@@ -23,8 +29,11 @@ public class CustomRepositoryImpl<T> implements CustomRepository<T> {
     }
 
     @Override
-    public Window<T> findAll(
-            Specification<T> spec, PageRequest pageRequest, ScrollPosition scrollPosition, Class<T> entityClass) {
+    public Window<@NonNull T> findAll(
+            Specification<@NonNull T> spec,
+            PageRequest pageRequest,
+            ScrollPosition scrollPosition,
+            Class<T> entityClass) {
 
         // Build CriteriaQuery using Specification
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
