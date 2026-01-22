@@ -34,7 +34,6 @@ public class PostTag implements Serializable {
     private LocalDateTime createdOn = LocalDateTime.now();
 
     public PostTag() {
-
         // No-args constructor for JPA
     }
 
