@@ -29,7 +29,7 @@ public class PostDetails extends Auditable implements Serializable {
 
     @OneToOne(fetch = FetchType.LAZY)
     @MapsId
-    @JoinColumn(name = "id")
+    @JoinColumn(name = "id", nullable = false)
     private Post post;
 
     public PostDetails() {}
