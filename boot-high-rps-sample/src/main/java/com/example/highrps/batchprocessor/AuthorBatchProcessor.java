@@ -4,6 +4,7 @@ import com.example.highrps.mapper.AuthorRequestToEntityMapper;
 import com.example.highrps.model.request.AuthorRequest;
 import com.example.highrps.repository.AuthorRepository;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
@@ -45,7 +46,7 @@ public class AuthorBatchProcessor implements EntityBatchProcessor {
                     // Determine key first
                     String email = extractKey(payload);
 
-                    // Skip if a recent tombstone exists for this title (prevents re-insert races).
+                    // Skip if a recent tombstone exists for this email (prevents re-insert races).
                     // IMPORTANT: this Redis lookup is intentionally outside the JSON mapping try/catch so
                     // Redis failures don't get swallowed as "mapping errors".
                     if (email != null) {
@@ -81,7 +82,7 @@ public class AuthorBatchProcessor implements EntityBatchProcessor {
     public void processDeletes(List<String> keys) {
         if (keys.isEmpty()) return;
         try {
-            long deletedRows = authorRepository.deleteByEmailInIgnoreCase(keys);
+            long deletedRows = authorRepository.deleteByEmailInAllIgnoreCase(keys);
             log.debug("Deleted {} author entities for {} keys", deletedRows, keys.size());
         } catch (Exception e) {
             log.warn("Failed to batch delete author entities for keys: {}", keys, e);
@@ -97,7 +98,7 @@ public class AuthorBatchProcessor implements EntityBatchProcessor {
                 log.warn("Author payload missing email");
                 return null;
             }
-            return email;
+            return email.toLowerCase(Locale.ROOT);
         } catch (Exception e) {
             log.warn("Failed to extract email from author payload", e);
             return null;

@@ -6,6 +6,7 @@ import static org.awaitility.Awaitility.await;
 import com.example.highrps.common.AbstractIntegrationTest;
 import com.example.highrps.model.response.AuthorResponse;
 import java.time.Duration;
+import java.util.Locale;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -16,6 +17,7 @@ public class AuthorControllerIT extends AbstractIntegrationTest {
     @Test
     void crudAuthorResourcesAPICheck() {
         String email = "junitState@email.com";
+        var emailKey = email.toLowerCase(Locale.ROOT);
 
         // 1) Create an author via API
         mockMvcTester
@@ -33,6 +35,7 @@ public class AuthorControllerIT extends AbstractIntegrationTest {
                 .exchange()
                 .assertThat()
                 .hasStatus(HttpStatus.CREATED)
+                .hasContentType(MediaType.APPLICATION_JSON)
                 .hasHeader(HttpHeaders.LOCATION, "http://localhost/api/author/" + email);
 
         // Ensure caches/redis are populated by hitting GET (which populates local cache and redis)
@@ -55,11 +58,11 @@ public class AuthorControllerIT extends AbstractIntegrationTest {
                 });
 
         // Assert local cache has the key (redis may be populated asynchronously)
-        String cached = localCache.getIfPresent(email);
+        String cached = localCache.getIfPresent(emailKey);
         assertThat(cached).isNotNull();
         AuthorResponse cachedResponse = AuthorResponse.fromJson(cached);
         assertThat(cachedResponse.middleName()).isNull();
-        String redisString = redisTemplate.opsForValue().get("authors:" + email);
+        String redisString = redisTemplate.opsForValue().get("authors:" + emailKey);
         assertThat(redisString).isNotNull();
         cachedResponse = AuthorResponse.fromJson(redisString);
         assertThat(cachedResponse.middleName()).isNull();
@@ -89,12 +92,12 @@ public class AuthorControllerIT extends AbstractIntegrationTest {
                 });
 
         // Verify caches updated with new content
-        String cachedAfter = localCache.getIfPresent(email);
+        String cachedAfter = localCache.getIfPresent(emailKey);
         assertThat(cachedAfter).isNotNull();
         AuthorResponse cachedAfterResponse = AuthorResponse.fromJson(cachedAfter);
         assertThat(cachedAfterResponse.middleName()).isEqualTo("IT");
         assertThat(cachedAfterResponse.firstName()).isEqualTo("junit");
-        String redisAfterString = redisTemplate.opsForValue().get("authors:" + email);
+        String redisAfterString = redisTemplate.opsForValue().get("authors:" + emailKey);
         assertThat(redisAfterString).isNotNull();
         AuthorResponse redisAfterResponse = AuthorResponse.fromJson(redisAfterString);
         assertThat(redisAfterResponse.middleName()).isEqualTo("IT");
@@ -108,8 +111,9 @@ public class AuthorControllerIT extends AbstractIntegrationTest {
                 .assertThat()
                 .hasStatus(HttpStatus.NO_CONTENT);
 
-        assertThat(localCache.getIfPresent(email)).isNull();
-        assertThat(redisTemplate.hasKey(email)).isFalse();
+        // Assert local cache and redis no longer have the key
+        assertThat(localCache.getIfPresent(emailKey)).isNull();
+        assertThat(redisTemplate.opsForValue().get("authors:" + emailKey)).isNull();
 
         // 4) Subsequent GET should return 404
         await().atMost(Duration.ofSeconds(15))
@@ -123,7 +127,7 @@ public class AuthorControllerIT extends AbstractIntegrationTest {
                         .hasContentType(MediaType.APPLICATION_PROBLEM_JSON));
 
         // Also assert local cache and redis no longer have the key
-        assertThat(localCache.getIfPresent(email)).isNull();
-        assertThat(redisTemplate.hasKey(email)).isFalse();
+        assertThat(localCache.getIfPresent(emailKey)).isNull();
+        assertThat(redisTemplate.hasKey("authors:" + emailKey)).isFalse();
     }
 }

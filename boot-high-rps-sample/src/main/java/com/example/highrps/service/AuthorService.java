@@ -9,6 +9,7 @@ import com.example.highrps.model.response.AuthorResponse;
 import com.example.highrps.repository.AuthorRepository;
 import com.github.benmanes.caffeine.cache.Cache;
 import java.time.Duration;
+import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -59,96 +60,8 @@ public class AuthorService {
         this.appProperties = appProperties;
     }
 
-    public AuthorResponse saveOrUpdateAuthor(AuthorRequest newAuthorRequest) {
-        String email = newAuthorRequest.email();
-
-        // Build the response now so we can return it after successful publish
-        AuthorResponse authorResponse = authorRequestToResponseMapper.mapToAuthorResponse(newAuthorRequest);
-        String json = AuthorResponse.toJson(authorResponse);
-
-        // Publish envelope and wait for the send to complete. Only after a successful send
-        // do we populate the local cache and return the response.
-        var future = kafkaProducerService.publishEnvelope("author", email, newAuthorRequest);
-        processFuture(email, future);
-
-        // Only populate local cache after successful publish. Cache update is best-effort.
-        try {
-            localCache.put(email, json);
-        } catch (Exception e) {
-            log.warn("Failed to update local cache for email after successful publish: {}", email, e);
-        }
-
-        // perform an eager Redis write (listener remains source of truth for DB queue).
-        try {
-            redis.opsForValue().set("authors:" + email, json);
-        } catch (Exception e) {
-            log.warn("Eager redis write failed for email {} (listener will still populate redis)", email, e);
-        }
-
-        return authorResponse;
-    }
-
-    public void deleteAuthor(String email) {
-
-        // Publish tombstone to the per-entity aggregates topic so Streams/materializers see the delete
-        var deleteForEntity = kafkaProducerService.publishDeleteForEntity("author", email);
-        processFuture(email, deleteForEntity);
-
-        try {
-            localCache.invalidate(email);
-        } catch (Exception e) {
-            log.warn("Failed to mark local cache deletion for email: {}", email, e);
-        }
-
-        try {
-            String prev = redis.opsForValue().getAndDelete("authors:" + email);
-            boolean existed = prev != null;
-            log.debug("Deleted key for email {} presentBeforeDelete={}", email, existed);
-        } catch (Exception e) {
-            log.warn("Failed to delete redis key for email: {}", email, e);
-        }
-
-        // Mark deleted in a short-lived Redis set so batch processors skip re-inserts
-        try {
-            redis.opsForValue().set("deleted:authors:" + email, "1", Duration.ofSeconds(60));
-        } catch (Exception ex) {
-            log.warn("Failed to mark email {} in deleted:authors set", email, ex);
-        }
-    }
-
-    private void processFuture(
-            String email, CompletableFuture<SendResult<String, EventEnvelope>> sendResultCompletableFuture) {
-        try {
-            // Publish tombstone to the per-entity aggregates topic so Streams/materializers see the delete
-            sendResultCompletableFuture.get(appProperties.getPublishTimeOutMs(), TimeUnit.MILLISECONDS);
-        } catch (TimeoutException te) {
-            // Attempt to cancel the send if possible and surface a clear error
-            try {
-                sendResultCompletableFuture.cancel(true);
-            } catch (Exception cancelEx) {
-                log.warn("Failed to cancel publish future after timeout for email {}", email, cancelEx);
-            }
-            log.error(
-                    "Timed out waiting for Kafka publish for email {} after {} ms",
-                    email,
-                    appProperties.getPublishTimeOutMs(),
-                    te);
-            throw new IllegalStateException("Timed out publishing author event for email " + email, te);
-        } catch (InterruptedException ie) {
-            Thread.currentThread().interrupt();
-            log.error("Interrupted while waiting for Kafka publish for email {}", email, ie);
-            throw new IllegalStateException("Interrupted while publishing author event for email " + email, ie);
-        } catch (ExecutionException ee) {
-            Throwable cause = ee.getCause() == null ? ee : ee.getCause();
-            log.error("Failed to publish author envelope for email {}", email, cause);
-            throw new IllegalStateException("Failed to publish author event for email " + email, cause);
-        } catch (Exception ex) {
-            log.error("Unexpected error while publishing author envelope for email {}", email, ex);
-            throw new IllegalStateException("Failed to publish author event for email " + email, ex);
-        }
-    }
-
     public AuthorResponse findAuthorByEmail(String email) {
+        email = email.toLowerCase(Locale.ROOT);
         var cached = localCache.getIfPresent(email);
         if (cached != null) {
             log.info("findAuthorByEmail: hit local cache for email={}", email);
@@ -182,6 +95,101 @@ public class AuthorService {
         throw new ResourceNotFoundException("Author not found for email: " + email);
     }
 
+    public AuthorResponse saveOrUpdateAuthor(AuthorRequest newAuthorRequest) {
+        String email = newAuthorRequest.email();
+        String emailKey = email.toLowerCase(Locale.ROOT);
+
+        // Build the response now so we can return it after successful publish
+        AuthorResponse authorResponse = authorRequestToResponseMapper.mapToAuthorResponse(newAuthorRequest);
+        String json = AuthorResponse.toJson(authorResponse);
+
+        // Publish envelope and wait for the send to complete. Only after a successful
+        // send
+        // do we populate the local cache and return the response.
+        var future = kafkaProducerService.publishEnvelope("author", emailKey, newAuthorRequest);
+        processFuture(email, future);
+
+        // Only populate local cache after successful publish. Cache update is
+        // best-effort.
+        try {
+            localCache.put(emailKey, json);
+        } catch (Exception e) {
+            log.warn("Failed to update local cache for email after successful publish: {}", email, e);
+        }
+
+        // perform an eager Redis write (listener remains source of truth for DB queue).
+        try {
+            redis.opsForValue().set("authors:" + emailKey, json);
+        } catch (Exception e) {
+            log.warn("Eager redis write failed for email {} (listener will still populate redis)", email, e);
+        }
+
+        return authorResponse;
+    }
+
+    public void deleteAuthor(String email) {
+
+        var emailKey = email.toLowerCase(Locale.ROOT);
+        // Publish tombstone to the per-entity aggregates topic so Streams/materializers
+        // see the delete
+        var deleteForEntity = kafkaProducerService.publishDeleteForEntity("author", emailKey);
+        processFuture(email, deleteForEntity);
+
+        try {
+            localCache.invalidate(emailKey);
+        } catch (Exception e) {
+            log.warn("Failed to mark local cache deletion for email: {}", email, e);
+        }
+
+        try {
+            String prev = redis.opsForValue().getAndDelete("authors:" + emailKey);
+            boolean existed = prev != null;
+            log.debug("Deleted key for email {}, presentBeforeDelete={}", email, existed);
+        } catch (Exception e) {
+            log.warn("Failed to delete redis key for email: {}", email, e);
+        }
+
+        // Mark deleted in a short-lived Redis set so batch processors skip re-inserts
+        try {
+            redis.opsForValue().set("deleted:authors:" + emailKey, "1", Duration.ofSeconds(60));
+        } catch (Exception ex) {
+            log.warn("Failed to mark email {} in deleted:authors set", email, ex);
+        }
+    }
+
+    private void processFuture(
+            String email, CompletableFuture<SendResult<String, EventEnvelope>> sendResultCompletableFuture) {
+        try {
+            // Publish tombstone to the per-entity aggregates topic so Streams/materializers
+            // see the delete
+            sendResultCompletableFuture.get(appProperties.getPublishTimeOutMs(), TimeUnit.MILLISECONDS);
+        } catch (TimeoutException te) {
+            // Attempt to cancel the send if possible and surface a clear error
+            try {
+                sendResultCompletableFuture.cancel(true);
+            } catch (Exception cancelEx) {
+                log.warn("Failed to cancel publish future after timeout for email {}", email, cancelEx);
+            }
+            log.error(
+                    "Timed out waiting for Kafka publish for email {} after {} ms",
+                    email,
+                    appProperties.getPublishTimeOutMs(),
+                    te);
+            throw new IllegalStateException("Timed out publishing author event for email " + email, te);
+        } catch (InterruptedException ie) {
+            Thread.currentThread().interrupt();
+            log.error("Interrupted while waiting for Kafka publish for email {}", email, ie);
+            throw new IllegalStateException("Interrupted while publishing author event for email " + email, ie);
+        } catch (ExecutionException ee) {
+            Throwable cause = ee.getCause() == null ? ee : ee.getCause();
+            log.error("Failed to publish author envelope for email {}", email, cause);
+            throw new IllegalStateException("Failed to publish author event for email " + email, cause);
+        } catch (Exception ex) {
+            log.error("Unexpected error while publishing author envelope for email {}", email, ex);
+            throw new IllegalStateException("Failed to publish author event for email " + email, ex);
+        }
+    }
+
     private ReadOnlyKeyValueStore<String, AuthorRequest> getKeyValueStore() {
         if (keyValueStore == null) {
             keyValueStoreLock.lock();
@@ -200,9 +208,10 @@ public class AuthorService {
     }
 
     public boolean emailExists(String email) {
-        return localCache.getIfPresent(email) != null
-                || redis.opsForValue().get("authors:" + email) != null
-                || getKeyValueStore().get(email) != null
+        var emailKey = email.toLowerCase(Locale.ROOT);
+        return localCache.getIfPresent(emailKey) != null
+                || redis.opsForValue().get("authors:" + emailKey) != null
+                || getKeyValueStore().get(emailKey) != null
                 || authorRepository.existsByEmailIgnoreCase(email);
     }
 }
