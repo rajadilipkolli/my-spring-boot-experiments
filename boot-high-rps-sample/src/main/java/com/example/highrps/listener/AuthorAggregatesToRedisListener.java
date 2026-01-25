@@ -9,8 +9,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.kafka.annotation.BackOff;
 import org.springframework.kafka.annotation.DltHandler;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.annotation.RetryableTopic;
+import org.springframework.kafka.retrytopic.TopicSuffixingStrategy;
 import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
@@ -41,6 +44,10 @@ public class AuthorAggregatesToRedisListener {
             topics = "authors-aggregates",
             groupId = "authors-redis-writer",
             containerFactory = "authorKafkaListenerContainerFactory")
+    @RetryableTopic(
+            attempts = "4",
+            backOff = @BackOff(delay = 500, multiplier = 2.0),
+            topicSuffixingStrategy = TopicSuffixingStrategy.SUFFIX_WITH_INDEX_VALUE)
     public void handleAggregate(ConsumerRecord<String, AuthorRequest> record) {
         if (record == null) return;
 

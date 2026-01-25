@@ -7,7 +7,6 @@ import java.util.Map;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
-import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,11 +20,8 @@ import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaAdmin;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
-import org.springframework.kafka.listener.DeadLetterPublishingRecoverer;
-import org.springframework.kafka.listener.DefaultErrorHandler;
 import org.springframework.kafka.support.serializer.JacksonJsonDeserializer;
 import org.springframework.kafka.support.serializer.JacksonJsonSerializer;
-import org.springframework.util.backoff.FixedBackOff;
 
 @Configuration(proxyBeanMethods = false)
 public class KafkaConfig {
@@ -102,13 +98,6 @@ public class KafkaConfig {
             ConsumerFactory<String, AuthorRequest> authorConsumerFactory, KafkaTemplate<String, Object> kafkaTemplate) {
         var f = new ConcurrentKafkaListenerContainerFactory<String, AuthorRequest>();
         f.setConsumerFactory(authorConsumerFactory);
-
-        // Configure an error handler that publishes failed records to a DLQ using the application's KafkaTemplate
-        // Use zero retries (FixedBackOff with maxAttempts=0) so we don't block retries in the listener thread.
-        DeadLetterPublishingRecoverer recoverer = new DeadLetterPublishingRecoverer(
-                kafkaTemplate, (record, ex) -> new TopicPartition(record.topic() + "-dlq", record.partition()));
-        DefaultErrorHandler dh = new DefaultErrorHandler(recoverer, new FixedBackOff(0L, 0L));
-        f.setCommonErrorHandler(dh);
 
         return f;
     }
