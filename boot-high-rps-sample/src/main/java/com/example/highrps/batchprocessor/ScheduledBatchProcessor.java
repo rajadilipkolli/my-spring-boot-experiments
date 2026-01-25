@@ -100,7 +100,7 @@ public class ScheduledBatchProcessor {
 
                 // If this entity was deleted recently, skip any queued upsert that could resurrect it.
                 // Tombstones still flow through normally.
-                if (!isDeleted) {
+                if (entityType != null && !isDeleted) {
                     try {
                         String deletedSetKey = "deleted:" + entityType + "s"; // simple pluralization
                         BoundSetOperations<String, String> deletedSet = redis.boundSetOps(deletedSetKey);
@@ -122,9 +122,10 @@ public class ScheduledBatchProcessor {
                 var perKey = groupedByEntityType.computeIfAbsent(entityType, k -> new HashMap<>());
                 PayloadOrTombstone existing = perKey.get(key);
                 if (isDeleted) {
-                    // Always prefer tombstone for this key
+                    // Always prefer tombstone for this key and store the original raw tombstone payload so it can
+                    // be re-queued if downstream processing fails.
                     log.debug("Grouping: tombstone for entity={}, key={}", entityType, key);
-                    perKey.put(key, PayloadOrTombstone.tombstone(key));
+                    perKey.put(key, PayloadOrTombstone.tombstone(item, key));
                 } else {
                     log.debug("Grouping: upsert for entity={}, key={}", entityType, key);
                     // Only store payload if we don't already have a tombstone for this key
@@ -173,10 +174,8 @@ public class ScheduledBatchProcessor {
             } catch (Exception e) {
                 log.error("Failed to process batch for entity type: {}, re-queuing", entityType, e);
                 // Re-queue items for this entity type to avoid data loss
-                payloadsByKey.values().stream()
-                        .filter(p -> !p.isTombstone())
-                        .map(PayloadOrTombstone::payload)
-                        .forEach(payload -> redis.opsForList().leftPush(queueKey, payload));
+                payloadsByKey.values().stream().map(PayloadOrTombstone::payload).forEach(payload -> redis.opsForList()
+                        .leftPush(queueKey, payload));
                 throw e;
             }
         });
@@ -190,8 +189,8 @@ public class ScheduledBatchProcessor {
             return new PayloadOrTombstone(payload, null, false);
         }
 
-        static PayloadOrTombstone tombstone(String key) {
-            return new PayloadOrTombstone(null, key, true);
+        static PayloadOrTombstone tombstone(String payload, String key) {
+            return new PayloadOrTombstone(payload, key, true);
         }
     }
 }

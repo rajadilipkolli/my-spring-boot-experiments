@@ -103,7 +103,7 @@ public class AuthorService {
 
         // 3) Remove from persistent storage (if present) BEFORE publishing tombstone
         try {
-            authorRepository.deleteByEmail(email);
+            authorRepository.deleteByEmailIgnoreCase(email);
             log.debug("Attempted delete of author entity from DB for email: {}", email);
         } catch (Exception e) {
             log.warn("Failed to query or delete DB entity for email: {}", email, e);

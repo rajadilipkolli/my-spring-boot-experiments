@@ -9,8 +9,8 @@ public interface AuthorRepository extends JpaRepository<AuthorEntity, Long> {
 
     Optional<AuthorEntity> findByEmailAllIgnoreCase(String email);
 
-    boolean existsByEmail(String email);
+    boolean existsByEmailIgnoreCase(String email);
 
     @Transactional
-    void deleteByEmail(String email);
+    void deleteByEmailIgnoreCase(String email);
 }

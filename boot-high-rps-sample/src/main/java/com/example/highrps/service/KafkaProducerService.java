@@ -1,6 +1,7 @@
 package com.example.highrps.service;
 
 import com.example.highrps.model.request.EventEnvelope;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +22,10 @@ public class KafkaProducerService {
 
     @Value("${app.kafka.events-topic:events}")
     private String eventsTopic;
+
+    private static final Map<String, String> ENTITY_TOPICS = Map.of(
+            "post", "posts-aggregates",
+            "author", "authors-aggregates");
 
     @SuppressWarnings({"unchecked"})
     public KafkaProducerService(KafkaTemplate<String, ?> kafkaTemplate, JsonMapper mapper) {
@@ -53,8 +58,10 @@ public class KafkaProducerService {
      * This ensures the per-entity aggregate listeners receive the tombstone and can delete their materialized view.
      */
     public void publishDeleteForEntity(String entity, String key) {
-        String topic =
-                entity + "s-aggregates"; // simple pluralization: post -> posts-aggregates, author -> authors-aggregates
+        String topic = ENTITY_TOPICS.get(entity);
+        if (topic == null) {
+            throw new IllegalArgumentException("Unknown entity type: " + entity);
+        }
         publishDeleteToTopic(topic, key);
     }
 
