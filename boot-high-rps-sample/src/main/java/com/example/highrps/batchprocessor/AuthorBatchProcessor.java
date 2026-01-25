@@ -62,10 +62,8 @@ public class AuthorBatchProcessor implements EntityBatchProcessor {
     public void processDeletes(List<String> keys) {
         keys.forEach(email -> {
             try {
-                if (authorRepository.existsByEmailIgnoreCase(email)) {
-                    authorRepository.deleteByEmailIgnoreCase(email);
-                    log.debug("Deleted author entity for email: {}", email);
-                }
+                authorRepository.deleteByEmailIgnoreCase(email);
+                log.debug("Deleted author entity for email: {}", email);
             } catch (Exception e) {
                 log.warn("Failed to delete author entity for email: {}", email, e);
             }

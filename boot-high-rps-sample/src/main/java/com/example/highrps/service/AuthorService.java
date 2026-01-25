@@ -128,12 +128,14 @@ public class AuthorService {
     public AuthorResponse findAuthorByEmail(String email) {
         var cached = localCache.getIfPresent(email);
         if (cached != null) {
+            log.info("findAuthorByEmail: hit local cache for email={}", email);
             return AuthorResponse.fromJson(cached);
         }
 
         try {
             var raw = redis.opsForValue().get("authors:" + email);
             if (raw != null) {
+                log.info("findAuthorByEmail: hit redis for email={}", email);
                 localCache.put(email, raw);
                 return AuthorResponse.fromJson(raw);
             }

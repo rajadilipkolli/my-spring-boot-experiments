@@ -97,7 +97,12 @@ public class PostBatchProcessor implements EntityBatchProcessor {
     public String extractKey(String payload) {
         try {
             var node = jsonMapper.readTree(payload);
-            return node.get("title").asString();
+            String titleNode = node.get("title").asString(null);
+            if (titleNode == null || titleNode.isBlank()) {
+                log.warn("Missing 'title' field in post payload: {}", payload);
+                return null;
+            }
+            return titleNode;
         } catch (Exception e) {
             log.warn("Failed to extract title from post payload", e);
             return null;

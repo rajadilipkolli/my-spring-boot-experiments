@@ -27,7 +27,7 @@ public interface PostRepository extends JpaRepository<PostEntity, Long> {
     void deleteByTitle(String title);
 
     @Transactional
-    @Modifying
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("DELETE FROM PostEntity p WHERE p.title IN :titles")
     int deleteAllByTitleIn(@Param("titles") List<String> titles);
 }
