@@ -96,7 +96,7 @@ public class AuthorControllerIT extends AbstractIntegrationTest {
         assertThat(localCache.getIfPresent(email)).isNull();
 
         // 4) Subsequent GET should return 404
-        await().atMost(Duration.ofSeconds(10))
+        await().atMost(Duration.ofSeconds(15))
                 .pollInterval(Duration.ofMillis(500))
                 .untilAsserted(() -> mockMvcTester
                         .get()

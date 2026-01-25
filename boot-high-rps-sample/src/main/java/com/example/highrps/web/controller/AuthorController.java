@@ -28,7 +28,7 @@ public class AuthorController {
 
     @PostMapping(value = "/author")
     public ResponseEntity<AuthorResponse> createAuthor(@RequestBody @Valid AuthorRequest newAuthorRequest) {
-        AuthorResponse resp = authorService.saveAuthor(newAuthorRequest);
+        AuthorResponse resp = authorService.saveOrUpdateAuthor(newAuthorRequest);
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{email}")
                 .buildAndExpand(resp.email())
@@ -39,10 +39,10 @@ public class AuthorController {
     @PutMapping(value = "/author/{email}")
     public ResponseEntity<AuthorResponse> updateAuthor(
             @PathVariable String email, @RequestBody @Valid AuthorRequest newAuthorRequest) {
-        if (!email.equals(newAuthorRequest.email())) {
+        if (!email.equals(newAuthorRequest.email()) && !authorService.isEmailAvailable(email)) {
             return ResponseEntity.badRequest().build();
         }
-        AuthorResponse resp = authorService.updateAuthor(newAuthorRequest);
+        AuthorResponse resp = authorService.saveOrUpdateAuthor(newAuthorRequest);
         return ResponseEntity.ok(resp);
     }
 

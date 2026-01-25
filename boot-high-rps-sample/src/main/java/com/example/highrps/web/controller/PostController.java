@@ -34,7 +34,7 @@ public class PostController {
 
     @PostMapping(value = "/posts")
     public ResponseEntity<PostResponse> createPost(@RequestBody @Valid NewPostRequest newPostRequest) {
-        PostResponse postResponse = postService.savePost(newPostRequest);
+        PostResponse postResponse = postService.saveOrUpdatePost(newPostRequest);
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{title}")
                 .buildAndExpand(postResponse.title())
@@ -45,10 +45,10 @@ public class PostController {
     @PutMapping(value = "/posts/{title}")
     public ResponseEntity<PostResponse> updatePost(
             @PathVariable String title, @RequestBody @Valid NewPostRequest newPostRequest) {
-        if (!title.equals(newPostRequest.title())) {
+        if (!title.equals(newPostRequest.title()) && !postService.isTitleAvailable(title)) {
             return ResponseEntity.badRequest().build();
         }
-        PostResponse postResponse = postService.updatePost(newPostRequest);
+        PostResponse postResponse = postService.saveOrUpdatePost(newPostRequest);
         return ResponseEntity.ok(postResponse);
     }
 

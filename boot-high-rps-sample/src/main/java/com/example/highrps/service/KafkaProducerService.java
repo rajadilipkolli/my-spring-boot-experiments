@@ -69,13 +69,15 @@ public class KafkaProducerService {
      *
      * @return a future that completes when the send succeeds/fails
      */
-    public CompletableFuture<SendResult<String, EventEnvelope>> publishEventToTopic(
+    private CompletableFuture<SendResult<String, EventEnvelope>> publishEventToTopic(
             String topic, String key, EventEnvelope value) {
         return kafkaTemplate
                 .send(topic, key, value)
                 .whenComplete((result, ex) -> {
                     if (ex != null) {
                         log.error("Failed to publish event to topic {} for key {}", topic, key, ex);
+                        throw new IllegalStateException(
+                                "Failed to publish to topic %s event for key %s ".formatted(topic, key), ex);
                     } else if (result != null) {
                         log.debug(
                                 "Published event to topic {} partition {} offset {} for key {}",
@@ -95,7 +97,7 @@ public class KafkaProducerService {
      *
      * @return a future that completes when the send succeeds/fails
      */
-    public CompletableFuture<SendResult<String, EventEnvelope>> publishDeleteToTopic(String topic, String key) {
+    private CompletableFuture<SendResult<String, EventEnvelope>> publishDeleteToTopic(String topic, String key) {
         return kafkaTemplate
                 .send(topic, key, null)
                 .whenComplete((result, ex) -> {

@@ -1,5 +1,6 @@
 package com.example.highrps.service;
 
+import com.example.highrps.config.AppProperties;
 import com.example.highrps.exception.ResourceNotFoundException;
 import com.example.highrps.mapper.PostEntityToPostResponse;
 import com.example.highrps.mapper.PostRequestToResponseMapper;
@@ -9,6 +10,9 @@ import com.example.highrps.repository.PostRepository;
 import com.github.benmanes.caffeine.cache.Cache;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.locks.ReentrantLock;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StoreQueryParameters;
@@ -16,7 +20,6 @@ import org.apache.kafka.streams.state.QueryableStoreTypes;
 import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.kafka.config.StreamsBuilderFactoryBean;
 import org.springframework.stereotype.Service;
@@ -34,9 +37,7 @@ public class PostService {
     private final PostEntityToPostResponse postEntityToPostResponse;
     private final StreamsBuilderFactoryBean kafkaStreamsFactory;
     private final PostRepository postRepository;
-
-    @Value("${app.batch.queue-key:events:queue}")
-    private String batchQueueKey;
+    private final AppProperties appProperties;
 
     private volatile ReadOnlyKeyValueStore<String, NewPostRequest> keyValueStore = null;
 
@@ -50,7 +51,8 @@ public class PostService {
             PostRequestToResponseMapper postRequestToResponseMapper,
             PostEntityToPostResponse postEntityToPostResponse,
             StreamsBuilderFactoryBean kafkaStreamsFactory,
-            PostRepository postRepository) {
+            PostRepository postRepository,
+            AppProperties appProperties) {
         this.kafkaProducerService = kafkaProducerService;
         this.localCache = localCache;
         this.redis = redis;
@@ -58,47 +60,55 @@ public class PostService {
         this.postEntityToPostResponse = postEntityToPostResponse;
         this.kafkaStreamsFactory = kafkaStreamsFactory;
         this.postRepository = postRepository;
+        this.appProperties = appProperties;
     }
 
-    public PostResponse savePost(NewPostRequest newPostRequest) {
+    public PostResponse saveOrUpdatePost(NewPostRequest newPostRequest) {
+        String title = newPostRequest.title();
         if (newPostRequest.published() != null && newPostRequest.published()) {
             newPostRequest = newPostRequest.withPublishedAt(LocalDateTime.now());
         }
-        NewPostRequest finalNewPostRequest = newPostRequest;
-        kafkaProducerService
-                .publishEnvelope("post", newPostRequest.title(), newPostRequest)
-                .whenComplete((res, ex) -> {
-                    if (ex != null) {
-                        log.warn("Failed to publish post envelope for title {}", finalNewPostRequest.title(), ex);
-                    }
-                });
+
+        // Build the response now so we can return it after successful publish
         PostResponse postResponse = postRequestToResponseMapper.mapToPostResponse(newPostRequest);
         String json = PostResponse.toJson(postResponse);
-        localCache.put(newPostRequest.title(), json);
-        return postResponse;
-    }
 
-    public PostResponse updatePost(NewPostRequest newPostRequest) {
-        String title = newPostRequest.title();
-        if (newPostRequest.published() != null && newPostRequest.published() && newPostRequest.publishedAt() == null) {
-            newPostRequest = newPostRequest.withPublishedAt(LocalDateTime.now());
+        // Publish envelope and wait for the send to complete. Only after a successful send
+        // do we populate the local cache and return the response.
+        var future = kafkaProducerService.publishEnvelope("post", title, newPostRequest);
+        try {
+            future.get(appProperties.getPublishTimeOutMs(), TimeUnit.MILLISECONDS);
+        } catch (TimeoutException te) {
+            // Attempt to cancel the send if possible and surface a clear error
+            try {
+                future.cancel(true);
+            } catch (Exception cancelEx) {
+                log.warn("Failed to cancel publish future after timeout for title {}", title, cancelEx);
+            }
+            log.error(
+                    "Timed out waiting for Kafka publish for title {} after {} ms",
+                    title,
+                    appProperties.getPublishTimeOutMs(),
+                    te);
+            throw new IllegalStateException("Timed out publishing post event for title " + title, te);
+        } catch (InterruptedException ie) {
+            Thread.currentThread().interrupt();
+            log.error("Interrupted while waiting for Kafka publish for title {}", title, ie);
+            throw new IllegalStateException("Interrupted while publishing post event for title " + title, ie);
+        } catch (ExecutionException ee) {
+            Throwable cause = ee.getCause() == null ? ee : ee.getCause();
+            log.error("Failed to publish post envelope for title {}", title, cause);
+            throw new IllegalStateException("Failed to publish post event for title " + title, cause);
+        } catch (Exception ex) {
+            log.error("Unexpected error while publishing post envelope for title {}", title, ex);
+            throw new IllegalStateException("Failed to publish post event for title " + title, ex);
         }
-        // Publish event first so Streams + Aggregates handle materialized view
-        kafkaProducerService
-                .publishEnvelope("post", newPostRequest.title(), newPostRequest)
-                .whenComplete((res, ex) -> {
-                    if (ex != null) {
-                        log.warn("Failed to publish post envelope for title {}", title, ex);
-                    }
-                });
 
-        // Update local cache and redis to reflect new state immediately
-        PostResponse postResponse = postRequestToResponseMapper.mapToPostResponse(newPostRequest);
-        String json = PostResponse.toJson(postResponse);
+        // Only populate local cache after successful publish. Cache update is best-effort.
         try {
             localCache.put(title, json);
         } catch (Exception e) {
-            log.warn("Failed to update local cache for title: {}", title, e);
+            log.warn("Failed to update local cache for title after successful publish: {}", title, e);
         }
 
         return postResponse;
@@ -206,5 +216,12 @@ public class PostService {
             }
         }
         return keyValueStore;
+    }
+
+    public boolean isTitleAvailable(String title) {
+        return localCache.getIfPresent(title) != null
+                || redis.opsForValue().get("posts:" + title) != null
+                || getKeyValueStore().get(title) != null
+                || postRepository.existsByTitle(title);
     }
 }

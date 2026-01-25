@@ -1,5 +1,6 @@
 package com.example.highrps.service;
 
+import com.example.highrps.config.AppProperties;
 import com.example.highrps.exception.ResourceNotFoundException;
 import com.example.highrps.mapper.AuthorEntityToResponseMapper;
 import com.example.highrps.mapper.AuthorRequestToResponseMapper;
@@ -8,6 +9,9 @@ import com.example.highrps.model.response.AuthorResponse;
 import com.example.highrps.repository.AuthorRepository;
 import com.github.benmanes.caffeine.cache.Cache;
 import java.time.Duration;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.locks.ReentrantLock;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StoreQueryParameters;
@@ -32,6 +36,7 @@ public class AuthorService {
     private final AuthorEntityToResponseMapper authorEntityToResponseMapper;
     private final StreamsBuilderFactoryBean kafkaStreamsFactory;
     private final AuthorRepository authorRepository;
+    private final AppProperties appProperties;
 
     private volatile ReadOnlyKeyValueStore<String, AuthorRequest> keyValueStore = null;
     private final ReentrantLock keyValueStoreLock = new ReentrantLock();
@@ -43,7 +48,8 @@ public class AuthorService {
             AuthorRequestToResponseMapper authorRequestToResponseMapper,
             AuthorEntityToResponseMapper authorEntityToResponseMapper,
             StreamsBuilderFactoryBean kafkaStreamsFactory,
-            AuthorRepository authorRepository) {
+            AuthorRepository authorRepository,
+            AppProperties appProperties) {
         this.kafkaProducerService = kafkaProducerService;
         this.localCache = localCache;
         this.redis = redis;
@@ -51,38 +57,54 @@ public class AuthorService {
         this.authorEntityToResponseMapper = authorEntityToResponseMapper;
         this.kafkaStreamsFactory = kafkaStreamsFactory;
         this.authorRepository = authorRepository;
+        this.appProperties = appProperties;
     }
 
-    public AuthorResponse saveAuthor(AuthorRequest newAuthorRequest) {
-        // Publish a typed envelope for the 'author' entity so StreamsTopology can route it
-        kafkaProducerService
-                .publishEnvelope("author", newAuthorRequest.email(), newAuthorRequest)
-                .whenComplete((res, ex) -> {
-                    if (ex != null) {
-                        log.warn("Failed to publish author envelope for email {}", newAuthorRequest.email(), ex);
-                    }
-                });
-        AuthorResponse authorResponse = authorRequestToResponseMapper.mapToAuthorResponse(newAuthorRequest);
-        String json = AuthorResponse.toJson(authorResponse);
-        localCache.put(newAuthorRequest.email(), json);
-        return authorResponse;
-    }
-
-    public AuthorResponse updateAuthor(AuthorRequest newAuthorRequest) {
+    public AuthorResponse saveOrUpdateAuthor(AuthorRequest newAuthorRequest) {
         String email = newAuthorRequest.email();
-        kafkaProducerService.publishEnvelope("author", email, newAuthorRequest).whenComplete((res, ex) -> {
-            if (ex != null) {
-                log.warn("Failed to publish author envelope for email {}", email, ex);
-            }
-        });
 
+        // Build the response now so we can return it after successful publish
         AuthorResponse authorResponse = authorRequestToResponseMapper.mapToAuthorResponse(newAuthorRequest);
         String json = AuthorResponse.toJson(authorResponse);
+
+        // Publish envelope and wait for the send to complete. Only after a successful send
+        // do we populate the local cache and return the response.
+        var future = kafkaProducerService.publishEnvelope("author", email, newAuthorRequest);
+        try {
+            future.get(appProperties.getPublishTimeOutMs(), TimeUnit.MILLISECONDS);
+        } catch (TimeoutException te) {
+            // Attempt to cancel the send if possible and surface a clear error
+            try {
+                future.cancel(true);
+            } catch (Exception cancelEx) {
+                log.warn("Failed to cancel publish future after timeout for email {}", email, cancelEx);
+            }
+            log.error(
+                    "Timed out waiting for Kafka publish for email {} after {} ms",
+                    email,
+                    appProperties.getPublishTimeOutMs(),
+                    te);
+            throw new IllegalStateException("Timed out publishing author event for email " + email, te);
+        } catch (InterruptedException ie) {
+            Thread.currentThread().interrupt();
+            log.error("Interrupted while waiting for Kafka publish for email {}", email, ie);
+            throw new IllegalStateException("Interrupted while publishing author event for email " + email, ie);
+        } catch (ExecutionException ee) {
+            Throwable cause = ee.getCause() == null ? ee : ee.getCause();
+            log.error("Failed to publish author envelope for email {}", email, cause);
+            throw new IllegalStateException("Failed to publish author event for email " + email, cause);
+        } catch (Exception ex) {
+            log.error("Unexpected error while publishing author envelope for email {}", email, ex);
+            throw new IllegalStateException("Failed to publish author event for email " + email, ex);
+        }
+
+        // Only populate local cache after successful publish. Cache update is best-effort.
         try {
             localCache.put(email, json);
         } catch (Exception e) {
-            log.warn("Failed to update local cache for email: {}", email, e);
+            log.warn("Failed to update local cache for email after successful publish: {}", email, e);
         }
+
         return authorResponse;
     }
 
@@ -183,5 +205,12 @@ public class AuthorService {
             }
         }
         return keyValueStore;
+    }
+
+    public boolean isEmailAvailable(String email) {
+        return localCache.getIfPresent(email) != null
+                || redis.opsForValue().get("authors:" + email) != null
+                || getKeyValueStore().get(email) != null
+                || authorRepository.existsByEmailIgnoreCase(email);
     }
 }

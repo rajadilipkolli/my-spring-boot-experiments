@@ -325,6 +325,10 @@ app.kafka.authors-aggregates-topic.replication-factor=1
 
 # Cache and queue
 app.batch.queue-key=events:queue
+
+# Control how long (ms) the service will wait for Kafka publish futures to complete before
+# failing the request. Make this large enough for your environment or tests.
+app.kafka.publish-timeout-ms=5000
 ```
 
 ## Testing the Architecture
