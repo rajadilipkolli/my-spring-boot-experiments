@@ -2,6 +2,9 @@ package com.example.highrps.common;
 
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
+import com.example.highrps.repository.PostRepository;
+import com.example.highrps.repository.PostTagRepository;
+import com.example.highrps.repository.TagRepository;
 import com.github.benmanes.caffeine.cache.Cache;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -23,4 +26,13 @@ public abstract class AbstractIntegrationTest {
 
     @Autowired
     protected RedisTemplate<String, String> redisTemplate;
+
+    @Autowired
+    protected PostRepository postRepository;
+
+    @Autowired
+    protected TagRepository tagRepository;
+
+    @Autowired
+    protected PostTagRepository postTagRepository;
 }

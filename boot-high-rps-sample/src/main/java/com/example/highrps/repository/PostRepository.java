@@ -4,6 +4,8 @@ import com.example.highrps.entities.PostEntity;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.transaction.annotation.Transactional;
 
 public interface PostRepository extends JpaRepository<PostEntity, Long> {
@@ -18,5 +20,7 @@ public interface PostRepository extends JpaRepository<PostEntity, Long> {
     boolean existsByTitle(String title);
 
     @Transactional
+    @Modifying
+    @Query("delete from PostEntity p where p.title = ?1")
     void deleteByTitle(String title);
 }

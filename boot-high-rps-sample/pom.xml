@@ -19,6 +19,7 @@
         <java.version>25</java.version>
         <springdoc-openapi.version>3.0.1</springdoc-openapi.version>
         <mapstruct.version>1.6.3</mapstruct.version>
+        <datasource-micrometer-boot.version>2.0.1</datasource-micrometer-boot.version>
 
         <project.testresult.directory>${project.build.directory}/test-results</project.testresult.directory>
         <spotless.version>3.2.0</spotless.version>
@@ -89,6 +90,11 @@
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-database-postgresql</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>net.ttddyy.observation</groupId>
+            <artifactId>datasource-micrometer-spring-boot</artifactId>
+            <version>${datasource-micrometer-boot.version}</version>
         </dependency>
         <dependency>
             <groupId>org.mapstruct</groupId>
