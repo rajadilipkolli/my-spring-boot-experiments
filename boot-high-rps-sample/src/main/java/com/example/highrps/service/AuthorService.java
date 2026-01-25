@@ -54,7 +54,13 @@ public class AuthorService {
 
     public AuthorResponse saveAuthor(AuthorRequest newAuthorRequest) {
         // Publish a typed envelope for the 'author' entity so StreamsTopology can route it
-        kafkaProducerService.publishEnvelope("author", newAuthorRequest.email(), newAuthorRequest);
+        kafkaProducerService
+                .publishEnvelope("author", newAuthorRequest.email(), newAuthorRequest)
+                .whenComplete((res, ex) -> {
+                    if (ex != null) {
+                        log.warn("Failed to publish author envelope for email {}", newAuthorRequest.email(), ex);
+                    }
+                });
         AuthorResponse authorResponse = authorRequestToResponseMapper.mapToAuthorResponse(newAuthorRequest);
         String json = AuthorResponse.toJson(authorResponse);
         localCache.put(newAuthorRequest.email(), json);
@@ -63,7 +69,11 @@ public class AuthorService {
 
     public AuthorResponse updateAuthor(AuthorRequest newAuthorRequest) {
         String email = newAuthorRequest.email();
-        kafkaProducerService.publishEnvelope("author", email, newAuthorRequest);
+        kafkaProducerService.publishEnvelope("author", email, newAuthorRequest).whenComplete((res, ex) -> {
+            if (ex != null) {
+                log.warn("Failed to publish author envelope for email {}", email, ex);
+            }
+        });
 
         AuthorResponse authorResponse = authorRequestToResponseMapper.mapToAuthorResponse(newAuthorRequest);
         String json = AuthorResponse.toJson(authorResponse);
@@ -83,9 +93,23 @@ public class AuthorService {
         }
 
         try {
-            redis.opsForValue().getAndDelete("authors:" + email);
+            String prev = redis.opsForValue().getAndDelete("authors:" + email);
+            boolean existed = prev != null;
+            log.debug("Deleted key for email {} presentBeforeDelete={}", email, existed);
         } catch (Exception e) {
             log.warn("Failed to delete redis key for email: {}", email, e);
+        }
+
+        // 3) Remove from persistent storage (if present) BEFORE publishing tombstone
+        try {
+            if (authorRepository.existsByEmail(email)) {
+                log.info("Deleting author entity from DB for email: {}", email);
+                authorRepository.deleteByEmail(email);
+            } else {
+                log.info("deleteAuthor: no DB entity found for email={}", email);
+            }
+        } catch (Exception e) {
+            log.warn("Failed to query or delete DB entity for email: {}", email, e);
         }
 
         try {
@@ -95,8 +119,13 @@ public class AuthorService {
             log.warn("Failed to publish delete event for email: {}", email, e);
         }
 
-        authorRepository.deleteByEmail(email);
-        log.debug("Attempted delete of author entity from DB for email: {}", email);
+        // Mark deleted in a short-lived Redis set so batch processors skip re-inserts
+        try {
+            redis.opsForSet().add("deleted:authors", email);
+            redis.expire("deleted:authors", java.time.Duration.ofSeconds(60));
+        } catch (Exception ex) {
+            log.warn("Failed to mark email {} in deleted:authors set", email, ex);
+        }
     }
 
     public AuthorResponse findAuthorByEmail(String email) {

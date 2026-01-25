@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.BoundSetOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -57,6 +58,10 @@ public class ScheduledBatchProcessor {
             return;
         }
 
+        // NOTE: do not bind a single entity-type deleted set up front. We will check the per-entity
+        // deleted set (e.g. deleted:posts, deleted:authors) when the entityType is known to avoid
+        // re-inserting entities that were recently deleted.
+
         // Group items by entity type, then deduplicate by key within each entity type
         Map<String, Map<String, PayloadOrTombstone>> groupedByEntityType = new HashMap<>();
 
@@ -91,6 +96,26 @@ public class ScheduledBatchProcessor {
                 if (key == null) {
                     log.warn("Failed to extract key from payload for entity type: {}", entityType);
                     continue;
+                }
+
+                // If this entity was deleted recently, skip any queued upsert that could resurrect it.
+                // Tombstones still flow through normally.
+                if (!isDeleted) {
+                    try {
+                        String deletedSetKey = "deleted:" + entityType + "s"; // simple pluralization
+                        BoundSetOperations<String, String> deletedSet = redis.boundSetOps(deletedSetKey);
+                        Boolean deleted = deletedSet.isMember(key);
+                        if (Boolean.TRUE.equals(deleted)) {
+                            log.debug(
+                                    "Skipping queued upsert because it is marked deleted: entity={}, key={}",
+                                    entityType,
+                                    key);
+                            continue;
+                        }
+                    } catch (Exception e) {
+                        // If Redis failed, don't silently swallow; log and continue - we'll still process the payload
+                        log.warn("Failed to consult deleted set for entity {}: {}", entityType, e.getMessage());
+                    }
                 }
 
                 // Place into per-entity map, with tombstone taking precedence over payloads.
@@ -135,7 +160,7 @@ public class ScheduledBatchProcessor {
 
             try {
                 log.debug(
-                        "Processing batch for entity={}, deletes={}, upserts={}",
+                        "Processing batch for entity={}, deletes={}, upserts= {}",
                         entityType,
                         deletes.size(),
                         upserts.size());

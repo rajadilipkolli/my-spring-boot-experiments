@@ -16,7 +16,7 @@ public class AuthorControllerIT extends AbstractIntegrationTest {
     void crudAuthorResourcesAPICheck() {
         String email = "junitIt@email.com";
 
-        // 1) Create a post
+        // 1) Create an author via API
         mockMvcTester
                 .post()
                 .uri("/api/author")
@@ -43,20 +43,21 @@ public class AuthorControllerIT extends AbstractIntegrationTest {
                 .hasContentType(MediaType.APPLICATION_JSON)
                 .bodyJson()
                 .convertTo(AuthorResponse.class)
-                .satisfies(postResponse -> {
-                    assertThat(postResponse.email()).isEqualTo(email);
-                    assertThat(postResponse.firstName()).isEqualTo("junit");
-                    assertThat(postResponse.middleName()).isNull();
-                    assertThat(postResponse.lastName()).isEqualTo("integration");
-                    assertThat(postResponse.mobile()).isEqualTo(1234567890L);
-                    assertThat(postResponse.registeredAt()).isNull();
+                .satisfies(authorResponse -> {
+                    assertThat(authorResponse.email()).isEqualTo(email);
+                    assertThat(authorResponse.firstName()).isEqualTo("junit");
+                    assertThat(authorResponse.middleName()).isNull();
+                    assertThat(authorResponse.lastName()).isEqualTo("integration");
+                    assertThat(authorResponse.mobile()).isEqualTo(1234567890L);
+                    assertThat(authorResponse.registeredAt()).isNull();
                 });
 
-        // Assert local cache and redis have the key
+        // Assert local cache has the key (redis may be populated asynchronously)
         String cached = localCache.getIfPresent(email);
         assertThat(cached).isNotNull();
+        assertThat(cached).doesNotContain("IT");
 
-        // 2) Update the post via the new PUT endpoint to change content
+        // 2) Update the author via the new PUT endpoint to change content
         mockMvcTester
                 .put()
                 .uri("/api/author/" + email)
@@ -82,13 +83,15 @@ public class AuthorControllerIT extends AbstractIntegrationTest {
         assertThat(cachedAfter).isNotNull();
         assertThat(cachedAfter).contains("IT");
 
-        // 3) Delete the post
+        // 3) Delete the author via API
         mockMvcTester
                 .delete()
                 .uri("/api/author/" + email)
                 .exchange()
                 .assertThat()
                 .hasStatus(HttpStatus.NO_CONTENT);
+
+        assertThat(localCache.getIfPresent(email)).isNull();
 
         // 4) Subsequent GET should return 404
         await().atMost(Duration.ofSeconds(10))

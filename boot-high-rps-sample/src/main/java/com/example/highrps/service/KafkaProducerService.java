@@ -1,10 +1,12 @@
 package com.example.highrps.service;
 
 import com.example.highrps.model.request.EventEnvelope;
+import java.util.concurrent.CompletableFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.json.JsonMapper;
@@ -30,14 +32,19 @@ public class KafkaProducerService {
     /**
      * Publish an EventEnvelope to the default events topic. This wraps the payload as JSON
      * and adds an entity label so Streams branching can route to the right per-entity topic.
+     *
+     * @return a future that completes when the send succeeds/fails; envelope creation errors complete the future exceptionally
      */
-    public void publishEnvelope(String entity, String key, Object payload) {
+    public CompletableFuture<SendResult<String, Object>> publishEnvelope(String entity, String key, Object payload) {
         try {
             JsonNode payloadNode = mapper.valueToTree(payload);
             EventEnvelope envelope = new EventEnvelope(entity, payloadNode);
-            publishEventToTopic(eventsTopic, key, envelope);
+            return publishEventToTopic(eventsTopic, key, envelope);
         } catch (Exception e) {
             log.error("Failed to create EventEnvelope for entity {} key {}", entity, key, e);
+            CompletableFuture<SendResult<String, Object>> failed = new CompletableFuture<>();
+            failed.completeExceptionally(e);
+            return failed;
         }
     }
 
@@ -53,34 +60,44 @@ public class KafkaProducerService {
 
     /**
      * Publish a typed event to the specified topic using the provided key.
+     *
+     * @return a future that completes when the send succeeds/fails
      */
-    public void publishEventToTopic(String topic, String key, Object value) {
-        kafkaTemplate.send(topic, key, value).whenComplete((result, ex) -> {
-            if (ex != null) {
-                log.error("Failed to publish event to topic {} for key {}", topic, key, ex);
-            } else if (result != null) {
-                log.debug(
-                        "Published event to topic {} partition {} offset {} for key {}",
-                        topic,
-                        result.getRecordMetadata().partition(),
-                        result.getRecordMetadata().offset(),
-                        key);
-            } else {
-                log.debug("Published event to topic {} for key {} (no metadata)", topic, key);
-            }
-        });
+    public CompletableFuture<SendResult<String, Object>> publishEventToTopic(String topic, String key, Object value) {
+        return kafkaTemplate
+                .send(topic, key, value)
+                .whenComplete((result, ex) -> {
+                    if (ex != null) {
+                        log.error("Failed to publish event to topic {} for key {}", topic, key, ex);
+                    } else if (result != null) {
+                        log.debug(
+                                "Published event to topic {} partition {} offset {} for key {}",
+                                topic,
+                                result.getRecordMetadata().partition(),
+                                result.getRecordMetadata().offset(),
+                                key);
+                    } else {
+                        log.debug("Published event to topic {} for key {} (no metadata)", topic, key);
+                    }
+                })
+                .toCompletableFuture();
     }
 
     /**
      * Publish a tombstone (null value) for the provided key on the specified topic.
+     *
+     * @return a future that completes when the send succeeds/fails
      */
-    public void publishDeleteToTopic(String topic, String key) {
-        kafkaTemplate.send(topic, key, null).whenComplete((result, ex) -> {
-            if (ex != null) {
-                log.error("Failed to publish delete (tombstone) to topic {} for key {}", topic, key, ex);
-            } else {
-                log.debug("Published delete (tombstone) to topic {} for key {}", topic, key);
-            }
-        });
+    public CompletableFuture<SendResult<String, Object>> publishDeleteToTopic(String topic, String key) {
+        return kafkaTemplate
+                .send(topic, key, null)
+                .whenComplete((result, ex) -> {
+                    if (ex != null) {
+                        log.error("Failed to publish delete (tombstone) to topic {} for key {}", topic, key, ex);
+                    } else {
+                        log.debug("Published delete (tombstone) to topic {} for key {}", topic, key);
+                    }
+                })
+                .toCompletableFuture();
     }
 }

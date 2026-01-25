@@ -9,6 +9,9 @@ import com.example.highrps.repository.PostRepository;
 import com.github.benmanes.caffeine.cache.Cache;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StoreQueryParameters;
@@ -38,6 +41,13 @@ public class PostService {
     @Value("${app.batch.queue-key:events:queue}")
     private String batchQueueKey;
 
+    // New flag: control whether deletePost blocks waiting for Kafka Streams tombstone
+    @Value("${app.wait-for-tombstone:false}")
+    private boolean waitForTombstone;
+
+    // Executor for asynchronous tombstone waits when blocking is disabled
+    private final ExecutorService tombstoneWaitExecutor = Executors.newCachedThreadPool();
+
     private volatile ReadOnlyKeyValueStore<String, NewPostRequest> keyValueStore = null;
 
     // Lock used to initialize the Kafka Streams read-only store instead of using synchronized
@@ -64,7 +74,14 @@ public class PostService {
         if (newPostRequest.published() != null && newPostRequest.published()) {
             newPostRequest = newPostRequest.withPublishedAt(LocalDateTime.now());
         }
-        kafkaProducerService.publishEnvelope("post", newPostRequest.title(), newPostRequest);
+        NewPostRequest finalNewPostRequest = newPostRequest;
+        kafkaProducerService
+                .publishEnvelope("post", newPostRequest.title(), newPostRequest)
+                .whenComplete((res, ex) -> {
+                    if (ex != null) {
+                        log.warn("Failed to publish post envelope for title {}", finalNewPostRequest.title(), ex);
+                    }
+                });
         PostResponse postResponse = postRequestToResponseMapper.mapToPostResponse(newPostRequest);
         String json = PostResponse.toJson(postResponse);
         localCache.put(newPostRequest.title(), json);
@@ -77,7 +94,13 @@ public class PostService {
             newPostRequest = newPostRequest.withPublishedAt(LocalDateTime.now());
         }
         // Publish event first so Streams + Aggregates handle materialized view
-        kafkaProducerService.publishEnvelope("post", newPostRequest.title(), newPostRequest);
+        kafkaProducerService
+                .publishEnvelope("post", newPostRequest.title(), newPostRequest)
+                .whenComplete((res, ex) -> {
+                    if (ex != null) {
+                        log.warn("Failed to publish post envelope for title {}", title, ex);
+                    }
+                });
 
         // Update local cache and redis to reflect new state immediately
         PostResponse postResponse = postRequestToResponseMapper.mapToPostResponse(newPostRequest);
@@ -128,48 +151,58 @@ public class PostService {
             log.warn("Failed to publish delete event for title: {}", title, e);
         }
 
-        // 4b) Remove any pending upsert items for this title from the Redis queue to avoid re-insert
+        // 4b) Mark deleted in a short-lived Redis set so batch processors skip re-inserts
         try {
-            // mark deleted in a short-lived Redis set so batch processors skip re-inserts
-            try {
-                redis.opsForSet().add("deleted:posts", title);
-                redis.expire("deleted:posts", Duration.ofSeconds(60));
-            } catch (Exception ex) {
-                log.warn("Failed to mark title {} in deleted:posts set", title, ex);
-            }
-
-            var queued = redis.opsForList().range(batchQueueKey, 0, -1);
-            if (queued != null && !queued.isEmpty()) {
-                String titleMatcher = "\"title\":\"" + title + "\"";
-                for (String q : queued) {
-                    if (q == null) continue;
-                    // if this queued item contains the title and is NOT a tombstone marker, remove it
-                    if (q.contains(titleMatcher) && !q.contains("\"__deleted\"")) {
-                        try {
-                            redis.opsForList().remove(batchQueueKey, 0, q);
-                        } catch (Exception ex) {
-                            log.warn("Failed to remove queued upsert for title {} from queue", title, ex);
-                        }
-                    }
-                }
-            }
-        } catch (Exception e) {
-            log.warn("Failed to scan/clean batch queue for title: {}", title, e);
+            redis.opsForSet().add("deleted:posts", title);
+            redis.expire("deleted:posts", Duration.ofSeconds(60));
+        } catch (Exception ex) {
+            log.warn("Failed to mark title {} in deleted:posts set", title, ex);
         }
 
         // 5) Wait briefly for the Kafka Streams materialized store to apply the tombstone so interactive queries
         // (and subsequent GETs) do not return stale results. This keeps the API behavior consistent for tests.
-        try {
-            ReadOnlyKeyValueStore<String, NewPostRequest> store = getKeyValueStore();
-            long deadline = System.currentTimeMillis() + 5000; // wait up to 5s
-            while (System.currentTimeMillis() < deadline) {
-                if (store.get(title) == null) {
-                    break;
+        if (waitForTombstone) {
+            try {
+                ReadOnlyKeyValueStore<String, NewPostRequest> store = getKeyValueStore();
+                long deadline = System.currentTimeMillis() + 5000; // wait up to 5s
+                while (System.currentTimeMillis() < deadline) {
+                    if (store.get(title) == null) {
+                        break;
+                    }
+                    TimeUnit.MILLISECONDS.sleep(200);
                 }
-                Thread.sleep(200);
+            } catch (Exception e) {
+                log.warn("Failed to wait for Kafka Streams store to apply tombstone for title: {}", title, e);
             }
-        } catch (Exception e) {
-            log.warn("Failed to wait for Kafka Streams store to apply tombstone for title: {}", title, e);
+        } else {
+            // Run the same polling logic asynchronously so we do not block production request threads.
+            tombstoneWaitExecutor.submit(() -> {
+                try {
+                    ReadOnlyKeyValueStore<String, NewPostRequest> store = getKeyValueStore();
+                    long deadline = System.currentTimeMillis() + 5000; // try up to 5s in background
+                    while (System.currentTimeMillis() < deadline) {
+                        try {
+                            if (store.get(title) == null) {
+                                return; // success
+                            }
+                        } catch (Exception inner) {
+                            // If store.get throws, log and bail — we don't want to silently swallow in production
+                            log.warn(
+                                    "Background wait: failed to query Kafka Streams store for title: {}", title, inner);
+                            return;
+                        }
+                        Thread.sleep(200);
+                    }
+                    log.warn(
+                            "Background wait: kafka streams store did not apply tombstone within timeout for title={}",
+                            title);
+                } catch (Exception e) {
+                    log.warn(
+                            "Background wait: unexpected exception while waiting for tombstone for title: {}",
+                            title,
+                            e);
+                }
+            });
         }
     }
 
