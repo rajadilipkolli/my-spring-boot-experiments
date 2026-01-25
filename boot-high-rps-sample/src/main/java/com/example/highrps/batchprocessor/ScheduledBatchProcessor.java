@@ -1,4 +1,4 @@
-package com.example.highrps.config;
+package com.example.highrps.batchprocessor;
 
 import java.util.HashMap;
 import java.util.List;

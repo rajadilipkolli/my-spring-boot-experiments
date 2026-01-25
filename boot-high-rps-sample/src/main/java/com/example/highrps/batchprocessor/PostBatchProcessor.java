@@ -1,4 +1,4 @@
-package com.example.highrps.config;
+package com.example.highrps.batchprocessor;
 
 import com.example.highrps.mapper.NewPostRequestToPostEntityMapper;
 import com.example.highrps.model.request.NewPostRequest;
@@ -46,16 +46,21 @@ public class PostBatchProcessor implements EntityBatchProcessor {
     public void processUpserts(List<String> payloads) {
         var entities = payloads.stream()
                 .map(payload -> {
-                    try {
-                        // Skip if a recent tombstone exists for this title (prevents re-insert races)
-                        String title = extractKey(payload);
-                        if (title != null) {
-                            Boolean deleted = redis.opsForSet().isMember("deleted:posts", title);
-                            if (Boolean.TRUE.equals(deleted)) {
-                                log.debug("Skipping upsert for title {} because recent tombstone present", title);
-                                return null;
-                            }
+                    // Determine key first
+                    String title = extractKey(payload);
+
+                    // Skip if a recent tombstone exists for this title (prevents re-insert races).
+                    // IMPORTANT: this Redis lookup is intentionally outside the JSON mapping try/catch so
+                    // Redis failures don't get swallowed as "mapping errors".
+                    if (title != null) {
+                        Boolean deleted = redis.opsForSet().isMember("deleted:posts", title);
+                        if (Boolean.TRUE.equals(deleted)) {
+                            log.debug("Skipping upsert for title {} because recent tombstone present", title);
+                            return null;
                         }
+                    }
+
+                    try {
                         NewPostRequest req = jsonMapper.readValue(payload, NewPostRequest.class);
                         return mapper.convert(req, tagRepository);
                     } catch (Exception e) {
@@ -95,7 +100,7 @@ public class PostBatchProcessor implements EntityBatchProcessor {
     public String extractKey(String payload) {
         try {
             var node = jsonMapper.readTree(payload);
-            return node.get("title").asText();
+            return node.get("title").asString();
         } catch (Exception e) {
             log.warn("Failed to extract title from post payload", e);
             return null;

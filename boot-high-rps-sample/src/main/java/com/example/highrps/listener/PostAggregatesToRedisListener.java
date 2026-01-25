@@ -1,4 +1,4 @@
-package com.example.highrps.config;
+package com.example.highrps.listener;
 
 import com.example.highrps.mapper.PostRequestToResponseMapper;
 import com.example.highrps.model.request.NewPostRequest;

@@ -1,4 +1,4 @@
-package com.example.highrps.config;
+package com.example.highrps.batchprocessor;
 
 import com.example.highrps.mapper.AuthorRequestToEntityMapper;
 import com.example.highrps.model.request.AuthorRequest;
@@ -76,7 +76,7 @@ public class AuthorBatchProcessor implements EntityBatchProcessor {
     public String extractKey(String payload) {
         try {
             var node = jsonMapper.readTree(payload);
-            return node.get("email").asText();
+            return node.get("email").asString();
         } catch (Exception e) {
             log.warn("Failed to extract email from author payload", e);
             return null;

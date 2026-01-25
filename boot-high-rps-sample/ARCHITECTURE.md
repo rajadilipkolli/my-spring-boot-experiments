@@ -6,7 +6,7 @@ This application uses a generic event-driven architecture that can be easily ext
 
 ## Data Flow Architecture
 
-```
+```text
 ┌─────────────┐
 │  Controller │  (PostController, AuthorController, etc.)
 └──────┬──────┘
@@ -280,18 +280,12 @@ To add a new entity (e.g., "Comment"):
    public class CommentBatchProcessor implements EntityBatchProcessor {
        @Override
        public String getEntityType() { return "comment"; }
-       
+
        @Override
        public void processUpserts(List<String> payloads) {
            // Parse JSON, map to entities, save to repository
-       }by creating a single batch processor class
-2. **Performance**: Multi-layer caching (Local → Redis → Streams → DB) + Batch DB writes
-3. **Scalability**: Kafka Streams horizontal scaling + Single queue for all entities
-4. **Reliability**: Tombstone handling, DLT for errors, idempotent consumers, re-queuing on failure
-5. **Consistency**: Single source of truth pattern with eventual consistency
-6. **Observability**: Structured logging at each layer with entity type context
-7. **Generic Design**: Strategy pattern allows heterogeneous entity processing without code duplication
-       
+       }
+
        @Override
        public String extractKey(String payload) {
            // Extract comment ID from JSON
