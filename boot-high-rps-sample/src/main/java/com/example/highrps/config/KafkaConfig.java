@@ -6,9 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
-import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.kafka.autoconfigure.KafkaConnectionDetails;
 import org.springframework.context.annotation.Bean;
@@ -16,48 +14,12 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
-import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaAdmin;
 import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.kafka.core.ProducerFactory;
 import org.springframework.kafka.support.serializer.JacksonJsonDeserializer;
-import org.springframework.kafka.support.serializer.JacksonJsonSerializer;
 
 @Configuration(proxyBeanMethods = false)
 public class KafkaConfig {
-
-    // Producer: generic Object-valued KafkaTemplate so no runtime casts are needed
-    @Bean
-    ProducerFactory<String, Object> producerFactory(KafkaConnectionDetails kafkaConnectionDetails) {
-        Map<String, Object> cfg = new HashMap<>();
-        cfg.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaConnectionDetails.getBootstrapServers());
-        // Any additional producer tuning can go here
-        return new DefaultKafkaProducerFactory<>(cfg, new StringSerializer(), new JacksonJsonSerializer<>());
-    }
-
-    @Bean
-    KafkaTemplate<String, Object> kafkaTemplate(ProducerFactory<String, Object> producerFactory) {
-        return new KafkaTemplate<>(producerFactory);
-    }
-
-    // Keep a String-valued ConsumerFactory and factory for listeners that consume String payloads.
-    @Bean
-    ConsumerFactory<String, String> stringConsumerFactory(KafkaConnectionDetails kafkaConnectionDetails) {
-        Map<String, Object> cfg = new HashMap<>();
-        cfg.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaConnectionDetails.getBootstrapServers());
-        cfg.put(ConsumerConfig.GROUP_ID_CONFIG, "aggregates-redis-writer");
-        cfg.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-        cfg.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-        return new DefaultKafkaConsumerFactory<>(cfg, new StringDeserializer(), new StringDeserializer());
-    }
-
-    @Bean
-    ConcurrentKafkaListenerContainerFactory<String, String> stringKafkaListenerContainerFactory(
-            ConsumerFactory<String, String> stringConsumerFactory) {
-        var f = new ConcurrentKafkaListenerContainerFactory<String, String>();
-        f.setConsumerFactory(stringConsumerFactory);
-        return f;
-    }
 
     // Consumer factory for NewPostRequest (used by listeners that consume typed payloads)
     @Bean
@@ -98,7 +60,6 @@ public class KafkaConfig {
             ConsumerFactory<String, AuthorRequest> authorConsumerFactory, KafkaTemplate<String, Object> kafkaTemplate) {
         var f = new ConcurrentKafkaListenerContainerFactory<String, AuthorRequest>();
         f.setConsumerFactory(authorConsumerFactory);
-
         return f;
     }
 

@@ -17,7 +17,7 @@ public class KafkaProducerService {
 
     private static final Logger log = LoggerFactory.getLogger(KafkaProducerService.class);
 
-    private final KafkaTemplate<String, Object> kafkaTemplate;
+    private final KafkaTemplate<String, EventEnvelope> kafkaTemplate;
     private final JsonMapper mapper;
 
     @Value("${app.kafka.events-topic:events}")
@@ -27,10 +27,8 @@ public class KafkaProducerService {
             "post", "posts-aggregates",
             "author", "authors-aggregates");
 
-    @SuppressWarnings({"unchecked"})
-    public KafkaProducerService(KafkaTemplate<String, ?> kafkaTemplate, JsonMapper mapper) {
-        // cast to KafkaTemplate<String, Object> so we can send arbitrary payload types
-        this.kafkaTemplate = (KafkaTemplate<String, Object>) kafkaTemplate;
+    public KafkaProducerService(KafkaTemplate<String, EventEnvelope> kafkaTemplate, JsonMapper mapper) {
+        this.kafkaTemplate = kafkaTemplate;
         this.mapper = mapper;
     }
 
@@ -40,14 +38,15 @@ public class KafkaProducerService {
      *
      * @return a future that completes when the send succeeds/fails; envelope creation errors complete the future exceptionally
      */
-    public CompletableFuture<SendResult<String, Object>> publishEnvelope(String entity, String key, Object payload) {
+    public CompletableFuture<SendResult<String, EventEnvelope>> publishEnvelope(
+            String entity, String key, Object payload) {
         try {
             JsonNode payloadNode = mapper.valueToTree(payload);
             EventEnvelope envelope = new EventEnvelope(entity, payloadNode);
             return publishEventToTopic(eventsTopic, key, envelope);
         } catch (Exception e) {
             log.error("Failed to create EventEnvelope for entity {} key {}", entity, key, e);
-            CompletableFuture<SendResult<String, Object>> failed = new CompletableFuture<>();
+            CompletableFuture<SendResult<String, EventEnvelope>> failed = new CompletableFuture<>();
             failed.completeExceptionally(e);
             return failed;
         }
@@ -70,7 +69,8 @@ public class KafkaProducerService {
      *
      * @return a future that completes when the send succeeds/fails
      */
-    public CompletableFuture<SendResult<String, Object>> publishEventToTopic(String topic, String key, Object value) {
+    public CompletableFuture<SendResult<String, EventEnvelope>> publishEventToTopic(
+            String topic, String key, EventEnvelope value) {
         return kafkaTemplate
                 .send(topic, key, value)
                 .whenComplete((result, ex) -> {
@@ -95,7 +95,7 @@ public class KafkaProducerService {
      *
      * @return a future that completes when the send succeeds/fails
      */
-    public CompletableFuture<SendResult<String, Object>> publishDeleteToTopic(String topic, String key) {
+    public CompletableFuture<SendResult<String, EventEnvelope>> publishDeleteToTopic(String topic, String key) {
         return kafkaTemplate
                 .send(topic, key, null)
                 .whenComplete((result, ex) -> {
