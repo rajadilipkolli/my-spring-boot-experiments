@@ -53,7 +53,7 @@ public class PostBatchProcessor implements EntityBatchProcessor {
                     // IMPORTANT: this Redis lookup is intentionally outside the JSON mapping try/catch so
                     // Redis failures don't get swallowed as "mapping errors".
                     if (title != null) {
-                        Boolean deleted = redis.opsForSet().isMember("deleted:posts", title);
+                        Boolean deleted = redis.hasKey("deleted:post:" + title);
                         if (Boolean.TRUE.equals(deleted)) {
                             log.debug("Skipping upsert for title {} because recent tombstone present", title);
                             return null;
@@ -84,16 +84,13 @@ public class PostBatchProcessor implements EntityBatchProcessor {
 
     @Override
     public void processDeletes(List<String> keys) {
-        keys.forEach(title -> {
-            try {
-                if (postRepository.existsByTitle(title)) {
-                    postRepository.deleteByTitle(title);
-                    log.debug("Deleted post entity for title: {}", title);
-                }
-            } catch (Exception e) {
-                log.warn("Failed to delete post entity for title: {}", title, e);
-            }
-        });
+        if (keys.isEmpty()) return;
+        try {
+            int deleted = postRepository.deleteAllByTitleIn(keys);
+            log.debug("Deleted {} post entities for {} keys", deleted, keys.size());
+        } catch (Exception e) {
+            log.warn("Failed to batch delete post entities for keys: {}", keys, e);
+        }
     }
 
     @Override

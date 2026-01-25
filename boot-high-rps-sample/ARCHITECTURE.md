@@ -51,7 +51,7 @@ This application uses a generic event-driven architecture that can be easily ext
 
 ## Read Path (Query Flow)
 
-```
+```text
 ┌─────────────┐
 │ GET Request │
 └──────┬──────┘
@@ -83,7 +83,7 @@ This application uses a generic event-driven architecture that can be easily ext
 
 The application uses a **generic batch processor** with a **strategy pattern** to handle asynchronous database persistence:
 
-```
+```text
 ┌──────────────────────────┐
 │ Aggregate Listeners      │  Write JSON + entity metadata to Redis queue
 └──────┬───────────────────┘

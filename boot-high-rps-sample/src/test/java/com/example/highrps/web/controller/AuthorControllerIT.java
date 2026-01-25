@@ -55,7 +55,8 @@ public class AuthorControllerIT extends AbstractIntegrationTest {
         // Assert local cache has the key (redis may be populated asynchronously)
         String cached = localCache.getIfPresent(email);
         assertThat(cached).isNotNull();
-        assertThat(cached).doesNotContain("IT");
+        AuthorResponse cachedResponse = AuthorResponse.fromJson(cached);
+        assertThat(cachedResponse.middleName()).isNull();
 
         // 2) Update the author via the new PUT endpoint to change content
         mockMvcTester
@@ -81,7 +82,8 @@ public class AuthorControllerIT extends AbstractIntegrationTest {
         // Verify caches updated with new content
         String cachedAfter = localCache.getIfPresent(email);
         assertThat(cachedAfter).isNotNull();
-        assertThat(cachedAfter).contains("IT");
+        AuthorResponse cachedAfterResponse = AuthorResponse.fromJson(cachedAfter);
+        assertThat(cachedAfterResponse.middleName()).isEqualTo("IT");
 
         // 3) Delete the author via API
         mockMvcTester

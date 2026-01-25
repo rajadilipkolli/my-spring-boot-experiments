@@ -76,7 +76,12 @@ public class AuthorBatchProcessor implements EntityBatchProcessor {
     public String extractKey(String payload) {
         try {
             var node = jsonMapper.readTree(payload);
-            return node.get("email").asString();
+            String email = node.path("email").asString(null);
+            if (email == null || email.isBlank()) {
+                log.warn("Author payload missing email");
+                return null;
+            }
+            return email;
         } catch (Exception e) {
             log.warn("Failed to extract email from author payload", e);
             return null;

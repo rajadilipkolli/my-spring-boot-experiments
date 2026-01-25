@@ -6,11 +6,11 @@ import jakarta.validation.constraints.Positive;
 import java.io.Serializable;
 
 public record AuthorRequest(
-        @NotBlank(message = "FirstName Cant be Blank") String firstName,
+        @NotBlank(message = "FirstName Can't be Blank") String firstName,
         String middleName,
-        @NotBlank(message = "LastName Cant be Blank") String lastName,
+        @NotBlank(message = "LastName Can't be Blank") String lastName,
 
         @Positive(message = "Mobile Number should be positive") Long mobile,
 
-        @Email @NotBlank(message = "Email Cant be Blank") String email)
+        @Email @NotBlank(message = "Email Can't be Blank") String email)
         implements Serializable {}

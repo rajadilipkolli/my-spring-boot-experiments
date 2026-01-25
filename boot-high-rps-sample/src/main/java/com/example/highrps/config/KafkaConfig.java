@@ -26,8 +26,6 @@ public class KafkaConfig {
     ProducerFactory<String, Object> producerFactory(KafkaConnectionDetails kafkaConnectionDetails) {
         Map<String, Object> cfg = new HashMap<>();
         cfg.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaConnectionDetails.getBootstrapServers());
-        cfg.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-        cfg.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JacksonJsonSerializer.class);
         // Any additional producer tuning can go here
         return new DefaultKafkaProducerFactory<>(cfg, new StringSerializer(), new JacksonJsonSerializer<>());
     }
@@ -116,9 +114,12 @@ public class KafkaConfig {
         events.configs(eventsCfg);
 
         NewTopic posts = new NewTopic("posts-aggregates", postsAggregatesPartitions, postsAggregatesReplication);
+        Map<String, String> aggregatesCfg = new HashMap<>();
+        aggregatesCfg.put("cleanup.policy", "compact");
+        posts.configs(aggregatesCfg);
         NewTopic authors =
                 new NewTopic("authors-aggregates", authorsAggregatesPartitions, authorsAggregatesReplication);
-
+        authors.configs(aggregatesCfg);
         return new KafkaAdmin.NewTopics(events, posts, authors);
     }
 }

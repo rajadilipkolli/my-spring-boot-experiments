@@ -108,11 +108,11 @@ public class AuthorAggregatesToRedisListener {
 
     @DltHandler
     public void dlt(ConsumerRecord<String, AuthorRequest> record, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
-        log.error("Received dead-letter message : {} from topic {}", record.value(), topic);
+        AuthorRequest value = record.value();
+        log.error("Received dead-letter message: key={}, value={} from topic {}", record.key(), value, topic);
         // Push failed message to a simple Redis DLQ list for later inspection
         String dlqKey = "dlq:authors-aggregates";
         try {
-            AuthorRequest value = record.value();
             if (value == null) {
                 log.warn("DLT record has null value; key={}", record.key());
                 return;
