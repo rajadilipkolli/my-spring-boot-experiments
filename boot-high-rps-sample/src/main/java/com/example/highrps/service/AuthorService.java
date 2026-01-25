@@ -95,14 +95,8 @@ public class AuthorService {
             log.warn("Failed to publish delete event for email: {}", email, e);
         }
 
-        try {
-            if (authorRepository.existsByEmail(email)) {
-                log.info("Deleting author entity from DB for email: {}", email);
-                authorRepository.deleteByEmail(email);
-            }
-        } catch (Exception e) {
-            log.warn("Failed to query or delete DB entity for email: {}", email, e);
-        }
+        authorRepository.deleteByEmail(email);  
+        log.debug("Attempted delete of author entity from DB for email: {}", email);  
     }
 
     public AuthorResponse findAuthorByEmail(String email) {

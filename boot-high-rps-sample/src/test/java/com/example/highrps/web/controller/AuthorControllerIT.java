@@ -95,7 +95,7 @@ public class AuthorControllerIT extends AbstractIntegrationTest {
                 .pollInterval(Duration.ofMillis(500))
                 .untilAsserted(() -> mockMvcTester
                         .get()
-                        .uri("/api/posts/" + email)
+                        .uri("/api/author/" + email)
                         .exchange()
                         .assertThat()
                         .hasStatus(HttpStatus.NOT_FOUND)

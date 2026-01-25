@@ -206,16 +206,7 @@ public class PostService {
         // compared to the authoritative DB. Using DB + Redis + local cache ensures deletes are visible
         // immediately after persistent deletion and avoids test flakiness due to Streams propagation delays.
 
-        return postRepository
-                .findByTitle(title)
-                .map(postEntityToPostResponse::convert)
-                .map(response -> {
-                    var json = PostResponse.toJson(response);
-                    localCache.put(title, json);
-                    redis.opsForValue().set("posts:" + title, json);
-                    return response;
-                })
-                .orElseThrow(() -> new ResourceNotFoundException("Post not found for title: " + title));
+        throw new ResourceNotFoundException("Post not found for title: " + title);
     }
 
     private ReadOnlyKeyValueStore<String, NewPostRequest> getKeyValueStore() {

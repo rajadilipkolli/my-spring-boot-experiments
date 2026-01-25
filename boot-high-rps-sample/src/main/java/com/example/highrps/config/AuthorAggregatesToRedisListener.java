@@ -3,6 +3,7 @@ package com.example.highrps.config;
 import com.example.highrps.mapper.AuthorRequestToResponseMapper;
 import com.example.highrps.model.request.AuthorRequest;
 import com.example.highrps.model.response.AuthorResponse;
+import java.util.Map;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +14,7 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.json.JsonMapper;
 
 @Component
 public class AuthorAggregatesToRedisListener {
@@ -22,14 +24,17 @@ public class AuthorAggregatesToRedisListener {
     private final RedisTemplate<String, String> redis;
     private final AuthorRequestToResponseMapper mapper;
     private final String queueKey;
+    private final JsonMapper jsonMapper;
 
     public AuthorAggregatesToRedisListener(
             RedisTemplate<String, String> redis,
             AuthorRequestToResponseMapper mapper,
-            @Value("${app.batch.queue-key:events:queue}") String queueKey) {
+            @Value("${app.batch.queue-key:events:queue}") String queueKey,
+            JsonMapper jsonMapper) {
         this.redis = redis;
         this.mapper = mapper;
         this.queueKey = queueKey;
+        this.jsonMapper = jsonMapper;
     }
 
     @KafkaListener(
@@ -59,7 +64,8 @@ public class AuthorAggregatesToRedisListener {
                     log.warn("Failed to delete redis key for tombstone: {}", redisKey, e);
                 }
                 try {
-                    String tombstoneJson = "{\"email\":\"" + key + "\",\"__deleted\":true,\"__entity\":\"author\"}";
+                    String tombstoneJson = jsonMapper.writeValueAsString(
+                            Map.of("email", key, "__deleted", true, "__entity", "author"));
                     redis.opsForList().leftPush(queueKey, tombstoneJson);
                 } catch (Exception e) {
                     log.error("Failed to enqueue tombstone marker for key: {}, may lose durability", key, e);
@@ -106,7 +112,12 @@ public class AuthorAggregatesToRedisListener {
         // Push failed message to a simple Redis DLQ list for later inspection
         String dlqKey = "dlq:authors-aggregates";
         try {
-            String payload = AuthorResponse.toJson(mapper.mapToAuthorResponse(record.value()));
+            AuthorRequest value = record.value();
+            if (value == null) {
+                log.warn("DLT record has null value; key={}", record.key());
+                return;
+            }
+            String payload = AuthorResponse.toJson(mapper.mapToAuthorResponse(value));
             redis.opsForList().leftPush(dlqKey, payload);
         } catch (Exception e) {
             log.warn("Failed to push to DLQ: {}", dlqKey, e);
