@@ -7,7 +7,13 @@ import jakarta.validation.Valid;
 import java.net.URI;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @Validated
@@ -28,7 +34,7 @@ public class PostController {
 
     @PostMapping(value = "/posts")
     public ResponseEntity<PostResponse> createPost(@RequestBody @Valid NewPostRequest newPostRequest) {
-        PostResponse postResponse = postService.savePost(newPostRequest);
+        PostResponse postResponse = postService.saveOrUpdatePost(newPostRequest);
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{title}")
                 .buildAndExpand(postResponse.title())
@@ -39,10 +45,10 @@ public class PostController {
     @PutMapping(value = "/posts/{title}")
     public ResponseEntity<PostResponse> updatePost(
             @PathVariable String title, @RequestBody @Valid NewPostRequest newPostRequest) {
-        if (!title.equals(newPostRequest.title())) {
+        if (!title.equals(newPostRequest.title()) && !postService.isTitleAvailable(title)) {
             return ResponseEntity.badRequest().build();
         }
-        PostResponse postResponse = postService.updatePost(newPostRequest);
+        PostResponse postResponse = postService.saveOrUpdatePost(newPostRequest);
         return ResponseEntity.ok(postResponse);
     }
 

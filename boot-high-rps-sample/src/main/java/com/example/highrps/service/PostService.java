@@ -1,5 +1,6 @@
 package com.example.highrps.service;
 
+import com.example.highrps.config.AppProperties;
 import com.example.highrps.exception.ResourceNotFoundException;
 import com.example.highrps.mapper.PostEntityToPostResponse;
 import com.example.highrps.mapper.PostRequestToResponseMapper;
@@ -7,7 +8,11 @@ import com.example.highrps.model.request.NewPostRequest;
 import com.example.highrps.model.response.PostResponse;
 import com.example.highrps.repository.PostRepository;
 import com.github.benmanes.caffeine.cache.Cache;
+import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.locks.ReentrantLock;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StoreQueryParameters;
@@ -32,6 +37,7 @@ public class PostService {
     private final PostEntityToPostResponse postEntityToPostResponse;
     private final StreamsBuilderFactoryBean kafkaStreamsFactory;
     private final PostRepository postRepository;
+    private final AppProperties appProperties;
 
     private volatile ReadOnlyKeyValueStore<String, NewPostRequest> keyValueStore = null;
 
@@ -45,7 +51,8 @@ public class PostService {
             PostRequestToResponseMapper postRequestToResponseMapper,
             PostEntityToPostResponse postEntityToPostResponse,
             StreamsBuilderFactoryBean kafkaStreamsFactory,
-            PostRepository postRepository) {
+            PostRepository postRepository,
+            AppProperties appProperties) {
         this.kafkaProducerService = kafkaProducerService;
         this.localCache = localCache;
         this.redis = redis;
@@ -53,34 +60,55 @@ public class PostService {
         this.postEntityToPostResponse = postEntityToPostResponse;
         this.kafkaStreamsFactory = kafkaStreamsFactory;
         this.postRepository = postRepository;
+        this.appProperties = appProperties;
     }
 
-    public PostResponse savePost(NewPostRequest newPostRequest) {
-        if (newPostRequest.published() != null && newPostRequest.published() && newPostRequest.publishedAt() == null) {
-            newPostRequest = newPostRequest.withPublishedAt(LocalDateTime.now());
-        }
-        kafkaProducerService.publishEvent(newPostRequest);
-        PostResponse postResponse = postRequestToResponseMapper.mapToPostResponse(newPostRequest);
-        String json = PostResponse.toJson(postResponse);
-        localCache.put(newPostRequest.title(), json);
-        return postResponse;
-    }
-
-    public PostResponse updatePost(NewPostRequest newPostRequest) {
+    public PostResponse saveOrUpdatePost(NewPostRequest newPostRequest) {
         String title = newPostRequest.title();
-        if (newPostRequest.published() != null && newPostRequest.published() && newPostRequest.publishedAt() == null) {
+        if (newPostRequest.published() != null && newPostRequest.published()) {
             newPostRequest = newPostRequest.withPublishedAt(LocalDateTime.now());
         }
-        // Publish event first so Streams + Aggregates handle materialized view
-        kafkaProducerService.publishEvent(newPostRequest);
 
-        // Update local cache and redis to reflect new state immediately
+        // Build the response now so we can return it after successful publish
         PostResponse postResponse = postRequestToResponseMapper.mapToPostResponse(newPostRequest);
         String json = PostResponse.toJson(postResponse);
+
+        // Publish envelope and wait for the send to complete. Only after a successful send
+        // do we populate the local cache and return the response.
+        var future = kafkaProducerService.publishEnvelope("post", title, newPostRequest);
+        try {
+            future.get(appProperties.getPublishTimeOutMs(), TimeUnit.MILLISECONDS);
+        } catch (TimeoutException te) {
+            // Attempt to cancel the send if possible and surface a clear error
+            try {
+                future.cancel(true);
+            } catch (Exception cancelEx) {
+                log.warn("Failed to cancel publish future after timeout for title {}", title, cancelEx);
+            }
+            log.error(
+                    "Timed out waiting for Kafka publish for title {} after {} ms",
+                    title,
+                    appProperties.getPublishTimeOutMs(),
+                    te);
+            throw new IllegalStateException("Timed out publishing post event for title " + title, te);
+        } catch (InterruptedException ie) {
+            Thread.currentThread().interrupt();
+            log.error("Interrupted while waiting for Kafka publish for title {}", title, ie);
+            throw new IllegalStateException("Interrupted while publishing post event for title " + title, ie);
+        } catch (ExecutionException ee) {
+            Throwable cause = ee.getCause() == null ? ee : ee.getCause();
+            log.error("Failed to publish post envelope for title {}", title, cause);
+            throw new IllegalStateException("Failed to publish post event for title " + title, cause);
+        } catch (Exception ex) {
+            log.error("Unexpected error while publishing post envelope for title {}", title, ex);
+            throw new IllegalStateException("Failed to publish post event for title " + title, ex);
+        }
+
+        // Only populate local cache after successful publish. Cache update is best-effort.
         try {
             localCache.put(title, json);
         } catch (Exception e) {
-            log.warn("Failed to update local cache for title: {}", title, e);
+            log.warn("Failed to update local cache for title after successful publish: {}", title, e);
         }
 
         return postResponse;
@@ -90,6 +118,7 @@ public class PostService {
         // 1) Mark deletion in local cache so reads return absent immediately
         try {
             localCache.invalidate(title);
+            log.info("deletePost: invalidated local cache for title={}", title);
         } catch (Exception e) {
             log.warn("Failed to mark local cache deletion for title: {}", title, e);
         }
@@ -97,15 +126,37 @@ public class PostService {
         // 2) Remove from Redis
         try {
             redis.opsForValue().getAndDelete("posts:" + title);
+            log.info("deletePost: removed redis key for title={}", title);
         } catch (Exception e) {
             log.warn("Failed to delete redis key for title: {}", title, e);
         }
 
-        // 3) Publish tombstone to Kafka events topic so Streams topology removes materialized entry
+        // 3) Remove from persistent storage (if present) BEFORE publishing tombstone
         try {
-            kafkaProducerService.publishDelete(title);
+            if (postRepository.existsByTitle(title)) {
+                log.info("Deleting post entity from DB for title: {}", title);
+                postRepository.deleteByTitle(title);
+            } else {
+                log.info("deletePost: no DB entity found for title={}", title);
+            }
+        } catch (Exception e) {
+            log.warn("Failed to query or delete DB entity for title: {}", title, e);
+        }
+
+        // 4) Publish tombstone to per-entity aggregates topic so Streams materialized KTable sees the delete
+        try {
+            kafkaProducerService.publishDeleteForEntity("post", title);
+            log.info("deletePost: published tombstone for title={}", title);
         } catch (Exception e) {
             log.warn("Failed to publish delete event for title: {}", title, e);
+        }
+
+        // 4b) Mark deleted in a short-lived Redis set so batch processors skip re-inserts
+        try {
+            // Use per-title key so each deletion has independent TTL
+            redis.opsForValue().set("deleted:posts:" + title, "1", Duration.ofSeconds(60));
+        } catch (Exception ex) {
+            log.warn("Failed to mark title {} in deleted:posts set", title, ex);
         }
     }
 
@@ -113,17 +164,18 @@ public class PostService {
         // 1) Local cache
         var cached = localCache.getIfPresent(title);
         if (cached != null) {
+            log.info("findPostByTitle: hit local cache for title={}", title);
             return PostResponse.fromJson(cached);
         }
 
         // 2) Redis materialized view
         var raw = redis.opsForValue().get("posts:" + title);
         if (raw != null) {
+            log.info("findPostByTitle: hit redis for title={}", title);
             localCache.put(title, raw);
             return PostResponse.fromJson(raw);
         }
 
-        // 3) Fallback: interactive query against Kafka Streams `posts-store` (materialized KTable)
         try {
             NewPostRequest cachedRequest = getKeyValueStore().get(title);
             if (cachedRequest != null) {
@@ -134,7 +186,6 @@ public class PostService {
                 return response;
             }
         } catch (Exception e) {
-            // ignore and fall through to empty
             log.error("Failed to query Kafka Streams store for title: {}", title, e);
         }
 
@@ -165,5 +216,12 @@ public class PostService {
             }
         }
         return keyValueStore;
+    }
+
+    public boolean isTitleAvailable(String title) {
+        return localCache.getIfPresent(title) != null
+                || redis.opsForValue().get("posts:" + title) != null
+                || getKeyValueStore().get(title) != null
+                || postRepository.existsByTitle(title);
     }
 }
