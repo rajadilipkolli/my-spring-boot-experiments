@@ -4,6 +4,7 @@ import com.example.highrps.model.request.NewPostRequest;
 import com.example.highrps.model.response.PostResponse;
 import com.example.highrps.service.PostService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import java.net.URI;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -45,7 +46,7 @@ public class PostController {
     @PutMapping(value = "/posts/{title}")
     public ResponseEntity<PostResponse> updatePost(
             @PathVariable String title, @RequestBody @Valid NewPostRequest newPostRequest) {
-        if (!title.equals(newPostRequest.title()) && !postService.isTitleAvailable(title)) {
+        if (!title.equals(newPostRequest.title()) && !postService.titleExists(title)) {
             return ResponseEntity.badRequest().build();
         }
         PostResponse postResponse = postService.saveOrUpdatePost(newPostRequest);
@@ -53,7 +54,7 @@ public class PostController {
     }
 
     @DeleteMapping("/posts/{title}")
-    public ResponseEntity<Void> deletePost(@PathVariable String title) {
+    public ResponseEntity<Void> deletePost(@PathVariable @NotBlank String title) {
         postService.deletePost(title);
         return ResponseEntity.noContent().build();
     }
