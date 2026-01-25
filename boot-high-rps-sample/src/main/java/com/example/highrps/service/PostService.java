@@ -9,9 +9,6 @@ import com.example.highrps.repository.PostRepository;
 import com.github.benmanes.caffeine.cache.Cache;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StoreQueryParameters;
@@ -40,13 +37,6 @@ public class PostService {
 
     @Value("${app.batch.queue-key:events:queue}")
     private String batchQueueKey;
-
-    // New flag: control whether deletePost blocks waiting for Kafka Streams tombstone
-    @Value("${app.wait-for-tombstone:false}")
-    private boolean waitForTombstone;
-
-    // Executor for asynchronous tombstone waits when blocking is disabled
-    private final ExecutorService tombstoneWaitExecutor = Executors.newCachedThreadPool();
 
     private volatile ReadOnlyKeyValueStore<String, NewPostRequest> keyValueStore = null;
 
@@ -153,56 +143,10 @@ public class PostService {
 
         // 4b) Mark deleted in a short-lived Redis set so batch processors skip re-inserts
         try {
-            redis.opsForSet().add("deleted:posts", title);
-            redis.expire("deleted:posts", Duration.ofSeconds(60));
+            // Use per-title key so each deletion has independent TTL
+            redis.opsForValue().set("deleted:posts:" + title, "1", Duration.ofSeconds(60));
         } catch (Exception ex) {
             log.warn("Failed to mark title {} in deleted:posts set", title, ex);
-        }
-
-        // 5) Wait briefly for the Kafka Streams materialized store to apply the tombstone so interactive queries
-        // (and subsequent GETs) do not return stale results. This keeps the API behavior consistent for tests.
-        if (waitForTombstone) {
-            try {
-                ReadOnlyKeyValueStore<String, NewPostRequest> store = getKeyValueStore();
-                long deadline = System.currentTimeMillis() + 5000; // wait up to 5s
-                while (System.currentTimeMillis() < deadline) {
-                    if (store.get(title) == null) {
-                        break;
-                    }
-                    TimeUnit.MILLISECONDS.sleep(200);
-                }
-            } catch (Exception e) {
-                log.warn("Failed to wait for Kafka Streams store to apply tombstone for title: {}", title, e);
-            }
-        } else {
-            // Run the same polling logic asynchronously so we do not block production request threads.
-            tombstoneWaitExecutor.submit(() -> {
-                try {
-                    ReadOnlyKeyValueStore<String, NewPostRequest> store = getKeyValueStore();
-                    long deadline = System.currentTimeMillis() + 5000; // try up to 5s in background
-                    while (System.currentTimeMillis() < deadline) {
-                        try {
-                            if (store.get(title) == null) {
-                                return; // success
-                            }
-                        } catch (Exception inner) {
-                            // If store.get throws, log and bail — we don't want to silently swallow in production
-                            log.warn(
-                                    "Background wait: failed to query Kafka Streams store for title: {}", title, inner);
-                            return;
-                        }
-                        TimeUnit.MILLISECONDS.sleep(200);
-                    }
-                    log.warn(
-                            "Background wait: kafka streams store did not apply tombstone within timeout for title={}",
-                            title);
-                } catch (Exception e) {
-                    log.warn(
-                            "Background wait: unexpected exception while waiting for tombstone for title: {}",
-                            title,
-                            e);
-                }
-            });
         }
     }
 
@@ -222,24 +166,29 @@ public class PostService {
             return PostResponse.fromJson(raw);
         }
 
-        // 3) Check authoritative persistent storage (DB) first to ensure deletes are visible promptly
-        var fromDb = postRepository.findByTitle(title);
-        if (fromDb.isPresent()) {
-            log.info("findPostByTitle: hit DB for title={}", title);
-            var response = postEntityToPostResponse.convert(fromDb.get());
-            var json = PostResponse.toJson(response);
-            localCache.put(title, json);
-            redis.opsForValue().set("posts:" + title, json);
-            return response;
+        try {
+            NewPostRequest cachedRequest = getKeyValueStore().get(title);
+            if (cachedRequest != null) {
+                PostResponse response = postRequestToResponseMapper.mapToPostResponse(cachedRequest);
+                var json = PostResponse.toJson(response);
+                localCache.put(title, json);
+                redis.opsForValue().set("posts:" + title, json);
+                return response;
+            }
+        } catch (Exception e) {
+            log.error("Failed to query Kafka Streams store for title: {}", title, e);
         }
 
-        log.info("findPostByTitle: nothing found for title={}, throwing ResourceNotFound", title);
-
-        // NOTE: we intentionally do not consult Kafka Streams interactive store here because it may be stale
-        // compared to the authoritative DB. Using DB + Redis + local cache ensures deletes are visible
-        // immediately after persistent deletion and avoids test flakiness due to Streams propagation delays.
-
-        throw new ResourceNotFoundException("Post not found for title: " + title);
+        return postRepository
+                .findByTitle(title)
+                .map(postEntityToPostResponse::convert)
+                .map(response -> {
+                    var json = PostResponse.toJson(response);
+                    localCache.put(title, json);
+                    redis.opsForValue().set("posts:" + title, json);
+                    return response;
+                })
+                .orElseThrow(() -> new ResourceNotFoundException("Post not found for title: " + title));
     }
 
     private ReadOnlyKeyValueStore<String, NewPostRequest> getKeyValueStore() {

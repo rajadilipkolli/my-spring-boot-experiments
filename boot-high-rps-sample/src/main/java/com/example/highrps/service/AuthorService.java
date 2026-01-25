@@ -7,6 +7,7 @@ import com.example.highrps.model.request.AuthorRequest;
 import com.example.highrps.model.response.AuthorResponse;
 import com.example.highrps.repository.AuthorRepository;
 import com.github.benmanes.caffeine.cache.Cache;
+import java.time.Duration;
 import java.util.concurrent.locks.ReentrantLock;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StoreQueryParameters;
@@ -117,8 +118,8 @@ public class AuthorService {
 
         // Mark deleted in a short-lived Redis set so batch processors skip re-inserts
         try {
-            redis.opsForSet().add("deleted:authors", email);
-            redis.expire("deleted:authors", java.time.Duration.ofSeconds(60));
+            // Use per-email key so each deletion has independent TTL
+            redis.opsForValue().set("deleted:authors:" + email, "1", Duration.ofSeconds(60));
         } catch (Exception ex) {
             log.warn("Failed to mark email {} in deleted:authors set", email, ex);
         }
