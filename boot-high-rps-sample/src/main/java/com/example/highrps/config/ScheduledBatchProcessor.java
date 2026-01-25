@@ -1,12 +1,8 @@
 package com.example.highrps.config;
 
-import com.example.highrps.mapper.NewPostRequestToPostEntityMapper;
-import com.example.highrps.model.request.NewPostRequest;
-import com.example.highrps.repository.PostRepository;
-import com.example.highrps.repository.TagRepository;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,35 +12,42 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import tools.jackson.databind.json.JsonMapper;
 
+/**
+ * Generic batch processor that handles asynchronous persistence of entities from Redis queue.
+ * Uses strategy pattern to delegate entity-specific operations to EntityBatchProcessor implementations.
+ * Supports multiple entity types (posts, authors, etc.) with automatic routing based on entity metadata.
+ */
 @Component
 public class ScheduledBatchProcessor {
 
     private static final Logger log = LoggerFactory.getLogger(ScheduledBatchProcessor.class);
 
     private final RedisTemplate<String, String> redis;
-    private final NewPostRequestToPostEntityMapper newPostRequestToPostEntityMapper;
-    private final PostRepository postRepository;
-    private final TagRepository tagRepository;
     private final JsonMapper jsonMapper;
+    private final Map<String, EntityBatchProcessor> processorsByEntityType;
 
     private final String queueKey;
     private final int batchSize;
 
     public ScheduledBatchProcessor(
             RedisTemplate<String, String> redis,
-            NewPostRequestToPostEntityMapper newPostRequestToPostEntityMapper,
-            PostRepository postRepository,
-            TagRepository tagRepository,
             JsonMapper jsonMapper,
+            List<EntityBatchProcessor> processors,
             @Value("${app.batch.queue-key}") String queueKey,
             @Value("${app.batch.size}") int batchSize) {
         this.redis = redis;
-        this.newPostRequestToPostEntityMapper = newPostRequestToPostEntityMapper;
-        this.postRepository = postRepository;
-        this.tagRepository = tagRepository;
         this.jsonMapper = jsonMapper;
         this.queueKey = queueKey;
         this.batchSize = batchSize;
+
+        // Build registry of processors by entity type
+        this.processorsByEntityType =
+                processors.stream().collect(Collectors.toMap(EntityBatchProcessor::getEntityType, p -> p));
+
+        log.info(
+                "Initialized ScheduledBatchProcessor with {} entity processors: {}",
+                processorsByEntityType.size(),
+                processorsByEntityType.keySet());
     }
 
     @Scheduled(fixedDelayString = "${app.batch.delay-ms}")
@@ -54,75 +57,116 @@ public class ScheduledBatchProcessor {
             return;
         }
 
-        // Deduplicate by title, keeping the latest value in the batch
-        Map<String, Object> latestByTitle = items.stream()
-                .filter(Objects::nonNull)
-                .map(s -> {
-                    try {
-                        // Attempt to parse tombstone marker first
-                        var node = jsonMapper.readTree(s);
-                        if (node.has("__deleted") && node.get("__deleted").asBoolean(false)) {
-                            // Represent tombstone with the raw title string
-                            return Map.<String, Object>of(node.get("title").asString(), Boolean.TRUE);
-                        }
-                        // Otherwise, parse as NewPostRequest
-                        NewPostRequest req = jsonMapper.readValue(s, NewPostRequest.class);
-                        return Map.<String, Object>of(req.title(), req);
-                    } catch (Exception e) {
-                        log.warn("Failed to deserialize queued payload: {}", s, e);
-                        return null;
-                    }
-                })
-                .filter(Objects::nonNull)
-                .flatMap(m -> m.entrySet().stream())
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (older, newer) -> newer));
+        // Group items by entity type, then deduplicate by key within each entity type
+        Map<String, Map<String, PayloadOrTombstone>> groupedByEntityType = new HashMap<>();
 
-        // Now separate deletes and upserts: if value is Boolean.TRUE => delete
-        var deletes = latestByTitle.entrySet().stream()
-                .filter(e -> Boolean.TRUE.equals(e.getValue()))
-                .map(Map.Entry::getKey)
-                .toList();
+        for (String item : items) {
+            if (item == null) continue;
 
-        var upserts = latestByTitle.values().stream()
-                .filter(v -> v instanceof NewPostRequest)
-                .map(v -> (NewPostRequest) v)
-                .map(newPostRequest -> {
-                    try {
-                        return newPostRequestToPostEntityMapper.convert(newPostRequest, tagRepository);
-                    } catch (Exception e) {
-                        log.warn("Failed to map queued response to entity for title: {}", newPostRequest.title(), e);
-                        return null;
-                    }
-                })
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
-        if (!upserts.isEmpty()) {
             try {
-                postRepository.saveAll(upserts);
+                var node = jsonMapper.readTree(item);
+                String entityType = node.has("__entity") ? node.get("__entity").asString() : null;
+                boolean isDeleted =
+                        node.has("__deleted") && node.get("__deleted").asBoolean(false);
+
+                if (entityType == null) {
+                    // Backward compatibility: infer entity type from payload structure
+                    if (node.has("title")) {
+                        entityType = "post";
+                    } else if (node.has("email") && node.has("firstName")) {
+                        entityType = "author";
+                    } else {
+                        log.warn("Unable to determine entity type for payload: {}", item);
+                        continue;
+                    }
+                }
+
+                EntityBatchProcessor processor = processorsByEntityType.get(entityType);
+                if (processor == null) {
+                    log.warn("No processor found for entity type: {}", entityType);
+                    continue;
+                }
+
+                String key = processor.extractKey(item);
+                if (key == null) {
+                    log.warn("Failed to extract key from payload for entity type: {}", entityType);
+                    continue;
+                }
+
+                // Place into per-entity map, with tombstone taking precedence over payloads.
+                var perKey = groupedByEntityType.computeIfAbsent(entityType, k -> new HashMap<>());
+                PayloadOrTombstone existing = perKey.get(key);
+                if (isDeleted) {
+                    // Always prefer tombstone for this key
+                    log.debug("Grouping: tombstone for entity={}, key={}", entityType, key);
+                    perKey.put(key, PayloadOrTombstone.tombstone(key));
+                } else {
+                    log.debug("Grouping: upsert for entity={}, key={}", entityType, key);
+                    // Only store payload if we don't already have a tombstone for this key
+                    if (existing == null || !existing.isTombstone()) {
+                        perKey.put(key, PayloadOrTombstone.payload(item));
+                    } else {
+                        log.debug(
+                                "Skipping upsert because tombstone already present for entity={}, key={}",
+                                entityType,
+                                key);
+                    }
+                }
             } catch (Exception e) {
-                log.error("Failed to persist batch of {} entities, re-queuing", upserts.size(), e);
-                // Re-queue items to avoid data loss
-                items.forEach(item -> redis.opsForList().leftPush(queueKey, item));
-                throw e;
+                log.warn("Failed to parse queued item: {}", item, e);
             }
         }
 
-        if (!deletes.isEmpty()) {
+        // Process each entity type's batch
+        groupedByEntityType.forEach((entityType, payloadsByKey) -> {
+            EntityBatchProcessor processor = processorsByEntityType.get(entityType);
+            if (processor == null) return;
+
+            // Separate deletes and upserts
+            List<String> deletes = payloadsByKey.values().stream()
+                    .filter(PayloadOrTombstone::isTombstone)
+                    .map(PayloadOrTombstone::key)
+                    .toList();
+
+            List<String> upserts = payloadsByKey.values().stream()
+                    .filter(p -> !p.isTombstone())
+                    .map(PayloadOrTombstone::payload)
+                    .toList();
+
             try {
-                deletes.forEach(title -> {
-                    try {
-                        if (postRepository.existsByTitle(title)) {
-                            postRepository.deleteByTitle(title);
-                        }
-                    } catch (Exception e) {
-                        log.warn("Failed to delete DB entity for title: {}", title, e);
-                    }
-                });
+                log.debug(
+                        "Processing batch for entity={}, deletes={}, upserts={}",
+                        entityType,
+                        deletes.size(),
+                        upserts.size());
+                if (!upserts.isEmpty()) {
+                    processor.processUpserts(upserts);
+                }
+                if (!deletes.isEmpty()) {
+                    processor.processDeletes(deletes);
+                }
             } catch (Exception e) {
-                log.error("Failed to delete batch of {} entities, re-queuing", deletes.size(), e);
-                items.forEach(item -> redis.opsForList().leftPush(queueKey, item));
+                log.error("Failed to process batch for entity type: {}, re-queuing", entityType, e);
+                // Re-queue items for this entity type to avoid data loss
+                payloadsByKey.values().stream()
+                        .filter(p -> !p.isTombstone())
+                        .map(PayloadOrTombstone::payload)
+                        .forEach(payload -> redis.opsForList().leftPush(queueKey, payload));
                 throw e;
             }
+        });
+    }
+
+    /**
+     * Internal record to represent either a payload to persist or a tombstone (delete marker).
+     */
+    private record PayloadOrTombstone(String payload, String key, boolean isTombstone) {
+        static PayloadOrTombstone payload(String payload) {
+            return new PayloadOrTombstone(payload, null, false);
+        }
+
+        static PayloadOrTombstone tombstone(String key) {
+            return new PayloadOrTombstone(null, key, true);
         }
     }
 }

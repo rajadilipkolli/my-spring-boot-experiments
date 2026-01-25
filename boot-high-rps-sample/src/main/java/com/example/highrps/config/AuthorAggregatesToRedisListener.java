@@ -1,8 +1,8 @@
 package com.example.highrps.config;
 
-import com.example.highrps.mapper.PostRequestToResponseMapper;
-import com.example.highrps.model.request.NewPostRequest;
-import com.example.highrps.model.response.PostResponse;
+import com.example.highrps.mapper.AuthorRequestToResponseMapper;
+import com.example.highrps.model.request.AuthorRequest;
+import com.example.highrps.model.response.AuthorResponse;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,17 +15,17 @@ import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
 
 @Component
-public class AggregatesToRedisListener {
+public class AuthorAggregatesToRedisListener {
 
-    private static final Logger log = LoggerFactory.getLogger(AggregatesToRedisListener.class);
+    private static final Logger log = LoggerFactory.getLogger(AuthorAggregatesToRedisListener.class);
 
     private final RedisTemplate<String, String> redis;
-    private final PostRequestToResponseMapper mapper;
+    private final AuthorRequestToResponseMapper mapper;
     private final String queueKey;
 
-    public AggregatesToRedisListener(
+    public AuthorAggregatesToRedisListener(
             RedisTemplate<String, String> redis,
-            PostRequestToResponseMapper mapper,
+            AuthorRequestToResponseMapper mapper,
             @Value("${app.batch.queue-key:events:queue}") String queueKey) {
         this.redis = redis;
         this.mapper = mapper;
@@ -33,22 +33,24 @@ public class AggregatesToRedisListener {
     }
 
     @KafkaListener(
-            topics = "posts-aggregates",
-            groupId = "aggregates-redis-writer",
-            containerFactory = "newPostKafkaListenerContainerFactory")
-    public void handleAggregate(ConsumerRecord<String, NewPostRequest> record) {
+            topics = "authors-aggregates",
+            groupId = "authors-redis-writer",
+            containerFactory = "authorKafkaListenerContainerFactory")
+    public void handleAggregate(ConsumerRecord<String, AuthorRequest> record) {
         if (record == null) return;
-        // Log record metadata early to diagnose tombstone timing issues
+
         try {
             String key = record.key();
-            NewPostRequest payload = record.value();
+            AuthorRequest payload = record.value();
             log.debug(
-                    "Received posts-aggregates record: partition={}, offset={}, key={}, valueIsNull={}",
+                    "Received authors-aggregates record: partition={}, offset={}, key={}, valueIsNull={}",
                     record.partition(),
                     record.offset(),
                     key,
                     payload == null);
-            String redisKey = "posts:" + key;
+
+            String redisKey = "authors:" + key;
+
             // If payload is null -> tombstone: remove Redis key and enqueue delete marker
             if (payload == null) {
                 try {
@@ -57,7 +59,7 @@ public class AggregatesToRedisListener {
                     log.warn("Failed to delete redis key for tombstone: {}", redisKey, e);
                 }
                 try {
-                    String tombstoneJson = "{\"title\":\"" + key + "\",\"__deleted\":true,\"__entity\":\"post\"}";
+                    String tombstoneJson = "{\"email\":\"" + key + "\",\"__deleted\":true,\"__entity\":\"author\"}";
                     redis.opsForList().leftPush(queueKey, tombstoneJson);
                 } catch (Exception e) {
                     log.error("Failed to enqueue tombstone marker for key: {}, may lose durability", key, e);
@@ -65,16 +67,16 @@ public class AggregatesToRedisListener {
                 return;
             }
 
-            // Map NewPostRequest to PostResponse for Redis storage
-            PostResponse value = mapper.mapToPostResponse(payload);
-            var json = PostResponse.toJson(value);
+            // Map AuthorRequest to AuthorResponse for Redis storage
+            AuthorResponse value = mapper.mapToAuthorResponse(payload);
+            var json = AuthorResponse.toJson(value);
 
             String existing = redis.opsForValue().get(redisKey);
 
             // Idempotent: if the existing value matches desired value, skip write
             if (existing != null) {
                 try {
-                    PostResponse existingStats = PostResponse.fromJson(existing);
+                    AuthorResponse existingStats = AuthorResponse.fromJson(existing);
                     if (existingStats.equals(value)) {
                         return;
                     }
@@ -93,18 +95,18 @@ public class AggregatesToRedisListener {
                 log.error("Failed to enqueue payload for DB write, key: {}, may lose durability", key, e);
             }
         } catch (Exception e) {
-            log.error("Unhandled exception in handleAggregate", e);
+            log.error("Unhandled exception in handleAggregate for authors", e);
             throw e;
         }
     }
 
     @DltHandler
-    public void dlt(ConsumerRecord<String, NewPostRequest> record, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
+    public void dlt(ConsumerRecord<String, AuthorRequest> record, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
         log.error("Received dead-letter message : {} from topic {}", record.value(), topic);
         // Push failed message to a simple Redis DLQ list for later inspection
-        String dlqKey = "dlq:posts-aggregates";
+        String dlqKey = "dlq:authors-aggregates";
         try {
-            String payload = PostResponse.toJson(mapper.mapToPostResponse(record.value()));
+            String payload = AuthorResponse.toJson(mapper.mapToAuthorResponse(record.value()));
             redis.opsForList().leftPush(dlqKey, payload);
         } catch (Exception e) {
             log.warn("Failed to push to DLQ: {}", dlqKey, e);
