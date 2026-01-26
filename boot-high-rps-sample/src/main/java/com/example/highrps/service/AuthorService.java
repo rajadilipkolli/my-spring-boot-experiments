@@ -61,18 +61,26 @@ public class AuthorService {
     }
 
     public AuthorResponse findAuthorByEmail(String email) {
-        email = email.toLowerCase(Locale.ROOT);
-        var cached = localCache.getIfPresent(email);
+        var emailKey = email.toLowerCase(Locale.ROOT);
+        try {
+            Boolean deleted = redis.hasKey("deleted:authors:" + emailKey);
+            if (Boolean.TRUE.equals(deleted)) {
+                throw new ResourceNotFoundException("Author not found for email: " + email);
+            }
+        } catch (Exception e) {
+            log.warn("Failed to check tombstone for email {}, proceeding with lookup", email, e);
+        }
+        var cached = localCache.getIfPresent(emailKey);
         if (cached != null) {
             log.info("findAuthorByEmail: hit local cache for email={}", email);
             return AuthorResponse.fromJson(cached);
         }
 
         try {
-            var raw = redis.opsForValue().get("authors:" + email);
+            var raw = redis.opsForValue().get("authors:" + emailKey);
             if (raw != null) {
                 log.info("findAuthorByEmail: hit redis for email={}", email);
-                localCache.put(email, raw);
+                localCache.put(emailKey, raw);
                 return AuthorResponse.fromJson(raw);
             }
         } catch (Exception e) {
@@ -80,12 +88,16 @@ public class AuthorService {
         }
 
         try {
-            AuthorRequest cachedRequest = getKeyValueStore().get(email);
+            AuthorRequest cachedRequest = getKeyValueStore().get(emailKey);
             if (cachedRequest != null) {
                 AuthorResponse response = authorRequestToResponseMapper.mapToAuthorResponse(cachedRequest);
                 var json = AuthorResponse.toJson(response);
-                localCache.put(email, json);
-                redis.opsForValue().set("authors:" + email, json);
+                localCache.put(emailKey, json);
+                try {
+                    redis.opsForValue().set("authors:" + emailKey, json);
+                } catch (Exception re) {
+                    log.warn("Failed to update Redis for email {} after Streams lookup", email, re);
+                }
                 return response;
             }
         } catch (Exception e) {
@@ -130,8 +142,7 @@ public class AuthorService {
     public void deleteAuthor(String email) {
 
         var emailKey = email.toLowerCase(Locale.ROOT);
-        // Publish tombstone to the per-entity aggregates topic so Streams/materializers
-        // see the delete
+        // Wait for publish completion so downstream processing observes a successful send
         var deleteForEntity = kafkaProducerService.publishDeleteForEntity("author", emailKey);
         processFuture(email, deleteForEntity);
 
@@ -209,9 +220,20 @@ public class AuthorService {
 
     public boolean emailExists(String email) {
         var emailKey = email.toLowerCase(Locale.ROOT);
-        return localCache.getIfPresent(emailKey) != null
-                || redis.opsForValue().get("authors:" + emailKey) != null
-                || getKeyValueStore().get(emailKey) != null
-                || authorRepository.existsByEmailIgnoreCase(email);
+        // resilience pattern
+        try {
+            if (localCache.getIfPresent(emailKey) != null) {
+                return true;
+            }
+            if (redis.opsForValue().get("authors:" + emailKey) != null) {
+                return true;
+            }
+            if (getKeyValueStore().get(emailKey) != null) {
+                return true;
+            }
+        } catch (Exception e) {
+            log.warn("Cache/streams lookup failed for email {}, falling back to DB", email, e);
+        }
+        return authorRepository.existsByEmailIgnoreCase(email);
     }
 }

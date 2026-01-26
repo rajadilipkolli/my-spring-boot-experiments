@@ -62,6 +62,50 @@ public class PostService {
         this.appProperties = appProperties;
     }
 
+    public PostResponse findPostByTitle(String title) {
+        // 1) Local cache
+        try {
+            Boolean deleted = redis.hasKey("deleted:posts:" + title);
+            if (Boolean.TRUE.equals(deleted)) {
+                throw new ResourceNotFoundException("Post not found for title: " + title);
+            }
+        } catch (Exception e) {
+            log.warn("Failed to check tombstone for title {}, proceeding with lookup", title, e);
+        }
+        var cached = localCache.getIfPresent(title);
+        if (cached != null) {
+            log.info("findPostByTitle: hit local cache for title={}", title);
+            return PostResponse.fromJson(cached);
+        }
+
+        // 2) Redis materialized view
+        var raw = redis.opsForValue().get("posts:" + title);
+        if (raw != null) {
+            log.info("findPostByTitle: hit redis for title={}", title);
+            localCache.put(title, raw);
+            return PostResponse.fromJson(raw);
+        }
+
+        try {
+            NewPostRequest cachedRequest = getKeyValueStore().get(title);
+            if (cachedRequest != null) {
+                PostResponse response = postRequestToResponseMapper.mapToPostResponse(cachedRequest);
+                var json = PostResponse.toJson(response);
+                localCache.put(title, json);
+                try {
+                    redis.opsForValue().set("posts:" + title, json);
+                } catch (Exception re) {
+                    log.warn("Failed to update Redis for title {} after Streams lookup", title, re);
+                }
+                return response;
+            }
+        } catch (Exception e) {
+            log.error("Failed to query Kafka Streams store for title: {}", title, e);
+        }
+
+        throw new ResourceNotFoundException("Post not found for title: " + title);
+    }
+
     public PostResponse saveOrUpdatePost(NewPostRequest newPostRequest) {
         String title = newPostRequest.title();
         if (newPostRequest.published() != null && newPostRequest.published() && newPostRequest.publishedAt() == null) {
@@ -92,36 +136,6 @@ public class PostService {
         }
 
         return postResponse;
-    }
-
-    private void processFuture(CompletableFuture<SendResult<String, EventEnvelope>> future, String title) {
-        try {
-            future.get(appProperties.getPublishTimeOutMs(), TimeUnit.MILLISECONDS);
-        } catch (TimeoutException te) {
-            // Attempt to cancel the send if possible and surface a clear error
-            try {
-                future.cancel(true);
-            } catch (Exception cancelEx) {
-                log.warn("Failed to cancel publish future after timeout for title {}", title, cancelEx);
-            }
-            log.error(
-                    "Timed out waiting for Kafka publish for title {} after {} ms",
-                    title,
-                    appProperties.getPublishTimeOutMs(),
-                    te);
-            throw new IllegalStateException("Timed out publishing post event for title " + title, te);
-        } catch (InterruptedException ie) {
-            Thread.currentThread().interrupt();
-            log.error("Interrupted while waiting for Kafka publish for title {}", title, ie);
-            throw new IllegalStateException("Interrupted while publishing post event for title " + title, ie);
-        } catch (ExecutionException ee) {
-            Throwable cause = ee.getCause() == null ? ee : ee.getCause();
-            log.error("Failed to publish post envelope for title {}", title, cause);
-            throw new IllegalStateException("Failed to publish post event for title " + title, cause);
-        } catch (Exception ex) {
-            log.error("Unexpected error while publishing post envelope for title {}", title, ex);
-            throw new IllegalStateException("Failed to publish post event for title " + title, ex);
-        }
     }
 
     public void deletePost(String title) {
@@ -160,36 +174,34 @@ public class PostService {
         }
     }
 
-    public PostResponse findPostByTitle(String title) {
-        // 1) Local cache
-        var cached = localCache.getIfPresent(title);
-        if (cached != null) {
-            log.info("findPostByTitle: hit local cache for title={}", title);
-            return PostResponse.fromJson(cached);
-        }
-
-        // 2) Redis materialized view
-        var raw = redis.opsForValue().get("posts:" + title);
-        if (raw != null) {
-            log.info("findPostByTitle: hit redis for title={}", title);
-            localCache.put(title, raw);
-            return PostResponse.fromJson(raw);
-        }
-
+    private void processFuture(CompletableFuture<SendResult<String, EventEnvelope>> future, String title) {
         try {
-            NewPostRequest cachedRequest = getKeyValueStore().get(title);
-            if (cachedRequest != null) {
-                PostResponse response = postRequestToResponseMapper.mapToPostResponse(cachedRequest);
-                var json = PostResponse.toJson(response);
-                localCache.put(title, json);
-                redis.opsForValue().set("posts:" + title, json);
-                return response;
+            future.get(appProperties.getPublishTimeOutMs(), TimeUnit.MILLISECONDS);
+        } catch (TimeoutException te) {
+            // Attempt to cancel the send if possible and surface a clear error
+            try {
+                future.cancel(true);
+            } catch (Exception cancelEx) {
+                log.warn("Failed to cancel publish future after timeout for title {}", title, cancelEx);
             }
-        } catch (Exception e) {
-            log.error("Failed to query Kafka Streams store for title: {}", title, e);
+            log.error(
+                    "Timed out waiting for Kafka publish for title {} after {} ms",
+                    title,
+                    appProperties.getPublishTimeOutMs(),
+                    te);
+            throw new IllegalStateException("Timed out publishing post event for title " + title, te);
+        } catch (InterruptedException ie) {
+            Thread.currentThread().interrupt();
+            log.error("Interrupted while waiting for Kafka publish for title {}", title, ie);
+            throw new IllegalStateException("Interrupted while publishing post event for title " + title, ie);
+        } catch (ExecutionException ee) {
+            Throwable cause = ee.getCause() == null ? ee : ee.getCause();
+            log.error("Failed to publish post envelope for title {}", title, cause);
+            throw new IllegalStateException("Failed to publish post event for title " + title, cause);
+        } catch (Exception ex) {
+            log.error("Unexpected error while publishing post envelope for title {}", title, ex);
+            throw new IllegalStateException("Failed to publish post event for title " + title, ex);
         }
-
-        throw new ResourceNotFoundException("Post not found for title: " + title);
     }
 
     private ReadOnlyKeyValueStore<String, NewPostRequest> getKeyValueStore() {
@@ -210,9 +222,19 @@ public class PostService {
     }
 
     public boolean titleExists(String title) {
-        return localCache.getIfPresent(title) != null
-                || redis.opsForValue().get("posts:" + title) != null
-                || getKeyValueStore().get(title) != null
-                || postRepository.existsByTitle(title);
+        try {
+            if (localCache.getIfPresent(title) != null) {
+                return true;
+            }
+            if (redis.opsForValue().get("posts:" + title) != null) {
+                return true;
+            }
+            if (getKeyValueStore().get(title) != null) {
+                return true;
+            }
+        } catch (Exception e) {
+            log.warn("Cache/streams lookup failed for title {}, falling back to DB", title, e);
+        }
+        return postRepository.existsByTitle(title);
     }
 }

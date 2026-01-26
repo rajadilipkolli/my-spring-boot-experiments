@@ -114,6 +114,8 @@ public class AuthorControllerIT extends AbstractIntegrationTest {
         // Assert local cache and redis no longer have the key
         assertThat(localCache.getIfPresent(emailKey)).isNull();
         assertThat(redisTemplate.opsForValue().get("authors:" + emailKey)).isNull();
+        assertThat(redisTemplate.opsForValue().get("deleted:authors:" + emailKey))
+                .isNotNull();
 
         // 4) Subsequent GET should return 404
         await().atMost(Duration.ofSeconds(15))
