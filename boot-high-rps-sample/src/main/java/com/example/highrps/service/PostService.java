@@ -223,6 +223,10 @@ public class PostService {
 
     public boolean titleExists(String title) {
         try {
+            Boolean deleted = redis.hasKey("deleted:posts:" + title);
+            if (Boolean.TRUE.equals(deleted)) {
+                return false;
+            }
             if (localCache.getIfPresent(title) != null) {
                 return true;
             }

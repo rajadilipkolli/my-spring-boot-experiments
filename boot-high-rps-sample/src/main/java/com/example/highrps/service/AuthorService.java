@@ -63,8 +63,13 @@ public class AuthorService {
     public AuthorResponse findAuthorByEmail(String email) {
         var emailKey = email.toLowerCase(Locale.ROOT);
         try {
-            Boolean deleted = redis.hasKey("deleted:authors:" + emailKey);
-            if (Boolean.TRUE.equals(deleted)) {
+            String deletedValue = null;
+            try {
+                deletedValue = redis.opsForValue().get("deleted:authors:" + emailKey);
+            } catch (Exception ex) {
+                log.warn("opsForValue.get failed for deleted marker for email {}: {}", email, ex.getMessage());
+            }
+            if (deletedValue != null) {
                 throw new ResourceNotFoundException("Author not found for email: " + email);
             }
         } catch (Exception e) {
@@ -162,7 +167,7 @@ public class AuthorService {
 
         // Mark deleted in a short-lived Redis set so batch processors skip re-inserts
         try {
-            redis.opsForValue().set("deleted:authors:" + emailKey, "1", Duration.ofSeconds(60));
+            redis.opsForValue().set("deleted:authors:" + emailKey, "1", Duration.ofSeconds(120));
         } catch (Exception ex) {
             log.warn("Failed to mark email {} in deleted:authors set", email, ex);
         }
@@ -222,6 +227,9 @@ public class AuthorService {
         var emailKey = email.toLowerCase(Locale.ROOT);
         // resilience pattern
         try {
+            if (Boolean.TRUE.equals(redis.hasKey("deleted:authors:" + emailKey))) {
+                return false;
+            }
             if (localCache.getIfPresent(emailKey) != null) {
                 return true;
             }

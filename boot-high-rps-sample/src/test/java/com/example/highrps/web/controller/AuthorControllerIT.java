@@ -91,7 +91,7 @@ public class AuthorControllerIT extends AbstractIntegrationTest {
                     assertThat(resp.firstName()).isEqualTo("junit");
                 });
 
-        // Verify caches updated with new content
+        // Verify local cache updated with new content
         String cachedAfter = localCache.getIfPresent(emailKey);
         assertThat(cachedAfter).isNotNull();
         AuthorResponse cachedAfterResponse = AuthorResponse.fromJson(cachedAfter);
@@ -120,6 +120,10 @@ public class AuthorControllerIT extends AbstractIntegrationTest {
         // 4) Subsequent GET should return 404
         await().atMost(Duration.ofSeconds(15))
                 .pollInterval(Duration.ofMillis(500))
+                .conditionEvaluationListener(condition -> {
+                    // Uncomment for debugging pipeline failures
+                    // System.out.println("Polling attempt: " + condition.getElapsedTimeInMS() + "ms");
+                })
                 .untilAsserted(() -> mockMvcTester
                         .get()
                         .uri("/api/author/" + email)
