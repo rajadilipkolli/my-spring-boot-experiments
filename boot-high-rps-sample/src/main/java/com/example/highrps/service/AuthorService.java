@@ -62,18 +62,14 @@ public class AuthorService {
 
     public AuthorResponse findAuthorByEmail(String email) {
         var emailKey = email.toLowerCase(Locale.ROOT);
+        String deletedValue = null;
         try {
-            String deletedValue = null;
-            try {
-                deletedValue = redis.opsForValue().get("deleted:authors:" + emailKey);
-            } catch (Exception ex) {
-                log.warn("opsForValue.get failed for deleted marker for email {}: {}", email, ex.getMessage());
-            }
-            if (deletedValue != null) {
-                throw new ResourceNotFoundException("Author not found for email: " + email);
-            }
-        } catch (Exception e) {
-            log.warn("Failed to check tombstone for email {}, proceeding with lookup", email, e);
+            deletedValue = redis.opsForValue().get("deleted:authors:" + emailKey);
+        } catch (Exception ex) {
+            log.warn("opsForValue.get failed for deleted marker for email {}: {}", email, ex.getMessage());
+        }
+        if (deletedValue != null) {
+            throw new ResourceNotFoundException("Author not found for email: " + email);
         }
         var cached = localCache.getIfPresent(emailKey);
         if (cached != null) {

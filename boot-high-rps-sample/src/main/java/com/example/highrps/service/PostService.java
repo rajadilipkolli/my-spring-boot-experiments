@@ -63,15 +63,12 @@ public class PostService {
     }
 
     public PostResponse findPostByTitle(String title) {
-        // 1) Local cache
-        try {
-            Boolean deleted = redis.hasKey("deleted:posts:" + title);
-            if (Boolean.TRUE.equals(deleted)) {
-                throw new ResourceNotFoundException("Post not found for title: " + title);
-            }
-        } catch (Exception e) {
-            log.warn("Failed to check tombstone for title {}, proceeding with lookup", title, e);
+        // 1a) Tombstone record check in Redis
+        Boolean deleted = redis.hasKey("deleted:posts:" + title);
+        if (Boolean.TRUE.equals(deleted)) {
+            throw new ResourceNotFoundException("Post not found for title: " + title);
         }
+        // 1b) Local cache
         var cached = localCache.getIfPresent(title);
         if (cached != null) {
             log.info("findPostByTitle: hit local cache for title={}", title);

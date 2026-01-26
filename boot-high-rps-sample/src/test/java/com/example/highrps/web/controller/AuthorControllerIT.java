@@ -115,14 +115,15 @@ public class AuthorControllerIT extends AbstractIntegrationTest {
         assertThat(localCache.getIfPresent(emailKey)).isNull();
         assertThat(redisTemplate.opsForValue().get("authors:" + emailKey)).isNull();
         assertThat(redisTemplate.opsForValue().get("deleted:authors:" + emailKey))
-                .isNotNull();
+                .isNotNull()
+                .isEqualTo("1");
 
         // 4) Subsequent GET should return 404
         await().atMost(Duration.ofSeconds(15))
                 .pollInterval(Duration.ofMillis(500))
                 .conditionEvaluationListener(condition -> {
                     // Uncomment for debugging pipeline failures
-                    // System.out.println("Polling attempt: " + condition.getElapsedTimeInMS() + "ms");
+                    System.out.println("Polling attempt: " + condition.getElapsedTimeInMS() + "ms");
                 })
                 .untilAsserted(() -> mockMvcTester
                         .get()
