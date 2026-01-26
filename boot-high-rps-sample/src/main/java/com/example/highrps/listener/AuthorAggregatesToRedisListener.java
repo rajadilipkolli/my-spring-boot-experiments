@@ -49,8 +49,6 @@ public class AuthorAggregatesToRedisListener {
             backOff = @BackOff(delay = 500, multiplier = 2.0),
             topicSuffixingStrategy = TopicSuffixingStrategy.SUFFIX_WITH_INDEX_VALUE)
     public void handleAggregate(ConsumerRecord<String, AuthorRequest> record) {
-        if (record == null) return;
-
         try {
             String key = record.key();
             AuthorRequest payload = record.value();
@@ -83,23 +81,6 @@ public class AuthorAggregatesToRedisListener {
             // Map AuthorRequest to AuthorResponse for Redis storage
             AuthorResponse value = mapper.mapToAuthorResponse(payload);
             var json = AuthorResponse.toJson(value);
-
-            String existing = redis.opsForValue().get(redisKey);
-
-            // Idempotent: if the existing value matches desired value, skip write
-            if (existing != null) {
-                try {
-                    AuthorResponse existingStats = AuthorResponse.fromJson(existing);
-                    if (existingStats.equals(value)) {
-                        return;
-                    }
-                } catch (Exception e) {
-                    log.warn("Failed to parse existing stats for key: {}, will overwrite", key, e);
-                }
-            }
-
-            // Write to Redis
-            redis.opsForValue().set(redisKey, json);
 
             // Enqueue the same payload for asynchronous DB writes
             try {

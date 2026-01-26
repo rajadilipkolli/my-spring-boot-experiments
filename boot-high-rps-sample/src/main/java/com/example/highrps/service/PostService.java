@@ -2,14 +2,15 @@ package com.example.highrps.service;
 
 import com.example.highrps.config.AppProperties;
 import com.example.highrps.exception.ResourceNotFoundException;
-import com.example.highrps.mapper.PostEntityToPostResponse;
 import com.example.highrps.mapper.PostRequestToResponseMapper;
+import com.example.highrps.model.request.EventEnvelope;
 import com.example.highrps.model.request.NewPostRequest;
 import com.example.highrps.model.response.PostResponse;
 import com.example.highrps.repository.PostRepository;
 import com.github.benmanes.caffeine.cache.Cache;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -22,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.kafka.config.StreamsBuilderFactoryBean;
+import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
@@ -34,7 +36,6 @@ public class PostService {
     private final Cache<String, String> localCache;
     private final RedisTemplate<String, String> redis;
     private final PostRequestToResponseMapper postRequestToResponseMapper;
-    private final PostEntityToPostResponse postEntityToPostResponse;
     private final StreamsBuilderFactoryBean kafkaStreamsFactory;
     private final PostRepository postRepository;
     private final AppProperties appProperties;
@@ -49,7 +50,6 @@ public class PostService {
             Cache<String, String> localCache,
             RedisTemplate<String, String> redis,
             PostRequestToResponseMapper postRequestToResponseMapper,
-            PostEntityToPostResponse postEntityToPostResponse,
             StreamsBuilderFactoryBean kafkaStreamsFactory,
             PostRepository postRepository,
             AppProperties appProperties) {
@@ -57,15 +57,55 @@ public class PostService {
         this.localCache = localCache;
         this.redis = redis;
         this.postRequestToResponseMapper = postRequestToResponseMapper;
-        this.postEntityToPostResponse = postEntityToPostResponse;
         this.kafkaStreamsFactory = kafkaStreamsFactory;
         this.postRepository = postRepository;
         this.appProperties = appProperties;
     }
 
+    public PostResponse findPostByTitle(String title) {
+        // 1a) Tombstone record check in Redis
+        Boolean deleted = redis.hasKey("deleted:posts:" + title);
+        if (Boolean.TRUE.equals(deleted)) {
+            throw new ResourceNotFoundException("Post not found for title: " + title);
+        }
+        // 1b) Local cache
+        var cached = localCache.getIfPresent(title);
+        if (cached != null) {
+            log.info("findPostByTitle: hit local cache for title={}", title);
+            return PostResponse.fromJson(cached);
+        }
+
+        // 2) Redis materialized view
+        var raw = redis.opsForValue().get("posts:" + title);
+        if (raw != null) {
+            log.info("findPostByTitle: hit redis for title={}", title);
+            localCache.put(title, raw);
+            return PostResponse.fromJson(raw);
+        }
+
+        try {
+            NewPostRequest cachedRequest = getKeyValueStore().get(title);
+            if (cachedRequest != null) {
+                PostResponse response = postRequestToResponseMapper.mapToPostResponse(cachedRequest);
+                var json = PostResponse.toJson(response);
+                localCache.put(title, json);
+                try {
+                    redis.opsForValue().set("posts:" + title, json);
+                } catch (Exception re) {
+                    log.warn("Failed to update Redis for title {} after Streams lookup", title, re);
+                }
+                return response;
+            }
+        } catch (Exception e) {
+            log.error("Failed to query Kafka Streams store for title: {}", title, e);
+        }
+
+        throw new ResourceNotFoundException("Post not found for title: " + title);
+    }
+
     public PostResponse saveOrUpdatePost(NewPostRequest newPostRequest) {
         String title = newPostRequest.title();
-        if (newPostRequest.published() != null && newPostRequest.published()) {
+        if (newPostRequest.published() != null && newPostRequest.published() && newPostRequest.publishedAt() == null) {
             newPostRequest = newPostRequest.withPublishedAt(LocalDateTime.now());
         }
 
@@ -76,6 +116,62 @@ public class PostService {
         // Publish envelope and wait for the send to complete. Only after a successful send
         // do we populate the local cache and return the response.
         var future = kafkaProducerService.publishEnvelope("post", title, newPostRequest);
+        processFuture(future, title);
+
+        // Only populate local cache after successful publish. Cache update is best-effort.
+        try {
+            localCache.put(title, json);
+        } catch (Exception e) {
+            log.warn("Failed to update local cache for title after successful publish: {}", title, e);
+        }
+
+        // perform an eager Redis write (listener remains source of truth for DB queue).
+        try {
+            redis.opsForValue().set("posts:" + title, json);
+        } catch (Exception e) {
+            log.warn("Eager redis write failed for title {} (listener will still populate redis)", title, e);
+        }
+
+        return postResponse;
+    }
+
+    public void deletePost(String title) {
+
+        // 1) Publish tombstone to per-entity aggregates topic so Streams materialized KTable sees the delete
+        try {
+            var deleteForEntity = kafkaProducerService.publishDeleteForEntity("post", title);
+            processFuture(deleteForEntity, title);
+            log.info("deletePost: published tombstone for title={}", title);
+        } catch (Exception e) {
+            log.warn("Failed to publish delete event for title: {}", title, e);
+        }
+
+        // 2) Mark deletion in local cache so reads return absent immediately
+        try {
+            localCache.invalidate(title);
+            log.info("deletePost: invalidated local cache for title={}", title);
+        } catch (Exception e) {
+            log.warn("Failed to mark local cache deletion for title: {}", title, e);
+        }
+
+        // 3) Remove from Redis
+        try {
+            redis.opsForValue().getAndDelete("posts:" + title);
+            log.info("deletePost: removed redis key for title={}", title);
+        } catch (Exception e) {
+            log.warn("Failed to delete redis key for title: {}", title, e);
+        }
+
+        // 4b) Mark deleted in a short-lived Redis set so batch processors skip re-inserts
+        try {
+            // Use per-title key so each deletion has independent TTL
+            redis.opsForValue().set("deleted:posts:" + title, "1", Duration.ofSeconds(60));
+        } catch (Exception ex) {
+            log.warn("Failed to mark title {} in deleted:posts set", title, ex);
+        }
+    }
+
+    private void processFuture(CompletableFuture<SendResult<String, EventEnvelope>> future, String title) {
         try {
             future.get(appProperties.getPublishTimeOutMs(), TimeUnit.MILLISECONDS);
         } catch (TimeoutException te) {
@@ -103,102 +199,6 @@ public class PostService {
             log.error("Unexpected error while publishing post envelope for title {}", title, ex);
             throw new IllegalStateException("Failed to publish post event for title " + title, ex);
         }
-
-        // Only populate local cache after successful publish. Cache update is best-effort.
-        try {
-            localCache.put(title, json);
-        } catch (Exception e) {
-            log.warn("Failed to update local cache for title after successful publish: {}", title, e);
-        }
-
-        return postResponse;
-    }
-
-    public void deletePost(String title) {
-        // 1) Mark deletion in local cache so reads return absent immediately
-        try {
-            localCache.invalidate(title);
-            log.info("deletePost: invalidated local cache for title={}", title);
-        } catch (Exception e) {
-            log.warn("Failed to mark local cache deletion for title: {}", title, e);
-        }
-
-        // 2) Remove from Redis
-        try {
-            redis.opsForValue().getAndDelete("posts:" + title);
-            log.info("deletePost: removed redis key for title={}", title);
-        } catch (Exception e) {
-            log.warn("Failed to delete redis key for title: {}", title, e);
-        }
-
-        // 3) Remove from persistent storage (if present) BEFORE publishing tombstone
-        try {
-            if (postRepository.existsByTitle(title)) {
-                log.info("Deleting post entity from DB for title: {}", title);
-                postRepository.deleteByTitle(title);
-            } else {
-                log.info("deletePost: no DB entity found for title={}", title);
-            }
-        } catch (Exception e) {
-            log.warn("Failed to query or delete DB entity for title: {}", title, e);
-        }
-
-        // 4) Publish tombstone to per-entity aggregates topic so Streams materialized KTable sees the delete
-        try {
-            kafkaProducerService.publishDeleteForEntity("post", title);
-            log.info("deletePost: published tombstone for title={}", title);
-        } catch (Exception e) {
-            log.warn("Failed to publish delete event for title: {}", title, e);
-        }
-
-        // 4b) Mark deleted in a short-lived Redis set so batch processors skip re-inserts
-        try {
-            // Use per-title key so each deletion has independent TTL
-            redis.opsForValue().set("deleted:posts:" + title, "1", Duration.ofSeconds(60));
-        } catch (Exception ex) {
-            log.warn("Failed to mark title {} in deleted:posts set", title, ex);
-        }
-    }
-
-    public PostResponse findPostByTitle(String title) {
-        // 1) Local cache
-        var cached = localCache.getIfPresent(title);
-        if (cached != null) {
-            log.info("findPostByTitle: hit local cache for title={}", title);
-            return PostResponse.fromJson(cached);
-        }
-
-        // 2) Redis materialized view
-        var raw = redis.opsForValue().get("posts:" + title);
-        if (raw != null) {
-            log.info("findPostByTitle: hit redis for title={}", title);
-            localCache.put(title, raw);
-            return PostResponse.fromJson(raw);
-        }
-
-        try {
-            NewPostRequest cachedRequest = getKeyValueStore().get(title);
-            if (cachedRequest != null) {
-                PostResponse response = postRequestToResponseMapper.mapToPostResponse(cachedRequest);
-                var json = PostResponse.toJson(response);
-                localCache.put(title, json);
-                redis.opsForValue().set("posts:" + title, json);
-                return response;
-            }
-        } catch (Exception e) {
-            log.error("Failed to query Kafka Streams store for title: {}", title, e);
-        }
-
-        return postRepository
-                .findByTitle(title)
-                .map(postEntityToPostResponse::convert)
-                .map(response -> {
-                    var json = PostResponse.toJson(response);
-                    localCache.put(title, json);
-                    redis.opsForValue().set("posts:" + title, json);
-                    return response;
-                })
-                .orElseThrow(() -> new ResourceNotFoundException("Post not found for title: " + title));
     }
 
     private ReadOnlyKeyValueStore<String, NewPostRequest> getKeyValueStore() {
@@ -218,10 +218,24 @@ public class PostService {
         return keyValueStore;
     }
 
-    public boolean isTitleAvailable(String title) {
-        return localCache.getIfPresent(title) != null
-                || redis.opsForValue().get("posts:" + title) != null
-                || getKeyValueStore().get(title) != null
-                || postRepository.existsByTitle(title);
+    public boolean titleExists(String title) {
+        try {
+            Boolean deleted = redis.hasKey("deleted:posts:" + title);
+            if (Boolean.TRUE.equals(deleted)) {
+                return false;
+            }
+            if (localCache.getIfPresent(title) != null) {
+                return true;
+            }
+            if (redis.opsForValue().get("posts:" + title) != null) {
+                return true;
+            }
+            if (getKeyValueStore().get(title) != null) {
+                return true;
+            }
+        } catch (Exception e) {
+            log.warn("Cache/streams lookup failed for title {}, falling back to DB", title, e);
+        }
+        return postRepository.existsByTitle(title);
     }
 }

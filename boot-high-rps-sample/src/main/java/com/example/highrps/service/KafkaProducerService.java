@@ -55,13 +55,15 @@ public class KafkaProducerService {
     /**
      * Publish a tombstone to the per-entity aggregates topic for the given entity/key.
      * This ensures the per-entity aggregate listeners receive the tombstone and can delete their materialized view.
+     *
+     * @return a future that completes when the send succeeds/fails
      */
-    public void publishDeleteForEntity(String entity, String key) {
+    public CompletableFuture<SendResult<String, EventEnvelope>> publishDeleteForEntity(String entity, String key) {
         String topic = ENTITY_TOPICS.get(entity);
         if (topic == null) {
             throw new IllegalArgumentException("Unknown entity type: " + entity);
         }
-        publishDeleteToTopic(topic, key);
+        return publishDeleteToTopic(topic, key);
     }
 
     /**
@@ -76,8 +78,6 @@ public class KafkaProducerService {
                 .whenComplete((result, ex) -> {
                     if (ex != null) {
                         log.error("Failed to publish event to topic {} for key {}", topic, key, ex);
-                        throw new IllegalStateException(
-                                "Failed to publish to topic %s event for key %s ".formatted(topic, key), ex);
                     } else if (result != null) {
                         log.debug(
                                 "Published event to topic {} partition {} offset {} for key {}",

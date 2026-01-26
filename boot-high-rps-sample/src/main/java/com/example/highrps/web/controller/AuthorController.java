@@ -4,6 +4,7 @@ import com.example.highrps.model.request.AuthorRequest;
 import com.example.highrps.model.response.AuthorResponse;
 import com.example.highrps.service.AuthorService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import java.net.URI;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -21,7 +22,7 @@ public class AuthorController {
     }
 
     @GetMapping("/author/{email}")
-    public ResponseEntity<AuthorResponse> getAuthorByUsername(@PathVariable String email) {
+    public ResponseEntity<AuthorResponse> getAuthorByEmail(@PathVariable String email) {
         AuthorResponse resp = authorService.findAuthorByEmail(email);
         return ResponseEntity.ok(resp);
     }
@@ -39,7 +40,7 @@ public class AuthorController {
     @PutMapping(value = "/author/{email}")
     public ResponseEntity<AuthorResponse> updateAuthor(
             @PathVariable String email, @RequestBody @Valid AuthorRequest newAuthorRequest) {
-        if (!email.equals(newAuthorRequest.email()) && !authorService.isEmailAvailable(email)) {
+        if (!email.equals(newAuthorRequest.email()) && !authorService.emailExists(email)) {
             return ResponseEntity.badRequest().build();
         }
         AuthorResponse resp = authorService.saveOrUpdateAuthor(newAuthorRequest);
@@ -47,7 +48,7 @@ public class AuthorController {
     }
 
     @DeleteMapping("/author/{email}")
-    public ResponseEntity<Void> deleteAuthor(@PathVariable String email) {
+    public ResponseEntity<Void> deleteAuthor(@PathVariable @NotBlank String email) {
         authorService.deleteAuthor(email);
         return ResponseEntity.noContent().build();
     }
