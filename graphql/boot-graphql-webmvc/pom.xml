@@ -21,7 +21,7 @@
 
         <java.version>25</java.version>
         <springdoc-openapi.version>3.0.1</springdoc-openapi.version>
-        <datasource-micrometer-boot.version>2.0.1</datasource-micrometer-boot.version>
+        <datasource-micrometer-boot.version>2.1.0</datasource-micrometer-boot.version>
         <org.mapstruct.extensions.spring.version>2.0.0</org.mapstruct.extensions.spring.version>
         <org.mapstruct.version>1.6.3</org.mapstruct.version>
 
