@@ -153,7 +153,7 @@ class ActorControllerIT extends AbstractIntegrationTest {
     }
 
     @Test
-    void shouldReturn400WhenCreateNewActorWithoutText() throws Exception {
+    void shouldReturn400WhenCreateNewActorWithoutName() throws Exception {
         ActorRequest actorRequest = new ActorRequest(null);
 
         this.mockMvc
@@ -162,7 +162,7 @@ class ActorControllerIT extends AbstractIntegrationTest {
                         .content(objectMapper.writeValueAsString(actorRequest)))
                 .andExpect(status().isBadRequest())
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
-                .andExpect(jsonPath("$.type", is("about:blank")))
+                .andExpect(jsonPath("$.type", is("http://api.boot-data-keyset-pagination.com/errors/validation-error")))
                 .andExpect(jsonPath("$.title", is("Constraint Violation")))
                 .andExpect(jsonPath("$.status", is(400)))
                 .andExpect(jsonPath("$.detail", is("Invalid request content.")))

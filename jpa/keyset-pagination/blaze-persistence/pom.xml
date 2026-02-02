@@ -85,7 +85,7 @@
         </dependency>
         <dependency>
             <groupId>com.blazebit</groupId>
-            <artifactId>blaze-persistence-integration-spring-data-3.4</artifactId>
+            <artifactId>blaze-persistence-integration-spring-data-4.0</artifactId>
             <scope>compile</scope>
             <version>${blaze-persistence.version}</version>
         </dependency>
