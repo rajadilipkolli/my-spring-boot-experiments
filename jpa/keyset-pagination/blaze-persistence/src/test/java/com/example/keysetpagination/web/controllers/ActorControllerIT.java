@@ -17,7 +17,6 @@ import com.example.keysetpagination.entities.Actor;
 import com.example.keysetpagination.model.request.ActorRequest;
 import com.example.keysetpagination.model.response.PagedResult;
 import com.example.keysetpagination.repositories.ActorRepository;
-import com.fasterxml.jackson.core.type.TypeReference;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import tools.jackson.core.type.TypeReference;
 
 class ActorControllerIT extends AbstractIntegrationTest {
 
@@ -153,7 +153,7 @@ class ActorControllerIT extends AbstractIntegrationTest {
     }
 
     @Test
-    void shouldReturn400WhenCreateNewActorWithoutText() throws Exception {
+    void shouldReturn400WhenCreateNewActorWithoutName() throws Exception {
         ActorRequest actorRequest = new ActorRequest(null);
 
         this.mockMvc
@@ -162,7 +162,7 @@ class ActorControllerIT extends AbstractIntegrationTest {
                         .content(objectMapper.writeValueAsString(actorRequest)))
                 .andExpect(status().isBadRequest())
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
-                .andExpect(jsonPath("$.type", is("about:blank")))
+                .andExpect(jsonPath("$.type", is("http://api.boot-data-keyset-pagination.com/errors/validation-error")))
                 .andExpect(jsonPath("$.title", is("Constraint Violation")))
                 .andExpect(jsonPath("$.status", is(400)))
                 .andExpect(jsonPath("$.detail", is("Invalid request content.")))
