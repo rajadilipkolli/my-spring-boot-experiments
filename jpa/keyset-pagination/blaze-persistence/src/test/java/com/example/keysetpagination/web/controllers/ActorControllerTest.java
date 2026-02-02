@@ -20,19 +20,19 @@ import com.example.keysetpagination.exception.ActorNotFoundException;
 import com.example.keysetpagination.model.request.ActorRequest;
 import com.example.keysetpagination.model.response.ActorResponse;
 import com.example.keysetpagination.services.ActorService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.LocalDate;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import tools.jackson.databind.ObjectMapper;
 
 @WebMvcTest(controllers = ActorController.class)
 @ActiveProfiles(PROFILE_TEST)
@@ -105,7 +105,8 @@ class ActorControllerTest {
                             .content(objectMapper.writeValueAsString(actorRequest)))
                     .andExpect(status().isBadRequest())
                     .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is("application/problem+json")))
-                    .andExpect(jsonPath("$.type", is("about:blank")))
+                    .andExpect(jsonPath(
+                            "$.type", is("http://api.boot-data-keyset-pagination.com/errors/validation-error")))
                     .andExpect(jsonPath("$.title", is("Constraint Violation")))
                     .andExpect(jsonPath("$.status", is(400)))
                     .andExpect(jsonPath("$.detail", is("Invalid request content.")))

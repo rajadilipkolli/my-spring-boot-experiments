@@ -17,7 +17,6 @@ import com.example.keysetpagination.entities.Actor;
 import com.example.keysetpagination.model.request.ActorRequest;
 import com.example.keysetpagination.model.response.PagedResult;
 import com.example.keysetpagination.repositories.ActorRepository;
-import com.fasterxml.jackson.core.type.TypeReference;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import tools.jackson.core.type.TypeReference;
 
 class ActorControllerIT extends AbstractIntegrationTest {
 
