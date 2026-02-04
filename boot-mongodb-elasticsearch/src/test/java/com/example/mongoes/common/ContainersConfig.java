@@ -16,7 +16,7 @@ public class ContainersConfig {
     @Bean
     @RestartScope
     ElasticsearchContainer elasticsearchContainer() {
-        return new ElasticsearchContainer("docker.elastic.co/elasticsearch/elasticsearch:9.2.3")
+        return new ElasticsearchContainer("docker.elastic.co/elasticsearch/elasticsearch:9.3.0")
                 .withEnv(Map.of("xpack.security.enabled", "false"));
     }
 
@@ -24,6 +24,6 @@ public class ContainersConfig {
     @Bean
     @RestartScope
     MongoDBContainer mongoDBContainer() {
-        return new MongoDBContainer(DockerImageName.parse("mongo").withTag("8.2.2")).withSharding();
+        return new MongoDBContainer(DockerImageName.parse("mongo").withTag("8.2.4")).withSharding();
     }
 }
