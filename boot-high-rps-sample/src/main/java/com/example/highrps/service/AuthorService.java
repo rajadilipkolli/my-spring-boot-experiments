@@ -236,7 +236,9 @@ public class AuthorService {
             if (redis.opsForValue().get("authors:" + emailKey) != null) {
                 return true;
             }
-            if (getKeyValueStore().get(emailKey) != null) {
+            AuthorRequest cachedRequest = requestCoalescer.subscribe(
+                    emailKey, () -> getKeyValueStore().get(emailKey));
+            if (cachedRequest != null) {
                 return true;
             }
         } catch (Exception e) {

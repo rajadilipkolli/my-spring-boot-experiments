@@ -234,7 +234,9 @@ public class PostService {
             if (redis.opsForValue().get("posts:" + title) != null) {
                 return true;
             }
-            if (getKeyValueStore().get(title) != null) {
+            NewPostRequest cachedRequest =
+                    requestCoalescer.subscribe(title, () -> getKeyValueStore().get(title));
+            if (cachedRequest != null) {
                 return true;
             }
         } catch (Exception e) {
