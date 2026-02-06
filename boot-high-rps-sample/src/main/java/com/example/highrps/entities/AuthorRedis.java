@@ -1,5 +1,6 @@
 package com.example.highrps.entities;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import org.springframework.data.annotation.Id;
@@ -7,6 +8,9 @@ import org.springframework.data.redis.core.RedisHash;
 
 @RedisHash("authors:entity")
 public class AuthorRedis extends Auditable implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     @Id
     private String email;

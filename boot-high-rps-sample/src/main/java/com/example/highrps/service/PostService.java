@@ -1,12 +1,14 @@
 package com.example.highrps.service;
 
 import com.example.highrps.config.AppProperties;
+import com.example.highrps.entities.PostRedis;
 import com.example.highrps.exception.ResourceNotFoundException;
 import com.example.highrps.mapper.PostRequestToResponseMapper;
 import com.example.highrps.model.request.EventEnvelope;
 import com.example.highrps.model.request.NewPostRequest;
 import com.example.highrps.model.response.PostResponse;
 import com.example.highrps.repository.jpa.PostRepository;
+import com.example.highrps.repository.redis.PostRedisRepository;
 import com.example.highrps.utility.RequestCoalescer;
 import com.github.benmanes.caffeine.cache.Cache;
 import io.micrometer.core.instrument.Counter;
@@ -41,6 +43,7 @@ public class PostService {
     private final PostRequestToResponseMapper postRequestToResponseMapper;
     private final StreamsBuilderFactoryBean kafkaStreamsFactory;
     private final PostRepository postRepository;
+    private final PostRedisRepository postRedisRepository;
     private final AppProperties appProperties;
     private final RequestCoalescer<NewPostRequest> requestCoalescer;
     private final Counter eventsPublishedCounter;
@@ -58,6 +61,7 @@ public class PostService {
             PostRequestToResponseMapper postRequestToResponseMapper,
             StreamsBuilderFactoryBean kafkaStreamsFactory,
             PostRepository postRepository,
+            PostRedisRepository postRedisRepository,
             AppProperties appProperties,
             MeterRegistry meterRegistry) {
         this.kafkaProducerService = kafkaProducerService;
@@ -66,6 +70,7 @@ public class PostService {
         this.postRequestToResponseMapper = postRequestToResponseMapper;
         this.kafkaStreamsFactory = kafkaStreamsFactory;
         this.postRepository = postRepository;
+        this.postRedisRepository = postRedisRepository;
         this.appProperties = appProperties;
         this.requestCoalescer = new RequestCoalescer<>();
 
@@ -135,11 +140,7 @@ public class PostService {
         processFuture(future, title);
 
         // increment events counter after successful publish
-        try {
-            eventsPublishedCounter.increment();
-        } catch (Exception e) {
-            log.warn("Failed to increment eventsPublishedCounter", e);
-        }
+        eventsPublishedCounter.increment();
 
         // Only populate local cache after successful publish. Cache update is best-effort.
         try {
@@ -148,11 +149,16 @@ public class PostService {
             log.warn("Failed to update local cache for title after successful publish: {}", title, e);
         }
 
-        // perform an eager Redis write (listener remains source of truth for DB queue).
+        // perform an eager repository write so batch/JPA processors can read repository-backed entries
         try {
-            redis.opsForValue().set("posts:" + title, json);
+            PostRedis pr = new PostRedis()
+                    .setTitle(title)
+                    .setContent(postResponse.content())
+                    .setPublished(postResponse.published())
+                    .setPublishedAt(postResponse.publishedAt());
+            postRedisRepository.save(pr);
         } catch (Exception e) {
-            log.warn("Eager redis write failed for title {} (listener will still populate redis)", title, e);
+            log.warn("Eager redis repository write failed for title {} (listener will still populate redis)", title, e);
         }
 
         return postResponse;
@@ -165,15 +171,10 @@ public class PostService {
             var deleteForEntity = kafkaProducerService.publishDeleteForEntity("post", title);
             processFuture(deleteForEntity, title);
             log.info("deletePost: published tombstone for title={}", title);
-        } catch (Exception e) {
-            log.warn("Failed to publish delete event for title: {}", title, e);
-        }
-
-        // increment tombstone counter after successful publish
-        try {
+            // increment tombstone counter after successful publish
             tombstonesPublishedCounter.increment();
         } catch (Exception e) {
-            log.warn("Failed to increment tombstonesPublishedCounter", e);
+            log.warn("Failed to publish delete event for title: {}", title, e);
         }
 
         // 2) Mark deletion in local cache so reads return absent immediately
@@ -184,12 +185,14 @@ public class PostService {
             log.warn("Failed to mark local cache deletion for title: {}", title, e);
         }
 
-        // 3) Remove from Redis
+        // 3) Remove from Redis so reads return absent immediately and batch processors don't re-populate from
+        // repository
+
+        // delete repository entry as well
         try {
-            redis.opsForValue().getAndDelete("posts:" + title);
-            log.info("deletePost: removed redis key for title={}", title);
+            postRedisRepository.deleteById(title);
         } catch (Exception e) {
-            log.warn("Failed to delete redis key for title: {}", title, e);
+            log.warn("Failed to delete redis repository entry for title: {}", title, e);
         }
 
         // 4b) Mark deleted in a short-lived Redis set so batch processors skip re-inserts
@@ -257,7 +260,7 @@ public class PostService {
             if (localCache.getIfPresent(title) != null) {
                 return true;
             }
-            if (redis.opsForValue().get("posts:" + title) != null) {
+            if (postRedisRepository.findById(title).isPresent()) {
                 return true;
             }
             NewPostRequest cachedRequest =

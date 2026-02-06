@@ -99,7 +99,7 @@ public class AuthorService {
             return AuthorResponse.fromJson(cached);
         }
 
-        Optional<AuthorRedis> byId = authorRedisRepository.findById(email);
+        Optional<AuthorRedis> byId = authorRedisRepository.findById(emailKey);
         if (byId.isPresent()) {
             log.info("findAuthorByEmail: hit Redis repository for email={}", email);
             AuthorRedis ar = byId.get();
@@ -289,7 +289,7 @@ public class AuthorService {
             if (localCache.getIfPresent(emailKey) != null) {
                 return true;
             }
-            if (redis.opsForValue().get("authors:" + emailKey) != null) {
+            if (authorRedisRepository.findById(email).isPresent()) {
                 return true;
             }
             AuthorRequest cachedRequest = requestCoalescer.subscribe(

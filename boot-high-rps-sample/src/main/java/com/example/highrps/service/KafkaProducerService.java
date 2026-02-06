@@ -37,9 +37,9 @@ public class KafkaProducerService {
         this.kafkaTemplate = kafkaTemplate;
         this.mapper = mapper;
         this.meterRegistry = meterRegistry;
-        // base counters (global)
-        this.eventsPublishedCounter = meterRegistry.counter("app.kafka.events.published");
-        this.tombstonesPublishedCounter = meterRegistry.counter("app.kafka.tombstones.published");
+        // base counters (global) - include a topic tag with value 'all' so tag keys match per-topic counters
+        this.eventsPublishedCounter = meterRegistry.counter("app.kafka.events.published", "topic", "all");
+        this.tombstonesPublishedCounter = meterRegistry.counter("app.kafka.tombstones.published", "topic", "all");
     }
 
     /**

@@ -6,6 +6,7 @@ import com.example.highrps.repository.jpa.PostRepository;
 import com.example.highrps.repository.jpa.PostTagRepository;
 import com.example.highrps.repository.jpa.TagRepository;
 import com.example.highrps.repository.redis.AuthorRedisRepository;
+import com.example.highrps.repository.redis.PostRedisRepository;
 import com.github.benmanes.caffeine.cache.Cache;
 import io.micrometer.core.instrument.MeterRegistry;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,4 +48,7 @@ public abstract class AbstractIntegrationTest {
 
     @Autowired
     protected AuthorRedisRepository authorRedisRepository;
+
+    @Autowired
+    protected PostRedisRepository postRedisRepository;
 }

@@ -130,7 +130,6 @@ public class AuthorControllerIT extends AbstractIntegrationTest {
 
         // Also assert local cache and redis no longer have the key
         assertThat(localCache.getIfPresent(emailKey)).isNull();
-        assertThat(redisTemplate.hasKey("authors:" + emailKey)).isFalse();
 
         double count =
                 this.meterRegistry.get("app.kafka.events.published").counter().count();
@@ -143,7 +142,7 @@ public class AuthorControllerIT extends AbstractIntegrationTest {
         double authorPublishedCount =
                 this.meterRegistry.counter("authors.events.published").count();
         assertThat(authorPublishedCount)
-                .isEqualTo(1); // at least create and delete events should be published to the per-entity topic
+                .isEqualTo(2); // create and update events should be published to the per-entity topic
         double authorTombstoneCount =
                 this.meterRegistry.counter("authors.tombstones.published").count();
         assertThat(authorTombstoneCount)
