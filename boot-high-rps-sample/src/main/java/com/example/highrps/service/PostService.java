@@ -114,12 +114,7 @@ public class PostService {
                 var json = PostResponse.toJson(response);
                 localCache.put(title, json);
                 try {
-                    PostRedis pr = new PostRedis()
-                            .setTitle(title)
-                            .setContent(response.content())
-                            .setPublished(response.published())
-                            .setPublishedAt(response.publishedAt());
-                    postRedisRepository.save(pr);
+                    postRedisRepository.save(postRedisRepository.save(toPostRedis(title, cachedRequest)));
                 } catch (Exception re) {
                     log.warn("Failed to update Redis for title {} after Streams lookup", title, re);
                 }
@@ -138,18 +133,21 @@ public class PostService {
             newPostRequest = newPostRequest.withPublishedAt(LocalDateTime.now());
         }
 
-        // Build the response now so we can return it after successful publish
-        PostResponse postResponse = postRequestToResponseMapper.mapToPostResponse(newPostRequest);
-        String json = PostResponse.toJson(postResponse);
-
         // Publish envelope and wait for the send to complete. Only after a successful send
         // do we populate the local cache and return the response.
         var future = kafkaProducerService.publishEnvelope("post", title, newPostRequest);
         processFuture(future, title);
 
         // increment events counter after successful publish
-        eventsPublishedCounter.increment();
+        try {
+            eventsPublishedCounter.increment();
+        } catch (Exception e) {
+            log.warn("Failed to increment eventsPublishedCounter", e);
+        }
 
+        // Build the response now so we can return it after successful publish
+        PostResponse postResponse = postRequestToResponseMapper.mapToPostResponse(newPostRequest);
+        String json = PostResponse.toJson(postResponse);
         // Only populate local cache after successful publish. Cache update is best-effort.
         try {
             localCache.put(title, json);
@@ -159,18 +157,27 @@ public class PostService {
 
         // perform an eager repository write so batch/JPA processors can read repository-backed entries
         try {
-            PostRedis pr = new PostRedis()
-                    .setTitle(title)
-                    .setContent(postResponse.content())
-                    .setPublished(postResponse.published())
-                    .setPublishedAt(postResponse.publishedAt())
-                    .setAuthorEmail(newPostRequest.email());
-            postRedisRepository.save(pr);
+            postRedisRepository.save(toPostRedis(title, newPostRequest));
         } catch (Exception e) {
             log.warn("Eager redis repository write failed for title {} (listener will still populate redis)", title, e);
         }
 
         return postResponse;
+    }
+
+    /**
+     * Update helper that encapsulates the controller logic so the controller only needs a
+     * single service call. Preserves existing behavior: if the path title does not match
+     * the request title and the original path title does not exist, a bad-request condition
+     * is signaled by throwing IllegalArgumentException.
+     */
+    public PostResponse updatePost(String pathTitle, NewPostRequest newPostRequest) {
+        if (!pathTitle.equals(newPostRequest.title()) && !titleExists(pathTitle)) {
+            throw new IllegalArgumentException("Path title does not match request title and original title not found");
+        }
+        NewPostRequest withModifiedAt = newPostRequest.withModifiedAt(
+                LocalDateTime.now(), getCreatedAtByTitleAndEmail(newPostRequest.title(), newPostRequest.email()));
+        return saveOrUpdatePost(withModifiedAt);
     }
 
     public void deletePost(String title) {
@@ -279,5 +286,38 @@ public class PostService {
             log.warn("Cache/streams lookup failed for title {}, falling back to DB", title, e);
         }
         return postRepository.existsByTitle(title);
+    }
+
+    public LocalDateTime getCreatedAtByTitleAndEmail(String title, String email) {
+        try {
+            String localCacheIfPresent = localCache.getIfPresent(title);
+            if (localCacheIfPresent != null) {
+                return PostResponse.fromJson(localCacheIfPresent).createdAt();
+            }
+            Optional<PostRedis> postRedis = postRedisRepository.findById(title);
+            if (postRedis.isPresent()) {
+                return postRedis.get().getCreatedAt();
+            }
+            NewPostRequest cachedRequest =
+                    requestCoalescer.subscribe(title, () -> getKeyValueStore().get(title));
+            if (cachedRequest != null) {
+                return cachedRequest.createdAt();
+            }
+        } catch (Exception e) {
+            log.warn("Cache/streams lookup failed for title {}, falling back to DB", title, e);
+        }
+        return postRepository.findByTitleAndAuthorEntity_Email(title, email).getCreatedAt();
+    }
+
+    private PostRedis toPostRedis(String title, NewPostRequest newPostRequest) {
+        PostRedis postRedis = new PostRedis()
+                .setTitle(title)
+                .setContent(newPostRequest.content())
+                .setPublished(newPostRequest.published() != null && newPostRequest.published())
+                .setPublishedAt(newPostRequest.publishedAt())
+                .setAuthorEmail(newPostRequest.email());
+        postRedis.setCreatedAt(newPostRequest.createdAt());
+        postRedis.setModifiedAt(newPostRequest.modifiedAt());
+        return postRedis;
     }
 }

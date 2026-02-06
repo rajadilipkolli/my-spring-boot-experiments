@@ -6,6 +6,7 @@ import com.example.highrps.service.PostService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import java.net.URI;
+import java.time.LocalDateTime;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -35,7 +36,8 @@ public class PostController {
 
     @PostMapping(value = "/posts")
     public ResponseEntity<PostResponse> createPost(@RequestBody @Valid NewPostRequest newPostRequest) {
-        PostResponse postResponse = postService.saveOrUpdatePost(newPostRequest);
+        NewPostRequest withCreatedAt = newPostRequest.withCreatedAt(LocalDateTime.now());
+        PostResponse postResponse = postService.saveOrUpdatePost(withCreatedAt);
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{title}")
                 .buildAndExpand(postResponse.title())
@@ -46,11 +48,12 @@ public class PostController {
     @PutMapping(value = "/posts/{title}")
     public ResponseEntity<PostResponse> updatePost(
             @PathVariable String title, @RequestBody @Valid NewPostRequest newPostRequest) {
-        if (!title.equals(newPostRequest.title()) && !postService.titleExists(title)) {
+        try {
+            PostResponse postResponse = postService.updatePost(title, newPostRequest);
+            return ResponseEntity.ok(postResponse);
+        } catch (IllegalArgumentException iae) {
             return ResponseEntity.badRequest().build();
         }
-        PostResponse postResponse = postService.saveOrUpdatePost(newPostRequest);
-        return ResponseEntity.ok(postResponse);
     }
 
     @DeleteMapping("/posts/{title}")

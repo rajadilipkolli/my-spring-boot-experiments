@@ -1,11 +1,14 @@
 package com.example.highrps.batchprocessor;
 
+import com.example.highrps.entities.PostEntity;
 import com.example.highrps.mapper.NewPostRequestToPostEntityMapper;
 import com.example.highrps.model.request.NewPostRequest;
 import com.example.highrps.repository.jpa.PostRepository;
 import com.example.highrps.repository.jpa.TagRepository;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,39 +47,83 @@ public class PostBatchProcessor implements EntityBatchProcessor {
 
     @Override
     public void processUpserts(List<String> payloads) {
-        var entities = payloads.stream()
+        // Step 1: Parse payloads and extract titles
+        List<ParsedPost> parsedPosts = payloads.stream()
                 .map(payload -> {
-                    // Determine key first
                     String title = extractKey(payload);
-
-                    // Skip if a recent tombstone exists for this title (prevents re-insert races).
-                    // IMPORTANT: this Redis lookup is intentionally outside the JSON mapping try/catch so
-                    // Redis failures don't get swallowed as "mapping errors".
                     if (title != null) {
+                        // Skip if tombstone exists
                         Boolean deleted = redis.hasKey("deleted:post:" + title);
                         if (Boolean.TRUE.equals(deleted)) {
                             log.debug("Skipping upsert for title {} because recent tombstone present", title);
                             return null;
                         }
                     }
-
                     try {
                         NewPostRequest req = jsonMapper.readValue(payload, NewPostRequest.class);
-                        return mapper.convert(req, tagRepository);
+                        return new ParsedPost(title, req);
                     } catch (Exception e) {
                         log.warn("Failed to map post payload to entity: {}", payload, e);
                         return null;
                     }
                 })
                 .filter(Objects::nonNull)
+                .toList();
+
+        if (parsedPosts.isEmpty()) {
+            return;
+        }
+
+        // Step 2: Extract all titles and fetch existing posts from DB
+        List<String> titles = parsedPosts.stream()
+                .map(ParsedPost::title)
+                .filter(Objects::nonNull)
                 .collect(Collectors.toList());
 
-        if (!entities.isEmpty()) {
+        List<PostEntity> existingPosts = postRepository.findByTitleIn(titles);
+
+        Map<String, PostEntity> existingByTitle =
+                existingPosts.stream().collect(Collectors.toMap(PostEntity::getTitle, Function.identity()));
+
+        // Step 3: Process each post - update existing or create new
+        List<PostEntity> entitiesToSave = parsedPosts.stream()
+                .map(parsed -> {
+                    PostEntity entity = existingByTitle.get(parsed.title());
+                    if (entity != null) {
+                        // Update existing entity
+                        try {
+                            mapper.updatePostEntity(parsed.request(), entity, tagRepository);
+                            log.debug("Updating existing post with title: {}", parsed.title());
+                        } catch (Exception e) {
+                            log.warn("Failed to update post entity for title: {}", parsed.title(), e);
+                            return null;
+                        }
+                    } else {
+                        // Create new entity
+                        try {
+                            entity = mapper.convert(parsed.request(), tagRepository);
+                            log.debug("Creating new post with title: {}", parsed.title());
+                        } catch (Exception e) {
+                            log.warn("Failed to create post entity for title: {}", parsed.title(), e);
+                            return null;
+                        }
+                    }
+                    return entity;
+                })
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+
+        // Step 4: Save all (both new and updated)
+        if (!entitiesToSave.isEmpty()) {
             try {
-                postRepository.saveAll(entities);
-                log.debug("Persisted batch of {} post entities", entities.size());
+                postRepository.saveAll(entitiesToSave);
+                log.debug(
+                        "Persisted batch of {} post entities ({} updates, {} inserts)",
+                        entitiesToSave.size(),
+                        existingPosts.size(),
+                        entitiesToSave.size() - existingPosts.size());
             } catch (Exception e) {
-                log.error("Failed to persist batch of {} post entities", entities.size(), e);
+                log.error("Failed to persist batch of {} post entities", entitiesToSave.size(), e);
                 throw e;
             }
         }
@@ -86,7 +133,8 @@ public class PostBatchProcessor implements EntityBatchProcessor {
     public void processDeletes(List<String> keys) {
         if (keys.isEmpty()) return;
         try {
-            int deleted = postRepository.deleteAllByTitleIn(keys);
+            int deleted = postRepository.deleteAllByTitleIn(
+                    keys.stream().map(String::toLowerCase).toList());
             log.debug("Deleted {} post entities for {} keys", deleted, keys.size());
         } catch (Exception e) {
             log.warn("Failed to batch delete post entities for keys: {}", keys, e);
@@ -108,4 +156,7 @@ public class PostBatchProcessor implements EntityBatchProcessor {
             return null;
         }
     }
+
+    // Helper record to hold parsed data
+    private record ParsedPost(String title, NewPostRequest request) {}
 }

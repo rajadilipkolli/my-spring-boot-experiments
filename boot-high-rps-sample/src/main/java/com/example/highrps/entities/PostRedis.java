@@ -16,7 +16,7 @@ public class PostRedis extends Auditable implements Serializable {
     private String title;
 
     private String content;
-    private Boolean published;
+    private boolean published;
     private LocalDateTime publishedAt;
     private String authorEmail;
 

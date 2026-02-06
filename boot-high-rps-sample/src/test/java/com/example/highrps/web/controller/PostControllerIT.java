@@ -7,6 +7,7 @@ import com.example.highrps.common.AbstractIntegrationTest;
 import com.example.highrps.entities.PostRedis;
 import com.example.highrps.model.response.PostResponse;
 import java.time.Duration;
+import java.time.LocalDateTime;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -79,6 +80,8 @@ class PostControllerIT extends AbstractIntegrationTest {
                     assertThat(postResponse.content()).isEqualTo("Will be deleted later");
                     assertThat(postResponse.published()).isFalse();
                     assertThat(postResponse.publishedAt()).isNull();
+                    assertThat(postResponse.createdAt()).isNotNull().isInstanceOf(LocalDateTime.class);
+                    assertThat(postResponse.modifiedAt()).isNull();
                     assertThat(postResponse.tags()).isNull();
                     assertThat(postResponse.details()).isNull();
                 });
@@ -94,6 +97,10 @@ class PostControllerIT extends AbstractIntegrationTest {
                     PostRedis value = postRedisRepository.findById(title).orElse(null);
                     assertThat(value).isNotNull();
                     assertThat(value.getContent()).isEqualTo("Will be deleted later");
+                    assertThat(value.getPublished()).isFalse();
+                    assertThat(value.getPublishedAt()).isNull();
+                    assertThat(value.getCreatedAt()).isNotNull().isInstanceOf(LocalDateTime.class);
+                    assertThat(value.getModifiedAt()).isNull();
                 });
 
         // 2) Update the post via the new PUT endpoint to change content
@@ -118,7 +125,10 @@ class PostControllerIT extends AbstractIntegrationTest {
                 .hasStatus(HttpStatus.OK)
                 .bodyJson()
                 .convertTo(PostResponse.class)
-                .satisfies(resp -> assertThat(resp.content()).isEqualTo("Updated content before delete"));
+                .satisfies(resp -> {
+                    assertThat(resp.content()).isEqualTo("Updated content before delete");
+                    assertThat(resp.modifiedAt()).isNotNull().isInstanceOf(LocalDateTime.class);
+                });
 
         // Verify caches updated with new content
         String cachedAfter = localCache.getIfPresent(title);
@@ -131,6 +141,12 @@ class PostControllerIT extends AbstractIntegrationTest {
                     PostRedis value = postRedisRepository.findById(title).orElse(null);
                     assertThat(value).isNotNull();
                     assertThat(value.getContent()).isEqualTo("Updated content before delete");
+                    assertThat(value.getPublished()).isTrue();
+                    assertThat(value.getPublishedAt()).isNotNull().isInstanceOf(LocalDateTime.class);
+                    assertThat(value.getCreatedAt()).isNotNull().isInstanceOf(LocalDateTime.class);
+                    assertThat(value.getModifiedAt()).isNotNull().isInstanceOf(LocalDateTime.class);
+                    assertThat(value.getModifiedAt().isAfter(value.getCreatedAt()))
+                            .isEqualTo(true);
                 });
 
         // 3) Delete the post

@@ -9,7 +9,7 @@ import org.jspecify.annotations.Nullable;
 
 @Entity
 @Table(name = "authors")
-public class AuthorEntity implements Serializable {
+public class AuthorEntity extends Auditable implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)

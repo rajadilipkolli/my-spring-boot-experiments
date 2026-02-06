@@ -1,13 +1,13 @@
 CREATE TABLE posts
 (
     id           BIGINT                      NOT NULL,
-    created_at   TIMESTAMP WITHOUT TIME ZONE NOT NULL,
-    modified_at  TIMESTAMP WITHOUT TIME ZONE,
     title        VARCHAR(255),
     content      VARCHAR(4096),
     published    BOOLEAN                     NOT NULL,
     published_at TIMESTAMP WITHOUT TIME ZONE,
     author_id    BIGINT,
+    created_at   TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    modified_at  TIMESTAMP WITHOUT TIME ZONE,
     CONSTRAINT pk_posts PRIMARY KEY (id)
 );
 

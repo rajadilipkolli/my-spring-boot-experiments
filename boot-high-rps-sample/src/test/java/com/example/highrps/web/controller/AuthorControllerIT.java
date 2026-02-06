@@ -6,6 +6,7 @@ import static org.awaitility.Awaitility.await;
 import com.example.highrps.common.AbstractIntegrationTest;
 import com.example.highrps.model.response.AuthorResponse;
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.Locale;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
@@ -55,6 +56,11 @@ public class AuthorControllerIT extends AbstractIntegrationTest {
                     assertThat(authorResponse.lastName()).isEqualTo("integration");
                     assertThat(authorResponse.mobile()).isEqualTo(1234567890L);
                     assertThat(authorResponse.registeredAt()).isNull();
+                    assertThat(authorResponse.createdAt())
+                            .isNotNull()
+                            .isInstanceOf(LocalDateTime.class)
+                            .isBefore(LocalDateTime.now());
+                    assertThat(authorResponse.modifiedAt()).isNull();
                 });
 
         // Assert local cache has the key (redis may be populated asynchronously)
@@ -62,9 +68,12 @@ public class AuthorControllerIT extends AbstractIntegrationTest {
         assertThat(cached).isNotNull();
         AuthorResponse cachedResponse = AuthorResponse.fromJson(cached);
         assertThat(cachedResponse.middleName()).isNull();
-        var redisString = authorRedisRepository.findById(emailKey);
-        assertThat(redisString).isPresent();
-        assertThat(redisString.get().getMiddleName()).isNull();
+        var redisString = authorRedisRepository.findById(emailKey).orElse(null);
+        assertThat(redisString).isNotNull();
+        assertThat(redisString.getMiddleName()).isNull();
+        assertThat(redisString.getCreatedAt()).isNotNull().isInstanceOf(LocalDateTime.class);
+        assertThat(redisString.getModifiedAt())
+                .isNull(); // modifiedAt should be null on create as there is no update yet
 
         // 2) Update the author via the new PUT endpoint to change content
         mockMvcTester
@@ -88,6 +97,14 @@ public class AuthorControllerIT extends AbstractIntegrationTest {
                 .satisfies(resp -> {
                     assertThat(resp.middleName()).isEqualTo("IT");
                     assertThat(resp.firstName()).isEqualTo("junit");
+                    assertThat(resp.createdAt())
+                            .isNotNull()
+                            .isInstanceOf(LocalDateTime.class)
+                            .isBefore(LocalDateTime.now());
+                    assertThat(resp.modifiedAt())
+                            .isNotNull()
+                            .isInstanceOf(LocalDateTime.class)
+                            .isBefore(LocalDateTime.now());
                 });
 
         // Verify local cache updated with new content
@@ -96,10 +113,14 @@ public class AuthorControllerIT extends AbstractIntegrationTest {
         AuthorResponse cachedAfterResponse = AuthorResponse.fromJson(cachedAfter);
         assertThat(cachedAfterResponse.middleName()).isEqualTo("IT");
         assertThat(cachedAfterResponse.firstName()).isEqualTo("junit");
-        var redisAfterResponse = authorRedisRepository.findById(emailKey);
-        assertThat(redisAfterResponse).isPresent();
-        assertThat(redisAfterResponse.get().getMiddleName()).isEqualTo("IT");
-        assertThat(redisAfterResponse.get().getFirstName()).isEqualTo("junit");
+        var updatedResponseFromRedis = authorRedisRepository.findById(emailKey).orElse(null);
+        assertThat(updatedResponseFromRedis).isNotNull();
+        assertThat(updatedResponseFromRedis.getMiddleName()).isEqualTo("IT");
+        assertThat(updatedResponseFromRedis.getFirstName()).isEqualTo("junit");
+        assertThat(updatedResponseFromRedis.getCreatedAt()).isNotNull().isInstanceOf(LocalDateTime.class);
+        assertThat(updatedResponseFromRedis.getModifiedAt()).isNotNull().isInstanceOf(LocalDateTime.class);
+        assertThat(updatedResponseFromRedis.getModifiedAt().isAfter(updatedResponseFromRedis.getCreatedAt()))
+                .isTrue();
 
         // 3) Delete the author via API
         mockMvcTester

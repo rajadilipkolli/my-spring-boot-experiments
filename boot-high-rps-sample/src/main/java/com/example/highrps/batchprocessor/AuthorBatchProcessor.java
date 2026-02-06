@@ -1,11 +1,14 @@
 package com.example.highrps.batchprocessor;
 
+import com.example.highrps.entities.AuthorEntity;
 import com.example.highrps.mapper.AuthorRequestToEntityMapper;
 import com.example.highrps.model.request.AuthorRequest;
 import com.example.highrps.repository.jpa.AuthorRepository;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,15 +44,12 @@ public class AuthorBatchProcessor implements EntityBatchProcessor {
 
     @Override
     public void processUpserts(List<String> payloads) {
-        var entities = payloads.stream()
+        // Step 1: Parse payloads and extract emails
+        List<ParsedAuthor> parsedAuthors = payloads.stream()
                 .map(payload -> {
-                    // Determine key first
                     String email = extractKey(payload);
-
-                    // Skip if a recent tombstone exists for this email (prevents re-insert races).
-                    // IMPORTANT: this Redis lookup is intentionally outside the JSON mapping try/catch so
-                    // Redis failures don't get swallowed as "mapping errors".
                     if (email != null) {
+                        // Skip if tombstone exists
                         Boolean deleted = redis.hasKey("deleted:authors:" + email);
                         if (Boolean.TRUE.equals(deleted)) {
                             log.debug("Skipping upsert for email {} because recent tombstone present", email);
@@ -58,21 +58,69 @@ public class AuthorBatchProcessor implements EntityBatchProcessor {
                     }
                     try {
                         AuthorRequest req = jsonMapper.readValue(payload, AuthorRequest.class);
-                        return mapper.convert(req);
+                        return new ParsedAuthor(email, req);
                     } catch (Exception e) {
                         log.warn("Failed to map author payload to entity: {}", payload, e);
                         return null;
                     }
                 })
                 .filter(Objects::nonNull)
+                .toList();
+
+        if (parsedAuthors.isEmpty()) {
+            return;
+        }
+
+        // Step 2: Extract all emails and fetch existing authors from DB
+        List<String> emails = parsedAuthors.stream()
+                .map(ParsedAuthor::email)
+                .filter(Objects::nonNull)
                 .collect(Collectors.toList());
 
-        if (!entities.isEmpty()) {
+        List<AuthorEntity> existingAuthors = authorRepository.findByEmailInAllIgnoreCase(emails);
+
+        Map<String, AuthorEntity> existingByEmail = existingAuthors.stream()
+                .collect(Collectors.toMap(a -> a.getEmail().toLowerCase(Locale.ROOT), Function.identity()));
+
+        // Step 3: Process each author - update existing or create new
+        List<AuthorEntity> entitiesToSave = parsedAuthors.stream()
+                .map(parsed -> {
+                    AuthorEntity entity = existingByEmail.get(parsed.email());
+                    if (entity != null) {
+                        // Update existing entity
+                        try {
+                            mapper.updateAuthorEntity(parsed.request(), entity);
+                            log.debug("Updating existing author with email: {}", parsed.email());
+                        } catch (Exception e) {
+                            log.warn("Failed to update author entity for email: {}", parsed.email(), e);
+                            return null;
+                        }
+                    } else {
+                        // Create new entity
+                        try {
+                            entity = mapper.convert(parsed.request());
+                            log.debug("Creating new author with email: {}", parsed.email());
+                        } catch (Exception e) {
+                            log.warn("Failed to create author entity for email: {}", parsed.email(), e);
+                            return null;
+                        }
+                    }
+                    return entity;
+                })
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+
+        // Step 4: Save all (both new and updated)
+        if (!entitiesToSave.isEmpty()) {
             try {
-                authorRepository.saveAll(entities);
-                log.debug("Persisted batch of {} author entities", entities.size());
+                authorRepository.saveAll(entitiesToSave);
+                log.debug(
+                        "Persisted batch of {} author entities ({} updates, {} inserts)",
+                        entitiesToSave.size(),
+                        existingAuthors.size(),
+                        entitiesToSave.size() - existingAuthors.size());
             } catch (Exception e) {
-                log.error("Failed to persist batch of {} author entities", entities.size(), e);
+                log.error("Failed to persist batch of {} author entities", entitiesToSave.size(), e);
                 throw e;
             }
         }
@@ -82,7 +130,8 @@ public class AuthorBatchProcessor implements EntityBatchProcessor {
     public void processDeletes(List<String> keys) {
         if (keys.isEmpty()) return;
         try {
-            long deletedRows = authorRepository.deleteByEmailInAllIgnoreCase(keys);
+            List<String> lowerCaseKeys = keys.stream().map(String::toLowerCase).toList();
+            long deletedRows = authorRepository.deleteByEmailInAllIgnoreCase(lowerCaseKeys);
             log.debug("Deleted {} author entities for {} keys", deletedRows, keys.size());
         } catch (Exception e) {
             log.warn("Failed to batch delete author entities for keys: {}", keys, e);
@@ -104,4 +153,7 @@ public class AuthorBatchProcessor implements EntityBatchProcessor {
             return null;
         }
     }
+
+    // Helper record to hold parsed data
+    private record ParsedAuthor(String email, AuthorRequest request) {}
 }

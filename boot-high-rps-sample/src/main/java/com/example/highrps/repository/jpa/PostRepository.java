@@ -12,12 +12,17 @@ import org.springframework.transaction.annotation.Transactional;
 
 public interface PostRepository extends JpaRepository<PostEntity, Long> {
 
+    PostEntity findByTitleAndAuthorEntity_Email(String title, String email);
+
     @EntityGraph(attributePaths = {"tags", "details", "authorEntity", "tags.tagEntity"})
     @Override
     Optional<PostEntity> findById(Long aLong);
 
     @EntityGraph(attributePaths = {"tags", "details", "authorEntity", "tags.tagEntity"})
     Optional<PostEntity> findByTitle(String title);
+
+    @EntityGraph(attributePaths = {"tags", "details", "authorEntity", "tags.tagEntity"})
+    List<PostEntity> findByTitleIn(List<String> titles);
 
     boolean existsByTitle(String title);
 
