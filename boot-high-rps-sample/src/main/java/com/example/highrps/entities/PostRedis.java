@@ -18,6 +18,7 @@ public class PostRedis extends Auditable implements Serializable {
     private String content;
     private Boolean published;
     private LocalDateTime publishedAt;
+    private String authorEmail;
 
     public PostRedis() {}
 
@@ -55,5 +56,14 @@ public class PostRedis extends Auditable implements Serializable {
 
     public LocalDateTime getPublishedAt() {
         return publishedAt;
+    }
+
+    public PostRedis setAuthorEmail(String authorEmail) {
+        this.authorEmail = authorEmail;
+        return this;
+    }
+
+    public String getAuthorEmail() {
+        return authorEmail;
     }
 }

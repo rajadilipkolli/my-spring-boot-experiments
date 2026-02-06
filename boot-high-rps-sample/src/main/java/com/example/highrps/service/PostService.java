@@ -15,6 +15,7 @@ import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -96,11 +97,13 @@ public class PostService {
         }
 
         // 2) Redis materialized view
-        var raw = redis.opsForValue().get("posts:" + title);
-        if (raw != null) {
-            log.info("findPostByTitle: hit redis for title={}", title);
-            localCache.put(title, raw);
-            return PostResponse.fromJson(raw);
+        Optional<PostRedis> byId = postRedisRepository.findById(title);
+        if (byId.isPresent()) {
+            log.info("findPostByTitle: hit redis repository for title={}", title);
+            PostResponse response = PostResponse.fromRedis(byId.get());
+            var json = PostResponse.toJson(response);
+            localCache.put(title, json);
+            return response;
         }
 
         try {
@@ -111,7 +114,12 @@ public class PostService {
                 var json = PostResponse.toJson(response);
                 localCache.put(title, json);
                 try {
-                    redis.opsForValue().set("posts:" + title, json);
+                    PostRedis pr = new PostRedis()
+                            .setTitle(title)
+                            .setContent(response.content())
+                            .setPublished(response.published())
+                            .setPublishedAt(response.publishedAt());
+                    postRedisRepository.save(pr);
                 } catch (Exception re) {
                     log.warn("Failed to update Redis for title {} after Streams lookup", title, re);
                 }
@@ -155,7 +163,8 @@ public class PostService {
                     .setTitle(title)
                     .setContent(postResponse.content())
                     .setPublished(postResponse.published())
-                    .setPublishedAt(postResponse.publishedAt());
+                    .setPublishedAt(postResponse.publishedAt())
+                    .setAuthorEmail(newPostRequest.email());
             postRedisRepository.save(pr);
         } catch (Exception e) {
             log.warn("Eager redis repository write failed for title {} (listener will still populate redis)", title, e);
@@ -187,8 +196,6 @@ public class PostService {
 
         // 3) Remove from Redis so reads return absent immediately and batch processors don't re-populate from
         // repository
-
-        // delete repository entry as well
         try {
             postRedisRepository.deleteById(title);
         } catch (Exception e) {

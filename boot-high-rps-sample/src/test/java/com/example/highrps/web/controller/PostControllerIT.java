@@ -146,8 +146,7 @@ class PostControllerIT extends AbstractIntegrationTest {
                 .pollInterval(Duration.ofSeconds(1))
                 .untilAsserted(() -> {
                     assertThat(postRepository.existsByTitle(title)).isFalse();
-                    PostRedis value = postRedisRepository.findById(title).orElse(null);
-                    assertThat(value).isNull();
+                    assertThat(postRedisRepository.existsById(title)).isFalse();
                     assertThat(localCache.getIfPresent(title)).isNull();
                 });
 
@@ -314,6 +313,6 @@ class PostControllerIT extends AbstractIntegrationTest {
 
         // Also assert local cache and redis no longer have the key
         assertThat(localCache.getIfPresent(title)).isNull();
-        assertThat(postRedisRepository.findById(title)).isEmpty();
+        assertThat(postRedisRepository.existsById(title)).isFalse();
     }
 }

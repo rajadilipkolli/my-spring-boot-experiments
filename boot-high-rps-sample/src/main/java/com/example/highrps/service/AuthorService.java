@@ -277,7 +277,7 @@ public class AuthorService {
             if (localCache.getIfPresent(emailKey) != null) {
                 return true;
             }
-            if (authorRedisRepository.existsById(email)) {
+            if (authorRedisRepository.existsById(emailKey)) {
                 return true;
             }
             AuthorRequest cachedRequest = requestCoalescer.subscribe(
