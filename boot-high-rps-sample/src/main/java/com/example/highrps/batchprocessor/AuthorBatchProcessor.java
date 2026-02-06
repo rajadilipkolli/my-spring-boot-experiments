@@ -2,7 +2,7 @@ package com.example.highrps.batchprocessor;
 
 import com.example.highrps.mapper.AuthorRequestToEntityMapper;
 import com.example.highrps.model.request.AuthorRequest;
-import com.example.highrps.repository.AuthorRepository;
+import com.example.highrps.repository.jpa.AuthorRepository;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;

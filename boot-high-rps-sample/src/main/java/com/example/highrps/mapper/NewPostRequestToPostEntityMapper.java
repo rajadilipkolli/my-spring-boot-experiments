@@ -5,7 +5,7 @@ import com.example.highrps.entities.PostTagEntity;
 import com.example.highrps.entities.TagEntity;
 import com.example.highrps.model.request.NewPostRequest;
 import com.example.highrps.model.request.TagRequest;
-import com.example.highrps.repository.TagRepository;
+import com.example.highrps.repository.jpa.TagRepository;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Context;
 import org.mapstruct.Mapper;

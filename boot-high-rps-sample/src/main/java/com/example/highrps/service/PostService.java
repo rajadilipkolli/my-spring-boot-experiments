@@ -6,7 +6,7 @@ import com.example.highrps.mapper.PostRequestToResponseMapper;
 import com.example.highrps.model.request.EventEnvelope;
 import com.example.highrps.model.request.NewPostRequest;
 import com.example.highrps.model.response.PostResponse;
-import com.example.highrps.repository.PostRepository;
+import com.example.highrps.repository.jpa.PostRepository;
 import com.example.highrps.utility.RequestCoalescer;
 import com.github.benmanes.caffeine.cache.Cache;
 import java.time.Duration;

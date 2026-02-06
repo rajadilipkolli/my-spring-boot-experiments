@@ -3,6 +3,7 @@ package com.example.highrps.listener;
 import com.example.highrps.mapper.AuthorRequestToResponseMapper;
 import com.example.highrps.model.request.AuthorRequest;
 import com.example.highrps.model.response.AuthorResponse;
+import com.example.highrps.repository.redis.AuthorRedisRepository;
 import java.util.Map;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.slf4j.Logger;
@@ -28,16 +29,19 @@ public class AuthorAggregatesToRedisListener {
     private final AuthorRequestToResponseMapper mapper;
     private final String queueKey;
     private final JsonMapper jsonMapper;
+    private final AuthorRedisRepository authorRedisRepository;
 
     public AuthorAggregatesToRedisListener(
             RedisTemplate<String, String> redis,
             AuthorRequestToResponseMapper mapper,
             @Value("${app.batch.queue-key:events:queue}") String queueKey,
-            JsonMapper jsonMapper) {
+            JsonMapper jsonMapper,
+            AuthorRedisRepository authorRedisRepository) {
         this.redis = redis;
         this.mapper = mapper;
         this.queueKey = queueKey;
         this.jsonMapper = jsonMapper;
+        this.authorRedisRepository = authorRedisRepository;
     }
 
     @KafkaListener(
@@ -59,14 +63,12 @@ public class AuthorAggregatesToRedisListener {
                     key,
                     payload == null);
 
-            String redisKey = "authors:" + key;
-
             // If payload is null -> tombstone: remove Redis key and enqueue delete marker
             if (payload == null) {
                 try {
-                    redis.opsForValue().getAndDelete(redisKey);
+                    authorRedisRepository.deleteById(key);
                 } catch (Exception e) {
-                    log.warn("Failed to delete redis key for tombstone: {}", redisKey, e);
+                    log.warn("Failed to delete redis key for tombstone: {}", key, e);
                 }
                 try {
                     String tombstoneJson = jsonMapper.writeValueAsString(

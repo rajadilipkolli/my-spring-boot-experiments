@@ -2,8 +2,8 @@ package com.example.highrps.batchprocessor;
 
 import com.example.highrps.mapper.NewPostRequestToPostEntityMapper;
 import com.example.highrps.model.request.NewPostRequest;
-import com.example.highrps.repository.PostRepository;
-import com.example.highrps.repository.TagRepository;
+import com.example.highrps.repository.jpa.PostRepository;
+import com.example.highrps.repository.jpa.TagRepository;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;

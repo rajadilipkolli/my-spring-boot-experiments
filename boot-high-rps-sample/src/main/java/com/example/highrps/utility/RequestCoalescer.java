@@ -6,8 +6,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
 public class RequestCoalescer<T> {
-
-    private final Map<String, CompletableFuture<T>> inFlightRequests = new ConcurrentHashMap<>();
+    Map<String, CompletableFuture<T>> inFlightRequests = new ConcurrentHashMap<>();
 
     public T subscribe(String key, Supplier<T> supplier) {
         CompletableFuture<T> future = getOrCreateFuture(key, supplier);
