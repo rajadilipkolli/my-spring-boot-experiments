@@ -207,7 +207,7 @@ class PostControllerIT extends AbstractIntegrationTest {
     void crudPostResourcesWithStateCheck() {
         String title = "delete-me";
         String email = "test@local.com";
-        var cacheKey = String.join(":", title, email.toLowerCase());
+        var cacheKey = String.join(":", title, email.toLowerCase(Locale.ROOT));
 
         authorRepository.save(new AuthorEntity()
                 .setEmail(email)

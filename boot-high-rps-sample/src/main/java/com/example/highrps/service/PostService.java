@@ -135,7 +135,7 @@ public class PostService {
         if (newPostRequest.published() != null && newPostRequest.published() && newPostRequest.publishedAt() == null) {
             newPostRequest = newPostRequest.withPublishedAt(LocalDateTime.now());
         }
-        var cacheKey = String.join(":", title, newPostRequest.email().toLowerCase());
+        var cacheKey = cacheKey(title, newPostRequest.email());
         // Publish envelope and wait for the send to complete. Only after a successful send
         // do we populate the local cache and return the response.
         var future = kafkaProducerService.publishEnvelope("post", cacheKey, newPostRequest);
@@ -289,7 +289,7 @@ public class PostService {
         return postRepository.existsByTitleAndAuthorEntity_EmailIgnoreCase(title, email.toLowerCase(Locale.ROOT));
     }
 
-    public LocalDateTime getCreatedAtByTitleAndEmail(String title, String email) {
+    private LocalDateTime getCreatedAtByTitleAndEmail(String title, String email) {
         var cacheKey = cacheKey(title, email);
         try {
             String localCacheIfPresent = localCache.getIfPresent(cacheKey);
@@ -315,7 +315,7 @@ public class PostService {
     }
 
     private PostRedis toPostRedis(String title, NewPostRequest newPostRequest) {
-        var cacheKey = String.join(":", title, newPostRequest.email().toLowerCase());
+        var cacheKey = cacheKey(title, newPostRequest.email());
         PostRedis postRedis = new PostRedis()
                 .setId(cacheKey)
                 .setTitle(title)
