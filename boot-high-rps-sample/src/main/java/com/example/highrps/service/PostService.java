@@ -168,11 +168,11 @@ public class PostService {
      * Update helper that encapsulates the controller logic so the controller only needs a
      * single service call. Preserves existing behavior: if the path title does not match
      * the request title and the original path title does not exist, a bad-request condition
-     * is signaled by throwing IllegalArgumentException.
+     * is signaled by throwing ResourceNotFoundException.
      */
     public PostResponse updatePost(String pathTitle, NewPostRequest newPostRequest) {
         if (!pathTitle.equals(newPostRequest.title()) && !titleExists(pathTitle, newPostRequest.email())) {
-            throw new IllegalArgumentException("Path title does not match request title and original title not found");
+            throw new ResourceNotFoundException("Path title does not match request title and original title not found");
         }
         NewPostRequest withModifiedAt = newPostRequest.withTimestamps(
                 LocalDateTime.now(), getCreatedAtByTitleAndEmail(newPostRequest.title(), newPostRequest.email()));

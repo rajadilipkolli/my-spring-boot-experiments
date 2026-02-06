@@ -49,12 +49,8 @@ public class PostController {
     @PutMapping(value = "/posts/{title}")
     public ResponseEntity<PostResponse> updatePost(
             @PathVariable String title, @RequestBody @Valid NewPostRequest newPostRequest) {
-        try {
-            PostResponse postResponse = postService.updatePost(title, newPostRequest);
-            return ResponseEntity.ok(postResponse);
-        } catch (IllegalArgumentException iae) {
-            return ResponseEntity.badRequest().build();
-        }
+        PostResponse postResponse = postService.updatePost(title, newPostRequest);
+        return ResponseEntity.ok(postResponse);
     }
 
     @DeleteMapping("/posts/{title}/{email}")

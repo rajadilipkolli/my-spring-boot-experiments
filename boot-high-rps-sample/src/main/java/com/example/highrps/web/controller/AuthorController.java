@@ -30,7 +30,7 @@ public class AuthorController {
 
     @PostMapping(value = "/author")
     public ResponseEntity<AuthorResponse> createAuthor(@RequestBody @Valid AuthorRequest newAuthorRequest) {
-        AuthorRequest withCreatedAt = newAuthorRequest.withTimeStamps(LocalDateTime.now(), null);
+        AuthorRequest withCreatedAt = newAuthorRequest.withTimestamps(LocalDateTime.now(), null);
         AuthorResponse resp = authorService.saveOrUpdateAuthor(withCreatedAt);
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{email}")
@@ -42,12 +42,8 @@ public class AuthorController {
     @PutMapping(value = "/author/{email}")
     public ResponseEntity<AuthorResponse> updateAuthor(
             @PathVariable String email, @RequestBody @Valid AuthorRequest newAuthorRequest) {
-        try {
-            AuthorResponse resp = authorService.updateAuthor(email, newAuthorRequest);
-            return ResponseEntity.ok(resp);
-        } catch (IllegalArgumentException iae) {
-            return ResponseEntity.badRequest().build();
-        }
+        AuthorResponse resp = authorService.updateAuthor(email, newAuthorRequest);
+        return ResponseEntity.ok(resp);
     }
 
     @DeleteMapping("/author/{email}")

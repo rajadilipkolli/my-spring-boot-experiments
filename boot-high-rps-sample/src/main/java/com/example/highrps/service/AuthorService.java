@@ -190,14 +190,14 @@ public class AuthorService {
      * Update helper that encapsulates the controller logic so the controller only needs a
      * single service call. Preserves existing behavior: if the path email does not match
      * the request email and the original path email does not exist, a bad-request condition
-     * is signaled by throwing IllegalArgumentException.
+     * is signaled by throwing ResourceNotFoundException.
      */
     public AuthorResponse updateAuthor(String pathEmail, AuthorRequest newAuthorRequest) {
         if (!pathEmail.equalsIgnoreCase(newAuthorRequest.email()) && !emailExists(pathEmail)) {
-            throw new IllegalArgumentException("Path email does not match request email and original email not found");
+            throw new ResourceNotFoundException("Path email does not match request email and original email not found");
         }
         AuthorRequest withModifiedAt =
-                newAuthorRequest.withTimeStamps(getCreatedAtByEmail(pathEmail), LocalDateTime.now());
+                newAuthorRequest.withTimestamps(getCreatedAtByEmail(pathEmail), LocalDateTime.now());
         return saveOrUpdateAuthor(withModifiedAt);
     }
 
