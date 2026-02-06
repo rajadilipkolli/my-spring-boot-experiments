@@ -1,10 +1,12 @@
 package com.example.highrps.common;
 
 import com.redis.testcontainers.RedisContainer;
+import java.time.Duration;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.context.annotation.Bean;
 import org.springframework.test.context.DynamicPropertyRegistrar;
+import org.testcontainers.grafana.LgtmStackContainer;
 import org.testcontainers.kafka.KafkaContainer;
 import org.testcontainers.postgresql.PostgreSQLContainer;
 import org.testcontainers.utility.DockerImageName;
@@ -16,6 +18,14 @@ public class ContainersConfig {
     @ServiceConnection
     PostgreSQLContainer postgreSQLContainer() {
         return new PostgreSQLContainer(DockerImageName.parse("postgres").withTag("18.1-alpine"));
+    }
+
+    @Bean
+    @ServiceConnection
+    LgtmStackContainer lgtmContainer() {
+        return new LgtmStackContainer(DockerImageName.parse("grafana/otel-lgtm:0.17.0"))
+                .withStartupTimeout(Duration.ofMinutes(2))
+                .withReuse(true);
     }
 
     @Bean

@@ -6,7 +6,10 @@ import com.example.highrps.repository.PostRepository;
 import com.example.highrps.repository.PostTagRepository;
 import com.example.highrps.repository.TagRepository;
 import com.github.benmanes.caffeine.cache.Cache;
+import io.micrometer.core.instrument.MeterRegistry;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.micrometer.metrics.test.autoconfigure.AutoConfigureMetrics;
+import org.springframework.boot.micrometer.tracing.test.autoconfigure.AutoConfigureTracing;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -16,6 +19,8 @@ import org.springframework.test.web.servlet.assertj.MockMvcTester;
 @ActiveProfiles({"test"})
 @SpringBootTest(webEnvironment = RANDOM_PORT, classes = ContainersConfig.class)
 @AutoConfigureMockMvc
+@AutoConfigureTracing
+@AutoConfigureMetrics
 public abstract class AbstractIntegrationTest {
 
     @Autowired
@@ -35,4 +40,7 @@ public abstract class AbstractIntegrationTest {
 
     @Autowired
     protected PostTagRepository postTagRepository;
+
+    @Autowired
+    protected MeterRegistry meterRegistry;
 }
