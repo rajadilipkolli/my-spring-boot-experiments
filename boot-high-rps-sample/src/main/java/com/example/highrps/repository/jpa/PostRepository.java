@@ -11,6 +11,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
 public interface PostRepository extends JpaRepository<PostEntity, Long> {
+    boolean existsByTitleAndAuthorEntity_EmailIgnoreCase(String title, String email);
 
     Optional<PostEntity> findByTitleAndAuthorEntity_Email(String title, String email);
 
@@ -19,20 +20,12 @@ public interface PostRepository extends JpaRepository<PostEntity, Long> {
     Optional<PostEntity> findById(Long aLong);
 
     @EntityGraph(attributePaths = {"tags", "details", "authorEntity", "tags.tagEntity"})
-    Optional<PostEntity> findByTitle(String title);
-
-    @EntityGraph(attributePaths = {"tags", "details", "authorEntity", "tags.tagEntity"})
     List<PostEntity> findByTitleIn(List<String> titles);
 
     boolean existsByTitle(String title);
 
     @Transactional
+    @Query("delete from PostEntity p where p.title = :title and lower(p.authorEntity.email) = :email")
     @Modifying(clearAutomatically = true, flushAutomatically = true)
-    @Query("delete from PostEntity p where p.title = ?1")
-    void deleteByTitle(String title);
-
-    @Transactional
-    @Modifying(clearAutomatically = true, flushAutomatically = true)
-    @Query("DELETE FROM PostEntity p WHERE lower(p.title) IN :titles")
-    int deleteAllByTitleIn(@Param("titles") List<String> titles);
+    int deleteByTitleAndAuthorEntity_EmailIgnoreCase(@Param("title") String title, @Param("email") String email);
 }

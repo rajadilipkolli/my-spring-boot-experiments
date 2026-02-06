@@ -9,6 +9,7 @@ public record PostResponse(
         String title,
         String content,
         boolean published,
+        String authorEmail,
         LocalDateTime createdAt,
         LocalDateTime modifiedAt,
         LocalDateTime publishedAt,
@@ -29,7 +30,8 @@ public record PostResponse(
         return new PostResponse(
                 postRedis.getTitle(),
                 postRedis.getContent(),
-                postRedis.getPublished(),
+                postRedis.isPublished(),
+                postRedis.getAuthorEmail(),
                 postRedis.getCreatedAt(),
                 postRedis.getModifiedAt(),
                 postRedis.getPublishedAt(),

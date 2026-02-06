@@ -12,7 +12,8 @@ public record AuthorRequest(
         String middleName,
         @NotBlank(message = "LastName Can't be Blank") String lastName,
 
-        @Positive(message = "Mobile Number should be positive") Long mobile,
+        @Positive(message = "Mobile Number should be positive")
+        Long mobile,
 
         @Email @NotBlank(message = "Email Can't be Blank") String email,
         @JsonIgnore LocalDateTime createdAt,

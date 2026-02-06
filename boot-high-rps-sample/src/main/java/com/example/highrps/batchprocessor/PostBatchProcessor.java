@@ -1,11 +1,14 @@
 package com.example.highrps.batchprocessor;
 
+import com.example.highrps.entities.AuthorEntity;
 import com.example.highrps.entities.PostEntity;
 import com.example.highrps.mapper.NewPostRequestToPostEntityMapper;
 import com.example.highrps.model.request.NewPostRequest;
+import com.example.highrps.repository.jpa.AuthorRepository;
 import com.example.highrps.repository.jpa.PostRepository;
 import com.example.highrps.repository.jpa.TagRepository;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
@@ -14,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import tools.jackson.databind.json.JsonMapper;
 
 @Component
@@ -26,18 +30,21 @@ public class PostBatchProcessor implements EntityBatchProcessor {
     private final TagRepository tagRepository;
     private final JsonMapper jsonMapper;
     private final RedisTemplate<String, String> redis;
+    private final AuthorRepository authorRepository;
 
     public PostBatchProcessor(
             NewPostRequestToPostEntityMapper mapper,
             PostRepository postRepository,
             TagRepository tagRepository,
             JsonMapper jsonMapper,
-            RedisTemplate<String, String> redis) {
+            RedisTemplate<String, String> redis,
+            AuthorRepository authorRepository) {
         this.mapper = mapper;
         this.postRepository = postRepository;
         this.tagRepository = tagRepository;
         this.jsonMapper = jsonMapper;
         this.redis = redis;
+        this.authorRepository = authorRepository;
     }
 
     @Override
@@ -46,6 +53,7 @@ public class PostBatchProcessor implements EntityBatchProcessor {
     }
 
     @Override
+    @Transactional
     public void processUpserts(List<String> payloads) {
         // Step 1: Parse payloads and extract titles
         List<ParsedPost> parsedPosts = payloads.stream()
@@ -103,6 +111,19 @@ public class PostBatchProcessor implements EntityBatchProcessor {
                         // Create new entity
                         try {
                             entity = mapper.convert(parsed.request(), tagRepository);
+                            String authorEmail = parsed.request().email();
+                            AuthorEntity author = null;
+                            try {
+                                if (authorRepository.existsByEmailIgnoreCase(authorEmail)) {
+                                    author = authorRepository.getReferenceByEmail(authorEmail);
+                                }
+                            } catch (Exception ex) {
+                                // Fallback to a safe lookup if reference retrieval fails
+                                author = authorRepository
+                                        .findByEmailIgnoreCase(authorEmail)
+                                        .orElse(null);
+                            }
+                            entity.setAuthorEntity(author);
                             log.debug("Creating new post with title: {}", parsed.title());
                         } catch (Exception e) {
                             log.warn("Failed to create post entity for title: {}", parsed.title(), e);
@@ -134,9 +155,19 @@ public class PostBatchProcessor implements EntityBatchProcessor {
     public void processDeletes(List<String> keys) {
         if (keys.isEmpty()) return;
         try {
-            int deleted = postRepository.deleteAllByTitleIn(
-                    keys.stream().map(String::toLowerCase).toList());
-            log.debug("Deleted {} post entities for {} keys", deleted, keys.size());
+            List<ParserKey> cacheKeysList = keys.stream()
+                    .map(s -> s.split(":"))
+                    .map(strings -> new ParserKey(strings[0], strings[1].toLowerCase(Locale.ROOT)))
+                    .toList();
+
+            for (ParserKey key : cacheKeysList) {
+                try {
+                    long rows = postRepository.deleteByTitleAndAuthorEntity_EmailIgnoreCase(key.title(), key.email());
+                    log.debug("Deleted  {} post entity for title: {}, email: {}", rows > 0, key.title(), key.email());
+                } catch (Exception e) {
+                    log.warn("Failed to delete post entity for title: {}, email: {}", key.title(), key.email(), e);
+                }
+            }
         } catch (Exception e) {
             log.warn("Failed to batch delete post entities for keys: {}", keys, e);
         }
@@ -160,4 +191,6 @@ public class PostBatchProcessor implements EntityBatchProcessor {
 
     // Helper record to hold parsed data
     private record ParsedPost(String title, NewPostRequest request) {}
+
+    private record ParserKey(String title, String email) {}
 }

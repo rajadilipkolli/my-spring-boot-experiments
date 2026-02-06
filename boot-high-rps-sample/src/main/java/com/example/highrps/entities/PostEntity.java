@@ -10,7 +10,13 @@ import org.hibernate.Hibernate;
 import org.jspecify.annotations.Nullable;
 
 @Entity
-@Table(name = "posts")
+@Table(
+        name = "posts",
+        uniqueConstraints = {
+            @UniqueConstraint(
+                    name = "uc_postentity_title_author_id",
+                    columnNames = {"title", "author_id"})
+        })
 public class PostEntity extends Auditable {
 
     @Id

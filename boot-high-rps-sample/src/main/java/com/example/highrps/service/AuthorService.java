@@ -193,7 +193,7 @@ public class AuthorService {
      * is signaled by throwing IllegalArgumentException.
      */
     public AuthorResponse updateAuthor(String pathEmail, AuthorRequest newAuthorRequest) {
-        if (!pathEmail.equals(newAuthorRequest.email()) && !emailExists(pathEmail)) {
+        if (!pathEmail.equalsIgnoreCase(newAuthorRequest.email()) && !emailExists(pathEmail)) {
             throw new IllegalArgumentException("Path email does not match request email and original email not found");
         }
         AuthorRequest withModifiedAt =

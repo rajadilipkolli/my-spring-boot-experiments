@@ -65,6 +65,7 @@ public class AuthorBatchProcessor implements EntityBatchProcessor {
                     }
                 })
                 .filter(Objects::nonNull)
+                .filter(p -> p.email() != null)
                 .toList();
 
         if (parsedAuthors.isEmpty()) {

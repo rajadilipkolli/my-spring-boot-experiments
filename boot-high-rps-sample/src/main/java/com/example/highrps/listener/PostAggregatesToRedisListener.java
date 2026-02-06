@@ -55,28 +55,28 @@ public class PostAggregatesToRedisListener {
     public void handleAggregate(ConsumerRecord<String, NewPostRequest> record) {
         // Log record metadata early to diagnose tombstone timing issues
         try {
-            String key = record.key();
+            String cacheKey = record.key();
             NewPostRequest payload = record.value();
             log.debug(
-                    "Received posts-aggregates record: partition={}, offset={}, key={}, valueIsNull={}",
+                    "Received posts-aggregates record: partition={}, offset={}, cacheKey={}, valueIsNull={}",
                     record.partition(),
                     record.offset(),
-                    key,
+                    cacheKey,
                     payload == null);
-            // If payload is null -> tombstone: remove Redis key and enqueue delete marker
+            // If payload is null -> tombstone: remove Redis cacheKey and enqueue delete marker
             if (payload == null) {
                 try {
                     // remove repository-backed entry
-                    postRedisRepository.deleteById(key);
+                    postRedisRepository.deleteById(cacheKey);
                 } catch (Exception e) {
-                    log.warn("Failed to delete repository entry for tombstone key: {}", key, e);
+                    log.warn("Failed to delete repository entry for tombstone cacheKey: {}", cacheKey, e);
                 }
                 try {
-                    String tombstoneJson =
-                            jsonMapper.writeValueAsString(Map.of("title", key, "__deleted", true, "__entity", "post"));
+                    String tombstoneJson = jsonMapper.writeValueAsString(
+                            Map.of("title", cacheKey, "__deleted", true, "__entity", "post"));
                     redis.opsForList().leftPush(queueKey, tombstoneJson);
                 } catch (Exception e) {
-                    log.error("Failed to enqueue tombstone marker for key: {}, may lose durability", key, e);
+                    log.error("Failed to enqueue tombstone marker for cacheKey: {}, may lose durability", cacheKey, e);
                 }
                 return;
             }
@@ -89,7 +89,7 @@ public class PostAggregatesToRedisListener {
             try {
                 redis.opsForList().leftPush(queueKey, json);
             } catch (Exception e) {
-                log.error("Failed to enqueue payload for DB write, key: {}, may lose durability", key, e);
+                log.error("Failed to enqueue payload for DB write, cacheKey: {}, may lose durability", cacheKey, e);
             }
         } catch (Exception e) {
             log.error("Unhandled exception in handleAggregate", e);

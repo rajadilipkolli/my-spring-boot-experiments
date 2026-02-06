@@ -22,4 +22,6 @@ public interface AuthorRepository extends JpaRepository<AuthorEntity, Long> {
     int deleteByEmailInAllIgnoreCase(@Param("emails") List<String> emails);
 
     Optional<AuthorEntity> findByEmailIgnoreCase(String email);
+
+    AuthorEntity getReferenceByEmail(String email);
 }

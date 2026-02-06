@@ -30,7 +30,7 @@ public class PostController {
 
     @GetMapping("/posts/{title}/{email}")
     public ResponseEntity<PostResponse> getPostByTitle(
-            @NotBlank @PathVariable String email, @PathVariable @NotBlank String title) {
+            @PathVariable @NotBlank String title, @NotBlank @PathVariable String email) {
         PostResponse postResponse = postService.findPostByEmailAndTitle(email, title);
         return ResponseEntity.ok(postResponse);
     }

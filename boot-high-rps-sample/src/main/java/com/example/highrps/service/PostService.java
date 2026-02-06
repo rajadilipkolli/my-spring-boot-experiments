@@ -16,6 +16,7 @@ import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -85,36 +86,36 @@ public class PostService {
     }
 
     public PostResponse findPostByEmailAndTitle(String email, String title) {
-        var key = title + email.toLowerCase();
+        var cacheKey = String.join(":", title, email.toLowerCase());
         // 1a) Tombstone record check in Redis
-        Boolean deleted = redis.hasKey("deleted:posts:" + key);
+        Boolean deleted = redis.hasKey("deleted:posts:" + title);
         if (Boolean.TRUE.equals(deleted)) {
             throw new ResourceNotFoundException("Post not found for title: " + title);
         }
         // 1b) Local cache
-        var cached = localCache.getIfPresent(key);
+        var cached = localCache.getIfPresent(cacheKey);
         if (cached != null) {
             log.info("findPostByTitle: hit local cache for title={}", title);
             return PostResponse.fromJson(cached);
         }
 
         // 2) Redis materialized view
-        Optional<PostRedis> byId = postRedisRepository.findByTitleAndAuthorEmailIgnoreCase(title, email);
+        Optional<PostRedis> byId = postRedisRepository.findById(cacheKey);
         if (byId.isPresent()) {
             log.info("findPostByTitle: hit redis repository for title={}", title);
             PostResponse response = PostResponse.fromRedis(byId.get());
             var json = PostResponse.toJson(response);
-            localCache.put(key, json);
+            localCache.put(cacheKey, json);
             return response;
         }
 
         try {
-            NewPostRequest cachedRequest =
-                    requestCoalescer.subscribe(key, () -> getKeyValueStore().get(title));
+            NewPostRequest cachedRequest = requestCoalescer.subscribe(
+                    cacheKey, () -> getKeyValueStore().get(cacheKey));
             if (cachedRequest != null) {
                 PostResponse response = postRequestToResponseMapper.mapToPostResponse(cachedRequest);
                 var json = PostResponse.toJson(response);
-                localCache.put(key, json);
+                localCache.put(cacheKey, json);
                 try {
                     postRedisRepository.save(toPostRedis(title, cachedRequest));
                 } catch (Exception re) {
@@ -134,10 +135,10 @@ public class PostService {
         if (newPostRequest.published() != null && newPostRequest.published() && newPostRequest.publishedAt() == null) {
             newPostRequest = newPostRequest.withPublishedAt(LocalDateTime.now());
         }
-        var key = title + newPostRequest.email().toLowerCase();
+        var cacheKey = String.join(":", title, newPostRequest.email().toLowerCase());
         // Publish envelope and wait for the send to complete. Only after a successful send
         // do we populate the local cache and return the response.
-        var future = kafkaProducerService.publishEnvelope("post", key, newPostRequest);
+        var future = kafkaProducerService.publishEnvelope("post", cacheKey, newPostRequest);
         processFuture(future, title);
 
         // increment events counter after successful publish
@@ -148,7 +149,7 @@ public class PostService {
         String json = PostResponse.toJson(postResponse);
         // Only populate local cache after successful publish. Cache update is best-effort.
         try {
-            localCache.put(key, json);
+            localCache.put(cacheKey, json);
         } catch (Exception e) {
             log.warn("Failed to update local cache for title after successful publish: {}", title, e);
         }
@@ -170,7 +171,7 @@ public class PostService {
      * is signaled by throwing IllegalArgumentException.
      */
     public PostResponse updatePost(String pathTitle, NewPostRequest newPostRequest) {
-        if (!pathTitle.equals(newPostRequest.title()) && !titleExists(pathTitle)) {
+        if (!pathTitle.equals(newPostRequest.title()) && !titleExists(pathTitle, newPostRequest.email())) {
             throw new IllegalArgumentException("Path title does not match request title and original title not found");
         }
         NewPostRequest withModifiedAt = newPostRequest.withTimestamps(
@@ -179,10 +180,10 @@ public class PostService {
     }
 
     public void deletePost(String title, String email) {
-        var key = title + email.toLowerCase();
+        var cacheKey = String.join(":", title, email.toLowerCase());
         // 1) Publish tombstone to per-entity aggregates topic so Streams materialized KTable sees the delete
         try {
-            var deleteForEntity = kafkaProducerService.publishDeleteForEntity("post", key);
+            var deleteForEntity = kafkaProducerService.publishDeleteForEntity("post", cacheKey);
             processFuture(deleteForEntity, title);
             log.info("deletePost: published tombstone for title={}", title);
             // increment tombstone counter after successful publish
@@ -193,7 +194,7 @@ public class PostService {
 
         // 2) Mark deletion in local cache so reads return absent immediately
         try {
-            localCache.invalidate(key);
+            localCache.invalidate(cacheKey);
             log.info("deletePost: invalidated local cache for title={}", title);
         } catch (Exception e) {
             log.warn("Failed to mark local cache deletion for title: {}", title, e);
@@ -202,15 +203,16 @@ public class PostService {
         // 3) Remove from Redis so reads return absent immediately and batch processors don't re-populate from
         // repository
         try {
-            postRedisRepository.deleteByTitleAndAuthorEmailIgnoreCase(title, email);
+            postRedisRepository.deleteById(cacheKey);
+            log.info("deletePost: deleted redis repository entries for title={}", title);
         } catch (Exception e) {
             log.warn("Failed to delete redis repository entry for title: {}", title, e);
         }
 
         // 4b) Mark deleted in a short-lived Redis set so batch processors skip re-inserts
         try {
-            // Use per-title key so each deletion has independent TTL
-            redis.opsForValue().set("deleted:posts:" + key, "1", Duration.ofSeconds(60));
+            // Use per-title cacheKey so each deletion has independent TTL
+            redis.opsForValue().set("deleted:posts:" + title, "1", Duration.ofSeconds(60));
         } catch (Exception ex) {
             log.warn("Failed to mark title {} in deleted:posts set", title, ex);
         }
@@ -263,41 +265,43 @@ public class PostService {
         return keyValueStore;
     }
 
-    public boolean titleExists(String title) {
+    private boolean titleExists(String title, String email) {
+        var cacheKey = String.join(":", title, email.toLowerCase());
         try {
             Boolean deleted = redis.hasKey("deleted:posts:" + title);
             if (Boolean.TRUE.equals(deleted)) {
                 return false;
             }
-            if (localCache.getIfPresent(title) != null) {
+            if (localCache.getIfPresent(cacheKey) != null) {
                 return true;
             }
-            if (postRedisRepository.existsById(title)) {
+            if (postRedisRepository.existsById(cacheKey)) {
                 return true;
             }
-            NewPostRequest cachedRequest =
-                    requestCoalescer.subscribe(title, () -> getKeyValueStore().get(title));
+            NewPostRequest cachedRequest = requestCoalescer.subscribe(
+                    cacheKey, () -> getKeyValueStore().get(cacheKey));
             if (cachedRequest != null) {
                 return true;
             }
         } catch (Exception e) {
             log.warn("Cache/streams lookup failed for title {}, falling back to DB", title, e);
         }
-        return postRepository.existsByTitle(title);
+        return postRepository.existsByTitleAndAuthorEntity_EmailIgnoreCase(title, email.toLowerCase(Locale.ROOT));
     }
 
     public LocalDateTime getCreatedAtByTitleAndEmail(String title, String email) {
+        var cacheKey = title + email.toLowerCase();
         try {
-            String localCacheIfPresent = localCache.getIfPresent(title);
+            String localCacheIfPresent = localCache.getIfPresent(cacheKey);
             if (localCacheIfPresent != null) {
                 return PostResponse.fromJson(localCacheIfPresent).createdAt();
             }
-            Optional<PostRedis> postRedis = postRedisRepository.findById(title);
+            Optional<PostRedis> postRedis = postRedisRepository.findById(cacheKey);
             if (postRedis.isPresent()) {
                 return postRedis.get().getCreatedAt();
             }
-            NewPostRequest cachedRequest =
-                    requestCoalescer.subscribe(title, () -> getKeyValueStore().get(title));
+            NewPostRequest cachedRequest = requestCoalescer.subscribe(
+                    cacheKey, () -> getKeyValueStore().get(cacheKey));
             if (cachedRequest != null) {
                 return cachedRequest.createdAt();
             }
@@ -311,7 +315,9 @@ public class PostService {
     }
 
     private PostRedis toPostRedis(String title, NewPostRequest newPostRequest) {
+        var cacheKey = String.join(":", title, newPostRequest.email().toLowerCase());
         PostRedis postRedis = new PostRedis()
+                .setId(cacheKey)
                 .setTitle(title)
                 .setContent(newPostRequest.content())
                 .setPublished(newPostRequest.published() != null && newPostRequest.published())
