@@ -1,7 +1,6 @@
 package com.example.highrps.entities;
 
 import jakarta.persistence.*;
-import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -12,7 +11,7 @@ import org.jspecify.annotations.Nullable;
 
 @Entity
 @Table(name = "posts")
-public class PostEntity extends Auditable implements Serializable {
+public class PostEntity extends Auditable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)

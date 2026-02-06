@@ -12,7 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 public interface PostRepository extends JpaRepository<PostEntity, Long> {
 
-    PostEntity findByTitleAndAuthorEntity_Email(String title, String email);
+    Optional<PostEntity> findByTitleAndAuthorEntity_Email(String title, String email);
 
     @EntityGraph(attributePaths = {"tags", "details", "authorEntity", "tags.tagEntity"})
     @Override
@@ -33,6 +33,6 @@ public interface PostRepository extends JpaRepository<PostEntity, Long> {
 
     @Transactional
     @Modifying(clearAutomatically = true, flushAutomatically = true)
-    @Query("DELETE FROM PostEntity p WHERE p.title IN :titles")
+    @Query("DELETE FROM PostEntity p WHERE lower(p.title) IN :titles")
     int deleteAllByTitleIn(@Param("titles") List<String> titles);
 }

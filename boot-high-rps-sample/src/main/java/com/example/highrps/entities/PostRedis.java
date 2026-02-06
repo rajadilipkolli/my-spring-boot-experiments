@@ -40,12 +40,12 @@ public class PostRedis extends Auditable implements Serializable {
         return content;
     }
 
-    public PostRedis setPublished(Boolean published) {
+    public PostRedis setPublished(boolean published) {
         this.published = published;
         return this;
     }
 
-    public Boolean getPublished() {
+    public boolean getPublished() {
         return published;
     }
 

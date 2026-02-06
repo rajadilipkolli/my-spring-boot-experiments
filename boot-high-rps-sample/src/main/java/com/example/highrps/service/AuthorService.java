@@ -1,6 +1,7 @@
 package com.example.highrps.service;
 
 import com.example.highrps.config.AppProperties;
+import com.example.highrps.entities.Auditable;
 import com.example.highrps.entities.AuthorRedis;
 import com.example.highrps.exception.ResourceNotFoundException;
 import com.example.highrps.mapper.AuthorRequestToResponseMapper;
@@ -195,8 +196,8 @@ public class AuthorService {
         if (!pathEmail.equals(newAuthorRequest.email()) && !emailExists(pathEmail)) {
             throw new IllegalArgumentException("Path email does not match request email and original email not found");
         }
-        AuthorRequest withModifiedAt = newAuthorRequest.withCreatedAndModifiedAt(
-                LocalDateTime.now(), getCreatedAtByEmail(newAuthorRequest.email()));
+        AuthorRequest withModifiedAt =
+                newAuthorRequest.withTimeStamps(LocalDateTime.now(), getCreatedAtByEmail(pathEmail));
         return saveOrUpdateAuthor(withModifiedAt);
     }
 
@@ -328,9 +329,10 @@ public class AuthorService {
         } catch (Exception e) {
             log.warn("Cache/streams lookup failed for email {}, falling back to DB", email, e);
         }
-        return authorRepository.existsByEmailIgnoreCase(email)
-                ? authorRepository.findByEmailIgnoreCase(email).get().getCreatedAt()
-                : null;
+        return authorRepository
+                .findByEmailIgnoreCase(email)
+                .map(Auditable::getCreatedAt)
+                .orElse(null);
     }
 
     private AuthorRedis toAuthorRedis(String emailKey, AuthorResponse response) {

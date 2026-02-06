@@ -19,8 +19,8 @@ public record AuthorRequest(
         @JsonIgnore LocalDateTime modifiedAt)
         implements Serializable {
 
-    public AuthorRequest withCreatedAndModifiedAt(LocalDateTime now, LocalDateTime createdAtByEmail) {
+    public AuthorRequest withTimeStamps(LocalDateTime modifiedAt, LocalDateTime createdAtByEmail) {
         return new AuthorRequest(
-                this.firstName, this.middleName, this.lastName, this.mobile, this.email, createdAtByEmail, now);
+                this.firstName, this.middleName, this.lastName, this.mobile, this.email, createdAtByEmail, modifiedAt);
     }
 }

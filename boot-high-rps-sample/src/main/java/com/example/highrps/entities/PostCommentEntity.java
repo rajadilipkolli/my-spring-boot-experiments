@@ -1,14 +1,13 @@
 package com.example.highrps.entities;
 
 import jakarta.persistence.*;
-import java.io.Serializable;
 import java.time.OffsetDateTime;
 import java.util.Objects;
 import org.hibernate.Hibernate;
 
 @Entity
 @Table(name = "post_comments")
-public class PostCommentEntity extends Auditable implements Serializable {
+public class PostCommentEntity extends Auditable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)

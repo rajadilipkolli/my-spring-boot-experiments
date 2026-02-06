@@ -28,9 +28,10 @@ public class PostController {
         this.postService = postService;
     }
 
-    @GetMapping("/posts/{title}")
-    public ResponseEntity<PostResponse> getPostByTitle(@PathVariable String title) {
-        PostResponse postResponse = postService.findPostByTitle(title);
+    @GetMapping("/posts/{title}/{email}")
+    public ResponseEntity<PostResponse> getPostByTitle(
+            @NotBlank @PathVariable String email, @PathVariable @NotBlank String title) {
+        PostResponse postResponse = postService.findPostByEmailAndTitle(email, title);
         return ResponseEntity.ok(postResponse);
     }
 
@@ -56,9 +57,9 @@ public class PostController {
         }
     }
 
-    @DeleteMapping("/posts/{title}")
-    public ResponseEntity<Void> deletePost(@PathVariable @NotBlank String title) {
-        postService.deletePost(title);
+    @DeleteMapping("/posts/{title}/{email}")
+    public ResponseEntity<Void> deletePost(@PathVariable @NotBlank String title, @PathVariable @NotBlank String email) {
+        postService.deletePost(title, email);
         return ResponseEntity.noContent().build();
     }
 }

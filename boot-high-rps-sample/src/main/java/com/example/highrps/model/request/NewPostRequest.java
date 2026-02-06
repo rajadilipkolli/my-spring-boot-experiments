@@ -48,7 +48,7 @@ public record NewPostRequest(
                 this.tags);
     }
 
-    public NewPostRequest withModifiedAt(LocalDateTime now, LocalDateTime createdAt) {
+    public NewPostRequest withTimestamps(LocalDateTime modifiedAt, LocalDateTime createdAt) {
         return new NewPostRequest(
                 this.title,
                 this.content,
@@ -56,7 +56,7 @@ public record NewPostRequest(
                 this.published,
                 this.publishedAt,
                 createdAt,
-                now,
+                modifiedAt,
                 this.details,
                 this.tags);
     }

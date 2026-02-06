@@ -68,6 +68,7 @@ public class PostBatchProcessor implements EntityBatchProcessor {
                     }
                 })
                 .filter(Objects::nonNull)
+                .filter(p -> p.title() != null)
                 .toList();
 
         if (parsedPosts.isEmpty()) {
@@ -82,8 +83,8 @@ public class PostBatchProcessor implements EntityBatchProcessor {
 
         List<PostEntity> existingPosts = postRepository.findByTitleIn(titles);
 
-        Map<String, PostEntity> existingByTitle =
-                existingPosts.stream().collect(Collectors.toMap(PostEntity::getTitle, Function.identity()));
+        Map<String, PostEntity> existingByTitle = existingPosts.stream()
+                .collect(Collectors.toMap(PostEntity::getTitle, Function.identity(), (e1, e2) -> e1));
 
         // Step 3: Process each post - update existing or create new
         List<PostEntity> entitiesToSave = parsedPosts.stream()

@@ -30,7 +30,7 @@ public class AuthorController {
 
     @PostMapping(value = "/author")
     public ResponseEntity<AuthorResponse> createAuthor(@RequestBody @Valid AuthorRequest newAuthorRequest) {
-        AuthorRequest withCreatedAt = newAuthorRequest.withCreatedAndModifiedAt(null, LocalDateTime.now());
+        AuthorRequest withCreatedAt = newAuthorRequest.withTimeStamps(null, LocalDateTime.now());
         AuthorResponse resp = authorService.saveOrUpdateAuthor(withCreatedAt);
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{email}")

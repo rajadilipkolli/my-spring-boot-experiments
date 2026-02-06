@@ -38,7 +38,7 @@ class PostControllerIT extends AbstractIntegrationTest {
     void getPostByTitleNotFound() {
         mockMvcTester
                 .get()
-                .uri("/api/posts/non-existent-title")
+                .uri("/api/posts/non-existent-title/non-existent-email")
                 .exchange()
                 .assertThat()
                 .hasStatus(HttpStatus.NOT_FOUND)
@@ -48,6 +48,7 @@ class PostControllerIT extends AbstractIntegrationTest {
     @Test
     void crudPostResourcesAPICheck() {
         String title = "sample-post";
+        String email = "test1@local.com";
 
         // 1) Create a post
         mockMvcTester
@@ -68,7 +69,7 @@ class PostControllerIT extends AbstractIntegrationTest {
         // Ensure caches/redis are populated by hitting GET (which populates local cache and redis)
         mockMvcTester
                 .get()
-                .uri("/api/posts/" + title)
+                .uri("/api/posts/{title}/{email}", title, email)
                 .exchange()
                 .assertThat()
                 .hasStatus(HttpStatus.OK)
@@ -111,7 +112,7 @@ class PostControllerIT extends AbstractIntegrationTest {
                         {
                             "title": "sample-post",
                             "content": "Updated content before delete",
-                            "email": "test@local.com",
+                            "email": "test1@local.com",
                             "published": true,
                             "details": {
                                 "detailsKey": "This is a summary",
@@ -145,14 +146,13 @@ class PostControllerIT extends AbstractIntegrationTest {
                     assertThat(value.getPublishedAt()).isNotNull().isInstanceOf(LocalDateTime.class);
                     assertThat(value.getCreatedAt()).isNotNull().isInstanceOf(LocalDateTime.class);
                     assertThat(value.getModifiedAt()).isNotNull().isInstanceOf(LocalDateTime.class);
-                    assertThat(value.getModifiedAt().isAfter(value.getCreatedAt()))
-                            .isEqualTo(true);
+                    assertThat(value.getModifiedAt()).isAfter(value.getCreatedAt());
                 });
 
         // 3) Delete the post
         mockMvcTester
                 .delete()
-                .uri("/api/posts/" + title)
+                .uri("/api/posts/{title}/{email}", title, email)
                 .exchange()
                 .assertThat()
                 .hasStatus(HttpStatus.NO_CONTENT);
@@ -184,6 +184,7 @@ class PostControllerIT extends AbstractIntegrationTest {
     @Test
     void crudPostResourcesWithStateCheck() {
         String title = "delete-me";
+        String email = "test@local.com";
 
         // 1) Create a post
         mockMvcTester
@@ -217,7 +218,7 @@ class PostControllerIT extends AbstractIntegrationTest {
         // Ensure caches/redis are populated by hitting GET (which populates local cache and redis)
         mockMvcTester
                 .get()
-                .uri("/api/posts/" + title)
+                .uri("/api/posts/{title}/{email}", title, email)
                 .exchange()
                 .assertThat()
                 .hasStatus(HttpStatus.OK)
@@ -300,7 +301,7 @@ class PostControllerIT extends AbstractIntegrationTest {
         // 3) Delete the post
         mockMvcTester
                 .delete()
-                .uri("/api/posts/" + title)
+                .uri("/api/posts/{title}/{email}", title, email)
                 .exchange()
                 .assertThat()
                 .hasStatus(HttpStatus.NO_CONTENT);
@@ -321,7 +322,7 @@ class PostControllerIT extends AbstractIntegrationTest {
         // 4) Subsequent GET should return 404
         mockMvcTester
                 .get()
-                .uri("/api/posts/" + title)
+                .uri("/api/posts/{title}/{email}", title, email)
                 .exchange()
                 .assertThat()
                 .hasStatus(HttpStatus.NOT_FOUND)

@@ -58,5 +58,5 @@ public abstract class AbstractIntegrationTest {
     protected PostRedisRepository postRedisRepository;
 
     @Autowired
-    protected AuthorBatchProcessor processor;
+    protected AuthorBatchProcessor authorBatchProcessor;
 }

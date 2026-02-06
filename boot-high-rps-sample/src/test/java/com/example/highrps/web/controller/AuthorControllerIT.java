@@ -119,8 +119,7 @@ public class AuthorControllerIT extends AbstractIntegrationTest {
         assertThat(updatedResponseFromRedis.getFirstName()).isEqualTo("junit");
         assertThat(updatedResponseFromRedis.getCreatedAt()).isNotNull().isInstanceOf(LocalDateTime.class);
         assertThat(updatedResponseFromRedis.getModifiedAt()).isNotNull().isInstanceOf(LocalDateTime.class);
-        assertThat(updatedResponseFromRedis.getModifiedAt().isAfter(updatedResponseFromRedis.getCreatedAt()))
-                .isTrue();
+        assertThat(updatedResponseFromRedis.getModifiedAt()).isAfter(updatedResponseFromRedis.getCreatedAt());
 
         // 3) Delete the author via API
         mockMvcTester

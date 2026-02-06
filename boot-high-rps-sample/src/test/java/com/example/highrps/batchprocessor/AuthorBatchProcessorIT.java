@@ -17,7 +17,12 @@ class AuthorBatchProcessorIT extends AbstractIntegrationTest {
     void setUp() {
         // clean DB and Redis markers
         authorRepository.deleteAll();
-        redisTemplate.getConnectionFactory().getConnection().serverCommands().flushDb();
+        redisTemplate.execute(
+                connection -> {
+                    connection.serverCommands().flushDb();
+                    return null;
+                },
+                true);
     }
 
     @Test
@@ -27,7 +32,7 @@ class AuthorBatchProcessorIT extends AbstractIntegrationTest {
         String payload2 =
                 "{\"firstName\":\"Jane\",\"middleName\":\"A\",\"lastName\":\"Smith\",\"mobile\":9876543210,\"email\":\"jane@example.com\"}";
 
-        processor.processUpserts(List.of(payload1, payload2));
+        authorBatchProcessor.processUpserts(List.of(payload1, payload2));
 
         List<AuthorEntity> all = authorRepository.findAll();
         assertThat(all).hasSize(2);
@@ -41,7 +46,7 @@ class AuthorBatchProcessorIT extends AbstractIntegrationTest {
         // Now update John
         String updateJohn =
                 "{\"firstName\":\"Johnny\",\"middleName\":\"M\",\"lastName\":\"Doe\",\"mobile\":1234567890,\"email\":\"john@example.com\"}";
-        processor.processUpserts(List.of(updateJohn));
+        authorBatchProcessor.processUpserts(List.of(updateJohn));
 
         AuthorEntity updated = authorRepository.findAll().stream()
                 .filter(a -> "john@example.com".equalsIgnoreCase(a.getEmail()))
@@ -60,7 +65,7 @@ class AuthorBatchProcessorIT extends AbstractIntegrationTest {
         // mark tombstone in Redis
         redisTemplate.opsForValue().set("deleted:authors:" + email, "1", Duration.ofSeconds(60));
 
-        processor.processUpserts(List.of(payload));
+        authorBatchProcessor.processUpserts(List.of(payload));
 
         boolean exists = authorRepository.existsByEmailIgnoreCase(email);
         assertThat(exists).isFalse();
@@ -83,7 +88,7 @@ class AuthorBatchProcessorIT extends AbstractIntegrationTest {
 
         assertThat(authorRepository.findAll()).hasSize(2);
 
-        processor.processDeletes(List.of("d1@example.com", "D2@Example.com"));
+        authorBatchProcessor.processDeletes(List.of("d1@example.com", "D2@Example.com"));
 
         assertThat(authorRepository.findAll()).isEmpty();
     }

@@ -80,7 +80,10 @@ public class AuthorBatchProcessor implements EntityBatchProcessor {
         List<AuthorEntity> existingAuthors = authorRepository.findByEmailInAllIgnoreCase(emails);
 
         Map<String, AuthorEntity> existingByEmail = existingAuthors.stream()
-                .collect(Collectors.toMap(a -> a.getEmail().toLowerCase(Locale.ROOT), Function.identity()));
+                .collect(Collectors.toMap(
+                        a -> a.getEmail().toLowerCase(Locale.ROOT),
+                        Function.identity(),
+                        (a1, a2) -> a1)); // in case of duplicates, keep the first
 
         // Step 3: Process each author - update existing or create new
         List<AuthorEntity> entitiesToSave = parsedAuthors.stream()
