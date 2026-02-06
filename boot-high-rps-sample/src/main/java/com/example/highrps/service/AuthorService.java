@@ -7,6 +7,7 @@ import com.example.highrps.model.request.AuthorRequest;
 import com.example.highrps.model.request.EventEnvelope;
 import com.example.highrps.model.response.AuthorResponse;
 import com.example.highrps.repository.AuthorRepository;
+import com.example.highrps.utility.RequestCoalescer;
 import com.github.benmanes.caffeine.cache.Cache;
 import java.time.Duration;
 import java.util.Locale;
@@ -39,6 +40,7 @@ public class AuthorService {
     private final StreamsBuilderFactoryBean kafkaStreamsFactory;
     private final AuthorRepository authorRepository;
     private final AppProperties appProperties;
+    private final RequestCoalescer<AuthorRequest> requestCoalescer;
 
     private volatile ReadOnlyKeyValueStore<String, AuthorRequest> keyValueStore = null;
     private final ReentrantLock keyValueStoreLock = new ReentrantLock();
@@ -58,6 +60,7 @@ public class AuthorService {
         this.kafkaStreamsFactory = kafkaStreamsFactory;
         this.authorRepository = authorRepository;
         this.appProperties = appProperties;
+        this.requestCoalescer = new RequestCoalescer<>();
     }
 
     public AuthorResponse findAuthorByEmail(String email) {
@@ -89,7 +92,8 @@ public class AuthorService {
         }
 
         try {
-            AuthorRequest cachedRequest = getKeyValueStore().get(emailKey);
+            AuthorRequest cachedRequest = requestCoalescer.subscribe(
+                    emailKey, () -> getKeyValueStore().get(emailKey));
             if (cachedRequest != null) {
                 AuthorResponse response = authorRequestToResponseMapper.mapToAuthorResponse(cachedRequest);
                 var json = AuthorResponse.toJson(response);
