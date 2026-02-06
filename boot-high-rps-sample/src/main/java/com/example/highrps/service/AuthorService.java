@@ -127,13 +127,7 @@ public class AuthorService {
                     localCache.put(emailKey, json);
                     try {
                         // also persist an AuthorRedis object for repository-based reads
-                        AuthorRedis ar = new AuthorRedis()
-                                .setEmail(emailKey)
-                                .setFirstName(response.firstName())
-                                .setMiddleName(response.middleName())
-                                .setLastName(response.lastName())
-                                .setMobile(response.mobile())
-                                .setRegisteredAt(response.registeredAt());
+                        AuthorRedis ar = toAuthorRedis(emailKey, response);
                         authorRedisRepository.save(ar);
                     } catch (Exception re) {
                         log.warn("Failed to update Redis for email {} after Streams lookup", email, re);
@@ -179,13 +173,7 @@ public class AuthorService {
 
         // perform an eager Redis write using repository so it can be directly used by JPA batch
         try {
-            AuthorRedis ar = new AuthorRedis()
-                    .setEmail(emailKey)
-                    .setFirstName(authorResponse.firstName())
-                    .setMiddleName(authorResponse.middleName())
-                    .setLastName(authorResponse.lastName())
-                    .setMobile(authorResponse.mobile())
-                    .setRegisteredAt(authorResponse.registeredAt());
+            AuthorRedis ar = toAuthorRedis(emailKey, authorResponse);
             authorRedisRepository.save(ar);
         } catch (Exception e) {
             log.warn("Eager redis repository write failed for email {} (listener will still populate redis)", email, e);
@@ -289,7 +277,7 @@ public class AuthorService {
             if (localCache.getIfPresent(emailKey) != null) {
                 return true;
             }
-            if (authorRedisRepository.findById(email).isPresent()) {
+            if (authorRedisRepository.existsById(email)) {
                 return true;
             }
             AuthorRequest cachedRequest = requestCoalescer.subscribe(
@@ -301,5 +289,15 @@ public class AuthorService {
             log.warn("Cache/streams lookup failed for email {}, falling back to DB", email, e);
         }
         return authorRepository.existsByEmailIgnoreCase(email);
+    }
+
+    private AuthorRedis toAuthorRedis(String emailKey, AuthorResponse response) {
+        return new AuthorRedis()
+                .setEmail(emailKey)
+                .setFirstName(response.firstName())
+                .setMiddleName(response.middleName())
+                .setLastName(response.lastName())
+                .setMobile(response.mobile())
+                .setRegisteredAt(response.registeredAt());
     }
 }

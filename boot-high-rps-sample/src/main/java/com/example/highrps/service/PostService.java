@@ -260,7 +260,7 @@ public class PostService {
             if (localCache.getIfPresent(title) != null) {
                 return true;
             }
-            if (postRedisRepository.findById(title).isPresent()) {
+            if (postRedisRepository.existsById(title)) {
                 return true;
             }
             NewPostRequest cachedRequest =
