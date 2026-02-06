@@ -1,6 +1,8 @@
 package com.example.highrps.service;
 
 import com.example.highrps.model.request.EventEnvelope;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import org.slf4j.Logger;
@@ -19,6 +21,9 @@ public class KafkaProducerService {
 
     private final KafkaTemplate<String, EventEnvelope> kafkaTemplate;
     private final JsonMapper mapper;
+    private final MeterRegistry meterRegistry;
+    private final Counter eventsPublishedCounter;
+    private final Counter tombstonesPublishedCounter;
 
     @Value("${app.kafka.events-topic:events}")
     private String eventsTopic;
@@ -27,9 +32,14 @@ public class KafkaProducerService {
             "post", "posts-aggregates",
             "author", "authors-aggregates");
 
-    public KafkaProducerService(KafkaTemplate<String, EventEnvelope> kafkaTemplate, JsonMapper mapper) {
+    public KafkaProducerService(
+            KafkaTemplate<String, EventEnvelope> kafkaTemplate, JsonMapper mapper, MeterRegistry meterRegistry) {
         this.kafkaTemplate = kafkaTemplate;
         this.mapper = mapper;
+        this.meterRegistry = meterRegistry;
+        // base counters (global) - include a topic tag with value 'all' so tag keys match per-topic counters
+        this.eventsPublishedCounter = meterRegistry.counter("app.kafka.events.published", "topic", "all");
+        this.tombstonesPublishedCounter = meterRegistry.counter("app.kafka.tombstones.published", "topic", "all");
     }
 
     /**
@@ -88,6 +98,14 @@ public class KafkaProducerService {
                     } else {
                         log.debug("Published event to topic {} for key {} (no metadata)", topic, key);
                     }
+                    // increment metrics on successful publish
+                    if (ex == null) {
+                        eventsPublishedCounter.increment();
+                        // also emit a per-topic counter with tag "topic"
+                        meterRegistry
+                                .counter("app.kafka.events.published", "topic", topic)
+                                .increment();
+                    }
                 })
                 .toCompletableFuture();
     }
@@ -104,7 +122,15 @@ public class KafkaProducerService {
                     if (ex != null) {
                         log.error("Failed to publish delete (tombstone) to topic {} for key {}", topic, key, ex);
                     } else {
+                        // reference result to avoid unused-parameter warnings (log at trace level)
+                        if (result != null) {
+                            log.trace("Tombstone send result: {}", result);
+                        }
                         log.debug("Published delete (tombstone) to topic {} for key {}", topic, key);
+                        tombstonesPublishedCounter.increment();
+                        meterRegistry
+                                .counter("app.kafka.tombstones.published", "topic", topic)
+                                .increment();
                     }
                 })
                 .toCompletableFuture();

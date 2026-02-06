@@ -1,18 +1,21 @@
 package com.example.highrps.service;
 
 import com.example.highrps.config.AppProperties;
+import com.example.highrps.entities.AuthorRedis;
 import com.example.highrps.exception.ResourceNotFoundException;
 import com.example.highrps.mapper.AuthorRequestToResponseMapper;
 import com.example.highrps.model.request.AuthorRequest;
 import com.example.highrps.model.request.EventEnvelope;
 import com.example.highrps.model.response.AuthorResponse;
-import com.example.highrps.repository.AuthorRepository;
+import com.example.highrps.repository.jpa.AuthorRepository;
+import com.example.highrps.repository.redis.AuthorRedisRepository;
 import com.example.highrps.utility.RequestCoalescer;
 import com.github.benmanes.caffeine.cache.Cache;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import java.time.Duration;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -41,6 +44,7 @@ public class AuthorService {
     private final AuthorRequestToResponseMapper authorRequestToResponseMapper;
     private final StreamsBuilderFactoryBean kafkaStreamsFactory;
     private final AuthorRepository authorRepository;
+    private final AuthorRedisRepository authorRedisRepository;
     private final AppProperties appProperties;
     private final RequestCoalescer<AuthorRequest> requestCoalescer;
 
@@ -57,6 +61,7 @@ public class AuthorService {
             AuthorRequestToResponseMapper authorRequestToResponseMapper,
             StreamsBuilderFactoryBean kafkaStreamsFactory,
             AuthorRepository authorRepository,
+            AuthorRedisRepository authorRedisRepository,
             AppProperties appProperties,
             MeterRegistry meterRegistry) {
         this.kafkaProducerService = kafkaProducerService;
@@ -65,6 +70,7 @@ public class AuthorService {
         this.authorRequestToResponseMapper = authorRequestToResponseMapper;
         this.kafkaStreamsFactory = kafkaStreamsFactory;
         this.authorRepository = authorRepository;
+        this.authorRedisRepository = authorRedisRepository;
         this.appProperties = appProperties;
         this.requestCoalescer = new RequestCoalescer<>();
 
@@ -93,15 +99,21 @@ public class AuthorService {
             return AuthorResponse.fromJson(cached);
         }
 
-        try {
-            var raw = redis.opsForValue().get("authors:" + emailKey);
-            if (raw != null) {
-                log.info("findAuthorByEmail: hit redis for email={}", email);
-                localCache.put(emailKey, raw);
-                return AuthorResponse.fromJson(raw);
-            }
-        } catch (Exception e) {
-            log.warn("Failed to read from Redis for email: {}, falling back", email, e);
+        Optional<AuthorRedis> byId = authorRedisRepository.findById(emailKey);
+        if (byId.isPresent()) {
+            log.info("findAuthorByEmail: hit Redis repository for email={}", email);
+            AuthorRedis ar = byId.get();
+            AuthorResponse response = new AuthorResponse(
+                    null,
+                    ar.getFirstName(),
+                    ar.getMiddleName(),
+                    ar.getLastName(),
+                    ar.getMobile(),
+                    ar.getEmail(),
+                    ar.getRegisteredAt());
+            var json = AuthorResponse.toJson(response);
+            localCache.put(emailKey, json);
+            return response;
         }
 
         try {
@@ -109,14 +121,19 @@ public class AuthorService {
                     emailKey, () -> getKeyValueStore().get(emailKey));
             if (cachedRequest != null) {
                 AuthorResponse response = authorRequestToResponseMapper.mapToAuthorResponse(cachedRequest);
-                var json = AuthorResponse.toJson(response);
-                localCache.put(emailKey, json);
-                try {
-                    redis.opsForValue().set("authors:" + emailKey, json);
-                } catch (Exception re) {
-                    log.warn("Failed to update Redis for email {} after Streams lookup", email, re);
+                if (response != null) {
+                    log.info("findAuthorByEmail: hit Kafka Streams store for email={}", email);
+                    var json = AuthorResponse.toJson(response);
+                    localCache.put(emailKey, json);
+                    try {
+                        // also persist an AuthorRedis object for repository-based reads
+                        AuthorRedis ar = toAuthorRedis(emailKey, response);
+                        authorRedisRepository.save(ar);
+                    } catch (Exception re) {
+                        log.warn("Failed to update Redis for email {} after Streams lookup", email, re);
+                    }
+                    return response;
                 }
-                return response;
             }
         } catch (Exception e) {
             log.error("Failed to query Kafka Streams store for email: {}", email, e);
@@ -154,11 +171,12 @@ public class AuthorService {
             log.warn("Failed to update local cache for email after successful publish: {}", email, e);
         }
 
-        // perform an eager Redis write (listener remains source of truth for DB queue).
+        // perform an eager Redis write using repository so it can be directly used by JPA batch
         try {
-            redis.opsForValue().set("authors:" + emailKey, json);
+            AuthorRedis ar = toAuthorRedis(emailKey, authorResponse);
+            authorRedisRepository.save(ar);
         } catch (Exception e) {
-            log.warn("Eager redis write failed for email {} (listener will still populate redis)", email, e);
+            log.warn("Eager redis repository write failed for email {} (listener will still populate redis)", email, e);
         }
 
         return authorResponse;
@@ -185,11 +203,10 @@ public class AuthorService {
         }
 
         try {
-            String prev = redis.opsForValue().getAndDelete("authors:" + emailKey);
-            boolean existed = prev != null;
-            log.debug("Deleted key for email {}, presentBeforeDelete={}", email, existed);
+            // delete any repository entry
+            authorRedisRepository.deleteById(emailKey);
         } catch (Exception e) {
-            log.warn("Failed to delete redis key for email: {}", email, e);
+            log.warn("Failed to delete redis repository entry for email: {}", email, e);
         }
 
         // Mark deleted in a short-lived Redis set so batch processors skip re-inserts
@@ -260,7 +277,7 @@ public class AuthorService {
             if (localCache.getIfPresent(emailKey) != null) {
                 return true;
             }
-            if (redis.opsForValue().get("authors:" + emailKey) != null) {
+            if (authorRedisRepository.existsById(emailKey)) {
                 return true;
             }
             AuthorRequest cachedRequest = requestCoalescer.subscribe(
@@ -272,5 +289,15 @@ public class AuthorService {
             log.warn("Cache/streams lookup failed for email {}, falling back to DB", email, e);
         }
         return authorRepository.existsByEmailIgnoreCase(email);
+    }
+
+    private AuthorRedis toAuthorRedis(String emailKey, AuthorResponse response) {
+        return new AuthorRedis()
+                .setEmail(emailKey)
+                .setFirstName(response.firstName())
+                .setMiddleName(response.middleName())
+                .setLastName(response.lastName())
+                .setMobile(response.mobile())
+                .setRegisteredAt(response.registeredAt());
     }
 }

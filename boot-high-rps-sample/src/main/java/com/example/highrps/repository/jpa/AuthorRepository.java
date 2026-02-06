@@ -1,4 +1,4 @@
-package com.example.highrps.repository;
+package com.example.highrps.repository.jpa;
 
 import com.example.highrps.entities.AuthorEntity;
 import java.util.List;

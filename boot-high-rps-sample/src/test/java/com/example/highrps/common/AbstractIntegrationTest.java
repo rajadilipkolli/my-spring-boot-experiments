@@ -2,9 +2,11 @@ package com.example.highrps.common;
 
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
-import com.example.highrps.repository.PostRepository;
-import com.example.highrps.repository.PostTagRepository;
-import com.example.highrps.repository.TagRepository;
+import com.example.highrps.repository.jpa.PostRepository;
+import com.example.highrps.repository.jpa.PostTagRepository;
+import com.example.highrps.repository.jpa.TagRepository;
+import com.example.highrps.repository.redis.AuthorRedisRepository;
+import com.example.highrps.repository.redis.PostRedisRepository;
 import com.github.benmanes.caffeine.cache.Cache;
 import io.micrometer.core.instrument.MeterRegistry;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,4 +45,10 @@ public abstract class AbstractIntegrationTest {
 
     @Autowired
     protected MeterRegistry meterRegistry;
+
+    @Autowired
+    protected AuthorRedisRepository authorRedisRepository;
+
+    @Autowired
+    protected PostRedisRepository postRedisRepository;
 }

@@ -62,10 +62,9 @@ public class AuthorControllerIT extends AbstractIntegrationTest {
         assertThat(cached).isNotNull();
         AuthorResponse cachedResponse = AuthorResponse.fromJson(cached);
         assertThat(cachedResponse.middleName()).isNull();
-        String redisString = redisTemplate.opsForValue().get("authors:" + emailKey);
-        assertThat(redisString).isNotNull();
-        cachedResponse = AuthorResponse.fromJson(redisString);
-        assertThat(cachedResponse.middleName()).isNull();
+        var redisString = authorRedisRepository.findById(emailKey);
+        assertThat(redisString).isPresent();
+        assertThat(redisString.get().getMiddleName()).isNull();
 
         // 2) Update the author via the new PUT endpoint to change content
         mockMvcTester
@@ -97,11 +96,10 @@ public class AuthorControllerIT extends AbstractIntegrationTest {
         AuthorResponse cachedAfterResponse = AuthorResponse.fromJson(cachedAfter);
         assertThat(cachedAfterResponse.middleName()).isEqualTo("IT");
         assertThat(cachedAfterResponse.firstName()).isEqualTo("junit");
-        String redisAfterString = redisTemplate.opsForValue().get("authors:" + emailKey);
-        assertThat(redisAfterString).isNotNull();
-        AuthorResponse redisAfterResponse = AuthorResponse.fromJson(redisAfterString);
-        assertThat(redisAfterResponse.middleName()).isEqualTo("IT");
-        assertThat(redisAfterResponse.firstName()).isEqualTo("junit");
+        var redisAfterResponse = authorRedisRepository.findById(emailKey);
+        assertThat(redisAfterResponse).isPresent();
+        assertThat(redisAfterResponse.get().getMiddleName()).isEqualTo("IT");
+        assertThat(redisAfterResponse.get().getFirstName()).isEqualTo("junit");
 
         // 3) Delete the author via API
         mockMvcTester
@@ -113,7 +111,8 @@ public class AuthorControllerIT extends AbstractIntegrationTest {
 
         // Assert local cache and redis no longer have the key
         assertThat(localCache.getIfPresent(emailKey)).isNull();
-        assertThat(redisTemplate.opsForValue().get("authors:" + emailKey)).isNull();
+        var redisAfterDelete = authorRedisRepository.findById(emailKey);
+        assertThat(redisAfterDelete).isEmpty();
         assertThat(redisTemplate.opsForValue().get("deleted:authors:" + emailKey))
                 .isNotNull()
                 .isEqualTo("1");
@@ -121,10 +120,6 @@ public class AuthorControllerIT extends AbstractIntegrationTest {
         // 4) Subsequent GET should return 404
         await().atMost(Duration.ofSeconds(15))
                 .pollInterval(Duration.ofMillis(500))
-                .conditionEvaluationListener(condition -> {
-                    // Uncomment for debugging pipeline failures
-                    System.out.println("Polling attempt: " + condition.getElapsedTimeInMS() + "ms");
-                })
                 .untilAsserted(() -> mockMvcTester
                         .get()
                         .uri("/api/author/" + email)
@@ -135,6 +130,22 @@ public class AuthorControllerIT extends AbstractIntegrationTest {
 
         // Also assert local cache and redis no longer have the key
         assertThat(localCache.getIfPresent(emailKey)).isNull();
-        assertThat(redisTemplate.hasKey("authors:" + emailKey)).isFalse();
+
+        double count =
+                this.meterRegistry.get("app.kafka.events.published").counter().count();
+        assertThat(count).isGreaterThanOrEqualTo(2); // at least create and delete events should be published
+        double deleteCount = this.meterRegistry
+                .get("app.kafka.tombstones.published")
+                .counter()
+                .count();
+        assertThat(deleteCount).isGreaterThanOrEqualTo(1); // at least 1 tombstone should be published for the delete
+        double authorPublishedCount =
+                this.meterRegistry.counter("authors.events.published").count();
+        assertThat(authorPublishedCount)
+                .isEqualTo(2); // create and update events should be published to the per-entity topic
+        double authorTombstoneCount =
+                this.meterRegistry.counter("authors.tombstones.published").count();
+        assertThat(authorTombstoneCount)
+                .isEqualTo(1); // at least 1 tombstone should be published to the per-entity topic for the delete
     }
 }

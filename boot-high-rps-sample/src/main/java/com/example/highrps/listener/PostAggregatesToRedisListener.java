@@ -3,6 +3,7 @@ package com.example.highrps.listener;
 import com.example.highrps.mapper.PostRequestToResponseMapper;
 import com.example.highrps.model.request.NewPostRequest;
 import com.example.highrps.model.response.PostResponse;
+import com.example.highrps.repository.redis.PostRedisRepository;
 import java.util.Map;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.slf4j.Logger;
@@ -28,16 +29,19 @@ public class PostAggregatesToRedisListener {
     private final PostRequestToResponseMapper mapper;
     private final String queueKey;
     private final JsonMapper jsonMapper;
+    private final PostRedisRepository postRedisRepository;
 
     public PostAggregatesToRedisListener(
             RedisTemplate<String, String> redis,
             PostRequestToResponseMapper mapper,
             @Value("${app.batch.queue-key:events:queue}") String queueKey,
-            JsonMapper jsonMapper) {
+            JsonMapper jsonMapper,
+            PostRedisRepository postRedisRepository) {
         this.redis = redis;
         this.mapper = mapper;
         this.queueKey = queueKey;
         this.jsonMapper = jsonMapper;
+        this.postRedisRepository = postRedisRepository;
     }
 
     @KafkaListener(
@@ -59,13 +63,13 @@ public class PostAggregatesToRedisListener {
                     record.offset(),
                     key,
                     payload == null);
-            String redisKey = "posts:" + key;
             // If payload is null -> tombstone: remove Redis key and enqueue delete marker
             if (payload == null) {
                 try {
-                    redis.opsForValue().getAndDelete(redisKey);
+                    // remove repository-backed entry
+                    postRedisRepository.deleteById(key);
                 } catch (Exception e) {
-                    log.warn("Failed to delete redis key for tombstone: {}", redisKey, e);
+                    log.warn("Failed to delete repository entry for tombstone key: {}", key, e);
                 }
                 try {
                     String tombstoneJson =
