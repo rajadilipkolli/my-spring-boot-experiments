@@ -8,14 +8,13 @@ import jakarta.persistence.Id;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
-import java.io.Serializable;
 import java.util.Objects;
 
 @Entity
 @Table(
         name = "tags",
         uniqueConstraints = {@UniqueConstraint(columnNames = "tag_name", name = "uc_tag_name")})
-public class TagEntity implements Serializable {
+public class TagEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "tags_seq")

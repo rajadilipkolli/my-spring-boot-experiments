@@ -6,6 +6,7 @@ import com.example.highrps.service.PostService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import java.net.URI;
+import java.time.LocalDateTime;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -27,18 +28,20 @@ public class PostController {
         this.postService = postService;
     }
 
-    @GetMapping("/posts/{title}")
-    public ResponseEntity<PostResponse> getPostByTitle(@PathVariable String title) {
-        PostResponse postResponse = postService.findPostByTitle(title);
+    @GetMapping("/posts/{title}/{email}")
+    public ResponseEntity<PostResponse> getPostByTitleAndEmail(
+            @PathVariable @NotBlank String title, @NotBlank @PathVariable String email) {
+        PostResponse postResponse = postService.findPostByEmailAndTitle(email, title);
         return ResponseEntity.ok(postResponse);
     }
 
     @PostMapping(value = "/posts")
     public ResponseEntity<PostResponse> createPost(@RequestBody @Valid NewPostRequest newPostRequest) {
-        PostResponse postResponse = postService.saveOrUpdatePost(newPostRequest);
+        NewPostRequest withCreatedAt = newPostRequest.withCreatedAt(LocalDateTime.now());
+        PostResponse postResponse = postService.saveOrUpdatePost(withCreatedAt);
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
-                .path("/{title}")
-                .buildAndExpand(postResponse.title())
+                .path("/{title}/{email}")
+                .buildAndExpand(postResponse.title(), withCreatedAt.email())
                 .toUri();
         return ResponseEntity.created(location).body(postResponse);
     }
@@ -46,16 +49,13 @@ public class PostController {
     @PutMapping(value = "/posts/{title}")
     public ResponseEntity<PostResponse> updatePost(
             @PathVariable String title, @RequestBody @Valid NewPostRequest newPostRequest) {
-        if (!title.equals(newPostRequest.title()) && !postService.titleExists(title)) {
-            return ResponseEntity.badRequest().build();
-        }
-        PostResponse postResponse = postService.saveOrUpdatePost(newPostRequest);
+        PostResponse postResponse = postService.updatePost(title, newPostRequest);
         return ResponseEntity.ok(postResponse);
     }
 
-    @DeleteMapping("/posts/{title}")
-    public ResponseEntity<Void> deletePost(@PathVariable @NotBlank String title) {
-        postService.deletePost(title);
+    @DeleteMapping("/posts/{title}/{email}")
+    public ResponseEntity<Void> deletePost(@PathVariable @NotBlank String title, @PathVariable @NotBlank String email) {
+        postService.deletePost(title, email);
         return ResponseEntity.noContent().build();
     }
 }

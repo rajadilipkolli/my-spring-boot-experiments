@@ -6,6 +6,7 @@ import com.example.highrps.service.AuthorService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import java.net.URI;
+import java.time.LocalDateTime;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -29,7 +30,8 @@ public class AuthorController {
 
     @PostMapping(value = "/author")
     public ResponseEntity<AuthorResponse> createAuthor(@RequestBody @Valid AuthorRequest newAuthorRequest) {
-        AuthorResponse resp = authorService.saveOrUpdateAuthor(newAuthorRequest);
+        AuthorRequest withCreatedAt = newAuthorRequest.withTimestamps(LocalDateTime.now(), null);
+        AuthorResponse resp = authorService.saveOrUpdateAuthor(withCreatedAt);
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{email}")
                 .buildAndExpand(resp.email())
@@ -40,10 +42,7 @@ public class AuthorController {
     @PutMapping(value = "/author/{email}")
     public ResponseEntity<AuthorResponse> updateAuthor(
             @PathVariable String email, @RequestBody @Valid AuthorRequest newAuthorRequest) {
-        if (!email.equals(newAuthorRequest.email()) && !authorService.emailExists(email)) {
-            return ResponseEntity.badRequest().build();
-        }
-        AuthorResponse resp = authorService.saveOrUpdateAuthor(newAuthorRequest);
+        AuthorResponse resp = authorService.updateAuthor(email, newAuthorRequest);
         return ResponseEntity.ok(resp);
     }
 

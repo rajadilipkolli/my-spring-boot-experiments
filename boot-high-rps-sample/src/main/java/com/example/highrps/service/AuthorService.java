@@ -1,6 +1,7 @@
 package com.example.highrps.service;
 
 import com.example.highrps.config.AppProperties;
+import com.example.highrps.entities.Auditable;
 import com.example.highrps.entities.AuthorRedis;
 import com.example.highrps.exception.ResourceNotFoundException;
 import com.example.highrps.mapper.AuthorRequestToResponseMapper;
@@ -14,6 +15,7 @@ import com.github.benmanes.caffeine.cache.Cache;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -110,7 +112,9 @@ public class AuthorService {
                     ar.getLastName(),
                     ar.getMobile(),
                     ar.getEmail(),
-                    ar.getRegisteredAt());
+                    ar.getRegisteredAt(),
+                    ar.getCreatedAt(),
+                    ar.getModifiedAt());
             var json = AuthorResponse.toJson(response);
             localCache.put(emailKey, json);
             return response;
@@ -182,20 +186,34 @@ public class AuthorService {
         return authorResponse;
     }
 
+    /**
+     * Update helper that encapsulates the controller logic so the controller only needs a
+     * single service call. Preserves existing behavior: if the path email does not match
+     * the request email and the original path email does not exist, a bad-request condition
+     * is signaled by throwing ResourceNotFoundException.
+     */
+    public AuthorResponse updateAuthor(String pathEmail, AuthorRequest newAuthorRequest) {
+        if (!pathEmail.equalsIgnoreCase(newAuthorRequest.email()) && !emailExists(pathEmail)) {
+            throw new ResourceNotFoundException("Path email does not match request email and original email not found");
+        }
+        AuthorRequest withModifiedAt =
+                newAuthorRequest.withTimestamps(getCreatedAtByEmail(pathEmail), LocalDateTime.now());
+        return saveOrUpdateAuthor(withModifiedAt);
+    }
+
     public void deleteAuthor(String email) {
 
         var emailKey = email.toLowerCase(Locale.ROOT);
-        // Wait for publish completion so downstream processing observes a successful send
-        var deleteForEntity = kafkaProducerService.publishDeleteForEntity("author", emailKey);
-        processFuture(email, deleteForEntity);
-
-        // increment tombstone counter after successful publish
+        // 1) Publish tombstone
         try {
+            var deleteForEntity = kafkaProducerService.publishDeleteForEntity("author", emailKey);
+            processFuture(email, deleteForEntity);
             tombstonesPublishedCounter.increment();
         } catch (Exception e) {
-            log.warn("Failed to increment tombstonesPublishedCounter", e);
+            log.warn("Failed to publish delete event for email: {}", email, e);
         }
 
+        // 2) Local cleanup (best-effort)
         try {
             localCache.invalidate(emailKey);
         } catch (Exception e) {
@@ -291,13 +309,42 @@ public class AuthorService {
         return authorRepository.existsByEmailIgnoreCase(email);
     }
 
+    private LocalDateTime getCreatedAtByEmail(String email) {
+        var emailKey = email.toLowerCase(Locale.ROOT);
+        // resilience pattern
+        try {
+            String localCacheIfPresent = localCache.getIfPresent(emailKey);
+            if (localCacheIfPresent != null) {
+                return AuthorResponse.fromJson(localCacheIfPresent).createdAt();
+            }
+            Optional<AuthorRedis> byId = authorRedisRepository.findById(emailKey);
+            if (byId.isPresent()) {
+                return byId.get().getCreatedAt();
+            }
+            AuthorRequest cachedRequest = requestCoalescer.subscribe(
+                    emailKey, () -> getKeyValueStore().get(emailKey));
+            if (cachedRequest != null) {
+                return cachedRequest.createdAt();
+            }
+        } catch (Exception e) {
+            log.warn("Cache/streams lookup failed for email {}, falling back to DB", email, e);
+        }
+        return authorRepository
+                .findByEmailIgnoreCase(email)
+                .map(Auditable::getCreatedAt)
+                .orElse(null);
+    }
+
     private AuthorRedis toAuthorRedis(String emailKey, AuthorResponse response) {
-        return new AuthorRedis()
+        AuthorRedis authorRedis = new AuthorRedis()
                 .setEmail(emailKey)
                 .setFirstName(response.firstName())
                 .setMiddleName(response.middleName())
                 .setLastName(response.lastName())
                 .setMobile(response.mobile())
                 .setRegisteredAt(response.registeredAt());
+        authorRedis.setCreatedAt(response.createdAt());
+        authorRedis.setModifiedAt(response.modifiedAt());
+        return authorRedis;
     }
 }

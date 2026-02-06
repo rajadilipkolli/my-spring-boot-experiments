@@ -8,6 +8,8 @@ CREATE TABLE authors
     email         TEXT NOT NULL,
     registered_at TIMESTAMP WITHOUT TIME ZONE,
     version       SMALLINT,
+    created_at    TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    modified_at   TIMESTAMP WITHOUT TIME ZONE,
     CONSTRAINT pk_authors PRIMARY KEY (id)
 );
 

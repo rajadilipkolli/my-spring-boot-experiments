@@ -1,12 +1,11 @@
 package com.example.highrps.entities;
 
 import jakarta.persistence.*;
-import java.io.Serializable;
 import java.util.Objects;
 
 @Entity
 @Table(name = "post_details")
-public class PostDetailsEntity extends Auditable implements Serializable {
+public class PostDetailsEntity extends Auditable {
 
     @Id
     private Long id;

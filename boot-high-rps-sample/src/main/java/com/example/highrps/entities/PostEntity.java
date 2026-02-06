@@ -1,7 +1,6 @@
 package com.example.highrps.entities;
 
 import jakarta.persistence.*;
-import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -11,8 +10,14 @@ import org.hibernate.Hibernate;
 import org.jspecify.annotations.Nullable;
 
 @Entity
-@Table(name = "posts")
-public class PostEntity extends Auditable implements Serializable {
+@Table(
+        name = "posts",
+        uniqueConstraints = {
+            @UniqueConstraint(
+                    name = "uc_postentity_title_author_id",
+                    columnNames = {"title", "author_id"})
+        })
+public class PostEntity extends Auditable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)

@@ -11,7 +11,9 @@ public record AuthorResponse(
         String lastName,
         Long mobile,
         String email,
-        LocalDateTime registeredAt) {
+        LocalDateTime registeredAt,
+        LocalDateTime createdAt,
+        LocalDateTime modifiedAt) {
     private static final JsonMapper JSON = new JsonMapper();
 
     public static AuthorResponse fromJson(String cached) {

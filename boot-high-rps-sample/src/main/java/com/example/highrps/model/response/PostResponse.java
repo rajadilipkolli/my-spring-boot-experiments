@@ -2,7 +2,6 @@ package com.example.highrps.model.response;
 
 import com.example.highrps.entities.PostRedis;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import tools.jackson.databind.json.JsonMapper;
 
@@ -10,6 +9,7 @@ public record PostResponse(
         String title,
         String content,
         boolean published,
+        String authorEmail,
         LocalDateTime createdAt,
         LocalDateTime modifiedAt,
         LocalDateTime publishedAt,
@@ -30,11 +30,12 @@ public record PostResponse(
         return new PostResponse(
                 postRedis.getTitle(),
                 postRedis.getContent(),
-                postRedis.getPublished(),
+                postRedis.isPublished(),
+                postRedis.getAuthorEmail(),
                 postRedis.getCreatedAt(),
                 postRedis.getModifiedAt(),
                 postRedis.getPublishedAt(),
                 null,
-                new ArrayList<>());
+                List.of());
     }
 }

@@ -6,6 +6,10 @@ import com.example.highrps.entities.TagEntity;
 import com.example.highrps.model.request.NewPostRequest;
 import com.example.highrps.model.request.TagRequest;
 import com.example.highrps.repository.jpa.TagRepository;
+import java.util.Locale;
+import java.util.Objects;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Context;
 import org.mapstruct.Mapper;
@@ -35,17 +39,12 @@ public interface NewPostRequestToPostEntityMapper {
             return;
         }
         var requestedByName = newPostRequest.tags().stream()
-                .collect(java.util.stream.Collectors.toMap(
-                        t -> t.tagName().toLowerCase(java.util.Locale.ROOT),
-                        java.util.function.Function.identity(),
-                        (a, b) -> a));
+                .collect(Collectors.toMap(t -> t.tagName().toLowerCase(Locale.ROOT), Function.identity(), (a, b) -> a));
 
         var existingByName = postEntity.getTags().stream()
                 .map(PostTagEntity::getTagEntity)
-                .collect(java.util.stream.Collectors.toMap(
-                        t -> t.getTagName().toLowerCase(java.util.Locale.ROOT),
-                        java.util.function.Function.identity(),
-                        (a, b) -> a));
+                .collect(Collectors.toMap(
+                        t -> t.getTagName().toLowerCase(Locale.ROOT), Function.identity(), (a, b) -> a));
 
         existingByName.keySet().stream()
                 .filter(name -> !requestedByName.containsKey(name))
@@ -53,7 +52,7 @@ public interface NewPostRequestToPostEntityMapper {
 
         existingByName.forEach((name, tagEntity) -> {
             TagRequest req = requestedByName.get(name);
-            if (req != null && !java.util.Objects.equals(tagEntity.getTagDescription(), req.tagDescription())) {
+            if (req != null && !Objects.equals(tagEntity.getTagDescription(), req.tagDescription())) {
                 tagEntity.setTagDescription(req.tagDescription());
             }
         });
