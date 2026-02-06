@@ -29,7 +29,7 @@ public class PostController {
     }
 
     @GetMapping("/posts/{title}/{email}")
-    public ResponseEntity<PostResponse> getPostByTitle(
+    public ResponseEntity<PostResponse> getPostByTitleAndEmail(
             @PathVariable @NotBlank String title, @NotBlank @PathVariable String email) {
         PostResponse postResponse = postService.findPostByEmailAndTitle(email, title);
         return ResponseEntity.ok(postResponse);
@@ -40,8 +40,8 @@ public class PostController {
         NewPostRequest withCreatedAt = newPostRequest.withCreatedAt(LocalDateTime.now());
         PostResponse postResponse = postService.saveOrUpdatePost(withCreatedAt);
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
-                .path("/{title}")
-                .buildAndExpand(postResponse.title())
+                .path("/{title}/{email}")
+                .buildAndExpand(postResponse.title(), withCreatedAt.email())
                 .toUri();
         return ResponseEntity.created(location).body(postResponse);
     }

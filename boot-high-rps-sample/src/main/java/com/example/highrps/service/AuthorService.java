@@ -197,7 +197,7 @@ public class AuthorService {
             throw new IllegalArgumentException("Path email does not match request email and original email not found");
         }
         AuthorRequest withModifiedAt =
-                newAuthorRequest.withTimeStamps(LocalDateTime.now(), getCreatedAtByEmail(pathEmail));
+                newAuthorRequest.withTimeStamps(getCreatedAtByEmail(pathEmail), LocalDateTime.now());
         return saveOrUpdateAuthor(withModifiedAt);
     }
 

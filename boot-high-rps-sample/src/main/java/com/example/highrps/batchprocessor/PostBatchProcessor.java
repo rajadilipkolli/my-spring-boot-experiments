@@ -84,10 +84,7 @@ public class PostBatchProcessor implements EntityBatchProcessor {
         }
 
         // Step 2: Extract all titles and fetch existing posts from DB
-        List<String> titles = parsedPosts.stream()
-                .map(ParsedPost::title)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+        List<String> titles = parsedPosts.stream().map(ParsedPost::title).collect(Collectors.toList());
 
         List<PostEntity> existingPosts = postRepository.findByTitleIn(titles);
 

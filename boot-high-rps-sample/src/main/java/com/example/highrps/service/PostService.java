@@ -86,9 +86,9 @@ public class PostService {
     }
 
     public PostResponse findPostByEmailAndTitle(String email, String title) {
-        var cacheKey = String.join(":", title, email.toLowerCase());
+        var cacheKey = cacheKey(title, email);
         // 1a) Tombstone record check in Redis
-        Boolean deleted = redis.hasKey("deleted:posts:" + title);
+        Boolean deleted = redis.hasKey("deleted:posts:" + cacheKey);
         if (Boolean.TRUE.equals(deleted)) {
             throw new ResourceNotFoundException("Post not found for title: " + title);
         }
@@ -180,7 +180,7 @@ public class PostService {
     }
 
     public void deletePost(String title, String email) {
-        var cacheKey = String.join(":", title, email.toLowerCase());
+        var cacheKey = cacheKey(title, email);
         // 1) Publish tombstone to per-entity aggregates topic so Streams materialized KTable sees the delete
         try {
             var deleteForEntity = kafkaProducerService.publishDeleteForEntity("post", cacheKey);
@@ -212,7 +212,7 @@ public class PostService {
         // 4b) Mark deleted in a short-lived Redis set so batch processors skip re-inserts
         try {
             // Use per-title cacheKey so each deletion has independent TTL
-            redis.opsForValue().set("deleted:posts:" + title, "1", Duration.ofSeconds(60));
+            redis.opsForValue().set("deleted:posts:" + cacheKey, "1", Duration.ofSeconds(60));
         } catch (Exception ex) {
             log.warn("Failed to mark title {} in deleted:posts set", title, ex);
         }
@@ -266,9 +266,9 @@ public class PostService {
     }
 
     private boolean titleExists(String title, String email) {
-        var cacheKey = String.join(":", title, email.toLowerCase());
+        var cacheKey = cacheKey(title, email);
         try {
-            Boolean deleted = redis.hasKey("deleted:posts:" + title);
+            Boolean deleted = redis.hasKey("deleted:posts:" + cacheKey);
             if (Boolean.TRUE.equals(deleted)) {
                 return false;
             }
@@ -290,7 +290,7 @@ public class PostService {
     }
 
     public LocalDateTime getCreatedAtByTitleAndEmail(String title, String email) {
-        var cacheKey = title + email.toLowerCase();
+        var cacheKey = cacheKey(title, email);
         try {
             String localCacheIfPresent = localCache.getIfPresent(cacheKey);
             if (localCacheIfPresent != null) {
@@ -326,5 +326,9 @@ public class PostService {
         postRedis.setCreatedAt(newPostRequest.createdAt());
         postRedis.setModifiedAt(newPostRequest.modifiedAt());
         return postRedis;
+    }
+
+    private String cacheKey(String title, String email) {
+        return String.join(":", title, email.toLowerCase(Locale.ROOT));
     }
 }

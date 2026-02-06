@@ -56,7 +56,7 @@ class PostControllerIT extends AbstractIntegrationTest {
     void crudPostResourcesAPICheck() {
         String title = "sample-post";
         String email = "test1@local.com";
-        var cacheKey = String.join(":", title, email.toLowerCase());
+        var cacheKey = String.join(":", title, email.toLowerCase(Locale.ROOT));
 
         authorRepository.save(new AuthorEntity()
                 .setEmail(email)
