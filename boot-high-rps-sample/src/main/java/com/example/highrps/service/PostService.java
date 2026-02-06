@@ -9,6 +9,8 @@ import com.example.highrps.model.response.PostResponse;
 import com.example.highrps.repository.jpa.PostRepository;
 import com.example.highrps.utility.RequestCoalescer;
 import com.github.benmanes.caffeine.cache.Cache;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.concurrent.CompletableFuture;
@@ -41,6 +43,8 @@ public class PostService {
     private final PostRepository postRepository;
     private final AppProperties appProperties;
     private final RequestCoalescer<NewPostRequest> requestCoalescer;
+    private final Counter eventsPublishedCounter;
+    private final Counter tombstonesPublishedCounter;
 
     private volatile ReadOnlyKeyValueStore<String, NewPostRequest> keyValueStore = null;
 
@@ -54,7 +58,8 @@ public class PostService {
             PostRequestToResponseMapper postRequestToResponseMapper,
             StreamsBuilderFactoryBean kafkaStreamsFactory,
             PostRepository postRepository,
-            AppProperties appProperties) {
+            AppProperties appProperties,
+            MeterRegistry meterRegistry) {
         this.kafkaProducerService = kafkaProducerService;
         this.localCache = localCache;
         this.redis = redis;
@@ -63,6 +68,13 @@ public class PostService {
         this.postRepository = postRepository;
         this.appProperties = appProperties;
         this.requestCoalescer = new RequestCoalescer<>();
+
+        this.eventsPublishedCounter = Counter.builder("posts.events.published")
+                .description("Number of post events published to Kafka")
+                .register(meterRegistry);
+        this.tombstonesPublishedCounter = Counter.builder("posts.tombstones.published")
+                .description("Number of post tombstone events published to Kafka")
+                .register(meterRegistry);
     }
 
     public PostResponse findPostByTitle(String title) {
@@ -122,6 +134,13 @@ public class PostService {
         var future = kafkaProducerService.publishEnvelope("post", title, newPostRequest);
         processFuture(future, title);
 
+        // increment events counter after successful publish
+        try {
+            eventsPublishedCounter.increment();
+        } catch (Exception e) {
+            log.warn("Failed to increment eventsPublishedCounter", e);
+        }
+
         // Only populate local cache after successful publish. Cache update is best-effort.
         try {
             localCache.put(title, json);
@@ -148,6 +167,13 @@ public class PostService {
             log.info("deletePost: published tombstone for title={}", title);
         } catch (Exception e) {
             log.warn("Failed to publish delete event for title: {}", title, e);
+        }
+
+        // increment tombstone counter after successful publish
+        try {
+            tombstonesPublishedCounter.increment();
+        } catch (Exception e) {
+            log.warn("Failed to increment tombstonesPublishedCounter", e);
         }
 
         // 2) Mark deletion in local cache so reads return absent immediately
