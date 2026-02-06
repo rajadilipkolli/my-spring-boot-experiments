@@ -7,6 +7,7 @@ import com.example.highrps.model.request.EventEnvelope;
 import com.example.highrps.model.request.NewPostRequest;
 import com.example.highrps.model.response.PostResponse;
 import com.example.highrps.repository.PostRepository;
+import com.example.highrps.utility.RequestCoalescer;
 import com.github.benmanes.caffeine.cache.Cache;
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -39,6 +40,7 @@ public class PostService {
     private final StreamsBuilderFactoryBean kafkaStreamsFactory;
     private final PostRepository postRepository;
     private final AppProperties appProperties;
+    private final RequestCoalescer<NewPostRequest> requestCoalescer;
 
     private volatile ReadOnlyKeyValueStore<String, NewPostRequest> keyValueStore = null;
 
@@ -60,6 +62,7 @@ public class PostService {
         this.kafkaStreamsFactory = kafkaStreamsFactory;
         this.postRepository = postRepository;
         this.appProperties = appProperties;
+        this.requestCoalescer = new RequestCoalescer<>();
     }
 
     public PostResponse findPostByTitle(String title) {
@@ -84,7 +87,8 @@ public class PostService {
         }
 
         try {
-            NewPostRequest cachedRequest = getKeyValueStore().get(title);
+            NewPostRequest cachedRequest =
+                    requestCoalescer.subscribe(title, () -> getKeyValueStore().get(title));
             if (cachedRequest != null) {
                 PostResponse response = postRequestToResponseMapper.mapToPostResponse(cachedRequest);
                 var json = PostResponse.toJson(response);
@@ -230,7 +234,9 @@ public class PostService {
             if (redis.opsForValue().get("posts:" + title) != null) {
                 return true;
             }
-            if (getKeyValueStore().get(title) != null) {
+            NewPostRequest cachedRequest =
+                    requestCoalescer.subscribe(title, () -> getKeyValueStore().get(title));
+            if (cachedRequest != null) {
                 return true;
             }
         } catch (Exception e) {

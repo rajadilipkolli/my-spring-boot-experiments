@@ -7,6 +7,7 @@ import com.example.highrps.model.request.AuthorRequest;
 import com.example.highrps.model.request.EventEnvelope;
 import com.example.highrps.model.response.AuthorResponse;
 import com.example.highrps.repository.AuthorRepository;
+import com.example.highrps.utility.RequestCoalescer;
 import com.github.benmanes.caffeine.cache.Cache;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -41,6 +42,7 @@ public class AuthorService {
     private final StreamsBuilderFactoryBean kafkaStreamsFactory;
     private final AuthorRepository authorRepository;
     private final AppProperties appProperties;
+    private final RequestCoalescer<AuthorRequest> requestCoalescer;
 
     private final Counter eventsPublishedCounter;
     private final Counter tombstonesPublishedCounter;
@@ -64,6 +66,7 @@ public class AuthorService {
         this.kafkaStreamsFactory = kafkaStreamsFactory;
         this.authorRepository = authorRepository;
         this.appProperties = appProperties;
+        this.requestCoalescer = new RequestCoalescer<>();
 
         this.eventsPublishedCounter = Counter.builder("authors.events.published")
                 .description("Number of author events published to Kafka")
@@ -102,7 +105,8 @@ public class AuthorService {
         }
 
         try {
-            AuthorRequest cachedRequest = getKeyValueStore().get(emailKey);
+            AuthorRequest cachedRequest = requestCoalescer.subscribe(
+                    emailKey, () -> getKeyValueStore().get(emailKey));
             if (cachedRequest != null) {
                 AuthorResponse response = authorRequestToResponseMapper.mapToAuthorResponse(cachedRequest);
                 var json = AuthorResponse.toJson(response);
@@ -259,7 +263,9 @@ public class AuthorService {
             if (redis.opsForValue().get("authors:" + emailKey) != null) {
                 return true;
             }
-            if (getKeyValueStore().get(emailKey) != null) {
+            AuthorRequest cachedRequest = requestCoalescer.subscribe(
+                    emailKey, () -> getKeyValueStore().get(emailKey));
+            if (cachedRequest != null) {
                 return true;
             }
         } catch (Exception e) {
