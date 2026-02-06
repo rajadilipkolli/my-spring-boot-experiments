@@ -8,6 +8,8 @@ import com.example.highrps.model.request.EventEnvelope;
 import com.example.highrps.model.response.AuthorResponse;
 import com.example.highrps.repository.AuthorRepository;
 import com.github.benmanes.caffeine.cache.Cache;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
 import java.time.Duration;
 import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
@@ -40,6 +42,9 @@ public class AuthorService {
     private final AuthorRepository authorRepository;
     private final AppProperties appProperties;
 
+    private final Counter eventsPublishedCounter;
+    private final Counter tombstonesPublishedCounter;
+
     private volatile ReadOnlyKeyValueStore<String, AuthorRequest> keyValueStore = null;
     private final ReentrantLock keyValueStoreLock = new ReentrantLock();
 
@@ -50,7 +55,8 @@ public class AuthorService {
             AuthorRequestToResponseMapper authorRequestToResponseMapper,
             StreamsBuilderFactoryBean kafkaStreamsFactory,
             AuthorRepository authorRepository,
-            AppProperties appProperties) {
+            AppProperties appProperties,
+            MeterRegistry meterRegistry) {
         this.kafkaProducerService = kafkaProducerService;
         this.localCache = localCache;
         this.redis = redis;
@@ -58,6 +64,13 @@ public class AuthorService {
         this.kafkaStreamsFactory = kafkaStreamsFactory;
         this.authorRepository = authorRepository;
         this.appProperties = appProperties;
+
+        this.eventsPublishedCounter = Counter.builder("authors.events.published")
+                .description("Number of author events published to Kafka")
+                .register(meterRegistry);
+        this.tombstonesPublishedCounter = Counter.builder("authors.tombstones.published")
+                .description("Number of author tombstone events published to Kafka")
+                .register(meterRegistry);
     }
 
     public AuthorResponse findAuthorByEmail(String email) {
@@ -122,6 +135,13 @@ public class AuthorService {
         var future = kafkaProducerService.publishEnvelope("author", emailKey, newAuthorRequest);
         processFuture(email, future);
 
+        // increment events counter after successful publish
+        try {
+            eventsPublishedCounter.increment();
+        } catch (Exception e) {
+            log.warn("Failed to increment eventsPublishedCounter", e);
+        }
+
         // Only populate local cache after successful publish. Cache update is
         // best-effort.
         try {
@@ -146,6 +166,13 @@ public class AuthorService {
         // Wait for publish completion so downstream processing observes a successful send
         var deleteForEntity = kafkaProducerService.publishDeleteForEntity("author", emailKey);
         processFuture(email, deleteForEntity);
+
+        // increment tombstone counter after successful publish
+        try {
+            tombstonesPublishedCounter.increment();
+        } catch (Exception e) {
+            log.warn("Failed to increment tombstonesPublishedCounter", e);
+        }
 
         try {
             localCache.invalidate(emailKey);
