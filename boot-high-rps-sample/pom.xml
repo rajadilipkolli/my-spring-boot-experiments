@@ -19,7 +19,7 @@
         <java.version>25</java.version>
         <springdoc-openapi.version>3.0.1</springdoc-openapi.version>
         <mapstruct.version>1.6.3</mapstruct.version>
-        <datasource-micrometer-boot.version>2.1.0</datasource-micrometer-boot.version>
+        <datasource-micrometer-boot.version>2.1.1</datasource-micrometer-boot.version>
 
         <project.testresult.directory>${project.build.directory}/test-results</project.testresult.directory>
         <spotless.version>3.2.1</spotless.version>
