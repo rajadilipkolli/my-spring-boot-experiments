@@ -10,10 +10,10 @@ import org.testcontainers.utility.DockerImageName;
 public class DBContainerInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
     private static final PostgreSQLContainer POSTGRE_SQL_CONTAINER =
-            new PostgreSQLContainer(DockerImageName.parse("postgres").withTag("18.1-alpine"));
+            new PostgreSQLContainer(DockerImageName.parse("postgres").withTag("18.2-alpine"));
 
     private static final PostgreSQLContainer POSTGRE_SQL_CONTAINER_1 =
-            new PostgreSQLContainer(DockerImageName.parse("postgres").withTag("18.1-alpine"));
+            new PostgreSQLContainer(DockerImageName.parse("postgres").withTag("18.2-alpine"));
 
     static {
         Startables.deepStart(POSTGRE_SQL_CONTAINER, POSTGRE_SQL_CONTAINER_1).join();

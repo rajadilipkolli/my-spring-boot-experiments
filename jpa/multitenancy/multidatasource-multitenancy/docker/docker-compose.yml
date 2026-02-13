@@ -2,7 +2,7 @@ name: multidatasource-multitenancy
 services:
 
   postgresqldb:
-    image: postgres:18.1-alpine
+    image: postgres:18.2-alpine
     environment:
       - POSTGRES_USER=appuser
       - POSTGRES_PASSWORD=secret
