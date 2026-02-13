@@ -2,7 +2,7 @@ name: boot-high-rps-sample
 services:
 
   postgresqldb:
-    image: postgres:18.1-alpine
+    image: postgres:18.2-alpine
     hostname: postgresqldb
     container_name: postgresql
     extra_hosts: [ 'host.docker.internal:host-gateway' ]
