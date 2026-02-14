@@ -4,7 +4,7 @@ import com.example.highrps.model.request.NewPostRequest;
 import com.example.highrps.model.response.PostResponse;
 import com.example.highrps.service.PostService;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Positive;
 import java.net.URI;
 import java.time.LocalDateTime;
 import org.springframework.http.ResponseEntity;
@@ -28,34 +28,33 @@ public class PostController {
         this.postService = postService;
     }
 
-    @GetMapping("/posts/{title}/{email}")
-    public ResponseEntity<PostResponse> getPostByTitleAndEmail(
-            @PathVariable @NotBlank String title, @NotBlank @PathVariable String email) {
-        PostResponse postResponse = postService.findPostByEmailAndTitle(email, title);
+    @GetMapping("/posts/{postId}")
+    public ResponseEntity<PostResponse> getPostByPostId(@PathVariable @Positive Long postId) {
+        PostResponse postResponse = postService.findPostById(postId);
         return ResponseEntity.ok(postResponse);
     }
 
     @PostMapping(value = "/posts")
     public ResponseEntity<PostResponse> createPost(@RequestBody @Valid NewPostRequest newPostRequest) {
-        NewPostRequest withCreatedAt = newPostRequest.withCreatedAt(LocalDateTime.now());
+        NewPostRequest withCreatedAt = newPostRequest.withTimestamps(LocalDateTime.now(), null);
         PostResponse postResponse = postService.saveOrUpdatePost(withCreatedAt);
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
-                .path("/{title}/{email}")
-                .buildAndExpand(postResponse.title(), withCreatedAt.email())
+                .path("/{postId}")
+                .buildAndExpand(withCreatedAt.postId())
                 .toUri();
         return ResponseEntity.created(location).body(postResponse);
     }
 
-    @PutMapping(value = "/posts/{title}")
+    @PutMapping(value = "/posts/{postId}")
     public ResponseEntity<PostResponse> updatePost(
-            @PathVariable String title, @RequestBody @Valid NewPostRequest newPostRequest) {
-        PostResponse postResponse = postService.updatePost(title, newPostRequest);
+            @PathVariable @Positive Long postId, @RequestBody @Valid NewPostRequest newPostRequest) {
+        PostResponse postResponse = postService.updatePost(postId, newPostRequest);
         return ResponseEntity.ok(postResponse);
     }
 
-    @DeleteMapping("/posts/{title}/{email}")
-    public ResponseEntity<Void> deletePost(@PathVariable @NotBlank String title, @PathVariable @NotBlank String email) {
-        postService.deletePost(title, email);
+    @DeleteMapping("/posts/{postId}")
+    public ResponseEntity<Void> deletePost(@PathVariable @Positive Long postId) {
+        postService.deletePostById(postId);
         return ResponseEntity.noContent().build();
     }
 }

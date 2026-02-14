@@ -2,6 +2,7 @@ package com.example.highrps.config;
 
 import com.example.highrps.model.request.AuthorRequest;
 import com.example.highrps.model.request.NewPostRequest;
+import com.example.highrps.postcomment.domain.PostCommentRequest;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.kafka.clients.admin.NewTopic;
@@ -21,7 +22,8 @@ import org.springframework.kafka.support.serializer.JacksonJsonDeserializer;
 @Configuration(proxyBeanMethods = false)
 public class KafkaConfig {
 
-    // Consumer factory for NewPostRequest (used by listeners that consume typed payloads)
+    // Consumer factory for NewPostRequest (used by listeners that consume typed
+    // payloads)
     @Bean
     ConsumerFactory<String, NewPostRequest> newPostConsumerFactory(KafkaConnectionDetails kafkaConnectionDetails) {
         Map<String, Object> cfg = new HashMap<>();
@@ -29,7 +31,9 @@ public class KafkaConfig {
         cfg.put(ConsumerConfig.GROUP_ID_CONFIG, "aggregates-redis-writer");
         cfg.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         cfg.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JacksonJsonDeserializer.class);
-        cfg.put(JacksonJsonDeserializer.TRUSTED_PACKAGES, "com.example.highrps.model.request");
+        cfg.put(
+                JacksonJsonDeserializer.TRUSTED_PACKAGES,
+                "com.example.highrps.model.request,com.example.highrps.postcomment.domain");
         return new DefaultKafkaConsumerFactory<>(
                 cfg, new StringDeserializer(), new JacksonJsonDeserializer<>(NewPostRequest.class));
     }
@@ -42,7 +46,8 @@ public class KafkaConfig {
         return f;
     }
 
-    // Consumer factory for AuthorRequest (used by listeners that consume typed author payloads)
+    // Consumer factory for AuthorRequest (used by listeners that consume typed
+    // author payloads)
     @Bean
     ConsumerFactory<String, AuthorRequest> authorConsumerFactory(KafkaConnectionDetails kafkaConnectionDetails) {
         Map<String, Object> cfg = new HashMap<>();
@@ -63,7 +68,33 @@ public class KafkaConfig {
         return f;
     }
 
-    // Application-level topics. Kafka Streams will create internal changelog topics automatically.
+    // Consumer factory for PostCommentRequest (used by listeners that consume typed
+    // comment payloads)
+    @Bean
+    ConsumerFactory<String, PostCommentRequest> postCommentConsumerFactory(
+            KafkaConnectionDetails kafkaConnectionDetails) {
+        Map<String, Object> cfg = new HashMap<>();
+        cfg.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaConnectionDetails.getBootstrapServers());
+        cfg.put(ConsumerConfig.GROUP_ID_CONFIG, "post-comments-redis-writer");
+        cfg.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+        cfg.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JacksonJsonDeserializer.class);
+        cfg.put(
+                JacksonJsonDeserializer.TRUSTED_PACKAGES,
+                "com.example.highrps.model.request,com.example.highrps.postcomment.domain");
+        return new DefaultKafkaConsumerFactory<>(
+                cfg, new StringDeserializer(), new JacksonJsonDeserializer<>(PostCommentRequest.class));
+    }
+
+    @Bean
+    ConcurrentKafkaListenerContainerFactory<String, PostCommentRequest> postCommentKafkaListenerContainerFactory(
+            ConsumerFactory<String, PostCommentRequest> postCommentConsumerFactory) {
+        var f = new ConcurrentKafkaListenerContainerFactory<String, PostCommentRequest>();
+        f.setConsumerFactory(postCommentConsumerFactory);
+        return f;
+    }
+
+    // Application-level topics. Kafka Streams will create internal changelog topics
+    // automatically.
     @Bean
     KafkaAdmin.NewTopics eventsTopic(
             @Value("${app.kafka.events-topic.partitions:3}") int eventsPartitions,
@@ -72,6 +103,9 @@ public class KafkaConfig {
             @Value("${app.kafka.posts-aggregates-topic.replication-factor:1}") short postsAggregatesReplication,
             @Value("${app.kafka.authors-aggregates-topic.partitions:3}") int authorsAggregatesPartitions,
             @Value("${app.kafka.authors-aggregates-topic.replication-factor:1}") short authorsAggregatesReplication,
+            @Value("${app.kafka.post-comments-aggregates-topic.partitions:3}") int postCommentsAggregatesPartitions,
+            @Value("${app.kafka.post-comments-aggregates-topic.replication-factor:1}")
+                    short postCommentsAggregatesReplication,
             @Value("${app.kafka.events-topic.tombstone-retention-ms:604800000}") long tombstoneRetentionMs) {
 
         NewTopic events = new NewTopic("events", eventsPartitions, eventsReplication);
@@ -85,6 +119,9 @@ public class KafkaConfig {
         NewTopic authors =
                 new NewTopic("authors-aggregates", authorsAggregatesPartitions, authorsAggregatesReplication);
         authors.configs(Map.of("cleanup.policy", "compact"));
-        return new KafkaAdmin.NewTopics(events, posts, authors);
+        NewTopic postComments = new NewTopic(
+                "post-comments-aggregates", postCommentsAggregatesPartitions, postCommentsAggregatesReplication);
+        postComments.configs(Map.of("cleanup.policy", "compact"));
+        return new KafkaAdmin.NewTopics(events, posts, authors, postComments);
     }
 }

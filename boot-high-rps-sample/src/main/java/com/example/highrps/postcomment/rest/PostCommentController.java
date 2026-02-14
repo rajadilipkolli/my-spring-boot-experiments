@@ -1,13 +1,25 @@
 package com.example.highrps.postcomment.rest;
 
-import com.example.highrps.postcomment.domain.*;
+import com.example.highrps.postcomment.domain.CreatePostCommentCmd;
+import com.example.highrps.postcomment.domain.GetPostCommentQuery;
+import com.example.highrps.postcomment.domain.PostCommentCommandService;
+import com.example.highrps.postcomment.domain.PostCommentQueryService;
+import com.example.highrps.postcomment.domain.PostCommentResult;
+import com.example.highrps.postcomment.domain.UpdatePostCommentCmd;
 import com.example.highrps.postcomment.domain.vo.PostCommentId;
 import jakarta.validation.Valid;
 import java.net.URI;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @Validated

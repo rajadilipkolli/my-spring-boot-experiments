@@ -6,6 +6,7 @@ import java.util.List;
 import tools.jackson.databind.json.JsonMapper;
 
 public record PostResponse(
+        Long postId,
         String title,
         String content,
         boolean published,
@@ -28,6 +29,7 @@ public record PostResponse(
 
     public static PostResponse fromRedis(PostRedis postRedis) {
         return new PostResponse(
+                postRedis.getId(),
                 postRedis.getTitle(),
                 postRedis.getContent(),
                 postRedis.isPublished(),

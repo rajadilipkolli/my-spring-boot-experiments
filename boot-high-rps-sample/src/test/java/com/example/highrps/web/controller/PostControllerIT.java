@@ -10,7 +10,7 @@ import com.example.highrps.model.response.PostDetailsResponse;
 import com.example.highrps.model.response.PostResponse;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.Locale;
+import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -56,7 +56,6 @@ class PostControllerIT extends AbstractIntegrationTest {
     void crudPostResourcesAPICheck() {
         String title = "sample-post";
         String email = "test1@local.com";
-        var cacheKey = String.join(":", title, email.toLowerCase(Locale.ROOT));
 
         authorRepository.save(new AuthorEntity()
                 .setEmail(email)
@@ -65,6 +64,7 @@ class PostControllerIT extends AbstractIntegrationTest {
                 .setMobile(9876543210L));
 
         // 1) Create a post
+        AtomicReference<Long> postId = new AtomicReference<>();
         mockMvcTester
                 .post()
                 .uri("/api/posts")
@@ -82,12 +82,18 @@ class PostControllerIT extends AbstractIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .exchange()
                 .assertThat()
-                .hasStatus(HttpStatus.CREATED);
+                .hasStatus(HttpStatus.CREATED)
+                .apply(result -> {
+                    String location = result.getResponse().getHeader("Location");
+                    assertThat(location).isNotNull();
+                    assertThat(location).contains("/api/posts/");
+                    postId.set(Long.valueOf(location.substring(location.lastIndexOf("/") + 1)));
+                });
 
         // Ensure caches/redis are populated by hitting GET (which populates local cache and redis)
         mockMvcTester
                 .get()
-                .uri("/api/posts/{title}/{email}", title, email)
+                .uri("/api/posts/{postId}", postId.get())
                 .exchange()
                 .assertThat()
                 .hasStatus(HttpStatus.OK)
@@ -95,6 +101,7 @@ class PostControllerIT extends AbstractIntegrationTest {
                 .bodyJson()
                 .convertTo(PostResponse.class)
                 .satisfies(postResponse -> {
+                    assertThat(postResponse.postId()).isEqualTo(postId.get());
                     assertThat(postResponse.title()).isEqualTo(title);
                     assertThat(postResponse.content()).isEqualTo("Will be deleted later");
                     assertThat(postResponse.published()).isFalse();
@@ -108,6 +115,7 @@ class PostControllerIT extends AbstractIntegrationTest {
                 });
 
         // Assert local cache and redis have the key
+        String cacheKey = String.valueOf(postId.get());
         String cached = localCache.getIfPresent(cacheKey);
         assertThat(cached).isNotNull();
         // Redis may be populated synchronously or asynchronously depending on timing and listener implementation.
@@ -115,7 +123,7 @@ class PostControllerIT extends AbstractIntegrationTest {
         await().atMost(Duration.ofSeconds(45))
                 .pollInterval(Duration.ofSeconds(1))
                 .untilAsserted(() -> {
-                    PostRedis value = postRedisRepository.findById(cacheKey).orElse(null);
+                    PostRedis value = postRedisRepository.findById(postId.get()).orElse(null);
                     assertThat(value).isNotNull();
                     assertThat(value.getContent()).isEqualTo("Will be deleted later");
                     assertThat(value.isPublished()).isFalse();
@@ -127,9 +135,10 @@ class PostControllerIT extends AbstractIntegrationTest {
         // 2) Update the post via the new PUT endpoint to change content
         mockMvcTester
                 .put()
-                .uri("/api/posts/" + title)
+                .uri("/api/posts/" + postId.get())
                 .content("""
                         {
+                            "postId": %d,
                             "title": "sample-post",
                             "content": "Updated content before delete",
                             "email": "test1@local.com",
@@ -139,7 +148,7 @@ class PostControllerIT extends AbstractIntegrationTest {
                                 "createdBy": "Some additional info"
                             }
                         }
-                        """)
+                        """.formatted(postId.get()))
                 .contentType(MediaType.APPLICATION_JSON)
                 .exchange()
                 .assertThat()
@@ -159,7 +168,7 @@ class PostControllerIT extends AbstractIntegrationTest {
         await().atMost(Duration.ofSeconds(45))
                 .pollInterval(Duration.ofSeconds(1))
                 .untilAsserted(() -> {
-                    PostRedis value = postRedisRepository.findById(cacheKey).orElse(null);
+                    PostRedis value = postRedisRepository.findById(postId.get()).orElse(null);
                     assertThat(value).isNotNull();
                     assertThat(value.getContent()).isEqualTo("Updated content before delete");
                     assertThat(value.isPublished()).isTrue();
@@ -172,7 +181,7 @@ class PostControllerIT extends AbstractIntegrationTest {
         // 3) Delete the post
         mockMvcTester
                 .delete()
-                .uri("/api/posts/{title}/{email}", title, email)
+                .uri("/api/posts/{postId}", postId.get())
                 .exchange()
                 .assertThat()
                 .hasStatus(HttpStatus.NO_CONTENT);
@@ -181,10 +190,8 @@ class PostControllerIT extends AbstractIntegrationTest {
         await().atMost(Duration.ofSeconds(60))
                 .pollInterval(Duration.ofSeconds(1))
                 .untilAsserted(() -> {
-                    assertThat(postRepository.existsByTitleAndAuthorEntity_EmailIgnoreCase(
-                                    title, email.toLowerCase(Locale.ROOT)))
-                            .isFalse();
-                    assertThat(postRedisRepository.existsById(cacheKey)).isFalse();
+                    assertThat(postRepository.existsById(postId.get())).isFalse();
+                    assertThat(postRedisRepository.existsById(postId.get())).isFalse();
                     assertThat(localCache.getIfPresent(cacheKey)).isNull();
                 });
 
@@ -193,7 +200,7 @@ class PostControllerIT extends AbstractIntegrationTest {
                 .pollInterval(Duration.ofSeconds(1))
                 .untilAsserted(() -> mockMvcTester
                         .get()
-                        .uri("/api/posts/{title}/{email}", title, email)
+                        .uri("/api/posts/{postId}", postId.get())
                         .exchange()
                         .assertThat()
                         .hasStatus(HttpStatus.NOT_FOUND)
@@ -207,15 +214,17 @@ class PostControllerIT extends AbstractIntegrationTest {
     void crudPostResourcesWithStateCheck() {
         String title = "delete-me";
         String email = "test@local.com";
-        var cacheKey = String.join(":", title, email.toLowerCase(Locale.ROOT));
 
-        authorRepository.save(new AuthorEntity()
+        AuthorEntity entity = new AuthorEntity()
                 .setEmail(email)
                 .setFirstName("FirstName")
                 .setLastName("LastName")
-                .setMobile(9876543210L));
+                .setMobile(9876543210L);
+        entity.setCreatedAt(LocalDateTime.now());
+        authorRepository.save(entity);
 
         // 1) Create a post
+        AtomicReference<Long> postId = new AtomicReference<>();
         mockMvcTester
                 .post()
                 .uri("/api/posts")
@@ -245,12 +254,18 @@ class PostControllerIT extends AbstractIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .exchange()
                 .assertThat()
-                .hasStatus(HttpStatus.CREATED);
+                .hasStatus(HttpStatus.CREATED)
+                .apply(result -> {
+                    String location = result.getResponse().getHeader("Location");
+                    assertThat(location).isNotNull();
+                    assertThat(location).contains("/api/posts/");
+                    postId.set(Long.valueOf(location.substring(location.lastIndexOf("/") + 1)));
+                });
 
         // Ensure caches/redis are populated by hitting GET (which populates local cache and redis)
         mockMvcTester
                 .get()
-                .uri("/api/posts/{title}/{email}", title, email)
+                .uri("/api/posts/{postId}", postId.get())
                 .exchange()
                 .assertThat()
                 .hasStatus(HttpStatus.OK)
@@ -258,6 +273,7 @@ class PostControllerIT extends AbstractIntegrationTest {
                 .bodyJson()
                 .convertTo(PostResponse.class)
                 .satisfies(postResponse -> {
+                    assertThat(postResponse.postId()).isEqualTo(postId.get());
                     assertThat(postResponse.title()).isEqualTo(title);
                     assertThat(postResponse.content()).isEqualTo("Will be deleted");
                     assertThat(postResponse.published()).isFalse();
@@ -270,21 +286,20 @@ class PostControllerIT extends AbstractIntegrationTest {
                 });
 
         // Assert local cache and redis have the cacheKey
+        String cacheKey = String.valueOf(postId.get());
         String cached = localCache.getIfPresent(cacheKey);
         assertThat(cached).isNotNull();
         // as redis will take a short moment to be populated due to async nature, it should go through kafka and in
         // AggregatesToRedisListener value is set
         await().atMost(Duration.ofSeconds(45))
                 .pollInterval(Duration.ofSeconds(1))
-                .untilAsserted(
-                        () -> assertThat(postRedisRepository.findById(cacheKey)).isPresent());
+                .untilAsserted(() ->
+                        assertThat(postRedisRepository.findById(postId.get())).isPresent());
 
         await().atMost(Duration.ofSeconds(30))
                 .pollInterval(Duration.ofSeconds(1))
                 .untilAsserted(() -> {
-                    assertThat(postRepository.existsByTitleAndAuthorEntity_EmailIgnoreCase(
-                                    title, email.toLowerCase(Locale.ROOT)))
-                            .isTrue();
+                    assertThat(postRepository.existsByPostRefId(postId.get())).isTrue();
                     assertThat(tagRepository.count()).isEqualTo(2);
                     assertThat(postTagRepository.countByPostEntity_Title(title)).isEqualTo(2);
                 });
@@ -292,9 +307,10 @@ class PostControllerIT extends AbstractIntegrationTest {
         // 2) Update the post via the new PUT endpoint to change content
         mockMvcTester
                 .put()
-                .uri("/api/posts/" + title)
+                .uri("/api/posts/{postId}", postId.get())
                 .content("""
                         {
+                          "postId": %d,
                           "title": "delete-me",
                           "content": "Updated content before delete",
                           "email": "test@local.com",
@@ -304,7 +320,7 @@ class PostControllerIT extends AbstractIntegrationTest {
                             "createdBy": "JunitIteration"
                           }
                         }
-                        """)
+                        """.formatted(postId.get()))
                 .contentType(MediaType.APPLICATION_JSON)
                 .exchange()
                 .assertThat()
@@ -320,9 +336,7 @@ class PostControllerIT extends AbstractIntegrationTest {
         await().atMost(Duration.ofSeconds(30))
                 .pollInterval(Duration.ofSeconds(1))
                 .untilAsserted(() -> {
-                    assertThat(postRepository.existsByTitleAndAuthorEntity_EmailIgnoreCase(
-                                    title, email.toLowerCase(Locale.ROOT)))
-                            .isTrue();
+                    assertThat(postRepository.existsByPostRefId(postId.get())).isTrue();
                     assertThat(tagRepository.count()).isEqualTo(2);
                     assertThat(postTagRepository.countByPostEntity_Title(title)).isEqualTo(2);
                 });
@@ -336,7 +350,7 @@ class PostControllerIT extends AbstractIntegrationTest {
         await().atMost(Duration.ofSeconds(45))
                 .pollInterval(Duration.ofSeconds(1))
                 .untilAsserted(() -> {
-                    PostRedis value = postRedisRepository.findById(cacheKey).orElse(null);
+                    PostRedis value = postRedisRepository.findById(postId.get()).orElse(null);
                     assertThat(value).isNotNull();
                     assertThat(value.getContent()).isEqualTo("Updated content before delete");
                 });
@@ -344,7 +358,7 @@ class PostControllerIT extends AbstractIntegrationTest {
         // 3) Delete the post
         mockMvcTester
                 .delete()
-                .uri("/api/posts/{title}/{email}", title, email)
+                .uri("/api/posts/{postId}", postId.get())
                 .exchange()
                 .assertThat()
                 .hasStatus(HttpStatus.NO_CONTENT);
@@ -354,10 +368,8 @@ class PostControllerIT extends AbstractIntegrationTest {
         await().atMost(Duration.ofSeconds(60))
                 .pollInterval(Duration.ofSeconds(1))
                 .untilAsserted(() -> {
-                    assertThat(postRepository.existsByTitleAndAuthorEntity_EmailIgnoreCase(title, email))
-                            .isFalse();
+                    assertThat(postRepository.existsByPostRefId(postId.get())).isFalse();
                     assertThat(postTagRepository.countByPostEntity_Title(title)).isEqualTo(0);
-                    assertThat(postRedisRepository.findById(cacheKey)).isEmpty();
                 });
 
         // Ensure tags themselves are still present (should be 2)
@@ -366,7 +378,7 @@ class PostControllerIT extends AbstractIntegrationTest {
         // 4) Subsequent GET should return 404
         mockMvcTester
                 .get()
-                .uri("/api/posts/{title}/{email}", title, email)
+                .uri("/api/posts/{postId}", postId.get())
                 .exchange()
                 .assertThat()
                 .hasStatus(HttpStatus.NOT_FOUND)
@@ -374,6 +386,6 @@ class PostControllerIT extends AbstractIntegrationTest {
 
         // Also assert local cache and redis no longer have the cacheKey
         assertThat(localCache.getIfPresent(cacheKey)).isNull();
-        assertThat(postRedisRepository.existsById(cacheKey)).isFalse();
+        assertThat(postRedisRepository.existsById(postId.get())).isFalse();
     }
 }

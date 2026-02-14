@@ -37,6 +37,9 @@ public class PostEntity extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
 
+    @Column(name = "post_ref_id", nullable = false)
+    private Long postRefId;
+
     @Column(name = "title", nullable = false)
     private String title;
 
@@ -90,6 +93,15 @@ public class PostEntity extends BaseEntity {
 
     public PostEntity setTitle(String title) {
         this.title = title;
+        return this;
+    }
+
+    public Long getPostRefId() {
+        return postRefId;
+    }
+
+    public PostEntity setPostRefId(Long postRefId) {
+        this.postRefId = postRefId;
         return this;
     }
 

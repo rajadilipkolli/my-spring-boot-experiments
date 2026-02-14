@@ -76,8 +76,12 @@ public class ScheduledBatchProcessor {
 
                 if (entityType == null) {
                     // Backward compatibility: infer entity type from payload structure
-                    if (node.has("title")) {
-                        entityType = "post";
+                    if (node.has("postId")) {
+                        if (node.has("postCommentId")) {
+                            entityType = "post-comment";
+                        } else {
+                            entityType = "post";
+                        }
                     } else if (node.has("email") && node.has("firstName")) {
                         entityType = "author";
                     } else {

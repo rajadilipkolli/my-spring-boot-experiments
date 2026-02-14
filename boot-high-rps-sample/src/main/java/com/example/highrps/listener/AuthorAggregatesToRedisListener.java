@@ -82,11 +82,15 @@ public class AuthorAggregatesToRedisListener {
 
             // Map AuthorRequest to AuthorResponse for Redis storage
             AuthorResponse value = mapper.mapToAuthorResponse(payload);
-            var json = AuthorResponse.toJson(value);
+            var jsonString = AuthorResponse.toJson(value);
+            if (jsonString.startsWith("{")) {
+                // Add entity type for downstream processing
+                jsonString = "{\"__entity\":\"author\"," + jsonString.substring(1);
+            }
 
             // Enqueue the same payload for asynchronous DB writes
             try {
-                redis.opsForList().leftPush(queueKey, json);
+                redis.opsForList().leftPush(queueKey, jsonString);
             } catch (Exception e) {
                 log.error("Failed to enqueue payload for DB write, key: {}, may lose durability", key, e);
             }

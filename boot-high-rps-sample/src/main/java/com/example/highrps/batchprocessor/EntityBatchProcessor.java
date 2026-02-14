@@ -9,7 +9,7 @@ import java.util.List;
 public interface EntityBatchProcessor {
 
     /**
-     * Returns the entity type this processor handles (e.g., "post", "author").
+     * Returns the entity type this processor handles (e.g., "post", "author", "post-comment").
      */
     String getEntityType();
 

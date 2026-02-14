@@ -6,6 +6,7 @@ import com.example.highrps.entities.TagEntity;
 import com.example.highrps.model.request.NewPostRequest;
 import com.example.highrps.model.request.TagRequest;
 import com.example.highrps.repository.jpa.TagRepository;
+import java.time.LocalDateTime;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.function.Function;
@@ -26,6 +27,7 @@ import org.mapstruct.NullValueCheckStrategy;
 public interface NewPostRequestToPostEntityMapper {
 
     @Mapping(target = "tags", ignore = true)
+    @Mapping(target = "postRefId", source = "postId")
     PostEntity convert(NewPostRequest newPostRequest, @Context TagRepository tagRepository);
 
     @Mapping(target = "tags", ignore = true)
@@ -63,10 +65,11 @@ public interface NewPostRequestToPostEntityMapper {
     }
 
     default TagEntity getTagEntity(TagRepository tagRepository, TagRequest tagsRequest) {
-        return tagRepository
-                .findByTagNameIgnoreCase(tagsRequest.tagName())
-                .orElseGet(() -> tagRepository.save(new TagEntity()
-                        .setTagName(tagsRequest.tagName())
-                        .setTagDescription(tagsRequest.tagDescription())));
+        return tagRepository.findByTagNameIgnoreCase(tagsRequest.tagName()).orElseGet(() -> {
+            TagEntity tagEntity =
+                    new TagEntity().setTagName(tagsRequest.tagName()).setTagDescription(tagsRequest.tagDescription());
+            tagEntity.setCreatedAt(LocalDateTime.now());
+            return tagRepository.save(tagEntity);
+        });
     }
 }

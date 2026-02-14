@@ -17,7 +17,13 @@ import java.util.Objects;
 import org.hibernate.Hibernate;
 
 @Entity
-@Table(name = "post_comments")
+@Table(
+        name = "post_comments",
+        uniqueConstraints = {
+            @UniqueConstraint(
+                    name = "uc_postcommententity_title",
+                    columnNames = {"title", "post_id"})
+        })
 public class PostCommentEntity extends BaseEntity {
 
     @Id

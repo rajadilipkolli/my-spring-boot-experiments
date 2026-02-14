@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Configuration;
 public class AppProperties {
 
     private Long publishTimeOutMs = 5000L;
+    private boolean kafkaStreamsEnabled = true;
 
     public Long getPublishTimeOutMs() {
         return publishTimeOutMs;
@@ -15,5 +16,13 @@ public class AppProperties {
 
     public void setPublishTimeOutMs(Long publishTimeOutMs) {
         this.publishTimeOutMs = publishTimeOutMs;
+    }
+
+    public boolean isKafkaStreamsEnabled() {
+        return kafkaStreamsEnabled;
+    }
+
+    public void setKafkaStreamsEnabled(boolean kafkaStreamsEnabled) {
+        this.kafkaStreamsEnabled = kafkaStreamsEnabled;
     }
 }
