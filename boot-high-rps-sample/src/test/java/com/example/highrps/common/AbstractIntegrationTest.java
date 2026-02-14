@@ -22,7 +22,9 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
 
 @ActiveProfiles({"test"})
-@SpringBootTest(webEnvironment = RANDOM_PORT, classes = ContainersConfig.class)
+@SpringBootTest(
+        webEnvironment = RANDOM_PORT,
+        classes = {ContainersConfig.class, SQLContainerConfig.class})
 @AutoConfigureMockMvc
 @AutoConfigureTracing
 @AutoConfigureMetrics
