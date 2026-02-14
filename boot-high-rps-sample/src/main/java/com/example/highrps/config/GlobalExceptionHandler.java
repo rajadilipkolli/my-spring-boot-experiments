@@ -66,7 +66,7 @@ class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     ProblemDetail handleUnexpected(Exception e) {
-        logger.error("Unexpected exception occurred", e);
+        log.error("Unexpected exception occurred", e);
 
         // Don't expose internal details in production
         String message = "An unexpected error occurred";

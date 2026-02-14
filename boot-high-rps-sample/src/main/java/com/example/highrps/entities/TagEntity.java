@@ -1,5 +1,6 @@
 package com.example.highrps.entities;
 
+import com.example.highrps.shared.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -15,7 +16,7 @@ import java.util.Objects;
 @Table(
         name = "tags",
         uniqueConstraints = {@UniqueConstraint(columnNames = "tag_name", name = "uc_tag_name")})
-public class TagEntity {
+public class TagEntity extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "tags_seq")
@@ -65,7 +66,7 @@ public class TagEntity {
         return version;
     }
 
-    public void setVersion(Short version) {
+    void setVersion(Short version) {
         this.version = version;
     }
 

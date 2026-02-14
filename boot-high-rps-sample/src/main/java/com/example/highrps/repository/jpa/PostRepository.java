@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import com.example.highrps.shared.ResourceNotFoundException;
 import org.springframework.transaction.annotation.Transactional;
 
 public interface PostRepository extends JpaRepository<PostEntity, Long> {
@@ -30,7 +31,7 @@ public interface PostRepository extends JpaRepository<PostEntity, Long> {
     // Default convenience method
     default PostEntity getByTitleAndEmail(String title, String email) {
         return findByTitleAndAuthorEntity_Email(title, email)
-                .orElseThrow(() -> new com.example.highrps.shared.ResourceNotFoundException(
+                .orElseThrow(() -> new ResourceNotFoundException(
                         "Post not found with title: " + title + " and email: " + email));
     }
 }

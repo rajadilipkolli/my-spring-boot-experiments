@@ -1,13 +1,13 @@
 CREATE TABLE authors
 (
-    id            BIGINT      NOT NULL,
+    id            BIGINT        
     first_name    TEXT NOT NULL,
     middle_name   TEXT,
     last_name     TEXT NOT NULL,
-    mobile        BIGINT      NOT NULL,
+    mobile        BIGINT        NOT NULL,
     email         TEXT NOT NULL,
     registered_at TIMESTAMP WITHOUT TIME ZONE,
-    version       SMALLINT,
+    version       SMALLINT      NOT NULL DEFAULT 0,
     created_at    TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     modified_at   TIMESTAMP WITHOUT TIME ZONE,
     CONSTRAINT pk_authors PRIMARY KEY (id)
