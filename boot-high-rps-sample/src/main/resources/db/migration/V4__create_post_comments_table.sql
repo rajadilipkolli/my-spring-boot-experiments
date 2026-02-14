@@ -7,6 +7,7 @@ CREATE TABLE post_comments
     content      TEXT,
     published    BOOLEAN                     NOT NULL,
     published_at TIMESTAMP WITHOUT TIME ZONE,
+    version      SMALLINT,
     post_id      BIGINT                      NOT NULL,
     CONSTRAINT pk_post_comments PRIMARY KEY (id)
 );

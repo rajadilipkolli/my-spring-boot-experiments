@@ -8,6 +8,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+import jakarta.persistence.Version;
 import java.util.Objects;
 
 @Entity
@@ -24,7 +25,12 @@ public class TagEntity {
     @Column(nullable = false, unique = true, name = "tag_name")
     private String tagName;
 
+    @Column(name = "tag_description")
     private String tagDescription;
+
+    @Version
+    @Column(name = "version", nullable = false)
+    private Short version;
 
     public TagEntity() {}
 
@@ -53,6 +59,14 @@ public class TagEntity {
     public TagEntity setTagDescription(String tagDescription) {
         this.tagDescription = tagDescription;
         return this;
+    }
+
+    public Short getVersion() {
+        return version;
+    }
+
+    public void setVersion(Short version) {
+        this.version = version;
     }
 
     @Override

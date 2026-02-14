@@ -1,15 +1,14 @@
 package com.example.highrps.service;
 
 import com.example.highrps.config.AppProperties;
-import com.example.highrps.entities.Auditable;
 import com.example.highrps.entities.AuthorRedis;
-import com.example.highrps.exception.ResourceNotFoundException;
 import com.example.highrps.mapper.AuthorRequestToResponseMapper;
 import com.example.highrps.model.request.AuthorRequest;
 import com.example.highrps.model.request.EventEnvelope;
 import com.example.highrps.model.response.AuthorResponse;
 import com.example.highrps.repository.jpa.AuthorRepository;
 import com.example.highrps.repository.redis.AuthorRedisRepository;
+import com.example.highrps.shared.ResourceNotFoundException;
 import com.example.highrps.utility.RequestCoalescer;
 import com.github.benmanes.caffeine.cache.Cache;
 import io.micrometer.core.instrument.Counter;
@@ -33,9 +32,11 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.kafka.config.StreamsBuilderFactoryBean;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
 @Service
+@Transactional(readOnly = true)
 public class AuthorService {
 
     private static final Logger log = LoggerFactory.getLogger(AuthorService.class);
@@ -146,6 +147,7 @@ public class AuthorService {
         throw new ResourceNotFoundException("Author not found for email: " + email);
     }
 
+    @Transactional
     public AuthorResponse saveOrUpdateAuthor(AuthorRequest newAuthorRequest) {
         String email = newAuthorRequest.email();
         String emailKey = email.toLowerCase(Locale.ROOT);
@@ -175,7 +177,8 @@ public class AuthorService {
             log.warn("Failed to update local cache for email after successful publish: {}", email, e);
         }
 
-        // perform an eager Redis write using repository so it can be directly used by JPA batch
+        // perform an eager Redis write using repository so it can be directly used by
+        // JPA batch
         try {
             AuthorRedis ar = toAuthorRedis(emailKey, authorResponse);
             authorRedisRepository.save(ar);
@@ -187,11 +190,15 @@ public class AuthorService {
     }
 
     /**
-     * Update helper that encapsulates the controller logic so the controller only needs a
-     * single service call. Preserves existing behavior: if the path email does not match
-     * the request email and the original path email does not exist, a bad-request condition
+     * Update helper that encapsulates the controller logic so the controller only
+     * needs a
+     * single service call. Preserves existing behavior: if the path email does not
+     * match
+     * the request email and the original path email does not exist, a bad-request
+     * condition
      * is signaled by throwing ResourceNotFoundException.
      */
+    @Transactional
     public AuthorResponse updateAuthor(String pathEmail, AuthorRequest newAuthorRequest) {
         if (!pathEmail.equalsIgnoreCase(newAuthorRequest.email()) && !emailExists(pathEmail)) {
             throw new ResourceNotFoundException("Path email does not match request email and original email not found");
@@ -201,6 +208,7 @@ public class AuthorService {
         return saveOrUpdateAuthor(withModifiedAt);
     }
 
+    @Transactional
     public void deleteAuthor(String email) {
 
         var emailKey = email.toLowerCase(Locale.ROOT);
@@ -331,7 +339,7 @@ public class AuthorService {
         }
         return authorRepository
                 .findByEmailIgnoreCase(email)
-                .map(Auditable::getCreatedAt)
+                .map(author -> author.getCreatedAt())
                 .orElse(null);
     }
 

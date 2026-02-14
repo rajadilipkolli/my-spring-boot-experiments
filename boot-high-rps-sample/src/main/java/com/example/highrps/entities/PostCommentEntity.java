@@ -1,5 +1,6 @@
 package com.example.highrps.entities;
 
+import com.example.highrps.shared.BaseEntity;
 import jakarta.persistence.*;
 import java.time.OffsetDateTime;
 import java.util.Objects;
@@ -7,20 +8,27 @@ import org.hibernate.Hibernate;
 
 @Entity
 @Table(name = "post_comments")
-public class PostCommentEntity extends Auditable {
+public class PostCommentEntity extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(name = "title", nullable = false)
     private String title;
 
+    @Column(name = "content")
     private String content;
 
+    @Column(name = "published", nullable = false)
     private boolean published;
 
+    @Column(name = "published_at")
     private OffsetDateTime publishedAt;
+
+    @Version
+    @Column(name = "version", nullable = false)
+    private Short version;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id", nullable = false)
@@ -78,6 +86,14 @@ public class PostCommentEntity extends Auditable {
 
     public PostEntity getPostEntity() {
         return postEntity;
+    }
+
+    public Short getVersion() {
+        return version;
+    }
+
+    public void setVersion(Short version) {
+        this.version = version;
     }
 
     @Override

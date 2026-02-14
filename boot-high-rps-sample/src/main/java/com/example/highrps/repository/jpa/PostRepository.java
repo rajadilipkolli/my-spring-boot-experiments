@@ -22,10 +22,15 @@ public interface PostRepository extends JpaRepository<PostEntity, Long> {
     @EntityGraph(attributePaths = {"tags", "details", "authorEntity", "tags.tagEntity"})
     List<PostEntity> findByTitleIn(List<String> titles);
 
-    boolean existsByTitle(String title);
-
     @Transactional
     @Query("delete from PostEntity p where p.title = :title and lower(p.authorEntity.email) = :email")
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     int deleteByTitleAndAuthorEntity_EmailIgnoreCase(@Param("title") String title, @Param("email") String email);
+
+    // Default convenience method
+    default PostEntity getByTitleAndEmail(String title, String email) {
+        return findByTitleAndAuthorEntity_Email(title, email)
+                .orElseThrow(() -> new com.example.highrps.shared.ResourceNotFoundException(
+                        "Post not found with title: " + title + " and email: " + email));
+    }
 }

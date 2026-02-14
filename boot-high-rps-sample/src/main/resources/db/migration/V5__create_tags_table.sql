@@ -3,6 +3,7 @@ CREATE TABLE tags
     id              BIGINT       NOT NULL,
     tag_name        VARCHAR(255) NOT NULL,
     tag_description VARCHAR(255),
+    version         SMALLINT,
     CONSTRAINT pk_tags PRIMARY KEY (id)
 );
 

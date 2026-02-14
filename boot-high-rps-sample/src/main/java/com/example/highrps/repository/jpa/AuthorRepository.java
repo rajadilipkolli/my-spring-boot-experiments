@@ -24,4 +24,11 @@ public interface AuthorRepository extends JpaRepository<AuthorEntity, Long> {
     Optional<AuthorEntity> findByEmailIgnoreCase(String email);
 
     AuthorEntity getReferenceByEmail(String email);
+
+    // Default convenience method
+    default AuthorEntity getByEmail(String email) {
+        return findByEmailIgnoreCase(email)
+                .orElseThrow(() -> new com.example.highrps.shared.ResourceNotFoundException(
+                        "Author not found with email: " + email));
+    }
 }

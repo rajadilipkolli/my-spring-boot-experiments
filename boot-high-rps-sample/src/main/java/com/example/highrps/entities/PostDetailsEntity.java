@@ -1,11 +1,12 @@
 package com.example.highrps.entities;
 
+import com.example.highrps.shared.BaseEntity;
 import jakarta.persistence.*;
 import java.util.Objects;
 
 @Entity
 @Table(name = "post_details")
-public class PostDetailsEntity extends Auditable {
+public class PostDetailsEntity extends BaseEntity {
 
     @Id
     private Long id;
