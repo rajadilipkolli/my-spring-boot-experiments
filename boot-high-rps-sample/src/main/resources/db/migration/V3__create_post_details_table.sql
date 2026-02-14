@@ -1,10 +1,10 @@
 CREATE TABLE post_details
 (
     id          BIGINT                      NOT NULL,
-    created_at  TIMESTAMP WITHOUT TIME ZONE NOT NULL,
-    modified_at TIMESTAMP WITHOUT TIME ZONE,
     details_key VARCHAR(255),
     created_by  VARCHAR(255),
+    created_at  TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    modified_at TIMESTAMP WITHOUT TIME ZONE,
     CONSTRAINT pk_post_details PRIMARY KEY (id)
 );
 

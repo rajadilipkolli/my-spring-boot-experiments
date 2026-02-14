@@ -1,6 +1,20 @@
 package com.example.highrps.entities;
 
-import jakarta.persistence.*;
+import com.example.highrps.shared.AssertUtil;
+import com.example.highrps.shared.BaseEntity;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
+import jakarta.persistence.Version;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -17,20 +31,27 @@ import org.jspecify.annotations.Nullable;
                     name = "uc_postentity_title_author_id",
                     columnNames = {"title", "author_id"})
         })
-public class PostEntity extends Auditable {
+public class PostEntity extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
 
+    @Column(name = "title", nullable = false)
     private String title;
 
-    @Column(length = 4096)
+    @Column(name = "content", length = 4096)
     private String content;
 
+    @Column(name = "published", nullable = false)
     private boolean published;
 
+    @Column(name = "published_at")
     private LocalDateTime publishedAt;
+
+    @Version
+    @Column(name = "version", nullable = false)
+    private Short version;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "postEntity", orphanRemoval = true)
     private List<PostCommentEntity> comments = new ArrayList<>();
@@ -44,6 +65,19 @@ public class PostEntity extends Auditable {
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "author_id", nullable = false)
     private AuthorEntity authorEntity;
+
+    // Protected no-arg constructor for JPA and tests
+    protected PostEntity() {}
+
+    // Public constructor with required fields and validation
+    public PostEntity(String title, String content, AuthorEntity authorEntity) {
+        this.title = AssertUtil.requireNotBlank(title, "Post title cannot be null or empty");
+        this.content = AssertUtil.requireNotBlank(content, "Post content cannot be null or empty");
+        this.authorEntity = authorEntity;
+        this.published = false;
+        this.comments = new ArrayList<>();
+        this.tags = new ArrayList<>();
+    }
 
     public PostEntity setId(Long id) {
         this.id = id;
@@ -167,6 +201,27 @@ public class PostEntity extends Auditable {
                 postTagEntity.setTagEntity(null);
             }
         }
+    }
+
+    // Domain methods
+    public void publish() {
+        if (!this.published) {
+            this.published = true;
+            this.publishedAt = LocalDateTime.now();
+        }
+    }
+
+    public void unpublish() {
+        this.published = false;
+        this.publishedAt = null;
+    }
+
+    public Short getVersion() {
+        return version;
+    }
+
+    public void setVersion(Short version) {
+        this.version = version;
     }
 
     @Override

@@ -1,6 +1,16 @@
 package com.example.highrps.entities;
 
-import jakarta.persistence.*;
+import com.example.highrps.shared.AssertUtil;
+import com.example.highrps.shared.BaseEntity;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -8,7 +18,7 @@ import org.jspecify.annotations.Nullable;
 
 @Entity
 @Table(name = "authors")
-public class AuthorEntity extends Auditable {
+public class AuthorEntity extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
@@ -37,6 +47,19 @@ public class AuthorEntity extends Auditable {
 
     @OneToMany(mappedBy = "authorEntity", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PostEntity> postEntities = new ArrayList<>();
+
+    // Protected no-arg constructor for JPA and tests
+    public AuthorEntity() {}
+
+    // Public constructor with required fields and validation
+    public AuthorEntity(String firstName, String lastName, String email, Long mobile) {
+        this.firstName = AssertUtil.requireNotBlank(firstName, "First name cannot be null or empty");
+        this.lastName = AssertUtil.requireNotBlank(lastName, "Last name cannot be null or empty");
+        this.email = AssertUtil.requireNotBlank(email, "Email cannot be null or empty");
+        this.mobile = AssertUtil.requireNotNull(mobile, "Mobile cannot be null");
+        this.postEntities = new ArrayList<>();
+        this.registeredAt = LocalDateTime.now();
+    }
 
     public AuthorEntity setId(Long id) {
         this.id = id;

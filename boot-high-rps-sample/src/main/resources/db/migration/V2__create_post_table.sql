@@ -6,6 +6,7 @@ CREATE TABLE posts
     published    BOOLEAN                     NOT NULL,
     published_at TIMESTAMP WITHOUT TIME ZONE,
     author_id    BIGINT,
+    version      SMALLINT                    NOT NULL DEFAULT 0,
     created_at   TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     modified_at  TIMESTAMP WITHOUT TIME ZONE,
     CONSTRAINT pk_posts PRIMARY KEY (id)

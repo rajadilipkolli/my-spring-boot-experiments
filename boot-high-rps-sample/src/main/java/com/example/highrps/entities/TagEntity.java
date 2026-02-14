@@ -1,5 +1,6 @@
 package com.example.highrps.entities;
 
+import com.example.highrps.shared.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -8,13 +9,14 @@ import jakarta.persistence.Id;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+import jakarta.persistence.Version;
 import java.util.Objects;
 
 @Entity
 @Table(
         name = "tags",
         uniqueConstraints = {@UniqueConstraint(columnNames = "tag_name", name = "uc_tag_name")})
-public class TagEntity {
+public class TagEntity extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "tags_seq")
@@ -24,7 +26,12 @@ public class TagEntity {
     @Column(nullable = false, unique = true, name = "tag_name")
     private String tagName;
 
+    @Column(name = "tag_description")
     private String tagDescription;
+
+    @Version
+    @Column(name = "version", nullable = false)
+    private Short version;
 
     public TagEntity() {}
 
@@ -53,6 +60,14 @@ public class TagEntity {
     public TagEntity setTagDescription(String tagDescription) {
         this.tagDescription = tagDescription;
         return this;
+    }
+
+    public Short getVersion() {
+        return version;
+    }
+
+    void setVersion(Short version) {
+        this.version = version;
     }
 
     @Override

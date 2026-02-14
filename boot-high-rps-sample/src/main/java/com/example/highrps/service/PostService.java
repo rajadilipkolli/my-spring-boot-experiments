@@ -3,13 +3,13 @@ package com.example.highrps.service;
 import com.example.highrps.config.AppProperties;
 import com.example.highrps.entities.PostEntity;
 import com.example.highrps.entities.PostRedis;
-import com.example.highrps.exception.ResourceNotFoundException;
 import com.example.highrps.mapper.PostRequestToResponseMapper;
 import com.example.highrps.model.request.EventEnvelope;
 import com.example.highrps.model.request.NewPostRequest;
 import com.example.highrps.model.response.PostResponse;
 import com.example.highrps.repository.jpa.PostRepository;
 import com.example.highrps.repository.redis.PostRedisRepository;
+import com.example.highrps.shared.ResourceNotFoundException;
 import com.example.highrps.utility.RequestCoalescer;
 import com.github.benmanes.caffeine.cache.Cache;
 import io.micrometer.core.instrument.Counter;
@@ -33,9 +33,11 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.kafka.config.StreamsBuilderFactoryBean;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
 @Service
+@Transactional(readOnly = true)
 public class PostService {
 
     private static final Logger log = LoggerFactory.getLogger(PostService.class);
@@ -54,7 +56,8 @@ public class PostService {
 
     private volatile ReadOnlyKeyValueStore<String, NewPostRequest> keyValueStore = null;
 
-    // Lock used to initialize the Kafka Streams read-only store instead of using synchronized
+    // Lock used to initialize the Kafka Streams read-only store instead of using
+    // synchronized
     private final ReentrantLock keyValueStoreLock = new ReentrantLock();
 
     public PostService(
@@ -130,13 +133,15 @@ public class PostService {
         throw new ResourceNotFoundException("Post not found for title: " + title);
     }
 
+    @Transactional
     public PostResponse saveOrUpdatePost(NewPostRequest newPostRequest) {
         String title = newPostRequest.title();
         if (newPostRequest.published() != null && newPostRequest.published() && newPostRequest.publishedAt() == null) {
             newPostRequest = newPostRequest.withPublishedAt(LocalDateTime.now());
         }
         var cacheKey = cacheKey(title, newPostRequest.email());
-        // Publish envelope and wait for the send to complete. Only after a successful send
+        // Publish envelope and wait for the send to complete. Only after a successful
+        // send
         // do we populate the local cache and return the response.
         var future = kafkaProducerService.publishEnvelope("post", cacheKey, newPostRequest);
         processFuture(future, title);
@@ -147,14 +152,16 @@ public class PostService {
         // Build the response now so we can return it after successful publish
         PostResponse postResponse = postRequestToResponseMapper.mapToPostResponse(newPostRequest);
         String json = PostResponse.toJson(postResponse);
-        // Only populate local cache after successful publish. Cache update is best-effort.
+        // Only populate local cache after successful publish. Cache update is
+        // best-effort.
         try {
             localCache.put(cacheKey, json);
         } catch (Exception e) {
             log.warn("Failed to update local cache for title after successful publish: {}", title, e);
         }
 
-        // perform an eager repository write so batch/JPA processors can read repository-backed entries
+        // perform an eager repository write so batch/JPA processors can read
+        // repository-backed entries
         try {
             postRedisRepository.save(toPostRedis(title, newPostRequest));
         } catch (Exception e) {
@@ -165,11 +172,15 @@ public class PostService {
     }
 
     /**
-     * Update helper that encapsulates the controller logic so the controller only needs a
-     * single service call. Preserves existing behavior: if the path title does not match
-     * the request title and the original path title does not exist, a bad-request condition
+     * Update helper that encapsulates the controller logic so the controller only
+     * needs a
+     * single service call. Preserves existing behavior: if the path title does not
+     * match
+     * the request title and the original path title does not exist, a bad-request
+     * condition
      * is signaled by throwing ResourceNotFoundException.
      */
+    @Transactional
     public PostResponse updatePost(String pathTitle, NewPostRequest newPostRequest) {
         if (!pathTitle.equals(newPostRequest.title()) && !titleExists(pathTitle, newPostRequest.email())) {
             throw new ResourceNotFoundException("Path title does not match request title and original title not found");
@@ -179,9 +190,11 @@ public class PostService {
         return saveOrUpdatePost(withModifiedAt);
     }
 
+    @Transactional
     public void deletePost(String title, String email) {
         var cacheKey = cacheKey(title, email);
-        // 1) Publish tombstone to per-entity aggregates topic so Streams materialized KTable sees the delete
+        // 1) Publish tombstone to per-entity aggregates topic so Streams materialized
+        // KTable sees the delete
         try {
             var deleteForEntity = kafkaProducerService.publishDeleteForEntity("post", cacheKey);
             processFuture(deleteForEntity, title);
@@ -200,7 +213,8 @@ public class PostService {
             log.warn("Failed to mark local cache deletion for title: {}", title, e);
         }
 
-        // 3) Remove from Redis so reads return absent immediately and batch processors don't re-populate from
+        // 3) Remove from Redis so reads return absent immediately and batch processors
+        // don't re-populate from
         // repository
         try {
             postRedisRepository.deleteById(cacheKey);
@@ -209,7 +223,8 @@ public class PostService {
             log.warn("Failed to delete redis repository entry for title: {}", title, e);
         }
 
-        // 4b) Mark deleted in a short-lived Redis set so batch processors skip re-inserts
+        // 4b) Mark deleted in a short-lived Redis set so batch processors skip
+        // re-inserts
         try {
             // Use per-title cacheKey so each deletion has independent TTL
             redis.opsForValue().set("deleted:posts:" + cacheKey, "1", Duration.ofSeconds(60));

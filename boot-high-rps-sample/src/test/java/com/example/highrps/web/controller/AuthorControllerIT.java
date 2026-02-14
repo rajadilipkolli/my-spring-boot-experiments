@@ -13,7 +13,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 
-public class AuthorControllerIT extends AbstractIntegrationTest {
+class AuthorControllerIT extends AbstractIntegrationTest {
 
     @Test
     void crudAuthorResourcesAPICheck() {
