@@ -11,6 +11,7 @@ public interface PostRepository extends JpaRepository<PostEntity, Long> {
 
     boolean existsByPostRefId(Long postRefId);
 
+    @EntityGraph(attributePaths = {"authorEntity"})
     Optional<PostEntity> findByPostRefId(Long postRefId);
 
     @EntityGraph(attributePaths = {"tags", "details", "authorEntity", "tags.tagEntity"})

@@ -130,6 +130,7 @@ public class PostService {
 
     @Transactional
     public PostResponse saveOrUpdatePost(NewPostRequest newPostRequest) {
+        Assert.notNull(newPostRequest.postId(), () -> "postId must not be null");
         if (newPostRequest.published() != null && newPostRequest.published() && newPostRequest.publishedAt() == null) {
             newPostRequest = newPostRequest.withPublishedAt(LocalDateTime.now());
         }
@@ -169,18 +170,13 @@ public class PostService {
     }
 
     /**
-     * Update helper that encapsulates the controller logic so the controller only
-     * needs a
-     * single service call. Preserves existing behavior: if the path title does not
-     * match
-     * the request title and the original path title does not exist, a bad-request
-     * condition
-     * is signaled by throwing ResourceNotFoundException.
+     * Update helper that validates the path postId matches the request postId,
+     * sets timestamps, and delegates to {`@link` `#saveOrUpdatePost`}.
      */
     @Transactional
     public PostResponse updatePost(Long postId, NewPostRequest newPostRequest) {
         if (newPostRequest.postId() == null || !(Objects.equals(postId, newPostRequest.postId()))) {
-            throw new ResourceNotFoundException("PostId does not match request postId and original post not found");
+            throw new ResourceNotFoundException("Path postId does not match request postId");
         }
         NewPostRequest withModifiedAt =
                 newPostRequest.withTimestamps(getCreatedAtByPostId(newPostRequest.postId()), LocalDateTime.now());
@@ -224,6 +220,14 @@ public class PostService {
         } catch (Exception ex) {
             log.warn("Failed to mark postId {} in deleted:posts set", cacheKey, ex);
         }
+    }
+
+    public boolean existsByPostRefId(Long postRefId) {
+        // Check local cache and Redis before hitting DB for existence check
+        if (getCreatedAtByPostId(postRefId) != null) {
+            return true;
+        }
+        return postRepository.existsByPostRefId(postRefId);
     }
 
     private ReadOnlyKeyValueStore<String, NewPostRequest> getKeyValueStore() {

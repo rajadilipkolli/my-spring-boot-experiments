@@ -37,7 +37,7 @@ public class PostEntity extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
 
-    @Column(name = "post_ref_id", nullable = false)
+    @Column(name = "post_ref_id", unique = true, nullable = false)
     private Long postRefId;
 
     @Column(name = "title", nullable = false)

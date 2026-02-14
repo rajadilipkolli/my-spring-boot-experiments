@@ -54,13 +54,13 @@ public record PostCommentRequest(
         OffsetDateTime publishedAt = Boolean.TRUE.equals(cmd.published()) ? OffsetDateTime.now() : null;
         LocalDateTime now = LocalDateTime.now();
         return new PostCommentRequest(
-                commentId, cmd.postId(), cmd.title(), cmd.content(), cmd.published(), publishedAt, now, now);
+                commentId, cmd.postId(), cmd.title(), cmd.content(), cmd.published(), publishedAt, now, null);
     }
 
     /**
      * Create from UpdatePostCommentCmd.
      */
-    public static PostCommentRequest fromUpdateCmd(UpdatePostCommentCmd cmd, LocalDateTime createdAt) {
+    public static PostCommentRequest fromUpdateCmd(UpdatePostCommentCmd cmd) {
         OffsetDateTime publishedAt = Boolean.TRUE.equals(cmd.published()) ? OffsetDateTime.now() : null;
         return new PostCommentRequest(
                 cmd.commentId().id(),
@@ -69,7 +69,7 @@ public record PostCommentRequest(
                 cmd.content(),
                 cmd.published(),
                 publishedAt,
-                createdAt,
+                cmd.createdAt() != null ? cmd.createdAt().toLocalDateTime() : null,
                 LocalDateTime.now());
     }
 }

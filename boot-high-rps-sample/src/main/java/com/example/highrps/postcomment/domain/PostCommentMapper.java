@@ -21,14 +21,10 @@ public abstract class PostCommentMapper {
 
     public abstract List<PostCommentResult> toResultList(List<PostCommentEntity> entities);
 
-    @Mapping(target = "id", source = "commentId")
     public abstract PostCommentResult toResultFromRequest(PostCommentRequest request);
 
     public abstract PostCommentResult toResultFromRedis(PostCommentRedis redis);
 
-    @Mapping(target = "id", expression = "java(generateCacheKey(request.postId(), request.commentId()))")
-    @Mapping(target = "commentId", source = "commentId")
-    @Mapping(target = "postId", source = "postId")
     public abstract PostCommentRedis toRedis(PostCommentRequest request);
 
     /**
@@ -51,12 +47,5 @@ public abstract class PostCommentMapper {
         } catch (JacksonException e) {
             throw new IllegalStateException("Failed to deserialize PostCommentResult from JSON", e);
         }
-    }
-
-    /**
-     * Generate cache key for PostComment.
-     */
-    protected String generateCacheKey(Long postId, Long commentId) {
-        return postId + ":" + commentId;
     }
 }

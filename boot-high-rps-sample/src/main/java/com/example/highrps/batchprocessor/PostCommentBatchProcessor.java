@@ -8,6 +8,7 @@ import com.example.highrps.repository.jpa.PostRepository;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
@@ -60,7 +61,7 @@ public class PostCommentBatchProcessor implements EntityBatchProcessor {
                     }
                     try {
                         PostCommentResult result = jsonMapper.readValue(payload, PostCommentResult.class);
-                        return new ParsedComment(result.id(), result.postId(), result);
+                        return new ParsedComment(result.commentId(), result.postId(), result);
                     } catch (Exception e) {
                         log.warn("Failed to map post comment payload to result: {}", payload, e);
                         return null;
@@ -78,10 +79,10 @@ public class PostCommentBatchProcessor implements EntityBatchProcessor {
         List<Long> commentIds =
                 parsedComments.stream().map(ParsedComment::commentId).collect(Collectors.toList());
 
-        List<PostCommentEntity> existingComments = postCommentRepository.findAllById(commentIds);
+        List<PostCommentEntity> existingComments = postCommentRepository.findByCommentRefIdIn(commentIds);
 
         Map<Long, PostCommentEntity> existingById = existingComments.stream()
-                .collect(Collectors.toMap(PostCommentEntity::getId, Function.identity(), (e1, e2) -> e1));
+                .collect(Collectors.toMap(PostCommentEntity::getCommentRefId, Function.identity(), (e1, e2) -> e1));
 
         // Step 3: Process each comment - update existing or create new
         List<PostCommentEntity> entitiesToSave = parsedComments.stream()
@@ -131,12 +132,12 @@ public class PostCommentBatchProcessor implements EntityBatchProcessor {
     public void processDeletes(List<String> keys) {
         if (keys.isEmpty()) return;
         try {
-            List<ParsedKey> cacheKeysList = keys.stream()
+            List<Long> cacheKeysList = keys.stream()
                     .map(s -> s.split(":"))
                     .filter(parts -> parts.length == 2)
                     .map(parts -> {
                         try {
-                            return new ParsedKey(Long.parseLong(parts[0]), Long.parseLong(parts[1]));
+                            return Long.parseLong(parts[1]);
                         } catch (NumberFormatException e) {
                             log.warn("Failed to parse cache key: {}", String.join(":", parts), e);
                             return null;
@@ -145,14 +146,14 @@ public class PostCommentBatchProcessor implements EntityBatchProcessor {
                     .filter(Objects::nonNull)
                     .toList();
 
-            for (ParsedKey key : cacheKeysList) {
-                try {
-                    postCommentRepository.deleteById(key.commentId());
-                    log.debug("Deleted comment entity for id: {}, postId: {}", key.commentId(), key.postId());
-                } catch (Exception e) {
-                    log.warn(
-                            "Failed to delete comment entity for id: {}, postId: {}", key.commentId(), key.postId(), e);
-                }
+            if (cacheKeysList.isEmpty()) {
+                return;
+            }
+            try {
+                long deletedRows = postCommentRepository.deleteByCommentRefIdIn(cacheKeysList);
+                log.debug("Deleted : {} comment entity for ids: {}", deletedRows, cacheKeysList);
+            } catch (Exception e) {
+                log.warn("Failed to delete comment entity for ids: {}", cacheKeysList, e);
             }
         } catch (Exception e) {
             log.warn("Failed to batch delete comment entities for keys: {}", keys, e);
@@ -163,10 +164,10 @@ public class PostCommentBatchProcessor implements EntityBatchProcessor {
     public String extractKey(String payload) {
         try {
             var node = jsonMapper.readTree(payload);
-            long commentId = node.path("id").asLong(-1L);
+            long commentId = node.path("commentId").asLong(-1L);
             long postId = node.path("postId").asLong(-1L);
             if (commentId == -1L || postId == -1L) {
-                log.warn("Missing 'id' or 'postId' field in comment payload: {}", payload);
+                log.warn("Missing 'commentId' or 'postId' field in comment payload: {}", payload);
                 return null;
             }
             return postId + ":" + commentId;
@@ -185,9 +186,13 @@ public class PostCommentBatchProcessor implements EntityBatchProcessor {
     }
 
     private PostCommentEntity createCommentEntity(PostCommentResult result) {
-        PostEntity post = postRepository.getReferenceById(result.postId());
-        PostCommentEntity entity = new PostCommentEntity(result.title(), result.content(), post);
-        entity.setId(result.id());
+        Optional<PostEntity> postExists = postRepository.findByPostRefId(result.postId());
+        if (postExists.isEmpty()) {
+            log.warn("Cannot create comment for non-existing post with id: {}", result.postId());
+            throw new IllegalStateException("Post with id " + result.postId() + " does not exist");
+        }
+        PostCommentEntity entity = new PostCommentEntity(result.title(), result.content(), postExists.get());
+        entity.setCommentRefId(result.commentId());
         entity.setPublished(result.published());
         entity.setPublishedAt(result.publishedAt());
         entity.setCreatedAt(result.createdAt());
@@ -197,6 +202,4 @@ public class PostCommentBatchProcessor implements EntityBatchProcessor {
 
     // Helper record to hold parsed data
     private record ParsedComment(Long commentId, Long postId, PostCommentResult result) {}
-
-    private record ParsedKey(Long postId, Long commentId) {}
 }
