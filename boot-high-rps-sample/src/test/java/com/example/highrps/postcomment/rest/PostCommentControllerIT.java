@@ -6,6 +6,7 @@ import com.example.highrps.common.AbstractIntegrationTest;
 import com.example.highrps.entities.AuthorEntity;
 import com.example.highrps.entities.PostDetailsEntity;
 import com.example.highrps.entities.PostEntity;
+import com.example.highrps.shared.IdGenerator;
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,6 +32,7 @@ class PostCommentControllerIT extends AbstractIntegrationTest {
         PostDetailsEntity postDetailsEntity = new PostDetailsEntity();
         postDetailsEntity.setCreatedBy("Test");
         PostEntity postEntity = new PostEntity("Test Post for Comments", "Post content", author);
+        postEntity.setPostRefId(IdGenerator.generateLong());
         postEntity.setDetails(postDetailsEntity);
         author.addPost(postEntity);
         AuthorEntity authorEntity = authorRepository.save(author);

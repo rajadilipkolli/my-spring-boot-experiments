@@ -74,18 +74,6 @@ public class ScheduledBatchProcessor {
                 boolean isDeleted =
                         node.has("__deleted") && node.get("__deleted").asBoolean(false);
 
-                if (entityType == null) {
-                    // Backward compatibility: infer entity type from payload structure
-                    if (node.has("title")) {
-                        entityType = "post";
-                    } else if (node.has("email") && node.has("firstName")) {
-                        entityType = "author";
-                    } else {
-                        log.warn("Unable to determine entity type for payload: {}", item);
-                        continue;
-                    }
-                }
-
                 EntityBatchProcessor processor = processorsByEntityType.get(entityType);
                 if (processor == null) {
                     log.warn("No processor found for entity type: {}", entityType);

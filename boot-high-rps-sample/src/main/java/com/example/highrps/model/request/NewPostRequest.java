@@ -1,5 +1,6 @@
 package com.example.highrps.model.request;
 
+import com.example.highrps.shared.IdGenerator;
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.validation.Valid;
@@ -11,6 +12,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public record NewPostRequest(
+        Long postId,
         @NotBlank(message = "PostTitle must not be blank") String title,
         @NotBlank(message = "PostContent must not be blank") String content,
 
@@ -25,34 +27,23 @@ public record NewPostRequest(
         @Valid List<TagRequest> tags)
         implements Serializable {
 
-    public NewPostRequest withPublishedAt(LocalDateTime now) {
+    public NewPostRequest withPublishedAt(LocalDateTime publishedAt) {
         return new NewPostRequest(
+                this.postId,
                 this.title,
                 this.content,
                 this.email,
                 this.published,
-                now,
+                publishedAt,
                 this.createdAt,
                 this.modifiedAt,
                 this.details,
                 this.tags);
     }
 
-    public NewPostRequest withCreatedAt(LocalDateTime now) {
+    public NewPostRequest withTimestamps(LocalDateTime createdAt, LocalDateTime modifiedAt) {
         return new NewPostRequest(
-                this.title,
-                this.content,
-                this.email,
-                this.published,
-                this.publishedAt,
-                now,
-                this.modifiedAt,
-                this.details,
-                this.tags);
-    }
-
-    public NewPostRequest withTimestamps(LocalDateTime modifiedAt, LocalDateTime createdAt) {
-        return new NewPostRequest(
+                this.postId != null ? this.postId : IdGenerator.generateLong(),
                 this.title,
                 this.content,
                 this.email,

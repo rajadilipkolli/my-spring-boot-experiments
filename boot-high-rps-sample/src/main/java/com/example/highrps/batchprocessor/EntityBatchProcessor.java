@@ -9,7 +9,7 @@ import java.util.List;
 public interface EntityBatchProcessor {
 
     /**
-     * Returns the entity type this processor handles (e.g., "post", "author").
+     * Returns the entity type this processor handles (e.g., "post", "author", "post-comment").
      */
     String getEntityType();
 
@@ -21,12 +21,12 @@ public interface EntityBatchProcessor {
 
     /**
      * Process a batch of delete operations for this entity type.
-     * @param keys Keys identifying entities to delete (e.g., title, email)
+     * @param keys Keys identifying entities to delete (e.g., postId, email)
      */
     void processDeletes(List<String> keys);
 
     /**
-     * Extract the entity key from a JSON payload (e.g., title for posts, email for authors).
+     * Extract the entity key from a JSON payload (e.g., postId for posts, email for authors).
      * @param payload JSON string
      * @return The entity key
      */

@@ -8,7 +8,6 @@ import com.example.highrps.repository.jpa.AuthorRepository;
 import com.example.highrps.repository.jpa.PostRepository;
 import com.example.highrps.repository.jpa.TagRepository;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
@@ -55,53 +54,55 @@ public class PostBatchProcessor implements EntityBatchProcessor {
     @Override
     @Transactional
     public void processUpserts(List<String> payloads) {
-        // Step 1: Parse payloads and extract titles
+        // Step 1: Parse payloads and extract postIds, while filtering out any with recent tombstones
         List<ParsedPost> parsedPosts = payloads.stream()
                 .map(payload -> {
-                    String title = extractKey(payload);
-                    if (title != null) {
+                    String postId = extractKey(payload);
+                    if (postId != null) {
                         // Skip if tombstone exists
-                        Boolean deleted = redis.hasKey("deleted:post:" + title);
+                        Boolean deleted = redis.hasKey("deleted:post:" + postId);
                         if (Boolean.TRUE.equals(deleted)) {
-                            log.debug("Skipping upsert for title {} because recent tombstone present", title);
+                            log.debug("Skipping upsert for postId {} because recent tombstone present", postId);
                             return null;
                         }
                     }
                     try {
                         NewPostRequest req = jsonMapper.readValue(payload, NewPostRequest.class);
-                        return new ParsedPost(title, req);
+                        return new ParsedPost(postId, req);
                     } catch (Exception e) {
                         log.warn("Failed to map post payload to entity: {}", payload, e);
                         return null;
                     }
                 })
                 .filter(Objects::nonNull)
-                .filter(p -> p.title() != null)
+                .filter(p -> p.postId() != null)
                 .toList();
 
         if (parsedPosts.isEmpty()) {
             return;
         }
 
-        // Step 2: Extract all titles and fetch existing posts from DB
-        List<String> titles = parsedPosts.stream().map(ParsedPost::title).collect(Collectors.toList());
+        // Step 2: Extract all postIds and fetch existing posts from DB
+        List<Long> postIds = parsedPosts.stream()
+                .map(parsedPost -> Long.valueOf(parsedPost.postId))
+                .toList();
 
-        List<PostEntity> existingPosts = postRepository.findByTitleIn(titles);
+        List<PostEntity> existingPosts = postRepository.findByPostRefIdIn(postIds);
 
-        Map<String, PostEntity> existingByTitle = existingPosts.stream()
-                .collect(Collectors.toMap(PostEntity::getTitle, Function.identity(), (e1, e2) -> e1));
+        Map<Long, PostEntity> existingByPostId = existingPosts.stream()
+                .collect(Collectors.toMap(PostEntity::getPostRefId, Function.identity(), (e1, e2) -> e1));
 
         // Step 3: Process each post - update existing or create new
         List<PostEntity> entitiesToSave = parsedPosts.stream()
                 .map(parsed -> {
-                    PostEntity entity = existingByTitle.get(parsed.title());
+                    PostEntity entity = existingByPostId.get(Long.valueOf(parsed.postId()));
                     if (entity != null) {
                         // Update existing entity
                         try {
                             mapper.updatePostEntity(parsed.request(), entity, tagRepository);
-                            log.debug("Updating existing post with title: {}", parsed.title());
+                            log.debug("Updating existing post with postid: {}", parsed.postId());
                         } catch (Exception e) {
-                            log.warn("Failed to update post entity for title: {}", parsed.title(), e);
+                            log.warn("Failed to update post entity for postId: {}", parsed.postId(), e);
                             return null;
                         }
                     } else {
@@ -121,9 +122,9 @@ public class PostBatchProcessor implements EntityBatchProcessor {
                                         .orElse(null);
                             }
                             entity.setAuthorEntity(author);
-                            log.debug("Creating new post with title: {}", parsed.title());
+                            log.debug("Creating new post with postRefId: {}", parsed.postId());
                         } catch (Exception e) {
-                            log.warn("Failed to create post entity for title: {}", parsed.title(), e);
+                            log.warn("Failed to create post entity for postId: {}", parsed.postId(), e);
                             return null;
                         }
                     }
@@ -152,19 +153,9 @@ public class PostBatchProcessor implements EntityBatchProcessor {
     public void processDeletes(List<String> keys) {
         if (keys.isEmpty()) return;
         try {
-            List<ParserKey> cacheKeysList = keys.stream()
-                    .map(s -> s.split(":"))
-                    .map(strings -> new ParserKey(strings[0], strings[1].toLowerCase(Locale.ROOT)))
-                    .toList();
-
-            for (ParserKey key : cacheKeysList) {
-                try {
-                    long rows = postRepository.deleteByTitleAndAuthorEntity_EmailIgnoreCase(key.title(), key.email());
-                    log.debug("Deleted  {} post entity for title: {}, email: {}", rows > 0, key.title(), key.email());
-                } catch (Exception e) {
-                    log.warn("Failed to delete post entity for title: {}, email: {}", key.title(), key.email(), e);
-                }
-            }
+            long deletedRows = postRepository.deleteByPostRefIdIn(
+                    keys.stream().map(Long::valueOf).toList());
+            log.debug("Deleted rows :{} post entity for keys :{}", deletedRows, keys);
         } catch (Exception e) {
             log.warn("Failed to batch delete post entities for keys: {}", keys, e);
         }
@@ -174,20 +165,18 @@ public class PostBatchProcessor implements EntityBatchProcessor {
     public String extractKey(String payload) {
         try {
             var node = jsonMapper.readTree(payload);
-            String titleNode = node.path("title").asString(null);
-            if (titleNode == null || titleNode.isBlank()) {
-                log.warn("Missing 'title' field in post payload: {}", payload);
+            String postId = node.path("postId").asString(null);
+            if (postId == null || postId.isBlank()) {
+                log.warn("Missing 'postId' field in post payload: {}", payload);
                 return null;
             }
-            return titleNode;
+            return postId;
         } catch (Exception e) {
-            log.warn("Failed to extract title from post payload", e);
+            log.warn("Failed to extract postId from post payload", e);
             return null;
         }
     }
 
     // Helper record to hold parsed data
-    private record ParsedPost(String title, NewPostRequest request) {}
-
-    private record ParserKey(String title, String email) {}
+    private record ParsedPost(String postId, NewPostRequest request) {}
 }

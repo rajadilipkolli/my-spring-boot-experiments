@@ -3,6 +3,7 @@ package com.example.highrps.config;
 import com.example.highrps.model.request.AuthorRequest;
 import com.example.highrps.model.request.EventEnvelope;
 import com.example.highrps.model.request.NewPostRequest;
+import com.example.highrps.postcomment.domain.PostCommentRequest;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.kstream.Consumed;
@@ -42,6 +43,7 @@ public class StreamsTopology {
         JacksonJsonSerde<EventEnvelope> envelopeSerde = new JacksonJsonSerde<>(EventEnvelope.class);
         JacksonJsonSerde<NewPostRequest> postSerde = new JacksonJsonSerde<>(NewPostRequest.class);
         JacksonJsonSerde<AuthorRequest> authorSerde = new JacksonJsonSerde<>(AuthorRequest.class);
+        JacksonJsonSerde<PostCommentRequest> postCommentSerde = new JacksonJsonSerde<>(PostCommentRequest.class);
 
         // Read the generic events topic as KStream of EventEnvelope
         KStream<String, EventEnvelope> envelopeStream =
@@ -61,7 +63,15 @@ public class StreamsTopology {
 
         authors.to("authors-aggregates", Produced.with(Serdes.String(), authorSerde));
 
-        log.info("Streams topology for events -> posts-aggregates/authors-aggregates registered");
+        // comments stream: filter envelopes with entity == 'post-comment' and convert payload to PostCommentRequest
+        KStream<String, PostCommentRequest> comments = envelopeStream
+                .filter((k, env) -> env != null && "post-comment".equalsIgnoreCase(env.entity()))
+                .mapValues(env -> mapper.convertValue(env.payload(), PostCommentRequest.class));
+
+        comments.to("post-comments-aggregates", Produced.with(Serdes.String(), postCommentSerde));
+
+        log.info(
+                "Streams topology for events -> posts-aggregates/authors-aggregates/post-comments-aggregates registered");
 
         return envelopeStream; // Return the stream to satisfy Spring's @Bean contract
     }
@@ -95,6 +105,24 @@ public class StreamsTopology {
                 "authors-aggregates", Consumed.with(Serdes.String(), authorSerde), Materialized.as("authors-store"));
 
         log.info("Authors KTable materialized as 'authors-store'");
+        return table;
+    }
+
+    /**
+     * Materialized KTable for comments: reads from post-comments-aggregates topic and materializes to 'post-comments-store'
+     * for interactive queries. Services can query this store to get the latest state of comments.
+     */
+    @Bean
+    public KTable<String, PostCommentRequest> postCommentRequestKTable(StreamsBuilder kafkaStreamBuilder) {
+        log.info("Building comments KTable with materialized store");
+        JacksonJsonSerde<PostCommentRequest> postCommentSerde = new JacksonJsonSerde<>(PostCommentRequest.class);
+
+        KTable<String, PostCommentRequest> table = kafkaStreamBuilder.table(
+                "post-comments-aggregates",
+                Consumed.with(Serdes.String(), postCommentSerde),
+                Materialized.as("post-comments-store"));
+
+        log.info("Comments KTable materialized as 'post-comments-store'");
         return table;
     }
 }

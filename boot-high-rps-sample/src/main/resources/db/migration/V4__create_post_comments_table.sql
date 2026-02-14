@@ -16,3 +16,5 @@ ALTER TABLE post_comments
     ADD CONSTRAINT FK_POST_COMMENTS_ON_POST FOREIGN KEY (post_id) REFERENCES posts (id) ON DELETE CASCADE;
 
 create sequence IF NOT EXISTS post_comments_seq start with 1 increment by 50;
+
+CREATE UNIQUE INDEX IF NOT EXISTS uc_postcommententity_title ON post_comments (title, post_id);

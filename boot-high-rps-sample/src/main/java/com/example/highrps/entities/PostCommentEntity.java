@@ -11,13 +11,20 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import jakarta.persistence.Version;
 import java.time.OffsetDateTime;
 import java.util.Objects;
 import org.hibernate.Hibernate;
 
 @Entity
-@Table(name = "post_comments")
+@Table(
+        name = "post_comments",
+        uniqueConstraints = {
+            @UniqueConstraint(
+                    name = "uc_postcommententity_title",
+                    columnNames = {"title", "post_id"})
+        })
 public class PostCommentEntity extends BaseEntity {
 
     @Id

@@ -145,9 +145,9 @@ public class AuthorEntity extends BaseEntity {
         return postEntities;
     }
 
-    public void addPost(PostEntity postEntity) {
+    public PostEntity addPost(PostEntity postEntity) {
         this.postEntities.add(postEntity);
-        postEntity.setAuthorEntity(this);
+        return postEntity.setAuthorEntity(this);
     }
 
     public void removePost(PostEntity postEntity) {

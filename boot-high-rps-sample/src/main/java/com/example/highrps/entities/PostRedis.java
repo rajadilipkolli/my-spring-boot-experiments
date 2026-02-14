@@ -14,7 +14,7 @@ public class PostRedis extends Auditable implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Id
-    private String id; // composite id: title:authorEmail
+    private Long id;
 
     @Indexed
     private String title;
@@ -28,12 +28,12 @@ public class PostRedis extends Auditable implements Serializable {
 
     public PostRedis() {}
 
-    public PostRedis setId(String id) {
+    public PostRedis setId(Long id) {
         this.id = id;
         return this;
     }
 
-    public String getId() {
+    public Long getId() {
         return id;
     }
 

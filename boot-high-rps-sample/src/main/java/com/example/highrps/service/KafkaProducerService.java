@@ -30,23 +30,28 @@ public class KafkaProducerService {
 
     private static final Map<String, String> ENTITY_TOPICS = Map.of(
             "post", "posts-aggregates",
-            "author", "authors-aggregates");
+            "author", "authors-aggregates",
+            "post-comment", "post-comments-aggregates");
 
     public KafkaProducerService(
             KafkaTemplate<String, EventEnvelope> kafkaTemplate, JsonMapper mapper, MeterRegistry meterRegistry) {
         this.kafkaTemplate = kafkaTemplate;
         this.mapper = mapper;
         this.meterRegistry = meterRegistry;
-        // base counters (global) - include a topic tag with value 'all' so tag keys match per-topic counters
+        // base counters (global) - include a topic tag with value 'all' so tag keys
+        // match per-topic counters
         this.eventsPublishedCounter = meterRegistry.counter("app.kafka.events.published", "topic", "all");
         this.tombstonesPublishedCounter = meterRegistry.counter("app.kafka.tombstones.published", "topic", "all");
     }
 
     /**
-     * Publish an EventEnvelope to the default events topic. This wraps the payload as JSON
-     * and adds an entity label so Streams branching can route to the right per-entity topic.
+     * Publish an EventEnvelope to the default events topic. This wraps the payload
+     * as JSON
+     * and adds an entity label so Streams branching can route to the right
+     * per-entity topic.
      *
-     * @return a future that completes when the send succeeds/fails; envelope creation errors complete the future exceptionally
+     * @return a future that completes when the send succeeds/fails; envelope
+     *         creation errors complete the future exceptionally
      */
     public CompletableFuture<SendResult<String, EventEnvelope>> publishEnvelope(
             String entity, String key, Object payload) {
@@ -63,8 +68,10 @@ public class KafkaProducerService {
     }
 
     /**
-     * Publish a tombstone to the per-entity aggregates topic for the given entity/key.
-     * This ensures the per-entity aggregate listeners receive the tombstone and can delete their materialized view.
+     * Publish a tombstone to the per-entity aggregates topic for the given
+     * entity/key.
+     * This ensures the per-entity aggregate listeners receive the tombstone and can
+     * delete their materialized view.
      *
      * @return a future that completes when the send succeeds/fails
      */
