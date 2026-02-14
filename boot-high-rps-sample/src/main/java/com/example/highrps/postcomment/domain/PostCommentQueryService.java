@@ -1,6 +1,5 @@
 package com.example.highrps.postcomment.domain;
 
-import com.example.highrps.entities.PostCommentEntity;
 import com.example.highrps.repository.jpa.PostCommentRepository;
 import java.util.List;
 import org.springframework.stereotype.Service;
@@ -18,12 +17,7 @@ public class PostCommentQueryService {
     }
 
     public List<PostCommentResult> getCommentsByPostId(Long postId) {
-        List<PostCommentEntity> byPostId = postCommentRepository.findByPostId(postId);
-        if (byPostId.isEmpty()) {
-            return List.of();
-        } else {
-            return postCommentMapper.toResultList(byPostId);
-        }
+        return postCommentMapper.toResultList(postCommentRepository.findByPostId(postId));
     }
 
     public PostCommentResult getCommentById(GetPostCommentQuery query) {
