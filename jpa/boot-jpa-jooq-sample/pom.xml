@@ -19,7 +19,7 @@
         <springdoc-openapi.version>3.0.1</springdoc-openapi.version>
         <datasource-micrometer-boot.version>2.1.1</datasource-micrometer-boot.version>
         <org.mapstruct.version>1.6.3</org.mapstruct.version>
-        <testcontainers-jooq-codegen-maven-plugin.version>0.0.4</testcontainers-jooq-codegen-maven-plugin.version>
+        <testcontainers-jooq-codegen-maven-plugin.version>1.0.0</testcontainers-jooq-codegen-maven-plugin.version>
         <spotless.version>3.2.1</spotless.version>
         <instancio.version>5.5.1</instancio.version>
 
@@ -164,7 +164,7 @@
                 </configuration>
             </plugin>
             <plugin>
-                <groupId>org.testcontainers</groupId>
+                <groupId>dev.sivalabs</groupId>
                 <artifactId>testcontainers-jooq-codegen-maven-plugin</artifactId>
                 <version>${testcontainers-jooq-codegen-maven-plugin.version}</version>
                 <dependencies>
