@@ -222,6 +222,14 @@ public class PostService {
         }
     }
 
+    public boolean existsByPostRefId(Long postRefId) {
+        // Check local cache and Redis before hitting DB for existence check
+        if (getCreatedAtByPostId(postRefId) != null) {
+            return true;
+        }
+        return postRepository.existsByPostRefId(postRefId);
+    }
+
     private ReadOnlyKeyValueStore<String, NewPostRequest> getKeyValueStore() {
         if (keyValueStore == null) {
             keyValueStoreLock.lock();

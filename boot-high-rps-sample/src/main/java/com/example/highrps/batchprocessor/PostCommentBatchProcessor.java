@@ -146,6 +146,9 @@ public class PostCommentBatchProcessor implements EntityBatchProcessor {
                     .filter(Objects::nonNull)
                     .toList();
 
+            if (cacheKeysList.isEmpty()) {
+                return;
+            }
             try {
                 long deletedRows = postCommentRepository.deleteByCommentRefIdIn(cacheKeysList);
                 log.debug("Deleted : {} comment entity for ids: {}", deletedRows, cacheKeysList);

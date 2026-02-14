@@ -25,9 +25,10 @@ public interface PostCommentRepository extends JpaRepository<PostCommentEntity, 
 
     @Query("""
             SELECT pc FROM PostCommentEntity pc
-            WHERE pc.commentRefId = :id AND pc.postEntity.postRefId = :postId
+            WHERE pc.commentRefId = :commentRefId AND pc.postEntity.postRefId = :postId
             """)
-    Optional<PostCommentEntity> findByCommentRefIdAndPostRefId(@Param("id") Long id, @Param("postId") Long postId);
+    Optional<PostCommentEntity> findByCommentRefIdAndPostRefId(
+            @Param("commentRefId") Long commentRefId, @Param("postId") Long postId);
 
     default PostCommentEntity getByCommentRefIdAndPostRefId(PostCommentId postCommentId, Long postId) {
         return findByCommentRefIdAndPostRefId(postCommentId.id(), postId)

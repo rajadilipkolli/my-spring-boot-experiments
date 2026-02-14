@@ -2,10 +2,11 @@ package com.example.highrps.postcomment.domain;
 
 import com.example.highrps.config.AppProperties;
 import com.example.highrps.postcomment.domain.vo.PostCommentId;
-import com.example.highrps.repository.jpa.PostCommentRepository;
 import com.example.highrps.repository.redis.PostCommentRedisRepository;
 import com.example.highrps.service.KafkaProducerService;
+import com.example.highrps.service.PostService;
 import com.example.highrps.shared.IdGenerator;
+import com.example.highrps.shared.ResourceNotFoundException;
 import com.example.highrps.utility.CacheKeyGenerator;
 import com.example.highrps.utility.KafkaPublishHelper;
 import com.github.benmanes.caffeine.cache.Cache;
@@ -16,15 +17,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@Transactional
 public class PostCommentCommandService {
 
     private static final Logger log = LoggerFactory.getLogger(PostCommentCommandService.class);
 
-    private final PostCommentRepository postCommentRepository;
+    private final PostService postService;
     private final KafkaProducerService kafkaProducerService;
     private final Cache<String, String> localCache;
     private final RedisTemplate<String, String> redis;
@@ -35,7 +34,7 @@ public class PostCommentCommandService {
     private final Counter tombstonesPublishedCounter;
 
     public PostCommentCommandService(
-            PostCommentRepository postCommentRepository,
+            PostService postService,
             KafkaProducerService kafkaProducerService,
             Cache<String, String> localCache,
             RedisTemplate<String, String> redis,
@@ -43,7 +42,7 @@ public class PostCommentCommandService {
             PostCommentMapper postCommentMapper,
             AppProperties appProperties,
             MeterRegistry meterRegistry) {
-        this.postCommentRepository = postCommentRepository;
+        this.postService = postService;
         this.kafkaProducerService = kafkaProducerService;
         this.localCache = localCache;
         this.redis = redis;
@@ -61,12 +60,17 @@ public class PostCommentCommandService {
 
     /**
      * Create a new comment with event-driven pattern:
-     * 1. Persist to database (for immediate consistency)
+     * 1. Validate post exists, generate ID, and publish to Kafka
      * 2. Publish to Kafka
      * 3. Update local cache
      * 4. Eager write to Redis
      */
     public PostCommentResult createComment(CreatePostCommentCmd cmd) {
+        // Validate post exists before generating ID and publishing to Kafka
+        if (!postService.existsByPostRefId(cmd.postId())) {
+            throw new ResourceNotFoundException("Post not found with id: " + cmd.postId());
+        }
+
         Long commentId = IdGenerator.generateLong();
 
         // Build request for Kafka event

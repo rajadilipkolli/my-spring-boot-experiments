@@ -75,7 +75,7 @@ class PostCommentControllerIT extends AbstractIntegrationTest {
                 });
 
         await().atMost(Duration.ofSeconds(60))
-                .pollDelay(Duration.ofSeconds(3))
+                .pollDelay(Duration.ofSeconds(1))
                 .pollInterval(Duration.ofMillis(500))
                 .untilAsserted(() -> assertThat(postCommentRepository.count()).isEqualTo(count + 1));
     }
@@ -126,7 +126,7 @@ class PostCommentControllerIT extends AbstractIntegrationTest {
                 });
 
         await().atMost(Duration.ofSeconds(60))
-                .pollDelay(Duration.ofSeconds(2))
+                .pollDelay(Duration.ofSeconds(1))
                 .pollInterval(Duration.ofMillis(500))
                 .untilAsserted(() -> assertThat(postCommentRepository.findByCommentRefIdAndPostRefId(commentId, postId))
                         .isPresent());
@@ -167,7 +167,7 @@ class PostCommentControllerIT extends AbstractIntegrationTest {
 
         // Get all comments
         await().atMost(Duration.ofSeconds(60))
-                .pollDelay(Duration.ofSeconds(3))
+                .pollDelay(Duration.ofSeconds(1))
                 .pollInterval(Duration.ofMillis(500))
                 .untilAsserted(() -> mockMvcTester
                         .get()
