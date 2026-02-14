@@ -46,7 +46,7 @@ public class PostCommentAggregatesToRedisListener {
 
     @KafkaListener(
             topics = "post-comments-aggregates",
-            groupId = "aggregates-redis-writer",
+            groupId = "post-comments-redis-writer",
             containerFactory = "postCommentKafkaListenerContainerFactory")
     @RetryableTopic(
             attempts = "4",

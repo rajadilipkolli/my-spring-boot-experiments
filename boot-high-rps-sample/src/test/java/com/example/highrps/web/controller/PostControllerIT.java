@@ -42,10 +42,10 @@ class PostControllerIT extends AbstractIntegrationTest {
     }
 
     @Test
-    void getPostByTitleNotFound() {
+    void getPostByPostIdNotFound() {
         mockMvcTester
                 .get()
-                .uri("/api/posts/non-existent-title/non-existent-email")
+                .uri("/api/posts/{postId}", 999999L)
                 .exchange()
                 .assertThat()
                 .hasStatus(HttpStatus.NOT_FOUND)

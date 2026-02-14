@@ -36,11 +36,11 @@ public class PostController {
 
     @PostMapping(value = "/posts")
     public ResponseEntity<PostResponse> createPost(@RequestBody @Valid NewPostRequest newPostRequest) {
-        NewPostRequest withCreatedAt = newPostRequest.withTimestamps(LocalDateTime.now(), null);
-        PostResponse postResponse = postService.saveOrUpdatePost(withCreatedAt);
+        NewPostRequest requestWithTimestamps = newPostRequest.withTimestamps(LocalDateTime.now(), null);
+        PostResponse postResponse = postService.saveOrUpdatePost(requestWithTimestamps);
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{postId}")
-                .buildAndExpand(withCreatedAt.postId())
+                .buildAndExpand(postResponse.postId())
                 .toUri();
         return ResponseEntity.created(location).body(postResponse);
     }

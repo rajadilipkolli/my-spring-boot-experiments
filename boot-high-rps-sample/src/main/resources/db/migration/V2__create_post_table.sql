@@ -19,3 +19,5 @@ ALTER TABLE posts
 create sequence IF NOT EXISTS posts_seq start with 1 increment by 50;
 
 CREATE UNIQUE INDEX IF NOT EXISTS uc_postentity_title_author_id ON posts (title, author_id);
+
+CREATE UNIQUE INDEX IF NOT EXISTS uc_postentity_post_ref_id ON posts (post_ref_id);

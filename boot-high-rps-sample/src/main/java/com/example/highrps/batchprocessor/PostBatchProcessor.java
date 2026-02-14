@@ -54,7 +54,7 @@ public class PostBatchProcessor implements EntityBatchProcessor {
     @Override
     @Transactional
     public void processUpserts(List<String> payloads) {
-        // Step 1: Parse payloads and extract titles
+        // Step 1: Parse payloads and extract postIds, while filtering out any with recent tombstones
         List<ParsedPost> parsedPosts = payloads.stream()
                 .map(payload -> {
                     String postId = extractKey(payload);
@@ -172,7 +172,7 @@ public class PostBatchProcessor implements EntityBatchProcessor {
             }
             return postId;
         } catch (Exception e) {
-            log.warn("Failed to extract title from post payload", e);
+            log.warn("Failed to extract postId from post payload", e);
             return null;
         }
     }

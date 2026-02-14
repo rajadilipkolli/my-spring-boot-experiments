@@ -28,12 +28,10 @@ public class KafkaConfig {
     ConsumerFactory<String, NewPostRequest> newPostConsumerFactory(KafkaConnectionDetails kafkaConnectionDetails) {
         Map<String, Object> cfg = new HashMap<>();
         cfg.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaConnectionDetails.getBootstrapServers());
-        cfg.put(ConsumerConfig.GROUP_ID_CONFIG, "aggregates-redis-writer");
+        cfg.put(ConsumerConfig.GROUP_ID_CONFIG, "new-posts-redis-writer");
         cfg.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         cfg.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JacksonJsonDeserializer.class);
-        cfg.put(
-                JacksonJsonDeserializer.TRUSTED_PACKAGES,
-                "com.example.highrps.model.request,com.example.highrps.postcomment.domain");
+        cfg.put(JacksonJsonDeserializer.TRUSTED_PACKAGES, "com.example.highrps.model.request");
         return new DefaultKafkaConsumerFactory<>(
                 cfg, new StringDeserializer(), new JacksonJsonDeserializer<>(NewPostRequest.class));
     }

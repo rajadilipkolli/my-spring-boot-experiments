@@ -93,14 +93,14 @@ public class PostService {
         String cacheKey = String.valueOf(postId);
         var cached = localCache.getIfPresent(cacheKey);
         if (cached != null) {
-            log.info("findPostByTitle: hit local cache for postId={}", postId);
+            log.info("findPostById: hit local cache for postId={}", postId);
             return PostResponse.fromJson(cached);
         }
 
         // 2) Redis materialized view
         Optional<PostRedis> byId = postRedisRepository.findById(postId);
         if (byId.isPresent()) {
-            log.info("findPostByTitle: hit redis repository for postId={}", postId);
+            log.info("findPostById: hit redis repository for postId={}", postId);
             PostResponse response = PostResponse.fromRedis(byId.get());
             var json = PostResponse.toJson(response);
             localCache.put(cacheKey, json);
@@ -219,7 +219,7 @@ public class PostService {
         // 4b) Mark deleted in a short-lived Redis set so batch processors skip
         // re-inserts
         try {
-            // Use per-title cacheKey so each deletion has independent TTL
+            // Use per-postId cacheKey so each deletion has independent TTL
             redis.opsForValue().set("deleted:posts:" + cacheKey, "1", Duration.ofSeconds(60));
         } catch (Exception ex) {
             log.warn("Failed to mark postId {} in deleted:posts set", cacheKey, ex);

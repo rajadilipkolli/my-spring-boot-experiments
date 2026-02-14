@@ -8,6 +8,7 @@ import com.example.highrps.postcomment.domain.PostCommentResult;
 import com.example.highrps.postcomment.domain.UpdatePostCommentCmd;
 import com.example.highrps.postcomment.domain.vo.PostCommentId;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import java.net.URI;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
@@ -35,13 +36,14 @@ public class PostCommentController {
     }
 
     @GetMapping
-    public ResponseEntity<List<PostCommentResponse>> getAllComments(@PathVariable Long postId) {
+    public ResponseEntity<List<PostCommentResponse>> getAllComments(@PathVariable @Positive Long postId) {
         List<PostCommentResult> results = queryService.getCommentsByPostId(postId);
         return ResponseEntity.ok(results.stream().map(PostCommentResponse::from).toList());
     }
 
     @GetMapping("/{postCommentId}")
-    public ResponseEntity<PostCommentResponse> getComment(@PathVariable Long postId, @PathVariable Long postCommentId) {
+    public ResponseEntity<PostCommentResponse> getComment(
+            @PathVariable @Positive Long postId, @PathVariable @Positive Long postCommentId) {
         PostCommentResult result =
                 queryService.getCommentById(new GetPostCommentQuery(postId, PostCommentId.of(postCommentId)));
         return ResponseEntity.ok(PostCommentResponse.from(result));
@@ -65,8 +67,8 @@ public class PostCommentController {
 
     @PutMapping("/{postCommentId}")
     public ResponseEntity<PostCommentResponse> updateComment(
-            @PathVariable Long postId,
-            @PathVariable Long postCommentId,
+            @PathVariable @Positive Long postId,
+            @PathVariable @Positive Long postCommentId,
             @RequestBody @Valid UpdatePostCommentRequest request) {
         commandService.updateComment(new UpdatePostCommentCmd(
                 PostCommentId.of(postCommentId), postId, request.title(), request.content(), request.published()));
@@ -77,7 +79,8 @@ public class PostCommentController {
     }
 
     @DeleteMapping("/{postCommentId}")
-    public ResponseEntity<Void> deleteComment(@PathVariable Long postId, @PathVariable Long postCommentId) {
+    public ResponseEntity<Void> deleteComment(
+            @PathVariable @Positive Long postId, @PathVariable @Positive Long postCommentId) {
         commandService.deleteComment(PostCommentId.of(postCommentId), postId);
         return ResponseEntity.noContent().build();
     }
