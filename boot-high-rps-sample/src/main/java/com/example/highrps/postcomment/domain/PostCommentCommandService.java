@@ -123,10 +123,7 @@ public class PostCommentCommandService {
         // Validate post and comment exists before publishing to Kafka
         PostCommentResult commentById =
                 postCommentQueryService.getCommentById(new GetPostCommentQuery(cmd.postId(), cmd.commentId()));
-        if (commentById == null) {
-            throw new ResourceNotFoundException("Post not found with id: " + cmd.postId() + " and comment id: "
-                    + cmd.commentId().id());
-        }
+
         // Build request for Kafka event
         PostCommentRequest request = PostCommentRequest.fromUpdateCmd(cmd, commentById.createdAt());
         var cacheKey = CacheKeyGenerator.generatePostCommentKey(
