@@ -24,6 +24,7 @@ public class PostCommentCommandService {
     private static final Logger log = LoggerFactory.getLogger(PostCommentCommandService.class);
 
     private final PostService postService;
+    private final PostCommentQueryService postCommentQueryService;
     private final KafkaProducerService kafkaProducerService;
     private final Cache<String, String> localCache;
     private final RedisTemplate<String, String> redis;
@@ -35,6 +36,7 @@ public class PostCommentCommandService {
 
     public PostCommentCommandService(
             PostService postService,
+            PostCommentQueryService postCommentQueryService,
             KafkaProducerService kafkaProducerService,
             Cache<String, String> localCache,
             RedisTemplate<String, String> redis,
@@ -43,6 +45,7 @@ public class PostCommentCommandService {
             AppProperties appProperties,
             MeterRegistry meterRegistry) {
         this.postService = postService;
+        this.postCommentQueryService = postCommentQueryService;
         this.kafkaProducerService = kafkaProducerService;
         this.localCache = localCache;
         this.redis = redis;
@@ -60,8 +63,8 @@ public class PostCommentCommandService {
 
     /**
      * Create a new comment with event-driven pattern:
-     * 1. Validate post exists, generate ID, and publish to Kafka
-     * 2. Publish to Kafka
+     * 1. Validate post exists
+     * 2. Generate ID and Publish to Kafka
      * 3. Update local cache
      * 4. Eager write to Redis
      */
@@ -110,15 +113,19 @@ public class PostCommentCommandService {
 
     /**
      * Update a comment with event-driven pattern:
-     * 1. Update database
+     * 1. Validate post and comment exists
      * 2. Publish to Kafka
      * 3. Update local cache
      * 4. Eager write to Redis
      */
     public void updateComment(UpdatePostCommentCmd cmd) {
 
+        // Validate post and comment exists before publishing to Kafka
+        PostCommentResult commentById =
+                postCommentQueryService.getCommentById(new GetPostCommentQuery(cmd.postId(), cmd.commentId()));
+
         // Build request for Kafka event
-        PostCommentRequest request = PostCommentRequest.fromUpdateCmd(cmd);
+        PostCommentRequest request = PostCommentRequest.fromUpdateCmd(cmd, commentById.createdAt());
         var cacheKey = CacheKeyGenerator.generatePostCommentKey(
                 cmd.postId(), cmd.commentId().id());
 
@@ -174,6 +181,7 @@ public class PostCommentCommandService {
             tombstonesPublishedCounter.increment();
         } catch (Exception e) {
             log.warn("Failed to publish delete event for comment: {}", commentId.id(), e);
+            throw new IllegalStateException("Failed to publish delete event for comment: " + commentId.id(), e);
         }
 
         // 2) Invalidate local cache

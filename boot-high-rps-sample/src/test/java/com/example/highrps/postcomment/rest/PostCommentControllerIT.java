@@ -5,7 +5,6 @@ import static org.awaitility.Awaitility.await;
 
 import com.example.highrps.common.AbstractIntegrationTest;
 import com.example.highrps.entities.AuthorEntity;
-import com.example.highrps.entities.PostCommentEntity;
 import com.example.highrps.entities.PostDetailsEntity;
 import com.example.highrps.entities.PostEntity;
 import com.example.highrps.shared.IdGenerator;
@@ -236,9 +235,7 @@ class PostCommentControllerIT extends AbstractIntegrationTest {
                 .pollDelay(Duration.ofSeconds(1))
                 .pollInterval(Duration.ofMillis(500))
                 .untilAsserted(() -> assertThat(postCommentRepository.findByCommentRefIdAndPostRefId(commentId, postId))
-                        .isPresent()
-                        .satisfies(postCommentEntity -> {
-                            PostCommentEntity commentEntity = postCommentEntity.get();
+                        .hasValueSatisfying(commentEntity -> {
                             assertThat(commentEntity.getTitle()).isEqualTo("Updated Title");
                             assertThat(commentEntity.getContent()).isEqualTo("Updated content");
                             assertThat(commentEntity.isPublished()).isTrue();

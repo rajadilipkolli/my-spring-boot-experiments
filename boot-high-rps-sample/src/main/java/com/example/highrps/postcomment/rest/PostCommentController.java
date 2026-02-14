@@ -69,12 +69,7 @@ public class PostCommentController {
             @PathVariable @Positive Long postCommentId,
             @RequestBody @Valid UpdatePostCommentRequest request) {
         commandService.updateComment(new UpdatePostCommentCmd(
-                PostCommentId.of(postCommentId),
-                postId,
-                request.title(),
-                request.content(),
-                request.createdAt(),
-                request.published()));
+                PostCommentId.of(postCommentId), postId, request.title(), request.content(), request.published()));
 
         PostCommentResult result =
                 queryService.getCommentById(new GetPostCommentQuery(postId, PostCommentId.of(postCommentId)));
