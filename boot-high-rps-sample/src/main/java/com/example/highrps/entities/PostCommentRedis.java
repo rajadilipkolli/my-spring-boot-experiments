@@ -14,13 +14,10 @@ public class PostCommentRedis extends Auditable implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Id
-    private String id; // composite id: postId:commentId
+    private String commentId;
 
     @Indexed
     private Long postId;
-
-    @Indexed
-    private Long commentId;
 
     private String title;
     private String content;
@@ -28,15 +25,6 @@ public class PostCommentRedis extends Auditable implements Serializable {
     private OffsetDateTime publishedAt;
 
     public PostCommentRedis() {}
-
-    public PostCommentRedis setId(String id) {
-        this.id = id;
-        return this;
-    }
-
-    public String getId() {
-        return id;
-    }
 
     public PostCommentRedis setPostId(Long postId) {
         this.postId = postId;
@@ -47,12 +35,12 @@ public class PostCommentRedis extends Auditable implements Serializable {
         return postId;
     }
 
-    public PostCommentRedis setCommentId(Long commentId) {
+    public PostCommentRedis setCommentId(String commentId) {
         this.commentId = commentId;
         return this;
     }
 
-    public Long getCommentId() {
+    public String getCommentId() {
         return commentId;
     }
 

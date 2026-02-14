@@ -190,7 +190,7 @@ class PostControllerIT extends AbstractIntegrationTest {
         await().atMost(Duration.ofSeconds(60))
                 .pollInterval(Duration.ofSeconds(1))
                 .untilAsserted(() -> {
-                    assertThat(postRepository.existsById(postId.get())).isFalse();
+                    assertThat(postRepository.existsByPostRefId(postId.get())).isFalse();
                     assertThat(postRedisRepository.existsById(postId.get())).isFalse();
                     assertThat(localCache.getIfPresent(cacheKey)).isNull();
                 });

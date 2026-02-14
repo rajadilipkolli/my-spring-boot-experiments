@@ -1,6 +1,5 @@
 package com.example.highrps.postcomment.domain;
 
-import com.example.highrps.config.AppProperties;
 import com.example.highrps.entities.PostCommentRedis;
 import com.example.highrps.repository.jpa.PostCommentRepository;
 import com.example.highrps.repository.redis.PostCommentRedisRepository;
@@ -36,7 +35,6 @@ public class PostCommentQueryService {
     private final PostCommentRedisRepository postCommentRedisRepository;
     private final StreamsBuilderFactoryBean kafkaStreamsFactory;
     private final RequestCoalescer<PostCommentRequest> requestCoalescer;
-    private final AppProperties appProperties;
 
     private volatile ReadOnlyKeyValueStore<String, PostCommentRequest> keyValueStore = null;
     private final ReentrantLock keyValueStoreLock = new ReentrantLock();
@@ -47,8 +45,7 @@ public class PostCommentQueryService {
             Cache<String, String> localCache,
             RedisTemplate<String, String> redis,
             PostCommentRedisRepository postCommentRedisRepository,
-            StreamsBuilderFactoryBean kafkaStreamsFactory,
-            AppProperties appProperties) {
+            StreamsBuilderFactoryBean kafkaStreamsFactory) {
         this.postCommentRepository = postCommentRepository;
         this.postCommentMapper = postCommentMapper;
         this.localCache = localCache;
@@ -56,7 +53,6 @@ public class PostCommentQueryService {
         this.postCommentRedisRepository = postCommentRedisRepository;
         this.kafkaStreamsFactory = kafkaStreamsFactory;
         this.requestCoalescer = new RequestCoalescer<>();
-        this.appProperties = appProperties;
     }
 
     /**
@@ -65,7 +61,7 @@ public class PostCommentQueryService {
      * per-post index in Redis.
      */
     public List<PostCommentResult> getCommentsByPostId(Long postId) {
-        return postCommentMapper.toResultList(postCommentRepository.findByPostId(postId));
+        return postCommentMapper.toResultList(postCommentRepository.findByPostRefId(postId));
     }
 
     /**
@@ -111,40 +107,38 @@ public class PostCommentQueryService {
         }
 
         // 4) Kafka Streams state store (if enabled)
-        if (appProperties.isKafkaStreamsEnabled()) {
-            try {
-                PostCommentRequest cachedRequest = requestCoalescer.subscribe(
-                        cacheKey, () -> getKeyValueStore().get(cacheKey));
-                if (cachedRequest != null) {
-                    log.info(
-                            "getCommentById: hit Kafka Streams store for postId={} commentId={}",
-                            query.postId(),
-                            query.commentId().id());
-                    PostCommentResult result = postCommentMapper.toResultFromRequest(cachedRequest);
-                    var json = postCommentMapper.toJson(result);
-                    localCache.put(cacheKey, json);
-                    try {
-                        postCommentRedisRepository.save(postCommentMapper.toRedis(cachedRequest));
-                    } catch (Exception re) {
-                        log.warn(
-                                "Failed to update Redis for postId {} commentId {} after Streams lookup",
-                                query.postId(),
-                                query.commentId().id(),
-                                re);
-                    }
-                    return result;
-                }
-            } catch (Exception e) {
-                log.error(
-                        "Failed to query Kafka Streams store for postId: {} commentId: {}",
+        try {
+            PostCommentRequest cachedRequest = requestCoalescer.subscribe(
+                    cacheKey, () -> getKeyValueStore().get(cacheKey));
+            if (cachedRequest != null) {
+                log.info(
+                        "getCommentById: hit Kafka Streams store for postId={} commentId={}",
                         query.postId(),
-                        query.commentId().id(),
-                        e);
+                        query.commentId().id());
+                PostCommentResult result = postCommentMapper.toResultFromRequest(cachedRequest);
+                var json = postCommentMapper.toJson(result);
+                localCache.put(cacheKey, json);
+                try {
+                    postCommentRedisRepository.save(postCommentMapper.toRedis(cachedRequest));
+                } catch (Exception re) {
+                    log.warn(
+                            "Failed to update Redis for postId {} commentId {} after Streams lookup",
+                            query.postId(),
+                            query.commentId().id(),
+                            re);
+                }
+                return result;
             }
+        } catch (Exception e) {
+            log.error(
+                    "Failed to query Kafka Streams store for postId: {} commentId: {}",
+                    query.postId(),
+                    query.commentId().id(),
+                    e);
         }
 
         // 5) Fallback to database
-        var comment = postCommentRepository.getByIdAndPostId(query.commentId(), query.postId());
+        var comment = postCommentRepository.getByCommentRefIdAndPostRefId(query.commentId(), query.postId());
         PostCommentResult result = postCommentMapper.toResult(comment);
 
         // Update caches on cache miss (best-effort)

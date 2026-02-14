@@ -1,14 +1,15 @@
 CREATE TABLE post_comments
 (
-    id           BIGINT                      NOT NULL,
-    title        TEXT                        NOT NULL,
-    content      TEXT,
-    published    BOOLEAN                     NOT NULL,
-    published_at TIMESTAMP WITHOUT TIME ZONE,
-    version      SMALLINT                    NOT NULL DEFAULT 0,
-    post_id      BIGINT                      NOT NULL,
-    created_at   TIMESTAMP WITHOUT TIME ZONE NOT NULL,
-    modified_at  TIMESTAMP WITHOUT TIME ZONE,
+    id              BIGINT                      NOT NULL,
+    comment_ref_id  BIGINT                      NOT NULL,
+    title           TEXT                        NOT NULL,
+    content         TEXT,
+    published       BOOLEAN                     NOT NULL,
+    published_at    TIMESTAMP WITHOUT TIME ZONE,
+    version         SMALLINT                    NOT NULL DEFAULT 0,
+    post_id         BIGINT                      NOT NULL,
+    created_at      TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    modified_at     TIMESTAMP WITHOUT TIME ZONE,
     CONSTRAINT pk_post_comments PRIMARY KEY (id)
 );
 

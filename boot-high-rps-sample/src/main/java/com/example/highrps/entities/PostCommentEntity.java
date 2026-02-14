@@ -31,6 +31,9 @@ public class PostCommentEntity extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
 
+    @Column(name = "comment_ref_id", unique = true, nullable = false)
+    private Long commentRefId;
+
     @Column(name = "title", nullable = false)
     private String title;
 
@@ -69,6 +72,15 @@ public class PostCommentEntity extends BaseEntity {
 
     public Long getId() {
         return id;
+    }
+
+    public PostCommentEntity setCommentRefId(Long commentRefId) {
+        this.commentRefId = commentRefId;
+        return this;
+    }
+
+    public Long getCommentRefId() {
+        return commentRefId;
     }
 
     public PostCommentEntity setTitle(String title) {

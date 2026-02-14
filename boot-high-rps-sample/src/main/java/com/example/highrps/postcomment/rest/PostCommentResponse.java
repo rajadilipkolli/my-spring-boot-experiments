@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 
 public record PostCommentResponse(
-        Long id,
+        Long commentId,
         String title,
         String content,
         boolean published,
@@ -16,7 +16,7 @@ public record PostCommentResponse(
 
     public static PostCommentResponse from(PostCommentResult result) {
         return new PostCommentResponse(
-                result.id(),
+                result.commentId(),
                 result.title(),
                 result.content(),
                 result.published(),

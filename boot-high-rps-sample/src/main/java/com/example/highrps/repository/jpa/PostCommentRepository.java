@@ -8,20 +8,26 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 
 public interface PostCommentRepository extends JpaRepository<PostCommentEntity, Long> {
 
-    @Query("SELECT pc FROM PostCommentEntity pc WHERE pc.postEntity.id = :postId")
-    List<PostCommentEntity> findByPostId(@Param("postId") Long postId);
+    @Transactional
+    long deleteByCommentRefIdIn(List<Long> commentRefIds);
+
+    @Query("SELECT pc FROM PostCommentEntity pc WHERE pc.postEntity.postRefId = :postId")
+    List<PostCommentEntity> findByPostRefId(@Param("postId") Long postId);
+
+    List<PostCommentEntity> findByCommentRefIdIn(List<Long> commentRefIds);
 
     @Query("""
             SELECT pc FROM PostCommentEntity pc
-            WHERE pc.id = :id AND pc.postEntity.id = :postId
+            WHERE pc.commentRefId = :id AND pc.postEntity.postRefId = :postId
             """)
-    Optional<PostCommentEntity> findByIdAndPostId(@Param("id") Long id, @Param("postId") Long postId);
+    Optional<PostCommentEntity> findByCommentRefIdAndPostRefId(@Param("id") Long id, @Param("postId") Long postId);
 
-    default PostCommentEntity getByIdAndPostId(PostCommentId postCommentId, Long postId) {
-        return findByIdAndPostId(postCommentId.id(), postId)
+    default PostCommentEntity getByCommentRefIdAndPostRefId(PostCommentId postCommentId, Long postId) {
+        return findByCommentRefIdAndPostRefId(postCommentId.id(), postId)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "PostComment not found with id: " + postCommentId.id() + " for post: " + postId));
     }

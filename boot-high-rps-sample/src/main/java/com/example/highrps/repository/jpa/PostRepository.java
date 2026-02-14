@@ -9,8 +9,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 public interface PostRepository extends JpaRepository<PostEntity, Long> {
 
+    @EntityGraph(attributePaths = {"authorEntity"})
     boolean existsByPostRefId(Long postRefId);
 
+    @EntityGraph(attributePaths = {"authorEntity"})
     Optional<PostEntity> findByPostRefId(Long postRefId);
 
     @EntityGraph(attributePaths = {"tags", "details", "authorEntity", "tags.tagEntity"})
@@ -18,4 +20,6 @@ public interface PostRepository extends JpaRepository<PostEntity, Long> {
 
     @Transactional
     long deleteByPostRefIdIn(List<Long> postRefIds);
+
+    PostEntity getReferenceByPostRefId(Long postId);
 }

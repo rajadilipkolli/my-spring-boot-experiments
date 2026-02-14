@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 
 public record PostCommentResult(
-        Long id,
+        Long commentId,
         String title,
         String content,
         boolean published,

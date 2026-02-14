@@ -51,7 +51,7 @@ public class PostCommentController {
 
     @PostMapping
     public ResponseEntity<PostCommentResponse> createComment(
-            @PathVariable Long postId, @RequestBody @Valid CreatePostCommentRequest request) {
+            @PathVariable @Positive Long postId, @RequestBody @Valid CreatePostCommentRequest request) {
         PostCommentId id = commandService.createComment(
                 new CreatePostCommentCmd(request.title(), request.content(), postId, request.published()));
 
@@ -71,7 +71,12 @@ public class PostCommentController {
             @PathVariable @Positive Long postCommentId,
             @RequestBody @Valid UpdatePostCommentRequest request) {
         commandService.updateComment(new UpdatePostCommentCmd(
-                PostCommentId.of(postCommentId), postId, request.title(), request.content(), request.published()));
+                PostCommentId.of(postCommentId),
+                postId,
+                request.title(),
+                request.content(),
+                request.createdAt(),
+                request.published()));
 
         PostCommentResult result =
                 queryService.getCommentById(new GetPostCommentQuery(postId, PostCommentId.of(postCommentId)));

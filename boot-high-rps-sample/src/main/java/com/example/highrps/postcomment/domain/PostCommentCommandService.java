@@ -1,20 +1,17 @@
 package com.example.highrps.postcomment.domain;
 
 import com.example.highrps.config.AppProperties;
-import com.example.highrps.entities.PostCommentEntity;
-import com.example.highrps.entities.PostEntity;
 import com.example.highrps.postcomment.domain.vo.PostCommentId;
 import com.example.highrps.repository.jpa.PostCommentRepository;
-import com.example.highrps.repository.jpa.PostRepository;
 import com.example.highrps.repository.redis.PostCommentRedisRepository;
 import com.example.highrps.service.KafkaProducerService;
+import com.example.highrps.shared.IdGenerator;
 import com.example.highrps.utility.CacheKeyGenerator;
 import com.example.highrps.utility.KafkaPublishHelper;
 import com.github.benmanes.caffeine.cache.Cache;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import java.time.Duration;
-import java.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -28,7 +25,6 @@ public class PostCommentCommandService {
     private static final Logger log = LoggerFactory.getLogger(PostCommentCommandService.class);
 
     private final PostCommentRepository postCommentRepository;
-    private final PostRepository postRepository;
     private final KafkaProducerService kafkaProducerService;
     private final Cache<String, String> localCache;
     private final RedisTemplate<String, String> redis;
@@ -40,7 +36,6 @@ public class PostCommentCommandService {
 
     public PostCommentCommandService(
             PostCommentRepository postCommentRepository,
-            PostRepository postRepository,
             KafkaProducerService kafkaProducerService,
             Cache<String, String> localCache,
             RedisTemplate<String, String> redis,
@@ -49,7 +44,6 @@ public class PostCommentCommandService {
             AppProperties appProperties,
             MeterRegistry meterRegistry) {
         this.postCommentRepository = postCommentRepository;
-        this.postRepository = postRepository;
         this.kafkaProducerService = kafkaProducerService;
         this.localCache = localCache;
         this.redis = redis;
@@ -73,16 +67,7 @@ public class PostCommentCommandService {
      * 4. Eager write to Redis
      */
     public PostCommentId createComment(CreatePostCommentCmd cmd) {
-        PostEntity post = postRepository.getReferenceById(cmd.postId());
-
-        PostCommentEntity comment = new PostCommentEntity(cmd.title(), cmd.content(), post);
-
-        if (Boolean.TRUE.equals(cmd.published())) {
-            comment.publish();
-        }
-
-        postCommentRepository.save(comment);
-        Long commentId = comment.getId();
+        Long commentId = IdGenerator.generateLong();
 
         // Build request for Kafka event
         PostCommentRequest request = PostCommentRequest.fromCreateCmd(cmd, commentId);
@@ -127,22 +112,9 @@ public class PostCommentCommandService {
      * 4. Eager write to Redis
      */
     public void updateComment(UpdatePostCommentCmd cmd) {
-        PostCommentEntity comment = postCommentRepository.getByIdAndPostId(cmd.commentId(), cmd.postId());
-
-        comment.setTitle(cmd.title());
-        comment.setContent(cmd.content());
-
-        if (Boolean.TRUE.equals(cmd.published())) {
-            comment.publish();
-        } else {
-            comment.unpublish();
-        }
-
-        // Get created timestamp from existing entity
-        LocalDateTime createdAt = comment.getCreatedAt();
 
         // Build request for Kafka event
-        PostCommentRequest request = PostCommentRequest.fromUpdateCmd(cmd, createdAt);
+        PostCommentRequest request = PostCommentRequest.fromUpdateCmd(cmd);
         var cacheKey = CacheKeyGenerator.generatePostCommentKey(
                 cmd.postId(), cmd.commentId().id());
 
@@ -184,7 +156,6 @@ public class PostCommentCommandService {
      * 2. Invalidate local cache
      * 3. Delete from Redis repository
      * 4. Mark deleted in Redis with TTL
-     * 5. Delete from database
      */
     public void deleteComment(PostCommentId commentId, Long postId) {
         var cacheKey = CacheKeyGenerator.generatePostCommentKey(postId, commentId.id());
@@ -226,9 +197,5 @@ public class PostCommentCommandService {
         } catch (Exception ex) {
             log.warn("Failed to mark comment {} in deleted:post-comments set", commentId.id(), ex);
         }
-
-        // 5) Delete from database
-        PostCommentEntity comment = postCommentRepository.getByIdAndPostId(commentId, postId);
-        postCommentRepository.delete(comment);
     }
 }
