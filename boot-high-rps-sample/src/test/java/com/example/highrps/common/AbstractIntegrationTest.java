@@ -4,6 +4,7 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 
 import com.example.highrps.batchprocessor.AuthorBatchProcessor;
 import com.example.highrps.repository.jpa.AuthorRepository;
+import com.example.highrps.repository.jpa.PostCommentRepository;
 import com.example.highrps.repository.jpa.PostRepository;
 import com.example.highrps.repository.jpa.PostTagRepository;
 import com.example.highrps.repository.jpa.TagRepository;
@@ -41,6 +42,9 @@ public abstract class AbstractIntegrationTest {
 
     @Autowired
     protected PostRepository postRepository;
+
+    @Autowired
+    protected PostCommentRepository postCommentRepository;
 
     @Autowired
     protected TagRepository tagRepository;

@@ -124,7 +124,7 @@ public class AuthorEntity extends BaseEntity {
         return registeredAt;
     }
 
-    public AuthorEntity setVersion(Short version) {
+    AuthorEntity setVersion(Short version) {
         this.version = version;
         return this;
     }

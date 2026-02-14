@@ -1,5 +1,6 @@
 package com.example.highrps.entities;
 
+import com.example.highrps.shared.AssertUtil;
 import com.example.highrps.shared.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -42,6 +43,17 @@ public class PostCommentEntity extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id", nullable = false)
     private PostEntity postEntity;
+
+    // Protected no-arg constructor for JPA
+    protected PostCommentEntity() {}
+
+    // Public constructor with required fields and validation
+    public PostCommentEntity(String title, String content, PostEntity postEntity) {
+        this.title = AssertUtil.requireNotBlank(title, "Comment title cannot be null or empty");
+        this.content = AssertUtil.requireNotBlank(content, "Comment content cannot be null or empty");
+        this.postEntity = postEntity;
+        this.published = false;
+    }
 
     public PostCommentEntity setId(Long id) {
         this.id = id;
@@ -103,6 +115,19 @@ public class PostCommentEntity extends BaseEntity {
 
     void setVersion(Short version) {
         this.version = version;
+    }
+
+    // Domain methods
+    public void publish() {
+        if (!this.published) {
+            this.published = true;
+            this.publishedAt = OffsetDateTime.now();
+        }
+    }
+
+    public void unpublish() {
+        this.published = false;
+        this.publishedAt = null;
     }
 
     @Override
