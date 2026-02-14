@@ -1,11 +1,11 @@
 CREATE TABLE authors
 (
-    id            BIGINT        
-    first_name    TEXT NOT NULL,
+    id            BIGINT,
+    first_name    TEXT          NOT NULL,
     middle_name   TEXT,
-    last_name     TEXT NOT NULL,
+    last_name     TEXT          NOT NULL,
     mobile        BIGINT        NOT NULL,
-    email         TEXT NOT NULL,
+    email         TEXT          NOT NULL,
     registered_at TIMESTAMP WITHOUT TIME ZONE,
     version       SMALLINT      NOT NULL DEFAULT 0,
     created_at    TIMESTAMP WITHOUT TIME ZONE NOT NULL,
