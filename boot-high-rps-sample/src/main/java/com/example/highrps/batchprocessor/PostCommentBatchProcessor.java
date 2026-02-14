@@ -109,7 +109,15 @@ public class PostCommentBatchProcessor implements EntityBatchProcessor {
                     } else {
                         // Create new entity
                         try {
-                            entity = createCommentEntity(parsed.result(), postsById.get(parsed.postId()));
+                            PostEntity postEntity = postsById.get(parsed.postId());
+                            if (postEntity == null) {
+                                log.warn(
+                                        "Post not found for postRefId: {}, skipping commentRef: {}",
+                                        parsed.postId(),
+                                        parsed.commentId());
+                                return null;
+                            }
+                            entity = createCommentEntity(parsed.result(), postEntity);
                             log.debug("Creating new comment with id: {}", parsed.commentId());
                         } catch (Exception e) {
                             log.warn("Failed to create comment entity for id: {}", parsed.commentId(), e);

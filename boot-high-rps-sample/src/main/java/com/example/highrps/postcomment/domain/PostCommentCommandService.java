@@ -184,7 +184,7 @@ public class PostCommentCommandService {
             tombstonesPublishedCounter.increment();
         } catch (Exception e) {
             log.warn("Failed to publish delete event for comment: {}", commentId.id(), e);
-            throw new IllegalStateException("Failed to publish delete event for comment: " + commentId.id());
+            throw new IllegalStateException("Failed to publish delete event for comment: " + commentId.id(), e);
         }
 
         // 2) Invalidate local cache
