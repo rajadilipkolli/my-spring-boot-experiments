@@ -60,7 +60,7 @@ public record PostCommentRequest(
     /**
      * Create from UpdatePostCommentCmd.
      */
-    public static PostCommentRequest fromUpdateCmd(UpdatePostCommentCmd cmd) {
+    public static PostCommentRequest fromUpdateCmd(UpdatePostCommentCmd cmd, LocalDateTime createdAt) {
         OffsetDateTime publishedAt = Boolean.TRUE.equals(cmd.published()) ? OffsetDateTime.now() : null;
         return new PostCommentRequest(
                 cmd.commentId().id(),
@@ -69,7 +69,7 @@ public record PostCommentRequest(
                 cmd.content(),
                 cmd.published(),
                 publishedAt,
-                cmd.createdAt() != null ? cmd.createdAt().toLocalDateTime() : null,
+                createdAt,
                 LocalDateTime.now());
     }
 }

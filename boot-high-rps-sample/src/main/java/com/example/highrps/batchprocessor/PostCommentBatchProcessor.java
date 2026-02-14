@@ -5,10 +5,7 @@ import com.example.highrps.entities.PostEntity;
 import com.example.highrps.postcomment.domain.PostCommentResult;
 import com.example.highrps.repository.jpa.PostCommentRepository;
 import com.example.highrps.repository.jpa.PostRepository;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
@@ -84,6 +81,14 @@ public class PostCommentBatchProcessor implements EntityBatchProcessor {
         Map<Long, PostCommentEntity> existingById = existingComments.stream()
                 .collect(Collectors.toMap(PostCommentEntity::getCommentRefId, Function.identity(), (e1, e2) -> e1));
 
+        // Collect unique postIds for new comments only
+        Set<Long> newPostIds = parsedComments.stream()
+                .filter(p -> !existingById.containsKey(p.commentId()))
+                .map(ParsedComment::postId)
+                .collect(Collectors.toSet());
+        Map<Long, PostEntity> postsById = postRepository.findByPostRefIdIn(new ArrayList<>(newPostIds)).stream()
+                .collect(Collectors.toMap(PostEntity::getPostRefId, Function.identity()));
+
         // Step 3: Process each comment - update existing or create new
         List<PostCommentEntity> entitiesToSave = parsedComments.stream()
                 .map(parsed -> {
@@ -100,7 +105,7 @@ public class PostCommentBatchProcessor implements EntityBatchProcessor {
                     } else {
                         // Create new entity
                         try {
-                            entity = createCommentEntity(parsed.result());
+                            entity = createCommentEntity(parsed.result(), postsById.get(parsed.postId()));
                             log.debug("Creating new comment with id: {}", parsed.commentId());
                         } catch (Exception e) {
                             log.warn("Failed to create comment entity for id: {}", parsed.commentId(), e);
@@ -116,11 +121,14 @@ public class PostCommentBatchProcessor implements EntityBatchProcessor {
         if (!entitiesToSave.isEmpty()) {
             try {
                 postCommentRepository.saveAll(entitiesToSave);
+                long updateCount = entitiesToSave.stream()
+                        .filter(e -> existingById.containsKey(e.getCommentRefId()))
+                        .count();
                 log.debug(
                         "Persisted batch of {} comment entities ({} updates, {} inserts)",
                         entitiesToSave.size(),
-                        existingComments.size(),
-                        entitiesToSave.size() - existingComments.size());
+                        updateCount,
+                        entitiesToSave.size() - updateCount);
             } catch (Exception e) {
                 log.error("Failed to persist batch of {} comment entities", entitiesToSave.size(), e);
                 throw e;
@@ -185,13 +193,8 @@ public class PostCommentBatchProcessor implements EntityBatchProcessor {
         entity.setModifiedAt(result.modifiedAt());
     }
 
-    private PostCommentEntity createCommentEntity(PostCommentResult result) {
-        Optional<PostEntity> postExists = postRepository.findByPostRefId(result.postId());
-        if (postExists.isEmpty()) {
-            log.warn("Cannot create comment for non-existing post with id: {}", result.postId());
-            throw new IllegalStateException("Post with id " + result.postId() + " does not exist");
-        }
-        PostCommentEntity entity = new PostCommentEntity(result.title(), result.content(), postExists.get());
+    private PostCommentEntity createCommentEntity(PostCommentResult result, PostEntity postEntity) {
+        PostCommentEntity entity = new PostCommentEntity(result.title(), result.content(), postEntity);
         entity.setCommentRefId(result.commentId());
         entity.setPublished(result.published());
         entity.setPublishedAt(result.publishedAt());
