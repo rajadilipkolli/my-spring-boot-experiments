@@ -19,3 +19,5 @@ ALTER TABLE post_comments
 create sequence IF NOT EXISTS post_comments_seq start with 1 increment by 50;
 
 CREATE UNIQUE INDEX IF NOT EXISTS uc_postcommententity_title ON post_comments (title, post_id);
+
+CREATE UNIQUE INDEX IF NOT EXISTS uc_postcommententity_comment_ref_id ON post_comments (comment_ref_id);

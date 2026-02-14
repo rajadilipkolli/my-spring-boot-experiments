@@ -164,7 +164,7 @@ public class PostCommentBatchProcessor implements EntityBatchProcessor {
             long commentId = node.path("commentId").asLong(-1L);
             long postId = node.path("postId").asLong(-1L);
             if (commentId == -1L || postId == -1L) {
-                log.warn("Missing 'id' or 'postId' field in comment payload: {}", payload);
+                log.warn("Missing 'commentId' or 'postId' field in comment payload: {}", payload);
                 return null;
             }
             return postId + ":" + commentId;
@@ -199,6 +199,4 @@ public class PostCommentBatchProcessor implements EntityBatchProcessor {
 
     // Helper record to hold parsed data
     private record ParsedComment(Long commentId, Long postId, PostCommentResult result) {}
-
-    private record ParsedKey(Long postId, Long commentId) {}
 }

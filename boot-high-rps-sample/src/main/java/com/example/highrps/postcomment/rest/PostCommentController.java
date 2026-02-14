@@ -52,14 +52,12 @@ public class PostCommentController {
     @PostMapping
     public ResponseEntity<PostCommentResponse> createComment(
             @PathVariable @Positive Long postId, @RequestBody @Valid CreatePostCommentRequest request) {
-        PostCommentId id = commandService.createComment(
+        PostCommentResult result = commandService.createComment(
                 new CreatePostCommentCmd(request.title(), request.content(), postId, request.published()));
-
-        PostCommentResult result = queryService.getCommentById(new GetPostCommentQuery(postId, id));
 
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{postCommentId}")
-                .buildAndExpand(id.id())
+                .buildAndExpand(result.commentId())
                 .toUri();
 
         return ResponseEntity.created(location).body(PostCommentResponse.from(result));

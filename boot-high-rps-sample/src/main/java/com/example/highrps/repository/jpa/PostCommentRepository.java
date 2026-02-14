@@ -6,6 +6,7 @@ import com.example.highrps.shared.ResourceNotFoundException;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,7 +14,9 @@ import org.springframework.transaction.annotation.Transactional;
 public interface PostCommentRepository extends JpaRepository<PostCommentEntity, Long> {
 
     @Transactional
-    long deleteByCommentRefIdIn(List<Long> commentRefIds);
+    @Modifying
+    @Query("DELETE FROM PostCommentEntity pc WHERE pc.commentRefId IN :commentRefIds")
+    long deleteByCommentRefIdIn(@Param("commentRefIds") List<Long> commentRefIds);
 
     @Query("SELECT pc FROM PostCommentEntity pc WHERE pc.postEntity.postRefId = :postId")
     List<PostCommentEntity> findByPostRefId(@Param("postId") Long postId);
@@ -29,6 +32,6 @@ public interface PostCommentRepository extends JpaRepository<PostCommentEntity, 
     default PostCommentEntity getByCommentRefIdAndPostRefId(PostCommentId postCommentId, Long postId) {
         return findByCommentRefIdAndPostRefId(postCommentId.id(), postId)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "PostComment not found with id: " + postCommentId.id() + " for post: " + postId));
+                        "PostComment not found with commentRefId: " + postCommentId.id() + " for post: " + postId));
     }
 }

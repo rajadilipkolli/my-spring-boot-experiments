@@ -66,7 +66,7 @@ public class PostCommentCommandService {
      * 3. Update local cache
      * 4. Eager write to Redis
      */
-    public PostCommentId createComment(CreatePostCommentCmd cmd) {
+    public PostCommentResult createComment(CreatePostCommentCmd cmd) {
         Long commentId = IdGenerator.generateLong();
 
         // Build request for Kafka event
@@ -101,7 +101,7 @@ public class PostCommentCommandService {
                     e);
         }
 
-        return PostCommentId.of(commentId);
+        return result;
     }
 
     /**

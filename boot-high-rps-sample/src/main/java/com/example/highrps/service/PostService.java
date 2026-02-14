@@ -130,7 +130,7 @@ public class PostService {
 
     @Transactional
     public PostResponse saveOrUpdatePost(NewPostRequest newPostRequest) {
-        Objects.requireNonNull(newPostRequest.postId(), "postId must not be null");
+        Assert.notNull(newPostRequest.postId(), () -> "postId must not be null");
         if (newPostRequest.published() != null && newPostRequest.published() && newPostRequest.publishedAt() == null) {
             newPostRequest = newPostRequest.withPublishedAt(LocalDateTime.now());
         }
