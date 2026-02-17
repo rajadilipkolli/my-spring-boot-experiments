@@ -30,7 +30,8 @@ public class Actor {
     private String nationality;
 
     @Version
-    Short version = 0;
+    @Column(nullable = false)
+    private Short version = 0;
 
     @ManyToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     private List<Movie> movies;

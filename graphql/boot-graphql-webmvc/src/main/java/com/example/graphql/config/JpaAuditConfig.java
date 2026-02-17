@@ -5,5 +5,5 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
 // As JpaAuditing works based on Proxy we shouldn't create configuration as proxyBeans as false
 @Configuration
-@EnableJpaAuditing
+@EnableJpaAuditing(modifyOnCreate = false)
 public class JpaAuditConfig {}

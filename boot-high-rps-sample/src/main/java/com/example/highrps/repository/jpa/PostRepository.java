@@ -1,0 +1,22 @@
+package com.example.highrps.repository.jpa;
+
+import com.example.highrps.entities.PostEntity;
+import java.util.List;
+import java.util.Optional;
+import org.springframework.data.jpa.repository.EntityGraph;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.transaction.annotation.Transactional;
+
+public interface PostRepository extends JpaRepository<PostEntity, Long> {
+
+    boolean existsByPostRefId(Long postRefId);
+
+    @EntityGraph(attributePaths = {"authorEntity"})
+    Optional<PostEntity> findByPostRefId(Long postRefId);
+
+    @EntityGraph(attributePaths = {"tags", "details", "authorEntity", "tags.tagEntity"})
+    List<PostEntity> findByPostRefIdIn(List<Long> postRefIds);
+
+    @Transactional
+    long deleteByPostRefIdIn(List<Long> postRefIds);
+}

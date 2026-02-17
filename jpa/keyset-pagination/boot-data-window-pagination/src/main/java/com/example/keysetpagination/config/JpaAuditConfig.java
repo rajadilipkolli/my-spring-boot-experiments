@@ -12,5 +12,5 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
  * - Primarily used by Animal entity for tracking creation timestamps
  */
 @Configuration
-@EnableJpaAuditing
+@EnableJpaAuditing(modifyOnCreate = false)
 public class JpaAuditConfig {}

@@ -30,11 +30,10 @@ public class PostTag implements Serializable {
     @MapsId("tagId")
     private Tag tag;
 
-    @Column(name = "created_on")
+    @Column(name = "created_on", nullable = false)
     private LocalDateTime createdOn = LocalDateTime.now();
 
     public PostTag() {
-
         // No-args constructor for JPA
     }
 

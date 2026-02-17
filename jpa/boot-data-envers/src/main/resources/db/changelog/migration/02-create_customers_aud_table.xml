@@ -19,9 +19,7 @@
             <column name="rev" type="integer">
                 <constraints nullable="false"/>
             </column>
-            <column name="revtype" type="${intType}">
-                <constraints nullable="false"/>
-            </column>
+            <column name="revtype" type="${intType}"/>
             <column name="REVEND" type="integer"/>
             <column name="name" type="${stringType}"/>
             <column name="address" type="${stringType}"/>

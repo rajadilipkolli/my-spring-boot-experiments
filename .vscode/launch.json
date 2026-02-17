@@ -312,6 +312,16 @@
               "projectName": "boot-strategy-plugin",
               "args": "",
               "envFile": "${workspaceFolder}/.env"
+          },
+          {
+            "type": "java",
+            "name": "Spring Boot-TestRabbitMQApplication<boot-rabbitmq-thymeleaf>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.poc.boot.rabbitmq.TestRabbitMQApplication",
+            "projectName": "boot-rabbitmq-thymeleaf",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
         }
     ]
 }

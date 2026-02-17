@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>4.0.1</version>
+        <version>4.0.2</version>
         <relativePath /> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.example.demo</groupId>
@@ -16,9 +16,9 @@
 
     <properties>
         <java.version>25</java.version>
-        <spotless.version>3.1.0</spotless.version>
-        <springdoc-openapi.version>3.0.0</springdoc-openapi.version>
-        <datasource-micrometer-boot.version>2.0.1</datasource-micrometer-boot.version>
+        <spotless.version>3.2.1</spotless.version>
+        <springdoc-openapi.version>3.0.1</springdoc-openapi.version>
+        <datasource-micrometer-boot.version>2.1.1</datasource-micrometer-boot.version>
 
         <project.testresult.directory>${project.build.directory}/test-results</project.testresult.directory>
         <junit.utReportFolder>${project.testresult.directory}/test</junit.utReportFolder>

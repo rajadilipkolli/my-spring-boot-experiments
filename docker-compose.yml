@@ -12,7 +12,7 @@ services:
       - SA_PASSWORD=password
 
   mysql:
-    image: mysql:9.5
+    image: mysql:9.6
     ports:
       - "3306:3306"
     volumes:
@@ -24,7 +24,7 @@ services:
       - MYSQL_DATABASE=mydatabase
 
   postgres:
-    image: postgres:18.1-alpine
+    image: postgres:18.2-alpine
     ports:
       - "5432:5432"
     volumes:
@@ -45,7 +45,7 @@ services:
       - PGADMIN_DEFAULT_PASSWORD=admin
 
   redis:
-    image: redis:8.4.0-alpine
+    image: redis:8.6.0-alpine
     ports:
       - "6379:6379"
     command: redis-server --save 60 1 --requirepass MDNcVb924a --loglevel warning
@@ -65,7 +65,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
 
   mongodb:
-    image: mongo:8.2.3
+    image: mongo:8.2.5
     ports:
       - "27017:27017"
     volumes:

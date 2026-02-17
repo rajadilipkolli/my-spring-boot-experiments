@@ -1,5 +1,6 @@
 package com.example.locks.entities;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -16,6 +17,7 @@ public class Genre {
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long genreId;
 
+    @Column(name = "genre_name", nullable = false)
     private String genreName;
 
     @ManyToMany(mappedBy = "genres")

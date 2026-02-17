@@ -22,5 +22,6 @@
     <logger name="com.example.graphql" level="DEBUG"/>
     <logger name="web" level="INFO" />
     <logger name="query-logger" level="DEBUG" />
+    <logger name="slow-query-logger" level="WARN" />
 
 </configuration>

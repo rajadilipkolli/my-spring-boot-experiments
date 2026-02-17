@@ -40,7 +40,6 @@ public class Post {
     @LastModifiedDate
     private LocalDateTime updatedAt;
 
-    @Column("version")
     @Version
     private Short version;
 

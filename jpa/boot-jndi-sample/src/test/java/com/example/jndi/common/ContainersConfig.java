@@ -8,7 +8,7 @@ import org.testcontainers.utility.DockerImageName;
 public class ContainersConfig {
 
     private static final PostgreSQLContainer postgreSQLContainer =
-            new PostgreSQLContainer(DockerImageName.parse("postgres").withTag("18.1-alpine"));
+            new PostgreSQLContainer(DockerImageName.parse("postgres").withTag("18.2-alpine"));
 
     static {
         postgreSQLContainer.start();

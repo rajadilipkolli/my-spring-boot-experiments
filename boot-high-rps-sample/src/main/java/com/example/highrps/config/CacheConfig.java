@@ -1,17 +1,24 @@
 package com.example.highrps.config;
 
+import com.example.highrps.repository.redis.AuthorRedisRepository;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import java.time.Duration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
-@Configuration
+@Configuration(proxyBeanMethods = false)
+@EnableRedisRepositories(basePackageClasses = AuthorRedisRepository.class)
 public class CacheConfig {
+
+    private static final Logger log = LoggerFactory.getLogger(CacheConfig.class);
 
     @Bean
     Cache<String, String> localCache() {
@@ -21,13 +28,9 @@ public class CacheConfig {
                 .recordStats()
                 .removalListener((key, value, cause) -> {
                     // Log or emit metrics for evictions
+                    log.debug("Removed key: {}, cause: {}", key, cause);
                 })
                 .build();
-    }
-
-    @Bean
-    LettuceConnectionFactory redisConnectionFactory() {
-        return new LettuceConnectionFactory();
     }
 
     @Bean

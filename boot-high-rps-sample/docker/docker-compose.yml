@@ -2,7 +2,7 @@ name: boot-high-rps-sample
 services:
 
   postgresqldb:
-    image: postgres:18.1-alpine
+    image: postgres:18.2-alpine
     hostname: postgresqldb
     container_name: postgresql
     extra_hosts: [ 'host.docker.internal:host-gateway' ]
@@ -45,7 +45,7 @@ services:
 
   redis:
     container_name: redis
-    image: 'redis:8.4.0-alpine'
+    image: 'redis:8.6.0-alpine'
     extra_hosts: [ 'host.docker.internal:host-gateway' ]
     ports:
       - '6379:6379'
@@ -61,7 +61,7 @@ services:
 
   kafka:
     container_name: kafka
-    image: apache/kafka-native:4.1.1
+    image: apache/kafka-native:4.2.0
     hostname: broker
     extra_hosts: [ 'host.docker.internal:host-gateway' ]
     ports:
@@ -118,12 +118,18 @@ services:
     networks:
       - demo-network
 
-  prometheus:
-    image: prom/prometheus:v3.8.1
-    volumes:
-      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+  grafana-lgtm:
+    image: grafana/otel-lgtm:0.18.1
+    extra_hosts: ['host.docker.internal:host-gateway']
+    container_name: grafana-lgtm
+    environment:
+      - OTEL_METRIC_EXPORT_INTERVAL=500
     ports:
-      - "9090:9090"
+      - "3000:3000" # Grafana UI
+      - "3200:3200" # OTLP HTTP receiver for logs
+      - "4317:4317" # OTLP gRPC receiver
+      - "4318:4318" # OTLP HTTP receiver
+      - "9090:9090" # Prometheus metrics endpoint
     networks:
       - demo-network
 

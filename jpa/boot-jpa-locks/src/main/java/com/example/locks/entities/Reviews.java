@@ -1,6 +1,7 @@
 package com.example.locks.entities;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -19,6 +20,7 @@ public class Reviews {
 
     private Double rating;
 
+    @Column(nullable = false)
     private String review;
 
     @ManyToOne(cascade = CascadeType.ALL)

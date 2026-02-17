@@ -24,7 +24,7 @@ public class Post {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "post", orphanRemoval = true)
     private List<PostComment> comments = new ArrayList<>();
 
-    @JoinColumn(name = "details_Id")
+    @JoinColumn(name = "details_Id", nullable = false)
     @OneToOne(cascade = CascadeType.ALL, mappedBy = "post", orphanRemoval = true)
     private PostDetails details;
 

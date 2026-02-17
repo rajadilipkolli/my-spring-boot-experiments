@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>4.0.1</version>
+        <version>4.0.2</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.example.learning</groupId>
@@ -16,11 +16,11 @@
 
     <properties>
         <java.version>25</java.version>
-        <springdoc-openapi.version>3.0.0</springdoc-openapi.version>
-        <datasource-micrometer-boot.version>2.0.1</datasource-micrometer-boot.version>
+        <springdoc-openapi.version>3.0.1</springdoc-openapi.version>
+        <datasource-micrometer-boot.version>2.1.1</datasource-micrometer-boot.version>
         <org.mapstruct.version>1.6.3</org.mapstruct.version>
-        <testcontainers-jooq-codegen-maven-plugin.version>0.0.4</testcontainers-jooq-codegen-maven-plugin.version>
-        <spotless.version>3.1.0</spotless.version>
+        <testcontainers-jooq-codegen-maven-plugin.version>1.0.0</testcontainers-jooq-codegen-maven-plugin.version>
+        <spotless.version>3.2.1</spotless.version>
         <instancio.version>5.5.1</instancio.version>
 
         <project.testresult.directory>${project.build.directory}/test-results</project.testresult.directory>
@@ -164,7 +164,7 @@
                 </configuration>
             </plugin>
             <plugin>
-                <groupId>org.testcontainers</groupId>
+                <groupId>dev.sivalabs</groupId>
                 <artifactId>testcontainers-jooq-codegen-maven-plugin</artifactId>
                 <version>${testcontainers-jooq-codegen-maven-plugin.version}</version>
                 <dependencies>
@@ -204,7 +204,7 @@
                                     MYSQL: mysql:8.0.33
                                     MARIADB: mariadb:10.11
                                 -->
-                                <containerImage>postgres:18.1-alpine</containerImage>
+                                <containerImage>postgres:18.2-alpine</containerImage>
                             </database>
                             <liquibase>
                                 <changeLogPath>db.changelog-master.yaml</changeLogPath>

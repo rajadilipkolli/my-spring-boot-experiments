@@ -47,7 +47,7 @@ public class PostEntity extends Auditable implements Serializable {
     private List<PostTagEntity> tags = new ArrayList<>();
 
     @ManyToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "author_id")
+    @JoinColumn(name = "author_id", nullable = false)
     private AuthorEntity authorEntity;
 
     public PostEntity setId(Long id) {

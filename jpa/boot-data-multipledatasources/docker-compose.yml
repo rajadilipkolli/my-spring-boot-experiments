@@ -1,7 +1,7 @@
 version: '3.8'
 services:
   postgres:
-    image: postgres:18.1-alpine
+    image: postgres:18.2-alpine
     ports:
       - "5432:5432"
     environment:
@@ -22,7 +22,7 @@ services:
       - PGADMIN_DEFAULT_PASSWORD=admin
 
   mysql:
-    image: mysql:9.5
+    image: mysql:9.6
     ports:
       # <Port exposed> : < MySQL Port running inside container>
       - "3306:3306"

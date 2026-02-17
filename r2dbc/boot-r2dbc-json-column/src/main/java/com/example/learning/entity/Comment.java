@@ -30,7 +30,6 @@ public class Comment {
     @LastModifiedDate
     private LocalDateTime updatedAt;
 
-    @Column("version")
     @Version
     private Short version;
 

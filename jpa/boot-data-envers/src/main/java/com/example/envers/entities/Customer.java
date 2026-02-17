@@ -27,6 +27,7 @@ public class Customer {
     private String address;
 
     @Version
+    @Column(nullable = false)
     Short version;
 
     public Long getId() {

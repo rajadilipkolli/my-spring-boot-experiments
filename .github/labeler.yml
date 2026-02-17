@@ -7,9 +7,9 @@
 "component : chaos-monkey":
   - changed-files:
       - any-glob-to-any-file: 'boot-chaos-monkey/**/*'
-"component : grafana-lgtm":
+"component : high-rps":
   - changed-files:
-      - any-glob-to-any-file: 'boot-grafana-lgtm/**/*'
+      - any-glob-to-any-file: 'boot-high-rps-sample/**/*'
 "component: mongodb-elasticsearch":
   - changed-files:
       - any-glob-to-any-file: 'boot-mongodb-elasticsearch/**/*'
@@ -98,6 +98,9 @@
   - changed-files:
       - any-glob-to-any-file:
           - jpa/multitenancy/**/*
+"component : grafana-lgtm":
+  - changed-files:
+      - any-glob-to-any-file: 'observability/boot-grafana-lgtm/**/*'
 "component: openapi":
   - changed-files:
       - any-glob-to-any-file:
@@ -130,6 +133,7 @@
           - batch-boot-jpa-sample/pom.xml
           - boot-api-archunit-sample/pom.xml
           - boot-chaos-monkey/pom.xml
+          - boot-high-rps-sample/pom.xml
           - boot-mongodb-elasticsearch/pom.xml
           - boot-opensearch-sample/pom.xml
           - boot-rabbitmq-thymeleaf/pom.xml
@@ -159,6 +163,7 @@
           - jpa/multitenancy/multidatasource-multitenancy/pom.xml
           - jpa/multitenancy/partition/pom.xml
           - jpa/multitenancy/schema/pom.xml
+          - observability/boot-grafana-lgtm/pom.xml
           - open-api-spring-boot/pom.xml
           - r2dbc/boot-jooq-r2dbc-sample/pom.xml
           - r2dbc/boot-r2dbc-json-column/pom.xml
