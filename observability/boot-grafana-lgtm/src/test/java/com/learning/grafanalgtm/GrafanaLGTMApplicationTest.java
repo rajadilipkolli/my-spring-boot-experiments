@@ -114,7 +114,7 @@ class GrafanaLGTMApplicationTest {
                 .statusCode(HttpStatus.SC_OK)
                 .contentType(ContentType.JSON)
                 .body("metrics.completedJobs", is(3))
-                .body("metrics.totalJobs", is(1))
+                .body("metrics.totalJobs", is(3))
                 .log()
                 .all();
     }
