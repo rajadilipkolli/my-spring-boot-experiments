@@ -204,7 +204,7 @@
                                     MYSQL: mysql:8.0.33
                                     MARIADB: mariadb:10.11
                                 -->
-                                <containerImage>postgres:18.2-alpine</containerImage>
+                                <containerImage>postgres:18.3-alpine</containerImage>
                             </database>
                             <liquibase>
                                 <changeLogPath>db.changelog-master.yaml</changeLogPath>
