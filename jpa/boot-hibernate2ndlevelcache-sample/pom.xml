@@ -21,7 +21,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
         <java.version>25</java.version>
-        <springdoc-openapi.version>3.0.1</springdoc-openapi.version>
+        <springdoc-openapi.version>3.0.2</springdoc-openapi.version>
         <datasource-micrometer-boot.version>2.1.1</datasource-micrometer-boot.version>
         <commons-io.version>2.21.0</commons-io.version>
         <org.mapstruct.version>1.6.3</org.mapstruct.version>
