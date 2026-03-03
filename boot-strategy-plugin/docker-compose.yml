@@ -6,7 +6,8 @@ services:
         container_name: tempo
         command: [ "-config.file=/etc/tempo.yaml" ]
         depends_on:
-            - loki
+            loki:
+                condition: service_healthy
         volumes:
             - ./platform/tempo/tempo-local.yaml:/etc/tempo.yaml:ro
         ports:
@@ -28,6 +29,10 @@ services:
         command: [ "-config.file=/etc/loki/local-config.yaml" ]
         ports:
             - "3100:3100" # loki needs to be exposed so it receives logs
+        healthcheck:
+            test: ["CMD", "/usr/bin/loki", "--version"]
+            interval: 5s
+            retries: 10
 
     prometheus:
         image: prom/prometheus:v3.10.0
@@ -57,7 +62,7 @@ services:
             prometheus:
                 condition: service_healthy
             loki:
-                condition: service_started
+                condition: service_healthy
         volumes:
             - ./platform/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
             - ./platform/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards:ro
@@ -72,4 +77,3 @@ services:
             interval: 5s
             retries: 10
             test: wget --no-verbose --tries=1 --spider http://localhost:3000 || exit 1
-
