@@ -1,12 +1,12 @@
 package com.example.highrps.postcomment.rest;
 
-import com.example.highrps.postcomment.domain.CreatePostCommentCmd;
-import com.example.highrps.postcomment.domain.GetPostCommentQuery;
-import com.example.highrps.postcomment.domain.PostCommentCommandService;
-import com.example.highrps.postcomment.domain.PostCommentQueryService;
-import com.example.highrps.postcomment.domain.PostCommentResult;
-import com.example.highrps.postcomment.domain.UpdatePostCommentCmd;
+import com.example.highrps.postcomment.command.CreatePostCommentCommand;
+import com.example.highrps.postcomment.command.PostCommentCommandResult;
+import com.example.highrps.postcomment.command.PostCommentCommandService;
+import com.example.highrps.postcomment.command.UpdatePostCommentCommand;
 import com.example.highrps.postcomment.domain.vo.PostCommentId;
+import com.example.highrps.postcomment.query.GetPostCommentQuery;
+import com.example.highrps.postcomment.query.PostCommentQueryService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import java.net.URI;
@@ -37,14 +37,14 @@ public class PostCommentController {
 
     @GetMapping
     public ResponseEntity<List<PostCommentResponse>> getAllComments(@PathVariable @Positive Long postId) {
-        List<PostCommentResult> results = queryService.getCommentsByPostId(postId);
+        List<PostCommentCommandResult> results = queryService.getCommentsByPostId(postId);
         return ResponseEntity.ok(results.stream().map(PostCommentResponse::from).toList());
     }
 
     @GetMapping("/{postCommentId}")
     public ResponseEntity<PostCommentResponse> getComment(
             @PathVariable @Positive Long postId, @PathVariable @Positive Long postCommentId) {
-        PostCommentResult result =
+        PostCommentCommandResult result =
                 queryService.getCommentById(new GetPostCommentQuery(postId, PostCommentId.of(postCommentId)));
         return ResponseEntity.ok(PostCommentResponse.from(result));
     }
@@ -52,12 +52,12 @@ public class PostCommentController {
     @PostMapping
     public ResponseEntity<PostCommentResponse> createComment(
             @PathVariable @Positive Long postId, @RequestBody @Valid CreatePostCommentRequest request) {
-        PostCommentResult result = commandService.createComment(
-                new CreatePostCommentCmd(request.title(), request.content(), postId, request.published()));
+        PostCommentCommandResult result = commandService.createComment(
+                new CreatePostCommentCommand(request.title(), request.content(), postId, request.published()));
 
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{postCommentId}")
-                .buildAndExpand(result.commentId())
+                .buildAndExpand(result.id())
                 .toUri();
 
         return ResponseEntity.created(location).body(PostCommentResponse.from(result));
@@ -68,10 +68,10 @@ public class PostCommentController {
             @PathVariable @Positive Long postId,
             @PathVariable @Positive Long postCommentId,
             @RequestBody @Valid UpdatePostCommentRequest request) {
-        commandService.updateComment(new UpdatePostCommentCmd(
+        commandService.updateComment(new UpdatePostCommentCommand(
                 PostCommentId.of(postCommentId), postId, request.title(), request.content(), request.published()));
 
-        PostCommentResult result =
+        PostCommentCommandResult result =
                 queryService.getCommentById(new GetPostCommentQuery(postId, PostCommentId.of(postCommentId)));
         return ResponseEntity.ok(PostCommentResponse.from(result));
     }

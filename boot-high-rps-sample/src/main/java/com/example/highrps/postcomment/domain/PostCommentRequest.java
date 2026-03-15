@@ -1,5 +1,7 @@
 package com.example.highrps.postcomment.domain;
 
+import com.example.highrps.postcomment.command.CreatePostCommentCommand;
+import com.example.highrps.postcomment.command.UpdatePostCommentCommand;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 
@@ -50,7 +52,7 @@ public record PostCommentRequest(
     /**
      * Create from CreatePostCommentCmd.
      */
-    public static PostCommentRequest fromCreateCmd(CreatePostCommentCmd cmd, Long commentId) {
+    public static PostCommentRequest fromCreateCmd(CreatePostCommentCommand cmd, Long commentId) {
         OffsetDateTime publishedAt = Boolean.TRUE.equals(cmd.published()) ? OffsetDateTime.now() : null;
         LocalDateTime now = LocalDateTime.now();
         return new PostCommentRequest(
@@ -60,7 +62,7 @@ public record PostCommentRequest(
     /**
      * Create from UpdatePostCommentCmd.
      */
-    public static PostCommentRequest fromUpdateCmd(UpdatePostCommentCmd cmd, LocalDateTime createdAt) {
+    public static PostCommentRequest fromUpdateCmd(UpdatePostCommentCommand cmd, LocalDateTime createdAt) {
         OffsetDateTime publishedAt = Boolean.TRUE.equals(cmd.published()) ? OffsetDateTime.now() : null;
         return new PostCommentRequest(
                 cmd.commentId().id(),

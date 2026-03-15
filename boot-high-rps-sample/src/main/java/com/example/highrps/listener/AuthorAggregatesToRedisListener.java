@@ -1,8 +1,8 @@
 package com.example.highrps.listener;
 
-import com.example.highrps.mapper.AuthorRequestToResponseMapper;
-import com.example.highrps.model.request.AuthorRequest;
-import com.example.highrps.model.response.AuthorResponse;
+import com.example.highrps.author.AuthorRequest;
+import com.example.highrps.author.AuthorRequestToResponseMapper;
+import com.example.highrps.author.AuthorResponse;
 import com.example.highrps.repository.redis.AuthorRedisRepository;
 import java.util.Map;
 import org.apache.kafka.clients.consumer.ConsumerRecord;

@@ -2,6 +2,7 @@ package com.example.highrps.postcomment.domain;
 
 import com.example.highrps.entities.PostCommentEntity;
 import com.example.highrps.entities.PostCommentRedis;
+import com.example.highrps.postcomment.command.PostCommentCommandResult;
 import java.util.List;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -17,35 +18,37 @@ public abstract class PostCommentMapper {
     protected ObjectMapper objectMapper;
 
     @Mapping(target = "postId", source = "postEntity.id")
-    public abstract PostCommentResult toResult(PostCommentEntity entity);
+    public abstract PostCommentCommandResult toResult(PostCommentEntity entity);
 
-    public abstract List<PostCommentResult> toResultList(List<PostCommentEntity> entities);
+    public abstract List<PostCommentCommandResult> toResultList(List<PostCommentEntity> entities);
 
-    public abstract PostCommentResult toResultFromRequest(PostCommentRequest request);
+    public abstract PostCommentCommandResult toResultFromRequest(PostCommentRequest request);
 
-    public abstract PostCommentResult toResultFromRedis(PostCommentRedis redis);
+    public abstract PostCommentCommandResult toResultFromRedis(PostCommentRedis redis);
 
     public abstract PostCommentRedis toRedis(PostCommentRequest request);
 
+    public abstract PostCommentRequest toRequestFromResult(PostCommentCommandResult result);
+
     /**
-     * Serialize PostCommentResult to JSON string for local cache.
+     * Serialize PostCommentCommandResult to JSON string for local cache.
      */
-    public String toJson(PostCommentResult result) {
+    public String toJson(PostCommentCommandResult result) {
         try {
             return objectMapper.writeValueAsString(result);
         } catch (JacksonException e) {
-            throw new IllegalStateException("Failed to serialize PostCommentResult to JSON", e);
+            throw new IllegalStateException("Failed to serialize PostCommentCommandResult to JSON", e);
         }
     }
 
     /**
-     * Deserialize JSON string to PostCommentResult from local cache.
+     * Deserialize JSON string to PostCommentCommandResult from local cache.
      */
-    public PostCommentResult fromJson(String json) {
+    public PostCommentCommandResult fromJson(String json) {
         try {
-            return objectMapper.readValue(json, PostCommentResult.class);
+            return objectMapper.readValue(json, PostCommentCommandResult.class);
         } catch (JacksonException e) {
-            throw new IllegalStateException("Failed to deserialize PostCommentResult from JSON", e);
+            throw new IllegalStateException("Failed to deserialize PostCommentCommandResult from JSON", e);
         }
     }
 }

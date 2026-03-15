@@ -1,6 +1,6 @@
 package com.example.highrps.postcomment.rest;
 
-import com.example.highrps.postcomment.domain.PostCommentResult;
+import com.example.highrps.postcomment.command.PostCommentCommandResult;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 
@@ -14,13 +14,13 @@ public record PostCommentResponse(
         LocalDateTime createdAt,
         LocalDateTime modifiedAt) {
 
-    public static PostCommentResponse from(PostCommentResult result) {
+    public static PostCommentResponse from(PostCommentCommandResult result) {
         return new PostCommentResponse(
-                result.commentId(),
+                result.id(),
                 result.title(),
                 result.content(),
                 result.published(),
-                result.publishedAt(),
+                null, // publishedAt - not in PostCommentCommandResult
                 result.postId(),
                 result.createdAt(),
                 result.modifiedAt());

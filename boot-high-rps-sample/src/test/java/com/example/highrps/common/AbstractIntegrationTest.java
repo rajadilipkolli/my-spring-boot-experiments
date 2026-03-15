@@ -2,7 +2,8 @@ package com.example.highrps.common;
 
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
-import com.example.highrps.batchprocessor.AuthorBatchProcessor;
+import com.example.highrps.HighRpsApplication;
+import com.example.highrps.infrastructure.kafka.batch.AuthorBatchProcessor;
 import com.example.highrps.repository.jpa.AuthorRepository;
 import com.example.highrps.repository.jpa.PostCommentRepository;
 import com.example.highrps.repository.jpa.PostRepository;
@@ -24,7 +25,7 @@ import org.springframework.test.web.servlet.assertj.MockMvcTester;
 @ActiveProfiles({"test"})
 @SpringBootTest(
         webEnvironment = RANDOM_PORT,
-        classes = {ContainersConfig.class, SQLContainerConfig.class})
+        classes = {HighRpsApplication.class, ContainersConfig.class, SQLContainerConfig.class})
 @AutoConfigureMockMvc
 @AutoConfigureTracing
 @AutoConfigureMetrics

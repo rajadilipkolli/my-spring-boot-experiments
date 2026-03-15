@@ -1,8 +1,8 @@
 package com.example.highrps.listener;
 
-import com.example.highrps.mapper.PostRequestToResponseMapper;
-import com.example.highrps.model.request.NewPostRequest;
-import com.example.highrps.model.response.PostResponse;
+import com.example.highrps.post.domain.PostResponse;
+import com.example.highrps.post.domain.requests.NewPostRequest;
+import com.example.highrps.post.mapper.PostRequestToResponseMapper;
 import com.example.highrps.repository.redis.PostRedisRepository;
 import java.util.Map;
 import org.apache.kafka.clients.consumer.ConsumerRecord;

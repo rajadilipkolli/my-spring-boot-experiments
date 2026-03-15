@@ -1,0 +1,104 @@
+package com.example.highrps.post.command;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.willDoNothing;
+import static org.mockito.Mockito.verify;
+
+import com.example.highrps.post.domain.events.PostCreatedEvent;
+import com.example.highrps.post.domain.events.PostDeletedEvent;
+import com.example.highrps.post.domain.events.PostUpdatedEvent;
+import com.example.highrps.repository.redis.PostRedisRepository;
+import com.github.benmanes.caffeine.cache.Cache;
+import java.time.Duration;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
+import tools.jackson.databind.json.JsonMapper;
+
+/**
+ * Unit tests for PostCommandService focusing on event publishing.
+ * Uses pure Mockito for fast, isolated testing.
+ */
+@ExtendWith(MockitoExtension.class)
+class PostCommandServiceTest {
+
+    @InjectMocks
+    private PostCommandService postCommandService;
+
+    @Mock
+    private ApplicationEventPublisher eventPublisher;
+
+    @Mock
+    private Cache<String, String> localCache;
+
+    @Mock
+    private RedisTemplate<String, String> redis;
+
+    @Mock
+    private ValueOperations<String, String> valueOperations;
+
+    @Mock
+    private PostRedisRepository postRedisRepository;
+
+    @Mock
+    private JsonMapper jsonMapper;
+
+    @Test
+    @DisplayName("Should publish PostCreatedEvent when creating a post")
+    void shouldPublishEventWhenCreatingPost() {
+        // Arrange
+        CreatePostCommand command =
+                new CreatePostCommand(99001L, "Test Title", "Test Content", "author@example.com", true);
+
+        // Act
+        PostCommandResult result = postCommandService.createPost(command);
+
+        // Assert
+        assertThat(result).isNotNull();
+        assertThat(result.postId()).isEqualTo(99001L);
+
+        // Verify event was published
+        verify(eventPublisher).publishEvent(any(PostCreatedEvent.class));
+    }
+
+    @Test
+    @DisplayName("Should publish PostUpdatedEvent when updating a post")
+    void shouldPublishEventWhenUpdatingPost() {
+        // Arrange
+        UpdatePostCommand updateCommand = new UpdatePostCommand(99002L, "Updated Title", "Updated Content", true);
+
+        // Act
+        PostCommandResult result = postCommandService.updatePost(updateCommand);
+
+        // Assert
+        assertThat(result).isNotNull();
+        assertThat(result.postId()).isEqualTo(99002L);
+
+        // Verify event was published
+        verify(eventPublisher).publishEvent(any(PostUpdatedEvent.class));
+    }
+
+    @Test
+    @DisplayName("Should publish PostDeletedEvent when deleting a post")
+    void shouldPublishEventWhenDeletingPost() {
+        // Arrange
+        Long postId = 99003L;
+
+        given(redis.opsForValue()).willReturn(valueOperations);
+        willDoNothing().given(valueOperations).set(any(String.class), any(String.class), any(Duration.class));
+
+        // Act
+        postCommandService.deletePost(postId);
+
+        // Assert - verify event was published
+        verify(eventPublisher).publishEvent(any(PostDeletedEvent.class));
+    }
+}

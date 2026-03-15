@@ -1,8 +1,8 @@
 package com.example.highrps.listener;
 
+import com.example.highrps.postcomment.command.PostCommentCommandResult;
 import com.example.highrps.postcomment.domain.PostCommentMapper;
 import com.example.highrps.postcomment.domain.PostCommentRequest;
-import com.example.highrps.postcomment.domain.PostCommentResult;
 import com.example.highrps.repository.redis.PostCommentRedisRepository;
 import java.util.Map;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -83,8 +83,8 @@ public class PostCommentAggregatesToRedisListener {
                 return;
             }
 
-            // Map PostCommentRequest to PostCommentResult for Redis storage
-            PostCommentResult value = mapper.toResultFromRequest(payload);
+            // Map PostCommentRequest to PostCommentCommandResult for Redis storage
+            PostCommentCommandResult value = mapper.toResultFromRequest(payload);
             var jsonString = mapper.toJson(value);
             if (jsonString.startsWith("{")) {
                 // Add entity type for downstream processing
