@@ -16,7 +16,7 @@ services:
             - MANAGEMENT_OTLP_LOGS_ENDPOINT=http://tempo:4318/v1/logs
 
     tempo-init:
-        image: busybox:1.36
+        image: busybox:1.37
         container_name: tempo-init
         command: ["sh", "-c", "chown -R 10001:10001 /tmp/tempo || true"]
         volumes:
