@@ -1,17 +1,16 @@
 package com.example.highrps.post.command;
 
+import com.example.highrps.infrastructure.redis.DeletionMarkerHandler;
 import com.example.highrps.post.PostRedis;
 import com.example.highrps.post.domain.events.PostCreatedEvent;
 import com.example.highrps.post.domain.events.PostDeletedEvent;
 import com.example.highrps.post.domain.events.PostUpdatedEvent;
 import com.example.highrps.repository.redis.PostRedisRepository;
 import com.github.benmanes.caffeine.cache.Cache;
-import java.time.Duration;
 import java.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tools.jackson.databind.json.JsonMapper;
@@ -29,21 +28,21 @@ public class PostCommandService {
 
     private final ApplicationEventPublisher events;
     private final Cache<String, String> localCache;
-    private final RedisTemplate<String, String> redis;
     private final PostRedisRepository postRedisRepository;
     private final JsonMapper objectMapper;
+    private final DeletionMarkerHandler deletionMarkerHandler;
 
     public PostCommandService(
             ApplicationEventPublisher events,
             Cache<String, String> localCache,
-            RedisTemplate<String, String> redis,
             PostRedisRepository postRedisRepository,
-            JsonMapper jsonMapper) {
+            JsonMapper jsonMapper,
+            DeletionMarkerHandler deletionMarkerHandler) {
         this.events = events;
         this.localCache = localCache;
-        this.redis = redis;
         this.postRedisRepository = postRedisRepository;
         this.objectMapper = jsonMapper;
+        this.deletionMarkerHandler = deletionMarkerHandler;
     }
 
     public PostCommandResult createPost(CreatePostCommand cmd) {
@@ -148,11 +147,7 @@ public class PostCommandService {
         }
 
         // 4. Mark deleted in Redis with TTL (prevents batch re-insertion)
-        try {
-            redis.opsForValue().set("deleted:posts:" + postId, "1", Duration.ofSeconds(60));
-        } catch (Exception e) {
-            log.warn("Failed to mark post as deleted in Redis: {}", postId, e);
-        }
+        deletionMarkerHandler.markDeleted("post", String.valueOf(postId));
 
         log.info("Post deleted successfully: {}", postId);
     }

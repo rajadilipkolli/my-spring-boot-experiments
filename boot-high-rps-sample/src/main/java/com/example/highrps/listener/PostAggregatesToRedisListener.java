@@ -1,8 +1,8 @@
 package com.example.highrps.listener;
 
-import com.example.highrps.post.domain.PostResponse;
+import com.example.highrps.infrastructure.redis.DeletionMarkerHandler;
+import com.example.highrps.post.PostRedis;
 import com.example.highrps.post.domain.requests.NewPostRequest;
-import com.example.highrps.post.mapper.PostRequestToResponseMapper;
 import com.example.highrps.repository.redis.PostRedisRepository;
 import java.util.Map;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -18,6 +18,7 @@ import org.springframework.kafka.retrytopic.TopicSuffixingStrategy;
 import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.json.JsonMapper;
 
 @Component
@@ -26,22 +27,22 @@ public class PostAggregatesToRedisListener {
     private static final Logger log = LoggerFactory.getLogger(PostAggregatesToRedisListener.class);
 
     private final RedisTemplate<String, String> redis;
-    private final PostRequestToResponseMapper mapper;
     private final String queueKey;
     private final JsonMapper jsonMapper;
     private final PostRedisRepository postRedisRepository;
+    private final DeletionMarkerHandler deletionMarkerHandler;
 
     public PostAggregatesToRedisListener(
             RedisTemplate<String, String> redis,
-            PostRequestToResponseMapper mapper,
             @Value("${app.batch.queue-key:events:queue}") String queueKey,
             JsonMapper jsonMapper,
-            PostRedisRepository postRedisRepository) {
+            PostRedisRepository postRedisRepository,
+            DeletionMarkerHandler deletionMarkerHandler) {
         this.redis = redis;
-        this.mapper = mapper;
         this.queueKey = queueKey;
         this.jsonMapper = jsonMapper;
         this.postRedisRepository = postRedisRepository;
+        this.deletionMarkerHandler = deletionMarkerHandler;
     }
 
     @KafkaListener(
@@ -69,10 +70,10 @@ public class PostAggregatesToRedisListener {
                 return;
             }
 
-            tools.jackson.databind.JsonNode node = jsonMapper.readTree(bytes);
-            if (node.isTextual() && node.asText().startsWith("eyJ")) {
+            JsonNode node = jsonMapper.readTree(bytes);
+            if (node.isString() && node.asString().startsWith("eyJ")) {
                 log.info("Detected Base64 encoded JSON payload in posts-aggregates, decoding...");
-                bytes = java.util.Base64.getDecoder().decode(node.asText());
+                bytes = java.util.Base64.getDecoder().decode(node.asString());
                 node = jsonMapper.readTree(bytes);
             }
 
@@ -85,16 +86,31 @@ public class PostAggregatesToRedisListener {
 
             NewPostRequest payload = jsonMapper.treeToValue(node, NewPostRequest.class);
 
-            // Map NewPostRequest to PostResponse for Redis storage
-            PostResponse value = mapper.mapToPostResponse(payload);
-            String jsonString = PostResponse.toJson(value);
-            if (jsonString.startsWith("{")) {
-                // Add entity type for downstream processing
-                jsonString = "{\"__entity\":\"post\"," + jsonString.substring(1);
+            // Update Redis Repository (Cache)
+            try {
+                PostRedis redisEntity = new PostRedis()
+                        .setId(payload.postId())
+                        .setTitle(payload.title())
+                        .setContent(payload.content())
+                        .setAuthorEmail(payload.email())
+                        .setPublished(payload.published())
+                        .setPublishedAt(payload.publishedAt())
+                        .setCreatedAt(payload.createdAt())
+                        .setModifiedAt(payload.modifiedAt())
+                        .setDetails(payload.details())
+                        .setTags(payload.tags());
+                postRedisRepository.save(redisEntity);
+            } catch (Exception e) {
+                log.warn("Failed to update post redis repository for key: {}", cacheKey, e);
             }
 
-            // Enqueue the same payload for asynchronous DB writes
+            // Enqueue payload for asynchronous DB writes
             try {
+                String jsonString = jsonMapper.writeValueAsString(payload);
+                if (jsonString.startsWith("{")) {
+                    // Add entity type for downstream processing
+                    jsonString = "{\"__entity\":\"post\"," + jsonString.substring(1);
+                }
                 redis.opsForList().leftPush(queueKey, jsonString);
             } catch (Exception e) {
                 log.error("Failed to enqueue payload for DB write, cacheKey: {}, may lose durability", cacheKey, e);
@@ -126,6 +142,7 @@ public class PostAggregatesToRedisListener {
             log.warn("Failed to delete repository entry for deletion of cacheKey: {}", cacheKey, e);
         }
         try {
+            deletionMarkerHandler.markDeleted("post", cacheKey);
             String tombstoneJson =
                     jsonMapper.writeValueAsString(Map.of("postId", cacheKey, "__deleted", true, "__entity", "post"));
             redis.opsForList().leftPush(queueKey, tombstoneJson);

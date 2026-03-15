@@ -3,6 +3,7 @@ package com.example.highrps.infrastructure.kafka.batch;
 import com.example.highrps.author.AuthorRequest;
 import com.example.highrps.author.AuthorRequestToEntityMapper;
 import com.example.highrps.entities.AuthorEntity;
+import com.example.highrps.infrastructure.redis.DeletionMarkerHandler;
 import com.example.highrps.repository.jpa.AuthorRepository;
 import java.util.List;
 import java.util.Locale;
@@ -12,7 +13,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 import tools.jackson.databind.json.JsonMapper;
 
@@ -24,17 +24,17 @@ public class AuthorBatchProcessor implements EntityBatchProcessor {
     private final AuthorRequestToEntityMapper mapper;
     private final AuthorRepository authorRepository;
     private final JsonMapper jsonMapper;
-    private final RedisTemplate<String, String> redis;
+    private final DeletionMarkerHandler deletionMarkerHandler;
 
     public AuthorBatchProcessor(
             AuthorRequestToEntityMapper mapper,
             AuthorRepository authorRepository,
             JsonMapper jsonMapper,
-            RedisTemplate<String, String> redis) {
+            DeletionMarkerHandler deletionMarkerHandler) {
         this.mapper = mapper;
         this.authorRepository = authorRepository;
         this.jsonMapper = jsonMapper;
-        this.redis = redis;
+        this.deletionMarkerHandler = deletionMarkerHandler;
     }
 
     @Override
@@ -50,8 +50,7 @@ public class AuthorBatchProcessor implements EntityBatchProcessor {
                     String email = extractKey(payload);
                     if (email != null) {
                         // Skip if tombstone exists
-                        Boolean deleted = redis.hasKey("deleted:authors:" + email);
-                        if (Boolean.TRUE.equals(deleted)) {
+                        if (deletionMarkerHandler.isDeleted("author", email)) {
                             log.debug("Skipping upsert for email {} because recent tombstone present", email);
                             return null;
                         }

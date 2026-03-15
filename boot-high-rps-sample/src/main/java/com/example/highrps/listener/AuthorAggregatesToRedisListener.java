@@ -1,8 +1,7 @@
 package com.example.highrps.listener;
 
 import com.example.highrps.author.AuthorRequest;
-import com.example.highrps.author.AuthorRequestToResponseMapper;
-import com.example.highrps.author.AuthorResponse;
+import com.example.highrps.entities.AuthorRedis;
 import com.example.highrps.repository.redis.AuthorRedisRepository;
 import java.util.Map;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -18,6 +17,7 @@ import org.springframework.kafka.retrytopic.TopicSuffixingStrategy;
 import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.json.JsonMapper;
 
 @Component
@@ -26,19 +26,16 @@ public class AuthorAggregatesToRedisListener {
     private static final Logger log = LoggerFactory.getLogger(AuthorAggregatesToRedisListener.class);
 
     private final RedisTemplate<String, String> redis;
-    private final AuthorRequestToResponseMapper mapper;
     private final String queueKey;
     private final JsonMapper jsonMapper;
     private final AuthorRedisRepository authorRedisRepository;
 
     public AuthorAggregatesToRedisListener(
             RedisTemplate<String, String> redis,
-            AuthorRequestToResponseMapper mapper,
             @Value("${app.batch.queue-key:events:queue}") String queueKey,
             JsonMapper jsonMapper,
             AuthorRedisRepository authorRedisRepository) {
         this.redis = redis;
-        this.mapper = mapper;
         this.queueKey = queueKey;
         this.jsonMapper = jsonMapper;
         this.authorRedisRepository = authorRedisRepository;
@@ -75,29 +72,41 @@ public class AuthorAggregatesToRedisListener {
                     redis.opsForList().leftPush(queueKey, tombstoneJson);
                 } catch (Exception e) {
                     log.error("Failed to enqueue tombstone marker for key: {}, may lose durability", key, e);
+                    throw new IllegalStateException("Failed to enqueue tombstone marker for key=" + key, e);
                 }
                 return;
             }
 
-            tools.jackson.databind.JsonNode node = jsonMapper.readTree(bytes);
-            if (node.isTextual() && node.asText().startsWith("eyJ")) {
+            JsonNode node = jsonMapper.readTree(bytes);
+            if (node.isString() && node.asString().startsWith("eyJ")) {
                 log.info("Detected Base64 encoded JSON payload in authors-aggregates, decoding...");
-                bytes = java.util.Base64.getDecoder().decode(node.asText());
+                bytes = java.util.Base64.getDecoder().decode(node.asString());
                 node = jsonMapper.readTree(bytes);
             }
 
             AuthorRequest payload = jsonMapper.treeToValue(node, AuthorRequest.class);
 
-            // Map AuthorRequest to AuthorResponse for Redis storage
-            AuthorResponse value = mapper.mapToAuthorResponse(payload);
-            var jsonString = AuthorResponse.toJson(value);
-            if (jsonString.startsWith("{")) {
-                // Add entity type for downstream processing
-                jsonString = "{\"__entity\":\"author\"," + jsonString.substring(1);
+            // Update Redis Repository (Cache)
+            try {
+                AuthorRedis redisEntity = new AuthorRedis()
+                        .setEmail(payload.email())
+                        .setFirstName(payload.firstName())
+                        .setMiddleName(payload.middleName())
+                        .setLastName(payload.lastName())
+                        .setMobile(payload.mobile())
+                        .setRegisteredAt(payload.registeredAt());
+                authorRedisRepository.save(redisEntity);
+            } catch (Exception e) {
+                log.warn("Failed to update author redis repository for key: {}", key, e);
             }
 
-            // Enqueue the same payload for asynchronous DB writes
+            // Enqueue payload for asynchronous DB writes
             try {
+                String jsonString = jsonMapper.writeValueAsString(payload);
+                if (jsonString.startsWith("{")) {
+                    // Add entity type for downstream processing
+                    jsonString = "{\"__entity\":\"author\"," + jsonString.substring(1);
+                }
                 redis.opsForList().leftPush(queueKey, jsonString);
             } catch (Exception e) {
                 log.error("Failed to enqueue payload for DB write, key: {}, may lose durability", key, e);

@@ -2,6 +2,7 @@ package com.example.highrps.infrastructure.kafka.batch;
 
 import com.example.highrps.entities.AuthorEntity;
 import com.example.highrps.entities.PostEntity;
+import com.example.highrps.infrastructure.redis.DeletionMarkerHandler;
 import com.example.highrps.post.domain.requests.NewPostRequest;
 import com.example.highrps.post.mapper.NewPostRequestToPostEntityMapper;
 import com.example.highrps.repository.jpa.AuthorRepository;
@@ -14,7 +15,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import tools.jackson.databind.json.JsonMapper;
@@ -28,22 +28,22 @@ public class PostBatchProcessor implements EntityBatchProcessor {
     private final PostRepository postRepository;
     private final TagRepository tagRepository;
     private final JsonMapper jsonMapper;
-    private final RedisTemplate<String, String> redis;
     private final AuthorRepository authorRepository;
+    private final DeletionMarkerHandler deletionMarkerHandler;
 
     public PostBatchProcessor(
             NewPostRequestToPostEntityMapper mapper,
             PostRepository postRepository,
             TagRepository tagRepository,
             JsonMapper jsonMapper,
-            RedisTemplate<String, String> redis,
-            AuthorRepository authorRepository) {
+            AuthorRepository authorRepository,
+            DeletionMarkerHandler deletionMarkerHandler) {
         this.mapper = mapper;
         this.postRepository = postRepository;
         this.tagRepository = tagRepository;
         this.jsonMapper = jsonMapper;
-        this.redis = redis;
         this.authorRepository = authorRepository;
+        this.deletionMarkerHandler = deletionMarkerHandler;
     }
 
     @Override
@@ -60,8 +60,7 @@ public class PostBatchProcessor implements EntityBatchProcessor {
                     String postId = extractKey(payload);
                     if (postId != null) {
                         // Skip if tombstone exists
-                        Boolean deleted = redis.hasKey("deleted:post:" + postId);
-                        if (Boolean.TRUE.equals(deleted)) {
+                        if (deletionMarkerHandler.isDeleted("post", postId)) {
                             log.debug("Skipping upsert for postId {} because recent tombstone present", postId);
                             return null;
                         }

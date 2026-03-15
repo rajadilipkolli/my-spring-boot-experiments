@@ -12,7 +12,7 @@
  * <p>
  * This is a non-domain module accessible by all other modules.
  */
-@org.springframework.modulith.ApplicationModule(
-        displayName = "Shared Kernel",
-        type = org.springframework.modulith.ApplicationModule.Type.OPEN)
+@ApplicationModule(displayName = "Shared Kernel", type = ApplicationModule.Type.OPEN)
 package com.example.highrps.shared;
+
+import org.springframework.modulith.ApplicationModule;

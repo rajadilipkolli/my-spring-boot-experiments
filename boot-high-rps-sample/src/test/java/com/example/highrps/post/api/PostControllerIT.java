@@ -7,7 +7,7 @@ import com.example.highrps.common.AbstractIntegrationTest;
 import com.example.highrps.entities.AuthorEntity;
 import com.example.highrps.post.PostRedis;
 import com.example.highrps.post.domain.PostDetailsResponse;
-import com.example.highrps.post.domain.PostResponse;
+import com.example.highrps.post.query.PostProjection;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.concurrent.atomic.AtomicReference;
@@ -99,7 +99,7 @@ class PostControllerIT extends AbstractIntegrationTest {
                 .hasStatus(HttpStatus.OK)
                 .hasContentType(MediaType.APPLICATION_JSON)
                 .bodyJson()
-                .convertTo(PostResponse.class)
+                .convertTo(PostProjection.class)
                 .satisfies(postResponse -> {
                     assertThat(postResponse.postId()).isEqualTo(postId.get());
                     assertThat(postResponse.title()).isEqualTo(title);
@@ -154,7 +154,7 @@ class PostControllerIT extends AbstractIntegrationTest {
                 .assertThat()
                 .hasStatus(HttpStatus.OK)
                 .bodyJson()
-                .convertTo(PostResponse.class)
+                .convertTo(PostProjection.class)
                 .satisfies(resp -> {
                     assertThat(resp.content()).isEqualTo("Updated content before delete");
                     assertThat(resp.modifiedAt()).isNotNull().isInstanceOf(LocalDateTime.class);
@@ -271,7 +271,7 @@ class PostControllerIT extends AbstractIntegrationTest {
                 .hasStatus(HttpStatus.OK)
                 .hasContentType(MediaType.APPLICATION_JSON)
                 .bodyJson()
-                .convertTo(PostResponse.class)
+                .convertTo(PostProjection.class)
                 .satisfies(postResponse -> {
                     assertThat(postResponse.postId()).isEqualTo(postId.get());
                     assertThat(postResponse.title()).isEqualTo(title);
@@ -326,7 +326,7 @@ class PostControllerIT extends AbstractIntegrationTest {
                 .assertThat()
                 .hasStatus(HttpStatus.OK)
                 .bodyJson()
-                .convertTo(PostResponse.class)
+                .convertTo(PostProjection.class)
                 .satisfies(postResponse -> {
                     assertThat(postResponse.content()).isEqualTo("Updated content before delete");
                     assertThat(postResponse.published()).isTrue();

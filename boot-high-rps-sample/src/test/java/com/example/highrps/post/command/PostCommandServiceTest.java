@@ -2,10 +2,9 @@ package com.example.highrps.post.command;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.willDoNothing;
 import static org.mockito.Mockito.verify;
 
+import com.example.highrps.infrastructure.redis.DeletionMarkerHandler;
 import com.example.highrps.post.domain.events.PostCreatedEvent;
 import com.example.highrps.post.domain.events.PostDeletedEvent;
 import com.example.highrps.post.domain.events.PostUpdatedEvent;
@@ -13,7 +12,6 @@ import com.example.highrps.post.domain.requests.PostDetailsRequest;
 import com.example.highrps.post.domain.requests.TagRequest;
 import com.example.highrps.repository.redis.PostRedisRepository;
 import com.github.benmanes.caffeine.cache.Cache;
-import java.time.Duration;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -24,8 +22,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
 import tools.jackson.databind.json.JsonMapper;
 
 /**
@@ -45,10 +41,7 @@ class PostCommandServiceTest {
     private Cache<String, String> localCache;
 
     @Mock
-    private RedisTemplate<String, String> redis;
-
-    @Mock
-    private ValueOperations<String, String> valueOperations;
+    private DeletionMarkerHandler deletionMarkerHandler;
 
     @Mock
     private PostRedisRepository postRedisRepository;
@@ -116,13 +109,11 @@ class PostCommandServiceTest {
         // Arrange
         Long postId = 99003L;
 
-        given(redis.opsForValue()).willReturn(valueOperations);
-        willDoNothing().given(valueOperations).set(any(String.class), any(String.class), any(Duration.class));
-
         // Act
         postCommandService.deletePost(postId);
 
         // Assert - verify event was published
         verify(eventPublisher).publishEvent(any(PostDeletedEvent.class));
+        verify(deletionMarkerHandler).markDeleted("post", String.valueOf(postId));
     }
 }

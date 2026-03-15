@@ -36,21 +36,20 @@ public class PostCommentController {
     }
 
     @GetMapping
-    public ResponseEntity<List<PostCommentResponse>> getAllComments(@PathVariable @Positive Long postId) {
-        List<PostCommentCommandResult> results = queryService.getCommentsByPostId(postId);
-        return ResponseEntity.ok(results.stream().map(PostCommentResponse::from).toList());
+    public ResponseEntity<List<PostCommentCommandResult>> getAllComments(@PathVariable @Positive Long postId) {
+        return ResponseEntity.ok(queryService.getCommentsByPostId(postId));
     }
 
     @GetMapping("/{postCommentId}")
-    public ResponseEntity<PostCommentResponse> getComment(
+    public ResponseEntity<PostCommentCommandResult> getComment(
             @PathVariable @Positive Long postId, @PathVariable @Positive Long postCommentId) {
         PostCommentCommandResult result =
                 queryService.getCommentById(new GetPostCommentQuery(postId, PostCommentId.of(postCommentId)));
-        return ResponseEntity.ok(PostCommentResponse.from(result));
+        return ResponseEntity.ok(result);
     }
 
     @PostMapping
-    public ResponseEntity<PostCommentResponse> createComment(
+    public ResponseEntity<PostCommentCommandResult> createComment(
             @PathVariable @Positive Long postId, @RequestBody @Valid CreatePostCommentRequest request) {
         PostCommentCommandResult result = commandService.createComment(
                 new CreatePostCommentCommand(request.title(), request.content(), postId, request.published()));
@@ -60,11 +59,11 @@ public class PostCommentController {
                 .buildAndExpand(result.id())
                 .toUri();
 
-        return ResponseEntity.created(location).body(PostCommentResponse.from(result));
+        return ResponseEntity.created(location).body(result);
     }
 
     @PutMapping("/{postCommentId}")
-    public ResponseEntity<PostCommentResponse> updateComment(
+    public ResponseEntity<PostCommentCommandResult> updateComment(
             @PathVariable @Positive Long postId,
             @PathVariable @Positive Long postCommentId,
             @RequestBody @Valid UpdatePostCommentRequest request) {
@@ -73,7 +72,7 @@ public class PostCommentController {
 
         PostCommentCommandResult result =
                 queryService.getCommentById(new GetPostCommentQuery(postId, PostCommentId.of(postCommentId)));
-        return ResponseEntity.ok(PostCommentResponse.from(result));
+        return ResponseEntity.ok(result);
     }
 
     @DeleteMapping("/{postCommentId}")

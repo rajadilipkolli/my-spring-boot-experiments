@@ -1,6 +1,9 @@
 package com.example.highrps.post.query;
 
+import com.example.highrps.post.domain.PostDetailsResponse;
+import com.example.highrps.post.domain.TagResponse;
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * Projection for post read model.
@@ -14,4 +17,6 @@ public record PostProjection(
         boolean published,
         LocalDateTime publishedAt,
         LocalDateTime createdAt,
-        LocalDateTime modifiedAt) {}
+        LocalDateTime modifiedAt,
+        PostDetailsResponse details,
+        List<TagResponse> tags) {}

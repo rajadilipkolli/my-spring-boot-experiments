@@ -2,7 +2,6 @@ package com.example.highrps.post.domain.requests;
 
 import com.example.highrps.shared.IdGenerator;
 import com.fasterxml.jackson.annotation.JsonAlias;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -21,8 +20,8 @@ public record NewPostRequest(
 
         Boolean published,
         LocalDateTime publishedAt,
-        @JsonIgnore LocalDateTime createdAt,
-        @JsonIgnore LocalDateTime modifiedAt,
+        LocalDateTime createdAt,
+        LocalDateTime modifiedAt,
         @Valid @NotNull PostDetailsRequest details,
         @Valid List<TagRequest> tags)
         implements Serializable {

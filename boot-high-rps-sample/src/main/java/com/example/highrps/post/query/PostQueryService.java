@@ -2,6 +2,8 @@ package com.example.highrps.post.query;
 
 import com.example.highrps.infrastructure.cache.RequestCoalescer;
 import com.example.highrps.post.PostRedis;
+import com.example.highrps.post.domain.PostDetailsResponse;
+import com.example.highrps.post.domain.TagResponse;
 import com.example.highrps.post.domain.requests.NewPostRequest;
 import com.example.highrps.repository.redis.PostRedisRepository;
 import com.example.highrps.shared.ResourceNotFoundException;
@@ -161,7 +163,14 @@ public class PostQueryService {
                 postRedis.isPublished(),
                 postRedis.getPublishedAt(),
                 postRedis.getCreatedAt(),
-                postRedis.getModifiedAt());
+                postRedis.getModifiedAt(),
+                new PostDetailsResponse(
+                        postRedis.getDetails().detailsKey(),
+                        null,
+                        postRedis.getDetails().createdBy()),
+                postRedis.getTags().stream()
+                        .map(t -> new TagResponse(null, t.tagName(), t.tagDescription()))
+                        .toList());
     }
 
     private PostProjection fromNewPostRequest(NewPostRequest request) {
@@ -173,7 +182,12 @@ public class PostQueryService {
                 request.published() != null && request.published(),
                 request.publishedAt(),
                 request.createdAt(),
-                request.modifiedAt());
+                request.modifiedAt(),
+                new PostDetailsResponse(
+                        request.details().detailsKey(), null, request.details().createdBy()),
+                request.tags().stream()
+                        .map(t -> new TagResponse(null, t.tagName(), t.tagDescription()))
+                        .toList());
     }
 
     private PostRedis toRedis(NewPostRequest request, Long postId) {

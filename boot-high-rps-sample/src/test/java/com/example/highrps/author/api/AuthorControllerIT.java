@@ -3,17 +3,22 @@ package com.example.highrps.author.api;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
-import com.example.highrps.author.AuthorResponse;
+import com.example.highrps.author.query.AuthorProjection;
 import com.example.highrps.common.AbstractIntegrationTest;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Locale;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import tools.jackson.databind.ObjectMapper;
 
 class AuthorControllerIT extends AbstractIntegrationTest {
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @Test
     void crudAuthorResourcesAPICheck() {
@@ -48,26 +53,26 @@ class AuthorControllerIT extends AbstractIntegrationTest {
                 .hasStatus(HttpStatus.OK)
                 .hasContentType(MediaType.APPLICATION_JSON)
                 .bodyJson()
-                .convertTo(AuthorResponse.class)
-                .satisfies(authorResponse -> {
-                    assertThat(authorResponse.email()).isEqualTo(email);
-                    assertThat(authorResponse.firstName()).isEqualTo("junitState");
-                    assertThat(authorResponse.middleName()).isNull();
-                    assertThat(authorResponse.lastName()).isEqualTo("integration");
-                    assertThat(authorResponse.mobile()).isEqualTo(1234567890L);
-                    assertThat(authorResponse.registeredAt()).isNull();
-                    assertThat(authorResponse.createdAt())
+                .convertTo(AuthorProjection.class)
+                .satisfies(authorProjection -> {
+                    assertThat(authorProjection.email()).isEqualTo(email);
+                    assertThat(authorProjection.firstName()).isEqualTo("junitState");
+                    assertThat(authorProjection.middleName()).isNull();
+                    assertThat(authorProjection.lastName()).isEqualTo("integration");
+                    assertThat(authorProjection.mobile()).isEqualTo(1234567890L);
+                    assertThat(authorProjection.registeredAt()).isNull();
+                    assertThat(authorProjection.createdAt())
                             .isNotNull()
                             .isInstanceOf(LocalDateTime.class)
                             .isBefore(LocalDateTime.now());
-                    assertThat(authorResponse.modifiedAt()).isNull();
+                    assertThat(authorProjection.modifiedAt()).isNull();
                 });
 
         // Assert local cache has the key (redis may be populated asynchronously)
         String cached = localCache.getIfPresent(emailKey);
         assertThat(cached).isNotNull();
-        AuthorResponse cachedResponse = AuthorResponse.fromJson(cached);
-        assertThat(cachedResponse.middleName()).isNull();
+        AuthorProjection cachedProjection = objectMapper.readValue(cached, AuthorProjection.class);
+        assertThat(cachedProjection.middleName()).isNull();
         var redisString = authorRedisRepository.findById(emailKey).orElse(null);
         assertThat(redisString).isNotNull();
         assertThat(redisString.getMiddleName()).isNull();
@@ -93,7 +98,7 @@ class AuthorControllerIT extends AbstractIntegrationTest {
                 .assertThat()
                 .hasStatus(HttpStatus.OK)
                 .bodyJson()
-                .convertTo(AuthorResponse.class)
+                .convertTo(AuthorProjection.class)
                 .satisfies(resp -> {
                     assertThat(resp.middleName()).isEqualTo("IT");
                     assertThat(resp.firstName()).isEqualTo("junit");
@@ -110,9 +115,9 @@ class AuthorControllerIT extends AbstractIntegrationTest {
         // Verify local cache updated with new content
         String cachedAfter = localCache.getIfPresent(emailKey);
         assertThat(cachedAfter).isNotNull();
-        AuthorResponse cachedAfterResponse = AuthorResponse.fromJson(cachedAfter);
-        assertThat(cachedAfterResponse.middleName()).isEqualTo("IT");
-        assertThat(cachedAfterResponse.firstName()).isEqualTo("junit");
+        AuthorProjection cachedAfterProjection = objectMapper.readValue(cachedAfter, AuthorProjection.class);
+        assertThat(cachedAfterProjection.middleName()).isEqualTo("IT");
+        assertThat(cachedAfterProjection.firstName()).isEqualTo("junit");
         var updatedResponseFromRedis = authorRedisRepository.findById(emailKey).orElse(null);
         assertThat(updatedResponseFromRedis).isNotNull();
         assertThat(updatedResponseFromRedis.getMiddleName()).isEqualTo("IT");

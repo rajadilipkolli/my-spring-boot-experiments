@@ -2,6 +2,7 @@ package com.example.highrps.listener;
 
 import com.example.highrps.entities.PostCommentRedis;
 import com.example.highrps.infrastructure.cache.CacheKeyGenerator;
+import com.example.highrps.infrastructure.redis.DeletionMarkerHandler;
 import com.example.highrps.postcomment.command.PostCommentCommandResult;
 import com.example.highrps.postcomment.domain.PostCommentMapper;
 import com.example.highrps.postcomment.domain.PostCommentRequest;
@@ -34,18 +35,21 @@ public class PostCommentAggregatesToRedisListener {
     private final String queueKey;
     private final JsonMapper jsonMapper;
     private final PostCommentRedisRepository postCommentRedisRepository;
+    private final DeletionMarkerHandler deletionMarkerHandler;
 
     public PostCommentAggregatesToRedisListener(
             RedisTemplate<String, String> redis,
             PostCommentMapper mapper,
             @Value("${app.batch.queue-key:events:queue}") String queueKey,
             JsonMapper jsonMapper,
-            PostCommentRedisRepository postCommentRedisRepository) {
+            PostCommentRedisRepository postCommentRedisRepository,
+            DeletionMarkerHandler deletionMarkerHandler) {
         this.redis = redis;
         this.mapper = mapper;
         this.queueKey = queueKey;
         this.jsonMapper = jsonMapper;
         this.postCommentRedisRepository = postCommentRedisRepository;
+        this.deletionMarkerHandler = deletionMarkerHandler;
     }
 
     @KafkaListener(
@@ -68,8 +72,8 @@ public class PostCommentAggregatesToRedisListener {
             JsonNode node = jsonMapper.readTree(bytes);
 
             // Resilience: Detect and decode Base64 encoded JSON (Spring Modulith often does this when externalizing)
-            if (node.isTextual()) {
-                String text = node.asText();
+            if (node.isString()) {
+                String text = node.asString();
                 if (text.startsWith("eyJ")) {
                     log.info("Detected Base64 encoded JSON payload in post-comments-aggregates, decoding...");
                     try {
@@ -95,6 +99,7 @@ public class PostCommentAggregatesToRedisListener {
                 }
 
                 try {
+                    deletionMarkerHandler.markDeleted("post-comment", cacheKey);
                     String tombstoneJson = jsonMapper.writeValueAsString(
                             Map.of("id", commentId, "postId", postId, "__deleted", true, "__entity", "post-comment"));
                     redis.opsForList().leftPush(queueKey, tombstoneJson);

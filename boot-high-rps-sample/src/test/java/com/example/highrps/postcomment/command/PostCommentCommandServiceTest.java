@@ -2,11 +2,11 @@ package com.example.highrps.postcomment.command;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.willDoNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.example.highrps.post.api.PostService;
+import com.example.highrps.infrastructure.redis.DeletionMarkerHandler;
+import com.example.highrps.post.query.PostQueryService;
 import com.example.highrps.postcomment.domain.PostCommentMapper;
 import com.example.highrps.postcomment.domain.events.PostCommentCreatedEvent;
 import com.example.highrps.postcomment.domain.events.PostCommentDeletedEvent;
@@ -17,7 +17,6 @@ import com.example.highrps.postcomment.query.PostCommentQueryService;
 import com.example.highrps.repository.redis.PostCommentRedisRepository;
 import com.github.benmanes.caffeine.cache.Cache;
 import io.micrometer.core.instrument.MeterRegistry;
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import org.junit.jupiter.api.DisplayName;
@@ -26,8 +25,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
 
 /**
  * Unit tests for PostCommentCommandService focusing on event publishing.
@@ -40,7 +37,7 @@ class PostCommentCommandServiceTest {
     private PostCommentCommandService postCommentCommandService;
 
     @Mock
-    private PostService postService;
+    private PostQueryService postQueryService;
 
     @Mock
     private PostCommentQueryService postCommentQueryService;
@@ -52,10 +49,7 @@ class PostCommentCommandServiceTest {
     private Cache<String, String> localCache;
 
     @Mock
-    private RedisTemplate<String, String> redis;
-
-    @Mock
-    private ValueOperations<String, String> valueOperations;
+    private DeletionMarkerHandler deletionMarkerHandler;
 
     @Mock
     private PostCommentRedisRepository postCommentRedisRepository;
@@ -71,11 +65,11 @@ class PostCommentCommandServiceTest {
     void shouldPublishEventWhenCreatingComment() {
         // Arrange
         Long postId = 1L;
-        when(postService.existsByPostRefId(postId)).thenReturn(true);
+        when(postQueryService.exists(postId)).thenReturn(true);
         CreatePostCommentCommand command = new CreatePostCommentCommand("Title", "Content", postId, true);
 
         // Act
-        PostCommentCommandResult result = postCommentCommandService.createComment(command);
+        postCommentCommandService.createComment(command);
 
         // Assert - verify event was published
         verify(eventPublisher).publishEvent(any(PostCommentCreatedEvent.class));
@@ -113,13 +107,11 @@ class PostCommentCommandServiceTest {
         // Arrange
         Long postId = 3L;
 
-        given(redis.opsForValue()).willReturn(valueOperations);
-        willDoNothing().given(valueOperations).set(any(String.class), any(String.class), any(Duration.class));
-
         // Act
         postCommentCommandService.deleteComment(new PostCommentId(1002L), postId);
 
         // Assert - verify event was published
         verify(eventPublisher).publishEvent(any(PostCommentDeletedEvent.class));
+        verify(deletionMarkerHandler).markDeleted(any(String.class), any(String.class));
     }
 }

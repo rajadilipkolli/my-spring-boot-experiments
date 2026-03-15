@@ -2,16 +2,14 @@ package com.example.highrps.author.command;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.willDoNothing;
 import static org.mockito.Mockito.verify;
 
 import com.example.highrps.author.domain.events.AuthorCreatedEvent;
 import com.example.highrps.author.domain.events.AuthorDeletedEvent;
 import com.example.highrps.author.domain.events.AuthorUpdatedEvent;
+import com.example.highrps.infrastructure.redis.DeletionMarkerHandler;
 import com.example.highrps.repository.redis.AuthorRedisRepository;
 import com.github.benmanes.caffeine.cache.Cache;
-import java.time.Duration;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,8 +17,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
 import tools.jackson.databind.json.JsonMapper;
 
 /**
@@ -40,10 +36,7 @@ class AuthorCommandServiceTest {
     private Cache<String, String> localCache;
 
     @Mock
-    private RedisTemplate<String, String> redis;
-
-    @Mock
-    private ValueOperations<String, String> valueOperations;
+    private DeletionMarkerHandler deletionMarkerHandler;
 
     @Mock
     private AuthorRedisRepository authorRedisRepository;
@@ -55,7 +48,8 @@ class AuthorCommandServiceTest {
     @DisplayName("Should publish AuthorCreatedEvent when creating an author")
     void shouldPublishEventWhenCreatingAuthor() {
         // Arrange
-        CreateAuthorCommand command = new CreateAuthorCommand("john99001@example.com", "John", "Doe", 1234567890L);
+        CreateAuthorCommand command =
+                new CreateAuthorCommand("john99001@example.com", "John", null, "Doe", 1234567890L);
 
         // Act
         AuthorCommandResult result = authorCommandService.createAuthor(command);
@@ -73,7 +67,7 @@ class AuthorCommandServiceTest {
     void shouldPublishEventWhenUpdatingAuthor() {
         // Arrange
         String email = "jane99002@example.com";
-        UpdateAuthorCommand updateCommand = new UpdateAuthorCommand(email, "Jane", "Smith", 9876543210L);
+        UpdateAuthorCommand updateCommand = new UpdateAuthorCommand(email, "Jane", null, "Smith", 9876543210L);
 
         // Act
         AuthorCommandResult result = authorCommandService.updateAuthor(updateCommand);
@@ -92,13 +86,11 @@ class AuthorCommandServiceTest {
         // Arrange
         String email = "delete99003@example.com";
 
-        given(redis.opsForValue()).willReturn(valueOperations);
-        willDoNothing().given(valueOperations).set(any(String.class), any(String.class), any(Duration.class));
-
         // Act
         authorCommandService.deleteAuthor(email);
 
         // Verify event was published
         verify(eventPublisher).publishEvent(any(AuthorDeletedEvent.class));
+        verify(deletionMarkerHandler).markDeleted("author", email);
     }
 }

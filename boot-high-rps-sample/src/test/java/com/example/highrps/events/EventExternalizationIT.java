@@ -139,7 +139,8 @@ class EventExternalizationIT {
         ContainerTestUtils.waitForAssignment(container, partitions);
 
         // Act - Create an author (which should publish AuthorCreatedEvent)
-        CreateAuthorCommand command = new CreateAuthorCommand("test-ext@example.com", "Test", "Author", 1234567890L);
+        CreateAuthorCommand command =
+                new CreateAuthorCommand("test-ext@example.com", "Test", null, "Author", 1234567890L);
         authorCommandService.createAuthor(command);
 
         // Assert - Verify event was externalized to Kafka
@@ -165,9 +166,8 @@ class EventExternalizationIT {
     @Test
     @DisplayName("Should externalize PostCommentCreatedEvent to Kafka topic 'postcomments'")
     void shouldExternalizePostCommentCreatedEventToKafka() throws Exception {
-        // Pre-requisite: Create an author and a post so PostCommentCommandService can validate post existence
         authorCommandService.createAuthor(
-                new CreateAuthorCommand("comment-ext-author@test.com", "Comment", "Author", 9876543210L));
+                new CreateAuthorCommand("comment-ext-author@test.com", "Comment", null, "Author", 9876543210L));
         postCommandService.createPost(new CreatePostCommand(
                 54321L,
                 "Post for Comment",

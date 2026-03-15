@@ -4,13 +4,12 @@ import com.example.highrps.author.domain.events.AuthorCreatedEvent;
 import com.example.highrps.author.domain.events.AuthorDeletedEvent;
 import com.example.highrps.author.domain.events.AuthorUpdatedEvent;
 import com.example.highrps.entities.AuthorRedis;
+import com.example.highrps.infrastructure.redis.DeletionMarkerHandler;
 import com.example.highrps.repository.redis.AuthorRedisRepository;
 import com.github.benmanes.caffeine.cache.Cache;
-import java.time.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tools.jackson.databind.json.JsonMapper;
@@ -27,33 +26,32 @@ public class AuthorCommandService {
 
     private final ApplicationEventPublisher events;
     private final Cache<String, String> localCache;
-    private final RedisTemplate<String, String> redis;
     private final AuthorRedisRepository authorRedisRepository;
     private final JsonMapper jsonMapper;
+    private final DeletionMarkerHandler deletionMarkerHandler;
 
     public AuthorCommandService(
             ApplicationEventPublisher events,
             Cache<String, String> localCache,
-            RedisTemplate<String, String> redis,
             AuthorRedisRepository authorRedisRepository,
-            JsonMapper jsonMapper) {
+            JsonMapper jsonMapper,
+            DeletionMarkerHandler deletionMarkerHandler) {
         this.events = events;
         this.localCache = localCache;
-        this.redis = redis;
         this.authorRedisRepository = authorRedisRepository;
         this.jsonMapper = jsonMapper;
+        this.deletionMarkerHandler = deletionMarkerHandler;
     }
 
     public AuthorCommandResult createAuthor(CreateAuthorCommand cmd) {
-        log.info("Creating author with email: {}", cmd.email());
-
         // Publish domain event (transactional)
-        AuthorCreatedEvent event = new AuthorCreatedEvent(cmd.email(), cmd.firstName(), cmd.lastName(), cmd.mobile());
+        AuthorCreatedEvent event =
+                new AuthorCreatedEvent(cmd.email(), cmd.firstName(), cmd.middleName(), cmd.lastName(), cmd.mobile());
         events.publishEvent(event);
 
         // Build result
         AuthorCommandResult result =
-                new AuthorCommandResult(cmd.email(), cmd.firstName(), cmd.lastName(), cmd.mobile());
+                new AuthorCommandResult(cmd.email(), cmd.firstName(), cmd.middleName(), cmd.lastName(), cmd.mobile());
 
         // Eager cache update
         updateCaches(cmd.email(), result);
@@ -63,15 +61,14 @@ public class AuthorCommandService {
     }
 
     public AuthorCommandResult updateAuthor(UpdateAuthorCommand cmd) {
-        log.info("Updating author with email: {}", cmd.email());
-
         // Publish domain event
-        AuthorUpdatedEvent event = new AuthorUpdatedEvent(cmd.email(), cmd.firstName(), cmd.lastName(), cmd.mobile());
+        AuthorUpdatedEvent event =
+                new AuthorUpdatedEvent(cmd.email(), cmd.firstName(), cmd.middleName(), cmd.lastName(), cmd.mobile());
         events.publishEvent(event);
 
         // Build result
         AuthorCommandResult result =
-                new AuthorCommandResult(cmd.email(), cmd.firstName(), cmd.lastName(), cmd.mobile());
+                new AuthorCommandResult(cmd.email(), cmd.firstName(), cmd.middleName(), cmd.lastName(), cmd.mobile());
 
         // Eager cache update
         updateCaches(cmd.email(), result);
@@ -98,11 +95,7 @@ public class AuthorCommandService {
         }
 
         // 4. Mark deleted in Redis with TTL
-        try {
-            redis.opsForValue().set("deleted:authors:" + email, "1", Duration.ofSeconds(60));
-        } catch (Exception e) {
-            log.warn("Failed to mark author as deleted in Redis: {}", email, e);
-        }
+        deletionMarkerHandler.markDeleted("author", email);
 
         log.info("Author deleted successfully: {}", email);
     }
@@ -123,6 +116,7 @@ public class AuthorCommandService {
             AuthorRedis authorRedis = new AuthorRedis()
                     .setEmail(result.email())
                     .setFirstName(result.firstName())
+                    .setMiddleName(result.middleName())
                     .setLastName(result.lastName())
                     .setMobile(result.mobile());
 

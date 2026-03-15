@@ -16,12 +16,20 @@ public record AuthorRequest(
         Long mobile,
 
         @Email @NotBlank(message = "Email Can't be Blank") String email,
+        @JsonIgnore LocalDateTime registeredAt,
         @JsonIgnore LocalDateTime createdAt,
         @JsonIgnore LocalDateTime modifiedAt)
         implements Serializable {
 
-    public AuthorRequest withTimestamps(LocalDateTime createdAt, LocalDateTime modifiedAt) {
+    public AuthorRequest withTimestamps(LocalDateTime registeredAt, LocalDateTime createdAt, LocalDateTime modifiedAt) {
         return new AuthorRequest(
-                this.firstName, this.middleName, this.lastName, this.mobile, this.email, createdAt, modifiedAt);
+                this.firstName,
+                this.middleName,
+                this.lastName,
+                this.mobile,
+                this.email,
+                registeredAt,
+                createdAt,
+                modifiedAt);
     }
 }

@@ -3,7 +3,7 @@ package com.example.highrps.author.command;
 /**
  * Command to create a new author.
  */
-public record CreateAuthorCommand(String email, String firstName, String lastName, Long mobile) {
+public record CreateAuthorCommand(String email, String firstName, String middleName, String lastName, Long mobile) {
     public CreateAuthorCommand {
         if (email == null || email.isBlank()) {
             throw new IllegalArgumentException("email must not be blank");

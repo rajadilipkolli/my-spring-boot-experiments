@@ -153,18 +153,35 @@ public class AuthorQueryService {
 
     private AuthorProjection fromRedis(AuthorRedis authorRedis) {
         return new AuthorProjection(
-                authorRedis.getEmail(), authorRedis.getFirstName(), authorRedis.getLastName(), authorRedis.getMobile());
+                authorRedis.getEmail(),
+                authorRedis.getFirstName(),
+                authorRedis.getMiddleName(),
+                authorRedis.getLastName(),
+                authorRedis.getMobile(),
+                authorRedis.getRegisteredAt(),
+                authorRedis.getCreatedAt(),
+                authorRedis.getModifiedAt());
     }
 
     private AuthorProjection fromAuthorRequest(AuthorRequest request) {
-        return new AuthorProjection(request.email(), request.firstName(), request.lastName(), request.mobile());
+        return new AuthorProjection(
+                request.email(),
+                request.firstName(),
+                request.middleName(),
+                request.lastName(),
+                request.mobile(),
+                request.registeredAt(),
+                request.createdAt(),
+                request.modifiedAt());
     }
 
     private AuthorRedis toRedis(AuthorRequest request) {
         return new AuthorRedis()
                 .setEmail(request.email())
                 .setFirstName(request.firstName())
+                .setMiddleName(request.middleName())
                 .setLastName(request.lastName())
-                .setMobile(request.mobile());
+                .setMobile(request.mobile())
+                .setRegisteredAt(request.registeredAt());
     }
 }

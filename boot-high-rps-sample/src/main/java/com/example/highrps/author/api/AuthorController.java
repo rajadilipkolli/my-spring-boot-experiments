@@ -1,11 +1,16 @@
 package com.example.highrps.author.api;
 
 import com.example.highrps.author.AuthorRequest;
-import com.example.highrps.author.AuthorResponse;
+import com.example.highrps.author.command.AuthorCommandResult;
+import com.example.highrps.author.command.AuthorCommandService;
+import com.example.highrps.author.command.CreateAuthorCommand;
+import com.example.highrps.author.command.UpdateAuthorCommand;
+import com.example.highrps.author.query.AuthorProjection;
+import com.example.highrps.author.query.AuthorQuery;
+import com.example.highrps.author.query.AuthorQueryService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import java.net.URI;
-import java.time.LocalDateTime;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -15,22 +20,29 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 @RestController
 public class AuthorController {
 
-    private final AuthorService authorService;
+    private final AuthorCommandService authorCommandService;
+    private final AuthorQueryService authorQueryService;
 
-    public AuthorController(AuthorService authorService) {
-        this.authorService = authorService;
+    public AuthorController(AuthorCommandService authorCommandService, AuthorQueryService authorQueryService) {
+        this.authorCommandService = authorCommandService;
+        this.authorQueryService = authorQueryService;
     }
 
     @GetMapping("/author/{email}")
-    public ResponseEntity<AuthorResponse> getAuthorByEmail(@PathVariable String email) {
-        AuthorResponse resp = authorService.findAuthorByEmail(email);
+    public ResponseEntity<AuthorProjection> getAuthorByEmail(@PathVariable String email) {
+        AuthorProjection resp = authorQueryService.getAuthor(new AuthorQuery(email));
         return ResponseEntity.ok(resp);
     }
 
     @PostMapping(value = "/author")
-    public ResponseEntity<AuthorResponse> createAuthor(@RequestBody @Valid AuthorRequest newAuthorRequest) {
-        AuthorRequest withCreatedAt = newAuthorRequest.withTimestamps(LocalDateTime.now(), null);
-        AuthorResponse resp = authorService.saveOrUpdateAuthor(withCreatedAt);
+    public ResponseEntity<AuthorCommandResult> createAuthor(@RequestBody @Valid AuthorRequest newAuthorRequest) {
+        CreateAuthorCommand cmd = new CreateAuthorCommand(
+                newAuthorRequest.email(),
+                newAuthorRequest.firstName(),
+                newAuthorRequest.middleName(),
+                newAuthorRequest.lastName(),
+                newAuthorRequest.mobile());
+        AuthorCommandResult resp = authorCommandService.createAuthor(cmd);
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{email}")
                 .buildAndExpand(resp.email())
@@ -39,15 +51,21 @@ public class AuthorController {
     }
 
     @PutMapping(value = "/author/{email}")
-    public ResponseEntity<AuthorResponse> updateAuthor(
+    public ResponseEntity<AuthorCommandResult> updateAuthor(
             @PathVariable String email, @RequestBody @Valid AuthorRequest newAuthorRequest) {
-        AuthorResponse resp = authorService.updateAuthor(email, newAuthorRequest);
+        UpdateAuthorCommand cmd = new UpdateAuthorCommand(
+                email,
+                newAuthorRequest.firstName(),
+                newAuthorRequest.middleName(),
+                newAuthorRequest.lastName(),
+                newAuthorRequest.mobile());
+        AuthorCommandResult resp = authorCommandService.updateAuthor(cmd);
         return ResponseEntity.ok(resp);
     }
 
     @DeleteMapping("/author/{email}")
     public ResponseEntity<Void> deleteAuthor(@PathVariable @NotBlank String email) {
-        authorService.deleteAuthor(email);
+        authorCommandService.deleteAuthor(email);
         return ResponseEntity.noContent().build();
     }
 }

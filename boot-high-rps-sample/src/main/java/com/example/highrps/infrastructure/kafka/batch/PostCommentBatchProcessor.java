@@ -2,6 +2,7 @@ package com.example.highrps.infrastructure.kafka.batch;
 
 import com.example.highrps.entities.PostCommentEntity;
 import com.example.highrps.entities.PostEntity;
+import com.example.highrps.infrastructure.redis.DeletionMarkerHandler;
 import com.example.highrps.postcomment.command.PostCommentCommandResult;
 import com.example.highrps.repository.jpa.PostCommentRepository;
 import com.example.highrps.repository.jpa.PostRepository;
@@ -14,7 +15,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import tools.jackson.databind.json.JsonMapper;
@@ -23,21 +23,21 @@ import tools.jackson.databind.json.JsonMapper;
 public class PostCommentBatchProcessor implements EntityBatchProcessor {
 
     private static final Logger log = LoggerFactory.getLogger(PostCommentBatchProcessor.class);
-
     private final PostCommentRepository postCommentRepository;
+
     private final PostRepository postRepository;
     private final JsonMapper jsonMapper;
-    private final RedisTemplate<String, String> redis;
+    private final DeletionMarkerHandler deletionMarkerHandler;
 
     public PostCommentBatchProcessor(
             PostCommentRepository postCommentRepository,
             PostRepository postRepository,
             JsonMapper jsonMapper,
-            RedisTemplate<String, String> redis) {
+            DeletionMarkerHandler deletionMarkerHandler) {
         this.postCommentRepository = postCommentRepository;
         this.postRepository = postRepository;
         this.jsonMapper = jsonMapper;
-        this.redis = redis;
+        this.deletionMarkerHandler = deletionMarkerHandler;
     }
 
     @Override
@@ -54,8 +54,7 @@ public class PostCommentBatchProcessor implements EntityBatchProcessor {
                     String cacheKey = extractKey(payload);
                     if (cacheKey != null) {
                         // Skip if tombstone exists
-                        Boolean deleted = redis.hasKey("deleted:post-comments:" + cacheKey);
-                        if (Boolean.TRUE.equals(deleted)) {
+                        if (deletionMarkerHandler.isDeleted("post-comment", cacheKey)) {
                             log.debug("Skipping upsert for comment {} because recent tombstone present", cacheKey);
                             return null;
                         }

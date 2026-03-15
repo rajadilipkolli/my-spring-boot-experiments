@@ -11,7 +11,7 @@
  * <p>
  * This is a non-domain module that supports all other modules.
  */
-@org.springframework.modulith.ApplicationModule(
-        displayName = "Infrastructure",
-        type = org.springframework.modulith.ApplicationModule.Type.OPEN)
+@ApplicationModule(displayName = "Infrastructure", type = ApplicationModule.Type.OPEN)
 package com.example.highrps.infrastructure;
+
+import org.springframework.modulith.ApplicationModule;

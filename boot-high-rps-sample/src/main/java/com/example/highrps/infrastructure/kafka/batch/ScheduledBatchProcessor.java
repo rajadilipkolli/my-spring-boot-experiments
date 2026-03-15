@@ -1,5 +1,6 @@
 package com.example.highrps.infrastructure.kafka.batch;
 
+import com.example.highrps.infrastructure.redis.DeletionMarkerHandler;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -7,7 +8,6 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.BoundSetOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -26,6 +26,7 @@ public class ScheduledBatchProcessor {
     private final RedisTemplate<String, String> redis;
     private final JsonMapper jsonMapper;
     private final Map<String, EntityBatchProcessor> processorsByEntityType;
+    private final DeletionMarkerHandler deletionMarkerHandler;
 
     private final String queueKey;
     private final int batchSize;
@@ -35,11 +36,13 @@ public class ScheduledBatchProcessor {
             JsonMapper jsonMapper,
             List<EntityBatchProcessor> processors,
             @Value("${app.batch.queue-key}") String queueKey,
-            @Value("${app.batch.size}") int batchSize) {
+            @Value("${app.batch.size}") int batchSize,
+            DeletionMarkerHandler deletionMarkerHandler) {
         this.redis = redis;
         this.jsonMapper = jsonMapper;
         this.queueKey = queueKey;
         this.batchSize = batchSize;
+        this.deletionMarkerHandler = deletionMarkerHandler;
 
         // Build registry of processors by entity type
         this.processorsByEntityType =
@@ -89,20 +92,12 @@ public class ScheduledBatchProcessor {
                 // If this entity was deleted recently, skip any queued upsert that could resurrect it.
                 // Tombstones still flow through normally.
                 if (entityType != null && !isDeleted) {
-                    try {
-                        String deletedSetKey = "deleted:" + entityType + "s"; // simple pluralization
-                        BoundSetOperations<String, String> deletedSet = redis.boundSetOps(deletedSetKey);
-                        Boolean deleted = deletedSet.isMember(key);
-                        if (Boolean.TRUE.equals(deleted)) {
-                            log.debug(
-                                    "Skipping queued upsert because it is marked deleted: entity={}, key={}",
-                                    entityType,
-                                    key);
-                            continue;
-                        }
-                    } catch (Exception e) {
-                        // If Redis failed, don't silently swallow; log and continue - we'll still process the payload
-                        log.warn("Failed to consult deleted set for entity {}: {}", entityType, e.getMessage());
+                    if (deletionMarkerHandler.isDeleted(entityType, key)) {
+                        log.debug(
+                                "Skipping queued upsert because it is marked deleted: entity={}, key={}",
+                                entityType,
+                                key);
+                        continue;
                     }
                 }
 
@@ -153,20 +148,68 @@ public class ScheduledBatchProcessor {
                         entityType,
                         deletes.size(),
                         upserts.size());
+
                 if (!upserts.isEmpty()) {
-                    processor.processUpserts(upserts);
+                    try {
+                        processor.processUpserts(upserts);
+                    } catch (Exception e) {
+                        log.warn(
+                                "Batch upsert failed for entity type: {}, attempting individual processing to isolate poison pills",
+                                entityType);
+                        processUpsertsIndividually(processor, upserts);
+                    }
                 }
+
                 if (!deletes.isEmpty()) {
-                    processor.processDeletes(deletes);
+                    try {
+                        processor.processDeletes(deletes);
+                    } catch (Exception e) {
+                        log.warn(
+                                "Batch delete failed for entity type: {}, attempting individual processing",
+                                entityType);
+                        processDeletesIndividually(processor, deletes);
+                    }
                 }
             } catch (Exception e) {
-                log.error("Failed to process batch for entity type: {}, re-queuing", entityType, e);
-                // Re-queue items for this entity type to avoid data loss
-                payloadsByKey.values().stream().map(PayloadOrTombstone::payload).forEach(payload -> redis.opsForList()
-                        .leftPush(queueKey, payload));
-                throw e;
+                log.error("Unexpected error in batch processing for entity type: {}", entityType, e);
             }
         });
+    }
+
+    private void processUpsertsIndividually(EntityBatchProcessor processor, List<String> payloads) {
+        String entityType = processor.getEntityType();
+        String dlqKey = "dlq:batch:" + entityType;
+
+        for (String payload : payloads) {
+            try {
+                processor.processUpserts(List.of(payload));
+            } catch (Exception e) {
+                log.error("Failed to process individual upsert for {}, moving to DLQ: {}", entityType, payload, e);
+                try {
+                    redis.opsForList().leftPush(dlqKey, payload);
+                } catch (Exception re) {
+                    log.error("CRITICAL: Failed to push poison pill to DLQ: {}", dlqKey, re);
+                }
+            }
+        }
+    }
+
+    private void processDeletesIndividually(EntityBatchProcessor processor, List<String> keys) {
+        String entityType = processor.getEntityType();
+        String dlqKey = "dlq:batch:deletes:" + entityType;
+
+        for (String key : keys) {
+            try {
+                processor.processDeletes(List.of(key));
+            } catch (Exception e) {
+                log.error("Failed to process individual delete for {} key {}, moving to DLQ", entityType, key, e);
+                try {
+                    redis.opsForList().leftPush(dlqKey, key);
+                } catch (Exception re) {
+                    log.error("CRITICAL: Failed to push delete failure to DLQ: {}", dlqKey, re);
+                }
+            }
+        }
     }
 
     /**

@@ -1,7 +1,8 @@
 package com.example.highrps.postcomment.command;
 
 import com.example.highrps.infrastructure.cache.CacheKeyGenerator;
-import com.example.highrps.post.api.PostService;
+import com.example.highrps.infrastructure.redis.DeletionMarkerHandler;
+import com.example.highrps.post.query.PostQueryService;
 import com.example.highrps.postcomment.domain.PostCommentMapper;
 import com.example.highrps.postcomment.domain.PostCommentRequest;
 import com.example.highrps.postcomment.domain.events.PostCommentCreatedEvent;
@@ -16,11 +17,9 @@ import com.example.highrps.shared.ResourceNotFoundException;
 import com.github.benmanes.caffeine.cache.Cache;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
-import java.time.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,32 +33,32 @@ public class PostCommentCommandService {
 
     private static final Logger log = LoggerFactory.getLogger(PostCommentCommandService.class);
 
-    private final PostService postService;
+    private final PostQueryService postQueryService;
     private final PostCommentQueryService postCommentQueryService;
     private final ApplicationEventPublisher events;
     private final Cache<String, String> localCache;
-    private final RedisTemplate<String, String> redis;
     private final PostCommentRedisRepository postCommentRedisRepository;
     private final PostCommentMapper postCommentMapper;
     private final Counter eventsPublishedCounter;
     private final Counter tombstonesPublishedCounter;
+    private final DeletionMarkerHandler deletionMarkerHandler;
 
     public PostCommentCommandService(
-            PostService postService,
+            PostQueryService postQueryService,
             PostCommentQueryService postCommentQueryService,
             ApplicationEventPublisher events,
             Cache<String, String> localCache,
-            RedisTemplate<String, String> redis,
             PostCommentRedisRepository postCommentRedisRepository,
             PostCommentMapper postCommentMapper,
-            MeterRegistry meterRegistry) {
-        this.postService = postService;
+            MeterRegistry meterRegistry,
+            DeletionMarkerHandler deletionMarkerHandler) {
+        this.postQueryService = postQueryService;
         this.postCommentQueryService = postCommentQueryService;
         this.events = events;
         this.localCache = localCache;
-        this.redis = redis;
         this.postCommentRedisRepository = postCommentRedisRepository;
         this.postCommentMapper = postCommentMapper;
+        this.deletionMarkerHandler = deletionMarkerHandler;
 
         this.eventsPublishedCounter = Counter.builder("post-comments.events.published")
                 .description("Number of post comment events published")
@@ -74,7 +73,7 @@ public class PostCommentCommandService {
      */
     public PostCommentCommandResult createComment(CreatePostCommentCommand cmd) {
         // Validate post exists
-        if (!postService.existsByPostRefId(cmd.postId())) {
+        if (!postQueryService.exists(cmd.postId())) {
             throw new ResourceNotFoundException("Post not found with id: " + cmd.postId());
         }
 
@@ -165,12 +164,8 @@ public class PostCommentCommandService {
             log.warn("Failed to delete Redis entry for comment: {}", commentId.id(), e);
         }
 
-        // 4. Mark deleted in Redis with TTL
-        try {
-            redis.opsForValue().set("deleted:post-comments:" + cacheKey, "1", Duration.ofSeconds(60));
-        } catch (Exception e) {
-            log.warn("Failed to mark comment as deleted: {}", commentId.id(), e);
-        }
+        // 4. Mark deleted in Redis with TTL using unified handler
+        deletionMarkerHandler.markDeleted("post-comment", cacheKey);
 
         log.info("Deleted post comment: postId={}, commentId={}", postId, commentId.id());
     }
