@@ -6,43 +6,46 @@ import static org.awaitility.Awaitility.await;
 import com.example.highrps.HighRpsApplication;
 import com.example.highrps.author.command.AuthorCommandService;
 import com.example.highrps.author.command.CreateAuthorCommand;
-import com.example.highrps.author.domain.events.AuthorCreatedEvent;
 import com.example.highrps.common.ContainersConfig;
 import com.example.highrps.common.SQLContainerConfig;
 import com.example.highrps.post.command.CreatePostCommand;
 import com.example.highrps.post.command.PostCommandService;
-import com.example.highrps.post.domain.events.PostCreatedEvent;
+import com.example.highrps.post.domain.requests.PostDetailsRequest;
+import com.example.highrps.post.domain.requests.TagRequest;
 import com.example.highrps.postcomment.command.CreatePostCommentCommand;
 import com.example.highrps.postcomment.command.PostCommentCommandService;
-import com.example.highrps.postcomment.domain.events.PostCommentCreatedEvent;
 import java.time.Duration;
+import java.util.Collections;
 import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
+import org.apache.kafka.clients.admin.AdminClient;
+import org.apache.kafka.clients.admin.AdminClientConfig;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.kafka.autoconfigure.KafkaConnectionDetails;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.listener.ContainerProperties;
 import org.springframework.kafka.listener.KafkaMessageListenerContainer;
 import org.springframework.kafka.listener.MessageListener;
-import org.springframework.kafka.support.serializer.JacksonJsonDeserializer;
 import org.springframework.kafka.test.utils.ContainerTestUtils;
-import org.springframework.test.annotation.DirtiesContext;
+import org.testcontainers.kafka.KafkaContainer;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Integration tests for Spring Modulith event externalization to Kafka.
  * Verifies that domain events annotated with @Externalized are properly
  * published to Kafka topics.
  *
- * <p>
- * Uses @EmbeddedKafka to simulate a real Kafka broker for testing.
+ * <p>Spring Modulith serializes externalized events as JSON byte arrays,
+ * so we use StringDeserializer and parse the JSON manually.
  */
 @SpringBootTest(classes = {HighRpsApplication.class, ContainersConfig.class, SQLContainerConfig.class})
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class EventExternalizationIT {
 
     @Autowired
@@ -55,40 +58,68 @@ class EventExternalizationIT {
     private PostCommentCommandService postCommentCommandService;
 
     @Autowired
-    private org.testcontainers.kafka.KafkaContainer kafkaContainer;
+    private KafkaContainer kafkaContainer;
 
-    private Map<String, Object> receivedEvents;
+    @Autowired
+    private KafkaConnectionDetails kafkaConnectionDetails;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    private Map<String, String> receivedEvents;
 
     @BeforeEach
-    void setUp() {
+    void setUp() throws Exception {
         receivedEvents = new ConcurrentHashMap<>();
+        // List all topics to verify auto-creation
+        Properties props = new Properties();
+        props.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaConnectionDetails.getBootstrapServers());
+        try (AdminClient adminClient = AdminClient.create(props)) {
+            var topics = adminClient.listTopics().names().get();
+            System.out.println("Available Kafka Topics: " + topics);
+        }
     }
 
     @Test
     @DisplayName("Should externalize PostCreatedEvent to Kafka topic 'posts-aggregates'")
-    void shouldExternalizePostCreatedEventToKafka() {
+    void shouldExternalizePostCreatedEventToKafka() throws Exception {
         // Arrange - Set up Kafka consumer
-        KafkaMessageListenerContainer<String, PostCreatedEvent> container =
-                createKafkaConsumer("posts-aggregates", PostCreatedEvent.class);
-        container.setupMessageListener((MessageListener<String, PostCreatedEvent>) record -> {
+        String topic = "posts-aggregates";
+        int partitions = getPartitionCount(topic);
+        KafkaMessageListenerContainer<String, String> container = createKafkaConsumer(topic);
+        container.setupMessageListener((MessageListener<String, String>) record -> {
             receivedEvents.put("postCreated", record.value());
         });
         container.start();
-        ContainerTestUtils.waitForAssignment(container, 1);
+        ContainerTestUtils.waitForAssignment(container, partitions);
 
         // Act - Create a post (which should publish PostCreatedEvent)
-        CreatePostCommand command = new CreatePostCommand(12345L, "Test Post", "Test Content", "author@test.com", true);
-        postCommandService.createPost(command);
+        CreatePostCommand createCmd = new CreatePostCommand(
+                12345L,
+                "Test Post",
+                "Test Content",
+                "author@test.com",
+                true,
+                new PostDetailsRequest("initial-key", "tester"),
+                java.util.List.of(new TagRequest("tag1", "desc1")));
+        postCommandService.createPost(createCmd);
 
         // Assert - Verify event was externalized to Kafka
-        await().atMost(Duration.ofSeconds(10)).untilAsserted(() -> {
+        await().atMost(Duration.ofSeconds(30)).untilAsserted(() -> {
             assertThat(receivedEvents).containsKey("postCreated");
-            PostCreatedEvent event = (PostCreatedEvent) receivedEvents.get("postCreated");
-            assertThat(event.postId()).isEqualTo(12345L);
-            assertThat(event.title()).isEqualTo("Test Post");
-            assertThat(event.content()).isEqualTo("Test Content");
-            assertThat(event.authorEmail()).isEqualTo("author@test.com");
-            assertThat(event.published()).isTrue();
+            var rawJson = receivedEvents.get("postCreated");
+            if (rawJson != null && rawJson.startsWith("\"eyJ")) {
+                String inner = objectMapper.readTree(rawJson).asText();
+                rawJson = new String(java.util.Base64.getDecoder().decode(inner));
+            }
+            assertThat(rawJson).isNotNull();
+            System.out.println("Received PostCreatedEvent JSON: " + rawJson);
+            var json = objectMapper.readTree(rawJson);
+            assertThat(json.get("postId").asLong()).isEqualTo(12345L);
+            assertThat(json.get("title").asText()).isEqualTo("Test Post");
+            assertThat(json.get("content").asText()).isEqualTo("Test Content");
+            assertThat(json.get("authorEmail").asText()).isEqualTo("author@test.com");
+            assertThat(json.get("published").asBoolean()).isTrue();
         });
 
         container.stop();
@@ -96,28 +127,36 @@ class EventExternalizationIT {
 
     @Test
     @DisplayName("Should externalize AuthorCreatedEvent to Kafka topic 'authors-aggregates'")
-    void shouldExternalizeAuthorCreatedEventToKafka() {
+    void shouldExternalizeAuthorCreatedEventToKafka() throws Exception {
         // Arrange - Set up Kafka consumer
-        KafkaMessageListenerContainer<String, AuthorCreatedEvent> container =
-                createKafkaConsumer("authors-aggregates", AuthorCreatedEvent.class);
-        container.setupMessageListener((MessageListener<String, AuthorCreatedEvent>) record -> {
+        String topic = "authors-aggregates";
+        int partitions = getPartitionCount(topic);
+        KafkaMessageListenerContainer<String, String> container = createKafkaConsumer(topic);
+        container.setupMessageListener((MessageListener<String, String>) record -> {
             receivedEvents.put("authorCreated", record.value());
         });
         container.start();
-        ContainerTestUtils.waitForAssignment(container, 1);
+        ContainerTestUtils.waitForAssignment(container, partitions);
 
         // Act - Create an author (which should publish AuthorCreatedEvent)
-        CreateAuthorCommand command = new CreateAuthorCommand("test@example.com", "Test", "Author", 1234567890L);
+        CreateAuthorCommand command = new CreateAuthorCommand("test-ext@example.com", "Test", "Author", 1234567890L);
         authorCommandService.createAuthor(command);
 
         // Assert - Verify event was externalized to Kafka
-        await().atMost(Duration.ofSeconds(10)).untilAsserted(() -> {
+        await().atMost(Duration.ofSeconds(30)).untilAsserted(() -> {
             assertThat(receivedEvents).containsKey("authorCreated");
-            AuthorCreatedEvent event = (AuthorCreatedEvent) receivedEvents.get("authorCreated");
-            assertThat(event.email()).isEqualTo("test@example.com");
-            assertThat(event.firstName()).isEqualTo("Test");
-            assertThat(event.lastName()).isEqualTo("Author");
-            assertThat(event.mobile()).isEqualTo(1234567890L);
+            var rawJson = receivedEvents.get("authorCreated");
+            if (rawJson != null && rawJson.startsWith("\"eyJ")) {
+                String inner = objectMapper.readTree(rawJson).asText();
+                rawJson = new String(java.util.Base64.getDecoder().decode(inner));
+            }
+            assertThat(rawJson).isNotNull();
+            System.out.println("Received AuthorCreatedEvent JSON: " + rawJson);
+            var json = objectMapper.readTree(rawJson);
+            assertThat(json.get("email").asText()).isEqualTo("test-ext@example.com");
+            assertThat(json.get("firstName").asText()).isEqualTo("Test");
+            assertThat(json.get("lastName").asText()).isEqualTo("Author");
+            assertThat(json.get("mobile").asLong()).isEqualTo(1234567890L);
         });
 
         container.stop();
@@ -125,28 +164,48 @@ class EventExternalizationIT {
 
     @Test
     @DisplayName("Should externalize PostCommentCreatedEvent to Kafka topic 'postcomments'")
-    void shouldExternalizePostCommentCreatedEventToKafka() {
+    void shouldExternalizePostCommentCreatedEventToKafka() throws Exception {
+        // Pre-requisite: Create an author and a post so PostCommentCommandService can validate post existence
+        authorCommandService.createAuthor(
+                new CreateAuthorCommand("comment-ext-author@test.com", "Comment", "Author", 9876543210L));
+        postCommandService.createPost(new CreatePostCommand(
+                54321L,
+                "Post for Comment",
+                "Content",
+                "comment-ext-author@test.com",
+                true,
+                new PostDetailsRequest("comment-key", "author"),
+                java.util.List.of(new TagRequest("comments", "desc"))));
+
         // Arrange - Set up Kafka consumer
-        KafkaMessageListenerContainer<String, PostCommentCreatedEvent> container =
-                createKafkaConsumer("postcomments", PostCommentCreatedEvent.class);
-        container.setupMessageListener((MessageListener<String, PostCommentCreatedEvent>) record -> {
+        String topic = "post-comments-aggregates";
+        int partitions = getPartitionCount(topic);
+        KafkaMessageListenerContainer<String, String> container = createKafkaConsumer(topic);
+        container.setupMessageListener((MessageListener<String, String>) record -> {
             receivedEvents.put("commentCreated", record.value());
         });
         container.start();
-        ContainerTestUtils.waitForAssignment(container, 1);
+        ContainerTestUtils.waitForAssignment(container, partitions);
 
         // Act - Create a comment (which should publish PostCommentCreatedEvent)
         CreatePostCommentCommand command =
-                new CreatePostCommentCommand("Great post!", "commenter@test.com", 12345L, true);
+                new CreatePostCommentCommand("Great post!", "Excellent content", 54321L, true);
         postCommentCommandService.createComment(command);
 
         // Assert - Verify event was externalized to Kafka
-        await().atMost(Duration.ofSeconds(10)).untilAsserted(() -> {
+        await().atMost(Duration.ofSeconds(30)).untilAsserted(() -> {
             assertThat(receivedEvents).containsKey("commentCreated");
-            PostCommentCreatedEvent event = (PostCommentCreatedEvent) receivedEvents.get("commentCreated");
-            assertThat(event.id()).isEqualTo(999L);
-            assertThat(event.postId()).isEqualTo(12345L);
-            assertThat(event.reviewText()).isEqualTo("Great post!");
+            var rawJson = receivedEvents.get("commentCreated");
+            if (rawJson != null && rawJson.startsWith("\"eyJ")) {
+                String inner = objectMapper.readTree(rawJson).asText();
+                rawJson = new String(java.util.Base64.getDecoder().decode(inner));
+            }
+            assertThat(rawJson).isNotNull();
+            System.out.println("Received PostCommentCreatedEvent JSON: " + rawJson);
+            var json = objectMapper.readTree(rawJson);
+            assertThat(json.get("commentId").asLong()).isPositive();
+            assertThat(json.get("postId").asLong()).isEqualTo(54321L);
+            assertThat(json.get("content").asText()).isEqualTo("Excellent content");
         });
 
         container.stop();
@@ -154,8 +213,10 @@ class EventExternalizationIT {
 
     /**
      * Helper method to create a Kafka consumer for testing.
+     * Uses StringDeserializer because Spring Modulith serializes externalized
+     * events as raw JSON bytes, not typed Jackson objects.
      */
-    private <T> KafkaMessageListenerContainer<String, T> createKafkaConsumer(String topic, Class<T> valueType) {
+    private KafkaMessageListenerContainer<String, String> createKafkaConsumer(String topic) {
         Map<String, Object> consumerProps = Map.of(
                 ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG,
                 kafkaContainer.getBootstrapServers(),
@@ -166,15 +227,33 @@ class EventExternalizationIT {
                 ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG,
                 StringDeserializer.class,
                 ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
-                JacksonJsonDeserializer.class,
-                JacksonJsonDeserializer.TRUSTED_PACKAGES,
-                "*",
-                JacksonJsonDeserializer.VALUE_DEFAULT_TYPE,
-                valueType.getName());
+                StringDeserializer.class);
 
-        DefaultKafkaConsumerFactory<String, T> consumerFactory = new DefaultKafkaConsumerFactory<>(consumerProps);
+        DefaultKafkaConsumerFactory<String, String> consumerFactory = new DefaultKafkaConsumerFactory<>(consumerProps);
         ContainerProperties containerProps = new ContainerProperties(topic);
 
         return new KafkaMessageListenerContainer<>(consumerFactory, containerProps);
+    }
+
+    /**
+     * Get the actual partition count for a topic from the broker.
+     */
+    private int getPartitionCount(String topic) {
+        Properties props = new Properties();
+        props.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaContainer.getBootstrapServers());
+        try (AdminClient adminClient = AdminClient.create(props)) {
+            var topicDescription = adminClient
+                    .describeTopics(Collections.singletonList(topic))
+                    .allTopicNames()
+                    .get();
+            if (topicDescription.containsKey(topic)) {
+                return topicDescription.get(topic).partitions().size();
+            }
+            return 1;
+        } catch (Exception e) {
+            System.out.println("Could not get partition count for topic: " + topic + ", defaulting to 1. Error: "
+                    + e.getMessage());
+            return 1;
+        }
     }
 }

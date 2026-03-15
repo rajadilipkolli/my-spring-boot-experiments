@@ -17,7 +17,7 @@ public record PostResponse(
         PostDetailsResponse details,
         List<TagResponse> tags) {
 
-    public static final JsonMapper JSON_MAPPER = new JsonMapper();
+    private static final JsonMapper JSON_MAPPER = new JsonMapper();
 
     public static PostResponse fromJson(String cached) {
         return JSON_MAPPER.readValue(cached, PostResponse.class);
@@ -28,6 +28,21 @@ public record PostResponse(
     }
 
     public static PostResponse fromRedis(PostRedis postRedis) {
+        PostDetailsResponse detailsResponse = null;
+        if (postRedis.getDetails() != null) {
+            detailsResponse = new PostDetailsResponse(
+                    postRedis.getDetails().detailsKey(),
+                    postRedis.getCreatedAt(), // Using createdAt as heuristic
+                    postRedis.getDetails().createdBy());
+        }
+
+        List<TagResponse> tagResponses = List.of();
+        if (postRedis.getTags() != null) {
+            tagResponses = postRedis.getTags().stream()
+                    .map(t -> new TagResponse(null, t.tagName(), t.tagDescription()))
+                    .toList();
+        }
+
         return new PostResponse(
                 postRedis.getId(),
                 postRedis.getTitle(),
@@ -37,7 +52,7 @@ public record PostResponse(
                 postRedis.getCreatedAt(),
                 postRedis.getModifiedAt(),
                 postRedis.getPublishedAt(),
-                null,
-                List.of());
+                detailsResponse,
+                tagResponses);
     }
 }

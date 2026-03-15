@@ -52,19 +52,18 @@ public class AuthorAggregatesToRedisListener {
             attempts = "4",
             backOff = @BackOff(delay = 500, multiplier = 2.0),
             topicSuffixingStrategy = TopicSuffixingStrategy.SUFFIX_WITH_INDEX_VALUE)
-    public void handleAggregate(ConsumerRecord<String, AuthorRequest> record) {
+    public void handleAggregate(ConsumerRecord<String, byte[]> record) {
         try {
             String key = record.key();
-            AuthorRequest payload = record.value();
+            byte[] bytes = record.value();
             log.debug(
                     "Received authors-aggregates record: partition={}, offset={}, key={}, valueIsNull={}",
                     record.partition(),
                     record.offset(),
                     key,
-                    payload == null);
-
+                    bytes == null);
             // If payload is null -> tombstone: remove Redis key and enqueue delete marker
-            if (payload == null) {
+            if (bytes == null) {
                 try {
                     authorRedisRepository.deleteById(key);
                 } catch (Exception e) {
@@ -79,6 +78,15 @@ public class AuthorAggregatesToRedisListener {
                 }
                 return;
             }
+
+            tools.jackson.databind.JsonNode node = jsonMapper.readTree(bytes);
+            if (node.isTextual() && node.asText().startsWith("eyJ")) {
+                log.info("Detected Base64 encoded JSON payload in authors-aggregates, decoding...");
+                bytes = java.util.Base64.getDecoder().decode(node.asText());
+                node = jsonMapper.readTree(bytes);
+            }
+
+            AuthorRequest payload = jsonMapper.treeToValue(node, AuthorRequest.class);
 
             // Map AuthorRequest to AuthorResponse for Redis storage
             AuthorResponse value = mapper.mapToAuthorResponse(payload);
@@ -101,17 +109,12 @@ public class AuthorAggregatesToRedisListener {
     }
 
     @DltHandler
-    public void dlt(ConsumerRecord<String, AuthorRequest> record, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
-        AuthorRequest value = record.value();
-        log.error("Received dead-letter message: key={}, value={} from topic {}", record.key(), value, topic);
+    public void dlt(ConsumerRecord<String, byte[]> record, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
+        log.error("Received dead-letter message from topic {}. Key: {}", topic, record.key());
         // Push failed message to a simple Redis DLQ list for later inspection
         String dlqKey = "dlq:authors-aggregates";
         try {
-            if (value == null) {
-                log.warn("DLT record has null value; key={}", record.key());
-                return;
-            }
-            String payload = AuthorResponse.toJson(mapper.mapToAuthorResponse(value));
+            String payload = record.value() != null ? new String(record.value()) : "null";
             redis.opsForList().leftPush(dlqKey, payload);
         } catch (Exception e) {
             log.warn("Failed to push to DLQ: {}", dlqKey, e);

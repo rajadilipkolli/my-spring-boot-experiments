@@ -64,8 +64,23 @@ public class PostCommentQueryService {
 
     /**
      * Get comments by post ID.
+     * Checks Redis first (populated eagerly by command service), then falls back to JPA.
      */
     public List<PostCommentCommandResult> getCommentsByPostId(Long postId) {
+        // 1. Try Redis first (eager writes land here immediately)
+        try {
+            var redisComments = postCommentRedisRepository.findByPostId(postId);
+            if (redisComments != null && !redisComments.isEmpty()) {
+                log.debug("getCommentsByPostId: hit Redis for postId={}, count={}", postId, redisComments.size());
+                return redisComments.stream()
+                        .map(postCommentMapper::toResultFromRedis)
+                        .toList();
+            }
+        } catch (Exception e) {
+            log.warn("Failed to query Redis for postId={}, falling back to JPA", postId, e);
+        }
+
+        // 2. Fallback to JPA
         return postCommentMapper.toResultList(postCommentRepository.findByPostRefId(postId));
     }
 

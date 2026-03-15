@@ -1,5 +1,6 @@
 package com.example.highrps;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.modulith.core.ApplicationModules;
 import org.springframework.modulith.docs.Documenter;
@@ -9,7 +10,7 @@ import org.springframework.modulith.docs.Documenter;
  */
 class ModulithStructureTest {
 
-    ApplicationModules modules = ApplicationModules.of(HighRpsApplication.class);
+    private static final ApplicationModules MODULES = ApplicationModules.of(HighRpsApplication.class);
 
     @Test
     void verifiesModularStructure() {
@@ -17,12 +18,13 @@ class ModulithStructureTest {
         // - No cyclic dependencies between modules
         // - Proper module boundaries respected
         // - Only allowed dependencies are present
-        modules.verify();
+        MODULES.verify();
     }
 
     @Test
+    @Tag("modulith-docs")
     void documentsModuleStructure() {
         // Generates C4 and PlantUML diagrams
-        new Documenter(modules).writeDocumentation().writeIndividualModulesAsPlantUml();
+        new Documenter(MODULES).writeDocumentation().writeIndividualModulesAsPlantUml();
     }
 }

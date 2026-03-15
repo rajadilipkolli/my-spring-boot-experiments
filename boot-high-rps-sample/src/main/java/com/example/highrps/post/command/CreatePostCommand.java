@@ -1,9 +1,21 @@
 package com.example.highrps.post.command;
 
+import com.example.highrps.post.domain.requests.PostDetailsRequest;
+import com.example.highrps.post.domain.requests.TagRequest;
+import java.util.List;
+
 /**
  * Command to create a new post.
  */
-public record CreatePostCommand(Long postId, String title, String content, String authorEmail, Boolean published) {
+public record CreatePostCommand(
+        Long postId,
+        String title,
+        String content,
+        String authorEmail,
+        Boolean published,
+        PostDetailsRequest details,
+        List<TagRequest> tags) {
+
     public CreatePostCommand {
         if (postId == null) {
             throw new IllegalArgumentException("postId must not be null");

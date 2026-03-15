@@ -80,15 +80,22 @@ public class PostCommentCommandService {
 
         Long commentId = IdGenerator.generateLong();
 
-        // Publish domain event (transactional, auto-externalized to Kafka)
-        PostCommentCreatedEvent event = new PostCommentCreatedEvent(commentId, cmd.postId(), cmd.content());
+        // Build result and populate event
+        PostCommentRequest request = PostCommentRequest.fromCreateCmd(cmd, commentId);
+        PostCommentCreatedEvent event = new PostCommentCreatedEvent(
+                commentId,
+                cmd.postId(),
+                cmd.title(),
+                cmd.content(),
+                cmd.published(),
+                request.publishedAt(),
+                request.createdAt());
         events.publishEvent(event);
 
         // Increment counter
         eventsPublishedCounter.increment();
 
         // Build result
-        PostCommentRequest request = PostCommentRequest.fromCreateCmd(cmd, commentId);
         PostCommentCommandResult result = postCommentMapper.toResultFromRequest(request);
 
         // Eager cache updates
@@ -106,16 +113,23 @@ public class PostCommentCommandService {
         PostCommentCommandResult existing =
                 postCommentQueryService.getCommentById(new GetPostCommentQuery(cmd.postId(), cmd.commentId()));
 
-        // Publish domain event
-        PostCommentUpdatedEvent event =
-                new PostCommentUpdatedEvent(cmd.commentId().id(), cmd.postId(), cmd.content());
+        // Build request and populate event
+        PostCommentRequest request = PostCommentRequest.fromUpdateCmd(cmd, existing.createdAt());
+        PostCommentUpdatedEvent event = new PostCommentUpdatedEvent(
+                cmd.commentId().id(),
+                cmd.postId(),
+                cmd.title(),
+                cmd.content(),
+                cmd.published(),
+                request.publishedAt(),
+                request.createdAt(),
+                request.modifiedAt());
         events.publishEvent(event);
 
         // Increment counter
         eventsPublishedCounter.increment();
 
         // Build result
-        PostCommentRequest request = PostCommentRequest.fromUpdateCmd(cmd, existing.createdAt());
         PostCommentCommandResult result = postCommentMapper.toResultFromRequest(request);
 
         // Eager cache updates
@@ -134,7 +148,7 @@ public class PostCommentCommandService {
         var cacheKey = CacheKeyGenerator.generatePostCommentKey(postId, commentId.id());
 
         // 1. Publish tombstone event
-        events.publishEvent(new PostCommentDeletedEvent(commentId.id()));
+        events.publishEvent(new PostCommentDeletedEvent(commentId.id(), postId));
         tombstonesPublishedCounter.increment();
 
         // 2. Invalidate local cache

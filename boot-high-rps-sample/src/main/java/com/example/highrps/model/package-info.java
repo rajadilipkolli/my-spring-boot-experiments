@@ -11,7 +11,7 @@
  * moved
  * to their respective domain modules (post, author, postcomment).
  */
-@org.springframework.modulith.ApplicationModule(
-        displayName = "Model",
-        type = org.springframework.modulith.ApplicationModule.Type.OPEN)
+@ApplicationModule(displayName = "Model", type = ApplicationModule.Type.OPEN)
 package com.example.highrps.model;
+
+import org.springframework.modulith.ApplicationModule;

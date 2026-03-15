@@ -9,12 +9,17 @@ import static org.mockito.Mockito.verify;
 import com.example.highrps.post.domain.events.PostCreatedEvent;
 import com.example.highrps.post.domain.events.PostDeletedEvent;
 import com.example.highrps.post.domain.events.PostUpdatedEvent;
+import com.example.highrps.post.domain.requests.PostDetailsRequest;
+import com.example.highrps.post.domain.requests.TagRequest;
 import com.example.highrps.repository.redis.PostRedisRepository;
 import com.github.benmanes.caffeine.cache.Cache;
 import java.time.Duration;
+import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -51,12 +56,21 @@ class PostCommandServiceTest {
     @Mock
     private JsonMapper jsonMapper;
 
+    @Captor
+    private ArgumentCaptor<PostCreatedEvent> eventCaptor;
+
     @Test
     @DisplayName("Should publish PostCreatedEvent when creating a post")
     void shouldPublishEventWhenCreatingPost() {
         // Arrange
-        CreatePostCommand command =
-                new CreatePostCommand(99001L, "Test Title", "Test Content", "author@example.com", true);
+        CreatePostCommand command = new CreatePostCommand(
+                99001L,
+                "Test Title",
+                "Test Content",
+                "author@example.com",
+                true,
+                new PostDetailsRequest("key1", "user1"),
+                List.of(new TagRequest("t1", "d1")));
 
         // Act
         PostCommandResult result = postCommandService.createPost(command);
@@ -64,16 +78,26 @@ class PostCommandServiceTest {
         // Assert
         assertThat(result).isNotNull();
         assertThat(result.postId()).isEqualTo(99001L);
+        assertThat(result.title()).isEqualTo("Test Title");
 
         // Verify event was published
-        verify(eventPublisher).publishEvent(any(PostCreatedEvent.class));
+        verify(eventPublisher).publishEvent(eventCaptor.capture());
+        PostCreatedEvent event = eventCaptor.getValue();
+        assertThat(event.postId()).isEqualTo(99001L);
+        assertThat(event.title()).isEqualTo("Test Title");
     }
 
     @Test
     @DisplayName("Should publish PostUpdatedEvent when updating a post")
     void shouldPublishEventWhenUpdatingPost() {
         // Arrange
-        UpdatePostCommand updateCommand = new UpdatePostCommand(99002L, "Updated Title", "Updated Content", true);
+        UpdatePostCommand updateCommand = new UpdatePostCommand(
+                99002L,
+                "Updated Title",
+                "Updated Content",
+                true,
+                new PostDetailsRequest("key2", "user2"),
+                List.of(new TagRequest("t2", "d2")));
 
         // Act
         PostCommandResult result = postCommandService.updatePost(updateCommand);

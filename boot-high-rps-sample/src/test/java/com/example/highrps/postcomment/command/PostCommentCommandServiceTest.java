@@ -19,12 +19,11 @@ import com.github.benmanes.caffeine.cache.Cache;
 import io.micrometer.core.instrument.MeterRegistry;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Answers;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
+import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -97,6 +96,7 @@ class PostCommentCommandServiceTest {
                         "Old Title",
                         "Old Content",
                         true,
+                        OffsetDateTime.now(),
                         LocalDateTime.now(),
                         LocalDateTime.now()));
 

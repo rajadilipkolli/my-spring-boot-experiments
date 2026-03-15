@@ -1,12 +1,10 @@
 package com.example.highrps.infrastructure.kafka;
 
-import com.example.highrps.author.AuthorRequest;
-import com.example.highrps.post.domain.requests.NewPostRequest;
-import com.example.highrps.postcomment.domain.PostCommentRequest;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.common.serialization.ByteArrayDeserializer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.kafka.autoconfigure.KafkaConnectionDetails;
@@ -16,77 +14,63 @@ import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.core.KafkaAdmin;
-import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.kafka.support.serializer.JacksonJsonDeserializer;
 
 @Configuration(proxyBeanMethods = false)
 public class KafkaConfig {
 
-    // Consumer factory for NewPostRequest (used by listeners that consume typed
-    // payloads)
+    // Consumer factory for raw bytes (used by listeners that handle manual deserialization)
     @Bean
-    ConsumerFactory<String, NewPostRequest> newPostConsumerFactory(KafkaConnectionDetails kafkaConnectionDetails) {
+    ConsumerFactory<String, byte[]> newPostConsumerFactory(KafkaConnectionDetails kafkaConnectionDetails) {
         Map<String, Object> cfg = new HashMap<>();
         cfg.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaConnectionDetails.getBootstrapServers());
         cfg.put(ConsumerConfig.GROUP_ID_CONFIG, "new-posts-redis-writer");
         cfg.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-        cfg.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JacksonJsonDeserializer.class);
-        cfg.put(JacksonJsonDeserializer.TRUSTED_PACKAGES, "com.example.highrps.model.request");
-        return new DefaultKafkaConsumerFactory<>(
-                cfg, new StringDeserializer(), new JacksonJsonDeserializer<>(NewPostRequest.class));
+        cfg.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ByteArrayDeserializer.class);
+        return new DefaultKafkaConsumerFactory<>(cfg);
     }
 
     @Bean
-    ConcurrentKafkaListenerContainerFactory<String, NewPostRequest> newPostKafkaListenerContainerFactory(
-            ConsumerFactory<String, NewPostRequest> newPostConsumerFactory) {
-        var f = new ConcurrentKafkaListenerContainerFactory<String, NewPostRequest>();
+    ConcurrentKafkaListenerContainerFactory<String, byte[]> newPostKafkaListenerContainerFactory(
+            ConsumerFactory<String, byte[]> newPostConsumerFactory) {
+        var f = new ConcurrentKafkaListenerContainerFactory<String, byte[]>();
         f.setConsumerFactory(newPostConsumerFactory);
         return f;
     }
 
-    // Consumer factory for AuthorRequest (used by listeners that consume typed
-    // author payloads)
+    // Consumer factory for Author bytes
     @Bean
-    ConsumerFactory<String, AuthorRequest> authorConsumerFactory(KafkaConnectionDetails kafkaConnectionDetails) {
+    ConsumerFactory<String, byte[]> authorConsumerFactory(KafkaConnectionDetails kafkaConnectionDetails) {
         Map<String, Object> cfg = new HashMap<>();
         cfg.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaConnectionDetails.getBootstrapServers());
         cfg.put(ConsumerConfig.GROUP_ID_CONFIG, "authors-redis-writer");
         cfg.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-        cfg.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JacksonJsonDeserializer.class);
-        cfg.put(JacksonJsonDeserializer.TRUSTED_PACKAGES, "com.example.highrps.model.request");
-        return new DefaultKafkaConsumerFactory<>(
-                cfg, new StringDeserializer(), new JacksonJsonDeserializer<>(AuthorRequest.class));
+        cfg.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ByteArrayDeserializer.class);
+        return new DefaultKafkaConsumerFactory<>(cfg);
     }
 
     @Bean
-    ConcurrentKafkaListenerContainerFactory<String, AuthorRequest> authorKafkaListenerContainerFactory(
-            ConsumerFactory<String, AuthorRequest> authorConsumerFactory, KafkaTemplate<String, Object> kafkaTemplate) {
-        var f = new ConcurrentKafkaListenerContainerFactory<String, AuthorRequest>();
+    ConcurrentKafkaListenerContainerFactory<String, byte[]> authorKafkaListenerContainerFactory(
+            ConsumerFactory<String, byte[]> authorConsumerFactory) {
+        var f = new ConcurrentKafkaListenerContainerFactory<String, byte[]>();
         f.setConsumerFactory(authorConsumerFactory);
         return f;
     }
 
-    // Consumer factory for PostCommentRequest (used by listeners that consume typed
-    // comment payloads)
+    // Consumer factory for PostComment bytes
     @Bean
-    ConsumerFactory<String, PostCommentRequest> postCommentConsumerFactory(
-            KafkaConnectionDetails kafkaConnectionDetails) {
+    ConsumerFactory<String, byte[]> postCommentConsumerFactory(KafkaConnectionDetails kafkaConnectionDetails) {
         Map<String, Object> cfg = new HashMap<>();
         cfg.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaConnectionDetails.getBootstrapServers());
         cfg.put(ConsumerConfig.GROUP_ID_CONFIG, "post-comments-redis-writer");
         cfg.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-        cfg.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JacksonJsonDeserializer.class);
-        cfg.put(
-                JacksonJsonDeserializer.TRUSTED_PACKAGES,
-                "com.example.highrps.model.request,com.example.highrps.postcomment.domain");
-        return new DefaultKafkaConsumerFactory<>(
-                cfg, new StringDeserializer(), new JacksonJsonDeserializer<>(PostCommentRequest.class));
+        cfg.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ByteArrayDeserializer.class);
+        return new DefaultKafkaConsumerFactory<>(cfg);
     }
 
     @Bean
-    ConcurrentKafkaListenerContainerFactory<String, PostCommentRequest> postCommentKafkaListenerContainerFactory(
-            ConsumerFactory<String, PostCommentRequest> postCommentConsumerFactory) {
-        var f = new ConcurrentKafkaListenerContainerFactory<String, PostCommentRequest>();
+    ConcurrentKafkaListenerContainerFactory<String, byte[]> postCommentKafkaListenerContainerFactory(
+            ConsumerFactory<String, byte[]> postCommentConsumerFactory) {
+        var f = new ConcurrentKafkaListenerContainerFactory<String, byte[]>();
         f.setConsumerFactory(postCommentConsumerFactory);
         return f;
     }

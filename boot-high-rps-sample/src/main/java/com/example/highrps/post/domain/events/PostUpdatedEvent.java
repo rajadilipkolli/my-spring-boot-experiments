@@ -1,6 +1,9 @@
 package com.example.highrps.post.domain.events;
 
+import com.example.highrps.post.domain.requests.PostDetailsRequest;
+import com.example.highrps.post.domain.requests.TagRequest;
 import java.time.LocalDateTime;
+import java.util.List;
 import org.springframework.modulith.events.Externalized;
 
 /**
@@ -15,4 +18,6 @@ public record PostUpdatedEvent(
         String authorEmail,
         boolean published,
         LocalDateTime publishedAt,
-        LocalDateTime modifiedAt) {}
+        LocalDateTime modifiedAt,
+        PostDetailsRequest details,
+        List<TagRequest> tags) {}

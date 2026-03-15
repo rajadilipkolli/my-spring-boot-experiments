@@ -51,7 +51,9 @@ public class PostCommandService {
 
         // Generate timestamps
         LocalDateTime now = LocalDateTime.now();
-        LocalDateTime publishedAt = (cmd.published() != null && cmd.published()) ? now : null;
+
+        boolean isPublished = Boolean.TRUE.equals(cmd.published());
+        LocalDateTime publishedAt = isPublished ? now : null;
 
         // Publish domain event (transactional - committed with transaction)
         PostCreatedEvent event = new PostCreatedEvent(
@@ -59,9 +61,11 @@ public class PostCommandService {
                 cmd.title(),
                 cmd.content(),
                 cmd.authorEmail(),
-                cmd.published() != null && cmd.published(),
+                isPublished,
                 publishedAt,
-                now);
+                now,
+                cmd.details(),
+                cmd.tags());
         events.publishEvent(event);
 
         // Eager cache update (best effort)
@@ -70,11 +74,12 @@ public class PostCommandService {
                 cmd.title(),
                 cmd.content(),
                 cmd.authorEmail(),
-                cmd.published() != null && cmd.published(),
+                isPublished,
                 publishedAt,
                 now,
-                now // modifiedAt same as createdAt on creation
-                );
+                null, // modifiedAt should be null on creation
+                cmd.details(),
+                cmd.tags());
 
         updateCaches(cmd.postId(), result);
 
@@ -90,15 +95,20 @@ public class PostCommandService {
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime publishedAt = (cmd.published() != null && cmd.published()) ? now : null;
 
+        // Retrieve existing author email
+        String authorEmail = getAuthorEmail(cmd.postId());
+
         // Publish domain event
         PostUpdatedEvent event = new PostUpdatedEvent(
                 cmd.postId(),
                 cmd.title(),
                 cmd.content(),
-                null, // authorEmail not changed in update
+                authorEmail,
                 cmd.published() != null && cmd.published(),
                 publishedAt,
-                now);
+                now,
+                cmd.details(),
+                cmd.tags());
         events.publishEvent(event);
 
         // Eager cache update
@@ -106,11 +116,13 @@ public class PostCommandService {
                 cmd.postId(),
                 cmd.title(),
                 cmd.content(),
-                null, // Will be filled by query side
+                authorEmail,
                 cmd.published() != null && cmd.published(),
                 publishedAt,
                 createdAt,
-                now);
+                now,
+                cmd.details(),
+                cmd.tags());
 
         updateCaches(cmd.postId(), result);
 
@@ -164,7 +176,9 @@ public class PostCommandService {
                     .setContent(result.content())
                     .setPublished(result.published())
                     .setPublishedAt(result.publishedAt())
-                    .setAuthorEmail(result.authorEmail());
+                    .setAuthorEmail(result.authorEmail())
+                    .setDetails(result.details())
+                    .setTags(result.tags());
             postRedis.setCreatedAt(result.createdAt());
             postRedis.setModifiedAt(result.modifiedAt());
 
@@ -184,6 +198,18 @@ public class PostCommandService {
         } catch (Exception e) {
             log.warn("Failed to get createdAt for postId: {}, using now()", postId, e);
             return LocalDateTime.now();
+        }
+    }
+
+    private String getAuthorEmail(Long postId) {
+        try {
+            return postRedisRepository
+                    .findById(postId)
+                    .map(PostRedis::getAuthorEmail)
+                    .orElse(null);
+        } catch (Exception e) {
+            log.warn("Failed to get authorEmail for postId: {}", postId, e);
+            return null;
         }
     }
 }

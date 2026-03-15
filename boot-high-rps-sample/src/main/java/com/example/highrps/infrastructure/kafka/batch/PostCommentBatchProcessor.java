@@ -184,10 +184,11 @@ public class PostCommentBatchProcessor implements EntityBatchProcessor {
     public String extractKey(String payload) {
         try {
             var node = jsonMapper.readTree(payload);
-            long commentId = node.path("commentId").asLong(-1L);
+            // PostCommentCommandResult uses 'id' for the comment reference ID
+            long commentId = node.path("id").asLong(-1L);
             long postId = node.path("postId").asLong(-1L);
             if (commentId == -1L || postId == -1L) {
-                log.warn("Missing 'commentId' or 'postId' field in comment payload: {}", payload);
+                log.warn("Missing 'id' or 'postId' field in comment payload: {}", payload);
                 return null;
             }
             return postId + ":" + commentId;
@@ -201,7 +202,7 @@ public class PostCommentBatchProcessor implements EntityBatchProcessor {
         entity.setTitle(result.title());
         entity.setContent(result.content());
         entity.setPublished(result.published());
-        entity.setPublishedAt(null); // publishedAt not in PostCommentCommandResult
+        entity.setPublishedAt(result.publishedAt());
         entity.setModifiedAt(result.modifiedAt());
     }
 
@@ -209,7 +210,7 @@ public class PostCommentBatchProcessor implements EntityBatchProcessor {
         PostCommentEntity entity = new PostCommentEntity(result.title(), result.content(), postEntity);
         entity.setCommentRefId(result.id());
         entity.setPublished(result.published());
-        entity.setPublishedAt(null); // publishedAt not in PostCommentCommandResult
+        entity.setPublishedAt(result.publishedAt());
         entity.setCreatedAt(result.createdAt());
         entity.setModifiedAt(result.modifiedAt());
         return entity;

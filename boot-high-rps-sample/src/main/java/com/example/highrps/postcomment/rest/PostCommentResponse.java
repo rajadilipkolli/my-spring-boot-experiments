@@ -20,7 +20,7 @@ public record PostCommentResponse(
                 result.title(),
                 result.content(),
                 result.published(),
-                null, // publishedAt - not in PostCommentCommandResult
+                result.publishedAt(),
                 result.postId(),
                 result.createdAt(),
                 result.modifiedAt());
