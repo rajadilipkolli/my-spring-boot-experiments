@@ -24,6 +24,6 @@ public class ContainersConfig {
     @Bean
     @RestartScope
     MongoDBContainer mongoDBContainer() {
-        return new MongoDBContainer(DockerImageName.parse("mongo").withTag("8.2.4")).withSharding();
+        return new MongoDBContainer(DockerImageName.parse("mongo").withTag("8.2.6")).withSharding();
     }
 }
