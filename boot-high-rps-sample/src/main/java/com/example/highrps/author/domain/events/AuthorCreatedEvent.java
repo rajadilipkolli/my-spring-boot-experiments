@@ -8,4 +8,10 @@ import org.springframework.modulith.events.Externalized;
  */
 @Externalized("authors-aggregates::#{email}")
 public record AuthorCreatedEvent(
-        String email, String firstName, String middleName, String lastName, Long mobile, LocalDateTime createdAt) {}
+        String email,
+        String firstName,
+        String middleName,
+        String lastName,
+        Long mobile,
+        LocalDateTime registeredAt,
+        LocalDateTime createdAt) {}

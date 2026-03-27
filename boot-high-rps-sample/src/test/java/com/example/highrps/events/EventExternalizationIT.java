@@ -137,8 +137,9 @@ class EventExternalizationIT extends AbstractIntegrationTest {
         ContainerTestUtils.waitForAssignment(container, partitions);
 
         // Act - Create an author (which should publish AuthorCreatedEvent)
+        LocalDateTime now = LocalDateTime.now();
         CreateAuthorCommand command = new CreateAuthorCommand(
-                "test-ext@example.com", "Test", null, "Author", 1234567890L, LocalDateTime.now());
+                "test-ext@example.com", "Test", null, "Author", 1234567890L, now, now);
         authorCommandService.createAuthor(command);
 
         // Assert - Verify event was externalized to Kafka
@@ -164,8 +165,9 @@ class EventExternalizationIT extends AbstractIntegrationTest {
     @Test
     @DisplayName("Should externalize PostCommentCreatedEvent to Kafka topic 'post-comments-aggregates'")
     void shouldExternalizePostCommentCreatedEventToKafka() throws Exception {
+        LocalDateTime timestamp = LocalDateTime.now();
         authorCommandService.createAuthor(new CreateAuthorCommand(
-                "comment-ext-author@test.com", "Comment", null, "Author", 9876543210L, LocalDateTime.now()));
+                "comment-ext-author@test.com", "Comment", null, "Author", 9876543210L, timestamp, timestamp));
         postCommandService.createPost(new CreatePostCommand(
                 54321L,
                 "Post for Comment",

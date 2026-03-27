@@ -3,11 +3,7 @@ package com.example.highrps.infrastructure.kafka;
 import com.example.highrps.author.AuthorRequest;
 import com.example.highrps.post.domain.requests.NewPostRequest;
 import com.example.highrps.postcomment.domain.PostCommentRequest;
-import java.util.Base64;
-import org.apache.kafka.common.serialization.Deserializer;
-import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
-import org.apache.kafka.common.serialization.Serializer;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.kstream.Consumed;
 import org.apache.kafka.streams.kstream.KTable;
@@ -18,7 +14,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.annotation.EnableKafkaStreams;
 import org.springframework.kafka.support.serializer.JacksonJsonSerde;
-import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.json.JsonMapper;
 
 @Configuration
@@ -32,41 +27,50 @@ public class StreamsTopology {
         this.jsonMapper = jsonMapper;
     }
 
-    private <T> Serde<T> modulithCompatibleSerde(Class<T> type) {
-        JacksonJsonSerde<T> baseSerde = new JacksonJsonSerde<>(type, jsonMapper);
-        Serializer<T> serializer = baseSerde.serializer();
-
-        Deserializer<T> modulithDeserializer = (topic, data) -> {
-            if (data == null || data.length == 0) {
-                return null;
-            }
-            // Try parsing as normal JSON first
-            JsonNode node = jsonMapper.readTree(data);
-            // Check if it is a Base64-encoded string (characteristic of some Spring Modulith setups)
-            if (node.isString() && node.asString().startsWith("eyJ")) {
-                byte[] decoded = Base64.getDecoder().decode(node.asString());
-                return jsonMapper.readValue(decoded, type);
-            }
-            // Otherwise parse the node into the target type
-            return jsonMapper.treeToValue(node, type);
-        };
-
-        return Serdes.serdeFrom(serializer, modulithDeserializer);
-    }
-
     /**
      * Materialized KTable for posts: reads from posts-aggregates topic and
      * materializes to 'posts-store'
      * for interactive queries. Services can query this store to get the latest
      * state of posts.
+     *
+     * Uses byte[] deserialization to handle polymorphic events (PostCreatedEvent,
+     * PostUpdatedEvent, PostDeletedEvent) and transforms them to NewPostRequest or null
+     * for deletions.
      */
     @Bean
     public KTable<String, NewPostRequest> postsTable(StreamsBuilder kafkaStreamBuilder) {
         log.info("Building posts KTable with materialized store");
-        Serde<NewPostRequest> postSerde = modulithCompatibleSerde(NewPostRequest.class);
 
-        KTable<String, NewPostRequest> table = kafkaStreamBuilder.table(
-                "posts-aggregates", Consumed.with(Serdes.String(), postSerde), Materialized.as("posts-store"));
+        // Use ByteArray serde to handle polymorphic event types
+        KTable<String, byte[]> rawTable = kafkaStreamBuilder.table(
+                "posts-aggregates",
+                Consumed.with(Serdes.String(), Serdes.ByteArray()));
+
+        // Transform byte[] to NewPostRequest, handling deletion events
+        KTable<String, NewPostRequest> table = rawTable.mapValues((key, bytes) -> {
+            if (bytes == null) {
+                // Tombstone (null value) -> return null for deletion
+                log.debug("Received tombstone for key: {}", key);
+                return null;
+            }
+
+            try {
+                tools.jackson.databind.JsonNode node = jsonMapper.readTree(bytes);
+
+                // Check for PostDeletedEvent (only has postId field)
+                if (node.has("postId") && node.size() == 1) {
+                    log.debug("Received PostDeletedEvent for key: {}, returning null", key);
+                    return null;
+                }
+
+                // Deserialize to NewPostRequest for PostCreatedEvent/PostUpdatedEvent
+                return jsonMapper.treeToValue(node, NewPostRequest.class);
+            } catch (Exception e) {
+                log.error("Failed to deserialize post aggregate for key: {}", key, e);
+                // Return null to prevent downstream processing errors
+                return null;
+            }
+        }, Materialized.as("posts-store"));
 
         log.info("Posts KTable materialized as 'posts-store'");
         return table;
@@ -81,7 +85,7 @@ public class StreamsTopology {
     @Bean
     public KTable<String, AuthorRequest> authorsTable(StreamsBuilder kafkaStreamBuilder) {
         log.info("Building authors KTable with materialized store");
-        Serde<AuthorRequest> authorSerde = modulithCompatibleSerde(AuthorRequest.class);
+        JacksonJsonSerde<AuthorRequest> authorSerde = new JacksonJsonSerde<>(AuthorRequest.class, jsonMapper);
 
         KTable<String, AuthorRequest> table = kafkaStreamBuilder.table(
                 "authors-aggregates", Consumed.with(Serdes.String(), authorSerde), Materialized.as("authors-store"));
@@ -99,7 +103,8 @@ public class StreamsTopology {
     @Bean
     public KTable<String, PostCommentRequest> postCommentRequestKTable(StreamsBuilder kafkaStreamBuilder) {
         log.info("Building comments KTable with materialized store");
-        Serde<PostCommentRequest> postCommentSerde = modulithCompatibleSerde(PostCommentRequest.class);
+        JacksonJsonSerde<PostCommentRequest> postCommentSerde =
+                new JacksonJsonSerde<>(PostCommentRequest.class, jsonMapper);
 
         KTable<String, PostCommentRequest> table = kafkaStreamBuilder.table(
                 "post-comments-aggregates",

@@ -6,7 +6,13 @@ import java.time.LocalDateTime;
  * Command to create a new author.
  */
 public record CreateAuthorCommand(
-        String email, String firstName, String middleName, String lastName, Long mobile, LocalDateTime createdAt) {
+        String email,
+        String firstName,
+        String middleName,
+        String lastName,
+        Long mobile,
+        LocalDateTime registeredAt,
+        LocalDateTime createdAt) {
     public CreateAuthorCommand {
         if (email == null || email.isBlank()) {
             throw new IllegalArgumentException("email must not be blank");

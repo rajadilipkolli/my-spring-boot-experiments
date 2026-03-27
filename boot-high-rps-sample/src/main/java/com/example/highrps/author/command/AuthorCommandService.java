@@ -54,12 +54,25 @@ public class AuthorCommandService {
     public AuthorCommandResult createAuthor(CreateAuthorCommand cmd) {
         // Publish domain event (transactional)
         AuthorCreatedEvent event = new AuthorCreatedEvent(
-                cmd.email(), cmd.firstName(), cmd.middleName(), cmd.lastName(), cmd.mobile(), cmd.createdAt());
+                cmd.email(),
+                cmd.firstName(),
+                cmd.middleName(),
+                cmd.lastName(),
+                cmd.mobile(),
+                cmd.registeredAt(),
+                cmd.createdAt());
         events.publishEvent(event);
 
         // Build result
         AuthorCommandResult result = new AuthorCommandResult(
-                cmd.email(), cmd.firstName(), cmd.middleName(), cmd.lastName(), cmd.mobile(), cmd.createdAt(), null);
+                cmd.email(),
+                cmd.firstName(),
+                cmd.middleName(),
+                cmd.lastName(),
+                cmd.mobile(),
+                cmd.registeredAt(),
+                cmd.createdAt(),
+                null);
 
         // Eager cache update
         updateCaches(cmd.email(), result);
@@ -86,6 +99,7 @@ public class AuthorCommandService {
                 cmd.middleName(),
                 cmd.lastName(),
                 cmd.mobile(),
+                author.registeredAt(),
                 author.createdAt(),
                 cmd.modifiedAt());
         events.publishEvent(event);
@@ -97,6 +111,7 @@ public class AuthorCommandService {
                 cmd.middleName(),
                 cmd.lastName(),
                 cmd.mobile(),
+                author.registeredAt(),
                 author.createdAt(),
                 cmd.modifiedAt());
 
@@ -148,7 +163,8 @@ public class AuthorCommandService {
                     .setFirstName(result.firstName())
                     .setMiddleName(result.middleName())
                     .setLastName(result.lastName())
-                    .setMobile(result.mobile());
+                    .setMobile(result.mobile())
+                    .setRegisteredAt(result.registeredAt());
             authorRedis.setCreatedAt(result.createdAt());
             authorRedis.setModifiedAt(result.modifiedAt());
             authorRedisRepository.save(authorRedis);

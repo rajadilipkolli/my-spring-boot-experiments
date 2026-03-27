@@ -13,5 +13,6 @@ public record AuthorUpdatedEvent(
         String middleName,
         String lastName,
         Long mobile,
+        LocalDateTime registeredAt,
         LocalDateTime createdAt,
         LocalDateTime modifiedAt) {}

@@ -56,8 +56,9 @@ class AuthorCommandServiceTest {
     @DisplayName("Should publish AuthorCreatedEvent when creating an author")
     void shouldPublishEventWhenCreatingAuthor() {
         // Arrange
-        CreateAuthorCommand command =
-                new CreateAuthorCommand("john99001@example.com", "John", null, "Doe", 1234567890L, LocalDateTime.now());
+        LocalDateTime now = LocalDateTime.now();
+        CreateAuthorCommand command = new CreateAuthorCommand(
+                "john99001@example.com", "John", null, "Doe", 1234567890L, now, now);
 
         // Act
         AuthorCommandResult result = authorCommandService.createAuthor(command);

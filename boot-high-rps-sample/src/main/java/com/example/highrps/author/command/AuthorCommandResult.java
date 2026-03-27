@@ -11,5 +11,6 @@ public record AuthorCommandResult(
         String middleName,
         String lastName,
         Long mobile,
+        LocalDateTime registeredAt,
         LocalDateTime createdAt,
         LocalDateTime modifiedAt) {}

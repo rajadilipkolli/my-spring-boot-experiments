@@ -38,13 +38,15 @@ public class AuthorController {
 
     @PostMapping(value = "/author")
     public ResponseEntity<AuthorCommandResult> createAuthor(@RequestBody @Valid AuthorRequest newAuthorRequest) {
+        LocalDateTime now = LocalDateTime.now();
         CreateAuthorCommand cmd = new CreateAuthorCommand(
                 newAuthorRequest.email().toLowerCase(Locale.ROOT),
                 newAuthorRequest.firstName(),
                 newAuthorRequest.middleName(),
                 newAuthorRequest.lastName(),
                 newAuthorRequest.mobile(),
-                LocalDateTime.now());
+                now,
+                now);
         AuthorCommandResult resp = authorCommandService.createAuthor(cmd);
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{email}")
@@ -56,9 +58,8 @@ public class AuthorController {
     @PutMapping(value = "/author/{email}")
     public ResponseEntity<AuthorCommandResult> updateAuthor(
             @PathVariable String email, @RequestBody @Valid AuthorRequest newAuthorRequest) {
-        String normalizedEmail = email.toLowerCase(Locale.ROOT);
         UpdateAuthorCommand cmd = new UpdateAuthorCommand(
-                normalizedEmail,
+                email,
                 newAuthorRequest.firstName(),
                 newAuthorRequest.middleName(),
                 newAuthorRequest.lastName(),
