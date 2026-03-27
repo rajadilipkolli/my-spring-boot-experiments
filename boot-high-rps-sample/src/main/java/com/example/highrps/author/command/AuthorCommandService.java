@@ -17,6 +17,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import tools.jackson.databind.json.JsonMapper;
 
 /**
@@ -52,6 +54,12 @@ public class AuthorCommandService {
     }
 
     public AuthorCommandResult createAuthor(CreateAuthorCommand cmd) {
+
+        // Validate author doesn't already exist
+        if (authorQueryService.exists(cmd.email())) {
+            throw new IllegalArgumentException("Author already exists with email: " + cmd.email());
+        }
+
         // Publish domain event (transactional)
         AuthorCreatedEvent event = new AuthorCreatedEvent(
                 cmd.email(), cmd.firstName(), cmd.middleName(), cmd.lastName(), cmd.mobile(), cmd.createdAt());
@@ -62,7 +70,7 @@ public class AuthorCommandService {
                 cmd.email(), cmd.firstName(), cmd.middleName(), cmd.lastName(), cmd.mobile(), cmd.createdAt(), null);
 
         // Eager cache update
-        updateCaches(cmd.email(), result);
+        executeAfterCommit(() -> updateCaches(cmd.email(), result));
 
         log.info("Author created successfully: {}", cmd.email());
         return result;
@@ -101,7 +109,7 @@ public class AuthorCommandService {
                 cmd.modifiedAt());
 
         // Eager cache update
-        updateCaches(cmd.email(), result);
+        executeAfterCommit(() -> updateCaches(cmd.email(), result));
 
         log.info("Author updated successfully: {}", cmd.email());
         return result;
@@ -114,20 +122,35 @@ public class AuthorCommandService {
         // 1. Publish tombstone event
         events.publishEvent(new AuthorDeletedEvent(cacheKey));
 
-        // 2. Invalidate local cache
-        localCache.invalidate(cacheKey);
+        executeAfterCommit(() -> {
+            // 2. Invalidate local cache
+            localCache.invalidate(cacheKey);
 
-        // 3. Remove from Redis
-        try {
-            authorRedisRepository.deleteById(cacheKey);
-        } catch (Exception e) {
-            log.warn("Failed to delete Redis entry for email: {}", cacheKey, e);
-        }
+            // 3. Remove from Redis
+            try {
+                authorRedisRepository.deleteById(cacheKey);
+            } catch (Exception e) {
+                log.warn("Failed to delete Redis entry for email: {}", cacheKey, e);
+            }
 
-        // 4. Mark deleted in Redis with TTL
-        deletionMarkerHandler.markDeleted(DeletionMarkerHandler.AUTHOR, cacheKey);
+            // 4. Mark deleted in Redis with TTL
+            deletionMarkerHandler.markDeleted(DeletionMarkerHandler.AUTHOR, cacheKey);
+        });
 
         log.info("Author deleted successfully: {}", email);
+    }
+
+    private void executeAfterCommit(Runnable task) {
+        if (TransactionSynchronizationManager.isActualTransactionActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    task.run();
+                }
+            });
+        } else {
+            task.run();
+        }
     }
 
     private void updateCaches(String email, AuthorCommandResult result) {

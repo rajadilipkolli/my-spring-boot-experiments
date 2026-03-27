@@ -23,6 +23,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
  * Command service for PostComment aggregate.
@@ -99,7 +101,7 @@ public class PostCommentCommandService {
         PostCommentCommandResult result = postCommentMapper.toResultFromRequest(request);
 
         // Eager cache updates
-        updateCaches(cmd.postId(), commentId, result);
+        executeAfterCommit(() -> updateCaches(cmd.postId(), commentId, result));
 
         log.info("Created post comment: postId={}, commentId={}", cmd.postId(), commentId);
         return result;
@@ -133,7 +135,7 @@ public class PostCommentCommandService {
         PostCommentCommandResult result = postCommentMapper.toResultFromRequest(request);
 
         // Eager cache updates
-        updateCaches(cmd.postId(), cmd.commentId().id(), result);
+        executeAfterCommit(() -> updateCaches(cmd.postId(), cmd.commentId().id(), result));
 
         log.info(
                 "Updated post comment: postId={}, commentId={}",
@@ -151,24 +153,39 @@ public class PostCommentCommandService {
         events.publishEvent(new PostCommentDeletedEvent(commentId.id(), postId));
         tombstonesPublishedCounter.increment();
 
-        // 2. Invalidate local cache
-        try {
-            localCache.invalidate(cacheKey);
-        } catch (Exception e) {
-            log.warn("Failed to invalidate local cache for comment: {}", commentId.id(), e);
-        }
+        executeAfterCommit(() -> {
+            // 2. Invalidate local cache
+            try {
+                localCache.invalidate(cacheKey);
+            } catch (Exception e) {
+                log.warn("Failed to invalidate local cache for comment: {}", commentId.id(), e);
+            }
 
-        // 3. Remove from Redis
-        try {
-            postCommentRedisRepository.deleteById(cacheKey);
-        } catch (Exception e) {
-            log.warn("Failed to delete Redis entry for comment: {}", commentId.id(), e);
-        }
+            // 3. Remove from Redis
+            try {
+                postCommentRedisRepository.deleteById(cacheKey);
+            } catch (Exception e) {
+                log.warn("Failed to delete Redis entry for comment: {}", commentId.id(), e);
+            }
 
-        // 4. Mark deleted in Redis with TTL using unified handler
-        deletionMarkerHandler.markDeleted(DeletionMarkerHandler.POST_COMMENT, cacheKey);
+            // 4. Mark deleted in Redis with TTL using unified handler
+            deletionMarkerHandler.markDeleted(DeletionMarkerHandler.POST_COMMENT, cacheKey);
+        });
 
         log.info("Deleted post comment: postId={}, commentId={}", postId, commentId.id());
+    }
+
+    private void executeAfterCommit(Runnable task) {
+        if (TransactionSynchronizationManager.isActualTransactionActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    task.run();
+                }
+            });
+        } else {
+            task.run();
+        }
     }
 
     private void updateCaches(Long postId, Long commentId, PostCommentCommandResult result) {

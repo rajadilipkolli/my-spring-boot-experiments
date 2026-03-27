@@ -176,12 +176,15 @@ public class AuthorQueryService {
     }
 
     private AuthorRedis toRedis(AuthorRequest request) {
-        return new AuthorRedis()
+        AuthorRedis authorRedis = new AuthorRedis()
                 .setEmail(request.email())
                 .setFirstName(request.firstName())
                 .setMiddleName(request.middleName())
                 .setLastName(request.lastName())
                 .setMobile(request.mobile())
                 .setRegisteredAt(request.registeredAt());
+        authorRedis.setCreatedAt(request.createdAt());
+        authorRedis.setModifiedAt(request.modifiedAt());
+        return authorRedis;
     }
 }

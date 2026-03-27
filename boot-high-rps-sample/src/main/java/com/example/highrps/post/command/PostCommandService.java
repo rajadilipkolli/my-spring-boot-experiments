@@ -16,6 +16,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import tools.jackson.databind.json.JsonMapper;
 
 /**
@@ -95,7 +97,8 @@ public class PostCommandService {
                 detailsResponse,
                 tags);
 
-        updateCaches(cmd.postId(), result);
+        // Eager cache update
+        executeAfterCommit(() -> updateCaches(cmd.postId(), result));
 
         log.info("Post created successfully: {}", cmd.postId());
         return result;
@@ -151,7 +154,8 @@ public class PostCommandService {
                 detailsResponse,
                 tags);
 
-        updateCaches(cmd.postId(), result);
+        // Eager cache update
+        executeAfterCommit(() -> updateCaches(cmd.postId(), result));
 
         log.info("Post updated successfully: {}", cmd.postId());
         return result;
@@ -163,21 +167,36 @@ public class PostCommandService {
         // 1. Publish tombstone event
         events.publishEvent(new PostDeletedEvent(postId));
 
-        // 2. Invalidate local cache
-        String cacheKey = String.valueOf(postId);
-        localCache.invalidate(cacheKey);
+        executeAfterCommit(() -> {
+            // 2. Invalidate local cache
+            String cacheKey = String.valueOf(postId);
+            localCache.invalidate(cacheKey);
 
-        // 3. Remove from Redis
-        try {
-            postRedisRepository.deleteById(postId);
-        } catch (Exception e) {
-            log.warn("Failed to delete Redis entry for postId: {}", postId, e);
-        }
+            // 3. Remove from Redis
+            try {
+                postRedisRepository.deleteById(postId);
+            } catch (Exception e) {
+                log.warn("Failed to delete Redis entry for postId: {}", postId, e);
+            }
 
-        // 4. Mark deleted in Redis with TTL (prevents batch re-insertion)
-        deletionMarkerHandler.markDeleted(DeletionMarkerHandler.POST, String.valueOf(postId));
+            // 4. Mark deleted in Redis with TTL (prevents batch re-insertion)
+            deletionMarkerHandler.markDeleted(DeletionMarkerHandler.POST, String.valueOf(postId));
+        });
 
         log.info("Post deleted successfully: {}", postId);
+    }
+
+    private void executeAfterCommit(Runnable task) {
+        if (TransactionSynchronizationManager.isActualTransactionActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    task.run();
+                }
+            });
+        } else {
+            task.run();
+        }
     }
 
     private void updateCaches(Long postId, PostCommandResult result) {
