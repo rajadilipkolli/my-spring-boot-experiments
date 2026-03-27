@@ -56,8 +56,9 @@ public class AuthorController {
     @PutMapping(value = "/author/{email}")
     public ResponseEntity<AuthorCommandResult> updateAuthor(
             @PathVariable String email, @RequestBody @Valid AuthorRequest newAuthorRequest) {
+        String normalizedEmail = email.toLowerCase(Locale.ROOT);
         UpdateAuthorCommand cmd = new UpdateAuthorCommand(
-                email,
+                normalizedEmail,
                 newAuthorRequest.firstName(),
                 newAuthorRequest.middleName(),
                 newAuthorRequest.lastName(),

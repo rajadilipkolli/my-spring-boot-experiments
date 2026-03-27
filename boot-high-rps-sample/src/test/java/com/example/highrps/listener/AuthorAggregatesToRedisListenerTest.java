@@ -1,5 +1,6 @@
 package com.example.highrps.listener;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -55,8 +56,8 @@ class AuthorAggregatesToRedisListenerTest {
         verify(authorRedisRepository).save(captor.capture());
 
         AuthorRedis savedEntity = captor.getValue();
-        assert savedEntity.getEmail().equals(email);
-        assert savedEntity.getCreatedAt().equals(request.createdAt());
-        assert savedEntity.getModifiedAt().equals(request.modifiedAt());
+        assertThat(savedEntity.getEmail()).isEqualTo(email);
+        assertThat(savedEntity.getCreatedAt()).isEqualTo(request.createdAt());
+        assertThat(savedEntity.getModifiedAt()).isEqualTo(request.modifiedAt());
     }
 }
