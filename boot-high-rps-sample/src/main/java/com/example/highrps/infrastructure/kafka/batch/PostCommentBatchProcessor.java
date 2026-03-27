@@ -184,13 +184,13 @@ public class PostCommentBatchProcessor implements EntityBatchProcessor {
         try {
             var node = jsonMapper.readTree(payload);
             // PostCommentCommandResult uses 'id' for the comment reference ID
-            long commentId = node.path("id").asLong(-1L);
-            long postId = node.path("postId").asLong(-1L);
-            if (commentId == -1L || postId == -1L) {
+            String commentIdStr = node.path("id").asString();
+            String postIdStr = node.path("postId").asString();
+            if (commentIdStr.isEmpty() || postIdStr.isEmpty()) {
                 log.warn("Missing 'id' or 'postId' field in comment payload: {}", payload);
                 return null;
             }
-            return postId + ":" + commentId;
+            return postIdStr + ":" + commentIdStr;
         } catch (Exception e) {
             log.warn("Failed to extract key from comment payload", e);
             return null;

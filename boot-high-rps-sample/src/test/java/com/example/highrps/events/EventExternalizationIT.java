@@ -42,7 +42,8 @@ import tools.jackson.databind.ObjectMapper;
  * Verifies that domain events annotated with @Externalized are properly
  * published to Kafka topics.
  *
- * <p>Spring Modulith serializes externalized events as JSON byte arrays,
+ * <p>
+ * Spring Modulith serializes externalized events as JSON byte arrays,
  * so we use StringDeserializer and parse the JSON manually.
  */
 @SpringBootTest(classes = {HighRpsApplication.class, ContainersConfig.class, SQLContainerConfig.class})
@@ -109,16 +110,16 @@ class EventExternalizationIT {
             assertThat(receivedEvents).containsKey("postCreated");
             var rawJson = receivedEvents.get("postCreated");
             if (rawJson != null && rawJson.startsWith("\"eyJ")) {
-                String inner = objectMapper.readTree(rawJson).asText();
+                String inner = objectMapper.readTree(rawJson).asString();
                 rawJson = new String(java.util.Base64.getDecoder().decode(inner));
             }
             assertThat(rawJson).isNotNull();
             System.out.println("Received PostCreatedEvent JSON: " + rawJson);
             var json = objectMapper.readTree(rawJson);
             assertThat(json.get("postId").asLong()).isEqualTo(12345L);
-            assertThat(json.get("title").asText()).isEqualTo("Test Post");
-            assertThat(json.get("content").asText()).isEqualTo("Test Content");
-            assertThat(json.get("authorEmail").asText()).isEqualTo("author@test.com");
+            assertThat(json.get("title").asString()).isEqualTo("Test Post");
+            assertThat(json.get("content").asString()).isEqualTo("Test Content");
+            assertThat(json.get("authorEmail").asString()).isEqualTo("author@test.com");
             assertThat(json.get("published").asBoolean()).isTrue();
         });
 
@@ -148,15 +149,15 @@ class EventExternalizationIT {
             assertThat(receivedEvents).containsKey("authorCreated");
             var rawJson = receivedEvents.get("authorCreated");
             if (rawJson != null && rawJson.startsWith("\"eyJ")) {
-                String inner = objectMapper.readTree(rawJson).asText();
+                String inner = objectMapper.readTree(rawJson).asString();
                 rawJson = new String(java.util.Base64.getDecoder().decode(inner));
             }
             assertThat(rawJson).isNotNull();
             System.out.println("Received AuthorCreatedEvent JSON: " + rawJson);
             var json = objectMapper.readTree(rawJson);
-            assertThat(json.get("email").asText()).isEqualTo("test-ext@example.com");
-            assertThat(json.get("firstName").asText()).isEqualTo("Test");
-            assertThat(json.get("lastName").asText()).isEqualTo("Author");
+            assertThat(json.get("email").asString()).isEqualTo("test-ext@example.com");
+            assertThat(json.get("firstName").asString()).isEqualTo("Test");
+            assertThat(json.get("lastName").asString()).isEqualTo("Author");
             assertThat(json.get("mobile").asLong()).isEqualTo(1234567890L);
         });
 
@@ -197,7 +198,7 @@ class EventExternalizationIT {
             assertThat(receivedEvents).containsKey("commentCreated");
             var rawJson = receivedEvents.get("commentCreated");
             if (rawJson != null && rawJson.startsWith("\"eyJ")) {
-                String inner = objectMapper.readTree(rawJson).asText();
+                String inner = objectMapper.readTree(rawJson).asString();
                 rawJson = new String(java.util.Base64.getDecoder().decode(inner));
             }
             assertThat(rawJson).isNotNull();
@@ -205,7 +206,7 @@ class EventExternalizationIT {
             var json = objectMapper.readTree(rawJson);
             assertThat(json.get("commentId").asLong()).isPositive();
             assertThat(json.get("postId").asLong()).isEqualTo(54321L);
-            assertThat(json.get("content").asText()).isEqualTo("Excellent content");
+            assertThat(json.get("content").asString()).isEqualTo("Excellent content");
         });
 
         container.stop();

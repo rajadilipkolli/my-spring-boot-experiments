@@ -8,6 +8,7 @@ import com.example.highrps.post.domain.requests.NewPostRequest;
 import com.example.highrps.post.query.PostProjection;
 import com.example.highrps.post.query.PostQuery;
 import com.example.highrps.post.query.PostQueryService;
+import com.example.highrps.shared.IdGenerator;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import java.net.URI;
@@ -43,7 +44,7 @@ public class PostController {
     @PostMapping(value = "/posts")
     public ResponseEntity<PostCommandResult> createPost(@RequestBody @Valid NewPostRequest newPostRequest) {
         CreatePostCommand cmd = new CreatePostCommand(
-                newPostRequest.postId(),
+                newPostRequest.postId() != null ? newPostRequest.postId() : IdGenerator.generateLong(),
                 newPostRequest.title(),
                 newPostRequest.content(),
                 newPostRequest.email(),

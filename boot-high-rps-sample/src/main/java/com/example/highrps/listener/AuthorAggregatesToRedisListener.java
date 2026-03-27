@@ -102,7 +102,8 @@ public class AuthorAggregatesToRedisListener {
 
             // Enqueue payload for asynchronous DB writes
             try {
-                String jsonString = jsonMapper.writeValueAsString(payload);
+                // Use original node to preserve all fields
+                String jsonString = jsonMapper.writeValueAsString(node);
                 if (jsonString.startsWith("{")) {
                     // Add entity type for downstream processing
                     jsonString = "{\"__entity\":\"author\"," + jsonString.substring(1);

@@ -6,6 +6,7 @@ import static org.awaitility.Awaitility.await;
 import com.example.highrps.common.AbstractIntegrationTest;
 import com.example.highrps.entities.AuthorEntity;
 import com.example.highrps.post.PostRedis;
+import com.example.highrps.post.command.PostCommandResult;
 import com.example.highrps.post.domain.PostDetailsResponse;
 import com.example.highrps.post.query.PostProjection;
 import java.time.Duration;
@@ -154,7 +155,7 @@ class PostControllerIT extends AbstractIntegrationTest {
                 .assertThat()
                 .hasStatus(HttpStatus.OK)
                 .bodyJson()
-                .convertTo(PostProjection.class)
+                .convertTo(PostCommandResult.class)
                 .satisfies(resp -> {
                     assertThat(resp.content()).isEqualTo("Updated content before delete");
                     assertThat(resp.modifiedAt()).isNotNull().isInstanceOf(LocalDateTime.class);
@@ -326,7 +327,7 @@ class PostControllerIT extends AbstractIntegrationTest {
                 .assertThat()
                 .hasStatus(HttpStatus.OK)
                 .bodyJson()
-                .convertTo(PostProjection.class)
+                .convertTo(PostCommandResult.class)
                 .satisfies(postResponse -> {
                     assertThat(postResponse.content()).isEqualTo("Updated content before delete");
                     assertThat(postResponse.published()).isTrue();

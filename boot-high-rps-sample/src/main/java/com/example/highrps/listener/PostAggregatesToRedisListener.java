@@ -106,7 +106,8 @@ public class PostAggregatesToRedisListener {
 
             // Enqueue payload for asynchronous DB writes
             try {
-                String jsonString = jsonMapper.writeValueAsString(payload);
+                // Use original node to preserve all fields (like details and tags)
+                String jsonString = jsonMapper.writeValueAsString(node);
                 if (jsonString.startsWith("{")) {
                     // Add entity type for downstream processing
                     jsonString = "{\"__entity\":\"post\"," + jsonString.substring(1);

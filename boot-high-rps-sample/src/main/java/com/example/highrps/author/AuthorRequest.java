@@ -1,6 +1,5 @@
 package com.example.highrps.author;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
@@ -16,9 +15,9 @@ public record AuthorRequest(
         Long mobile,
 
         @Email @NotBlank(message = "Email Can't be Blank") String email,
-        @JsonIgnore LocalDateTime registeredAt,
-        @JsonIgnore LocalDateTime createdAt,
-        @JsonIgnore LocalDateTime modifiedAt)
+        LocalDateTime registeredAt,
+        LocalDateTime createdAt,
+        LocalDateTime modifiedAt)
         implements Serializable {
 
     public AuthorRequest withTimestamps(LocalDateTime registeredAt, LocalDateTime createdAt, LocalDateTime modifiedAt) {
