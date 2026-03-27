@@ -53,10 +53,10 @@ class BatchConfig implements JobExecutionListener {
         Step step = new StepBuilder("all-customers-step", jobRepository)
                 .allowStartIfComplete(true)
                 .<Customer, CustomerDTO>chunk(10)
+                .transactionManager(transactionManager)
                 .reader(jpaPagingItemReader)
                 .processor(getCustomerCustomerDTOItemProcessor())
                 .writer(getCustomerDTOItemWriter())
-                .transactionManager(transactionManager)
                 .faultTolerant() // tell to spring batch that this step can face errors
                 .skip(DataAccessException.class) // skip all DataAccessException
                 .skipLimit(20) // the number of times you want to skip DataAccessException.class
