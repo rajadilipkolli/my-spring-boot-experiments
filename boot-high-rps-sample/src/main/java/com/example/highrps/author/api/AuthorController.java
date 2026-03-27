@@ -70,7 +70,8 @@ public class AuthorController {
 
     @DeleteMapping("/author/{email}")
     public ResponseEntity<Void> deleteAuthor(@PathVariable @NotBlank String email) {
-        authorCommandService.deleteAuthor(email);
+        String normalizedEmail = email.toLowerCase(Locale.ROOT);
+        authorCommandService.deleteAuthor(normalizedEmail);
         return ResponseEntity.noContent().build();
     }
 }

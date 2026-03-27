@@ -13,13 +13,6 @@ import com.example.highrps.repository.redis.AuthorRedisRepository;
 import com.example.highrps.repository.redis.PostRedisRepository;
 import com.github.benmanes.caffeine.cache.Cache;
 import io.micrometer.core.instrument.MeterRegistry;
-import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Comparator;
-import java.util.stream.Stream;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,22 +36,6 @@ import tools.jackson.databind.json.JsonMapper;
 public abstract class AbstractIntegrationTest {
 
     private static final Logger log = LoggerFactory.getLogger(AbstractIntegrationTest.class);
-
-    @BeforeAll
-    static void cleanupKafkaStreamsState() {
-        // Clean up Kafka Streams state directory before tests on Windows
-        try {
-            Path stateDir = Paths.get("target", "kafka-streams-state");
-            if (Files.exists(stateDir)) {
-                log.info("Cleaning up Kafka Streams state directory: {}", stateDir);
-                try (Stream<Path> walk = Files.walk(stateDir)) {
-                    walk.sorted(Comparator.reverseOrder()).map(Path::toFile).forEach(File::delete);
-                }
-            }
-        } catch (Exception e) {
-            log.warn("Failed to clean up Kafka Streams state directory", e);
-        }
-    }
 
     @Autowired
     protected MockMvcTester mockMvcTester;
