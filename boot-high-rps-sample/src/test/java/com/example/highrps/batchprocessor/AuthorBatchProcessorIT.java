@@ -62,8 +62,8 @@ class AuthorBatchProcessorIT extends AbstractIntegrationTest {
                 "{\"firstName\":\"Tomb\",\"middleName\":null,\"lastName\":\"Stone\",\"mobile\":1111111111,\"email\":\""
                         + email + "\"}";
 
-        // mark tombstone in Redis
-        redisTemplate.opsForValue().set("deleted:authors:" + email, "1", Duration.ofSeconds(60));
+        // mark tombstone in Redis with unified key format
+        redisTemplate.opsForValue().set("deleted:author:" + email, "1", Duration.ofSeconds(60));
 
         authorBatchProcessor.processUpserts(List.of(payload));
 

@@ -7,8 +7,13 @@ import com.example.highrps.common.AbstractIntegrationTest;
 import com.example.highrps.entities.AuthorEntity;
 import com.example.highrps.entities.PostDetailsEntity;
 import com.example.highrps.entities.PostEntity;
+import com.example.highrps.post.PostRedis;
+import com.example.highrps.post.domain.PostDetailsResponse;
+import com.example.highrps.postcomment.command.PostCommentCommandResult;
 import com.example.highrps.shared.IdGenerator;
 import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.List;
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,10 +26,6 @@ class PostCommentControllerIT extends AbstractIntegrationTest {
 
     @BeforeEach
     void setUp() {
-        // Clean up repositories before each test
-        postCommentRepository.deleteAll();
-        postRepository.deleteAll();
-        authorRepository.deleteAll();
         // Create an author
         AuthorEntity author = new AuthorEntity()
                 .setEmail("comment-test@example.com")
@@ -38,6 +39,18 @@ class PostCommentControllerIT extends AbstractIntegrationTest {
         postEntity.setDetails(postDetailsEntity);
         author.addPost(postEntity);
         AuthorEntity authorEntity = authorRepository.save(author);
+        // saving to redis such that getPost will return data
+        PostRedis postRedis = new PostRedis()
+                .setId(postEntity.getPostRefId())
+                .setTitle(postEntity.getTitle())
+                .setContent(postEntity.getContent())
+                .setPublished(postEntity.isPublished())
+                .setPublishedAt(postEntity.getPublishedAt())
+                .setAuthorEmail(authorEntity.getEmail())
+                .setDetails(new PostDetailsResponse(
+                        postDetailsEntity.getDetailsKey(), LocalDateTime.now(), postDetailsEntity.getCreatedBy()))
+                .setTags(List.of());
+        postRedisRepository.save(postRedis);
         postId = authorEntity.getPostEntities().getFirst().getPostRefId();
     }
 
@@ -61,9 +74,9 @@ class PostCommentControllerIT extends AbstractIntegrationTest {
                 .hasContentType(MediaType.APPLICATION_JSON)
                 .containsHeader("Location")
                 .bodyJson()
-                .convertTo(PostCommentResponse.class)
+                .convertTo(PostCommentCommandResult.class)
                 .satisfies(response -> {
-                    assertThat(response.commentId()).isNotNull();
+                    assertThat(response.id()).isNotNull();
                     assertThat(response.title()).isEqualTo("Great post!");
                     assertThat(response.content()).isEqualTo("This is a very insightful comment.");
                     assertThat(response.published()).isTrue();
@@ -98,8 +111,8 @@ class PostCommentControllerIT extends AbstractIntegrationTest {
                 .assertThat()
                 .hasStatus(HttpStatus.CREATED)
                 .bodyJson()
-                .convertTo(PostCommentResponse.class)
-                .satisfies(response -> commentIdHolder[0] = response.commentId());
+                .convertTo(PostCommentCommandResult.class)
+                .satisfies(response -> commentIdHolder[0] = response.id());
 
         Long commentId = commentIdHolder[0];
 
@@ -112,9 +125,9 @@ class PostCommentControllerIT extends AbstractIntegrationTest {
                 .hasStatus(HttpStatus.OK)
                 .hasContentType(MediaType.APPLICATION_JSON)
                 .bodyJson()
-                .convertTo(PostCommentResponse.class)
+                .convertTo(PostCommentCommandResult.class)
                 .satisfies(response -> {
-                    assertThat(response.commentId()).isEqualTo(commentId);
+                    assertThat(response.id()).isEqualTo(commentId);
                     assertThat(response.title()).isEqualTo("Test Comment");
                     assertThat(response.content()).isEqualTo("Test content");
                     assertThat(response.published()).isFalse();
@@ -176,7 +189,7 @@ class PostCommentControllerIT extends AbstractIntegrationTest {
                         .hasStatus(HttpStatus.OK)
                         .hasContentType(MediaType.APPLICATION_JSON)
                         .bodyJson()
-                        .convertTo(InstanceOfAssertFactories.list(PostCommentResponse.class))
+                        .convertTo(InstanceOfAssertFactories.list(PostCommentCommandResult.class))
                         .hasSize(2));
     }
 
@@ -199,8 +212,8 @@ class PostCommentControllerIT extends AbstractIntegrationTest {
                 .assertThat()
                 .hasStatus(HttpStatus.CREATED)
                 .bodyJson()
-                .convertTo(PostCommentResponse.class)
-                .satisfies(response -> commentIdHolder[0] = response.commentId());
+                .convertTo(PostCommentCommandResult.class)
+                .satisfies(response -> commentIdHolder[0] = response.id());
 
         Long commentId = commentIdHolder[0];
 
@@ -220,9 +233,9 @@ class PostCommentControllerIT extends AbstractIntegrationTest {
                 .assertThat()
                 .hasStatus(HttpStatus.OK)
                 .bodyJson()
-                .convertTo(PostCommentResponse.class)
+                .convertTo(PostCommentCommandResult.class)
                 .satisfies(response -> {
-                    assertThat(response.commentId()).isEqualTo(commentId);
+                    assertThat(response.id()).isEqualTo(commentId);
                     assertThat(response.title()).isEqualTo("Updated Title");
                     assertThat(response.content()).isEqualTo("Updated content");
                     assertThat(response.published()).isTrue();
@@ -264,8 +277,8 @@ class PostCommentControllerIT extends AbstractIntegrationTest {
                 .assertThat()
                 .hasStatus(HttpStatus.CREATED)
                 .bodyJson()
-                .convertTo(PostCommentResponse.class)
-                .satisfies(response -> commentIdHolder[0] = response.commentId());
+                .convertTo(PostCommentCommandResult.class)
+                .satisfies(response -> commentIdHolder[0] = response.id());
 
         Long commentId = commentIdHolder[0];
 
@@ -321,8 +334,8 @@ class PostCommentControllerIT extends AbstractIntegrationTest {
                 .assertThat()
                 .hasStatus(HttpStatus.CREATED)
                 .bodyJson()
-                .convertTo(PostCommentResponse.class)
-                .satisfies(response -> commentIdHolder[0] = response.commentId());
+                .convertTo(PostCommentCommandResult.class)
+                .satisfies(response -> commentIdHolder[0] = response.id());
 
         Long commentId = commentIdHolder[0];
 

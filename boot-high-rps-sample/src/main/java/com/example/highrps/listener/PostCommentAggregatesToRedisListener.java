@@ -1,9 +1,13 @@
 package com.example.highrps.listener;
 
+import com.example.highrps.entities.PostCommentRedis;
+import com.example.highrps.infrastructure.cache.CacheKeyGenerator;
+import com.example.highrps.infrastructure.redis.DeletionMarkerHandler;
+import com.example.highrps.postcomment.command.PostCommentCommandResult;
 import com.example.highrps.postcomment.domain.PostCommentMapper;
 import com.example.highrps.postcomment.domain.PostCommentRequest;
-import com.example.highrps.postcomment.domain.PostCommentResult;
 import com.example.highrps.repository.redis.PostCommentRedisRepository;
+import java.util.Base64;
 import java.util.Map;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.slf4j.Logger;
@@ -18,6 +22,7 @@ import org.springframework.kafka.retrytopic.TopicSuffixingStrategy;
 import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.json.JsonMapper;
 
 @Component
@@ -30,18 +35,21 @@ public class PostCommentAggregatesToRedisListener {
     private final String queueKey;
     private final JsonMapper jsonMapper;
     private final PostCommentRedisRepository postCommentRedisRepository;
+    private final DeletionMarkerHandler deletionMarkerHandler;
 
     public PostCommentAggregatesToRedisListener(
             RedisTemplate<String, String> redis,
             PostCommentMapper mapper,
             @Value("${app.batch.queue-key:events:queue}") String queueKey,
             JsonMapper jsonMapper,
-            PostCommentRedisRepository postCommentRedisRepository) {
+            PostCommentRedisRepository postCommentRedisRepository,
+            DeletionMarkerHandler deletionMarkerHandler) {
         this.redis = redis;
         this.mapper = mapper;
         this.queueKey = queueKey;
         this.jsonMapper = jsonMapper;
         this.postCommentRedisRepository = postCommentRedisRepository;
+        this.deletionMarkerHandler = deletionMarkerHandler;
     }
 
     @KafkaListener(
@@ -52,80 +60,100 @@ public class PostCommentAggregatesToRedisListener {
             attempts = "4",
             backOff = @BackOff(delay = 500, multiplier = 2.0),
             topicSuffixingStrategy = TopicSuffixingStrategy.SUFFIX_WITH_INDEX_VALUE)
-    public void handleAggregate(ConsumerRecord<String, PostCommentRequest> record) {
-        // Log record metadata early to diagnose tombstone timing issues
+    public void handleAggregate(ConsumerRecord<String, byte[]> record) {
         try {
-            String cacheKey = record.key();
-            PostCommentRequest payload = record.value();
-            log.debug(
-                    "Received post-comments-aggregates record: partition={}, offset={}, cacheKey={}, valueIsNull={}",
-                    record.partition(),
-                    record.offset(),
-                    cacheKey,
-                    payload == null);
+            byte[] bytes = record.value();
+            if (bytes == null) {
+                log.warn("Received null (tombstone) payload in post-comments-aggregates for key: {}", record.key());
+                // Handle tombstone if needed, but usually we handle it via Deleted events or record.key()
+                return;
+            }
 
-            // If payload is null -> tombstone: remove Redis cacheKey and enqueue delete
-            // marker
-            if (payload == null) {
+            JsonNode node = jsonMapper.readTree(bytes);
+
+            // Resilience: Detect and decode Base64 encoded JSON (Spring Modulith often does this when externalizing)
+            if (node.isString()) {
+                String text = node.asString();
+                if (text.startsWith("eyJ")) {
+                    log.info("Detected Base64 encoded JSON payload in post-comments-aggregates, decoding...");
+                    try {
+                        bytes = Base64.getDecoder().decode(text);
+                        node = jsonMapper.readTree(bytes);
+                    } catch (Exception e) {
+                        log.warn("Failed to decode base64 node: {}", text.substring(0, Math.min(text.length(), 20)), e);
+                    }
+                }
+            }
+
+            // Check for Delete event (no content field)
+            if (!node.has("content") && node.has("commentId")) {
+                long commentId = node.get("commentId").asLong();
+                long postId = node.get("postId").asLong();
+                String cacheKey = CacheKeyGenerator.generatePostCommentKey(postId, commentId);
+                log.info("Processing DELETE event for comment: {}", cacheKey);
+
                 try {
-                    // remove repository-backed entry
                     postCommentRedisRepository.deleteById(cacheKey);
                 } catch (Exception e) {
-                    log.warn("Failed to delete repository entry for tombstone cacheKey: {}", cacheKey, e);
+                    log.warn("Failed to delete Redis entry: {}", cacheKey, e);
                 }
+
                 try {
+                    deletionMarkerHandler.markDeleted("post-comment", cacheKey);
                     String tombstoneJson = jsonMapper.writeValueAsString(
-                            Map.of("id", cacheKey, "__deleted", true, "__entity", "post-comment"));
+                            Map.of("id", commentId, "postId", postId, "__deleted", true, "__entity", "post-comment"));
                     redis.opsForList().leftPush(queueKey, tombstoneJson);
                 } catch (Exception e) {
-                    log.error("Failed to enqueue tombstone marker for cacheKey: {}, may lose durability", cacheKey, e);
+                    log.error("Failed to enqueue delete marker: {}", cacheKey, e);
                 }
                 return;
             }
 
-            // Map PostCommentRequest to PostCommentResult for Redis storage
-            PostCommentResult value = mapper.toResultFromRequest(payload);
-            var jsonString = mapper.toJson(value);
-            if (jsonString.startsWith("{")) {
-                // Add entity type for downstream processing
-                jsonString = "{\"__entity\":\"post-comment\"," + jsonString.substring(1);
+            // Created or Updated event
+            PostCommentRequest request = jsonMapper.treeToValue(node, PostCommentRequest.class);
+            if (request == null || request.commentId() == null) {
+                log.error("Failed to parse PostCommentRequest from node: {}", node);
+                return;
             }
 
-            // Update Redis repository
-            try {
-                postCommentRedisRepository.save(mapper.toRedis(payload));
-            } catch (Exception e) {
-                log.warn("Failed to update Redis repository for cacheKey: {}", cacheKey, e);
+            PostCommentCommandResult result = mapper.toResultFromRequest(request);
+            String jsonToEnqueue = mapper.toJson(result);
+            if (jsonToEnqueue.startsWith("{")) {
+                jsonToEnqueue = "{\"__entity\":\"post-comment\"," + jsonToEnqueue.substring(1);
             }
 
-            // Enqueue the same payload for asynchronous DB writes
+            // 1. Update Redis repository
             try {
-                redis.opsForList().leftPush(queueKey, jsonString);
+                PostCommentRedis redisEntity = mapper.toRedis(request);
+                postCommentRedisRepository.save(redisEntity);
             } catch (Exception e) {
-                log.error("Failed to enqueue payload for DB write, cacheKey: {}, may lose durability", cacheKey, e);
+                log.warn("Failed to sync comment to Redis: {}", request.commentId(), e);
             }
+
+            // 2. Enqueue for JPA Batch Persistence
+            try {
+                log.info("Enqueuing post-comment for DB write: id={}", request.commentId());
+                redis.opsForList().leftPush(queueKey, jsonToEnqueue);
+            } catch (Exception e) {
+                log.error("Failed to enqueue comment for DB write: {}", request.commentId(), e);
+                throw e;
+            }
+
         } catch (Exception e) {
-            log.error("Unhandled exception in handleAggregate", e);
-            throw e;
+            log.error("Failed to process post-comment aggregate event", e);
+            throw new RuntimeException("Event processing failed", e);
         }
     }
 
     @DltHandler
-    public void dlt(
-            ConsumerRecord<String, PostCommentRequest> record, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
-        log.error("Received dead-letter message : {} from topic {}", record.value(), topic);
-        // Push failed message to a simple Redis DLQ list for later inspection
-        String dlqKey = "dlq:post-comments-aggregates";
+    public void dlt(ConsumerRecord<String, byte[]> record, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
+        log.error("Message sent to DLT from topic {}. Key: {}", topic, record.key());
         try {
-            PostCommentRequest commentRequest = record.value();
-            if (commentRequest == null) {
-                log.warn("DLT record has null value; key={}", record.key());
-                return;
-            }
-            String payload = mapper.toJson(mapper.toResultFromRequest(commentRequest));
+            String dlqKey = "dlq:post-comments-aggregates";
+            String payload = record.value() != null ? new String(record.value()) : "null";
             redis.opsForList().leftPush(dlqKey, payload);
         } catch (Exception e) {
-            log.warn("Failed to push to DLQ: {}", dlqKey, e);
+            log.warn("Failed to push to DLQ", e);
         }
     }
 }

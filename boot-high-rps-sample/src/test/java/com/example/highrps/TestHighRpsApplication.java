@@ -4,7 +4,7 @@ import com.example.highrps.common.ContainersConfig;
 import com.example.highrps.common.SQLContainerConfig;
 import org.springframework.boot.SpringApplication;
 
-class TestHighRpsApplication {
+public class TestHighRpsApplication {
 
     public static void main(String[] args) {
         SpringApplication.from(HighRpsApplication::main)

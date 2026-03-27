@@ -20,6 +20,7 @@
         <springdoc-openapi.version>3.0.2</springdoc-openapi.version>
         <mapstruct.version>1.6.3</mapstruct.version>
         <datasource-micrometer-boot.version>2.2.0</datasource-micrometer-boot.version>
+        <spring-modulith.version>2.0.5</spring-modulith.version>
 
         <project.testresult.directory>${project.build.directory}/test-results</project.testresult.directory>
         <spotless.version>3.4.0</spotless.version>
@@ -118,6 +119,21 @@
             <version>${springdoc-openapi.version}</version>
         </dependency>
 
+        <!-- Moduliths Starts -->
+        <dependency>
+            <groupId>org.springframework.modulith</groupId>
+            <artifactId>spring-modulith-starter-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.modulith</groupId>
+            <artifactId>spring-modulith-starter-jpa</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.modulith</groupId>
+            <artifactId>spring-modulith-events-kafka</artifactId>
+        </dependency>
+        <!-- Moduliths Ends -->
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-webmvc-test</artifactId>
@@ -169,7 +185,24 @@
             <version>2.2.4</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.springframework.modulith</groupId>
+            <artifactId>spring-modulith-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.modulith</groupId>
+                <artifactId>spring-modulith-bom</artifactId>
+                <version>${spring-modulith.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <build>
         <plugins>
@@ -234,7 +267,6 @@
                 <artifactId>maven-failsafe-plugin</artifactId>
                 <version>${maven-failsafe-plugin.version}</version>
                 <configuration>
-                    <classesDirectory>${project.build.outputDirectory}</classesDirectory>
                     <runOrder>alphabetical</runOrder>
                     <reportsDirectory>${junit.itReportFolder}</reportsDirectory>
                     <includes>
