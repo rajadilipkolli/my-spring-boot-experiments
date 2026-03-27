@@ -1,7 +1,7 @@
 name: boot-strategy-plugin
 services:
     tempo:
-        image: grafana/tempo:2.10.2
+        image: grafana/tempo:2.10.3
         extra_hosts: ['host.docker.internal:host-gateway']
         container_name: tempo
         command: [ "-config.file=/etc/tempo.yaml" ]
@@ -23,7 +23,7 @@ services:
             start_period: 30s
 
     loki:
-        image: grafana/loki:3.6.7
+        image: grafana/loki:3.7.0
         extra_hosts: ['host.docker.internal:host-gateway']
         container_name: loki
         command: [ "-config.file=/etc/loki/local-config.yaml" ]
@@ -53,7 +53,7 @@ services:
             test: wget --no-verbose --tries=1 --spider http://localhost:9090/status || exit 1
 
     grafana:
-        image: grafana/grafana:12.4.1
+        image: grafana/grafana:12.4.2
         extra_hosts: ['host.docker.internal:host-gateway']
         container_name: grafana
         depends_on:
