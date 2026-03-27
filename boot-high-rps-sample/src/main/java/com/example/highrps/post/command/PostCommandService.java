@@ -2,12 +2,15 @@ package com.example.highrps.post.command;
 
 import com.example.highrps.infrastructure.redis.DeletionMarkerHandler;
 import com.example.highrps.post.PostRedis;
+import com.example.highrps.post.domain.PostDetailsResponse;
+import com.example.highrps.post.domain.TagResponse;
 import com.example.highrps.post.domain.events.PostCreatedEvent;
 import com.example.highrps.post.domain.events.PostDeletedEvent;
 import com.example.highrps.post.domain.events.PostUpdatedEvent;
 import com.example.highrps.repository.redis.PostRedisRepository;
 import com.github.benmanes.caffeine.cache.Cache;
 import java.time.LocalDateTime;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
@@ -54,6 +57,18 @@ public class PostCommandService {
         boolean isPublished = Boolean.TRUE.equals(cmd.published());
         LocalDateTime publishedAt = isPublished ? now : null;
 
+        // Map to ensure correct timestamps for the new state
+        PostDetailsResponse detailsResponse = cmd.details() != null
+                ? new PostDetailsResponse(
+                        cmd.details().detailsKey(), now, cmd.details().createdBy())
+                : null;
+
+        List<TagResponse> tags = cmd.tags() != null
+                ? cmd.tags().stream()
+                        .map(t -> new TagResponse(null, t.tagName(), t.tagDescription()))
+                        .toList()
+                : List.of();
+
         // Publish domain event (transactional - committed with transaction)
         PostCreatedEvent event = new PostCreatedEvent(
                 cmd.postId(),
@@ -63,8 +78,8 @@ public class PostCommandService {
                 isPublished,
                 publishedAt,
                 now,
-                cmd.details(),
-                cmd.tags());
+                detailsResponse,
+                tags);
         events.publishEvent(event);
 
         // Eager cache update (best effort)
@@ -77,8 +92,8 @@ public class PostCommandService {
                 publishedAt,
                 now,
                 null, // modifiedAt should be null on creation
-                cmd.details(),
-                cmd.tags());
+                detailsResponse,
+                tags);
 
         updateCaches(cmd.postId(), result);
 
@@ -97,6 +112,18 @@ public class PostCommandService {
         // Retrieve existing author email
         String authorEmail = getAuthorEmail(cmd.postId());
 
+        // Map to ensure correct timestamps
+        PostDetailsResponse detailsResponse = cmd.details() != null
+                ? new PostDetailsResponse(
+                        cmd.details().detailsKey(), now, cmd.details().createdBy())
+                : null;
+
+        List<TagResponse> tags = cmd.tags() != null
+                ? cmd.tags().stream()
+                        .map(t -> new TagResponse(null, t.tagName(), t.tagDescription()))
+                        .toList()
+                : List.of();
+
         // Publish domain event
         PostUpdatedEvent event = new PostUpdatedEvent(
                 cmd.postId(),
@@ -107,8 +134,8 @@ public class PostCommandService {
                 publishedAt,
                 createdAt,
                 now,
-                cmd.details(),
-                cmd.tags());
+                detailsResponse,
+                tags);
         events.publishEvent(event);
 
         // Eager cache update
@@ -121,8 +148,8 @@ public class PostCommandService {
                 publishedAt,
                 createdAt,
                 now,
-                cmd.details(),
-                cmd.tags());
+                detailsResponse,
+                tags);
 
         updateCaches(cmd.postId(), result);
 
@@ -148,7 +175,7 @@ public class PostCommandService {
         }
 
         // 4. Mark deleted in Redis with TTL (prevents batch re-insertion)
-        deletionMarkerHandler.markDeleted("post", String.valueOf(postId));
+        deletionMarkerHandler.markDeleted(DeletionMarkerHandler.POST, String.valueOf(postId));
 
         log.info("Post deleted successfully: {}", postId);
     }

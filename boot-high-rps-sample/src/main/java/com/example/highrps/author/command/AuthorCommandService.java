@@ -110,27 +110,28 @@ public class AuthorCommandService {
     public void deleteAuthor(String email) {
         log.info("Deleting author with email: {}", email);
 
+        String cacheKey = email.toLowerCase(Locale.ROOT);
         // 1. Publish tombstone event
-        events.publishEvent(new AuthorDeletedEvent(email));
+        events.publishEvent(new AuthorDeletedEvent(cacheKey));
 
         // 2. Invalidate local cache
-        localCache.invalidate(email);
+        localCache.invalidate(cacheKey);
 
         // 3. Remove from Redis
         try {
-            authorRedisRepository.deleteById(email);
+            authorRedisRepository.deleteById(cacheKey);
         } catch (Exception e) {
-            log.warn("Failed to delete Redis entry for email: {}", email, e);
+            log.warn("Failed to delete Redis entry for email: {}", cacheKey, e);
         }
 
         // 4. Mark deleted in Redis with TTL
-        deletionMarkerHandler.markDeleted("author", email);
+        deletionMarkerHandler.markDeleted(DeletionMarkerHandler.AUTHOR, cacheKey);
 
         log.info("Author deleted successfully: {}", email);
     }
 
     private void updateCaches(String email, AuthorCommandResult result) {
-        String cacheKey = email.toLowerCase();
+        String cacheKey = email.toLowerCase(Locale.ROOT);
 
         // Update local cache
         try {

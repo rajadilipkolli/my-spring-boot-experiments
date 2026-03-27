@@ -17,6 +17,7 @@ import com.example.highrps.shared.ResourceNotFoundException;
 import com.github.benmanes.caffeine.cache.Cache;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
+import java.time.ZoneOffset;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
@@ -88,7 +89,7 @@ public class PostCommentCommandService {
                 cmd.content(),
                 cmd.published(),
                 request.publishedAt(),
-                request.createdAt());
+                request.createdAt().atOffset(ZoneOffset.UTC));
         events.publishEvent(event);
 
         // Increment counter
@@ -165,7 +166,7 @@ public class PostCommentCommandService {
         }
 
         // 4. Mark deleted in Redis with TTL using unified handler
-        deletionMarkerHandler.markDeleted("post-comment", cacheKey);
+        deletionMarkerHandler.markDeleted(DeletionMarkerHandler.POST_COMMENT, cacheKey);
 
         log.info("Deleted post comment: postId={}, commentId={}", postId, commentId.id());
     }

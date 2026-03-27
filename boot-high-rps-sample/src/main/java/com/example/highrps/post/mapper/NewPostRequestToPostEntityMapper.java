@@ -3,8 +3,8 @@ package com.example.highrps.post.mapper;
 import com.example.highrps.entities.PostEntity;
 import com.example.highrps.entities.PostTagEntity;
 import com.example.highrps.entities.TagEntity;
+import com.example.highrps.post.domain.TagResponse;
 import com.example.highrps.post.domain.requests.NewPostRequest;
-import com.example.highrps.post.domain.requests.TagRequest;
 import com.example.highrps.repository.jpa.TagRepository;
 import java.time.LocalDateTime;
 import java.util.Locale;
@@ -70,9 +70,9 @@ public interface NewPostRequestToPostEntityMapper {
                 .forEach(name -> postEntity.removeTag(existingByName.get(name)));
 
         existingByName.forEach((name, tagEntity) -> {
-            TagRequest req = requestedByName.get(name);
-            if (req != null && !Objects.equals(tagEntity.getTagDescription(), req.tagDescription())) {
-                tagEntity.setTagDescription(req.tagDescription());
+            TagResponse resp = requestedByName.get(name);
+            if (resp != null && !Objects.equals(tagEntity.getTagDescription(), resp.tagDescription())) {
+                tagEntity.setTagDescription(resp.tagDescription());
             }
         });
 
@@ -81,10 +81,10 @@ public interface NewPostRequestToPostEntityMapper {
                 .forEach(name -> postEntity.addTag(getTagEntity(tagRepository, requestedByName.get(name))));
     }
 
-    default TagEntity getTagEntity(TagRepository tagRepository, TagRequest tagsRequest) {
-        return tagRepository.findByTagNameIgnoreCase(tagsRequest.tagName()).orElseGet(() -> {
+    default TagEntity getTagEntity(TagRepository tagRepository, TagResponse tagResponse) {
+        return tagRepository.findByTagNameIgnoreCase(tagResponse.tagName()).orElseGet(() -> {
             TagEntity tagEntity =
-                    new TagEntity().setTagName(tagsRequest.tagName()).setTagDescription(tagsRequest.tagDescription());
+                    new TagEntity().setTagName(tagResponse.tagName()).setTagDescription(tagResponse.tagDescription());
             tagEntity.setCreatedAt(LocalDateTime.now());
             return tagRepository.save(tagEntity);
         });

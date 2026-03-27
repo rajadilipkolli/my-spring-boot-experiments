@@ -1,6 +1,5 @@
 package com.example.highrps.postcomment.domain.events;
 
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import org.springframework.modulith.events.Externalized;
 
@@ -15,4 +14,4 @@ public record PostCommentCreatedEvent(
         String content,
         boolean published,
         OffsetDateTime publishedAt,
-        LocalDateTime createdAt) {}
+        OffsetDateTime createdAt) {}

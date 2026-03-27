@@ -1,7 +1,9 @@
 package com.example.highrps.post.command;
 
+import com.example.highrps.post.domain.requests.NewPostRequest;
 import com.example.highrps.post.domain.requests.PostDetailsRequest;
 import com.example.highrps.post.domain.requests.TagRequest;
+import com.example.highrps.shared.IdGenerator;
 import java.util.List;
 
 /**
@@ -29,5 +31,25 @@ public record CreatePostCommand(
         if (authorEmail == null || authorEmail.isBlank()) {
             throw new IllegalArgumentException("authorEmail must not be blank");
         }
+        tags = tags == null ? List.of() : List.copyOf(tags);
+    }
+
+    public static CreatePostCommand fromNewPostRequest(NewPostRequest newPostRequest) {
+
+        List<TagRequest> tagRequests = newPostRequest.tags() == null
+                ? List.of()
+                : newPostRequest.tags().stream()
+                        .map(tag -> new TagRequest(tag.tagName(), tag.tagDescription()))
+                        .toList();
+        return new CreatePostCommand(
+                newPostRequest.postId() != null ? newPostRequest.postId() : IdGenerator.generateLong(),
+                newPostRequest.title(),
+                newPostRequest.content(),
+                newPostRequest.email(),
+                newPostRequest.published(),
+                new PostDetailsRequest(
+                        newPostRequest.details().detailsKey(),
+                        newPostRequest.details().createdBy()),
+                tagRequests);
     }
 }

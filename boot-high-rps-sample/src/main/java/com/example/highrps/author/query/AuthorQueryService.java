@@ -3,9 +3,11 @@ package com.example.highrps.author.query;
 import com.example.highrps.author.AuthorRequest;
 import com.example.highrps.entities.AuthorRedis;
 import com.example.highrps.infrastructure.cache.RequestCoalescer;
+import com.example.highrps.infrastructure.redis.DeletionMarkerHandler;
 import com.example.highrps.repository.redis.AuthorRedisRepository;
 import com.example.highrps.shared.ResourceNotFoundException;
 import com.github.benmanes.caffeine.cache.Cache;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.concurrent.locks.ReentrantLock;
 import org.apache.kafka.streams.KafkaStreams;
@@ -14,7 +16,6 @@ import org.apache.kafka.streams.state.QueryableStoreTypes;
 import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.kafka.config.StreamsBuilderFactoryBean;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,9 +33,9 @@ public class AuthorQueryService {
     private static final Logger log = LoggerFactory.getLogger(AuthorQueryService.class);
 
     private final Cache<String, String> localCache;
-    private final RedisTemplate<String, String> redis;
     private final AuthorRedisRepository authorRedisRepository;
     private final StreamsBuilderFactoryBean kafkaStreamsFactory;
+    private final DeletionMarkerHandler deletionMarkerHandler;
     private final RequestCoalescer<AuthorRequest> requestCoalescer;
     private final JsonMapper jsonMapper;
 
@@ -43,15 +44,15 @@ public class AuthorQueryService {
 
     public AuthorQueryService(
             Cache<String, String> localCache,
-            RedisTemplate<String, String> redis,
             AuthorRedisRepository authorRedisRepository,
             StreamsBuilderFactoryBean kafkaStreamsFactory,
-            JsonMapper jsonMapper) {
+            JsonMapper jsonMapper,
+            DeletionMarkerHandler deletionMarkerHandler) {
         this.localCache = localCache;
-        this.redis = redis;
         this.authorRedisRepository = authorRedisRepository;
         this.kafkaStreamsFactory = kafkaStreamsFactory;
         this.jsonMapper = jsonMapper;
+        this.deletionMarkerHandler = deletionMarkerHandler;
         this.requestCoalescer = new RequestCoalescer<>();
     }
 
@@ -60,13 +61,12 @@ public class AuthorQueryService {
         log.debug("Querying author with email: {}", email);
 
         // 1. Check tombstone
-        Boolean deleted = redis.hasKey("deleted:author:" + email);
-        if (Boolean.TRUE.equals(deleted)) {
+        String cacheKey = email.toLowerCase(Locale.ROOT);
+        if (deletionMarkerHandler.isDeleted(DeletionMarkerHandler.AUTHOR, cacheKey)) {
             throw new ResourceNotFoundException("Author not found for email: " + email);
         }
 
         // 2. Local cache
-        String cacheKey = email.toLowerCase();
         String cached = localCache.getIfPresent(cacheKey);
         if (cached != null) {
             log.debug("Hit local cache for email: {}", email);
@@ -74,7 +74,7 @@ public class AuthorQueryService {
         }
 
         // 3. Redis materialized view
-        Optional<AuthorRedis> redisAuthor = authorRedisRepository.findById(email);
+        Optional<AuthorRedis> redisAuthor = authorRedisRepository.findById(cacheKey);
         if (redisAuthor.isPresent()) {
             log.debug("Hit Redis for email: {}", email);
             AuthorProjection projection = fromRedis(redisAuthor.get());

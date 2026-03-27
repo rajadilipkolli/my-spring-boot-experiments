@@ -1,14 +1,12 @@
 package com.example.highrps.post.query;
 
 import com.example.highrps.infrastructure.cache.RequestCoalescer;
+import com.example.highrps.infrastructure.redis.DeletionMarkerHandler;
 import com.example.highrps.post.PostRedis;
-import com.example.highrps.post.domain.PostDetailsResponse;
-import com.example.highrps.post.domain.TagResponse;
 import com.example.highrps.post.domain.requests.NewPostRequest;
 import com.example.highrps.repository.redis.PostRedisRepository;
 import com.example.highrps.shared.ResourceNotFoundException;
 import com.github.benmanes.caffeine.cache.Cache;
-import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.locks.ReentrantLock;
 import org.apache.kafka.streams.KafkaStreams;
@@ -17,7 +15,6 @@ import org.apache.kafka.streams.state.QueryableStoreTypes;
 import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.kafka.config.StreamsBuilderFactoryBean;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,9 +32,9 @@ public class PostQueryService {
     private static final Logger log = LoggerFactory.getLogger(PostQueryService.class);
 
     private final Cache<String, String> localCache;
-    private final RedisTemplate<String, String> redis;
     private final PostRedisRepository postRedisRepository;
     private final StreamsBuilderFactoryBean kafkaStreamsFactory;
+    private final DeletionMarkerHandler deletionMarkerHandler;
     private final RequestCoalescer<NewPostRequest> requestCoalescer;
     private final JsonMapper jsonMapper;
 
@@ -46,15 +43,15 @@ public class PostQueryService {
 
     public PostQueryService(
             Cache<String, String> localCache,
-            RedisTemplate<String, String> redis,
             PostRedisRepository postRedisRepository,
             StreamsBuilderFactoryBean kafkaStreamsFactory,
-            JsonMapper jsonMapper) {
+            JsonMapper jsonMapper,
+            DeletionMarkerHandler deletionMarkerHandler) {
         this.localCache = localCache;
-        this.redis = redis;
         this.postRedisRepository = postRedisRepository;
         this.kafkaStreamsFactory = kafkaStreamsFactory;
         this.jsonMapper = jsonMapper;
+        this.deletionMarkerHandler = deletionMarkerHandler;
         this.requestCoalescer = new RequestCoalescer<>();
     }
 
@@ -63,8 +60,7 @@ public class PostQueryService {
         log.debug("Querying post with id: {}", postId);
 
         // 1. Check tombstone (deleted posts)
-        Boolean deleted = redis.hasKey("deleted:posts:" + postId);
-        if (Boolean.TRUE.equals(deleted)) {
+        if (deletionMarkerHandler.isDeleted(DeletionMarkerHandler.POST, String.valueOf(postId))) {
             throw new ResourceNotFoundException("Post not found for id: " + postId);
         }
 
@@ -165,15 +161,8 @@ public class PostQueryService {
                 postRedis.getPublishedAt(),
                 postRedis.getCreatedAt(),
                 postRedis.getModifiedAt(),
-                new PostDetailsResponse(
-                        postRedis.getDetails().detailsKey(),
-                        null,
-                        postRedis.getDetails().createdBy()),
-                postRedis.getTags() != null
-                        ? postRedis.getTags().stream()
-                                .map(t -> new TagResponse(null, t.tagName(), t.tagDescription()))
-                                .toList()
-                        : List.of());
+                postRedis.getDetails(),
+                postRedis.getTags());
     }
 
     private PostProjection fromNewPostRequest(NewPostRequest request) {
@@ -186,23 +175,21 @@ public class PostQueryService {
                 request.publishedAt(),
                 request.createdAt(),
                 request.modifiedAt(),
-                new PostDetailsResponse(
-                        request.details().detailsKey(), null, request.details().createdBy()),
-                request.tags().stream()
-                        .map(t -> new TagResponse(null, t.tagName(), t.tagDescription()))
-                        .toList());
+                request.details(),
+                request.tags());
     }
 
     private PostRedis toRedis(NewPostRequest request, Long postId) {
-        PostRedis postRedis = new PostRedis()
+        return new PostRedis()
                 .setId(postId)
                 .setTitle(request.title())
                 .setContent(request.content())
                 .setPublished(request.published() != null && request.published())
                 .setPublishedAt(request.publishedAt())
-                .setAuthorEmail(request.email());
-        postRedis.setCreatedAt(request.createdAt());
-        postRedis.setModifiedAt(request.modifiedAt());
-        return postRedis;
+                .setAuthorEmail(request.email())
+                .setCreatedAt(request.createdAt())
+                .setModifiedAt(request.modifiedAt())
+                .setDetails(request.details())
+                .setTags(request.tags());
     }
 }

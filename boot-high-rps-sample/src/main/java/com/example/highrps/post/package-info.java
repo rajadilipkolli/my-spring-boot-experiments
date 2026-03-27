@@ -5,7 +5,7 @@
  * <p>
  * Public API: {@link com.example.highrps.post.api}
  * <p>
- * Allowed dependencies: author (for author validation)
+ * Allowed dependencies: author (for author validation), repository, shared, infrastructure, entities
  */
 @org.springframework.modulith.ApplicationModule(
         displayName = "Post Management",

@@ -1,5 +1,7 @@
 package com.example.highrps.post.domain.requests;
 
+import com.example.highrps.post.domain.PostDetailsResponse;
+import com.example.highrps.post.domain.TagResponse;
 import com.example.highrps.shared.IdGenerator;
 import com.fasterxml.jackson.annotation.JsonAlias;
 import jakarta.validation.Valid;
@@ -22,8 +24,8 @@ public record NewPostRequest(
         LocalDateTime publishedAt,
         LocalDateTime createdAt,
         LocalDateTime modifiedAt,
-        @Valid @NotNull PostDetailsRequest details,
-        @Valid List<TagRequest> tags)
+        @Valid @NotNull PostDetailsResponse details,
+        @Valid List<TagResponse> tags)
         implements Serializable {
 
     public NewPostRequest withPublishedAt(LocalDateTime publishedAt) {

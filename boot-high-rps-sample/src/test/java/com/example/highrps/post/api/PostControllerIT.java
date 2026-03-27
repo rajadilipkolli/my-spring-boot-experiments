@@ -109,7 +109,7 @@ class PostControllerIT extends AbstractIntegrationTest {
                     assertThat(postResponse.publishedAt()).isNull();
                     assertThat(postResponse.createdAt()).isNotNull().isInstanceOf(LocalDateTime.class);
                     assertThat(postResponse.modifiedAt()).isNull();
-                    assertThat(postResponse.tags()).isNull();
+                    assertThat(postResponse.tags()).isEmpty();
                     assertThat(postResponse.details()).isNotNull();
                     assertThat(postResponse.details().detailsKey()).isEqualTo("This is a summary");
                     assertThat(postResponse.details().createdBy()).isEqualTo("JunitIteration");

@@ -8,10 +8,11 @@ import com.example.highrps.entities.AuthorEntity;
 import com.example.highrps.entities.PostDetailsEntity;
 import com.example.highrps.entities.PostEntity;
 import com.example.highrps.post.PostRedis;
-import com.example.highrps.post.domain.requests.PostDetailsRequest;
+import com.example.highrps.post.domain.PostDetailsResponse;
 import com.example.highrps.postcomment.command.PostCommentCommandResult;
 import com.example.highrps.shared.IdGenerator;
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.BeforeEach;
@@ -46,7 +47,8 @@ class PostCommentControllerIT extends AbstractIntegrationTest {
                 .setPublished(postEntity.isPublished())
                 .setPublishedAt(postEntity.getPublishedAt())
                 .setAuthorEmail(authorEntity.getEmail())
-                .setDetails(new PostDetailsRequest(postDetailsEntity.getDetailsKey(), postDetailsEntity.getCreatedBy()))
+                .setDetails(new PostDetailsResponse(
+                        postDetailsEntity.getDetailsKey(), LocalDateTime.now(), postDetailsEntity.getCreatedBy()))
                 .setTags(List.of());
         postRedisRepository.save(postRedis);
         postId = authorEntity.getPostEntities().getFirst().getPostRefId();

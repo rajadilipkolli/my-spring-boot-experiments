@@ -64,7 +64,8 @@ public class PostAggregatesToRedisListener {
                     record.offset(),
                     cacheKey,
                     bytes == null);
-            // If payload is null -> tombstone: remove Redis cacheKey and enqueue delete marker
+            // If payload is null -> tombstone: remove Redis cacheKey and enqueue delete
+            // marker
             if (bytes == null) {
                 handleDeletion(cacheKey);
                 return;
@@ -88,6 +89,7 @@ public class PostAggregatesToRedisListener {
 
             // Update Redis Repository (Cache)
             try {
+                // Now directly using payload fields as they match PostRedis types
                 PostRedis redisEntity = new PostRedis()
                         .setId(payload.postId())
                         .setTitle(payload.title())
@@ -143,7 +145,7 @@ public class PostAggregatesToRedisListener {
             log.warn("Failed to delete repository entry for deletion of cacheKey: {}", cacheKey, e);
         }
         try {
-            deletionMarkerHandler.markDeleted("post", cacheKey);
+            deletionMarkerHandler.markDeleted(DeletionMarkerHandler.POST, cacheKey);
             String tombstoneJson =
                     jsonMapper.writeValueAsString(Map.of("postId", cacheKey, "__deleted", true, "__entity", "post"));
             redis.opsForList().leftPush(queueKey, tombstoneJson);

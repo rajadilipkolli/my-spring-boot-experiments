@@ -18,6 +18,10 @@ public class DeletionMarkerHandler {
     private static final String MARKER_PREFIX = "deleted:";
     private static final Duration DEFAULT_TTL = Duration.ofSeconds(60);
 
+    public static final String AUTHOR = "author";
+    public static final String POST = "post";
+    public static final String POST_COMMENT = "post-comment";
+
     private final RedisTemplate<String, String> redis;
 
     public DeletionMarkerHandler(RedisTemplate<String, String> redis) {

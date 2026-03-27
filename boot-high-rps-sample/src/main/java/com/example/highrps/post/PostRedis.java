@@ -1,7 +1,7 @@
 package com.example.highrps.post;
 
-import com.example.highrps.post.domain.requests.PostDetailsRequest;
-import com.example.highrps.post.domain.requests.TagRequest;
+import com.example.highrps.post.domain.PostDetailsResponse;
+import com.example.highrps.post.domain.TagResponse;
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -33,8 +33,8 @@ public class PostRedis implements Serializable {
 
     protected LocalDateTime modifiedAt;
 
-    private PostDetailsRequest details;
-    private List<TagRequest> tags;
+    private PostDetailsResponse details;
+    private List<TagResponse> tags;
 
     public PostRedis() {}
 
@@ -110,21 +110,21 @@ public class PostRedis implements Serializable {
         return modifiedAt;
     }
 
-    public PostRedis setDetails(PostDetailsRequest details) {
+    public PostRedis setDetails(PostDetailsResponse details) {
         this.details = details;
         return this;
     }
 
-    public PostDetailsRequest getDetails() {
+    public PostDetailsResponse getDetails() {
         return details;
     }
 
-    public PostRedis setTags(List<TagRequest> tags) {
+    public PostRedis setTags(List<TagResponse> tags) {
         this.tags = tags;
         return this;
     }
 
-    public List<TagRequest> getTags() {
+    public List<TagResponse> getTags() {
         return tags;
     }
 }

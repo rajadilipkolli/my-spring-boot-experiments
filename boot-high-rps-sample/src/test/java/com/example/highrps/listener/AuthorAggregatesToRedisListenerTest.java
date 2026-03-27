@@ -3,7 +3,6 @@ package com.example.highrps.listener;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import com.example.highrps.author.AuthorRequest;
 import com.example.highrps.entities.AuthorRedis;
@@ -13,7 +12,6 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import org.springframework.data.redis.core.ListOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import tools.jackson.databind.json.JsonMapper;
 
@@ -23,14 +21,11 @@ class AuthorAggregatesToRedisListenerTest {
     private RedisTemplate<String, String> redisTemplate;
     private JsonMapper jsonMapper;
     private AuthorRedisRepository authorRedisRepository;
-    private ListOperations<String, String> listOperations;
 
     @BeforeEach
     @SuppressWarnings("unchecked")
     void setUp() {
         redisTemplate = mock(RedisTemplate.class);
-        listOperations = mock(ListOperations.class);
-        when(redisTemplate.opsForList()).thenReturn(listOperations);
         jsonMapper = JsonMapper.builder().build();
         authorRedisRepository = mock(AuthorRedisRepository.class);
         listener =

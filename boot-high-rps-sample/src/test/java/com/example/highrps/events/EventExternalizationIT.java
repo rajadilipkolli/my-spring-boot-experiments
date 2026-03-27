@@ -15,6 +15,7 @@ import com.example.highrps.postcomment.command.PostCommentCommandService;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
@@ -99,7 +100,7 @@ class EventExternalizationIT extends AbstractIntegrationTest {
                 "author@test.com",
                 true,
                 new PostDetailsRequest("initial-key", "tester"),
-                java.util.List.of(new TagRequest("tag1", "desc1")));
+                List.of(new TagRequest("tag1", "desc1")));
         postCommandService.createPost(createCmd);
 
         // Assert - Verify event was externalized to Kafka
@@ -173,7 +174,7 @@ class EventExternalizationIT extends AbstractIntegrationTest {
                 "comment-ext-author@test.com",
                 true,
                 new PostDetailsRequest("comment-key", "author"),
-                java.util.List.of(new TagRequest("comments", "desc"))));
+                List.of(new TagRequest("comments", "desc"))));
 
         // Arrange - Set up Kafka consumer
         String topic = "post-comments-aggregates";

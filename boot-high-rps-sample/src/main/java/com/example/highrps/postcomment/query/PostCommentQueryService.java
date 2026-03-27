@@ -3,6 +3,7 @@ package com.example.highrps.postcomment.query;
 import com.example.highrps.entities.PostCommentRedis;
 import com.example.highrps.infrastructure.cache.CacheKeyGenerator;
 import com.example.highrps.infrastructure.cache.RequestCoalescer;
+import com.example.highrps.infrastructure.redis.DeletionMarkerHandler;
 import com.example.highrps.postcomment.command.PostCommentCommandResult;
 import com.example.highrps.postcomment.domain.PostCommentMapper;
 import com.example.highrps.postcomment.domain.PostCommentRequest;
@@ -19,7 +20,6 @@ import org.apache.kafka.streams.state.QueryableStoreTypes;
 import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.kafka.config.StreamsBuilderFactoryBean;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,10 +38,10 @@ public class PostCommentQueryService {
     private final PostCommentRepository postCommentRepository;
     private final PostCommentMapper postCommentMapper;
     private final Cache<String, String> localCache;
-    private final RedisTemplate<String, String> redis;
     private final PostCommentRedisRepository postCommentRedisRepository;
     private final StreamsBuilderFactoryBean kafkaStreamsFactory;
     private final RequestCoalescer<PostCommentRequest> requestCoalescer;
+    private final DeletionMarkerHandler deletionMarkerHandler;
 
     private volatile ReadOnlyKeyValueStore<String, PostCommentRequest> keyValueStore = null;
     private final ReentrantLock keyValueStoreLock = new ReentrantLock();
@@ -50,15 +50,15 @@ public class PostCommentQueryService {
             PostCommentRepository postCommentRepository,
             PostCommentMapper postCommentMapper,
             Cache<String, String> localCache,
-            RedisTemplate<String, String> redis,
             PostCommentRedisRepository postCommentRedisRepository,
-            StreamsBuilderFactoryBean kafkaStreamsFactory) {
+            StreamsBuilderFactoryBean kafkaStreamsFactory,
+            DeletionMarkerHandler deletionMarkerHandler) {
         this.postCommentRepository = postCommentRepository;
         this.postCommentMapper = postCommentMapper;
         this.localCache = localCache;
-        this.redis = redis;
         this.postCommentRedisRepository = postCommentRedisRepository;
         this.kafkaStreamsFactory = kafkaStreamsFactory;
+        this.deletionMarkerHandler = deletionMarkerHandler;
         this.requestCoalescer = new RequestCoalescer<>();
     }
 
@@ -92,8 +92,7 @@ public class PostCommentQueryService {
                 query.postId(), query.commentId().id());
 
         // 1. Check tombstone
-        Boolean deleted = redis.hasKey("deleted:post-comments:" + cacheKey);
-        if (Boolean.TRUE.equals(deleted)) {
+        if (deletionMarkerHandler.isDeleted(DeletionMarkerHandler.POST_COMMENT, cacheKey)) {
             throw new ResourceNotFoundException(
                     "PostComment not found with id: " + query.commentId().id() + " for post: " + query.postId());
         }

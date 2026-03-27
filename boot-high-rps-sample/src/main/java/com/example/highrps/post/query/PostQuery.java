@@ -5,8 +5,8 @@ package com.example.highrps.post.query;
  */
 public record PostQuery(Long postId) {
     public PostQuery {
-        if (postId == null) {
-            throw new IllegalArgumentException("postId must not be null");
+        if (postId == null || postId <= 0) {
+            throw new IllegalArgumentException("postId must be a positive number");
         }
     }
 }

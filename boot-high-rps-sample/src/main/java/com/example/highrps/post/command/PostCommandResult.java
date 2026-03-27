@@ -1,7 +1,7 @@
 package com.example.highrps.post.command;
 
-import com.example.highrps.post.domain.requests.PostDetailsRequest;
-import com.example.highrps.post.domain.requests.TagRequest;
+import com.example.highrps.post.domain.PostDetailsResponse;
+import com.example.highrps.post.domain.TagResponse;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -17,5 +17,5 @@ public record PostCommandResult(
         LocalDateTime publishedAt,
         LocalDateTime createdAt,
         LocalDateTime modifiedAt,
-        PostDetailsRequest details,
-        List<TagRequest> tags) {}
+        PostDetailsResponse details,
+        List<TagResponse> tags) {}

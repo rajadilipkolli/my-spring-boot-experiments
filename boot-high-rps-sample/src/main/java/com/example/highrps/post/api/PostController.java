@@ -8,7 +8,6 @@ import com.example.highrps.post.domain.requests.NewPostRequest;
 import com.example.highrps.post.query.PostProjection;
 import com.example.highrps.post.query.PostQuery;
 import com.example.highrps.post.query.PostQueryService;
-import com.example.highrps.shared.IdGenerator;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import java.net.URI;
@@ -43,14 +42,7 @@ public class PostController {
 
     @PostMapping(value = "/posts")
     public ResponseEntity<PostCommandResult> createPost(@RequestBody @Valid NewPostRequest newPostRequest) {
-        CreatePostCommand cmd = new CreatePostCommand(
-                newPostRequest.postId() != null ? newPostRequest.postId() : IdGenerator.generateLong(),
-                newPostRequest.title(),
-                newPostRequest.content(),
-                newPostRequest.email(),
-                newPostRequest.published(),
-                newPostRequest.details(),
-                newPostRequest.tags());
+        CreatePostCommand cmd = CreatePostCommand.fromNewPostRequest(newPostRequest);
         PostCommandResult postCommandResult = postCommandService.createPost(cmd);
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{postId}")
@@ -62,13 +54,7 @@ public class PostController {
     @PutMapping(value = "/posts/{postId}")
     public ResponseEntity<PostCommandResult> updatePost(
             @PathVariable @Positive Long postId, @RequestBody @Valid NewPostRequest newPostRequest) {
-        UpdatePostCommand cmd = new UpdatePostCommand(
-                postId,
-                newPostRequest.title(),
-                newPostRequest.content(),
-                newPostRequest.published(),
-                newPostRequest.details(),
-                newPostRequest.tags());
+        UpdatePostCommand cmd = UpdatePostCommand.fromNewPostRequest(newPostRequest, postId);
         PostCommandResult postCommandResult = postCommandService.updatePost(cmd);
         return ResponseEntity.ok(postCommandResult);
     }
