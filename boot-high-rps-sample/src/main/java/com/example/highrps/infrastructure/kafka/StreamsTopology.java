@@ -14,21 +14,29 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.annotation.EnableKafkaStreams;
 import org.springframework.kafka.support.serializer.JacksonJsonSerde;
+import tools.jackson.databind.json.JsonMapper;
 
 @Configuration
 @EnableKafkaStreams
 public class StreamsTopology {
 
     private static final Logger log = LoggerFactory.getLogger(StreamsTopology.class);
+    private final JsonMapper jsonMapper;
+
+    public StreamsTopology(JsonMapper jsonMapper) {
+        this.jsonMapper = jsonMapper;
+    }
 
     /**
-     * Materialized KTable for posts: reads from posts-aggregates topic and materializes to 'posts-store'
-     * for interactive queries. Services can query this store to get the latest state of posts.
+     * Materialized KTable for posts: reads from posts-aggregates topic and
+     * materializes to 'posts-store'
+     * for interactive queries. Services can query this store to get the latest
+     * state of posts.
      */
     @Bean
     public KTable<String, NewPostRequest> postsTable(StreamsBuilder kafkaStreamBuilder) {
         log.info("Building posts KTable with materialized store");
-        JacksonJsonSerde<NewPostRequest> postSerde = new JacksonJsonSerde<>(NewPostRequest.class);
+        JacksonJsonSerde<NewPostRequest> postSerde = new JacksonJsonSerde<>(NewPostRequest.class, jsonMapper);
 
         KTable<String, NewPostRequest> table = kafkaStreamBuilder.table(
                 "posts-aggregates", Consumed.with(Serdes.String(), postSerde), Materialized.as("posts-store"));
@@ -38,13 +46,15 @@ public class StreamsTopology {
     }
 
     /**
-     * Materialized KTable for authors: reads from authors-aggregates topic and materializes to 'authors-store'
-     * for interactive queries. Services can query this store to get the latest state of authors.
+     * Materialized KTable for authors: reads from authors-aggregates topic and
+     * materializes to 'authors-store'
+     * for interactive queries. Services can query this store to get the latest
+     * state of authors.
      */
     @Bean
     public KTable<String, AuthorRequest> authorsTable(StreamsBuilder kafkaStreamBuilder) {
         log.info("Building authors KTable with materialized store");
-        JacksonJsonSerde<AuthorRequest> authorSerde = new JacksonJsonSerde<>(AuthorRequest.class);
+        JacksonJsonSerde<AuthorRequest> authorSerde = new JacksonJsonSerde<>(AuthorRequest.class, jsonMapper);
 
         KTable<String, AuthorRequest> table = kafkaStreamBuilder.table(
                 "authors-aggregates", Consumed.with(Serdes.String(), authorSerde), Materialized.as("authors-store"));
@@ -54,13 +64,16 @@ public class StreamsTopology {
     }
 
     /**
-     * Materialized KTable for comments: reads from post-comments-aggregates topic and materializes to 'post-comments-store'
-     * for interactive queries. Services can query this store to get the latest state of comments.
+     * Materialized KTable for comments: reads from post-comments-aggregates topic
+     * and materializes to 'post-comments-store'
+     * for interactive queries. Services can query this store to get the latest
+     * state of comments.
      */
     @Bean
     public KTable<String, PostCommentRequest> postCommentRequestKTable(StreamsBuilder kafkaStreamBuilder) {
         log.info("Building comments KTable with materialized store");
-        JacksonJsonSerde<PostCommentRequest> postCommentSerde = new JacksonJsonSerde<>(PostCommentRequest.class);
+        JacksonJsonSerde<PostCommentRequest> postCommentSerde =
+                new JacksonJsonSerde<>(PostCommentRequest.class, jsonMapper);
 
         KTable<String, PostCommentRequest> table = kafkaStreamBuilder.table(
                 "post-comments-aggregates",
