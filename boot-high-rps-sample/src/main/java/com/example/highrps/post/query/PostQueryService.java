@@ -8,6 +8,7 @@ import com.example.highrps.post.domain.requests.NewPostRequest;
 import com.example.highrps.repository.redis.PostRedisRepository;
 import com.example.highrps.shared.ResourceNotFoundException;
 import com.github.benmanes.caffeine.cache.Cache;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.locks.ReentrantLock;
 import org.apache.kafka.streams.KafkaStreams;
@@ -168,9 +169,11 @@ public class PostQueryService {
                         postRedis.getDetails().detailsKey(),
                         null,
                         postRedis.getDetails().createdBy()),
-                postRedis.getTags().stream()
-                        .map(t -> new TagResponse(null, t.tagName(), t.tagDescription()))
-                        .toList());
+                postRedis.getTags() != null
+                        ? postRedis.getTags().stream()
+                                .map(t -> new TagResponse(null, t.tagName(), t.tagDescription()))
+                                .toList()
+                        : List.of());
     }
 
     private PostProjection fromNewPostRequest(NewPostRequest request) {

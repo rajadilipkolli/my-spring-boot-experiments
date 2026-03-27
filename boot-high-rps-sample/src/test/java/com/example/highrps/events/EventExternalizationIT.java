@@ -3,11 +3,9 @@ package com.example.highrps.events;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
-import com.example.highrps.HighRpsApplication;
 import com.example.highrps.author.command.AuthorCommandService;
 import com.example.highrps.author.command.CreateAuthorCommand;
-import com.example.highrps.common.ContainersConfig;
-import com.example.highrps.common.SQLContainerConfig;
+import com.example.highrps.common.AbstractIntegrationTest;
 import com.example.highrps.post.command.CreatePostCommand;
 import com.example.highrps.post.command.PostCommandService;
 import com.example.highrps.post.domain.requests.PostDetailsRequest;
@@ -15,6 +13,7 @@ import com.example.highrps.post.domain.requests.TagRequest;
 import com.example.highrps.postcomment.command.CreatePostCommentCommand;
 import com.example.highrps.postcomment.command.PostCommentCommandService;
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Properties;
@@ -28,7 +27,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.kafka.autoconfigure.KafkaConnectionDetails;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.listener.ContainerProperties;
 import org.springframework.kafka.listener.KafkaMessageListenerContainer;
@@ -46,8 +44,7 @@ import tools.jackson.databind.ObjectMapper;
  * Spring Modulith serializes externalized events as JSON byte arrays,
  * so we use StringDeserializer and parse the JSON manually.
  */
-@SpringBootTest(classes = {HighRpsApplication.class, ContainersConfig.class, SQLContainerConfig.class})
-class EventExternalizationIT {
+class EventExternalizationIT extends AbstractIntegrationTest {
 
     @Autowired
     private PostCommandService postCommandService;
@@ -140,8 +137,8 @@ class EventExternalizationIT {
         ContainerTestUtils.waitForAssignment(container, partitions);
 
         // Act - Create an author (which should publish AuthorCreatedEvent)
-        CreateAuthorCommand command =
-                new CreateAuthorCommand("test-ext@example.com", "Test", null, "Author", 1234567890L);
+        CreateAuthorCommand command = new CreateAuthorCommand(
+                "test-ext@example.com", "Test", null, "Author", 1234567890L, LocalDateTime.now());
         authorCommandService.createAuthor(command);
 
         // Assert - Verify event was externalized to Kafka
@@ -165,10 +162,10 @@ class EventExternalizationIT {
     }
 
     @Test
-    @DisplayName("Should externalize PostCommentCreatedEvent to Kafka topic 'postcomments'")
+    @DisplayName("Should externalize PostCommentCreatedEvent to Kafka topic 'post-comments-aggregates'")
     void shouldExternalizePostCommentCreatedEventToKafka() throws Exception {
-        authorCommandService.createAuthor(
-                new CreateAuthorCommand("comment-ext-author@test.com", "Comment", null, "Author", 9876543210L));
+        authorCommandService.createAuthor(new CreateAuthorCommand(
+                "comment-ext-author@test.com", "Comment", null, "Author", 9876543210L, LocalDateTime.now()));
         postCommandService.createPost(new CreatePostCommand(
                 54321L,
                 "Post for Comment",

@@ -60,7 +60,7 @@ public class AuthorQueryService {
         log.debug("Querying author with email: {}", email);
 
         // 1. Check tombstone
-        Boolean deleted = redis.hasKey("deleted:authors:" + email);
+        Boolean deleted = redis.hasKey("deleted:author:" + email);
         if (Boolean.TRUE.equals(deleted)) {
             throw new ResourceNotFoundException("Author not found for email: " + email);
         }

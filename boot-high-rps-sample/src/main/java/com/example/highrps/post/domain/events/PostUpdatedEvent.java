@@ -18,6 +18,7 @@ public record PostUpdatedEvent(
         String authorEmail,
         boolean published,
         LocalDateTime publishedAt,
+        LocalDateTime createdAt,
         LocalDateTime modifiedAt,
         PostDetailsRequest details,
         List<TagRequest> tags) {}

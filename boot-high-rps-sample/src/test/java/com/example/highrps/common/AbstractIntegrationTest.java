@@ -13,6 +13,16 @@ import com.example.highrps.repository.redis.AuthorRedisRepository;
 import com.example.highrps.repository.redis.PostRedisRepository;
 import com.github.benmanes.caffeine.cache.Cache;
 import io.micrometer.core.instrument.MeterRegistry;
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Comparator;
+import java.util.stream.Stream;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.micrometer.metrics.test.autoconfigure.AutoConfigureMetrics;
 import org.springframework.boot.micrometer.tracing.test.autoconfigure.AutoConfigureTracing;
@@ -21,6 +31,7 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
+import tools.jackson.databind.json.JsonMapper;
 
 @ActiveProfiles({"test"})
 @SpringBootTest(
@@ -30,6 +41,24 @@ import org.springframework.test.web.servlet.assertj.MockMvcTester;
 @AutoConfigureTracing
 @AutoConfigureMetrics
 public abstract class AbstractIntegrationTest {
+
+    private static final Logger log = LoggerFactory.getLogger(AbstractIntegrationTest.class);
+
+    @BeforeAll
+    static void cleanupKafkaStreamsState() {
+        // Clean up Kafka Streams state directory before tests on Windows
+        try {
+            Path stateDir = Paths.get("target", "kafka-streams-state");
+            if (Files.exists(stateDir)) {
+                log.info("Cleaning up Kafka Streams state directory: {}", stateDir);
+                try (Stream<Path> walk = Files.walk(stateDir)) {
+                    walk.sorted(Comparator.reverseOrder()).map(Path::toFile).forEach(File::delete);
+                }
+            }
+        } catch (Exception e) {
+            log.warn("Failed to clean up Kafka Streams state directory", e);
+        }
+    }
 
     @Autowired
     protected MockMvcTester mockMvcTester;
@@ -66,4 +95,21 @@ public abstract class AbstractIntegrationTest {
 
     @Autowired
     protected AuthorBatchProcessor authorBatchProcessor;
+
+    @Autowired
+    protected JsonMapper jsonMapper;
+
+    @BeforeEach
+    public void clearDatabase() {
+        postCommentRepository.deleteAllInBatch();
+        postTagRepository.deleteAllInBatch();
+        postRepository.deleteAllInBatch();
+        tagRepository.deleteAllInBatch();
+        authorRepository.deleteAllInBatch();
+
+        authorRedisRepository.deleteAll();
+        postRedisRepository.deleteAll();
+        redisTemplate.getConnectionFactory().getConnection().serverCommands().flushAll();
+        localCache.invalidateAll();
+    }
 }

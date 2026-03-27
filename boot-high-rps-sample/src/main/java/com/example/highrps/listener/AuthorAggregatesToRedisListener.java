@@ -95,6 +95,8 @@ public class AuthorAggregatesToRedisListener {
                         .setLastName(payload.lastName())
                         .setMobile(payload.mobile())
                         .setRegisteredAt(payload.registeredAt());
+                redisEntity.setCreatedAt(payload.createdAt());
+                redisEntity.setModifiedAt(payload.modifiedAt());
                 authorRedisRepository.save(redisEntity);
             } catch (Exception e) {
                 log.warn("Failed to update author redis repository for key: {}", key, e);

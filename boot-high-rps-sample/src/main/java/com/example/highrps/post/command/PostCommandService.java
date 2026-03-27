@@ -105,6 +105,7 @@ public class PostCommandService {
                 authorEmail,
                 cmd.published() != null && cmd.published(),
                 publishedAt,
+                createdAt,
                 now,
                 cmd.details(),
                 cmd.tags());

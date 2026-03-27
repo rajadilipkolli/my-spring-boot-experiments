@@ -11,6 +11,8 @@ import com.example.highrps.author.query.AuthorQueryService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import java.net.URI;
+import java.time.LocalDateTime;
+import java.util.Locale;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -30,22 +32,23 @@ public class AuthorController {
 
     @GetMapping("/author/{email}")
     public ResponseEntity<AuthorProjection> getAuthorByEmail(@PathVariable String email) {
-        AuthorProjection resp = authorQueryService.getAuthor(new AuthorQuery(email));
+        AuthorProjection resp = authorQueryService.getAuthor(new AuthorQuery(email.toLowerCase(Locale.ROOT)));
         return ResponseEntity.ok(resp);
     }
 
     @PostMapping(value = "/author")
     public ResponseEntity<AuthorCommandResult> createAuthor(@RequestBody @Valid AuthorRequest newAuthorRequest) {
         CreateAuthorCommand cmd = new CreateAuthorCommand(
-                newAuthorRequest.email(),
+                newAuthorRequest.email().toLowerCase(Locale.ROOT),
                 newAuthorRequest.firstName(),
                 newAuthorRequest.middleName(),
                 newAuthorRequest.lastName(),
-                newAuthorRequest.mobile());
+                newAuthorRequest.mobile(),
+                LocalDateTime.now());
         AuthorCommandResult resp = authorCommandService.createAuthor(cmd);
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{email}")
-                .buildAndExpand(resp.email())
+                .buildAndExpand(newAuthorRequest.email())
                 .toUri();
         return ResponseEntity.created(location).body(resp);
     }
@@ -58,7 +61,8 @@ public class AuthorController {
                 newAuthorRequest.firstName(),
                 newAuthorRequest.middleName(),
                 newAuthorRequest.lastName(),
-                newAuthorRequest.mobile());
+                newAuthorRequest.mobile(),
+                LocalDateTime.now());
         AuthorCommandResult resp = authorCommandService.updateAuthor(cmd);
         return ResponseEntity.ok(resp);
     }

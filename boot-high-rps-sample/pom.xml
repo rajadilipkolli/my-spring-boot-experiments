@@ -188,7 +188,6 @@
         <dependency>
             <groupId>org.springframework.modulith</groupId>
             <artifactId>spring-modulith-starter-test</artifactId>
-            <version>${spring-modulith.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

@@ -3,10 +3,15 @@ package com.example.highrps.author.command;
 import com.example.highrps.author.domain.events.AuthorCreatedEvent;
 import com.example.highrps.author.domain.events.AuthorDeletedEvent;
 import com.example.highrps.author.domain.events.AuthorUpdatedEvent;
+import com.example.highrps.author.query.AuthorProjection;
+import com.example.highrps.author.query.AuthorQuery;
+import com.example.highrps.author.query.AuthorQueryService;
 import com.example.highrps.entities.AuthorRedis;
 import com.example.highrps.infrastructure.redis.DeletionMarkerHandler;
 import com.example.highrps.repository.redis.AuthorRedisRepository;
+import com.example.highrps.shared.ResourceNotFoundException;
 import com.github.benmanes.caffeine.cache.Cache;
+import java.util.Locale;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
@@ -29,29 +34,32 @@ public class AuthorCommandService {
     private final AuthorRedisRepository authorRedisRepository;
     private final JsonMapper jsonMapper;
     private final DeletionMarkerHandler deletionMarkerHandler;
+    private final AuthorQueryService authorQueryService;
 
     public AuthorCommandService(
             ApplicationEventPublisher events,
             Cache<String, String> localCache,
             AuthorRedisRepository authorRedisRepository,
             JsonMapper jsonMapper,
-            DeletionMarkerHandler deletionMarkerHandler) {
+            DeletionMarkerHandler deletionMarkerHandler,
+            AuthorQueryService authorQueryService) {
         this.events = events;
         this.localCache = localCache;
         this.authorRedisRepository = authorRedisRepository;
         this.jsonMapper = jsonMapper;
         this.deletionMarkerHandler = deletionMarkerHandler;
+        this.authorQueryService = authorQueryService;
     }
 
     public AuthorCommandResult createAuthor(CreateAuthorCommand cmd) {
         // Publish domain event (transactional)
-        AuthorCreatedEvent event =
-                new AuthorCreatedEvent(cmd.email(), cmd.firstName(), cmd.middleName(), cmd.lastName(), cmd.mobile());
+        AuthorCreatedEvent event = new AuthorCreatedEvent(
+                cmd.email(), cmd.firstName(), cmd.middleName(), cmd.lastName(), cmd.mobile(), cmd.createdAt());
         events.publishEvent(event);
 
         // Build result
-        AuthorCommandResult result =
-                new AuthorCommandResult(cmd.email(), cmd.firstName(), cmd.middleName(), cmd.lastName(), cmd.mobile());
+        AuthorCommandResult result = new AuthorCommandResult(
+                cmd.email(), cmd.firstName(), cmd.middleName(), cmd.lastName(), cmd.mobile(), cmd.createdAt(), null);
 
         // Eager cache update
         updateCaches(cmd.email(), result);
@@ -61,14 +69,36 @@ public class AuthorCommandService {
     }
 
     public AuthorCommandResult updateAuthor(UpdateAuthorCommand cmd) {
+
+        AuthorQuery authorQuery = new AuthorQuery(cmd.email());
+
+        AuthorProjection author = authorQueryService.getAuthor(authorQuery);
+
+        // Validate author exists
+        if (author == null) {
+            throw new ResourceNotFoundException("Author not found with id: " + cmd.email());
+        }
+
         // Publish domain event
-        AuthorUpdatedEvent event =
-                new AuthorUpdatedEvent(cmd.email(), cmd.firstName(), cmd.middleName(), cmd.lastName(), cmd.mobile());
+        AuthorUpdatedEvent event = new AuthorUpdatedEvent(
+                cmd.email(),
+                cmd.firstName(),
+                cmd.middleName(),
+                cmd.lastName(),
+                cmd.mobile(),
+                author.createdAt(),
+                cmd.modifiedAt());
         events.publishEvent(event);
 
         // Build result
-        AuthorCommandResult result =
-                new AuthorCommandResult(cmd.email(), cmd.firstName(), cmd.middleName(), cmd.lastName(), cmd.mobile());
+        AuthorCommandResult result = new AuthorCommandResult(
+                cmd.email(),
+                cmd.firstName(),
+                cmd.middleName(),
+                cmd.lastName(),
+                cmd.mobile(),
+                author.createdAt(),
+                cmd.modifiedAt());
 
         // Eager cache update
         updateCaches(cmd.email(), result);
@@ -81,7 +111,7 @@ public class AuthorCommandService {
         log.info("Deleting author with email: {}", email);
 
         // 1. Publish tombstone event
-        events.publishEvent(new AuthorDeletedEvent(email));
+        events.publishEvent(new AuthorDeletedEvent(email.toLowerCase(Locale.ROOT)));
 
         // 2. Invalidate local cache
         String cacheKey = email.toLowerCase();
@@ -89,13 +119,13 @@ public class AuthorCommandService {
 
         // 3. Remove from Redis
         try {
-            authorRedisRepository.deleteById(email);
+            authorRedisRepository.deleteById(cacheKey);
         } catch (Exception e) {
             log.warn("Failed to delete Redis entry for email: {}", email, e);
         }
 
         // 4. Mark deleted in Redis with TTL
-        deletionMarkerHandler.markDeleted("author", email);
+        deletionMarkerHandler.markDeleted("author", cacheKey);
 
         log.info("Author deleted successfully: {}", email);
     }
@@ -114,12 +144,13 @@ public class AuthorCommandService {
         // Update Redis
         try {
             AuthorRedis authorRedis = new AuthorRedis()
-                    .setEmail(result.email())
+                    .setEmail(result.email().toLowerCase(Locale.ROOT))
                     .setFirstName(result.firstName())
                     .setMiddleName(result.middleName())
                     .setLastName(result.lastName())
                     .setMobile(result.mobile());
-
+            authorRedis.setCreatedAt(result.createdAt());
+            authorRedis.setModifiedAt(result.modifiedAt());
             authorRedisRepository.save(authorRedis);
         } catch (Exception e) {
             log.warn("Failed to update Redis for email: {}", email, e);

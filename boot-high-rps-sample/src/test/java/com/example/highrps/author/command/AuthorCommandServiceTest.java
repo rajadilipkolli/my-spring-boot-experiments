@@ -2,14 +2,19 @@ package com.example.highrps.author.command;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
 import com.example.highrps.author.domain.events.AuthorCreatedEvent;
 import com.example.highrps.author.domain.events.AuthorDeletedEvent;
 import com.example.highrps.author.domain.events.AuthorUpdatedEvent;
+import com.example.highrps.author.query.AuthorProjection;
+import com.example.highrps.author.query.AuthorQuery;
+import com.example.highrps.author.query.AuthorQueryService;
 import com.example.highrps.infrastructure.redis.DeletionMarkerHandler;
 import com.example.highrps.repository.redis.AuthorRedisRepository;
 import com.github.benmanes.caffeine.cache.Cache;
+import java.time.LocalDateTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -44,12 +49,15 @@ class AuthorCommandServiceTest {
     @Mock
     private JsonMapper jsonMapper;
 
+    @Mock
+    private AuthorQueryService authorQueryService;
+
     @Test
     @DisplayName("Should publish AuthorCreatedEvent when creating an author")
     void shouldPublishEventWhenCreatingAuthor() {
         // Arrange
         CreateAuthorCommand command =
-                new CreateAuthorCommand("john99001@example.com", "John", null, "Doe", 1234567890L);
+                new CreateAuthorCommand("john99001@example.com", "John", null, "Doe", 1234567890L, LocalDateTime.now());
 
         // Act
         AuthorCommandResult result = authorCommandService.createAuthor(command);
@@ -67,8 +75,12 @@ class AuthorCommandServiceTest {
     void shouldPublishEventWhenUpdatingAuthor() {
         // Arrange
         String email = "jane99002@example.com";
-        UpdateAuthorCommand updateCommand = new UpdateAuthorCommand(email, "Jane", null, "Smith", 9876543210L);
+        UpdateAuthorCommand updateCommand =
+                new UpdateAuthorCommand(email, "Jane", null, "Smith", 9876543210L, LocalDateTime.now());
 
+        AuthorProjection authorProjection = new AuthorProjection(
+                email, "Jane", null, "Smith", 9876543210L, LocalDateTime.now(), LocalDateTime.now(), null);
+        given(authorQueryService.getAuthor(new AuthorQuery(email))).willReturn(authorProjection);
         // Act
         AuthorCommandResult result = authorCommandService.updateAuthor(updateCommand);
 
