@@ -18,6 +18,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.AdminClientConfig;
@@ -81,7 +82,7 @@ class EventExternalizationIT extends AbstractIntegrationTest {
 
     @Test
     @DisplayName("Should externalize PostCreatedEvent to Kafka topic 'posts-aggregates'")
-    void shouldExternalizePostCreatedEventToKafka() throws Exception {
+    void shouldExternalizePostCreatedEventToKafka() {
         // Arrange - Set up Kafka consumer
         String topic = "posts-aggregates";
         int partitions = getPartitionCount(topic);
@@ -93,11 +94,12 @@ class EventExternalizationIT extends AbstractIntegrationTest {
         ContainerTestUtils.waitForAssignment(container, partitions);
 
         // Act - Create a post (which should publish PostCreatedEvent)
+        String email = "author-" + UUID.randomUUID() + "@test.com";
         CreatePostCommand createCmd = new CreatePostCommand(
                 12345L,
                 "Test Post",
                 "Test Content",
-                "author@test.com",
+                email,
                 true,
                 new PostDetailsRequest("initial-key", "tester"),
                 List.of(new TagRequest("tag1", "desc1")));
@@ -117,7 +119,7 @@ class EventExternalizationIT extends AbstractIntegrationTest {
             assertThat(json.get("postId").asLong()).isEqualTo(12345L);
             assertThat(json.get("title").asString()).isEqualTo("Test Post");
             assertThat(json.get("content").asString()).isEqualTo("Test Content");
-            assertThat(json.get("authorEmail").asString()).isEqualTo("author@test.com");
+            assertThat(json.get("authorEmail").asString()).isEqualTo(email);
             assertThat(json.get("published").asBoolean()).isTrue();
         });
 
@@ -126,7 +128,7 @@ class EventExternalizationIT extends AbstractIntegrationTest {
 
     @Test
     @DisplayName("Should externalize AuthorCreatedEvent to Kafka topic 'authors-aggregates'")
-    void shouldExternalizeAuthorCreatedEventToKafka() throws Exception {
+    void shouldExternalizeAuthorCreatedEventToKafka() {
         // Arrange - Set up Kafka consumer
         String topic = "authors-aggregates";
         int partitions = getPartitionCount(topic);
@@ -138,8 +140,9 @@ class EventExternalizationIT extends AbstractIntegrationTest {
         ContainerTestUtils.waitForAssignment(container, partitions);
 
         // Act - Create an author (which should publish AuthorCreatedEvent)
-        CreateAuthorCommand command = new CreateAuthorCommand(
-                "test-ext@example.com", "Test", null, "Author", 1234567890L, LocalDateTime.now());
+        String email = "test-ext-" + UUID.randomUUID() + "@example.com";
+        CreateAuthorCommand command =
+                new CreateAuthorCommand(email, "Test", null, "Author", 1234567890L, LocalDateTime.now());
         authorCommandService.createAuthor(command);
 
         // Assert - Verify event was externalized to Kafka
@@ -153,7 +156,7 @@ class EventExternalizationIT extends AbstractIntegrationTest {
             assertThat(rawJson).isNotNull();
             System.out.println("Received AuthorCreatedEvent JSON: " + rawJson);
             var json = objectMapper.readTree(rawJson);
-            assertThat(json.get("email").asString()).isEqualTo("test-ext@example.com");
+            assertThat(json.get("email").asString()).isEqualTo(email);
             assertThat(json.get("firstName").asString()).isEqualTo("Test");
             assertThat(json.get("lastName").asString()).isEqualTo("Author");
             assertThat(json.get("mobile").asLong()).isEqualTo(1234567890L);
@@ -164,14 +167,15 @@ class EventExternalizationIT extends AbstractIntegrationTest {
 
     @Test
     @DisplayName("Should externalize PostCommentCreatedEvent to Kafka topic 'post-comments-aggregates'")
-    void shouldExternalizePostCommentCreatedEventToKafka() throws Exception {
-        authorCommandService.createAuthor(new CreateAuthorCommand(
-                "comment-ext-author@test.com", "Comment", null, "Author", 9876543210L, LocalDateTime.now()));
+    void shouldExternalizePostCommentCreatedEventToKafka() {
+        String authorEmail = "comment-ext-author-" + UUID.randomUUID() + "@test.com";
+        authorCommandService.createAuthor(
+                new CreateAuthorCommand(authorEmail, "Comment", null, "Author", 9876543210L, LocalDateTime.now()));
         postCommandService.createPost(new CreatePostCommand(
                 54321L,
                 "Post for Comment",
                 "Content",
-                "comment-ext-author@test.com",
+                authorEmail,
                 true,
                 new PostDetailsRequest("comment-key", "author"),
                 List.of(new TagRequest("comments", "desc"))));
