@@ -312,6 +312,26 @@
             "projectName": "boot-rabbitmq-thymeleaf",
             "args": "",
             "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-TestHighRpsApplication<boot-high-rps-sample>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.example.highrps.TestHighRpsApplication",
+            "projectName": "boot-high-rps-sample",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-HighRpsApplication<boot-high-rps-sample>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.example.highrps.HighRpsApplication",
+            "projectName": "boot-high-rps-sample",
+            "args": "--spring.profiles.active=local",
+            "envFile": "${workspaceFolder}/.env"
         }
     ]
 }
