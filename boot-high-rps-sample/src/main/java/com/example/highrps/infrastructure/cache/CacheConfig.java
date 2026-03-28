@@ -1,6 +1,5 @@
 package com.example.highrps.infrastructure.cache;
 
-import com.example.highrps.repository.redis.AuthorRedisRepository;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import java.time.Duration;
@@ -15,7 +14,7 @@ import org.springframework.data.redis.repository.configuration.EnableRedisReposi
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 @Configuration(proxyBeanMethods = false)
-@EnableRedisRepositories(basePackageClasses = AuthorRedisRepository.class)
+@EnableRedisRepositories(basePackages = "com.example.highrps")
 public class CacheConfig {
 
     private static final Logger log = LoggerFactory.getLogger(CacheConfig.class);

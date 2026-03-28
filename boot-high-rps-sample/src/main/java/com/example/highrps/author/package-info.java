@@ -1,9 +1,7 @@
-/**
- * Author Management Module
- * <p>
- * This module handles all author-related operations following CQRS pattern.
- * <p>
- * Public API: {@link com.example.highrps.author.api}
- */
-@org.springframework.modulith.ApplicationModule(displayName = "Author Management")
+@ApplicationModule(
+        displayName = "Author Management",
+        type = ApplicationModule.Type.OPEN,
+        allowedDependencies = {"shared", "infrastructure", "post"})
 package com.example.highrps.author;
+
+import org.springframework.modulith.ApplicationModule;

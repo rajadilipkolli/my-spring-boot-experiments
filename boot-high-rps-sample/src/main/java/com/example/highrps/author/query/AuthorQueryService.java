@@ -1,10 +1,10 @@
 package com.example.highrps.author.query;
 
-import com.example.highrps.author.AuthorRequest;
-import com.example.highrps.entities.AuthorRedis;
+import com.example.highrps.author.domain.AuthorRedis;
+import com.example.highrps.author.domain.AuthorRedisRepository;
+import com.example.highrps.author.dto.AuthorRequest;
 import com.example.highrps.infrastructure.cache.RequestCoalescer;
 import com.example.highrps.infrastructure.redis.DeletionMarkerHandler;
-import com.example.highrps.repository.redis.AuthorRedisRepository;
 import com.example.highrps.shared.ResourceNotFoundException;
 import com.github.benmanes.caffeine.cache.Cache;
 import java.util.Locale;

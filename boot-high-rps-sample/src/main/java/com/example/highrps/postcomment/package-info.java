@@ -15,7 +15,7 @@
 @ApplicationModule(
         displayName = "PostComment Management",
         type = ApplicationModule.Type.OPEN,
-        allowedDependencies = {"post", "author", "repository", "shared", "infrastructure", "entities"})
+        allowedDependencies = {"post", "author", "shared", "infrastructure"})
 package com.example.highrps.postcomment;
 
 import org.springframework.modulith.ApplicationModule;

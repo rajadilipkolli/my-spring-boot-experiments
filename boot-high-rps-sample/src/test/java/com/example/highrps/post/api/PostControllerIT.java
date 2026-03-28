@@ -3,11 +3,11 @@ package com.example.highrps.post.api;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
+import com.example.highrps.author.domain.AuthorEntity;
 import com.example.highrps.common.AbstractIntegrationTest;
-import com.example.highrps.entities.AuthorEntity;
-import com.example.highrps.post.PostRedis;
 import com.example.highrps.post.command.PostCommandResult;
 import com.example.highrps.post.domain.PostDetailsResponse;
+import com.example.highrps.post.domain.PostRedis;
 import com.example.highrps.post.query.PostProjection;
 import java.time.Duration;
 import java.time.LocalDateTime;

@@ -1,13 +1,13 @@
 package com.example.highrps.post.command;
 
 import com.example.highrps.infrastructure.redis.DeletionMarkerHandler;
-import com.example.highrps.post.PostRedis;
 import com.example.highrps.post.domain.PostDetailsResponse;
+import com.example.highrps.post.domain.PostRedis;
+import com.example.highrps.post.domain.PostRedisRepository;
 import com.example.highrps.post.domain.TagResponse;
 import com.example.highrps.post.domain.events.PostCreatedEvent;
 import com.example.highrps.post.domain.events.PostDeletedEvent;
 import com.example.highrps.post.domain.events.PostUpdatedEvent;
-import com.example.highrps.repository.redis.PostRedisRepository;
 import com.github.benmanes.caffeine.cache.Cache;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -98,9 +98,11 @@ public class PostCommandService {
                 tags);
 
         // Eager cache update
-        executeAfterCommit(() -> updateCaches(cmd.postId(), result));
+        executeAfterCommit(() -> {
+            updateCaches(cmd.postId(), result);
+            log.info("Post created successfully: {}", cmd.postId());
+        });
 
-        log.info("Post created successfully: {}", cmd.postId());
         return result;
     }
 
@@ -155,9 +157,11 @@ public class PostCommandService {
                 tags);
 
         // Eager cache update
-        executeAfterCommit(() -> updateCaches(cmd.postId(), result));
+        executeAfterCommit(() -> {
+            updateCaches(cmd.postId(), result);
+            log.info("Post updated successfully: {}", cmd.postId());
+        });
 
-        log.info("Post updated successfully: {}", cmd.postId());
         return result;
     }
 
@@ -181,9 +185,9 @@ public class PostCommandService {
 
             // 4. Mark deleted in Redis with TTL (prevents batch re-insertion)
             deletionMarkerHandler.markDeleted(DeletionMarkerHandler.POST, String.valueOf(postId));
-        });
 
-        log.info("Post deleted successfully: {}", postId);
+            log.info("Post deleted successfully: {}", postId);
+        });
     }
 
     private void executeAfterCommit(Runnable task) {

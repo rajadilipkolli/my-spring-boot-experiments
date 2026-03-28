@@ -3,12 +3,12 @@ package com.example.highrps.postcomment.rest;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
+import com.example.highrps.author.domain.AuthorEntity;
 import com.example.highrps.common.AbstractIntegrationTest;
-import com.example.highrps.entities.AuthorEntity;
-import com.example.highrps.entities.PostDetailsEntity;
-import com.example.highrps.entities.PostEntity;
-import com.example.highrps.post.PostRedis;
+import com.example.highrps.post.domain.PostDetailsEntity;
 import com.example.highrps.post.domain.PostDetailsResponse;
+import com.example.highrps.post.domain.PostEntity;
+import com.example.highrps.post.domain.PostRedis;
 import com.example.highrps.postcomment.command.PostCommentCommandResult;
 import com.example.highrps.shared.IdGenerator;
 import java.time.Duration;
