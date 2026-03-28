@@ -3,10 +3,12 @@ package com.example.highrps.author.listener;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import com.example.highrps.author.domain.AuthorRedis;
 import com.example.highrps.author.domain.AuthorRedisRepository;
 import com.example.highrps.author.dto.AuthorRequest;
+import com.example.highrps.infrastructure.redis.DeletionMarkerHandler;
 import java.time.LocalDateTime;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,19 +23,24 @@ class AuthorAggregatesToRedisListenerTest {
     private RedisTemplate<String, String> redisTemplate;
     private JsonMapper jsonMapper;
     private AuthorRedisRepository authorRedisRepository;
+    private DeletionMarkerHandler deletionMarkerHandler;
 
     @BeforeEach
     @SuppressWarnings("unchecked")
     void setUp() {
         redisTemplate = mock(RedisTemplate.class);
+        var listOperations = mock(org.springframework.data.redis.core.ListOperations.class);
+        when(redisTemplate.opsForList()).thenReturn(listOperations);
+
         jsonMapper = JsonMapper.builder().build();
         authorRedisRepository = mock(AuthorRedisRepository.class);
-        listener =
-                new AuthorAggregatesToRedisListener(redisTemplate, "events:queue", jsonMapper, authorRedisRepository);
+        deletionMarkerHandler = mock(DeletionMarkerHandler.class);
+        listener = new AuthorAggregatesToRedisListener(
+                redisTemplate, "events:queue", jsonMapper, authorRedisRepository, deletionMarkerHandler);
     }
 
     @Test
-    void shouldMapCreatedAtAndModifiedAtToAuthorRedis() throws Exception {
+    void shouldMapCreatedAtAndModifiedAtToAuthorRedis() {
         // Arrange
         String email = "test@example.com";
         LocalDateTime now = LocalDateTime.now();

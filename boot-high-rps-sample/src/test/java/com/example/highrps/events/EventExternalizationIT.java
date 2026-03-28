@@ -9,8 +9,10 @@ import com.example.highrps.post.command.CreatePostCommand;
 import com.example.highrps.post.domain.requests.PostDetailsRequest;
 import com.example.highrps.post.domain.requests.TagRequest;
 import com.example.highrps.postcomment.command.CreatePostCommentCommand;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -83,11 +85,7 @@ class EventExternalizationIT extends AbstractIntegrationTest {
         // Assert - Verify event was externalized to Kafka
         await().atMost(Duration.ofSeconds(30)).untilAsserted(() -> {
             assertThat(receivedEvents).containsKey("postCreated");
-            var rawJson = receivedEvents.get("postCreated");
-            if (rawJson != null && rawJson.startsWith("\"eyJ")) {
-                String inner = jsonMapper.readTree(rawJson).asString();
-                rawJson = new String(java.util.Base64.getDecoder().decode(inner));
-            }
+            var rawJson = normalizePayload(receivedEvents.get("postCreated"));
             assertThat(rawJson).isNotNull();
             System.out.println("Received PostCreatedEvent JSON: " + rawJson);
             var json = jsonMapper.readTree(rawJson);
@@ -123,11 +121,7 @@ class EventExternalizationIT extends AbstractIntegrationTest {
         // Assert - Verify event was externalized to Kafka
         await().atMost(Duration.ofSeconds(30)).untilAsserted(() -> {
             assertThat(receivedEvents).containsKey("authorCreated");
-            var rawJson = receivedEvents.get("authorCreated");
-            if (rawJson != null && rawJson.startsWith("\"eyJ")) {
-                String inner = jsonMapper.readTree(rawJson).asString();
-                rawJson = new String(java.util.Base64.getDecoder().decode(inner));
-            }
+            var rawJson = normalizePayload(receivedEvents.get("authorCreated"));
             assertThat(rawJson).isNotNull();
             System.out.println("Received AuthorCreatedEvent JSON: " + rawJson);
             var json = jsonMapper.readTree(rawJson);
@@ -173,11 +167,7 @@ class EventExternalizationIT extends AbstractIntegrationTest {
         // Assert - Verify event was externalized to Kafka
         await().atMost(Duration.ofSeconds(30)).untilAsserted(() -> {
             assertThat(receivedEvents).containsKey("commentCreated");
-            var rawJson = receivedEvents.get("commentCreated");
-            if (rawJson != null && rawJson.startsWith("\"eyJ")) {
-                String inner = jsonMapper.readTree(rawJson).asString();
-                rawJson = new String(java.util.Base64.getDecoder().decode(inner));
-            }
+            var rawJson = normalizePayload(receivedEvents.get("commentCreated"));
             assertThat(rawJson).isNotNull();
             System.out.println("Received PostCommentCreatedEvent JSON: " + rawJson);
             var json = jsonMapper.readTree(rawJson);
@@ -232,6 +222,32 @@ class EventExternalizationIT extends AbstractIntegrationTest {
             System.out.println("Could not get partition count for topic: " + topic + ", defaulting to 1. Error: "
                     + e.getMessage());
             return 1;
+        }
+    }
+
+    /**
+     * Normalizes the payload by parsing it as JSON. If the parsed node is textual,
+     * it attempts to Base64-decode it to UTF-8 (falling back to original text if
+     * decoding fails). Returns rawJson unchanged if it's not a textual node or
+     * parsing fails.
+     */
+    private String normalizePayload(String rawJson) {
+        if (rawJson == null) {
+            return null;
+        }
+        try {
+            var node = jsonMapper.readTree(rawJson);
+            if (!node.isString()) {
+                return rawJson;
+            }
+            String text = node.asString();
+            try {
+                return new String(Base64.getDecoder().decode(text), StandardCharsets.UTF_8);
+            } catch (IllegalArgumentException e) {
+                return text;
+            }
+        } catch (Exception e) {
+            return rawJson;
         }
     }
 }
