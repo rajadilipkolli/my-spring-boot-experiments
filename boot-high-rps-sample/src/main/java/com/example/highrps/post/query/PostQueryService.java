@@ -2,9 +2,9 @@ package com.example.highrps.post.query;
 
 import com.example.highrps.infrastructure.cache.RequestCoalescer;
 import com.example.highrps.infrastructure.redis.DeletionMarkerHandler;
-import com.example.highrps.post.PostRedis;
+import com.example.highrps.post.domain.PostRedis;
+import com.example.highrps.post.domain.PostRedisRepository;
 import com.example.highrps.post.domain.requests.NewPostRequest;
-import com.example.highrps.repository.redis.PostRedisRepository;
 import com.example.highrps.shared.ResourceNotFoundException;
 import com.github.benmanes.caffeine.cache.Cache;
 import java.util.Optional;

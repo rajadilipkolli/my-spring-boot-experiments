@@ -1,10 +1,10 @@
 package com.example.highrps.author.api;
 
-import com.example.highrps.author.AuthorRequest;
 import com.example.highrps.author.command.AuthorCommandResult;
 import com.example.highrps.author.command.AuthorCommandService;
 import com.example.highrps.author.command.CreateAuthorCommand;
 import com.example.highrps.author.command.UpdateAuthorCommand;
+import com.example.highrps.author.dto.AuthorRequest;
 import com.example.highrps.author.query.AuthorProjection;
 import com.example.highrps.author.query.AuthorQuery;
 import com.example.highrps.author.query.AuthorQueryService;

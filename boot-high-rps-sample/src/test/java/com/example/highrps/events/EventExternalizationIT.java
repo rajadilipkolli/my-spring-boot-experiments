@@ -3,17 +3,16 @@ package com.example.highrps.events;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
-import com.example.highrps.author.command.AuthorCommandService;
 import com.example.highrps.author.command.CreateAuthorCommand;
 import com.example.highrps.common.AbstractIntegrationTest;
 import com.example.highrps.post.command.CreatePostCommand;
-import com.example.highrps.post.command.PostCommandService;
 import com.example.highrps.post.domain.requests.PostDetailsRequest;
 import com.example.highrps.post.domain.requests.TagRequest;
 import com.example.highrps.postcomment.command.CreatePostCommentCommand;
-import com.example.highrps.postcomment.command.PostCommentCommandService;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -27,15 +26,11 @@ import org.apache.kafka.common.serialization.StringDeserializer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.kafka.autoconfigure.KafkaConnectionDetails;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.listener.ContainerProperties;
 import org.springframework.kafka.listener.KafkaMessageListenerContainer;
 import org.springframework.kafka.listener.MessageListener;
 import org.springframework.kafka.test.utils.ContainerTestUtils;
-import org.testcontainers.kafka.KafkaContainer;
-import tools.jackson.databind.ObjectMapper;
 
 /**
  * Integration tests for Spring Modulith event externalization to Kafka.
@@ -47,24 +42,6 @@ import tools.jackson.databind.ObjectMapper;
  * so we use StringDeserializer and parse the JSON manually.
  */
 class EventExternalizationIT extends AbstractIntegrationTest {
-
-    @Autowired
-    private PostCommandService postCommandService;
-
-    @Autowired
-    private AuthorCommandService authorCommandService;
-
-    @Autowired
-    private PostCommentCommandService postCommentCommandService;
-
-    @Autowired
-    private KafkaContainer kafkaContainer;
-
-    @Autowired
-    private KafkaConnectionDetails kafkaConnectionDetails;
-
-    @Autowired
-    private ObjectMapper objectMapper;
 
     private Map<String, String> receivedEvents;
 
@@ -108,14 +85,10 @@ class EventExternalizationIT extends AbstractIntegrationTest {
         // Assert - Verify event was externalized to Kafka
         await().atMost(Duration.ofSeconds(30)).untilAsserted(() -> {
             assertThat(receivedEvents).containsKey("postCreated");
-            var rawJson = receivedEvents.get("postCreated");
-            if (rawJson != null && rawJson.startsWith("\"eyJ")) {
-                String inner = objectMapper.readTree(rawJson).asString();
-                rawJson = new String(java.util.Base64.getDecoder().decode(inner));
-            }
+            var rawJson = normalizePayload(receivedEvents.get("postCreated"));
             assertThat(rawJson).isNotNull();
             System.out.println("Received PostCreatedEvent JSON: " + rawJson);
-            var json = objectMapper.readTree(rawJson);
+            var json = jsonMapper.readTree(rawJson);
             assertThat(json.get("postId").asLong()).isEqualTo(12345L);
             assertThat(json.get("title").asString()).isEqualTo("Test Post");
             assertThat(json.get("content").asString()).isEqualTo("Test Content");
@@ -148,14 +121,10 @@ class EventExternalizationIT extends AbstractIntegrationTest {
         // Assert - Verify event was externalized to Kafka
         await().atMost(Duration.ofSeconds(30)).untilAsserted(() -> {
             assertThat(receivedEvents).containsKey("authorCreated");
-            var rawJson = receivedEvents.get("authorCreated");
-            if (rawJson != null && rawJson.startsWith("\"eyJ")) {
-                String inner = objectMapper.readTree(rawJson).asString();
-                rawJson = new String(java.util.Base64.getDecoder().decode(inner));
-            }
+            var rawJson = normalizePayload(receivedEvents.get("authorCreated"));
             assertThat(rawJson).isNotNull();
             System.out.println("Received AuthorCreatedEvent JSON: " + rawJson);
-            var json = objectMapper.readTree(rawJson);
+            var json = jsonMapper.readTree(rawJson);
             assertThat(json.get("email").asString()).isEqualTo(email);
             assertThat(json.get("firstName").asString()).isEqualTo("Test");
             assertThat(json.get("lastName").asString()).isEqualTo("Author");
@@ -198,14 +167,10 @@ class EventExternalizationIT extends AbstractIntegrationTest {
         // Assert - Verify event was externalized to Kafka
         await().atMost(Duration.ofSeconds(30)).untilAsserted(() -> {
             assertThat(receivedEvents).containsKey("commentCreated");
-            var rawJson = receivedEvents.get("commentCreated");
-            if (rawJson != null && rawJson.startsWith("\"eyJ")) {
-                String inner = objectMapper.readTree(rawJson).asString();
-                rawJson = new String(java.util.Base64.getDecoder().decode(inner));
-            }
+            var rawJson = normalizePayload(receivedEvents.get("commentCreated"));
             assertThat(rawJson).isNotNull();
             System.out.println("Received PostCommentCreatedEvent JSON: " + rawJson);
-            var json = objectMapper.readTree(rawJson);
+            var json = jsonMapper.readTree(rawJson);
             assertThat(json.get("commentId").asLong()).isPositive();
             assertThat(json.get("postId").asLong()).isEqualTo(54321L);
             assertThat(json.get("content").asString()).isEqualTo("Excellent content");
@@ -257,6 +222,32 @@ class EventExternalizationIT extends AbstractIntegrationTest {
             System.out.println("Could not get partition count for topic: " + topic + ", defaulting to 1. Error: "
                     + e.getMessage());
             return 1;
+        }
+    }
+
+    /**
+     * Normalizes the payload by parsing it as JSON. If the parsed node is textual,
+     * it attempts to Base64-decode it to UTF-8 (falling back to original text if
+     * decoding fails). Returns rawJson unchanged if it's not a textual node or
+     * parsing fails.
+     */
+    private String normalizePayload(String rawJson) {
+        if (rawJson == null) {
+            return null;
+        }
+        try {
+            var node = jsonMapper.readTree(rawJson);
+            if (!node.isString()) {
+                return rawJson;
+            }
+            String text = node.asString();
+            try {
+                return new String(Base64.getDecoder().decode(text), StandardCharsets.UTF_8);
+            } catch (IllegalArgumentException e) {
+                return text;
+            }
+        } catch (Exception e) {
+            return rawJson;
         }
     }
 }

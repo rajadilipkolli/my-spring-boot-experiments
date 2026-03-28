@@ -1,6 +1,6 @@
 package com.example.highrps.infrastructure.kafka;
 
-import com.example.highrps.author.AuthorRequest;
+import com.example.highrps.author.dto.AuthorRequest;
 import com.example.highrps.post.domain.requests.NewPostRequest;
 import com.example.highrps.postcomment.domain.PostCommentRequest;
 import java.util.Base64;

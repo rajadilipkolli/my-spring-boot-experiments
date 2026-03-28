@@ -1,14 +1,14 @@
 package com.example.highrps.author.command;
 
+import com.example.highrps.author.domain.AuthorRedis;
+import com.example.highrps.author.domain.AuthorRedisRepository;
 import com.example.highrps.author.domain.events.AuthorCreatedEvent;
 import com.example.highrps.author.domain.events.AuthorDeletedEvent;
 import com.example.highrps.author.domain.events.AuthorUpdatedEvent;
 import com.example.highrps.author.query.AuthorProjection;
 import com.example.highrps.author.query.AuthorQuery;
 import com.example.highrps.author.query.AuthorQueryService;
-import com.example.highrps.entities.AuthorRedis;
 import com.example.highrps.infrastructure.redis.DeletionMarkerHandler;
-import com.example.highrps.repository.redis.AuthorRedisRepository;
 import com.example.highrps.shared.ResourceNotFoundException;
 import com.github.benmanes.caffeine.cache.Cache;
 import java.util.Locale;
@@ -70,9 +70,11 @@ public class AuthorCommandService {
                 cmd.email(), cmd.firstName(), cmd.middleName(), cmd.lastName(), cmd.mobile(), cmd.createdAt(), null);
 
         // Eager cache update
-        executeAfterCommit(() -> updateCaches(cmd.email(), result));
+        executeAfterCommit(() -> {
+            updateCaches(cmd.email(), result);
+            log.info("Author created successfully: {}", cmd.email());
+        });
 
-        log.info("Author created successfully: {}", cmd.email());
         return result;
     }
 
@@ -109,9 +111,11 @@ public class AuthorCommandService {
                 cmd.modifiedAt());
 
         // Eager cache update
-        executeAfterCommit(() -> updateCaches(cmd.email(), result));
+        executeAfterCommit(() -> {
+            updateCaches(cmd.email(), result);
+            log.info("Author updated successfully: {}", cmd.email());
+        });
 
-        log.info("Author updated successfully: {}", cmd.email());
         return result;
     }
 
@@ -135,9 +139,9 @@ public class AuthorCommandService {
 
             // 4. Mark deleted in Redis with TTL
             deletionMarkerHandler.markDeleted(DeletionMarkerHandler.AUTHOR, cacheKey);
-        });
 
-        log.info("Author deleted successfully: {}", email);
+            log.info("Author deleted successfully: {}", email);
+        });
     }
 
     private void executeAfterCommit(Runnable task) {

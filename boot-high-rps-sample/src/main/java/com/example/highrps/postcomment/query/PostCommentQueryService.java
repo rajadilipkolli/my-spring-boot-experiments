@@ -1,14 +1,14 @@
 package com.example.highrps.postcomment.query;
 
-import com.example.highrps.entities.PostCommentRedis;
 import com.example.highrps.infrastructure.cache.CacheKeyGenerator;
 import com.example.highrps.infrastructure.cache.RequestCoalescer;
 import com.example.highrps.infrastructure.redis.DeletionMarkerHandler;
 import com.example.highrps.postcomment.command.PostCommentCommandResult;
 import com.example.highrps.postcomment.domain.PostCommentMapper;
+import com.example.highrps.postcomment.domain.PostCommentRedis;
+import com.example.highrps.postcomment.domain.PostCommentRedisRepository;
+import com.example.highrps.postcomment.domain.PostCommentRepository;
 import com.example.highrps.postcomment.domain.PostCommentRequest;
-import com.example.highrps.repository.jpa.PostCommentRepository;
-import com.example.highrps.repository.redis.PostCommentRedisRepository;
 import com.example.highrps.shared.ResourceNotFoundException;
 import com.github.benmanes.caffeine.cache.Cache;
 import java.util.List;

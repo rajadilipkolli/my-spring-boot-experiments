@@ -112,19 +112,30 @@ class AuthorControllerIT extends AbstractIntegrationTest {
                             .isBefore(LocalDateTime.now());
                 });
 
-        // Verify local cache updated with new content
-        String cachedAfter = localCache.getIfPresent(emailKey);
-        assertThat(cachedAfter).isNotNull();
-        AuthorProjection cachedAfterProjection = jsonMapper.readValue(cachedAfter, AuthorProjection.class);
-        assertThat(cachedAfterProjection.middleName()).isEqualTo("IT");
-        assertThat(cachedAfterProjection.firstName()).isEqualTo("junit");
-        var updatedResponseFromRedis = authorRedisRepository.findById(emailKey).orElse(null);
-        assertThat(updatedResponseFromRedis).isNotNull();
-        assertThat(updatedResponseFromRedis.getMiddleName()).isEqualTo("IT");
-        assertThat(updatedResponseFromRedis.getFirstName()).isEqualTo("junit");
-        assertThat(updatedResponseFromRedis.getCreatedAt()).isNotNull().isInstanceOf(LocalDateTime.class);
-        assertThat(updatedResponseFromRedis.getModifiedAt()).isNotNull().isInstanceOf(LocalDateTime.class);
-        assertThat(updatedResponseFromRedis.getModifiedAt()).isAfter(updatedResponseFromRedis.getCreatedAt());
+        // Verify local cache updated with new content using Awaitility for consistency
+        await().atMost(Duration.ofSeconds(10))
+                .pollInterval(Duration.ofMillis(500))
+                .untilAsserted(() -> {
+                    String cachedAfter = localCache.getIfPresent(emailKey);
+                    assertThat(cachedAfter).isNotNull();
+                    AuthorProjection cachedAfterProjection = jsonMapper.readValue(cachedAfter, AuthorProjection.class);
+                    assertThat(cachedAfterProjection.middleName()).isEqualTo("IT");
+                    assertThat(cachedAfterProjection.firstName()).isEqualTo("junit");
+
+                    var updatedResponseFromRedis =
+                            authorRedisRepository.findById(emailKey).orElse(null);
+                    assertThat(updatedResponseFromRedis).isNotNull();
+                    assertThat(updatedResponseFromRedis.getMiddleName()).isEqualTo("IT");
+                    assertThat(updatedResponseFromRedis.getFirstName()).isEqualTo("junit");
+                    assertThat(updatedResponseFromRedis.getCreatedAt())
+                            .isNotNull()
+                            .isInstanceOf(LocalDateTime.class);
+                    assertThat(updatedResponseFromRedis.getModifiedAt())
+                            .isNotNull()
+                            .isInstanceOf(LocalDateTime.class);
+                    assertThat(updatedResponseFromRedis.getModifiedAt())
+                            .isAfter(updatedResponseFromRedis.getCreatedAt());
+                });
 
         // 3) Delete the author via API
         mockMvcTester
@@ -134,13 +145,17 @@ class AuthorControllerIT extends AbstractIntegrationTest {
                 .assertThat()
                 .hasStatus(HttpStatus.NO_CONTENT);
 
-        // Assert local cache and redis no longer have the key
-        assertThat(localCache.getIfPresent(emailKey)).isNull();
-        var redisAfterDelete = authorRedisRepository.findById(emailKey);
-        assertThat(redisAfterDelete).isEmpty();
-        assertThat(redisTemplate.opsForValue().get("deleted:author:" + emailKey))
-                .isNotNull()
-                .isEqualTo("1");
+        // Assert local cache and redis no longer have the key (using Awaitility)
+        await().atMost(Duration.ofSeconds(10))
+                .pollInterval(Duration.ofMillis(500))
+                .untilAsserted(() -> {
+                    assertThat(localCache.getIfPresent(emailKey)).isNull();
+                    var redisAfterDelete = authorRedisRepository.findById(emailKey);
+                    assertThat(redisAfterDelete).isEmpty();
+                    assertThat(redisTemplate.opsForValue().get("deleted:author:" + emailKey))
+                            .isNotNull()
+                            .isEqualTo("1");
+                });
 
         // 4) Subsequent GET should return 404
         await().atMost(Duration.ofSeconds(15))

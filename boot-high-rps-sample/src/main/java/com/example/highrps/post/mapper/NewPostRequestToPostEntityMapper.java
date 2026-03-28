@@ -1,11 +1,7 @@
 package com.example.highrps.post.mapper;
 
-import com.example.highrps.entities.PostEntity;
-import com.example.highrps.entities.PostTagEntity;
-import com.example.highrps.entities.TagEntity;
-import com.example.highrps.post.domain.TagResponse;
+import com.example.highrps.post.domain.*;
 import com.example.highrps.post.domain.requests.NewPostRequest;
-import com.example.highrps.repository.jpa.TagRepository;
 import java.time.LocalDateTime;
 import java.util.Locale;
 import java.util.Objects;

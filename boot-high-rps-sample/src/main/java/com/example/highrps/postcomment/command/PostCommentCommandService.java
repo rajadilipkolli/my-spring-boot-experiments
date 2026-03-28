@@ -4,6 +4,7 @@ import com.example.highrps.infrastructure.cache.CacheKeyGenerator;
 import com.example.highrps.infrastructure.redis.DeletionMarkerHandler;
 import com.example.highrps.post.query.PostQueryService;
 import com.example.highrps.postcomment.domain.PostCommentMapper;
+import com.example.highrps.postcomment.domain.PostCommentRedisRepository;
 import com.example.highrps.postcomment.domain.PostCommentRequest;
 import com.example.highrps.postcomment.domain.events.PostCommentCreatedEvent;
 import com.example.highrps.postcomment.domain.events.PostCommentDeletedEvent;
@@ -11,7 +12,6 @@ import com.example.highrps.postcomment.domain.events.PostCommentUpdatedEvent;
 import com.example.highrps.postcomment.domain.vo.PostCommentId;
 import com.example.highrps.postcomment.query.GetPostCommentQuery;
 import com.example.highrps.postcomment.query.PostCommentQueryService;
-import com.example.highrps.repository.redis.PostCommentRedisRepository;
 import com.example.highrps.shared.IdGenerator;
 import com.example.highrps.shared.ResourceNotFoundException;
 import com.github.benmanes.caffeine.cache.Cache;
@@ -101,9 +101,11 @@ public class PostCommentCommandService {
         PostCommentCommandResult result = postCommentMapper.toResultFromRequest(request);
 
         // Eager cache updates
-        executeAfterCommit(() -> updateCaches(cmd.postId(), commentId, result));
+        executeAfterCommit(() -> {
+            updateCaches(cmd.postId(), commentId, result);
+            log.info("Created post comment: postId={}, commentId={}", cmd.postId(), commentId);
+        });
 
-        log.info("Created post comment: postId={}, commentId={}", cmd.postId(), commentId);
         return result;
     }
 
@@ -135,12 +137,13 @@ public class PostCommentCommandService {
         PostCommentCommandResult result = postCommentMapper.toResultFromRequest(request);
 
         // Eager cache updates
-        executeAfterCommit(() -> updateCaches(cmd.postId(), cmd.commentId().id(), result));
-
-        log.info(
-                "Updated post comment: postId={}, commentId={}",
-                cmd.postId(),
-                cmd.commentId().id());
+        executeAfterCommit(() -> {
+            updateCaches(cmd.postId(), cmd.commentId().id(), result);
+            log.info(
+                    "Updated post comment: postId={}, commentId={}",
+                    cmd.postId(),
+                    cmd.commentId().id());
+        });
     }
 
     /**
@@ -170,9 +173,9 @@ public class PostCommentCommandService {
 
             // 4. Mark deleted in Redis with TTL using unified handler
             deletionMarkerHandler.markDeleted(DeletionMarkerHandler.POST_COMMENT, cacheKey);
-        });
 
-        log.info("Deleted post comment: postId={}, commentId={}", postId, commentId.id());
+            log.info("Deleted post comment: postId={}, commentId={}", postId, commentId.id());
+        });
     }
 
     private void executeAfterCommit(Runnable task) {

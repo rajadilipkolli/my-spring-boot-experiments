@@ -1,7 +1,5 @@
 package com.example.highrps.postcomment.domain;
 
-import com.example.highrps.entities.PostCommentEntity;
-import com.example.highrps.entities.PostCommentRedis;
 import com.example.highrps.postcomment.command.PostCommentCommandResult;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;

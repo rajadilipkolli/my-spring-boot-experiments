@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
+import com.example.highrps.author.domain.AuthorRedisRepository;
 import com.example.highrps.author.domain.events.AuthorCreatedEvent;
 import com.example.highrps.author.domain.events.AuthorDeletedEvent;
 import com.example.highrps.author.domain.events.AuthorUpdatedEvent;
@@ -12,7 +13,6 @@ import com.example.highrps.author.query.AuthorProjection;
 import com.example.highrps.author.query.AuthorQuery;
 import com.example.highrps.author.query.AuthorQueryService;
 import com.example.highrps.infrastructure.redis.DeletionMarkerHandler;
-import com.example.highrps.repository.redis.AuthorRedisRepository;
 import com.github.benmanes.caffeine.cache.Cache;
 import java.time.LocalDateTime;
 import org.junit.jupiter.api.DisplayName;

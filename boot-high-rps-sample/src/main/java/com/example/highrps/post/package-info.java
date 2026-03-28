@@ -1,14 +1,7 @@
-/**
- * Post Management Module
- * <p>
- * This module handles all post-related operations following CQRS pattern.
- * <p>
- * Public API: {@link com.example.highrps.post.api}
- * <p>
- * Allowed dependencies: author (for author validation), repository, shared, infrastructure, entities
- */
-@org.springframework.modulith.ApplicationModule(
+@ApplicationModule(
         displayName = "Post Management",
-        type = org.springframework.modulith.ApplicationModule.Type.OPEN,
-        allowedDependencies = {"author", "repository", "shared", "infrastructure", "entities"})
+        type = ApplicationModule.Type.OPEN,
+        allowedDependencies = {"author", "shared", "infrastructure", "postcomment"})
 package com.example.highrps.post;
+
+import org.springframework.modulith.ApplicationModule;
