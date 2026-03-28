@@ -99,7 +99,7 @@ public class PostCommentAggregatesToRedisListener {
                 }
 
                 try {
-                    deletionMarkerHandler.markDeleted("post-comment", cacheKey);
+                    deletionMarkerHandler.markDeleted(DeletionMarkerHandler.POST_COMMENT, cacheKey);
                     String tombstoneJson = jsonMapper.writeValueAsString(
                             Map.of("id", commentId, "postId", postId, "__deleted", true, "__entity", "post-comment"));
                     redis.opsForList().leftPush(queueKey, tombstoneJson);
@@ -124,8 +124,13 @@ public class PostCommentAggregatesToRedisListener {
 
             // 1. Update Redis repository
             try {
-                PostCommentRedis redisEntity = mapper.toRedis(request);
-                postCommentRedisRepository.save(redisEntity);
+                String key = CacheKeyGenerator.generatePostCommentKey(request.postId(), request.commentId());
+                if (deletionMarkerHandler.isDeleted(DeletionMarkerHandler.POST_COMMENT, key)) {
+                    log.info("Skipping Redis update for postComment {} as it is marked as deleted", key);
+                } else {
+                    PostCommentRedis redisEntity = mapper.toRedis(request);
+                    postCommentRedisRepository.save(redisEntity);
+                }
             } catch (Exception e) {
                 log.warn("Failed to sync comment to Redis: {}", request.commentId(), e);
             }

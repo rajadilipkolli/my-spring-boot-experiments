@@ -94,7 +94,7 @@ public class AuthorAggregatesToRedisListener {
             // Update Redis Repository (Cache)
             try {
                 String cacheKey = key == null ? null : key.toLowerCase(Locale.ROOT);
-                if (cacheKey != null && deletionMarkerHandler.isDeleted(DeletionMarkerHandler.AUTHOR, key)) {
+                if (cacheKey != null && deletionMarkerHandler.isDeleted(DeletionMarkerHandler.AUTHOR, cacheKey)) {
                     log.info("Skipping Redis update for author {} as it is marked as deleted", key);
                 } else {
                     AuthorRedis redisEntity = new AuthorRedis()
