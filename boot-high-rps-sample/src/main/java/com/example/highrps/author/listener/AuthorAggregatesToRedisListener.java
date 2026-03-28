@@ -4,6 +4,7 @@ import com.example.highrps.author.domain.AuthorRedis;
 import com.example.highrps.author.domain.AuthorRedisRepository;
 import com.example.highrps.author.dto.AuthorRequest;
 import com.example.highrps.infrastructure.redis.DeletionMarkerHandler;
+import java.util.Locale;
 import java.util.Map;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.slf4j.Logger;
@@ -92,11 +93,15 @@ public class AuthorAggregatesToRedisListener {
 
             // Update Redis Repository (Cache)
             try {
-                if (deletionMarkerHandler.isDeleted(DeletionMarkerHandler.AUTHOR, key)) {
+                String cacheKey = key == null ? null : key.toLowerCase(Locale.ROOT);
+                if (cacheKey != null && deletionMarkerHandler.isDeleted(DeletionMarkerHandler.AUTHOR, key)) {
                     log.info("Skipping Redis update for author {} as it is marked as deleted", key);
                 } else {
                     AuthorRedis redisEntity = new AuthorRedis()
-                            .setEmail(payload.email())
+                            .setEmail(
+                                    payload.email() == null
+                                            ? null
+                                            : payload.email().toLowerCase(Locale.ROOT))
                             .setFirstName(payload.firstName())
                             .setMiddleName(payload.middleName())
                             .setLastName(payload.lastName())
