@@ -4,12 +4,15 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 
 import com.example.highrps.HighRpsApplication;
 import com.example.highrps.author.batch.AuthorBatchProcessor;
+import com.example.highrps.author.command.AuthorCommandService;
 import com.example.highrps.author.domain.AuthorRedisRepository;
 import com.example.highrps.author.domain.AuthorRepository;
+import com.example.highrps.post.command.PostCommandService;
 import com.example.highrps.post.domain.PostRedisRepository;
 import com.example.highrps.post.domain.PostRepository;
 import com.example.highrps.post.domain.PostTagRepository;
 import com.example.highrps.post.domain.TagRepository;
+import com.example.highrps.postcomment.command.PostCommentCommandService;
 import com.example.highrps.postcomment.domain.PostCommentRepository;
 import com.github.benmanes.caffeine.cache.Cache;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -17,6 +20,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.kafka.autoconfigure.KafkaConnectionDetails;
 import org.springframework.boot.micrometer.metrics.test.autoconfigure.AutoConfigureMetrics;
 import org.springframework.boot.micrometer.tracing.test.autoconfigure.AutoConfigureTracing;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -24,6 +28,7 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
+import org.testcontainers.kafka.KafkaContainer;
 import tools.jackson.databind.json.JsonMapper;
 
 @ActiveProfiles({"test"})
@@ -75,6 +80,21 @@ public abstract class AbstractIntegrationTest {
 
     @Autowired
     protected JsonMapper jsonMapper;
+
+    @Autowired
+    protected PostCommandService postCommandService;
+
+    @Autowired
+    protected AuthorCommandService authorCommandService;
+
+    @Autowired
+    protected PostCommentCommandService postCommentCommandService;
+
+    @Autowired
+    protected KafkaContainer kafkaContainer;
+
+    @Autowired
+    protected KafkaConnectionDetails kafkaConnectionDetails;
 
     @BeforeEach
     public void clearDatabase() {

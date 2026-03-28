@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import tools.jackson.databind.json.JsonMapper;
 
 @Component
@@ -44,6 +45,7 @@ public class AuthorBatchProcessor implements EntityBatchProcessor {
     }
 
     @Override
+    @Transactional
     public void processUpserts(List<String> payloads) {
         // Step 1: Parse payloads and extract emails
         List<ParsedAuthor> parsedAuthors = payloads.stream()
