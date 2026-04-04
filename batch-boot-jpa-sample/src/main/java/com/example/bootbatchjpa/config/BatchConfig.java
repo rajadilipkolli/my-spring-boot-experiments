@@ -30,6 +30,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.dao.DataAccessException;
+import org.springframework.transaction.PlatformTransactionManager;
 
 @Configuration(proxyBeanMethods = false)
 @EnableBatchProcessing
@@ -45,10 +46,14 @@ class BatchConfig implements JobExecutionListener {
     }
 
     @Bean
-    Job allCustomersJob(JpaPagingItemReader<Customer> jpaPagingItemReader, JobRepository jobRepository) {
+    Job allCustomersJob(
+            JpaPagingItemReader<Customer> jpaPagingItemReader,
+            JobRepository jobRepository,
+            PlatformTransactionManager transactionManager) {
         Step step = new StepBuilder("all-customers-step", jobRepository)
                 .allowStartIfComplete(true)
                 .<Customer, CustomerDTO>chunk(10)
+                .transactionManager(transactionManager)
                 .reader(jpaPagingItemReader)
                 .processor(getCustomerCustomerDTOItemProcessor())
                 .writer(getCustomerDTOItemWriter())

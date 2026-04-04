@@ -2,7 +2,7 @@ name: boot-high-rps-sample
 services:
 
   postgresqldb:
-    image: postgres:18.2-alpine
+    image: postgres:18.3-alpine
     hostname: postgresqldb
     container_name: postgresql
     extra_hosts: [ 'host.docker.internal:host-gateway' ]
@@ -45,7 +45,7 @@ services:
 
   redis:
     container_name: redis
-    image: 'redis:8.6.0-alpine'
+    image: 'redis:8.6.2-alpine'
     extra_hosts: [ 'host.docker.internal:host-gateway' ]
     ports:
       - '6379:6379'
@@ -119,7 +119,7 @@ services:
       - demo-network
 
   grafana-lgtm:
-    image: grafana/otel-lgtm:0.18.1
+    image: grafana/otel-lgtm:0.23.0
     extra_hosts: ['host.docker.internal:host-gateway']
     container_name: grafana-lgtm
     environment:
