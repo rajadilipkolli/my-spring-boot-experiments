@@ -5,21 +5,24 @@ spring:
       password: postgres_write
       username: postgres_write
       driverClassName: org.postgresql.Driver
-      url: jdbc:postgresql://localhost:5432/my_database
+      url: jdbc:postgresql://localhost:5432/my_database?options=-c%20timezone=UTC 
       hikari:
         auto-commit: false
         pool-name: primaryHikariPool
         data-source-properties:
           ApplicationName: ${spring.application.name}
+          serverTimezone: UTC
   replica:
     datasource:
       password: repl_password
       username: repl_user
       driverClassName: org.postgresql.Driver
-      url: jdbc:postgresql://localhost:15432/my_database
+      url: jdbc:postgresql://localhost:15432/my_database?options=-c%20timezone=UTC 
       hikari:
         auto-commit: false
         poolName: replicaHikariPool
+        data-source-properties:
+          serverTimezone: UTC
 ################ Database #####################
   data:
     jpa:
