@@ -2,7 +2,7 @@ name: mongodb-elasticsearch-integration
 services:
   mongodb:
     hostname: mongodb
-    image: mongo:8.2.6
+    image: mongo:8.2.7
     volumes:
       - mongodb:/data/db
     ports:
