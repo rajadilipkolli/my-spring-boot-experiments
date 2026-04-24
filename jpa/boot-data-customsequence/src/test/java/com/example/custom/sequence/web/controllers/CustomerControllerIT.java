@@ -86,7 +86,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
     }
 
     @Test
-    void shouldCreateNewCustomer() throws Exception {
+    void shouldCreateNewCustomer() {
         CustomerRequest customerRequest = new CustomerRequest("New Customer", null);
 
         this.mockMvcTester
@@ -113,7 +113,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
     }
 
     @Test
-    void shouldReturn400WhenCreateNewCustomerWithoutText() throws Exception {
+    void shouldReturn400WhenCreateNewCustomerWithoutText() {
         CustomerRequest customerRequest = new CustomerRequest(null, List.of(new OrderRequest("First Order", null)));
 
         this.mockMvcTester

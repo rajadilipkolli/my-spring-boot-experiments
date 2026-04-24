@@ -90,7 +90,7 @@ public interface CustomerAPI {
             operationId = "createCustomer",
             tags = {"customer-controller"},
             requestBody =
-                    @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    @RequestBody(
                             required = true,
                             content =
                                     @Content(
