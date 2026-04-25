@@ -33,7 +33,7 @@ jobs:
           cache: "maven"
       - name: Start up databases via docker compose
         run: |
-          docker compose up -d postgresql-master postgresql-slave
+          docker compose -f docker/docker-compose.yml up -d postgresql-master postgresql-slave
           sleep 5
           docker ps -a
       - name: Build and analyze
