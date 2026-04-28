@@ -7,7 +7,7 @@
 			"installMaven": "true",
 			"installGradle": "false"
 		},
-		"ghcr.io/devcontainers/features/node:1": {
+		"ghcr.io/devcontainers/features/node:2": {
 			"version": "lts"
 		},
 		"ghcr.io/devcontainers/features/docker-in-docker:2": {
