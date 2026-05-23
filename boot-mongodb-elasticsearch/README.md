@@ -112,7 +112,7 @@ flowchart LR
 ## Getting Started
 
 ### Prerequisites
-- JDK 21+
+- JDK 25+
 - Docker and Docker Compose
 - Maven 3.9+
 

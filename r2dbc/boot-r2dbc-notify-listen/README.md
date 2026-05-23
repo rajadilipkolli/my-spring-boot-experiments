@@ -13,7 +13,7 @@ This project demonstrates how to implement PostgreSQL's NOTIFY/LISTEN feature us
 ---
 ## Prerequisites
 
-- JDK 21
+- JDK 25
 - Maven
 - Docker and Docker Compose
 - PostgreSQL (or use provided Docker Compose)
