@@ -89,19 +89,23 @@ public class PostAggregatesToRedisListener {
 
             // Update Redis Repository (Cache)
             try {
-                // Now directly using payload fields as they match PostRedis types
-                PostRedis redisEntity = new PostRedis()
-                        .setId(payload.postId())
-                        .setTitle(payload.title())
-                        .setContent(payload.content())
-                        .setAuthorEmail(payload.email())
-                        .setPublished(payload.published())
-                        .setPublishedAt(payload.publishedAt())
-                        .setCreatedAt(payload.createdAt())
-                        .setModifiedAt(payload.modifiedAt())
-                        .setDetails(payload.details())
-                        .setTags(payload.tags());
-                postRedisRepository.save(redisEntity);
+                if (deletionMarkerHandler.isDeleted(DeletionMarkerHandler.POST, cacheKey)) {
+                    log.info("Skipping Redis update for post {} as it is marked as deleted", cacheKey);
+                } else {
+                    // Now directly using payload fields as they match PostRedis types
+                    PostRedis redisEntity = new PostRedis()
+                            .setId(payload.postId())
+                            .setTitle(payload.title())
+                            .setContent(payload.content())
+                            .setAuthorEmail(payload.email())
+                            .setPublished(payload.published())
+                            .setPublishedAt(payload.publishedAt())
+                            .setCreatedAt(payload.createdAt())
+                            .setModifiedAt(payload.modifiedAt())
+                            .setDetails(payload.details())
+                            .setTags(payload.tags());
+                    postRedisRepository.save(redisEntity);
+                }
             } catch (Exception e) {
                 log.warn("Failed to update post redis repository for key: {}", cacheKey, e);
             }
