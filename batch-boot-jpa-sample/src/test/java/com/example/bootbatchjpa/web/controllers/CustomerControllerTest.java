@@ -69,7 +69,9 @@ class CustomerControllerTest {
                 .andExpect(jsonPath("$.isFirst", is(true)))
                 .andExpect(jsonPath("$.isLast", is(true)))
                 .andExpect(jsonPath("$.hasNext", is(false)))
-                .andExpect(jsonPath("$.hasPrevious", is(false)));
+                .andExpect(jsonPath("$.hasPrevious", is(false)))
+                .andExpect(jsonPath(
+                        "$.data[0].id", is(customerList.getFirst().getId().intValue())));
     }
 
     @Test
