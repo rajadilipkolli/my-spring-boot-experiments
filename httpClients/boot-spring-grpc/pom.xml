@@ -104,17 +104,20 @@
             <plugin>
                 <groupId>io.github.ascopes</groupId>
                 <artifactId>protobuf-maven-plugin</artifactId>
-                <version>4.1.3</version>
+                <version>5.1.4</version>
                 <configuration>
-                    <protoc>${protobuf-java.version}</protoc>
-                    <binaryMavenPlugins>
-                        <binaryMavenPlugin>
+                    <protoc kind="binary-maven">
+                        <version>${protobuf-java.version}</version>
+                    </protoc>
+                    <plugins>
+                        <!-- Vanilla protoc plugins - these are platform specific executables
+           just like protoc is. -->
+                        <plugin kind="binary-maven">
                             <groupId>io.grpc</groupId>
                             <artifactId>protoc-gen-grpc-java</artifactId>
                             <version>${grpc.version}</version>
-                            <options>@generated=omit</options>
-                        </binaryMavenPlugin>
-                    </binaryMavenPlugins>
+                        </plugin>
+                    </plugins>
                 </configuration>
                 <executions>
                     <execution>
