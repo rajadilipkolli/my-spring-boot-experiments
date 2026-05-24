@@ -1,6 +1,7 @@
 package com.example.bootbatchjpa.web.controllers;
 
 import com.example.bootbatchjpa.config.logging.Loggable;
+import java.util.UUID;
 import org.springframework.batch.core.job.Job;
 import org.springframework.batch.core.job.JobExecution;
 import org.springframework.batch.core.job.parameters.JobParameters;
@@ -29,7 +30,7 @@ class JobInvokerController {
     GenericMessage allCustomersJobHandle() throws Exception {
 
         JobParameters jobParameters = new JobParametersBuilder()
-                .addLong("run.id", System.currentTimeMillis())
+                .addString("run.id", UUID.randomUUID().toString())
                 .toJobParameters();
         JobExecution jobExecution = this.jobOperator.start(this.allCustomersJob, jobParameters);
 

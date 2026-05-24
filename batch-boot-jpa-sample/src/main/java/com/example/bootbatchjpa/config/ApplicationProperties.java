@@ -1,8 +1,12 @@
 package com.example.bootbatchjpa.config;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
+import org.springframework.validation.annotation.Validated;
 
+@Validated
 @ConfigurationProperties("application")
 public class ApplicationProperties {
 
@@ -17,7 +21,7 @@ public class ApplicationProperties {
         this.cors = cors;
     }
 
-    @NestedConfigurationProperty
+    @Valid @NestedConfigurationProperty
     private Batch batch = new Batch();
 
     public Batch getBatch() {
@@ -29,8 +33,9 @@ public class ApplicationProperties {
     }
 
     public static class Batch {
-        private int gridSize = 4;
-        private int chunkSize = 10;
+        @Min(1) private int gridSize = 4;
+
+        @Min(1) private int chunkSize = 10;
 
         public int getGridSize() {
             return gridSize;

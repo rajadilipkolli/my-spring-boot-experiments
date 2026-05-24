@@ -1,5 +1,7 @@
 # batch-boot-jpa
 
+![](docs/architecture.webp)
+
 ### Run tests
 
 ```shell
@@ -26,3 +28,7 @@ You can also run the application using Maven as follows:
 * Actuator Endpoint: http://localhost:8080/actuator
 * PgAdmin : http://localhost:5050
 * SBOM : http://localhost:8080/actuator/sbom/application
+
+### Reference
+
+- https://towardsdev.com/spring-batch-partitioning-explained-parallel-jobs-without-breaking-data-1f55b5b28b54

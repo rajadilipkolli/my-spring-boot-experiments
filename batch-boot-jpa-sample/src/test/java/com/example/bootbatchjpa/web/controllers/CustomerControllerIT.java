@@ -8,8 +8,8 @@ import com.example.bootbatchjpa.entities.Customer;
 import com.example.bootbatchjpa.model.response.PagedResult;
 import com.example.bootbatchjpa.repositories.CustomerRepository;
 import java.net.URI;
-import java.util.LinkedHashMap;
 import java.util.List;
+import org.assertj.core.api.InstanceOfAssertFactories;
 import org.instancio.Instancio;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -120,11 +120,13 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                     assertThat(problemDetail.getStatus()).isEqualTo(400);
                     assertThat(problemDetail.getDetail()).isEqualTo("Invalid request content.");
                     assertThat(problemDetail.getInstance()).isEqualTo(URI.create("/api/customers"));
-                    assertThat(problemDetail.getProperties()).containsKey("violations");
-                    List<LinkedHashMap<String, Object>> violations = (List<LinkedHashMap<String, Object>>)
-                            problemDetail.getProperties().get("violations");
-                    assertThat(violations).hasSize(1);
-                    assertThat(violations.getFirst())
+                    assertThat(problemDetail.getProperties())
+                            .containsKey("violations")
+                            .extracting("violations")
+                            .asInstanceOf(InstanceOfAssertFactories.LIST)
+                            .hasSize(1)
+                            .first()
+                            .asInstanceOf(InstanceOfAssertFactories.MAP)
                             .containsEntry("field", "name")
                             .containsEntry("message", "Name cannot be empty")
                             .containsEntry("object", "customer")
