@@ -17,6 +17,38 @@ public class ApplicationProperties {
         this.cors = cors;
     }
 
+    @NestedConfigurationProperty
+    private Batch batch = new Batch();
+
+    public Batch getBatch() {
+        return batch;
+    }
+
+    public void setBatch(Batch batch) {
+        this.batch = batch;
+    }
+
+    public static class Batch {
+        private int gridSize = 4;
+        private int chunkSize = 10;
+
+        public int getGridSize() {
+            return gridSize;
+        }
+
+        public void setGridSize(int gridSize) {
+            this.gridSize = gridSize;
+        }
+
+        public int getChunkSize() {
+            return chunkSize;
+        }
+
+        public void setChunkSize(int chunkSize) {
+            this.chunkSize = chunkSize;
+        }
+    }
+
     public static class Cors {
         private String pathPattern = "/api/**";
         private String allowedMethods = "*";

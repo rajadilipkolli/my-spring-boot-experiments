@@ -1,26 +1,21 @@
 package com.example.bootbatchjpa.web.controllers;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.Matchers.hasSize;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.instancio.Select.field;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.example.bootbatchjpa.common.AbstractIntegrationTest;
 import com.example.bootbatchjpa.entities.Customer;
+import com.example.bootbatchjpa.model.response.PagedResult;
 import com.example.bootbatchjpa.repositories.CustomerRepository;
+import java.net.URI;
+import java.util.LinkedHashMap;
 import java.util.List;
 import org.instancio.Instancio;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.http.ProblemDetail;
 
 class CustomerControllerIT extends AbstractIntegrationTest {
 
@@ -43,88 +38,137 @@ class CustomerControllerIT extends AbstractIntegrationTest {
     }
 
     @Test
-    void shouldFetchAllCustomers() throws Exception {
-        this.mockMvc
-                .perform(get("/api/customers"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.size()", is(customerList.size())))
-                .andExpect(jsonPath("$.totalElements", is(3)))
-                .andExpect(jsonPath("$.pageNumber", is(1)))
-                .andExpect(jsonPath("$.totalPages", is(1)))
-                .andExpect(jsonPath("$.isFirst", is(true)))
-                .andExpect(jsonPath("$.isLast", is(true)))
-                .andExpect(jsonPath("$.hasNext", is(false)))
-                .andExpect(jsonPath("$.hasPrevious", is(false)));
+    void shouldFetchAllCustomers() {
+        this.mockMvcTester
+                .get()
+                .uri("/api/customers")
+                .assertThat()
+                .hasStatusOk()
+                .hasContentType(MediaType.APPLICATION_JSON_VALUE)
+                .bodyJson()
+                .convertTo(PagedResult.class)
+                .satisfies(pagedResult -> {
+                    assertThat(pagedResult.data()).hasSize(customerList.size());
+                    assertThat(pagedResult.totalElements()).isEqualTo(3);
+                    assertThat(pagedResult.pageNumber()).isEqualTo(1);
+                    assertThat(pagedResult.totalPages()).isEqualTo(1);
+                    assertThat(pagedResult.isFirst()).isEqualTo(true);
+                    assertThat(pagedResult.isLast()).isEqualTo(true);
+                    assertThat(pagedResult.hasNext()).isEqualTo(false);
+                    assertThat(pagedResult.hasPrevious()).isEqualTo(false);
+                });
     }
 
     @Test
-    void shouldFindCustomerById() throws Exception {
+    void shouldFindCustomerById() {
         Customer customer = customerList.getFirst();
         Long customerId = customer.getId();
 
-        this.mockMvc
-                .perform(get("/api/customers/{id}", customerId))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(customer.getId()), Long.class))
-                .andExpect(jsonPath("$.name", is(customer.getName())));
+        this.mockMvcTester
+                .get()
+                .uri("/api/customers/{id}", customerId)
+                .assertThat()
+                .hasStatusOk()
+                .hasContentType(MediaType.APPLICATION_JSON_VALUE)
+                .bodyJson()
+                .convertTo(Customer.class)
+                .satisfies(fetchedCustomer -> {
+                    assertThat(fetchedCustomer.getId()).isEqualTo(customer.getId());
+                    assertThat(fetchedCustomer.getName()).isEqualTo(customer.getName());
+                });
     }
 
     @Test
-    void shouldCreateNewCustomer() throws Exception {
+    void shouldCreateNewCustomer() {
         Customer customer = Instancio.create(Customer.class);
         customer.setId(null);
-        this.mockMvc
-                .perform(post("/api/customers")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonMapper.writeValueAsString(customer)))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id", notNullValue()))
-                .andExpect(jsonPath("$.name", is(customer.getName())));
+        this.mockMvcTester
+                .post()
+                .uri("/api/customers")
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .content(jsonMapper.writeValueAsString(customer))
+                .accept(MediaType.APPLICATION_JSON)
+                .assertThat()
+                .hasStatus(201)
+                .hasContentType(MediaType.APPLICATION_JSON_VALUE)
+                .bodyJson()
+                .convertTo(Customer.class)
+                .satisfies(createdCustomer -> {
+                    assertThat(createdCustomer.getId()).isNotNull();
+                    assertThat(createdCustomer.getName()).isEqualTo(customer.getName());
+                });
     }
 
     @Test
-    void shouldReturn400WhenCreateNewCustomerWithoutName() throws Exception {
+    void shouldReturn400WhenCreateNewCustomerWithoutName() {
         Customer customer = new Customer(null, null, null, null);
 
-        this.mockMvc
-                .perform(post("/api/customers")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonMapper.writeValueAsString(customer)))
-                .andExpect(status().isBadRequest())
-                .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
-                .andExpect(jsonPath("$.type", is("https://boot-jpa.com/errors/validation")))
-                .andExpect(jsonPath("$.title", is("Constraint Violation")))
-                .andExpect(jsonPath("$.status", is(400)))
-                .andExpect(jsonPath("$.detail", is("Invalid request content.")))
-                .andExpect(jsonPath("$.instance", is("/api/customers")))
-                .andExpect(jsonPath("$.violations", hasSize(1)))
-                .andExpect(jsonPath("$.violations[0].field", is("name")))
-                .andExpect(jsonPath("$.violations[0].message", is("Name cannot be empty")))
-                .andReturn();
+        this.mockMvcTester
+                .post()
+                .uri("/api/customers")
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .content(jsonMapper.writeValueAsString(customer))
+                .accept(MediaType.APPLICATION_JSON)
+                .assertThat()
+                .hasStatus(400)
+                .hasContentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE)
+                .bodyJson()
+                .convertTo(ProblemDetail.class)
+                .satisfies(problemDetail -> {
+                    assertThat(problemDetail.getType()).isEqualTo(URI.create("https://boot-jpa.com/errors/validation"));
+                    assertThat(problemDetail.getTitle()).isEqualTo("Constraint Violation");
+                    assertThat(problemDetail.getStatus()).isEqualTo(400);
+                    assertThat(problemDetail.getDetail()).isEqualTo("Invalid request content.");
+                    assertThat(problemDetail.getInstance()).isEqualTo(URI.create("/api/customers"));
+                    assertThat(problemDetail.getProperties()).containsKey("violations");
+                    List<LinkedHashMap<String, Object>> violations = (List<LinkedHashMap<String, Object>>)
+                            problemDetail.getProperties().get("violations");
+                    assertThat(violations).hasSize(1);
+                    assertThat(violations.getFirst())
+                            .containsEntry("field", "name")
+                            .containsEntry("message", "Name cannot be empty")
+                            .containsEntry("object", "customer")
+                            .containsEntry("rejectedValue", null);
+                });
     }
 
     @Test
-    void shouldUpdateCustomer() throws Exception {
+    void shouldUpdateCustomer() {
         Customer customer = customerList.getFirst();
         customer.setName("Updated Customer");
 
-        this.mockMvc
-                .perform(put("/api/customers/{id}", customer.getId())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonMapper.writeValueAsString(customer)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(customer.getId()), Long.class))
-                .andExpect(jsonPath("$.name", is("Updated Customer")));
+        this.mockMvcTester
+                .put()
+                .uri("/api/customers/{id}", customer.getId())
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .content(jsonMapper.writeValueAsString(customer))
+                .accept(MediaType.APPLICATION_JSON)
+                .assertThat()
+                .hasStatus(200)
+                .hasContentType(MediaType.APPLICATION_JSON_VALUE)
+                .bodyJson()
+                .convertTo(Customer.class)
+                .satisfies(updatedCustomer -> {
+                    assertThat(updatedCustomer.getId()).isEqualTo(customer.getId());
+                    assertThat(updatedCustomer.getName()).isEqualTo("Updated Customer");
+                });
     }
 
     @Test
-    void shouldDeleteCustomer() throws Exception {
+    void shouldDeleteCustomer() {
         Customer customer = customerList.getFirst();
 
-        this.mockMvc
-                .perform(delete("/api/customers/{id}", customer.getId()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(customer.getId()), Long.class))
-                .andExpect(jsonPath("$.name", is(customer.getName())));
+        this.mockMvcTester
+                .delete()
+                .uri("/api/customers/{id}", customer.getId())
+                .assertThat()
+                .hasStatusOk()
+                .hasContentType(MediaType.APPLICATION_JSON_VALUE)
+                .bodyJson()
+                .convertTo(Customer.class)
+                .satisfies(deletedCustomer -> {
+                    assertThat(deletedCustomer.getId()).isEqualTo(customer.getId());
+                    assertThat(deletedCustomer.getName()).isEqualTo(customer.getName());
+                });
     }
 }

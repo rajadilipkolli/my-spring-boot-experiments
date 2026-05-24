@@ -2,7 +2,7 @@ package com.example.bootbatchjpa.web.controllers;
 
 import com.example.bootbatchjpa.common.AbstractIntegrationTest;
 import org.junit.jupiter.api.Test;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 
 class JobInvokerControllerIT extends AbstractIntegrationTest {
 
@@ -11,16 +11,12 @@ class JobInvokerControllerIT extends AbstractIntegrationTest {
         mockMvcTester
                 .get()
                 .uri("/api/job/customers")
-                .param("minId", "0")
-                .param("maxId", "100")
                 .assertThat()
                 .hasStatusOk()
-                .hasContentType("text/plain;charset=UTF-8")
-                .hasBodyTextEqualTo("Batch job has been invoked as 2");
-    }
-
-    @Test
-    void shouldReturnBadRequestForMissingParameters() {
-        mockMvcTester.get().uri("/api/job/customers").assertThat().hasStatus(HttpStatus.BAD_REQUEST);
+                .hasContentType(MediaType.APPLICATION_JSON_VALUE)
+                .bodyJson()
+                .hasPath("message")
+                .extractingPath("message")
+                .isEqualTo("Batch job has been invoked as 2");
     }
 }

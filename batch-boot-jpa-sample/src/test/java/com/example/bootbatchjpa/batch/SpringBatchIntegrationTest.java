@@ -10,7 +10,6 @@ import org.springframework.batch.core.job.Job;
 import org.springframework.batch.core.job.JobExecution;
 import org.springframework.batch.core.job.JobInstance;
 import org.springframework.batch.core.job.parameters.JobParameters;
-import org.springframework.batch.core.job.parameters.JobParametersBuilder;
 import org.springframework.batch.test.JobOperatorTestUtils;
 import org.springframework.batch.test.JobRepositoryTestUtils;
 import org.springframework.batch.test.context.SpringBatchTest;
@@ -41,14 +40,18 @@ class SpringBatchIntegrationTest extends AbstractIntegrationTest {
         // given
 
         // when
-        JobExecution jobExecution = jobOperatorTestUtils.startJob(defaultJobParameters());
+        JobExecution jobExecution = jobOperatorTestUtils.startJob(this.jobOperatorTestUtils.getUniqueJobParameters());
         JobInstance actualJobInstance = jobExecution.getJobInstance();
         ExitStatus actualJobExitStatus = jobExecution.getExitStatus();
 
         // then
         assertThat(actualJobInstance.getJobName()).isEqualTo("all-customers-job");
-        assertThat(actualJobExitStatus.getExitCode()).isEqualTo(ExitStatus.COMPLETED.getExitCode());
         assertThat(actualJobExitStatus).isEqualTo(ExitStatus.COMPLETED);
+
+        // Assert that we have a manager step plus worker steps
+        assertThat(jobExecution.getStepExecutions()).hasSizeGreaterThan(1);
+        jobExecution.getStepExecutions().forEach(stepExecution -> assertThat(stepExecution.getExitStatus())
+                .isEqualTo(ExitStatus.COMPLETED));
     }
 
     @Test
@@ -61,12 +64,5 @@ class SpringBatchIntegrationTest extends AbstractIntegrationTest {
 
         // then
         assertThat(jobExecution.getExitStatus()).isEqualTo(ExitStatus.COMPLETED);
-    }
-
-    private JobParameters defaultJobParameters() {
-        return new JobParametersBuilder()
-                .addLong("minId", 0L)
-                .addLong("maxId", 100L)
-                .toJobParameters();
     }
 }
