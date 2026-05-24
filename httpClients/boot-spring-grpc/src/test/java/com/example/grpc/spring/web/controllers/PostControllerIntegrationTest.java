@@ -59,9 +59,6 @@ class PostControllerIntegrationTest extends AbstractIntegrationTest {
 
         // 6. Verify Deletion
         mockMvc.perform(get("/api/posts/{id}", postId))
-                .andExpect(status().isInternalServerError()); // gRPC translates NOT_FOUND to
-        // StatusRuntimeException wrapped in 500
-        // currently unless explicitly handled
-        // globally
+                .andExpect(status().isNotFound()); // gRPC translates NOT_FOUND to 404 now
     }
 }

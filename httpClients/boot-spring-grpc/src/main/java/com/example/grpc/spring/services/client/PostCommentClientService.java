@@ -33,42 +33,44 @@ public class PostCommentClientService {
                                     .build());
             return new PostCommentDto(response.getId(), response.getPostId(), response.getReview());
         } catch (StatusRuntimeException e) {
-            throw new RuntimeException("Failed to add comment", e);
+            throw e;
         }
     }
 
-    public PostCommentDto getComment(Long id) {
+    public PostCommentDto getComment(Long postId, Long id) {
         try {
             PostComment response =
-                    commentServiceStub.getComment(GetCommentRequest.newBuilder().setId(id).build());
+                    commentServiceStub.getComment(
+                            GetCommentRequest.newBuilder().setPostId(postId).setId(id).build());
             return new PostCommentDto(response.getId(), response.getPostId(), response.getReview());
         } catch (StatusRuntimeException e) {
-            throw new RuntimeException("Comment not found", e);
+            throw e;
         }
     }
 
-    public PostCommentDto updateComment(Long id, PostCommentDto dto) {
+    public PostCommentDto updateComment(Long postId, Long id, PostCommentDto dto) {
         try {
             PostComment response =
                     commentServiceStub.updateComment(
                             UpdateCommentRequest.newBuilder()
+                                    .setPostId(postId)
                                     .setId(id)
                                     .setReview(dto.review())
                                     .build());
             return new PostCommentDto(response.getId(), response.getPostId(), response.getReview());
         } catch (StatusRuntimeException e) {
-            throw new RuntimeException("Failed to update comment", e);
+            throw e;
         }
     }
 
-    public boolean deleteComment(Long id) {
+    public boolean deleteComment(Long postId, Long id) {
         try {
             DeleteCommentResponse response =
                     commentServiceStub.deleteComment(
-                            DeleteCommentRequest.newBuilder().setId(id).build());
+                            DeleteCommentRequest.newBuilder().setPostId(postId).setId(id).build());
             return response.getSuccess();
         } catch (StatusRuntimeException e) {
-            throw new RuntimeException("Failed to delete comment", e);
+            throw e;
         }
     }
 
@@ -81,7 +83,7 @@ public class PostCommentClientService {
                     .map(c -> new PostCommentDto(c.getId(), c.getPostId(), c.getReview()))
                     .toList();
         } catch (StatusRuntimeException e) {
-            throw new RuntimeException("Failed to list comments", e);
+            throw e;
         }
     }
 }

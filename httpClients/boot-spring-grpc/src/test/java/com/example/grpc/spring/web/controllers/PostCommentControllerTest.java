@@ -50,7 +50,7 @@ class PostCommentControllerTest {
     @Test
     void shouldGetComment() throws Exception {
         PostCommentDto response = new PostCommentDto(1L, 100L, "Great post!");
-        given(postCommentClientService.getComment(1L)).willReturn(response);
+        given(postCommentClientService.getComment(100L, 1L)).willReturn(response);
 
         mockMvc.perform(get("/api/posts/{postId}/comments/{id}", 100L, 1L))
                 .andExpect(status().isOk())
@@ -63,7 +63,7 @@ class PostCommentControllerTest {
         PostCommentDto request = new PostCommentDto(null, null, "Updated review");
         PostCommentDto response = new PostCommentDto(1L, 100L, "Updated review");
 
-        given(postCommentClientService.updateComment(eq(1L), any(PostCommentDto.class)))
+        given(postCommentClientService.updateComment(eq(100L), eq(1L), any(PostCommentDto.class)))
                 .willReturn(response);
 
         mockMvc.perform(
@@ -76,7 +76,7 @@ class PostCommentControllerTest {
 
     @Test
     void shouldDeleteComment() throws Exception {
-        given(postCommentClientService.deleteComment(1L)).willReturn(true);
+        given(postCommentClientService.deleteComment(100L, 1L)).willReturn(true);
 
         mockMvc.perform(delete("/api/posts/{postId}/comments/{id}", 100L, 1L))
                 .andExpect(status().isNoContent());
@@ -84,7 +84,7 @@ class PostCommentControllerTest {
 
     @Test
     void shouldReturnNotFoundWhenDeletingNonExistentComment() throws Exception {
-        given(postCommentClientService.deleteComment(1L)).willReturn(false);
+        given(postCommentClientService.deleteComment(100L, 1L)).willReturn(false);
 
         mockMvc.perform(delete("/api/posts/{postId}/comments/{id}", 100L, 1L))
                 .andExpect(status().isNotFound());

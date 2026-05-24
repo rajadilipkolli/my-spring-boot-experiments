@@ -11,10 +11,14 @@ import com.example.grpc.spring.proto.PostServiceGrpc;
 import com.example.grpc.spring.proto.UpdatePostRequest;
 import io.grpc.StatusRuntimeException;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 @Service
 public class PostClientService {
+
+    private static final Logger log = LoggerFactory.getLogger(PostClientService.class);
 
     private final PostServiceGrpc.PostServiceBlockingStub postServiceStub;
 
@@ -32,7 +36,8 @@ public class PostClientService {
                                     .build());
             return new PostDto(response.getId(), response.getTitle(), response.getContent());
         } catch (StatusRuntimeException e) {
-            throw new RuntimeException("Failed to create post", e);
+            log.error("Failed to create post: {}", e.getStatus(), e);
+            throw e;
         }
     }
 
@@ -41,7 +46,7 @@ public class PostClientService {
             Post response = postServiceStub.getPost(GetPostRequest.newBuilder().setId(id).build());
             return new PostDto(response.getId(), response.getTitle(), response.getContent());
         } catch (StatusRuntimeException e) {
-            throw new RuntimeException("Post not found", e);
+            throw e;
         }
     }
 
@@ -56,7 +61,7 @@ public class PostClientService {
                                     .build());
             return new PostDto(response.getId(), response.getTitle(), response.getContent());
         } catch (StatusRuntimeException e) {
-            throw new RuntimeException("Failed to update post", e);
+            throw e;
         }
     }
 
@@ -66,7 +71,7 @@ public class PostClientService {
                     postServiceStub.deletePost(DeletePostRequest.newBuilder().setId(id).build());
             return response.getSuccess();
         } catch (StatusRuntimeException e) {
-            throw new RuntimeException("Failed to delete post", e);
+            throw e;
         }
     }
 
@@ -79,7 +84,7 @@ public class PostClientService {
                     .map(p -> new PostDto(p.getId(), p.getTitle(), p.getContent()))
                     .toList();
         } catch (StatusRuntimeException e) {
-            throw new RuntimeException("Failed to list posts", e);
+            throw e;
         }
     }
 }

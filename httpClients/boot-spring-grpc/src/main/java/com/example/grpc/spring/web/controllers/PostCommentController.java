@@ -35,20 +35,20 @@ public class PostCommentController {
     @GetMapping("/{id}")
     public ResponseEntity<PostCommentDto> getComment(
             @PathVariable Long postId, @PathVariable Long id) {
-        return ResponseEntity.ok(commentClientService.getComment(id));
+        return ResponseEntity.ok(commentClientService.getComment(postId, id));
     }
 
     @Operation(summary = "Update an existing comment")
     @PutMapping("/{id}")
     public ResponseEntity<PostCommentDto> updateComment(
             @PathVariable Long postId, @PathVariable Long id, @RequestBody PostCommentDto dto) {
-        return ResponseEntity.ok(commentClientService.updateComment(id, dto));
+        return ResponseEntity.ok(commentClientService.updateComment(postId, id, dto));
     }
 
     @Operation(summary = "Delete a comment by ID")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteComment(@PathVariable Long postId, @PathVariable Long id) {
-        if (commentClientService.deleteComment(id)) {
+        if (commentClientService.deleteComment(postId, id)) {
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.notFound().build();

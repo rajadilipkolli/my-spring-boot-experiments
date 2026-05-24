@@ -54,7 +54,7 @@ public class PostCommentGrpcService extends PostCommentServiceGrpc.PostCommentSe
     public void getComment(
             GetCommentRequest request, StreamObserver<PostComment> responseObserver) {
         commentRepository
-                .findById(request.getId())
+                .findByPost_IdAndId(request.getPostId(), request.getId())
                 .ifPresentOrElse(
                         comment -> {
                             responseObserver.onNext(mapToProto(comment));
@@ -71,7 +71,7 @@ public class PostCommentGrpcService extends PostCommentServiceGrpc.PostCommentSe
     public void updateComment(
             UpdateCommentRequest request, StreamObserver<PostComment> responseObserver) {
         commentRepository
-                .findById(request.getId())
+                .findByPost_IdAndId(request.getPostId(), request.getId())
                 .ifPresentOrElse(
                         comment -> {
                             comment.setReview(request.getReview());
@@ -89,8 +89,9 @@ public class PostCommentGrpcService extends PostCommentServiceGrpc.PostCommentSe
     @Override
     public void deleteComment(
             DeleteCommentRequest request, StreamObserver<DeleteCommentResponse> responseObserver) {
-        if (commentRepository.existsById(request.getId())) {
-            commentRepository.deleteById(request.getId());
+        long deletedCount =
+                commentRepository.deleteByPost_IdAndId(request.getPostId(), request.getId());
+        if (deletedCount > 0) {
             responseObserver.onNext(DeleteCommentResponse.newBuilder().setSuccess(true).build());
             responseObserver.onCompleted();
         } else {

@@ -54,7 +54,11 @@ public class PostEntity {
     }
 
     public void setComments(List<PostCommentEntity> comments) {
-        this.comments = comments;
+        this.comments.forEach(existing -> existing.setPost(null));
+        this.comments.clear();
+        if (comments != null) {
+            comments.forEach(this::addComment);
+        }
     }
 
     public void addComment(PostCommentEntity comment) {

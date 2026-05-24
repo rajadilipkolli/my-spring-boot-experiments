@@ -52,6 +52,7 @@
           - httpClients/boot-http-proxy/**/*
           - httpClients/boot-rest-template/**/*
           - httpClients/boot-restclient/**/*
+          - httpClients/boot-spring-grpc/**/*
           - httpClients/boot-web-client-mvc/**/*
           - httpClients/boot-web-client-webflux/**/*
 "component: jmh-benchmark":
@@ -147,6 +148,7 @@
           - httpClients/boot-http-proxy/pom.xml
           - httpClients/boot-rest-template/pom.xml
           - httpClients/boot-restclient/pom.xml
+          - httpClients/boot-spring-grpc/pom.xml
           - httpClients/boot-web-client-mvc/pom.xml
           - httpClients/boot-web-client-webflux/pom.xml
           - jmh-benchmark/pom.xml
