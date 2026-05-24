@@ -25,10 +25,11 @@ import org.springframework.batch.infrastructure.item.ItemProcessor;
 import org.springframework.batch.infrastructure.item.ItemWriter;
 import org.springframework.batch.infrastructure.item.database.JpaPagingItemReader;
 import org.springframework.batch.infrastructure.item.database.builder.JpaPagingItemReaderBuilder;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.task.SimpleAsyncTaskExecutor;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.dao.DataAccessException;
 import org.springframework.transaction.PlatformTransactionManager;
 
@@ -71,15 +72,15 @@ class BatchConfig implements JobExecutionListener {
     }
 
     @Bean
-    Step customerManagerStep(Step customerWorkerStep, JobRepository jobRepository) {
-        SimpleAsyncTaskExecutor asyncTaskExecutor = new SimpleAsyncTaskExecutor("batch_worker_");
-        asyncTaskExecutor.setConcurrencyLimit(applicationProperties.getBatch().getGridSize());
-
+    Step customerManagerStep(
+            Step customerWorkerStep,
+            JobRepository jobRepository,
+            @Qualifier("applicationTaskExecutor") TaskExecutor taskExecutor) {
         return new StepBuilder("customerManagerStep", jobRepository)
                 .partitioner(customerWorkerStep.getName(), partitioner)
                 .step(customerWorkerStep)
                 .gridSize(applicationProperties.getBatch().getGridSize())
-                .taskExecutor(asyncTaskExecutor)
+                .taskExecutor(taskExecutor)
                 .build();
     }
 

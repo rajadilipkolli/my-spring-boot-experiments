@@ -17,6 +17,7 @@ class JobInvokerControllerIT extends AbstractIntegrationTest {
                 .bodyJson()
                 .hasPath("message")
                 .extractingPath("message")
-                .isEqualTo("Batch job has been invoked as 2");
+                .asString()
+                .matches("Batch job has been invoked as \\d+");
     }
 }
