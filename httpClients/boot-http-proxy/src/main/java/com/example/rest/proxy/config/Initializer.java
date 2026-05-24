@@ -25,6 +25,11 @@ class Initializer implements CommandLineRunner {
     @Override
     public void run(String... args) {
         log.info("Running Initializer.....");
+        if (postRepository.count() > 0) {
+            log.info("Skipping initializer because posts already exist");
+            return;
+        }
+
         List<Post> postList = jsonPlaceholderService.loadAllPosts();
         // Ensure ID is null to allow auto-generation
         postList.forEach(post -> post.setId(null));
