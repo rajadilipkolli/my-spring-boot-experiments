@@ -19,6 +19,7 @@
   * [http-proxy](httpClients/boot-http-proxy/README.md)
   * [rest-template](httpClients/boot-rest-template/README.md)
   * [rest-client](httpClients/boot-restclient/README.md)
+  * [spring-grpc](httpClients/boot-spring-grpc/README.md)
   * [web-client-mvc](httpClients/boot-web-client-mvc/README.md)
   * [web-client-webflux](httpClients/boot-web-client-webflux/README.md)
 * [jmh-benchmark](jmh-benchmark/README.md)
