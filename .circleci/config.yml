@@ -14,6 +14,9 @@ jobs:
     executor: machine_executor_amd64
     steps:
       - checkout
+      - run:
+          name: Fetch full history for SonarCloud
+          command: git fetch --unshallow || git fetch --all
       
       # Restore Maven dependencies cache
       - restore_cache:

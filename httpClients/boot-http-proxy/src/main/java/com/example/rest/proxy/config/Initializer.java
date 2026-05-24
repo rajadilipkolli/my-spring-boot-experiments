@@ -25,11 +25,10 @@ class Initializer implements CommandLineRunner {
     @Override
     public void run(String... args) {
         log.info("Running Initializer.....");
-        List<Post> postList = jsonPlaceholderService.loadAllPosts().stream()
-                .peek(post -> {
-                    post.setId(null); // Ensure ID is null to allow auto-generation
-                })
-                .toList();
+        List<Post> postList = jsonPlaceholderService.loadAllPosts();
+        // Ensure ID is null to allow auto-generation
+        postList.forEach(post -> post.setId(null));
+
         this.postRepository.saveAll(postList);
         log.info("Completed Initializer.....");
     }
