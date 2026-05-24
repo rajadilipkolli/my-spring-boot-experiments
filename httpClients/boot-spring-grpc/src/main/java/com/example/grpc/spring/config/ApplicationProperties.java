@@ -5,11 +5,9 @@ import org.springframework.boot.context.properties.NestedConfigurationProperty;
 
 @ConfigurationProperties("application")
 public class ApplicationProperties {
-    @NestedConfigurationProperty
-    private Cors cors = new Cors();
+    @NestedConfigurationProperty private Cors cors = new Cors();
 
-    @NestedConfigurationProperty
-    private Grpc grpc = new Grpc();
+    @NestedConfigurationProperty private Grpc grpc = new Grpc();
 
     public Cors getCors() {
         return cors;

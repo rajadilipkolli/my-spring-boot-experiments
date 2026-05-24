@@ -13,7 +13,7 @@ class GlobalExceptionHandler {
     ResponseEntity<ProblemDetail> handleAllExceptions(Exception ex) {
         ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.INTERNAL_SERVER_ERROR);
         problemDetail.setTitle("Internal Server Error");
-        problemDetail.setDetail(ex.getMessage());
+        problemDetail.setDetail("An unexpected error occurred. Please try again later.");
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(problemDetail);
     }
 }

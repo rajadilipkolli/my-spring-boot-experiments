@@ -1,0 +1,34 @@
+name: httpClients-boot-spring-grpc
+on:
+  push:
+    paths:
+      - "httpClients/boot-spring-grpc/**"
+    branches: [main]
+  pull_request:
+    paths:
+      - "httpClients/boot-spring-grpc/**"
+    types:
+      - opened
+      - synchronize
+      - reopened
+
+jobs:
+  build:
+    name: Run Unit & Integration Tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: "httpClients/boot-spring-grpc"
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
+
+      - name: Set up JDK
+        uses: actions/setup-java@v5
+        with:
+          java-version: 25
+          distribution: "temurin"
+          cache: "maven"
+      - name: Build and analyze
+        run: ./mvnw clean verify

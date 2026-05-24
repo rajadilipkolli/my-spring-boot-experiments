@@ -1,0 +1,25 @@
+pipeline {
+    agent any
+
+    tools {
+        jdk 'jdk25'
+    }
+
+    stages {
+        stage('Build and Test') {
+            steps {
+                dir('httpClients/boot-spring-grpc') {
+                    sh './mvnw clean verify'
+                }
+            }
+        }
+    }
+    
+    post {
+        always {
+            dir('httpClients/boot-spring-grpc') {
+                junit 'target/surefire-reports/*.xml,target/failsafe-reports/*.xml'
+            }
+        }
+    }
+}

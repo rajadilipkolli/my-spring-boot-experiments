@@ -2,14 +2,15 @@
 <configuration>
     <include resource="org/springframework/boot/logging/logback/defaults.xml" />
     <include resource="org/springframework/boot/logging/logback/console-appender.xml" />
+    <springProperty scope="context" name="appName" source="spring.application.name"/>
 
     <springProfile name="default">
         <root level="INFO">
             <appender-ref ref="CONSOLE" />
         </root>
     </springProfile>
-
     <springProfile name="!default">
+        <property name="LOG_FILE" value="logs/${appName}.log"/>
         <include resource="org/springframework/boot/logging/logback/file-appender.xml" />
         <root level="INFO">
             <appender-ref ref="FILE" />
@@ -17,5 +18,9 @@
         </root>
     </springProfile>
 
-    <logger name="com.example.grpc.spring" level="DEBUG" />
+    <logger name="com.example.locks" level="DEBUG"/>
+    <logger name="org.springframework" level="INFO"/>
+    <logger name="org.mapstruct" level="DEBUG" />
+
+
 </configuration>

@@ -1,0 +1,12 @@
+version: '3.8'
+services:
+  boot-spring-grpc:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    image: boot-spring-grpc:latest
+    ports:
+      - "8080:8080"
+      - "9090:9090"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker

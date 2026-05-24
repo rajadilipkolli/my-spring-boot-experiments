@@ -8,7 +8,5 @@ import org.springframework.context.annotation.Configuration;
 @Configuration(proxyBeanMethods = false)
 @OpenAPIDefinition(
         info = @Info(title = "boot-spring-grpc", version = "v1"),
-        servers = @Server(url = "/")
-)
-class SwaggerConfig {
-}
+        servers = @Server(url = "/"))
+class SwaggerConfig {}
