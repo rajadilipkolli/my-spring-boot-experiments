@@ -26,6 +26,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.support.RestClientAdapter;
 import org.springframework.web.service.invoker.HttpServiceProxyFactory;
+import org.zalando.logbook.spring.LogbookClientHttpRequestInterceptor;
 
 @Configuration(proxyBeanMethods = false)
 class RestClientConfiguration {
@@ -79,17 +80,16 @@ class RestClientConfiguration {
     }
 
     @Bean
-    RestClientCustomizer restClientCustomizer(ObservationRegistry observationRegistry
-            /** , LogbookClientHttpRequestInterceptor interceptor */
-            ) {
+    RestClientCustomizer restClientCustomizer(
+            ObservationRegistry observationRegistry, LogbookClientHttpRequestInterceptor interceptor) {
         return restClientBuilder -> restClientBuilder
                 .defaultHeaders(httpHeaders -> {
                     httpHeaders.setContentType(MediaType.APPLICATION_JSON);
                     httpHeaders.setAccept(List.of(MediaType.APPLICATION_JSON));
                 })
                 .baseUrl(applicationProperties.getPostServiceUrl())
-                .observationRegistry(observationRegistry);
-        // .requestInterceptor(interceptor);
+                .observationRegistry(observationRegistry)
+                .requestInterceptor(interceptor);
     }
 
     @Bean
