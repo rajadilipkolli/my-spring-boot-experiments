@@ -87,11 +87,11 @@
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
             <version>${springdoc-openapi.version}</version>
         </dependency>
-        <!-- <dependency>
+        <dependency>
             <groupId>org.zalando</groupId>
             <artifactId>logbook-spring-boot-starter</artifactId>
-            <version>3.12.3</version>
-        </dependency> -->
+            <version>4.0.4</version>
+        </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
