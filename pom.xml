@@ -10,6 +10,7 @@
 
     <properties>
         <maven.compiler.release>25</maven.compiler.release>
+        <sonar.projectKey>rajadilipkolli_my-spring-boot-experiments</sonar.projectKey>
         <sonar.organization>rajadilipkolli</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
         <jacoco-maven-plugin.version>0.8.14</jacoco-maven-plugin.version>
