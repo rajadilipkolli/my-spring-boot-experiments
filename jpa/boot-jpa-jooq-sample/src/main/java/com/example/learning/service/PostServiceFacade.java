@@ -32,10 +32,9 @@ public class PostServiceFacade implements PostService {
         if (exists) {
             log.debug("Post with title '{}' already exists", postRequest.title());
             throw new PostAlreadyExistsException(postRequest.title());
-        } else {
-            log.debug("Creating post with title '{}' for user '{}'", postRequest.title(), userName);
-            this.postWriteService.createPost(postRequest, userName);
         }
+        log.debug("Creating post with title '{}' for user '{}'", postRequest.title(), userName);
+        this.postWriteService.createPost(postRequest, userName);
     }
 
     @Override

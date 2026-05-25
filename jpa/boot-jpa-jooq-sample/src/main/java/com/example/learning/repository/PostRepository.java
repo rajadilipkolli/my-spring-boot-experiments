@@ -14,12 +14,8 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     @EntityGraph(attributePaths = {"details", "comments"})
     Optional<Post> findByTitleAndDetails_CreatedBy(String title, String createdBy);
 
-    boolean existsByTitleIgnoreCase(String title);
-
     @Transactional
     @Modifying
     @Query("delete from Post p where p.title = :title and p.details.createdBy = :createdBy")
     int deleteByTitleAndCreatedBy(@Param("title") String title, @Param("createdBy") String createdBy);
-
-    boolean existsByTitleAndDetails_CreatedBy(String title, String userName);
 }

@@ -58,24 +58,17 @@ public class PostReadServiceImpl implements PostReadService {
 
     @Override
     public boolean existsByTitleIgnoreCase(String title) {
-        Integer count = dslContext
-                .selectCount()
-                .from(POSTS)
-                .where(POSTS.TITLE.equalIgnoreCase(title))
-                .fetchOneInto(Integer.class);
-        return count != null && count > 0;
+        return dslContext.fetchExists(dslContext.selectOne().from(POSTS).where(POSTS.TITLE.equalIgnoreCase(title)));
     }
 
     @Override
     public boolean existsByTitleAndDetailsCreatedBy(String title, String createdBy) {
-        Integer count = dslContext
-                .selectCount()
+        return dslContext.fetchExists(dslContext
+                .selectOne()
                 .from(POSTS)
                 .join(POST_DETAILS)
                 .on(POSTS.ID.eq(POST_DETAILS.ID))
-                .where(POSTS.TITLE.eq(title).and(POST_DETAILS.CREATED_BY.eq(createdBy)))
-                .fetchOneInto(Integer.class);
-        return count != null && count > 0;
+                .where(POSTS.TITLE.eq(title).and(POST_DETAILS.CREATED_BY.eq(createdBy))));
     }
 
     private Field<List<TagResponse>> fetchTagsSubQuery() {
