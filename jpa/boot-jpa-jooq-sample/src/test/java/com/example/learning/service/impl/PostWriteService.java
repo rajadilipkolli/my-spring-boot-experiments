@@ -16,7 +16,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class JPAPostServiceImplTest {
+class PostWriteService {
 
     @Mock
     private PostRepository postRepository;
@@ -25,7 +25,7 @@ class JPAPostServiceImplTest {
     private PostMapper postMapper;
 
     @InjectMocks
-    private JPAPostServiceImpl jpaPostService;
+    private PostWriteServiceImpl jpaPostService;
 
     @Test
     void deletePostByUserNameAndTitle_WhenPostExists_ShouldDeleteSuccessfully() {

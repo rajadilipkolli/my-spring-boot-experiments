@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -31,10 +30,7 @@ class PostControllerTest {
     private JsonMapper jsonMapper;
 
     @MockitoBean
-    @Qualifier("jpaPostService") private PostService jpaPostService;
-
-    @MockitoBean
-    @Qualifier("jooqPostService") private PostService jooqPostService;
+    private PostService postService;
 
     @Test
     void createPostByUserName_shouldReturnValidationErrors() throws Exception {

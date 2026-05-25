@@ -10,52 +10,28 @@ import static org.jooq.impl.DSL.multiset;
 import static org.jooq.impl.DSL.select;
 
 import com.example.learning.exception.PostNotFoundException;
-import com.example.learning.model.request.PostRequest;
 import com.example.learning.model.response.PostCommentResponse;
 import com.example.learning.model.response.PostResponse;
 import com.example.learning.model.response.TagResponse;
-import com.example.learning.service.PostService;
+import com.example.learning.service.PostReadService;
 import java.util.List;
 import org.jooq.DSLContext;
 import org.jooq.Field;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-@Service("jooqPostService")
+@Service
 @Transactional(readOnly = true)
-public class JooqPostServiceImpl implements PostService {
+public class PostReadServiceImpl implements PostReadService {
 
     private final DSLContext dslContext;
 
-    public JooqPostServiceImpl(DSLContext dslContext) {
+    public PostReadServiceImpl(DSLContext dslContext) {
         this.dslContext = dslContext;
-    }
-
-    /**
-     * This operation is not supported in the JOOQ implementation.
-     * Please use the JPA implementation (jpaPostService) instead.
-     *
-     * @throws UnsupportedOperationException always
-     */
-    @Override
-    public void createPost(PostRequest postRequest, String userName) {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * This operation is not supported in the JOOQ implementation.
-     * Please use the JPA implementation (jpaPostService) instead.
-     *
-     * @throws UnsupportedOperationException always
-     */
-    @Override
-    public PostResponse updatePostByUserNameAndTitle(PostRequest postRequest, String userName, String title) {
-        throw new UnsupportedOperationException();
     }
 
     @Override
     public PostResponse fetchPostByUserNameAndTitle(String userName, String title) {
-
         PostResponse response = dslContext
                 .select(
                         POSTS.TITLE,
@@ -71,6 +47,7 @@ public class JooqPostServiceImpl implements PostService {
                 .on(POSTS.ID.eq(POST_DETAILS.ID))
                 .where(POST_DETAILS.CREATED_BY.eq(userName).and(POSTS.TITLE.eq(title)))
                 .fetchOneInto(PostResponse.class);
+
         if (response == null) {
             throw new PostNotFoundException(
                     String.format("Post with title '%s' not found for user '%s'", title, userName));
@@ -79,15 +56,26 @@ public class JooqPostServiceImpl implements PostService {
         return response;
     }
 
-    /**
-     * This operation is not supported in the JOOQ implementation.
-     * Please use the JPA implementation (jpaPostService) instead.
-     *
-     * @throws UnsupportedOperationException always
-     */
     @Override
-    public void deletePostByUserNameAndTitle(String userName, String title) {
-        throw new UnsupportedOperationException();
+    public boolean existsByTitleIgnoreCase(String title) {
+        Integer count = dslContext
+                .selectCount()
+                .from(POSTS)
+                .where(POSTS.TITLE.equalIgnoreCase(title))
+                .fetchOneInto(Integer.class);
+        return count != null && count > 0;
+    }
+
+    @Override
+    public boolean existsByTitleAndDetailsCreatedBy(String title, String createdBy) {
+        Integer count = dslContext
+                .selectCount()
+                .from(POSTS)
+                .join(POST_DETAILS)
+                .on(POSTS.ID.eq(POST_DETAILS.ID))
+                .where(POSTS.TITLE.eq(title).and(POST_DETAILS.CREATED_BY.eq(createdBy)))
+                .fetchOneInto(Integer.class);
+        return count != null && count > 0;
     }
 
     private Field<List<TagResponse>> fetchTagsSubQuery() {
