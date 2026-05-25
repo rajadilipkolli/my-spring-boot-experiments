@@ -28,7 +28,7 @@ public class PostServiceFacade implements PostService {
 
     @Override
     public void createPost(PostRequest postRequest, String userName) {
-        boolean exists = this.postReadService.existsByTitleIgnoreCase(postRequest.title());
+        boolean exists = this.postReadService.existsByTitleAndDetailsCreatedBy(postRequest.title(), userName);
         if (exists) {
             log.debug("Post with title '{}' already exists", postRequest.title());
             throw new PostAlreadyExistsException(postRequest.title());

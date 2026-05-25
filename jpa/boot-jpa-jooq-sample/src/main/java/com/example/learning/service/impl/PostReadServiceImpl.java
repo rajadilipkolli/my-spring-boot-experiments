@@ -57,11 +57,6 @@ public class PostReadServiceImpl implements PostReadService {
     }
 
     @Override
-    public boolean existsByTitleIgnoreCase(String title) {
-        return dslContext.fetchExists(dslContext.selectOne().from(POSTS).where(POSTS.TITLE.equalIgnoreCase(title)));
-    }
-
-    @Override
     public boolean existsByTitleAndDetailsCreatedBy(String title, String createdBy) {
         return dslContext.fetchExists(dslContext
                 .selectOne()

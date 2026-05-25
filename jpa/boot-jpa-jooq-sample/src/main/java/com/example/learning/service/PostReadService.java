@@ -6,7 +6,5 @@ public interface PostReadService {
 
     PostResponse fetchPostByUserNameAndTitle(String userName, String title);
 
-    boolean existsByTitleIgnoreCase(String title);
-
     boolean existsByTitleAndDetailsCreatedBy(String title, String createdBy);
 }
