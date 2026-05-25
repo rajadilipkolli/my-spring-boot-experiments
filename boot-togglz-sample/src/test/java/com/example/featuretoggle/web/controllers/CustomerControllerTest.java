@@ -28,7 +28,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 @WebMvcTest(controllers = CustomerController.class)
 @ActiveProfiles(PROFILE_TEST)
@@ -41,7 +41,7 @@ class CustomerControllerTest {
     private CustomerService customerService;
 
     @Autowired
-    private ObjectMapper objectMapper;
+    private JsonMapper jsonMapper;
 
     private List<Customer> customerList;
 
@@ -95,7 +95,7 @@ class CustomerControllerTest {
         this.mockMvc
                 .perform(post("/api/customers")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(customer)))
+                        .content(jsonMapper.writeValueAsString(customer)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id", notNullValue()))
                 .andExpect(jsonPath("$.text", is(customer.getText())));
@@ -108,7 +108,7 @@ class CustomerControllerTest {
         this.mockMvc
                 .perform(post("/api/customers")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(customer)))
+                        .content(jsonMapper.writeValueAsString(customer)))
                 .andExpect(status().isBadRequest())
                 .andExpect(header().string("Content-Type", is("application/problem+json")))
                 .andExpect(header().string("Content-Type", is("application/problem+json")))
@@ -130,7 +130,7 @@ class CustomerControllerTest {
         this.mockMvc
                 .perform(put("/api/customers/{id}", customer.getId())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(customer)))
+                        .content(jsonMapper.writeValueAsString(customer)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.text", is(customer.getText())));
     }
@@ -148,7 +148,7 @@ class CustomerControllerTest {
         this.mockMvc
                 .perform(put("/api/customers/{id}", customerId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(customer)))
+                        .content(jsonMapper.writeValueAsString(customer)))
                 .andExpect(status().isNotFound());
     }
 

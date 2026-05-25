@@ -37,7 +37,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 @WebMvcTest(controllers = DriverController.class)
 @ActiveProfiles(PROFILE_TEST)
@@ -50,7 +50,7 @@ class DriverControllerTest {
     private DriverService driverService;
 
     @Autowired
-    private ObjectMapper objectMapper;
+    private JsonMapper jsonMapper;
 
     private List<Driver> driverList;
 
@@ -120,7 +120,7 @@ class DriverControllerTest {
         this.mockMvc
                 .perform(post("/api/drivers")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(driverRequest)))
+                        .content(jsonMapper.writeValueAsString(driverRequest)))
                 .andExpect(status().isCreated())
                 .andExpect(header().exists(HttpHeaders.LOCATION))
                 .andExpect(jsonPath("$.id", notNullValue()))
@@ -134,7 +134,7 @@ class DriverControllerTest {
         this.mockMvc
                 .perform(post("/api/drivers")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(driverRequest)))
+                        .content(jsonMapper.writeValueAsString(driverRequest)))
                 .andExpect(status().isBadRequest())
                 .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                 .andExpect(jsonPath("$.type", is("https://api.boot-jndi-sample.com/errors/constraint-violation")))
@@ -159,7 +159,7 @@ class DriverControllerTest {
         this.mockMvc
                 .perform(put("/api/drivers/{id}", driverId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(driverRequest)))
+                        .content(jsonMapper.writeValueAsString(driverRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(driverId), Long.class))
                 .andExpect(jsonPath("$.text", is(driver.text())));
@@ -175,7 +175,7 @@ class DriverControllerTest {
         this.mockMvc
                 .perform(put("/api/drivers/{id}", driverId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(driverRequest)))
+                        .content(jsonMapper.writeValueAsString(driverRequest)))
                 .andExpect(status().isNotFound())
                 .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                 .andExpect(jsonPath("$.type", is("https://api.boot-jndi-sample.com/errors/not-found")))

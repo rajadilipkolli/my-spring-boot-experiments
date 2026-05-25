@@ -15,17 +15,17 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 import org.springframework.web.servlet.HandlerInterceptor;
-import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 @Configuration(proxyBeanMethods = false)
 public class MultiTenantInterceptor implements HandlerInterceptor {
 
     private final TenantIdentifierResolver tenantIdentifierResolver;
-    private final ObjectMapper objectMapper;
+    private final JsonMapper jsonMapper;
 
-    public MultiTenantInterceptor(TenantIdentifierResolver tenantIdentifierResolver, ObjectMapper objectMapper) {
+    public MultiTenantInterceptor(TenantIdentifierResolver tenantIdentifierResolver, JsonMapper jsonMapper) {
         this.tenantIdentifierResolver = tenantIdentifierResolver;
-        this.objectMapper = objectMapper;
+        this.jsonMapper = jsonMapper;
     }
 
     private List<String> validTenantsList = new ArrayList<>();
@@ -44,7 +44,7 @@ public class MultiTenantInterceptor implements HandlerInterceptor {
 
             response.setContentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE);
             response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-            response.getWriter().write(objectMapper.writeValueAsString(problemDetail));
+            response.getWriter().write(jsonMapper.writeValueAsString(problemDetail));
             response.getWriter().flush();
             return false;
         }

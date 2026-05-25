@@ -9,7 +9,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
-import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 @ActiveProfiles({AppConstants.PROFILE_STANDALONE})
 @SpringBootTest(
@@ -22,7 +22,7 @@ public abstract class AbstractIntegrationTest {
     protected MockMvcTester mockMvcTester;
 
     @Autowired
-    protected ObjectMapper objectMapper;
+    protected JsonMapper jsonMapper;
 
     @Autowired
     protected ActorRepository actorRepository;

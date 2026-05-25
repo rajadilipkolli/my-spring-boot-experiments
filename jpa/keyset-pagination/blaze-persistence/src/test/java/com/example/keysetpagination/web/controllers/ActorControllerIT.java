@@ -65,7 +65,7 @@ class ActorControllerIT extends AbstractIntegrationTest {
                 .getContentAsString();
 
         PagedResult<Actor> pagedResult =
-                objectMapper.readValue(contentAsString, new TypeReference<PagedResult<Actor>>() {});
+                jsonMapper.readValue(contentAsString, new TypeReference<PagedResult<Actor>>() {});
 
         this.mockMvc
                 .perform(get("/api/actors")
@@ -145,7 +145,7 @@ class ActorControllerIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(post("/api/actors")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(actorRequest)))
+                        .content(jsonMapper.writeValueAsString(actorRequest)))
                 .andExpect(status().isCreated())
                 .andExpect(header().string(HttpHeaders.LOCATION, matchesPattern(".*/api/actors/\\d+")))
                 .andExpect(jsonPath("$.id", notNullValue()))
@@ -159,7 +159,7 @@ class ActorControllerIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(post("/api/actors")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(actorRequest)))
+                        .content(jsonMapper.writeValueAsString(actorRequest)))
                 .andExpect(status().isBadRequest())
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                 .andExpect(jsonPath("$.type", is("http://api.boot-data-keyset-pagination.com/errors/validation-error")))
@@ -181,7 +181,7 @@ class ActorControllerIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(put("/api/actors/{id}", actorId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(actorRequest)))
+                        .content(jsonMapper.writeValueAsString(actorRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(actorId), Long.class))
                 .andExpect(jsonPath("$.name", is(actorRequest.name())));

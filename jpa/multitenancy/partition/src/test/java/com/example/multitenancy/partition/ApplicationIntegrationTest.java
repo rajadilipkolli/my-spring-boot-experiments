@@ -78,7 +78,7 @@ class ApplicationIntegrationTest extends AbstractIntegrationTest {
                     .perform(post("/api/customers")
                             .param("tenant", tenant)
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(customer)))
+                            .content(jsonMapper.writeValueAsString(customer)))
                     .andExpect(status().isCreated())
                     .andExpect(jsonPath("$.text", is(customer.getText())))
                     .andExpect(jsonPath("$.id", notNullValue()))

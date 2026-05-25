@@ -103,7 +103,7 @@ class LokiPushIntegrationTest extends AbstractIntegrationTest {
                                     continue;
                                 }
 
-                                JsonNode root = objectMapper.readTree(resp.body());
+                                JsonNode root = jsonMapper.readTree(resp.body());
                                 JsonNode data = root.path("data").path("result");
                                 if (data.isArray()) {
                                     for (JsonNode item : data) {

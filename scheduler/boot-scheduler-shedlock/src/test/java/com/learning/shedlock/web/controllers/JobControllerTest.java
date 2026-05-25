@@ -37,7 +37,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 @WebMvcTest(controllers = JobController.class)
 @ActiveProfiles(PROFILE_TEST)
@@ -50,7 +50,7 @@ class JobControllerTest {
     private JobService jobService;
 
     @Autowired
-    private ObjectMapper objectMapper;
+    private JsonMapper jsonMapper;
 
     private List<Job> jobList;
 
@@ -120,7 +120,7 @@ class JobControllerTest {
         this.mockMvc
                 .perform(post("/api/jobs")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(jobRequest)))
+                        .content(jsonMapper.writeValueAsString(jobRequest)))
                 .andExpect(status().isCreated())
                 .andExpect(header().exists(HttpHeaders.LOCATION))
                 .andExpect(jsonPath("$.id", notNullValue()))
@@ -134,7 +134,7 @@ class JobControllerTest {
         this.mockMvc
                 .perform(post("/api/jobs")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(jobRequest)))
+                        .content(jsonMapper.writeValueAsString(jobRequest)))
                 .andExpect(status().isBadRequest())
                 .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                 .andExpect(jsonPath("$.type", is("http://api.boot-shedlock-sample.com/errors/validation-error")))
@@ -158,7 +158,7 @@ class JobControllerTest {
         this.mockMvc
                 .perform(put("/api/jobs/{id}", jobId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(jobRequest)))
+                        .content(jsonMapper.writeValueAsString(jobRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(jobId), Long.class))
                 .andExpect(jsonPath("$.text", is(job.text())));
@@ -173,7 +173,7 @@ class JobControllerTest {
         this.mockMvc
                 .perform(put("/api/jobs/{id}", jobId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(jobRequest)))
+                        .content(jsonMapper.writeValueAsString(jobRequest)))
                 .andExpect(status().isNotFound())
                 .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                 .andExpect(jsonPath("$.type", is("http://api.boot-shedlock-sample.com/errors/not-found")))

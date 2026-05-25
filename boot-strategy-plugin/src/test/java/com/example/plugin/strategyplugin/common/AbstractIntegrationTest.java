@@ -8,7 +8,7 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
-import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 @ActiveProfiles({"test"})
 @SpringBootTest(
@@ -21,5 +21,5 @@ public abstract class AbstractIntegrationTest {
     @LocalServerPort protected int port;
 
     @Autowired protected MockMvcTester mockMvcTester;
-    @Autowired protected ObjectMapper objectMapper;
+    @Autowired protected JsonMapper jsonMapper;
 }

@@ -37,7 +37,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 @WebMvcTest(controllers = OrderController.class)
 @ActiveProfiles(PROFILE_TEST)
@@ -50,7 +50,7 @@ class OrderControllerTest {
     private OrderService orderService;
 
     @Autowired
-    private ObjectMapper objectMapper;
+    private JsonMapper jsonMapper;
 
     private List<Order> orderList;
     private Customer customer;
@@ -120,7 +120,7 @@ class OrderControllerTest {
         this.mockMvc
                 .perform(post("/api/orders")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(orderRequest)))
+                        .content(jsonMapper.writeValueAsString(orderRequest)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id", notNullValue()))
                 .andExpect(jsonPath("$.text", is(orderRequest.text())));
@@ -133,7 +133,7 @@ class OrderControllerTest {
         this.mockMvc
                 .perform(post("/api/orders")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(order)))
+                        .content(jsonMapper.writeValueAsString(order)))
                 .andExpect(status().isBadRequest())
                 .andExpect(header().string("Content-Type", is("application/problem+json")))
                 .andExpect(jsonPath("$.type", is("https://custom-sequence.com/errors/validation-error")))
@@ -160,7 +160,7 @@ class OrderControllerTest {
         this.mockMvc
                 .perform(put("/api/orders/{id}", orderResponse.id())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(orderRequest)))
+                        .content(jsonMapper.writeValueAsString(orderRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.text", is(orderResponse.text())));
     }
@@ -174,7 +174,7 @@ class OrderControllerTest {
         this.mockMvc
                 .perform(put("/api/orders/{id}", orderId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(orderRequest)))
+                        .content(jsonMapper.writeValueAsString(orderRequest)))
                 .andExpect(status().isNotFound());
 
         verify(orderService, times(1)).updateOrderById(orderId, orderRequest);

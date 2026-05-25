@@ -37,7 +37,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 @WebMvcTest(controllers = TagController.class)
 @ActiveProfiles(PROFILE_TEST)
@@ -50,7 +50,7 @@ class TagControllerTest {
     private TagService tagService;
 
     @Autowired
-    private ObjectMapper objectMapper;
+    private JsonMapper jsonMapper;
 
     private List<Tag> tagList;
 
@@ -120,7 +120,7 @@ class TagControllerTest {
         this.mockMvc
                 .perform(post("/api/tags")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(tagRequest)))
+                        .content(jsonMapper.writeValueAsString(tagRequest)))
                 .andExpect(status().isCreated())
                 .andExpect(header().exists(HttpHeaders.LOCATION))
                 .andExpect(jsonPath("$.id", notNullValue()))
@@ -134,7 +134,7 @@ class TagControllerTest {
         this.mockMvc
                 .perform(post("/api/tags")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(tagRequest)))
+                        .content(jsonMapper.writeValueAsString(tagRequest)))
                 .andExpect(status().isBadRequest())
                 .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                 .andExpect(jsonPath("$.type", is("https://api.graphql-webmvc.com/errors/validation")))
@@ -158,7 +158,7 @@ class TagControllerTest {
         this.mockMvc
                 .perform(put("/api/tags/{id}", tagId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(tagRequest)))
+                        .content(jsonMapper.writeValueAsString(tagRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(tagId), Long.class))
                 .andExpect(jsonPath("$.name", is(tag.name())));
@@ -173,7 +173,7 @@ class TagControllerTest {
         this.mockMvc
                 .perform(put("/api/tags/{id}", tagId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(tagRequest)))
+                        .content(jsonMapper.writeValueAsString(tagRequest)))
                 .andExpect(status().isNotFound())
                 .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                 .andExpect(jsonPath("$.type", is("http://api.boot-graphql-querydsl.com/errors/not-found")))

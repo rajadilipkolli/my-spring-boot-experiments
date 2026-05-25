@@ -89,7 +89,7 @@ class OrderControllerIT extends AbstractIntegrationTest {
                 .perform(post("/api/orders")
                         .param("tenant", "dbsystc")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(order)))
+                        .content(jsonMapper.writeValueAsString(order)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id", notNullValue()))
                 .andExpect(jsonPath("$.amount").value(order.amount().doubleValue()))
@@ -105,7 +105,7 @@ class OrderControllerIT extends AbstractIntegrationTest {
                 .perform(put("/api/orders/{id}", order.getId())
                         .param("tenant", "dbsystc")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(order)))
+                        .content(jsonMapper.writeValueAsString(order)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.amount").value(order.getAmount().doubleValue()));
     }
