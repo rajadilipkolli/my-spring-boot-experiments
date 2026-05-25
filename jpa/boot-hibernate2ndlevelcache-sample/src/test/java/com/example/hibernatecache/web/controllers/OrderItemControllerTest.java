@@ -38,7 +38,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 @WebMvcTest(controllers = OrderItemController.class)
 @ActiveProfiles(PROFILE_TEST)
@@ -51,7 +51,7 @@ class OrderItemControllerTest {
     private OrderItemService orderItemService;
 
     @Autowired
-    private ObjectMapper objectMapper;
+    private JsonMapper jsonMapper;
 
     private List<OrderItem> orderItemList;
     private Order savedOrder;
@@ -146,7 +146,7 @@ class OrderItemControllerTest {
         this.mockMvc
                 .perform(put("/api/order/items/{id}", orderItemId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(orderItemRequest)))
+                        .content(jsonMapper.writeValueAsString(orderItemRequest)))
                 .andExpect(status().isBadRequest())
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                 .andExpect(
@@ -171,7 +171,7 @@ class OrderItemControllerTest {
         this.mockMvc
                 .perform(put("/api/order/items/{id}", orderItemId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(orderItemRequest)))
+                        .content(jsonMapper.writeValueAsString(orderItemRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.orderItemId", is(orderItemId), Long.class))
                 .andExpect(jsonPath("$.price", is(orderItem.price()), BigDecimal.class))
@@ -187,7 +187,7 @@ class OrderItemControllerTest {
         this.mockMvc
                 .perform(put("/api/order/items/{id}", orderItemId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(orderItemRequest)))
+                        .content(jsonMapper.writeValueAsString(orderItemRequest)))
                 .andExpect(status().isBadRequest())
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                 .andExpect(

@@ -34,7 +34,7 @@ public class PostCommandService {
     private final ApplicationEventPublisher events;
     private final Cache<String, String> localCache;
     private final PostRedisRepository postRedisRepository;
-    private final JsonMapper objectMapper;
+    private final JsonMapper jsonMapper;
     private final DeletionMarkerHandler deletionMarkerHandler;
 
     public PostCommandService(
@@ -46,7 +46,7 @@ public class PostCommandService {
         this.events = events;
         this.localCache = localCache;
         this.postRedisRepository = postRedisRepository;
-        this.objectMapper = jsonMapper;
+        this.jsonMapper = jsonMapper;
         this.deletionMarkerHandler = deletionMarkerHandler;
     }
 
@@ -208,7 +208,7 @@ public class PostCommandService {
 
         // Update local cache
         try {
-            String json = objectMapper.writeValueAsString(result);
+            String json = jsonMapper.writeValueAsString(result);
             localCache.put(cacheKey, json);
         } catch (Exception e) {
             log.warn("Failed to update local cache for postId: {}", postId, e);

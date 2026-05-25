@@ -118,7 +118,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                 .perform(post("/api/customers")
                         .param("tenant", "dbsystc")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(customerDTO)))
+                        .content(jsonMapper.writeValueAsString(customerDTO)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id", notNullValue()))
                 .andExpect(jsonPath("$.text", is(customerDTO.text())))
@@ -134,7 +134,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
 
         mockMvc.perform(post("/api/customers")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(customerDto)))
+                        .content(jsonMapper.writeValueAsString(customerDto)))
                 .andExpect(status().isBadRequest())
                 .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                 .andExpect(jsonPath("$.type", is("https://multitenancy.com/errors/validation-error")))
@@ -152,7 +152,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                 .perform(post("/api/customers")
                         .param("tenant", "dbsystc")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(customerDTO)))
+                        .content(jsonMapper.writeValueAsString(customerDTO)))
                 .andExpect(status().isBadRequest())
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                 .andExpect(jsonPath("$.type", is("https://multitenancy.com/errors/validation-error")))
@@ -172,7 +172,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                 .perform(put("/api/customers/{id}", customer.getId())
                         .param("tenant", "dbsystc")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(customer)))
+                        .content(jsonMapper.writeValueAsString(customer)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.text", is(customer.getText())));
     }

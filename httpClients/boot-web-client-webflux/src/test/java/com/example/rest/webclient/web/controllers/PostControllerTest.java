@@ -23,7 +23,7 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.function.BodyInserters;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 @WebFluxTest(controllers = PostController.class)
 @ActiveProfiles(PROFILE_TEST)
@@ -33,7 +33,7 @@ class PostControllerTest {
 
     @MockitoBean private PostService postService;
 
-    @Autowired private ObjectMapper objectMapper;
+    @Autowired private JsonMapper jsonMapper;
 
     private List<PostDto> postList;
 
@@ -140,7 +140,7 @@ class PostControllerTest {
                 .put()
                 .uri("/api/posts/{id}", postId)
                 .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(objectMapper.writeValueAsString(post))
+                .bodyValue(jsonMapper.writeValueAsString(post))
                 .exchange()
                 .expectStatus()
                 .isOk()
@@ -158,7 +158,7 @@ class PostControllerTest {
                 .put()
                 .uri("/api/posts/{id}", postId)
                 .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(objectMapper.writeValueAsString(post))
+                .bodyValue(jsonMapper.writeValueAsString(post))
                 .exchange()
                 .expectStatus()
                 .isNotFound();

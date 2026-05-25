@@ -27,7 +27,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 @WebMvcTest(controllers = PostController.class)
 @ActiveProfiles(PROFILE_TEST)
@@ -37,7 +37,7 @@ class PostControllerTest {
 
     @MockitoBean private PostService postService;
 
-    @Autowired private ObjectMapper objectMapper;
+    @Autowired private JsonMapper jsonMapper;
 
     private List<PostDto> postList;
 
@@ -89,7 +89,7 @@ class PostControllerTest {
                 .perform(
                         post("/api/posts")
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(post)))
+                                .content(jsonMapper.writeValueAsString(post)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id", notNullValue()))
                 .andExpect(jsonPath("$.title", is(post.title())));
@@ -103,7 +103,7 @@ class PostControllerTest {
                 .perform(
                         post("/api/posts")
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(post)))
+                                .content(jsonMapper.writeValueAsString(post)))
                 .andExpect(status().isBadRequest())
                 .andExpect(
                         header().string(
@@ -133,7 +133,7 @@ class PostControllerTest {
                 .perform(
                         put("/api/posts/{id}", post.id())
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(post)))
+                                .content(jsonMapper.writeValueAsString(post)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.title", is(post.title())));
     }
@@ -148,7 +148,7 @@ class PostControllerTest {
                 .perform(
                         put("/api/posts/{id}", postId)
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(post)))
+                                .content(jsonMapper.writeValueAsString(post)))
                 .andExpect(status().isNotFound());
     }
 

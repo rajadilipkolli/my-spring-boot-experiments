@@ -32,7 +32,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 @WebMvcTest(controllers = PrimaryCustomerController.class)
 @ActiveProfiles(PROFILE_TEST)
@@ -42,7 +42,7 @@ class PrimaryCustomerControllerTest {
     private MockMvc mockMvc;
 
     @Autowired
-    private ObjectMapper objectMapper;
+    private JsonMapper jsonMapper;
 
     @MockitoBean
     private PrimaryCustomerService primaryCustomerService;
@@ -126,7 +126,7 @@ class PrimaryCustomerControllerTest {
                 .perform(post("/api/customers/primary")
                         .header("X-tenantId", "primary")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+                        .content(jsonMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id", notNullValue()))
                 .andExpect(jsonPath("$.text", is(primaryCustomer.getText())));
@@ -140,7 +140,7 @@ class PrimaryCustomerControllerTest {
                 .perform(post("/api/customers/primary")
                         .header("X-tenantId", "primary")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(primaryCustomer)))
+                        .content(jsonMapper.writeValueAsString(primaryCustomer)))
                 .andExpect(status().isBadRequest())
                 .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                 .andExpect(jsonPath("$.type", is("https://multitenancy.com/errors/validation-error")))
@@ -172,7 +172,7 @@ class PrimaryCustomerControllerTest {
                 .perform(put("/api/customers/primary/{id}", primaryCustomer.getId())
                         .header("X-tenantId", "primary")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(primaryCustomer)))
+                        .content(jsonMapper.writeValueAsString(primaryCustomer)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.text", is(primaryCustomer.getText())));
     }
@@ -191,7 +191,7 @@ class PrimaryCustomerControllerTest {
                 .perform(put("/api/customers/primary/{id}", customerId)
                         .header("X-tenantId", "primary")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(primaryCustomer)))
+                        .content(jsonMapper.writeValueAsString(primaryCustomer)))
                 .andExpect(status().isNotFound());
     }
 

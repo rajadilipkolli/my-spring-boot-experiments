@@ -26,7 +26,7 @@ class RedisControllerTest extends AbstractIntegrationTest {
                 .post()
                 .uri("/v1/redis/add")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(addRedisRequest))
+                .content(jsonMapper.writeValueAsString(addRedisRequest))
                 .assertThat()
                 .hasStatus(HttpStatus.CREATED)
                 .hasContentType(MediaType.APPLICATION_JSON)
@@ -40,7 +40,7 @@ class RedisControllerTest extends AbstractIntegrationTest {
                 .post()
                 .uri("/v1/redis/add")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(addRedisRequest))
+                .content(jsonMapper.writeValueAsString(addRedisRequest))
                 .assertThat()
                 .hasStatus(HttpStatus.CREATED);
 
@@ -49,7 +49,7 @@ class RedisControllerTest extends AbstractIntegrationTest {
                 .post()
                 .uri("/v1/redis/add")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(addRedisRequest))
+                .content(jsonMapper.writeValueAsString(addRedisRequest))
                 .assertThat()
                 .hasStatus(HttpStatus.CREATED);
     }

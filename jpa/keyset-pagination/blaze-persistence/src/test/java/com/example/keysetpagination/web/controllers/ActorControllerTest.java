@@ -32,7 +32,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 @WebMvcTest(controllers = ActorController.class)
 @ActiveProfiles(PROFILE_TEST)
@@ -45,7 +45,7 @@ class ActorControllerTest {
     private ActorService actorService;
 
     @Autowired
-    private ObjectMapper objectMapper;
+    private JsonMapper jsonMapper;
 
     @Nested
     @DisplayName("findById methods")
@@ -89,7 +89,7 @@ class ActorControllerTest {
 
             mockMvc.perform(post("/api/actors")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(actorRequest)))
+                            .content(jsonMapper.writeValueAsString(actorRequest)))
                     .andExpect(status().isCreated())
                     .andExpect(header().exists(HttpHeaders.LOCATION))
                     .andExpect(jsonPath("$.id", notNullValue()))
@@ -102,7 +102,7 @@ class ActorControllerTest {
 
             mockMvc.perform(post("/api/actors")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(actorRequest)))
+                            .content(jsonMapper.writeValueAsString(actorRequest)))
                     .andExpect(status().isBadRequest())
                     .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is("application/problem+json")))
                     .andExpect(jsonPath(
@@ -131,7 +131,7 @@ class ActorControllerTest {
 
             mockMvc.perform(put("/api/actors/{id}", actorId)
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(actorRequest)))
+                            .content(jsonMapper.writeValueAsString(actorRequest)))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.id", is(actorId), Long.class))
                     .andExpect(jsonPath("$.name", is(actor.name())));
@@ -146,7 +146,7 @@ class ActorControllerTest {
 
             mockMvc.perform(put("/api/actors/{id}", actorId)
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(actorRequest)))
+                            .content(jsonMapper.writeValueAsString(actorRequest)))
                     .andExpect(status().isNotFound())
                     .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                     .andExpect(jsonPath("$.type", is("http://api.boot-data-keyset-pagination.com/errors/not-found")))

@@ -108,7 +108,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                 .perform(post("/api/customers")
                         .header("X-tenantId", "primary")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(customer)))
+                        .content(jsonMapper.writeValueAsString(customer)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.text", is(customer.getText())));
     }
@@ -121,7 +121,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                 .perform(post("/api/customers")
                         .header("X-tenantId", "primary")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(customer)))
+                        .content(jsonMapper.writeValueAsString(customer)))
                 .andExpect(status().isBadRequest())
                 .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                 .andExpect(jsonPath("$.type", is("https://multitenancy.com/errors/validation-error")))
@@ -141,7 +141,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                 .perform(put("/api/customers/{id}", customer.getId())
                         .header("X-tenantId", "primary")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(customer)))
+                        .content(jsonMapper.writeValueAsString(customer)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.text", is(customer.getText())));
     }
@@ -174,7 +174,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
             mockMvc.perform(post("/api/customers")
                             .header("X-tenantId", "secondary")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(customer)))
+                            .content(jsonMapper.writeValueAsString(customer)))
                     .andExpect(status().isCreated())
                     .andExpect(jsonPath("$.id", notNullValue()))
                     .andExpect(jsonPath("$.text", is(customer.getText())));
@@ -197,7 +197,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
             mockMvc.perform(put("/api/customers/{id}", customer.getId())
                             .header("X-tenantId", "secondary")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(customer)))
+                            .content(jsonMapper.writeValueAsString(customer)))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.text", is(customer.getText())));
         }
@@ -232,7 +232,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
             mockMvc.perform(post("/api/customers")
                             .header("X-tenantId", "secondary")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(customer)))
+                            .content(jsonMapper.writeValueAsString(customer)))
                     .andExpect(status().isBadRequest())
                     .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                     .andExpect(jsonPath("$.type", is("https://multitenancy.com/errors/validation-error")))

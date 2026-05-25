@@ -35,7 +35,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 @WebMvcTest(controllers = RestaurantController.class)
 @ActiveProfiles(PROFILE_TEST)
@@ -48,7 +48,7 @@ class RestaurantControllerTest {
     private RestaurantService restaurantService;
 
     @Autowired
-    private ObjectMapper objectMapper;
+    private JsonMapper jsonMapper;
 
     private List<Restaurant> restaurantList;
 
@@ -114,7 +114,7 @@ class RestaurantControllerTest {
         this.mockMvc
                 .perform(post("/api/restaurants")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(restaurant)))
+                        .content(jsonMapper.writeValueAsString(restaurant)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.name", is(restaurant.getName())));
     }
@@ -126,7 +126,7 @@ class RestaurantControllerTest {
         this.mockMvc
                 .perform(post("/api/restaurants")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(restaurant)))
+                        .content(jsonMapper.writeValueAsString(restaurant)))
                 .andExpect(status().isBadRequest())
                 .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                 .andExpect(jsonPath("$.type", is("https://api.boot-opensearch.com/errors/validation-error")))
@@ -156,7 +156,7 @@ class RestaurantControllerTest {
         this.mockMvc
                 .perform(put("/api/restaurants/{id}", restaurant.getId())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(restaurant)))
+                        .content(jsonMapper.writeValueAsString(restaurant)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name", is(restaurant.getName())));
     }
@@ -171,7 +171,7 @@ class RestaurantControllerTest {
         this.mockMvc
                 .perform(put("/api/restaurants/{id}", restaurantId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(restaurant)))
+                        .content(jsonMapper.writeValueAsString(restaurant)))
                 .andExpect(status().isNotFound());
     }
 

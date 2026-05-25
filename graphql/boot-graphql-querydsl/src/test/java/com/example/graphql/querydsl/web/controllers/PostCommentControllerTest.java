@@ -39,7 +39,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 @WebMvcTest(controllers = PostCommentController.class)
 @ActiveProfiles(PROFILE_TEST)
@@ -52,7 +52,7 @@ class PostCommentControllerTest {
     private PostCommentService postCommentService;
 
     @Autowired
-    private ObjectMapper objectMapper;
+    private JsonMapper jsonMapper;
 
     private List<PostComment> postCommentList;
 
@@ -123,7 +123,7 @@ class PostCommentControllerTest {
         this.mockMvc
                 .perform(post("/api/posts/comments")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(postCommentRequest)))
+                        .content(jsonMapper.writeValueAsString(postCommentRequest)))
                 .andExpect(status().isCreated())
                 .andExpect(header().exists(HttpHeaders.LOCATION))
                 .andExpect(jsonPath("$.id", notNullValue()))
@@ -137,7 +137,7 @@ class PostCommentControllerTest {
         this.mockMvc
                 .perform(post("/api/posts/comments")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(postCommentRequest)))
+                        .content(jsonMapper.writeValueAsString(postCommentRequest)))
                 .andExpect(status().isBadRequest())
                 .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                 .andExpect(jsonPath("$.type", is("https://api.graphql-webmvc.com/errors/validation")))
@@ -162,7 +162,7 @@ class PostCommentControllerTest {
         this.mockMvc
                 .perform(put("/api/posts/comments/{id}", postCommentId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(postCommentRequest)))
+                        .content(jsonMapper.writeValueAsString(postCommentRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(postCommentId), Long.class))
                 .andExpect(jsonPath("$.review", is(postComment.review())));
@@ -178,7 +178,7 @@ class PostCommentControllerTest {
         this.mockMvc
                 .perform(put("/api/posts/comments/{id}", postCommentId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(postCommentRequest)))
+                        .content(jsonMapper.writeValueAsString(postCommentRequest)))
                 .andExpect(status().isNotFound())
                 .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                 .andExpect(jsonPath("$.type", is("http://api.boot-graphql-querydsl.com/errors/not-found")))

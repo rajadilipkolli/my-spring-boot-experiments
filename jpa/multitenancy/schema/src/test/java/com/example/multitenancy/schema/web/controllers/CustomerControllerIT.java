@@ -147,7 +147,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
             mockMvc.perform(post("/api/customers")
                             .param("tenant", TENANT_1)
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(customerDto)))
+                            .content(jsonMapper.writeValueAsString(customerDto)))
                     .andExpect(status().isCreated())
                     .andExpect(jsonPath("$.name", is("New Customer")));
 
@@ -168,7 +168,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
             mockMvc.perform(put("/api/customers/{id}", customer.getId())
                             .param("tenant", TENANT_1)
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(updateDto)))
+                            .content(jsonMapper.writeValueAsString(updateDto)))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.name", is("Updated Customer")));
 
@@ -230,7 +230,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
             mockMvc.perform(post("/api/customers")
                             .param("tenant", TENANT_2)
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(customerDto)))
+                            .content(jsonMapper.writeValueAsString(customerDto)))
                     .andExpect(status().isCreated())
                     .andExpect(jsonPath("$.name", is("New Tenant2 Customer")));
 
@@ -251,7 +251,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
             mockMvc.perform(put("/api/customers/{id}", customer.getId())
                             .param("tenant", TENANT_2)
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(updateDto)))
+                            .content(jsonMapper.writeValueAsString(updateDto)))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.name", is("Updated Tenant2 Customer")));
 
@@ -294,7 +294,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
             mockMvc.perform(post("/api/customers")
                             .param("tenant", TENANT_1)
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(newT1Customer)))
+                            .content(jsonMapper.writeValueAsString(newT1Customer)))
                     .andExpect(status().isCreated());
 
             // Perform operations on tenant2
@@ -302,7 +302,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
             mockMvc.perform(post("/api/customers")
                             .param("tenant", TENANT_2)
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(newT2Customer)))
+                            .content(jsonMapper.writeValueAsString(newT2Customer)))
                     .andExpect(status().isCreated());
 
             // Verify tenant1 has 3 customers
@@ -350,7 +350,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
             mockMvc.perform(post("/api/customers")
                             .param("tenant", TENANT_1)
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(invalidCustomer)))
+                            .content(jsonMapper.writeValueAsString(invalidCustomer)))
                     .andExpect(status().isBadRequest())
                     .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                     .andExpect(jsonPath("$.type", is("https://multitenancy-schema.com/errors/validation-error")))
@@ -371,7 +371,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
             mockMvc.perform(post("/api/customers")
                             .param("tenant", TENANT_2)
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(invalidCustomer)))
+                            .content(jsonMapper.writeValueAsString(invalidCustomer)))
                     .andExpect(status().isBadRequest())
                     .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                     .andExpect(jsonPath("$.violations[0].field", is("name")))
@@ -386,7 +386,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
             mockMvc.perform(put("/api/customers/{id}", 999L)
                             .param("tenant", TENANT_1)
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(updateDto)))
+                            .content(jsonMapper.writeValueAsString(updateDto)))
                     .andExpect(status().isNotFound());
         }
 
@@ -398,7 +398,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
             mockMvc.perform(put("/api/customers/{id}", 999L)
                             .param("tenant", TENANT_2)
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(updateDto)))
+                            .content(jsonMapper.writeValueAsString(updateDto)))
                     .andExpect(status().isNotFound());
         }
 
@@ -442,7 +442,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
             String response1 = mockMvc.perform(post("/api/customers")
                             .param("tenant", TENANT_2)
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(customer1)))
+                            .content(jsonMapper.writeValueAsString(customer1)))
                     .andExpect(status().isCreated())
                     .andExpect(jsonPath("$.name", is("Tenant2 Enterprise Customer")))
                     .andReturn()
@@ -452,7 +452,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
             String response2 = mockMvc.perform(post("/api/customers")
                             .param("tenant", TENANT_2)
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(customer2)))
+                            .content(jsonMapper.writeValueAsString(customer2)))
                     .andExpect(status().isCreated())
                     .andExpect(jsonPath("$.name", is("Tenant2 Premium Customer")))
                     .andReturn()
@@ -462,16 +462,16 @@ class CustomerControllerIT extends AbstractIntegrationTest {
             String response3 = mockMvc.perform(post("/api/customers")
                             .param("tenant", TENANT_2)
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(customer3)))
+                            .content(jsonMapper.writeValueAsString(customer3)))
                     .andExpect(status().isCreated())
                     .andExpect(jsonPath("$.name", is("Tenant2 Standard Customer")))
                     .andReturn()
                     .getResponse()
                     .getContentAsString();
 
-            Customer createdCustomer1 = objectMapper.readValue(response1, Customer.class);
-            Customer createdCustomer2 = objectMapper.readValue(response2, Customer.class);
-            Customer createdCustomer3 = objectMapper.readValue(response3, Customer.class);
+            Customer createdCustomer1 = jsonMapper.readValue(response1, Customer.class);
+            Customer createdCustomer2 = jsonMapper.readValue(response2, Customer.class);
+            Customer createdCustomer3 = jsonMapper.readValue(response3, Customer.class);
 
             // Phase 2: Verify all customers exist and can be retrieved
             mockMvc.perform(get("/api/customers").param("tenant", TENANT_2))
@@ -486,7 +486,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
             mockMvc.perform(put("/api/customers/{id}", createdCustomer1.getId())
                             .param("tenant", TENANT_2)
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(updatedCustomer1)))
+                            .content(jsonMapper.writeValueAsString(updatedCustomer1)))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.name", is("Tenant2 Enterprise Customer - VIP")));
 
@@ -494,7 +494,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
             mockMvc.perform(put("/api/customers/{id}", createdCustomer2.getId())
                             .param("tenant", TENANT_2)
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(updatedCustomer2)))
+                            .content(jsonMapper.writeValueAsString(updatedCustomer2)))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.name", is("Tenant2 Premium Customer - Upgraded")));
 
@@ -546,14 +546,14 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                 String response = mockMvc.perform(post("/api/customers")
                                 .param("tenant", TENANT_2)
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(customerDto)))
+                                .content(jsonMapper.writeValueAsString(customerDto)))
                         .andExpect(status().isCreated())
                         .andExpect(jsonPath("$.name", is(name)))
                         .andReturn()
                         .getResponse()
                         .getContentAsString();
 
-                createdCustomers.add(objectMapper.readValue(response, Customer.class));
+                createdCustomers.add(jsonMapper.readValue(response, Customer.class));
             }
 
             // Verify all 10 customers exist
@@ -568,7 +568,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                 mockMvc.perform(put("/api/customers/{id}", customer.getId())
                                 .param("tenant", TENANT_2)
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(updateDto)))
+                                .content(jsonMapper.writeValueAsString(updateDto)))
                         .andExpect(status().isOk())
                         .andExpect(jsonPath("$.name", is(customer.getName() + " - Updated")));
             }
@@ -598,20 +598,20 @@ class CustomerControllerIT extends AbstractIntegrationTest {
             String newCustomerResponse = mockMvc.perform(post("/api/customers")
                             .param("tenant", TENANT_2)
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(newCustomer)))
+                            .content(jsonMapper.writeValueAsString(newCustomer)))
                     .andExpect(status().isCreated())
                     .andReturn()
                     .getResponse()
                     .getContentAsString();
 
-            Customer createdCustomer = objectMapper.readValue(newCustomerResponse, Customer.class);
+            Customer createdCustomer = jsonMapper.readValue(newCustomerResponse, Customer.class);
 
             // Update first customer
             CustomerDto updateDto = new CustomerDto("T2 Customer Alpha - Modified");
             mockMvc.perform(put("/api/customers/{id}", initialCustomers.get(0).getId())
                             .param("tenant", TENANT_2)
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(updateDto)))
+                            .content(jsonMapper.writeValueAsString(updateDto)))
                     .andExpect(status().isOk());
 
             // Delete second customer
@@ -657,13 +657,13 @@ class CustomerControllerIT extends AbstractIntegrationTest {
             String longNameResponse = mockMvc.perform(post("/api/customers")
                             .param("tenant", TENANT_2)
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(longNameCustomer)))
+                            .content(jsonMapper.writeValueAsString(longNameCustomer)))
                     .andExpect(status().isCreated())
                     .andReturn()
                     .getResponse()
                     .getContentAsString();
 
-            Customer createdLongNameCustomer = objectMapper.readValue(longNameResponse, Customer.class);
+            Customer createdLongNameCustomer = jsonMapper.readValue(longNameResponse, Customer.class);
 
             // Test with special characters in customer name for tenant2
             String specialCharName = "T2 Customer with Special Chars: àáâãäåæçèéêë";
@@ -672,7 +672,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
             mockMvc.perform(post("/api/customers")
                             .param("tenant", TENANT_2)
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(specialCharCustomer)))
+                            .content(jsonMapper.writeValueAsString(specialCharCustomer)))
                     .andExpect(status().isCreated())
                     .andExpect(jsonPath("$.name", is(specialCharName)));
 
@@ -681,7 +681,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
             mockMvc.perform(put("/api/customers/{id}", createdLongNameCustomer.getId())
                             .param("tenant", TENANT_2)
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(emptyNameUpdate)))
+                            .content(jsonMapper.writeValueAsString(emptyNameUpdate)))
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.violations[0].field", is("name")));
 
@@ -690,7 +690,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
             mockMvc.perform(post("/api/customers")
                             .param("tenant", TENANT_2)
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(whitespaceCustomer)))
+                            .content(jsonMapper.writeValueAsString(whitespaceCustomer)))
                     .andExpect(status().isBadRequest());
 
             // Verify legitimate customers still exist
@@ -717,7 +717,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
             String t1c1Response = mockMvc.perform(post("/api/customers")
                             .param("tenant", TENANT_1)
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(t1Customer1)))
+                            .content(jsonMapper.writeValueAsString(t1Customer1)))
                     .andExpect(status().isCreated())
                     .andReturn()
                     .getResponse()
@@ -726,7 +726,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
             String t2c1Response = mockMvc.perform(post("/api/customers")
                             .param("tenant", TENANT_2)
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(t2Customer1)))
+                            .content(jsonMapper.writeValueAsString(t2Customer1)))
                     .andExpect(status().isCreated())
                     .andReturn()
                     .getResponse()
@@ -735,7 +735,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
             String t1c2Response = mockMvc.perform(post("/api/customers")
                             .param("tenant", TENANT_1)
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(t1Customer2)))
+                            .content(jsonMapper.writeValueAsString(t1Customer2)))
                     .andExpect(status().isCreated())
                     .andReturn()
                     .getResponse()
@@ -744,30 +744,30 @@ class CustomerControllerIT extends AbstractIntegrationTest {
             String t2c2Response = mockMvc.perform(post("/api/customers")
                             .param("tenant", TENANT_2)
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(t2Customer2)))
+                            .content(jsonMapper.writeValueAsString(t2Customer2)))
                     .andExpect(status().isCreated())
                     .andReturn()
                     .getResponse()
                     .getContentAsString();
 
-            Customer t1c1 = objectMapper.readValue(t1c1Response, Customer.class);
-            Customer t2c1 = objectMapper.readValue(t2c1Response, Customer.class);
-            Customer t1c2 = objectMapper.readValue(t1c2Response, Customer.class);
-            Customer t2c2 = objectMapper.readValue(t2c2Response, Customer.class);
+            Customer t1c1 = jsonMapper.readValue(t1c1Response, Customer.class);
+            Customer t2c1 = jsonMapper.readValue(t2c1Response, Customer.class);
+            Customer t1c2 = jsonMapper.readValue(t1c2Response, Customer.class);
+            Customer t2c2 = jsonMapper.readValue(t2c2Response, Customer.class);
 
             // Rapid fire operations alternating tenants
             CustomerDto updateDto1 = new CustomerDto("T1 Rapid Customer 1 - Updated");
             mockMvc.perform(put("/api/customers/{id}", t1c1.getId())
                             .param("tenant", TENANT_1)
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(updateDto1)))
+                            .content(jsonMapper.writeValueAsString(updateDto1)))
                     .andExpect(status().isOk());
 
             CustomerDto updateDto2 = new CustomerDto("T2 Rapid Customer 1 - Updated");
             mockMvc.perform(put("/api/customers/{id}", t2c1.getId())
                             .param("tenant", TENANT_2)
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(updateDto2)))
+                            .content(jsonMapper.writeValueAsString(updateDto2)))
                     .andExpect(status().isOk());
 
             // Verify each tenant maintains its own data
@@ -810,12 +810,12 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                 String response = mockMvc.perform(post("/api/customers")
                                 .param("tenant", TENANT_1)
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(dto)))
+                                .content(jsonMapper.writeValueAsString(dto)))
                         .andExpect(status().isCreated())
                         .andReturn()
                         .getResponse()
                         .getContentAsString();
-                t1Customers.add(objectMapper.readValue(response, Customer.class));
+                t1Customers.add(jsonMapper.readValue(response, Customer.class));
             }
 
             // Create different dataset in tenant2
@@ -827,12 +827,12 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                 String response = mockMvc.perform(post("/api/customers")
                                 .param("tenant", TENANT_2)
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(dto)))
+                                .content(jsonMapper.writeValueAsString(dto)))
                         .andExpect(status().isCreated())
                         .andReturn()
                         .getResponse()
                         .getContentAsString();
-                t2Customers.add(objectMapper.readValue(response, Customer.class));
+                t2Customers.add(jsonMapper.readValue(response, Customer.class));
             }
 
             // Verify tenant1 cannot access tenant2 customer IDs
@@ -853,7 +853,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                 mockMvc.perform(put("/api/customers/{id}", t1Customer.getId())
                                 .param("tenant", TENANT_2)
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(updateDto)))
+                                .content(jsonMapper.writeValueAsString(updateDto)))
                         .andExpect(status().isNotFound());
             }
 
@@ -890,7 +890,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
             String response1 = mockMvc.perform(post("/api/customers")
                             .param("tenant", TENANT_1)
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(customer1)))
+                            .content(jsonMapper.writeValueAsString(customer1)))
                     .andExpect(status().isCreated())
                     .andReturn()
                     .getResponse()
@@ -899,7 +899,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
             String response2 = mockMvc.perform(post("/api/customers")
                             .param("tenant", TENANT_1)
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(customer2)))
+                            .content(jsonMapper.writeValueAsString(customer2)))
                     .andExpect(status().isCreated())
                     .andReturn()
                     .getResponse()
@@ -912,7 +912,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
             String response3 = mockMvc.perform(post("/api/customers")
                             .param("tenant", TENANT_2)
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(customer3)))
+                            .content(jsonMapper.writeValueAsString(customer3)))
                     .andExpect(status().isCreated())
                     .andReturn()
                     .getResponse()
@@ -921,17 +921,17 @@ class CustomerControllerIT extends AbstractIntegrationTest {
             String response4 = mockMvc.perform(post("/api/customers")
                             .param("tenant", TENANT_2)
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(customer4)))
+                            .content(jsonMapper.writeValueAsString(customer4)))
                     .andExpect(status().isCreated())
                     .andReturn()
                     .getResponse()
                     .getContentAsString();
 
             // Parse responses and verify IDs are properly sequenced within each tenant
-            Customer t1c1 = objectMapper.readValue(response1, Customer.class);
-            Customer t1c2 = objectMapper.readValue(response2, Customer.class);
-            Customer t2c1 = objectMapper.readValue(response3, Customer.class);
-            Customer t2c2 = objectMapper.readValue(response4, Customer.class);
+            Customer t1c1 = jsonMapper.readValue(response1, Customer.class);
+            Customer t1c2 = jsonMapper.readValue(response2, Customer.class);
+            Customer t2c1 = jsonMapper.readValue(response3, Customer.class);
+            Customer t2c2 = jsonMapper.readValue(response4, Customer.class);
 
             // Each tenant should have its own ID sequence
             assertThat(t1c1.getId()).isNotNull();
@@ -953,7 +953,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
             mockMvc.perform(post("/api/customers")
                             .param("tenant", TENANT_1)
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(customerDto)))
+                            .content(jsonMapper.writeValueAsString(customerDto)))
                     .andExpect(status().isCreated())
                     .andExpect(jsonPath("$.name", is(sameName)));
 
@@ -961,7 +961,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
             mockMvc.perform(post("/api/customers")
                             .param("tenant", TENANT_2)
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(customerDto)))
+                            .content(jsonMapper.writeValueAsString(customerDto)))
                     .andExpect(status().isCreated())
                     .andExpect(jsonPath("$.name", is(sameName)));
 
@@ -996,12 +996,12 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                 String response = mockMvc.perform(post("/api/customers")
                                 .param("tenant", TENANT_2)
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(dto)))
+                                .content(jsonMapper.writeValueAsString(dto)))
                         .andExpect(status().isCreated())
                         .andReturn()
                         .getResponse()
                         .getContentAsString();
-                importedCustomers.add(objectMapper.readValue(response, Customer.class));
+                importedCustomers.add(jsonMapper.readValue(response, Customer.class));
             }
 
             // Verify all imported customers are accessible
@@ -1017,7 +1017,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                 mockMvc.perform(put("/api/customers/{id}", customer.getId())
                                 .param("tenant", TENANT_2)
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(rebrandDto)))
+                                .content(jsonMapper.writeValueAsString(rebrandDto)))
                         .andExpect(status().isOk())
                         .andExpect(jsonPath("$.name", is("Tenant2 Modern Customer " + (i + 1))));
             }

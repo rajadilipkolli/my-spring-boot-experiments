@@ -74,7 +74,7 @@ class DriverControllerIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(post("/api/drivers")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(driverRequest)))
+                        .content(jsonMapper.writeValueAsString(driverRequest)))
                 .andExpect(status().isCreated())
                 .andExpect(header().exists(HttpHeaders.LOCATION))
                 .andExpect(jsonPath("$.id", notNullValue()))
@@ -88,7 +88,7 @@ class DriverControllerIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(post("/api/drivers")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(driverRequest)))
+                        .content(jsonMapper.writeValueAsString(driverRequest)))
                 .andExpect(status().isBadRequest())
                 .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                 .andExpect(jsonPath("$.type", is("https://api.boot-jndi-sample.com/errors/constraint-violation")))
@@ -110,7 +110,7 @@ class DriverControllerIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(put("/api/drivers/{id}", driverId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(driverRequest)))
+                        .content(jsonMapper.writeValueAsString(driverRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(driverId), Long.class))
                 .andExpect(jsonPath("$.text", is(driverRequest.text())));
