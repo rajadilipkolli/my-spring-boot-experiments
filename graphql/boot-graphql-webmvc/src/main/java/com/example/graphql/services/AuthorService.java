@@ -6,11 +6,11 @@ import com.example.graphql.mapper.AuthorRequestToEntityMapper;
 import com.example.graphql.model.request.AuthorRequest;
 import com.example.graphql.model.response.AuthorResponse;
 import com.example.graphql.repositories.AuthorRepository;
-import com.example.graphql.util.SimpleWindow;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import org.springframework.core.convert.ConversionService;
+import org.springframework.data.domain.Limit;
 import org.springframework.data.domain.ScrollPosition;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Window;
@@ -79,15 +79,8 @@ public class AuthorService {
     }
 
     public Window<AuthorResponse> findAllAuthors(ScrollPosition scrollPosition, int limit) {
-        var all = authorRepository.findAll(Sort.by("id"));
-        int start = 0;
-        // For now only support offset-style scrolling starting at 0
-        int end = Math.min(start + limit, all.size());
-        var slice = all.subList(start, end).stream()
-                .map(author -> appConversionService.convert(author, AuthorResponse.class))
-                .toList();
-        boolean hasNext = end < all.size();
-        ScrollPosition nextPosition = ScrollPosition.offset(end);
-        return new SimpleWindow<>(slice, nextPosition, hasNext);
+        var authorWindow = authorRepository.findAllBy(
+                scrollPosition == null ? ScrollPosition.offset() : scrollPosition, Limit.of(limit), Sort.by("id"));
+        return authorWindow.map(author -> appConversionService.convert(author, AuthorResponse.class));
     }
 }
