@@ -28,8 +28,45 @@ public class CustomerGraphQLController {
 
     //    @SchemaMapping(typeName = "Query", field = "customers") or
     @QueryMapping
-    Flux<Customer> customers() {
-        return this.customerGraphQLService.findAllCustomers();
+    public reactor.core.publisher.Mono<com.example.graphql.dtos.CustomerConnection> customers(
+            @Argument(name = "first") Integer first,
+            @Argument(name = "after") String after,
+            @Argument(name = "last") Integer last,
+            @Argument(name = "before") String before) {
+        final int DEFAULT_PAGE_SIZE = 20;
+        int limit = first != null ? first : (last != null ? last : DEFAULT_PAGE_SIZE);
+        int offset = 0;
+        if (after != null && !after.isBlank()) {
+            try {
+                var decoded = new String(java.util.Base64.getDecoder().decode(after));
+                offset = Integer.parseInt(decoded);
+            } catch (Exception e) {
+                offset = 0;
+            }
+        }
+
+        final int finalOffset = offset;
+        final int finalLimit = limit;
+        return this.customerGraphQLService
+                .findAllCustomers(finalOffset, finalLimit)
+                .collectList()
+                .map(list -> {
+                    boolean hasNext = list.size() > finalLimit;
+                    var results = list.size() > finalLimit ? list.subList(0, finalLimit) : list;
+                    java.util.List<com.example.graphql.dtos.CustomerEdge> edges = new java.util.ArrayList<>();
+                    for (int i = 0; i < results.size(); i++) {
+                        var cust = results.get(i);
+                        int cursorIndex = finalOffset + i + 1; // cursor points to next offset
+                        String cursor = java.util.Base64.getEncoder()
+                                .encodeToString(String.valueOf(cursorIndex).getBytes());
+                        edges.add(new com.example.graphql.dtos.CustomerEdge(cust, cursor));
+                    }
+                    String startCursor = edges.isEmpty() ? null : edges.get(0).getCursor();
+                    String endCursor =
+                            edges.isEmpty() ? null : edges.get(edges.size() - 1).getCursor();
+                    var pageInfo = new com.example.graphql.dtos.PageInfo(false, hasNext, startCursor, endCursor);
+                    return new com.example.graphql.dtos.CustomerConnection(edges, pageInfo);
+                });
     }
 
     @QueryMapping

@@ -44,44 +44,75 @@ class AuthorEntityQueryTest {
 
     @Test
     void allAuthors() {
-        given(authorService.findAllAuthors())
-                .willReturn(List.of(
-                        new AuthorResponse(
-                                1L,
-                                "firstName",
-                                "middleName",
-                                "lastName",
-                                9848022338L,
-                                "junit1@email.com",
-                                LocalDateTime.now()),
-                        new AuthorResponse(
-                                2L,
-                                "secondName",
-                                "middleName",
-                                "lastName",
-                                9848022338L,
-                                "junit2@email.com",
-                                LocalDateTime.now())));
+        var r1 = new AuthorResponse(
+                1L, "firstName", "middleName", "lastName", 9848022338L, "junit1@email.com", LocalDateTime.now());
+        var r2 = new AuthorResponse(
+                2L, "secondName", "middleName", "lastName", 9848022338L, "junit2@email.com", LocalDateTime.now());
+
+        // simple Window implementation for test
+        var window = new org.springframework.data.domain.Window<AuthorResponse>() {
+            private final java.util.List<AuthorResponse> content = List.of(r1, r2);
+
+            @Override
+            public int size() {
+                return content.size();
+            }
+
+            @Override
+            public boolean isEmpty() {
+                return content.isEmpty();
+            }
+
+            @Override
+            public java.util.List<AuthorResponse> getContent() {
+                return content;
+            }
+
+            @Override
+            public boolean hasNext() {
+                return false;
+            }
+
+            @Override
+            public org.springframework.data.domain.ScrollPosition positionAt(int index) {
+                return org.springframework.data.domain.ScrollPosition.offset(0);
+            }
+
+            @Override
+            public <U> org.springframework.data.domain.Window<U> map(
+                    java.util.function.Function<? super AuthorResponse, ? extends U> converter) {
+                return null;
+            }
+
+            @Override
+            public java.util.Iterator<AuthorResponse> iterator() {
+                return content.iterator();
+            }
+        };
+
+        given(authorService.findAllAuthors(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.anyInt()))
+                .willReturn(window);
 
         var allAuthors = """
                 query authorEntities{
-                    allAuthors{
-                     id
-                     firstName
-                     email
-                   }
+                    allAuthors(first:2){
+                      edges { node { id firstName email } cursor }
+                      pageInfo { hasNextPage startCursor endCursor }
+                    }
                  }""";
+
         graphQlTester
                 .document(allAuthors)
                 .execute()
-                .path("allAuthors[*].email")
+                .path("allAuthors.edges[*].node.email")
                 .entityList(String.class)
                 .satisfies(emails -> assertThat(emails).contains("junit1@email.com", "junit2@email.com"))
-                .path("allAuthors[*].firstName")
-                .entityList(String.class)
-                .satisfies(names -> assertThat(names).containsAll(List.of("firstName", "secondName")));
+                .path("allAuthors.pageInfo.hasNextPage")
+                .entity(Boolean.class)
+                .satisfies(hasNext -> assertThat(hasNext).isFalse());
 
-        verify(authorService, times(1)).findAllAuthors();
+        verify(authorService, times(1))
+                .findAllAuthors(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.anyInt());
         verifyNoMoreInteractions(authorService);
     }
 

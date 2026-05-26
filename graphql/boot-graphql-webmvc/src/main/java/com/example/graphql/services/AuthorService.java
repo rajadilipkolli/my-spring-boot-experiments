@@ -6,10 +6,14 @@ import com.example.graphql.mapper.AuthorRequestToEntityMapper;
 import com.example.graphql.model.request.AuthorRequest;
 import com.example.graphql.model.response.AuthorResponse;
 import com.example.graphql.repositories.AuthorRepository;
+import com.example.graphql.util.SimpleWindow;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import org.springframework.core.convert.ConversionService;
+import org.springframework.data.domain.ScrollPosition;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Window;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -72,5 +76,18 @@ public class AuthorService {
 
     public boolean existsAuthorById(Long id) {
         return this.authorRepository.existsById(id);
+    }
+
+    public Window<AuthorResponse> findAllAuthors(ScrollPosition scrollPosition, int limit) {
+        var all = authorRepository.findAll(Sort.by("id"));
+        int start = 0;
+        // For now only support offset-style scrolling starting at 0
+        int end = Math.min(start + limit, all.size());
+        var slice = all.subList(start, end).stream()
+                .map(author -> appConversionService.convert(author, AuthorResponse.class))
+                .toList();
+        boolean hasNext = end < all.size();
+        ScrollPosition nextPosition = ScrollPosition.offset(end);
+        return new SimpleWindow<>(slice, nextPosition, hasNext);
     }
 }

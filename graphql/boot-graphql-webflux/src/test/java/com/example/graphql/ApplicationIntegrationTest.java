@@ -4,7 +4,6 @@ import static graphql.ErrorType.ValidationError;
 
 import com.example.graphql.common.AbstractIntegrationTest;
 import com.example.graphql.dtos.Customer;
-import com.example.graphql.dtos.CustomerDTO;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,20 +21,19 @@ class ApplicationIntegrationTest extends AbstractIntegrationTest {
         this.graphQlTester
                 .document("""
                         query {
-                          customers {
-                            id
-                            name
-                            orders {
-                              id
-                            }
+                          customers(first:2) {
+                            edges { node { id name } cursor }
+                            pageInfo { hasNextPage }
                           }
                         }
                         """)
                 .execute()
-                .path("customers[*]")
-                .hasValue()
-                .entityList(CustomerDTO.class)
-                .hasSize(4);
+                .path("customers.edges[*].node.id")
+                .entityList(Integer.class)
+                .hasSize(2)
+                .path("customers.pageInfo.hasNextPage")
+                .entity(Boolean.class)
+                .isEqualTo(true);
     }
 
     @Test

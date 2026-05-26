@@ -30,6 +30,13 @@ public class CustomerGraphQLServiceImpl implements CustomerGraphQLService {
     }
 
     @Override
+    public Flux<Customer> findAllCustomers(int offset, int limit) {
+        if (offset < 0) offset = 0;
+        if (limit <= 0) limit = 20;
+        return this.customerRepository.findAll().skip(offset).take(limit + 1);
+    }
+
+    @Override
     public Flux<Customer> findByNameIgnoringCase(String name) {
         return this.customerRepository.findByNameIgnoringCase(name);
     }

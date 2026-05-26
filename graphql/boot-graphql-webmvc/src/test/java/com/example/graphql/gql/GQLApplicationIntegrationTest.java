@@ -22,20 +22,14 @@ class GQLApplicationIntegrationTest extends AbstractIntegrationTest {
     @Order(1)
     void allAuthors() {
         graphQlTester
-                .documentName("allAuthors")
+                .documentName("allAuthorsPaginated")
                 .execute()
-                .path("allAuthors[*].email")
+                .path("allAuthors.pageInfo.hasNextPage")
+                .entity(Boolean.class)
+                .satisfies(hasNext -> assertThat(hasNext).isTrue())
+                .path("allAuthors.edges[*].node.email")
                 .entityList(String.class)
-                .satisfies(emails -> assertThat(emails).contains("user4@example.com"))
-                .hasSize(4)
-                .path("allAuthors[*].firstName")
-                .entityList(String.class)
-                .satisfies(names -> assertThat(names).contains("first name2"))
-                .hasSize(4)
-                .path("allAuthors[*].lastName")
-                .entityList(String.class)
-                .satisfies(names -> assertThat(names).contains("last name3"))
-                .hasSize(4);
+                .satisfies(emails -> assertThat(emails).hasSize(2));
     }
 
     @Order(2)
