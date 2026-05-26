@@ -38,40 +38,106 @@ public class CustomerGraphQLController {
             @Argument(name = "after") String after,
             @Argument(name = "last") Integer last,
             @Argument(name = "before") String before) {
-        final int DEFAULT_PAGE_SIZE = 20;
-        int limit = first != null ? first : (last != null ? last : DEFAULT_PAGE_SIZE);
-        int offset = 0;
-        if (after != null && !after.isBlank()) {
-            try {
-                var decoded = new String(Base64.getDecoder().decode(after));
-                offset = Integer.parseInt(decoded);
-            } catch (Exception e) {
-                offset = 0;
-            }
+        if (first != null && last != null) {
+            return Mono.error(new IllegalArgumentException("Cannot specify both first and last"));
+        }
+        if (after != null && before != null) {
+            return Mono.error(new IllegalArgumentException("Cannot specify both after and before"));
+        }
+        if (before != null && last == null) {
+            return Mono.error(new IllegalArgumentException("The 'before' argument requires 'last'"));
         }
 
-        final int finalOffset = offset;
-        final int finalLimit = limit;
+        int limit = first != null ? first : (last != null ? last : 20);
+        if (limit <= 0) {
+            return Mono.error(new IllegalArgumentException("Page size must be greater than zero"));
+        }
+
+        if (last != null) {
+            if (before != null && !before.isBlank()) {
+                int decodedBefore = decodeCursor(before);
+                int offset = Math.max(0, decodedBefore - limit);
+                final int queryLimit = limit;
+                final int queryOffset = offset;
+                return this.customerGraphQLService
+                        .findAllCustomers(queryOffset, queryLimit)
+                        .collectList()
+                        .zipWith(this.customerGraphQLService.countCustomers())
+                        .map(tuple -> buildBackwardConnection(
+                                tuple.getT1(), queryOffset, queryLimit, decodedBefore, tuple.getT2()));
+            }
+            final int queryLimit = limit;
+            return this.customerGraphQLService.countCustomers().flatMap(total -> {
+                int offset = Math.max(0, Math.toIntExact(total - queryLimit));
+                final int queryOffset = offset;
+                return this.customerGraphQLService
+                        .findAllCustomers(queryOffset, queryLimit + 1)
+                        .collectList()
+                        .map(list ->
+                                buildBackwardConnection(list, queryOffset, queryLimit, Math.toIntExact(total), total));
+            });
+        }
+
+        int offset = 0;
+        if (after != null && !after.isBlank()) {
+            offset = decodeCursor(after);
+        }
+
+        final int queryLimit = limit;
+        final int queryOffset = offset;
         return this.customerGraphQLService
-                .findAllCustomers(finalOffset, finalLimit)
+                .findAllCustomers(queryOffset, queryLimit + 1)
                 .collectList()
-                .map(list -> {
-                    boolean hasNext = list.size() > finalLimit;
-                    var results = list.size() > finalLimit ? list.subList(0, finalLimit) : list;
-                    List<CustomerEdge> edges = new ArrayList<>();
-                    for (int i = 0; i < results.size(); i++) {
-                        var cust = results.get(i);
-                        int cursorIndex = finalOffset + i + 1; // cursor points to next offset
-                        String cursor = Base64.getEncoder()
-                                .encodeToString(String.valueOf(cursorIndex).getBytes());
-                        edges.add(new CustomerEdge(cust, cursor));
-                    }
-                    String startCursor = edges.isEmpty() ? null : edges.get(0).getCursor();
-                    String endCursor =
-                            edges.isEmpty() ? null : edges.get(edges.size() - 1).getCursor();
-                    var pageInfo = new PageInfo(false, hasNext, startCursor, endCursor);
-                    return new CustomerConnection(edges, pageInfo);
-                });
+                .map(list -> buildForwardConnection(list, queryOffset, queryLimit));
+    }
+
+    private CustomerConnection buildForwardConnection(List<Customer> list, int offset, int limit) {
+        boolean hasNext = list.size() > limit;
+        var results = list.size() > limit ? list.subList(0, limit) : list;
+        List<CustomerEdge> edges = new ArrayList<>();
+        for (int i = 0; i < results.size(); i++) {
+            var cust = results.get(i);
+            int cursorIndex = offset + i + 1;
+            String cursor = Base64.getEncoder()
+                    .encodeToString(String.valueOf(cursorIndex).getBytes());
+            edges.add(new CustomerEdge(cust, cursor));
+        }
+        String startCursor = edges.isEmpty() ? null : edges.get(0).getCursor();
+        String endCursor = edges.isEmpty() ? null : edges.get(edges.size() - 1).getCursor();
+        var pageInfo = new PageInfo(offset > 0, hasNext, startCursor, endCursor);
+        return new CustomerConnection(edges, pageInfo);
+    }
+
+    private CustomerConnection buildBackwardConnection(
+            List<Customer> list, int offset, int limit, int beforeOffset, long totalCount) {
+        var results = list;
+        List<CustomerEdge> edges = new ArrayList<>();
+        for (int i = 0; i < results.size(); i++) {
+            var cust = results.get(i);
+            int cursorIndex = offset + i + 1;
+            String cursor = Base64.getEncoder()
+                    .encodeToString(String.valueOf(cursorIndex).getBytes());
+            edges.add(new CustomerEdge(cust, cursor));
+        }
+        String startCursor = edges.isEmpty() ? null : edges.get(0).getCursor();
+        String endCursor = edges.isEmpty() ? null : edges.get(edges.size() - 1).getCursor();
+        boolean hasPrevious = offset > 0;
+        boolean hasNext = beforeOffset < totalCount;
+        var pageInfo = new PageInfo(hasPrevious, hasNext, startCursor, endCursor);
+        return new CustomerConnection(edges, pageInfo);
+    }
+
+    private int decodeCursor(String cursor) {
+        try {
+            var decoded = new String(Base64.getDecoder().decode(cursor));
+            int value = Integer.parseInt(decoded);
+            if (value <= 0) {
+                throw new IllegalArgumentException("Invalid cursor: " + cursor);
+            }
+            return value;
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Invalid cursor: " + cursor, e);
+        }
     }
 
     @QueryMapping

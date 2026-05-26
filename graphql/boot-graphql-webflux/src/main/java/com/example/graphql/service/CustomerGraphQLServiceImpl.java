@@ -33,7 +33,12 @@ public class CustomerGraphQLServiceImpl implements CustomerGraphQLService {
     public Flux<Customer> findAllCustomers(int offset, int limit) {
         if (offset < 0) offset = 0;
         if (limit <= 0) limit = 20;
-        return this.customerRepository.findAllWithPaging(offset, limit + 1);
+        return this.customerRepository.findAllWithPaging(offset, limit);
+    }
+
+    @Override
+    public Mono<Long> countCustomers() {
+        return this.customerRepository.count();
     }
 
     @Override
