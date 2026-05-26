@@ -8,6 +8,7 @@ import com.example.graphql.dtos.PageInfo;
 import com.example.graphql.service.CustomerGraphQLService;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
@@ -99,7 +100,7 @@ public class CustomerGraphQLController {
             var cust = results.get(i);
             int cursorIndex = offset + i + 1;
             String cursor = Base64.getEncoder()
-                    .encodeToString(String.valueOf(cursorIndex).getBytes());
+                    .encodeToString(String.valueOf(cursorIndex).getBytes(StandardCharsets.UTF_8));
             edges.add(new CustomerEdge(cust, cursor));
         }
         String startCursor = edges.isEmpty() ? null : edges.get(0).getCursor();
@@ -116,7 +117,7 @@ public class CustomerGraphQLController {
             var cust = results.get(i);
             int cursorIndex = offset + i + 1;
             String cursor = Base64.getEncoder()
-                    .encodeToString(String.valueOf(cursorIndex).getBytes());
+                    .encodeToString(String.valueOf(cursorIndex).getBytes(StandardCharsets.UTF_8));
             edges.add(new CustomerEdge(cust, cursor));
         }
         String startCursor = edges.isEmpty() ? null : edges.get(0).getCursor();
@@ -129,7 +130,7 @@ public class CustomerGraphQLController {
 
     private int decodeCursor(String cursor) {
         try {
-            var decoded = new String(Base64.getDecoder().decode(cursor));
+            var decoded = new String(Base64.getDecoder().decode(cursor), StandardCharsets.UTF_8);
             int value = Integer.parseInt(decoded);
             if (value <= 0) {
                 throw new IllegalArgumentException("Invalid cursor: " + cursor);
