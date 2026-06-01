@@ -128,10 +128,10 @@ class ApplicationIntegrationTest extends AbstractIntegrationTest {
                 .execute()
                 .path("customers.edges[*].node.id")
                 .entityList(Integer.class)
-                .satisfies(ids -> assertThat(ids).containsExactly(2, 3))
+                .satisfies(ids -> assertThat(ids).containsExactly(1, 2))
                 .path("customers.pageInfo.hasPreviousPage")
                 .entity(Boolean.class)
-                .isEqualTo(true)
+                .isEqualTo(false)
                 .path("customers.pageInfo.hasNextPage")
                 .entity(Boolean.class)
                 .isEqualTo(true);

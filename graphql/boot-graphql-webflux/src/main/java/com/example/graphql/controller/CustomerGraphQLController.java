@@ -26,6 +26,8 @@ import reactor.core.publisher.Mono;
 @Validated
 public class CustomerGraphQLController {
 
+    private static final int MAX_PAGE_SIZE = 100;
+
     private final CustomerGraphQLService customerGraphQLService;
 
     public CustomerGraphQLController(CustomerGraphQLService customerGraphQLService) {
@@ -53,11 +55,14 @@ public class CustomerGraphQLController {
         if (limit <= 0) {
             return Mono.error(new IllegalArgumentException("Page size must be greater than zero"));
         }
+        if (limit > MAX_PAGE_SIZE) {
+            return Mono.error(new IllegalArgumentException("Page size must not exceed " + MAX_PAGE_SIZE));
+        }
 
         if (last != null) {
             if (before != null && !before.isBlank()) {
                 int decodedBefore = decodeCursor(before);
-                int offset = Math.max(0, decodedBefore - limit);
+                int offset = Math.max(0, decodedBefore - limit - 1);
                 final int queryLimit = limit;
                 final int queryOffset = offset;
                 return this.customerGraphQLService
