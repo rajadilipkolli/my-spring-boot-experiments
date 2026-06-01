@@ -45,7 +45,7 @@ type PostDetails {
 }
 
 type Query {
-    allAuthors: [Author!]
+    allAuthors(first: Int, after: String): AuthorConnection
     findAuthorByEmailId(email: String!): Author
     allTags: [Tags!]
     findTagByName(tagName: String!) : Tags
@@ -98,4 +98,21 @@ input AuthorInput {
     lastName:String!
     mobile:String
     email:String!
+}
+
+type PageInfo {
+    hasPreviousPage: Boolean!
+    hasNextPage: Boolean!
+    startCursor: String
+    endCursor: String
+}
+
+type AuthorEdge {
+    node: Author
+    cursor: String!
+}
+
+type AuthorConnection {
+    edges: [AuthorEdge]
+    pageInfo: PageInfo!
 }
