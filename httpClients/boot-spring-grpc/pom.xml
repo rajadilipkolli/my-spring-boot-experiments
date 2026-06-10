@@ -21,7 +21,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
         <java.version>25</java.version>
-        <grpc.version>1.81.0</grpc.version>
+        <grpc.version>1.82.0</grpc.version>
         <protobuf-java.version>4.33.4</protobuf-java.version>
         <spring-grpc.version>1.0.3</spring-grpc.version>
         <springdoc-openapi.version>3.0.3</springdoc-openapi.version>
