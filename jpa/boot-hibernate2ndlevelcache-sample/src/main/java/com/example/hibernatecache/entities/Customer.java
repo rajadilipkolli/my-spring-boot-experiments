@@ -11,6 +11,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import jakarta.persistence.Version;
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,6 +29,9 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 @Cacheable
 @Cache(region = "customerCache", usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
 public class Customer implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)

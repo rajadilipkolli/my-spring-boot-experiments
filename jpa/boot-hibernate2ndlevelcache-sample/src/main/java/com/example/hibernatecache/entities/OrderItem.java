@@ -11,6 +11,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
+import java.io.Serial;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Objects;
@@ -23,6 +24,9 @@ import org.hibernate.proxy.HibernateProxy;
 @Cacheable
 @Cache(region = "orderItemCache", usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
 public class OrderItem implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
@@ -39,7 +43,6 @@ public class OrderItem implements Serializable {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id", nullable = false)
-    @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
     private Order order;
 
     @Version
