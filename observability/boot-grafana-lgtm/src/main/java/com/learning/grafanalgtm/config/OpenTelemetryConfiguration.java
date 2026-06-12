@@ -1,15 +1,10 @@
 package com.learning.grafanalgtm.config;
 
 import io.micrometer.core.instrument.Tags;
-import io.micrometer.core.instrument.binder.jvm.ClassLoaderMetrics;
-import io.micrometer.core.instrument.binder.jvm.JvmMemoryMetrics;
-import io.micrometer.core.instrument.binder.jvm.JvmThreadMetrics;
 import io.micrometer.core.instrument.binder.jvm.convention.otel.OpenTelemetryJvmClassLoadingMeterConventions;
 import io.micrometer.core.instrument.binder.jvm.convention.otel.OpenTelemetryJvmCpuMeterConventions;
 import io.micrometer.core.instrument.binder.jvm.convention.otel.OpenTelemetryJvmMemoryMeterConventions;
 import io.micrometer.core.instrument.binder.jvm.convention.otel.OpenTelemetryJvmThreadMeterConventions;
-import io.micrometer.core.instrument.binder.system.ProcessorMetrics;
-import java.util.List;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.server.observation.OpenTelemetryServerRequestObservationConvention;
@@ -29,22 +24,17 @@ public class OpenTelemetryConfiguration {
     }
 
     @Bean
-    ProcessorMetrics processorMetrics(OpenTelemetryJvmCpuMeterConventions cpuConventions) {
-        return new ProcessorMetrics(List.of(), cpuConventions);
+    OpenTelemetryJvmMemoryMeterConventions openTelemetryJvmMemoryMeterConventions() {
+        return new OpenTelemetryJvmMemoryMeterConventions(Tags.empty());
     }
 
     @Bean
-    JvmMemoryMetrics jvmMemoryMetrics() {
-        return new JvmMemoryMetrics(List.of(), new OpenTelemetryJvmMemoryMeterConventions(Tags.empty()));
+    OpenTelemetryJvmThreadMeterConventions openTelemetryJvmThreadMeterConventions() {
+        return new OpenTelemetryJvmThreadMeterConventions(Tags.empty());
     }
 
     @Bean
-    JvmThreadMetrics jvmThreadMetrics() {
-        return new JvmThreadMetrics(List.of(), new OpenTelemetryJvmThreadMeterConventions(Tags.empty()));
-    }
-
-    @Bean
-    ClassLoaderMetrics classLoaderMetrics() {
-        return new ClassLoaderMetrics(new OpenTelemetryJvmClassLoadingMeterConventions());
+    OpenTelemetryJvmClassLoadingMeterConventions openTelemetryJvmClassLoadingMeterConventions() {
+        return new OpenTelemetryJvmClassLoadingMeterConventions();
     }
 }
