@@ -25,7 +25,6 @@ public abstract class AbstractIntegrationTest {
     static void registerGrpcProperties(DynamicPropertyRegistry registry) {
         int port = TestSocketUtils.findAvailableTcpPort();
         registry.add("spring.grpc.server.port", () -> port);
-        registry.add(
-                "spring.grpc.client.channels.local.address", () -> "static://localhost:" + port);
+        registry.add("spring.grpc.client.channel.local.target", () -> "localhost:" + port);
     }
 }
