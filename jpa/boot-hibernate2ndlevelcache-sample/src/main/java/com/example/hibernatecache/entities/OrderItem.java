@@ -3,12 +3,15 @@ package com.example.hibernatecache.entities;
 import jakarta.persistence.Cacheable;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Objects;
 import org.hibernate.annotations.Cache;
@@ -18,8 +21,8 @@ import org.hibernate.proxy.HibernateProxy;
 @Entity
 @Table(name = "order_items")
 @Cacheable
-@Cache(region = "orderItemCache", usage = CacheConcurrencyStrategy.READ_WRITE)
-public class OrderItem {
+@Cache(region = "orderItemCache", usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
+public class OrderItem implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
@@ -34,10 +37,13 @@ public class OrderItem {
     @Column(nullable = false)
     private Integer quantity;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id", nullable = false)
-    @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+    @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
     private Order order;
+
+    @Version
+    private Short version = 0;
 
     public Long getId() {
         return id;
@@ -81,6 +87,15 @@ public class OrderItem {
 
     public OrderItem setOrder(Order order) {
         this.order = order;
+        return this;
+    }
+
+    public Short getVersion() {
+        return version;
+    }
+
+    public OrderItem setVersion(Short version) {
+        this.version = version;
         return this;
     }
 

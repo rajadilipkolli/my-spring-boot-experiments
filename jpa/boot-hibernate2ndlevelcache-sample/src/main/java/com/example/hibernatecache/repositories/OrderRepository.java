@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 public interface OrderRepository extends BaseJpaRepository<Order, Long>, PagingAndSortingRepository<Order, Long> {
 
+    @Override
     @QueryHints(@QueryHint(name = HINT_CACHEABLE, value = "true"))
     @Query("SELECT o FROM Order o join fetch o.orderItems oi WHERE o.id = :id ORDER BY oi.itemCode")
     Optional<Order> findById(@Param("id") Long id);

@@ -139,6 +139,7 @@ class HibernateSecondLevelCacheIT extends AbstractIntegrationTest {
         this.mockMvc.perform(get("/api/customers/{id}", customerId)).andExpect(status().isOk());
 
         SQLStatementCountValidator.assertSelectCount(0); // No select, served from cache
+        SQLStatementCountValidator.assertTotalCount(0);
 
         // Update the customer
         CustomerRequest updatedRequest =
@@ -161,9 +162,9 @@ class HibernateSecondLevelCacheIT extends AbstractIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.firstName", is("UpdatedName")));
 
-        // Should not hit DB again because cache was updated
-        SQLStatementCountValidator.assertSelectCount(0);
-        SQLStatementCountValidator.assertTotalCount(0);
+        // Should hit DB again because cache was updated
+        SQLStatementCountValidator.assertSelectCount(1);
+        SQLStatementCountValidator.assertTotalCount(1);
     }
 
     @Test
@@ -212,7 +213,7 @@ class HibernateSecondLevelCacheIT extends AbstractIntegrationTest {
         SQLStatementCountValidator.assertSelectCount(0); // Both served from cache
 
         // Delete first customer
-        this.mockMvc.perform(delete("/api/customers/{id}", customerId1)).andExpect(status().isOk());
+        this.mockMvc.perform(delete("/api/customers/{id}", customerId1)).andExpect(status().isNoContent());
 
         // Try to fetch deleted customer
         this.mockMvc.perform(get("/api/customers/{id}", customerId1)).andExpect(status().isNotFound());

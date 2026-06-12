@@ -59,7 +59,7 @@ class OrderServiceTest {
         // given
         Order testOrder = getOrder();
         given(orderRepository.findById(1L)).willReturn(Optional.of(testOrder));
-        willDoNothing().given(orderRepository).deleteById(1L);
+        willDoNothing().given(orderRepository).delete(testOrder);
 
         // Mock EntityManager cache hierarchy
         EntityManagerFactory mockFactory = mock(EntityManagerFactory.class);
@@ -72,7 +72,7 @@ class OrderServiceTest {
         orderService.deleteOrderById(1L);
 
         // then
-        verify(orderRepository, times(1)).deleteById(1L);
+        verify(orderRepository, times(1)).delete(testOrder);
         verify(mockCache, times(1)).evict(Customer.class, 1L);
     }
 

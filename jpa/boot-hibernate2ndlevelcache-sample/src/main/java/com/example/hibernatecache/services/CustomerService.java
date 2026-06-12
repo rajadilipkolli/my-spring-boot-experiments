@@ -84,6 +84,8 @@ public class CustomerService {
 
     @Transactional
     public void deleteCustomerById(Long id) {
-        customerRepository.deleteById(id);
+        customerRepository.findById(id).ifPresentOrElse(customerRepository::delete, () -> {
+            throw new CustomerNotFoundException(id);
+        });
     }
 }

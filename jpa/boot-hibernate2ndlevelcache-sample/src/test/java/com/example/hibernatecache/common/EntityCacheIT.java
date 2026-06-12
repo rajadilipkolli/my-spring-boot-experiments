@@ -175,6 +175,9 @@ class EntityCacheIT extends AbstractIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.itemCode", is("UPDATED-ITEM")));
 
+        SQLStatementCountValidator.assertSelectCount(0);
+        SQLStatementCountValidator.assertUpdateCount(1);
+        SQLStatementCountValidator.assertTotalCount(1);
         SQLStatementCountValidator.reset();
 
         // Get order items again - should hit DB because collection cache was invalidated
@@ -216,10 +219,16 @@ class EntityCacheIT extends AbstractIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.size()", is(2)));
 
+        SQLStatementCountValidator.assertSelectCount(2);
+        SQLStatementCountValidator.assertTotalCount(2);
+
         // -------------------- STEP 2: Delete an order --------------------
         // Delete the order we just created
-        this.mockMvc.perform(delete("/api/orders/{id}", orderToDeleteId)).andExpect(status().isAccepted());
+        this.mockMvc.perform(delete("/api/orders/{id}", orderToDeleteId)).andExpect(status().isNoContent());
 
+        SQLStatementCountValidator.assertSelectCount(3);
+        SQLStatementCountValidator.assertDeleteCount(2);
+        SQLStatementCountValidator.assertTotalCount(5);
         // Reset SQL counter after deletion
         SQLStatementCountValidator.reset();
 
@@ -230,9 +239,9 @@ class EntityCacheIT extends AbstractIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.size()", is(1)));
 
-        // The key test is that the database is hit because the cache was invalidated, 1- customer exists, 1-order, 1-
-        // customer
-        SQLStatementCountValidator.assertSelectCount(3);
+        // 1-order, 1-customer
+        SQLStatementCountValidator.assertSelectCount(2);
+        SQLStatementCountValidator.assertTotalCount(2);
     }
 
     @Test
@@ -263,7 +272,7 @@ class EntityCacheIT extends AbstractIntegrationTest {
         SQLStatementCountValidator.assertTotalCount(0);
 
         // -------------------- STEP 1: Delete an order item --------------------
-        this.mockMvc.perform(delete("/api/order/items/{id}", orderItemId)).andExpect(status().isOk());
+        this.mockMvc.perform(delete("/api/order/items/{id}", orderItemId)).andExpect(status().isNoContent());
 
         // Reset SQL counter after deletion
         SQLStatementCountValidator.assertDeleteCount(1);

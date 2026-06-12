@@ -4,6 +4,7 @@ import jakarta.persistence.Cacheable;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -11,6 +12,8 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,8 +25,8 @@ import org.hibernate.proxy.HibernateProxy;
 @Entity
 @Table(name = "orders")
 @Cacheable
-@Cache(region = "orderCache", usage = CacheConcurrencyStrategy.READ_WRITE)
-public class Order {
+@Cache(region = "orderCache", usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
+public class Order implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
@@ -35,13 +38,16 @@ public class Order {
     @Column(nullable = false)
     private BigDecimal price;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "customer_id", nullable = false)
-    @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+    @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
     private Customer customer;
 
+    @Version
+    private Short version = 0;
+
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Cache(region = "orderItemsCache", usage = CacheConcurrencyStrategy.READ_WRITE)
+    @Cache(region = "orderItemsCache", usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
     private List<OrderItem> orderItems = new ArrayList<>();
 
     public Long getId() {
@@ -50,6 +56,15 @@ public class Order {
 
     public Order setId(Long id) {
         this.id = id;
+        return this;
+    }
+
+    public Short getVersion() {
+        return version;
+    }
+
+    public Order setVersion(Short version) {
+        this.version = version;
         return this;
     }
 

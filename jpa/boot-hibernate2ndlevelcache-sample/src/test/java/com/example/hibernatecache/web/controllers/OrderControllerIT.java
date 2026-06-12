@@ -17,6 +17,7 @@ import com.example.hibernatecache.entities.Order;
 import com.example.hibernatecache.entities.OrderItem;
 import com.example.hibernatecache.model.request.OrderItemRequest;
 import com.example.hibernatecache.model.request.OrderRequest;
+import io.hypersistence.utils.jdbc.validator.SQLStatementCountValidator;
 import java.math.BigDecimal;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -62,6 +63,8 @@ class OrderControllerIT extends AbstractIntegrationTest {
                                 .setPrice(BigDecimal.ONE)
                                 .setQuantity(1))));
         orderList = savedCustomer.getOrders();
+
+        SQLStatementCountValidator.reset();
     }
 
     @Test
@@ -78,6 +81,9 @@ class OrderControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.isLast", is(true)))
                 .andExpect(jsonPath("$.hasNext", is(false)))
                 .andExpect(jsonPath("$.hasPrevious", is(false)));
+
+        SQLStatementCountValidator.assertSelectCount(4);
+        SQLStatementCountValidator.assertTotalCount(4);
     }
 
     @Test
@@ -98,6 +104,9 @@ class OrderControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.orderItems[0].quantity", is(10)))
                 .andExpect(jsonPath("$.orderItems[0].itemCode", is("ITM001")))
                 .andExpect(jsonPath("$.orderItems[0].orderItemId", notNullValue()));
+
+        SQLStatementCountValidator.assertSelectCount(1);
+        SQLStatementCountValidator.assertTotalCount(1);
     }
 
     @Test
@@ -128,6 +137,10 @@ class OrderControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.orderItems[0].quantity", is(10)))
                 .andExpect(jsonPath("$.orderItems[0].itemCode", is("ITM1")))
                 .andExpect(jsonPath("$.orderItems[0].orderItemId", notNullValue()));
+
+        SQLStatementCountValidator.assertSelectCount(1);
+        SQLStatementCountValidator.assertInsertCount(2);
+        SQLStatementCountValidator.assertTotalCount(3);
     }
 
     @Test
@@ -155,6 +168,9 @@ class OrderControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.violations[2].message", is("Price is required")))
                 .andExpect(jsonPath("$.violations[3].field", is("orderItems[0].quantity")))
                 .andExpect(jsonPath("$.violations[3].message", is("Quantity is required")));
+
+        SQLStatementCountValidator.assertSelectCount(0);
+        SQLStatementCountValidator.assertTotalCount(0);
     }
 
     @Test
@@ -179,24 +195,20 @@ class OrderControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.orderItems[0].quantity", is(10)))
                 .andExpect(jsonPath("$.orderItems[0].itemCode", is("ITM001")))
                 .andExpect(jsonPath("$.orderItems[0].orderItemId", notNullValue()));
+
+        SQLStatementCountValidator.assertSelectCount(1);
+        SQLStatementCountValidator.assertUpdateCount(1);
+        SQLStatementCountValidator.assertTotalCount(2);
     }
 
     @Test
     void shouldDeleteOrder() throws Exception {
         Order order = orderList.getFirst();
 
-        this.mockMvc
-                .perform(delete("/api/orders/{id}", order.getId()))
-                .andExpect(status().isAccepted())
-                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_JSON_VALUE)))
-                .andExpect(jsonPath("$.orderId", is(order.getId()), Long.class))
-                .andExpect(jsonPath("$.customerId", is(savedCustomer.getId()), Long.class))
-                .andExpect(jsonPath("$.name", is(order.getName())))
-                .andExpect(jsonPath("$.price", is(10 * 10))) // price * quantity
-                .andExpect(jsonPath("$.orderItems.size()", is(1)))
-                .andExpect(jsonPath("$.orderItems[0].price", is(10)))
-                .andExpect(jsonPath("$.orderItems[0].quantity", is(10)))
-                .andExpect(jsonPath("$.orderItems[0].itemCode", is("ITM001")))
-                .andExpect(jsonPath("$.orderItems[0].orderItemId", notNullValue()));
+        this.mockMvc.perform(delete("/api/orders/{id}", order.getId())).andExpect(status().isNoContent());
+
+        SQLStatementCountValidator.assertSelectCount(1);
+        SQLStatementCountValidator.assertDeleteCount(2);
+        SQLStatementCountValidator.assertTotalCount(3);
     }
 }

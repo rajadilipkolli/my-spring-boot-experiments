@@ -13,6 +13,7 @@ import com.example.hibernatecache.entities.Customer;
 import com.example.hibernatecache.entities.Order;
 import com.example.hibernatecache.entities.OrderItem;
 import com.example.hibernatecache.model.request.OrderItemRequest;
+import io.hypersistence.utils.jdbc.validator.SQLStatementCountValidator;
 import java.math.BigDecimal;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,6 +35,8 @@ class OrderItemControllerIT extends AbstractIntegrationTest {
         Customer savedCustomer = customerRepository.persist(createTestCustomer());
         savedOrder = savedCustomer.getOrders().getFirst();
         orderItemList = savedOrder.getOrderItems();
+
+        SQLStatementCountValidator.reset();
     }
 
     private Customer createTestCustomer() {
@@ -72,6 +75,9 @@ class OrderItemControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.isLast", is(true)))
                 .andExpect(jsonPath("$.hasNext", is(false)))
                 .andExpect(jsonPath("$.hasPrevious", is(false)));
+
+        SQLStatementCountValidator.assertSelectCount(1);
+        SQLStatementCountValidator.assertTotalCount(1);
     }
 
     @Test
@@ -87,6 +93,9 @@ class OrderItemControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.price", is(orderItem.getPrice()), BigDecimal.class))
                 .andExpect(jsonPath("$.quantity", is(orderItem.getQuantity())))
                 .andExpect(jsonPath("$.itemCode", is(orderItem.getItemCode())));
+
+        SQLStatementCountValidator.assertSelectCount(1);
+        SQLStatementCountValidator.assertTotalCount(1);
     }
 
     @Test
@@ -104,6 +113,10 @@ class OrderItemControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.price", is(200.09)))
                 .andExpect(jsonPath("$.quantity", is(orderItemRequest.quantity())))
                 .andExpect(jsonPath("$.itemCode", is(orderItemRequest.itemCode())));
+
+        SQLStatementCountValidator.assertSelectCount(1);
+        SQLStatementCountValidator.assertUpdateCount(1);
+        SQLStatementCountValidator.assertTotalCount(2);
     }
 
     @Test
@@ -123,19 +136,19 @@ class OrderItemControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.title", is("Not Found")))
                 .andExpect(jsonPath("$.status", is(404)))
                 .andExpect(jsonPath("$.detail").value("OrderItem with Id '%d' not found".formatted(orderItemId)));
+
+        SQLStatementCountValidator.assertSelectCount(1);
+        SQLStatementCountValidator.assertTotalCount(1);
     }
 
     @Test
     void shouldDeleteOrderItem() throws Exception {
         OrderItem orderItem = orderItemList.getFirst();
 
-        this.mockMvc
-                .perform(delete("/api/order/items/{id}", orderItem.getId()))
-                .andExpect(status().isOk())
-                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_JSON_VALUE)))
-                .andExpect(jsonPath("$.orderItemId", is(orderItem.getId()), Long.class))
-                .andExpect(jsonPath("$.price", is(orderItem.getPrice()), BigDecimal.class))
-                .andExpect(jsonPath("$.quantity", is(orderItem.getQuantity())))
-                .andExpect(jsonPath("$.itemCode", is(orderItem.getItemCode())));
+        this.mockMvc.perform(delete("/api/order/items/{id}", orderItem.getId())).andExpect(status().isNoContent());
+
+        SQLStatementCountValidator.assertSelectCount(1);
+        SQLStatementCountValidator.assertDeleteCount(1);
+        SQLStatementCountValidator.assertTotalCount(2);
     }
 }
