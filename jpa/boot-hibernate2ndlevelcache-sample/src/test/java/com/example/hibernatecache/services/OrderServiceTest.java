@@ -83,17 +83,10 @@ class OrderServiceTest {
     void deleteOrderById_NotFound() {
         // given
         given(orderRepository.findById(1L)).willReturn(Optional.empty());
-
-        // Mock EntityManager cache hierarchy
-        EntityManagerFactory mockFactory = mock(EntityManagerFactory.class);
-        Cache mockCache = mock(Cache.class);
-        // Mocks kept as requested, but no stubbing needed since they are never called
-
         // when & then
         assertThrows(OrderNotFoundException.class, () -> orderService.deleteOrderById(1L));
 
         verify(orderRepository, never()).delete(any());
-        verify(mockCache, never()).evict(any(), any());
     }
 
     private Order getOrder() {

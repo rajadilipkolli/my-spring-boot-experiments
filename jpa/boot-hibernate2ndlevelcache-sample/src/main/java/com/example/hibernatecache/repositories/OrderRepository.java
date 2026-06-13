@@ -19,12 +19,12 @@ public interface OrderRepository extends BaseJpaRepository<Order, Long>, PagingA
 
     @Override
     @QueryHints(@QueryHint(name = HINT_CACHEABLE, value = "true"))
-    @Query("SELECT o FROM Order o left join fetch o.orderItems oi WHERE o.id = :id ORDER BY oi.itemCode")
+    @Query("SELECT DISTINCT o FROM Order o left join fetch o.orderItems oi WHERE o.id = :id ORDER BY oi.itemCode")
     Optional<Order> findById(@Param("id") Long id);
 
     @QueryHints(@QueryHint(name = HINT_CACHEABLE, value = "true"))
     @Query(
-            "SELECT o FROM Order o left join fetch o.orderItems oi WHERE o.customer.id = :customerId ORDER BY oi.itemCode")
+            "SELECT DISTINCT o FROM Order o left join fetch o.orderItems oi WHERE o.customer.id = :customerId ORDER BY oi.itemCode")
     List<Order> findByCustomerId(@Param("customerId") Long customerId);
 
     @Override
