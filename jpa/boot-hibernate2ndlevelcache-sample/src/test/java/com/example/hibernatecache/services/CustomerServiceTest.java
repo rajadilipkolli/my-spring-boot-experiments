@@ -48,11 +48,14 @@ class CustomerServiceTest {
     @Test
     void deleteCustomerById() {
         // given
-        willDoNothing().given(customerRepository).deleteById(1L);
+        Customer customer = getCustomer();
+        given(customerRepository.findById(1L)).willReturn(Optional.of(customer));
+        willDoNothing().given(customerRepository).delete(customer);
         // when
         customerService.deleteCustomerById(1L);
         // then
-        verify(customerRepository, times(1)).deleteById(1L);
+        verify(customerRepository, times(1)).findById(1L);
+        verify(customerRepository, times(1)).delete(customer);
     }
 
     private Customer getCustomer() {

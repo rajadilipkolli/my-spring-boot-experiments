@@ -8,6 +8,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -197,21 +198,15 @@ class CustomerControllerTest {
     @Test
     void shouldDeleteCustomer() throws Exception {
         Long customerId = 1L;
-        CustomerResponse customer =
-                new CustomerResponse(customerId, "firstName 3", "lastName 3", "email3@junit.com", "9876543213", null);
-        given(customerService.findCustomerById(customerId)).willReturn(Optional.of(customer));
         doNothing().when(customerService).deleteCustomerById(customerId);
 
-        this.mockMvc
-                .perform(delete("/api/customers/{id}", customerId))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.firstName", is(customer.firstName())));
+        this.mockMvc.perform(delete("/api/customers/{id}", customerId)).andExpect(status().isNoContent());
     }
 
     @Test
     void shouldReturn404WhenDeletingNonExistingCustomer() throws Exception {
         Long customerId = 1L;
-        given(customerService.findCustomerById(customerId)).willReturn(Optional.empty());
+        doThrow(new CustomerNotFoundException(customerId)).when(customerService).deleteCustomerById(customerId);
 
         this.mockMvc
                 .perform(delete("/api/customers/{id}", customerId))

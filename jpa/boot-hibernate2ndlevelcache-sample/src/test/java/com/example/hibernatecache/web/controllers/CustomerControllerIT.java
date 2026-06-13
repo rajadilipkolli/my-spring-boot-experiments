@@ -208,16 +208,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
     void shouldDeleteCustomer() throws Exception {
         Customer customer = customerList.getFirst();
 
-        this.mockMvc
-                .perform(delete("/api/customers/{id}", customer.getId()))
-                .andExpect(status().isOk())
-                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_JSON_VALUE)))
-                .andExpect(jsonPath("$.customerId", is(customer.getId()), Long.class))
-                .andExpect(jsonPath("$.firstName", is(customer.getFirstName())))
-                .andExpect(jsonPath("$.lastName", is(customer.getLastName())))
-                .andExpect(jsonPath("$.email", is(customer.getEmail())))
-                .andExpect(jsonPath("$.phone", is(customer.getPhone())))
-                .andExpect(jsonPath("$.orders.size()", is(1)));
+        this.mockMvc.perform(delete("/api/customers/{id}", customer.getId())).andExpect(status().isNoContent());
 
         // Customer, order and OrderItem
         SQLStatementCountValidator.assertDeleteCount(3);

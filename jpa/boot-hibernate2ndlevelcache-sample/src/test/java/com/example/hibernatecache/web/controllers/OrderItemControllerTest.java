@@ -8,6 +8,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -18,6 +19,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.example.hibernatecache.entities.Customer;
 import com.example.hibernatecache.entities.Order;
 import com.example.hibernatecache.entities.OrderItem;
+import com.example.hibernatecache.exception.OrderItemNotFoundException;
 import com.example.hibernatecache.model.query.FindOrderItemsQuery;
 import com.example.hibernatecache.model.request.OrderItemRequest;
 import com.example.hibernatecache.model.response.OrderItemResponse;
@@ -207,26 +209,21 @@ class OrderItemControllerTest {
     @Test
     void shouldDeleteOrderItem() throws Exception {
         Long orderItemId = 1L;
-        OrderItemResponse orderItem = new OrderItemResponse(orderItemId, "ITM1", BigDecimal.TEN, 10);
-        given(orderItemService.findOrderItemById(orderItemId)).willReturn(Optional.of(orderItem));
         doNothing().when(orderItemService).deleteOrderItemById(orderItemId);
 
-        this.mockMvc
-                .perform(delete("/api/order/items/{id}", orderItemId))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.orderItemId", is(orderItemId), Long.class))
-                .andExpect(jsonPath("$.price", is(orderItem.price()), BigDecimal.class))
-                .andExpect(jsonPath("$.quantity", is(orderItem.quantity())))
-                .andExpect(jsonPath("$.itemCode", is(orderItem.itemCode())));
+        this.mockMvc.perform(delete("/api/order/items/{id}", orderItemId)).andExpect(status().isNoContent());
     }
 
     @Test
     void shouldReturn404WhenDeletingNonExistingOrderItem() throws Exception {
         Long orderItemId = 999L;
-        given(orderItemService.findOrderItemById(orderItemId)).willReturn(Optional.empty());
+        doThrow(new OrderItemNotFoundException(orderItemId))
+                .when(orderItemService)
+                .deleteOrderItemById(orderItemId);
 
         this.mockMvc
                 .perform(delete("/api/order/items/{id}", orderItemId))
+                .andExpect(status().isNotFound())
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                 .andExpect(
                         jsonPath("$.type", is("https://api.boot-hibernate2ndlevelcache-sample.com/errors/not-found")))

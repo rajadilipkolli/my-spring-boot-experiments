@@ -88,13 +88,8 @@ class CustomerController {
     }
 
     @DeleteMapping("/{id}")
-    ResponseEntity<CustomerResponse> deleteCustomer(@PathVariable Long id) {
-        return customerService
-                .findCustomerById(id)
-                .map(customer -> {
-                    customerService.deleteCustomerById(id);
-                    return ResponseEntity.ok(customer);
-                })
-                .orElseThrow(() -> new CustomerNotFoundException(id));
+    ResponseEntity<Void> deleteCustomer(@PathVariable Long id) {
+        customerService.deleteCustomerById(id);
+        return ResponseEntity.noContent().build();
     }
 }

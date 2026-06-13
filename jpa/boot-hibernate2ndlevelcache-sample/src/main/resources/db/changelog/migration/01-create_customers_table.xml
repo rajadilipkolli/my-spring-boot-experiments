@@ -27,6 +27,7 @@
             <column name="last_name" type="${string.type}" />
             <column name="email" type="${string.type}" />
             <column name="phone" type="${string.type}" />
+            <column name="version" type="SMALLINT" defaultValueNumeric="0"/>
         </createTable>
     </changeSet>
 </databaseChangeLog>

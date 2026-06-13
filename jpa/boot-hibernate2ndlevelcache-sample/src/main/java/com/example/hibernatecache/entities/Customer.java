@@ -10,6 +10,9 @@ import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+import jakarta.persistence.Version;
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import org.hibernate.annotations.Cache;
@@ -25,7 +28,10 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
         })
 @Cacheable
 @Cache(region = "customerCache", usage = CacheConcurrencyStrategy.READ_WRITE)
-public class Customer {
+public class Customer implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
@@ -41,6 +47,9 @@ public class Customer {
 
     private String phone;
 
+    @Version
+    private Short version = 0;
+
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
     @Cache(region = "customerOrdersCache", usage = CacheConcurrencyStrategy.READ_WRITE)
     private List<Order> orders = new ArrayList<>();
@@ -51,6 +60,15 @@ public class Customer {
 
     public Customer setId(Long id) {
         this.id = id;
+        return this;
+    }
+
+    public Short getVersion() {
+        return version;
+    }
+
+    public Customer setVersion(Short version) {
+        this.version = version;
         return this;
     }
 
