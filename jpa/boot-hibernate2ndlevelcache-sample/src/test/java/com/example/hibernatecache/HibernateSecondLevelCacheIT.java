@@ -162,9 +162,9 @@ class HibernateSecondLevelCacheIT extends AbstractIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.firstName", is("UpdatedName")));
 
-        // Should hit DB again because cache was updated
-        SQLStatementCountValidator.assertSelectCount(1);
-        SQLStatementCountValidator.assertTotalCount(1);
+        // Should not hit DB again because cache was updated
+        SQLStatementCountValidator.assertSelectCount(0);
+        SQLStatementCountValidator.assertTotalCount(0);
     }
 
     @Test

@@ -26,7 +26,7 @@ import org.hibernate.proxy.HibernateProxy;
 @Entity
 @Table(name = "orders")
 @Cacheable
-@Cache(region = "orderCache", usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
+@Cache(region = "orderCache", usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Order implements Serializable {
 
     @Serial
@@ -50,7 +50,7 @@ public class Order implements Serializable {
     private Short version = 0;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Cache(region = "orderItemsCache", usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
+    @Cache(region = "orderItemsCache", usage = CacheConcurrencyStrategy.READ_WRITE)
     private List<OrderItem> orderItems = new ArrayList<>();
 
     public Long getId() {

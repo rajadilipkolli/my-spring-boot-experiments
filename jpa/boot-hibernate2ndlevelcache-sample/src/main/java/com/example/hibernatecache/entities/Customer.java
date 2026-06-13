@@ -27,7 +27,7 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
                     columnNames = {"email"})
         })
 @Cacheable
-@Cache(region = "customerCache", usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
+@Cache(region = "customerCache", usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Customer implements Serializable {
 
     @Serial
@@ -51,7 +51,7 @@ public class Customer implements Serializable {
     private Short version = 0;
 
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Cache(region = "customerOrdersCache", usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
+    @Cache(region = "customerOrdersCache", usage = CacheConcurrencyStrategy.READ_WRITE)
     private List<Order> orders = new ArrayList<>();
 
     public Long getId() {

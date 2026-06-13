@@ -94,8 +94,8 @@ class OrderItemControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.quantity", is(orderItem.getQuantity())))
                 .andExpect(jsonPath("$.itemCode", is(orderItem.getItemCode())));
 
-        SQLStatementCountValidator.assertSelectCount(1);
-        SQLStatementCountValidator.assertTotalCount(1);
+        SQLStatementCountValidator.assertSelectCount(0);
+        SQLStatementCountValidator.assertTotalCount(0);
     }
 
     @Test
@@ -114,9 +114,9 @@ class OrderItemControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.quantity", is(orderItemRequest.quantity())))
                 .andExpect(jsonPath("$.itemCode", is(orderItemRequest.itemCode())));
 
-        SQLStatementCountValidator.assertSelectCount(1);
+        SQLStatementCountValidator.assertSelectCount(0);
         SQLStatementCountValidator.assertUpdateCount(1);
-        SQLStatementCountValidator.assertTotalCount(2);
+        SQLStatementCountValidator.assertTotalCount(1);
     }
 
     @Test
@@ -147,8 +147,8 @@ class OrderItemControllerIT extends AbstractIntegrationTest {
 
         this.mockMvc.perform(delete("/api/order/items/{id}", orderItem.getId())).andExpect(status().isNoContent());
 
-        SQLStatementCountValidator.assertSelectCount(1);
+        SQLStatementCountValidator.assertSelectCount(0);
         SQLStatementCountValidator.assertDeleteCount(1);
-        SQLStatementCountValidator.assertTotalCount(2);
+        SQLStatementCountValidator.assertTotalCount(1);
     }
 }

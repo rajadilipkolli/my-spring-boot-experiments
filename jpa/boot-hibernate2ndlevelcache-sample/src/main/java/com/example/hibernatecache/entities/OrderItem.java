@@ -22,7 +22,7 @@ import org.hibernate.proxy.HibernateProxy;
 @Entity
 @Table(name = "order_items")
 @Cacheable
-@Cache(region = "orderItemCache", usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
+@Cache(region = "orderItemCache", usage = CacheConcurrencyStrategy.READ_WRITE)
 public class OrderItem implements Serializable {
 
     @Serial
