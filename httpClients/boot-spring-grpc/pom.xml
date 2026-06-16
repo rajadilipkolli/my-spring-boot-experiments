@@ -25,7 +25,7 @@
         <protobuf-java.version>4.33.4</protobuf-java.version>
         <spring-grpc.version>1.1.0</spring-grpc.version>
         <springdoc-openapi.version>3.0.3</springdoc-openapi.version>
-        <spotless.version>3.6.0</spotless.version>
+        <spotless.version>3.7.0</spotless.version>
         <jacoco-maven-plugin.version>0.8.15</jacoco-maven-plugin.version>
         <maven.compiler.release>${java.version}</maven.compiler.release>
     </properties>
