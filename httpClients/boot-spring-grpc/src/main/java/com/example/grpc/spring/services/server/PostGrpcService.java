@@ -14,9 +14,9 @@ import com.example.grpc.spring.repositories.PostRepository;
 import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
 import java.util.List;
-import org.springframework.stereotype.Service;
+import org.springframework.grpc.server.service.GrpcService;
 
-@Service
+@GrpcService
 public class PostGrpcService extends PostServiceGrpc.PostServiceImplBase {
 
     private final PostRepository postRepository;
