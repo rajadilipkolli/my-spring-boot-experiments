@@ -105,13 +105,15 @@ class PostControllerIntegrationTest extends AbstractIntegrationTest {
         assertThat(post.getId()).isEqualTo(postId);
 
         // 4. List Posts
-        postServiceBlockingStub
-                .listPosts(ListPostsRequest.newBuilder().build())
-                .getPostsList()
-                .stream()
-                .filter(p -> p.getId() == postId)
-                .findFirst()
-                .ifPresent(p -> assertThat(p.getTitle()).isEqualTo("Updated Title"));
+        assertThat(
+                        postServiceBlockingStub
+                                .listPosts(ListPostsRequest.newBuilder().build())
+                                .getPostsList())
+                .anySatisfy(
+                        p -> {
+                            assertThat(p.getId()).isEqualTo(postId);
+                            assertThat(p.getTitle()).isEqualTo("Updated Title");
+                        });
 
         // 5. Delete the Post
         DeletePostResponse deletePostResponse =

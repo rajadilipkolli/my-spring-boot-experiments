@@ -136,13 +136,16 @@ class PostCommentControllerIntegrationTest extends AbstractIntegrationTest {
         assertThat(postComment.getId()).isEqualTo(commentId);
 
         // 5. List Comments
-        postCommentServiceBlockingStub
-                .listComments(ListCommentsRequest.newBuilder().setPostId(postId).build())
-                .getCommentsList()
-                .stream()
-                .filter(c -> c.getId() == commentId)
-                .findFirst()
-                .ifPresent(c -> assertThat(c.getReview()).isEqualTo("Updated review"));
+        assertThat(
+                        postCommentServiceBlockingStub
+                                .listComments(
+                                        ListCommentsRequest.newBuilder().setPostId(postId).build())
+                                .getCommentsList())
+                .anySatisfy(
+                        c -> {
+                            assertThat(c.getId()).isEqualTo(commentId);
+                            assertThat(c.getReview()).isEqualTo("Updated review");
+                        });
 
         // 6. Delete the Comment
         DeleteCommentResponse deleteCommentResponse =
