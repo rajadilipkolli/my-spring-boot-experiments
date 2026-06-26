@@ -21,7 +21,7 @@ EOF
 cat >> "$PGDATA/pg_hba.conf" <<EOF
 
 # Replication connections
-host replication repl_user ${REPL_NETWORK:-172.16.0.0/12} scram-sha-256
+host replication repl_user ${REPL_NETWORK:-0.0.0.0/0} scram-sha-256
 
 # Application connections
 host all all ${APP_CIDR:-0.0.0.0/0} scram-sha-256

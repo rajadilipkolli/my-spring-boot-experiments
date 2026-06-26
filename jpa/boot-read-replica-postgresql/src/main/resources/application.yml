@@ -11,7 +11,6 @@ spring:
         pool-name: primaryHikariPool
         data-source-properties:
           ApplicationName: ${spring.application.name}
-          serverTimezone: UTC
   replica:
     datasource:
       password: app_readonly_password
@@ -22,7 +21,7 @@ spring:
         auto-commit: false
         poolName: replicaHikariPool
         data-source-properties:
-          serverTimezone: UTC
+          ApplicationName: ${spring.application.name}
 ################ Database #####################
   data:
     jpa:

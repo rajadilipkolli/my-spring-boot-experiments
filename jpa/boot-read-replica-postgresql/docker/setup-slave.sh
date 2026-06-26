@@ -31,11 +31,12 @@ if [ -f "$PGDATA/PG_VERSION" ]; then
 
     exec gosu postgres postgres -D "$PGDATA" -c hot_standby=on -c hot_standby_feedback=on
 else
-    echo "Data directory is empty, creating base backup..."
+    echo "Data directory is empty or incomplete, cleaning up and creating base backup..."
+    rm -rf "${PGDATA:?}"/*
     
     # Create base backup from master
     export PGPASSWORD="$REPLICATION_PASSWORD"
-    pg_basebackup \
+    gosu postgres pg_basebackup \
         -h "$POSTGRES_MASTER_HOST" \
         -p "$POSTGRES_MASTER_PORT" \
         -U "$REPLICATION_USER" \
