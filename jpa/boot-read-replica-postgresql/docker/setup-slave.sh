@@ -1,9 +1,13 @@
 #!/bin/bash
 set -Eeuo pipefail
 
-export PGDATA=/var/lib/postgresql/data
+
 
 echo "Setting up PostgreSQL slave..."
+
+# Ensure the base postgresql directory is accessible by the postgres user
+mkdir -p "$PGDATA"
+chown -R postgres:postgres /var/lib/postgresql
 
 # Wait for master to be ready
 echo "Waiting for master to be ready..."
@@ -18,7 +22,7 @@ echo "Master is ready. Checking if slave data exists..."
 if [ -f "$PGDATA/PG_VERSION" ]; then
     echo "Data directory exists, starting PostgreSQL..."
     # Change ownership
-    chown -R postgres:postgres "$PGDATA"
+    chown -R postgres:postgres /var/lib/postgresql
 
     # Add application connection rule if missing
     if ! grep -q "host all all ${APP_CIDR:-0.0.0.0/0} scram-sha-256" "$PGDATA/pg_hba.conf"; then
@@ -42,7 +46,7 @@ else
 
     # Set proper permissions
     chmod 700 "$PGDATA"
-    chown -R postgres:postgres "$PGDATA"
+    chown -R postgres:postgres /var/lib/postgresql
     
     # Add standby configuration
     cat >> "$PGDATA/postgresql.conf" <<EOF
