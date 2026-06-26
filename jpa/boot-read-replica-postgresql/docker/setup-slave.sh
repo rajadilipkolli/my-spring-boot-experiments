@@ -15,21 +15,27 @@ done
 
 echo "Master is ready. Checking if slave data exists..."
 
-if [ "$(ls -A $PGDATA 2>/dev/null)" ]; then
+if [ -f "$PGDATA/PG_VERSION" ]; then
     echo "Data directory exists, starting PostgreSQL..."
-    # Change ownership and start as postgres user
+    # Change ownership
     chown -R postgres:postgres "$PGDATA"
-    exec gosu postgres postgres -c hot_standby=on -c hot_standby_feedback=on
+
+    # Add application connection rule if missing
+    if ! grep -q "host all all ${APP_CIDR:-0.0.0.0/0} scram-sha-256" "$PGDATA/pg_hba.conf"; then
+        echo "host all all ${APP_CIDR:-0.0.0.0/0} scram-sha-256" >> "$PGDATA/pg_hba.conf"
+    fi
+
+    exec gosu postgres postgres -D "$PGDATA" -c hot_standby=on -c hot_standby_feedback=on
 else
     echo "Data directory is empty, creating base backup..."
     
     # Create base backup from master
-    PGPASSWORD="$REPLICATION_PASSWORD" pg_basebackup \
+    export PGPASSWORD="$REPLICATION_PASSWORD"
+    pg_basebackup \
         -h "$POSTGRES_MASTER_HOST" \
         -p "$POSTGRES_MASTER_PORT" \
         -U "$REPLICATION_USER" \
         -D "$PGDATA" \
-        -W \
         -v \
         -R \
         -X stream
@@ -44,6 +50,11 @@ hot_standby = on
 hot_standby_feedback = on
 EOF
 
+    # Add application connection rule if missing
+    if ! grep -q "host all all ${APP_CIDR:-0.0.0.0/0} scram-sha-256" "$PGDATA/pg_hba.conf"; then
+        echo "host all all ${APP_CIDR:-0.0.0.0/0} scram-sha-256" >> "$PGDATA/pg_hba.conf"
+    fi
+
     echo "Base backup complete. Starting PostgreSQL in standby mode..."
-    exec gosu postgres postgres
+    exec gosu postgres postgres -D "$PGDATA"
 fi

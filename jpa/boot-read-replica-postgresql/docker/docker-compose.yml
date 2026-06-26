@@ -1,7 +1,7 @@
 name: read-replica-postgresql
 services:
   postgresql-master:
-    image: 'postgres:17'
+    image: 'postgres:18'
     ports:
       - '5432:5432'
     volumes:
@@ -19,7 +19,7 @@ services:
       retries: 20
       start_period: 10s
   postgresql-slave:
-    image: 'postgres:17'
+    image: 'postgres:18'
     ports:
       - '15432:5432'
     depends_on:
