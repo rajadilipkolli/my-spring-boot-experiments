@@ -1,6 +1,6 @@
 services:
   postgresql-master:
-    image: 'bitnami/postgresql:latest'
+    image: 'soldevelo/postgresql:latest'
     ports:
       - '5432:5432'
     volumes:
@@ -15,7 +15,7 @@ services:
       - POSTGRESQL_PASSWORD=postgres_write
       - POSTGRESQL_DATABASE=my_database
   postgresql-slave:
-    image: 'bitnami/postgresql:latest'
+    image: 'soldevelo/postgresql:latest'
     ports:
       - '15432:5432'
     depends_on:
