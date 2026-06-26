@@ -27,7 +27,7 @@ class ApplicationIntegrationTest extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(post("/api/customers")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(customer)))
+                        .content(jsonMapper.writeValueAsString(customer)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.text", is(customer.getText())))
                 .andExpect(jsonPath("$.name", is(customer.getName())))

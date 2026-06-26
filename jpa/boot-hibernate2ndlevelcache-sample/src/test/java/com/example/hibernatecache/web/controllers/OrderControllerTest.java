@@ -8,6 +8,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -43,7 +44,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 @WebMvcTest(controllers = OrderController.class)
 @ActiveProfiles(PROFILE_TEST)
@@ -59,7 +60,7 @@ class OrderControllerTest {
     private OrderItemService orderItemService;
 
     @Autowired
-    private ObjectMapper objectMapper;
+    private JsonMapper jsonMapper;
 
     private List<Order> orderList;
 
@@ -155,7 +156,7 @@ class OrderControllerTest {
         this.mockMvc
                 .perform(post("/api/orders")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(orderRequest)))
+                        .content(jsonMapper.writeValueAsString(orderRequest)))
                 .andExpect(status().isCreated())
                 .andExpect(header().exists(HttpHeaders.LOCATION))
                 .andExpect(jsonPath("$.orderId", notNullValue()))
@@ -169,7 +170,7 @@ class OrderControllerTest {
         this.mockMvc
                 .perform(post("/api/orders")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(orderRequest)))
+                        .content(jsonMapper.writeValueAsString(orderRequest)))
                 .andExpect(status().isBadRequest())
                 .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                 .andExpect(
@@ -194,7 +195,7 @@ class OrderControllerTest {
         this.mockMvc
                 .perform(post("/api/orders")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(orderRequest)))
+                        .content(jsonMapper.writeValueAsString(orderRequest)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.violations", hasSize(2)))
                 .andExpect(jsonPath("$.violations[0].field", is("orderItems[0].price")))
@@ -218,7 +219,7 @@ class OrderControllerTest {
         this.mockMvc
                 .perform(put("/api/orders/{id}", orderId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(orderRequest)))
+                        .content(jsonMapper.writeValueAsString(orderRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.orderId", is(orderId), Long.class))
                 .andExpect(jsonPath("$.name", is(orderRequest.name())));
@@ -235,7 +236,7 @@ class OrderControllerTest {
         this.mockMvc
                 .perform(put("/api/orders/{id}", orderId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(orderRequest)))
+                        .content(jsonMapper.writeValueAsString(orderRequest)))
                 .andExpect(status().isNotFound())
                 .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                 .andExpect(
@@ -248,24 +249,19 @@ class OrderControllerTest {
     @Test
     void shouldDeleteOrder() throws Exception {
         Long orderId = 1L;
-        OrderResponse order =
-                new OrderResponse(customer.getId(), orderId, "Some text", BigDecimal.TEN, new ArrayList<>());
-        given(orderService.findOrderById(orderId)).willReturn(Optional.of(order));
         doNothing().when(orderService).deleteOrderById(orderId);
 
-        this.mockMvc
-                .perform(delete("/api/orders/{id}", orderId))
-                .andExpect(status().isAccepted())
-                .andExpect(jsonPath("$.name", is(order.name())));
+        this.mockMvc.perform(delete("/api/orders/{id}", orderId)).andExpect(status().isNoContent());
     }
 
     @Test
     void shouldReturn404WhenDeletingNonExistingOrder() throws Exception {
         Long orderId = 1L;
-        given(orderService.findOrderById(orderId)).willReturn(Optional.empty());
+        doThrow(new OrderNotFoundException(orderId)).when(orderService).deleteOrderById(orderId);
 
         this.mockMvc
                 .perform(delete("/api/orders/{id}", orderId))
+                .andExpect(status().isNotFound())
                 .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                 .andExpect(
                         jsonPath("$.type", is("https://api.boot-hibernate2ndlevelcache-sample.com/errors/not-found")))

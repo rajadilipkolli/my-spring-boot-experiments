@@ -1,5 +1,5 @@
 type Query {
-    customers : [Customer]
+    customers(first: Int, after: String, last: Int, before: String): CustomerConnection
     customersByName(name : String) : [Customer]
 }
 
@@ -17,4 +17,21 @@ type Customer {
     id: ID
     name: String
     orders: [Orders]
+}
+
+type PageInfo {
+    hasPreviousPage: Boolean!
+    hasNextPage: Boolean!
+    startCursor: String
+    endCursor: String
+}
+
+type CustomerEdge {
+    node: Customer
+    cursor: String!
+}
+
+type CustomerConnection {
+    edges: [CustomerEdge]
+    pageInfo: PageInfo!
 }

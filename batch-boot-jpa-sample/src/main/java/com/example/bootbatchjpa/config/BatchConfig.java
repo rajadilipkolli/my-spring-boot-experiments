@@ -16,7 +16,6 @@ import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.job.Job;
 import org.springframework.batch.core.job.JobExecution;
 import org.springframework.batch.core.job.builder.JobBuilder;
-import org.springframework.batch.core.job.parameters.JobParameters;
 import org.springframework.batch.core.job.parameters.RunIdIncrementer;
 import org.springframework.batch.core.listener.JobExecutionListener;
 import org.springframework.batch.core.repository.JobRepository;
@@ -26,9 +25,11 @@ import org.springframework.batch.infrastructure.item.ItemProcessor;
 import org.springframework.batch.infrastructure.item.ItemWriter;
 import org.springframework.batch.infrastructure.item.database.JpaPagingItemReader;
 import org.springframework.batch.infrastructure.item.database.builder.JpaPagingItemReaderBuilder;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.dao.DataAccessException;
 import org.springframework.transaction.PlatformTransactionManager;
 
@@ -40,19 +41,26 @@ class BatchConfig implements JobExecutionListener {
     private static final Logger log = LoggerFactory.getLogger(BatchConfig.class);
 
     private final EntityManagerFactory entityManagerFactory;
+    private final ApplicationProperties applicationProperties;
+    private final CustomerIdRangePartitioner partitioner;
 
-    BatchConfig(EntityManagerFactory entityManagerFactory) {
+    BatchConfig(
+            EntityManagerFactory entityManagerFactory,
+            ApplicationProperties applicationProperties,
+            CustomerIdRangePartitioner partitioner) {
         this.entityManagerFactory = entityManagerFactory;
+        this.applicationProperties = applicationProperties;
+        this.partitioner = partitioner;
     }
 
     @Bean
-    Job allCustomersJob(
+    Step customerWorkerStep(
             JpaPagingItemReader<Customer> jpaPagingItemReader,
             JobRepository jobRepository,
             PlatformTransactionManager transactionManager) {
-        Step step = new StepBuilder("all-customers-step", jobRepository)
+        return new StepBuilder("all-customers-step", jobRepository)
                 .allowStartIfComplete(true)
-                .<Customer, CustomerDTO>chunk(10)
+                .<Customer, CustomerDTO>chunk(applicationProperties.getBatch().getChunkSize())
                 .transactionManager(transactionManager)
                 .reader(jpaPagingItemReader)
                 .processor(getCustomerCustomerDTOItemProcessor())
@@ -61,9 +69,25 @@ class BatchConfig implements JobExecutionListener {
                 .skip(DataAccessException.class) // skip all DataAccessException
                 .skipLimit(20) // the number of times you want to skip DataAccessException.class
                 .build();
+    }
 
+    @Bean
+    Step customerManagerStep(
+            Step customerWorkerStep,
+            JobRepository jobRepository,
+            @Qualifier("applicationTaskExecutor") TaskExecutor taskExecutor) {
+        return new StepBuilder("customerManagerStep", jobRepository)
+                .partitioner(customerWorkerStep.getName(), partitioner)
+                .step(customerWorkerStep)
+                .gridSize(applicationProperties.getBatch().getGridSize())
+                .taskExecutor(taskExecutor)
+                .build();
+    }
+
+    @Bean
+    Job allCustomersJob(Step customerManagerStep, JobRepository jobRepository) {
         return new JobBuilder("all-customers-job", jobRepository)
-                .start(step)
+                .start(customerManagerStep)
                 .incrementer(new RunIdIncrementer())
                 .listener(this)
                 .build();
@@ -83,17 +107,17 @@ class BatchConfig implements JobExecutionListener {
     @Bean
     @StepScope
     JpaPagingItemReader<Customer> jpaPagingItemReader(
-            @Value("#{stepExecution.jobExecution.jobParameters}") JobParameters jobParameters) {
-        // use your jobParameters
+            @Value("#{stepExecutionContext['minValue']}") Long minValue,
+            @Value("#{stepExecutionContext['maxValue']}") Long maxValue) {
         Map<String, Object> parameterValuesMap = HashMap.newHashMap(2);
-        parameterValuesMap.put("minId", jobParameters.getLong("minId"));
-        parameterValuesMap.put("maxId", jobParameters.getLong("maxId"));
+        parameterValuesMap.put("minId", minValue);
+        parameterValuesMap.put("maxId", maxValue);
         return new JpaPagingItemReaderBuilder<Customer>()
                 .name("jpaPagingItemReader")
                 .entityManagerFactory(entityManagerFactory)
                 .queryString("SELECT c FROM Customer c WHERE c.id BETWEEN :minId AND :maxId ORDER BY c.id")
                 .parameterValues(parameterValuesMap)
-                .pageSize(10)
+                .pageSize(applicationProperties.getBatch().getChunkSize())
                 .build();
     }
 

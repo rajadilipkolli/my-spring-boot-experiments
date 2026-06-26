@@ -53,13 +53,8 @@ class OrderItemController {
     }
 
     @DeleteMapping("/{id}")
-    ResponseEntity<OrderItemResponse> deleteOrderItem(@PathVariable Long id) {
-        return orderItemService
-                .findOrderItemById(id)
-                .map(orderItem -> {
-                    orderItemService.deleteOrderItemById(id);
-                    return ResponseEntity.ok(orderItem);
-                })
-                .orElseThrow(() -> new OrderItemNotFoundException(id));
+    ResponseEntity<Void> deleteOrderItem(@PathVariable Long id) {
+        orderItemService.deleteOrderItemById(id);
+        return ResponseEntity.noContent().build();
     }
 }

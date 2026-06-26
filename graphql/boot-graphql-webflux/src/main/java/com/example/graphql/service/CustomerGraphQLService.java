@@ -10,6 +10,10 @@ import reactor.core.publisher.Mono;
 public interface CustomerGraphQLService {
     Flux<Customer> findAllCustomers();
 
+    Flux<Customer> findAllCustomers(int offset, int limit);
+
+    Mono<Long> countCustomers();
+
     Flux<Customer> findByNameIgnoringCase(String name);
 
     Mono<Map<Customer, List<Orders>>> findAllOrdersByCustomers(List<Customer> customers);

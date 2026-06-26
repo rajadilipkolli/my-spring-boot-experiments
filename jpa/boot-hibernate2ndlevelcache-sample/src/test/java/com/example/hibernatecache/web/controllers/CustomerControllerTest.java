@@ -8,6 +8,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -36,7 +37,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 @WebMvcTest(controllers = CustomerController.class)
 @ActiveProfiles(PROFILE_TEST)
@@ -52,7 +53,7 @@ class CustomerControllerTest {
     private OrderService orderService;
 
     @Autowired
-    private ObjectMapper objectMapper;
+    private JsonMapper jsonMapper;
 
     @Test
     void shouldFetchAllCustomers() throws Exception {
@@ -126,7 +127,7 @@ class CustomerControllerTest {
         this.mockMvc
                 .perform(post("/api/customers")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(customerRequest)))
+                        .content(jsonMapper.writeValueAsString(customerRequest)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.customerId", notNullValue()))
                 .andExpect(jsonPath("$.firstName", is(customer.firstName())));
@@ -139,7 +140,7 @@ class CustomerControllerTest {
         this.mockMvc
                 .perform(post("/api/customers")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(customer)))
+                        .content(jsonMapper.writeValueAsString(customer)))
                 .andExpect(status().isBadRequest())
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                 .andExpect(
@@ -169,7 +170,7 @@ class CustomerControllerTest {
         this.mockMvc
                 .perform(put("/api/customers/{id}", customerId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(customerRequest)))
+                        .content(jsonMapper.writeValueAsString(customerRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.firstName", is(customerResponse.firstName())));
     }
@@ -184,7 +185,7 @@ class CustomerControllerTest {
         this.mockMvc
                 .perform(put("/api/customers/{id}", customerId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(customerRequest)))
+                        .content(jsonMapper.writeValueAsString(customerRequest)))
                 .andExpect(status().isNotFound())
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                 .andExpect(
@@ -197,21 +198,15 @@ class CustomerControllerTest {
     @Test
     void shouldDeleteCustomer() throws Exception {
         Long customerId = 1L;
-        CustomerResponse customer =
-                new CustomerResponse(customerId, "firstName 3", "lastName 3", "email3@junit.com", "9876543213", null);
-        given(customerService.findCustomerById(customerId)).willReturn(Optional.of(customer));
         doNothing().when(customerService).deleteCustomerById(customerId);
 
-        this.mockMvc
-                .perform(delete("/api/customers/{id}", customerId))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.firstName", is(customer.firstName())));
+        this.mockMvc.perform(delete("/api/customers/{id}", customerId)).andExpect(status().isNoContent());
     }
 
     @Test
     void shouldReturn404WhenDeletingNonExistingCustomer() throws Exception {
         Long customerId = 1L;
-        given(customerService.findCustomerById(customerId)).willReturn(Optional.empty());
+        doThrow(new CustomerNotFoundException(customerId)).when(customerService).deleteCustomerById(customerId);
 
         this.mockMvc
                 .perform(delete("/api/customers/{id}", customerId))

@@ -47,8 +47,7 @@ class PostControllerIT extends AbstractIntegrationTest {
                                         .withHeader(
                                                 HttpHeaders.CONTENT_TYPE,
                                                 MediaType.APPLICATION_JSON_VALUE)
-                                        .withBody(
-                                                this.objectMapper.writeValueAsString(mockPosts))));
+                                        .withBody(this.jsonMapper.writeValueAsString(mockPosts))));
 
         // Test method
         Flux<PostDto> result =
@@ -83,7 +82,7 @@ class PostControllerIT extends AbstractIntegrationTest {
                                         .withHeader(
                                                 HttpHeaders.CONTENT_TYPE,
                                                 MediaType.APPLICATION_JSON_VALUE)
-                                        .withBody(this.objectMapper.writeValueAsString(post))));
+                                        .withBody(this.jsonMapper.writeValueAsString(post))));
 
         this.webTestClient
                 .get()

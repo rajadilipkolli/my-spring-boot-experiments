@@ -1,0 +1,19 @@
+query authorEntities {
+    allAuthors(first:2){
+        edges {
+            node {
+                id
+                firstName
+                lastName
+                email
+            }
+            cursor
+        }
+        pageInfo {
+            hasNextPage
+            hasPreviousPage
+            startCursor
+            endCursor
+        }
+    }
+}

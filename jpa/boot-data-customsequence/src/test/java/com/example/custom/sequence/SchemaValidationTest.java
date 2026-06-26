@@ -4,12 +4,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.example.custom.sequence.common.ContainersConfig;
 import com.example.custom.sequence.config.db.JpaConfig;
-import com.zaxxer.hikari.HikariDataSource;
 import javax.sql.DataSource;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.jdbc.datasource.LazyConnectionDataSourceProxy;
 
 @DataJpaTest(properties = {"spring.jpa.hibernate.ddl-auto=validate"})
 @Import({ContainersConfig.class, JpaConfig.class})
@@ -20,6 +20,6 @@ class SchemaValidationTest {
 
     @Test
     void validateJpaMappingsWithDbSchema() {
-        assertThat(dataSource).isInstanceOf(HikariDataSource.class);
+        assertThat(dataSource).isInstanceOf(LazyConnectionDataSourceProxy.class);
     }
 }

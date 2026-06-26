@@ -19,5 +19,7 @@
     </springProfile>
 
     <logger name="com.example.custom.sequence" level="DEBUG"/>
+    <logger name="boot-data-jpa-customsequence-logger" level="DEBUG"/>
+    <logger name="boot-data-jpa-customsequence-slow-logger" level="DEBUG"/>
 
 </configuration>

@@ -28,6 +28,7 @@
             <column name="customer_id" type="bigint">
                 <constraints nullable="false"/>
             </column>
+            <column name="version" type="SMALLINT" defaultValueNumeric="0"/>
         </createTable>
     </changeSet>
 </databaseChangeLog>

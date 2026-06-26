@@ -11,17 +11,17 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.HandlerInterceptor;
-import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 @Configuration(proxyBeanMethods = false)
 public class TenantInterceptor implements HandlerInterceptor {
 
     private final TenantIdentifierResolver tenantIdentifierResolver;
-    private final ObjectMapper objectMapper;
+    private final JsonMapper jsonMapper;
 
-    public TenantInterceptor(TenantIdentifierResolver tenantIdentifierResolver, ObjectMapper objectMapper) {
+    public TenantInterceptor(TenantIdentifierResolver tenantIdentifierResolver, JsonMapper jsonMapper) {
         this.tenantIdentifierResolver = tenantIdentifierResolver;
-        this.objectMapper = objectMapper;
+        this.jsonMapper = jsonMapper;
     }
 
     @Override
@@ -38,7 +38,7 @@ public class TenantInterceptor implements HandlerInterceptor {
 
             response.setContentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE);
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            response.getWriter().write(objectMapper.writeValueAsString(problemDetail));
+            response.getWriter().write(jsonMapper.writeValueAsString(problemDetail));
             response.getWriter().flush();
             return false;
         }

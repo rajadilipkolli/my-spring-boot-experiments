@@ -16,13 +16,13 @@ public class ContainersConfig {
     @Bean
     @ServiceConnection
     PostgreSQLContainer postgreSQLContainer() {
-        return new PostgreSQLContainer(DockerImageName.parse("postgres:18.3-alpine"));
+        return new PostgreSQLContainer(DockerImageName.parse("postgres:18.4-alpine"));
     }
 
     @Bean
     RedisContainer redisContainer() throws IOException {
         RedisContainer redisContainer =
-                new RedisContainer(DockerImageName.parse("redis").withTag("8.6.1-alpine"));
+                new RedisContainer(DockerImageName.parse("redis").withTag("8.8.0-alpine"));
         redisContainer.start();
         String ymlContent = """
                 singleServerConfig:

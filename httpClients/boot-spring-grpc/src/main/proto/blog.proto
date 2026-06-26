@@ -1,0 +1,109 @@
+syntax = "proto3";
+
+package com.example.grpc.spring.proto;
+option java_package = "com.example.grpc.spring.proto";
+option java_outer_classname = "BlogProto";
+option java_multiple_files = true;
+
+// ----------------------
+// Post Service
+// ----------------------
+
+service PostService {
+    rpc CreatePost (CreatePostRequest) returns (Post);
+    rpc GetPost (GetPostRequest) returns (Post);
+    rpc UpdatePost (UpdatePostRequest) returns (Post);
+    rpc DeletePost (DeletePostRequest) returns (DeletePostResponse);
+    rpc ListPosts (ListPostsRequest) returns (ListPostsResponse);
+}
+
+message Post {
+    int64 id = 1;
+    string title = 2;
+    string content = 3;
+}
+
+message CreatePostRequest {
+    string title = 1;
+    string content = 2;
+}
+
+message GetPostRequest {
+    int64 id = 1;
+}
+
+message UpdatePostRequest {
+    int64 id = 1;
+    string title = 2;
+    string content = 3;
+}
+
+message DeletePostRequest {
+    int64 id = 1;
+}
+
+message DeletePostResponse {
+    bool success = 1;
+}
+
+message ListPostsRequest {
+    int32 page_size = 1;
+    string page_token = 2;
+}
+
+message ListPostsResponse {
+    repeated Post posts = 1;
+    string next_page_token = 2;
+    int32 total_count = 3;
+}
+
+// ----------------------
+// PostComment Service
+// ----------------------
+
+service PostCommentService {
+    rpc AddComment (AddCommentRequest) returns (PostComment);
+    rpc GetComment (GetCommentRequest) returns (PostComment);
+    rpc UpdateComment (UpdateCommentRequest) returns (PostComment);
+    rpc DeleteComment (DeleteCommentRequest) returns (DeleteCommentResponse);
+    rpc ListComments (ListCommentsRequest) returns (ListCommentsResponse);
+}
+
+message PostComment {
+    int64 id = 1;
+    int64 post_id = 2;
+    string review = 3;
+}
+
+message AddCommentRequest {
+    int64 post_id = 1;
+    string review = 2;
+}
+
+message GetCommentRequest {
+    int64 post_id = 1;
+    int64 id = 2;
+}
+
+message UpdateCommentRequest {
+    int64 post_id = 1;
+    int64 id = 2;
+    string review = 3;
+}
+
+message DeleteCommentRequest {
+    int64 post_id = 1;
+    int64 id = 2;
+}
+
+message DeleteCommentResponse {
+    bool success = 1;
+}
+
+message ListCommentsRequest {
+    int64 post_id = 1;
+}
+
+message ListCommentsResponse {
+    repeated PostComment comments = 1;
+}

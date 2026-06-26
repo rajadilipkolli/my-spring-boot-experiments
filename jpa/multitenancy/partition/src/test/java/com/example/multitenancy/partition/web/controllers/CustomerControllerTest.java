@@ -30,7 +30,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 @WebMvcTest(controllers = CustomerController.class)
 @ActiveProfiles(PROFILE_TEST)
@@ -46,7 +46,7 @@ class CustomerControllerTest {
     private TenantIdentifierResolver tenantIdentifierResolver;
 
     @Autowired
-    private ObjectMapper objectMapper;
+    private JsonMapper jsonMapper;
 
     private List<Customer> customerList;
 
@@ -129,7 +129,7 @@ class CustomerControllerTest {
                 .perform(post("/api/customers")
                         .param("tenant", "dbsystc")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(customerDTO)))
+                        .content(jsonMapper.writeValueAsString(customerDTO)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.text", is(customerDTO.text())));
     }
@@ -142,7 +142,7 @@ class CustomerControllerTest {
                 .perform(post("/api/customers")
                         .param("tenant", "dbsystc")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(customerDTO)))
+                        .content(jsonMapper.writeValueAsString(customerDTO)))
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                 .andExpect(jsonPath("$.type", is("https://multitenancy.com/errors/validation-error")))
                 .andExpect(jsonPath("$.title", is("Constraint Violation")))
@@ -163,7 +163,7 @@ class CustomerControllerTest {
                 .perform(put("/api/customers/{id}", customer.getId())
                         .param("tenant", "dbsystc")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(customer)))
+                        .content(jsonMapper.writeValueAsString(customer)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.text", is(customer.getText())));
     }
@@ -178,7 +178,7 @@ class CustomerControllerTest {
                 .perform(put("/api/customers/{id}", customerId)
                         .param("tenant", "dbsystc")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(customer)))
+                        .content(jsonMapper.writeValueAsString(customer)))
                 .andExpect(status().isNotFound());
     }
 

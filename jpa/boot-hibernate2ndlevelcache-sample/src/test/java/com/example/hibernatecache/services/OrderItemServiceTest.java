@@ -77,11 +77,14 @@ class OrderItemServiceTest {
     @Test
     void deleteOrderItemById() {
         // given
-        willDoNothing().given(orderItemRepository).deleteById(1L);
+        OrderItem orderItem = getOrderItem();
+        given(orderItemRepository.findById(1L)).willReturn(Optional.of(orderItem));
+        willDoNothing().given(orderItemRepository).delete(orderItem);
         // when
         orderItemService.deleteOrderItemById(1L);
         // then
-        verify(orderItemRepository, times(1)).deleteById(1L);
+        verify(orderItemRepository, times(1)).findById(1L);
+        verify(orderItemRepository, times(1)).delete(orderItem);
     }
 
     private OrderItem getOrderItem() {

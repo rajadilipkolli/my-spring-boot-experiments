@@ -39,7 +39,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 @WebMvcTest(controllers = MovieController.class)
 @ActiveProfiles(AppConstants.PROFILE_TEST)
@@ -52,7 +52,7 @@ class MovieControllerTest {
     private MovieService movieService;
 
     @Autowired
-    private ObjectMapper objectMapper;
+    private JsonMapper jsonMapper;
 
     private List<Movie> movieList;
 
@@ -145,7 +145,7 @@ class MovieControllerTest {
         this.mockMvc
                 .perform(post("/api/movies")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(movieRequest)))
+                        .content(jsonMapper.writeValueAsString(movieRequest)))
                 .andExpect(status().isCreated())
                 .andExpect(header().exists(HttpHeaders.LOCATION))
                 .andExpect(jsonPath("$.movieId", notNullValue()))
@@ -159,7 +159,7 @@ class MovieControllerTest {
         this.mockMvc
                 .perform(post("/api/movies")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(movieRequest)))
+                        .content(jsonMapper.writeValueAsString(movieRequest)))
                 .andExpect(status().isBadRequest())
                 .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                 .andExpect(jsonPath("$.type", is("https://api.boot-jpa-locks.com/errors/constraint-violation")))
@@ -198,7 +198,7 @@ class MovieControllerTest {
         this.mockMvc
                 .perform(put("/api/movies/{id}", movieId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(movieRequest)))
+                        .content(jsonMapper.writeValueAsString(movieRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.movieId", is(movieId), Long.class))
                 .andExpect(jsonPath("$.movieTitle", is(movie.movieTitle())));
@@ -221,7 +221,7 @@ class MovieControllerTest {
         this.mockMvc
                 .perform(put("/api/movies/{id}", movieId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(movieRequest)))
+                        .content(jsonMapper.writeValueAsString(movieRequest)))
                 .andExpect(status().isNotFound())
                 .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                 .andExpect(jsonPath("$.type", is("https://api.boot-jpa-locks.com/errors/not-found")))

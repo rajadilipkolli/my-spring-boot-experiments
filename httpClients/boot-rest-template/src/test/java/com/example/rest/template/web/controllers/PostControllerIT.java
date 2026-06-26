@@ -74,7 +74,7 @@ class PostControllerIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(post("/api/posts")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(post)))
+                        .content(jsonMapper.writeValueAsString(post)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id", notNullValue()))
                 .andExpect(jsonPath("$.title", is(post.getTitle())));
@@ -87,7 +87,7 @@ class PostControllerIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(post("/api/posts")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(post)))
+                        .content(jsonMapper.writeValueAsString(post)))
                 .andExpect(status().isBadRequest())
                 .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                 .andExpect(jsonPath("$.type", is("https://api.boot-rest-template.com/errors/validation")))
@@ -113,7 +113,7 @@ class PostControllerIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(put("/api/posts/{id}", post.getId())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(post)))
+                        .content(jsonMapper.writeValueAsString(post)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(post.getId()), Long.class))
                 .andExpect(jsonPath("$.title", is(post.getTitle())));

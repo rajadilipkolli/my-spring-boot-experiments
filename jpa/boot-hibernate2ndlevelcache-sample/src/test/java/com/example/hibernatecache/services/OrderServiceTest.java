@@ -1,15 +1,18 @@
 package com.example.hibernatecache.services;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.times;
 import static org.mockito.BDDMockito.verify;
 import static org.mockito.BDDMockito.willDoNothing;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 
 import com.example.hibernatecache.entities.Customer;
 import com.example.hibernatecache.entities.Order;
+import com.example.hibernatecache.exception.OrderNotFoundException;
 import com.example.hibernatecache.mapper.OrderMapper;
 import com.example.hibernatecache.model.response.OrderResponse;
 import com.example.hibernatecache.repositories.OrderRepository;
@@ -59,7 +62,7 @@ class OrderServiceTest {
         // given
         Order testOrder = getOrder();
         given(orderRepository.findById(1L)).willReturn(Optional.of(testOrder));
-        willDoNothing().given(orderRepository).deleteById(1L);
+        willDoNothing().given(orderRepository).delete(testOrder);
 
         // Mock EntityManager cache hierarchy
         EntityManagerFactory mockFactory = mock(EntityManagerFactory.class);
@@ -72,8 +75,18 @@ class OrderServiceTest {
         orderService.deleteOrderById(1L);
 
         // then
-        verify(orderRepository, times(1)).deleteById(1L);
+        verify(orderRepository, times(1)).delete(testOrder);
         verify(mockCache, times(1)).evict(Customer.class, 1L);
+    }
+
+    @Test
+    void deleteOrderById_NotFound() {
+        // given
+        given(orderRepository.findById(1L)).willReturn(Optional.empty());
+        // when & then
+        assertThrows(OrderNotFoundException.class, () -> orderService.deleteOrderById(1L));
+
+        verify(orderRepository, never()).delete(any());
     }
 
     private Order getOrder() {

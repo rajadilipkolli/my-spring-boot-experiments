@@ -3,7 +3,6 @@ package com.example.graphql.controller;
 import static org.mockito.BDDMockito.given;
 
 import com.example.graphql.dtos.Customer;
-import com.example.graphql.dtos.CustomerDTO;
 import com.example.graphql.dtos.Orders;
 import com.example.graphql.service.CustomerGraphQLService;
 import java.util.List;
@@ -28,25 +27,26 @@ class CustomerGraphQLControllerTest {
     @Test
     void query_all_customers() {
         Customer customer = new Customer(1, "junit");
-        given(customerGraphQLService.findAllCustomers()).willReturn(Flux.just(customer));
+        given(customerGraphQLService.findAllCustomers(
+                        org.mockito.ArgumentMatchers.anyInt(), org.mockito.ArgumentMatchers.anyInt()))
+                .willReturn(Flux.just(customer));
         given(customerGraphQLService.findAllOrdersByCustomers(List.of(customer)))
                 .willReturn(Mono.just(Map.of(customer, List.of(new Orders(2, 1)))));
         this.graphQlTester
                 .document("""
             query {
-              customers {
-                id
-                name
-                orders {
-                  id
-                }
+              customers(first:1) {
+                edges { node { id name } cursor }
+                pageInfo { hasNextPage startCursor endCursor }
               }
             }
             """)
                 .execute()
-                .path("customers[*]")
-                .hasValue()
-                .entityList(CustomerDTO.class)
-                .hasSize(1);
+                .path("customers.edges[*].node.id")
+                .entityList(Integer.class)
+                .hasSize(1)
+                .path("customers.pageInfo.hasNextPage")
+                .entity(Boolean.class)
+                .isEqualTo(false);
     }
 }

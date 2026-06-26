@@ -18,10 +18,13 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.ScrollPosition;
+import org.springframework.data.domain.Window;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.BatchMapping;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
+import org.springframework.graphql.data.query.ScrollSubrange;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 
@@ -87,8 +90,11 @@ public class AuthorGraphQlController {
     }
 
     @QueryMapping
-    public List<AuthorResponse> allAuthors() {
-        return this.authorService.findAllAuthors();
+    public Window<AuthorResponse> allAuthors(ScrollSubrange subrange) {
+        final int DEFAULT_PAGE_SIZE = 20;
+        ScrollPosition position = subrange.position().orElse(ScrollPosition.offset());
+        int count = subrange.count().orElse(DEFAULT_PAGE_SIZE);
+        return this.authorService.findAllAuthors(position, count);
     }
 
     @QueryMapping

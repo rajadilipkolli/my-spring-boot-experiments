@@ -10,13 +10,13 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import tools.jackson.core.JacksonException;
-import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 public abstract class PostCommentMapper {
 
     @Autowired
-    protected ObjectMapper objectMapper;
+    protected JsonMapper jsonMapper;
 
     @Mapping(target = "postId", source = "postEntity.postRefId")
     @Mapping(target = "id", source = "commentRefId")
@@ -57,7 +57,7 @@ public abstract class PostCommentMapper {
      */
     public String toJson(PostCommentCommandResult result) {
         try {
-            return objectMapper.writeValueAsString(result);
+            return jsonMapper.writeValueAsString(result);
         } catch (JacksonException e) {
             throw new IllegalStateException("Failed to serialize PostCommentCommandResult to JSON", e);
         }
@@ -68,7 +68,7 @@ public abstract class PostCommentMapper {
      */
     public PostCommentCommandResult fromJson(String json) {
         try {
-            return objectMapper.readValue(json, PostCommentCommandResult.class);
+            return jsonMapper.readValue(json, PostCommentCommandResult.class);
         } catch (JacksonException e) {
             throw new IllegalStateException("Failed to deserialize PostCommentCommandResult from JSON", e);
         }

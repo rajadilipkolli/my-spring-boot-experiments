@@ -32,7 +32,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 @WebMvcTest(controllers = CustomerController.class)
 @ActiveProfiles(PROFILE_TEST)
@@ -42,7 +42,7 @@ class CustomerControllerTest {
     private MockMvc mockMvc;
 
     @Autowired
-    private ObjectMapper objectMapper;
+    private JsonMapper jsonMapper;
 
     @MockitoBean
     private CustomerService customerService;
@@ -143,7 +143,7 @@ class CustomerControllerTest {
         this.mockMvc
                 .perform(post("/api/customers")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(customerDto)))
+                        .content(jsonMapper.writeValueAsString(customerDto)))
                 .andExpect(status().isBadRequest())
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                 .andExpect(jsonPath("$.type", is("https://multitenancy.com/errors/validation-error")))
@@ -176,7 +176,7 @@ class CustomerControllerTest {
                 .perform(post("/api/customers")
                         .param("tenant", tenant)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(customerDto)))
+                        .content(jsonMapper.writeValueAsString(customerDto)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.name", is(customerDto.name())));
     }
@@ -189,7 +189,7 @@ class CustomerControllerTest {
                 .perform(post("/api/customers")
                         .param("tenant", tenant)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(customer)))
+                        .content(jsonMapper.writeValueAsString(customer)))
                 .andExpect(status().isBadRequest())
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                 .andExpect(jsonPath("$.type", is("https://multitenancy-schema.com/errors/validation-error")))
@@ -214,7 +214,7 @@ class CustomerControllerTest {
                 .perform(put("/api/customers/{id}", customer.getId())
                         .param("tenant", tenant)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(customerDto)))
+                        .content(jsonMapper.writeValueAsString(customerDto)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(1)))
                 .andExpect(jsonPath("$.name", is(customerDto.name())));
@@ -231,7 +231,7 @@ class CustomerControllerTest {
                 .perform(put("/api/customers/{id}", customerId)
                         .param("tenant", tenant)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(customer)))
+                        .content(jsonMapper.writeValueAsString(customer)))
                 .andExpect(status().isNotFound());
     }
 

@@ -6,7 +6,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>4.0.5</version>
+        <version>4.1.0</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>org.example</groupId>
@@ -18,9 +18,9 @@
         <maven.compiler.source>25</maven.compiler.source>
         <maven.compiler.target>25</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <spring-cloud.version>2025.1.1</spring-cloud.version>
-        <openapi-generator.version>7.21.0</openapi-generator.version>
-        <springdoc-openapi.version>3.0.2</springdoc-openapi.version>
+        <spring-cloud.version>2025.1.2</spring-cloud.version>
+        <openapi-generator.version>7.23.0</openapi-generator.version>
+        <springdoc-openapi.version>3.0.3</springdoc-openapi.version>
     </properties>
 
     <dependencies>

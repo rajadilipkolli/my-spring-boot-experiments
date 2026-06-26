@@ -69,7 +69,9 @@ public class OrderItemService {
 
     @Transactional
     public void deleteOrderItemById(Long id) {
-        orderItemRepository.deleteById(id);
+        orderItemRepository.findById(id).ifPresentOrElse(orderItemRepository::delete, () -> {
+            throw new OrderItemNotFoundException(id);
+        });
     }
 
     public List<OrderItemResponse> findOrderItemsByOrderId(Long orderId) {

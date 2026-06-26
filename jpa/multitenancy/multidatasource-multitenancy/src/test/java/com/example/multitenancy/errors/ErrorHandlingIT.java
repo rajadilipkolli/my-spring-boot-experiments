@@ -118,7 +118,7 @@ class ErrorHandlingIT extends AbstractIntegrationTest {
             mockMvc.perform(post("/api/customers/primary")
                             .header("X-tenantId", "primary")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(invalidCustomer)))
+                            .content(jsonMapper.writeValueAsString(invalidCustomer)))
                     .andExpect(status().isBadRequest())
                     .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                     .andExpect(jsonPath("$.type", is("https://multitenancy.com/errors/validation-error")))
@@ -140,7 +140,7 @@ class ErrorHandlingIT extends AbstractIntegrationTest {
             mockMvc.perform(post("/api/customers/secondary")
                             .header("X-tenantId", "schema1")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(invalidCustomer)))
+                            .content(jsonMapper.writeValueAsString(invalidCustomer)))
                     .andExpect(status().isBadRequest())
                     .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                     .andExpect(jsonPath("$.type", is("https://multitenancy.com/errors/validation-error")))
@@ -162,7 +162,7 @@ class ErrorHandlingIT extends AbstractIntegrationTest {
             mockMvc.perform(post("/api/customers/primary")
                             .header("X-tenantId", "primary")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(nullTextCustomer)))
+                            .content(jsonMapper.writeValueAsString(nullTextCustomer)))
                     .andExpect(status().isBadRequest())
                     .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                     .andExpect(jsonPath("$.violations[0].field").value("text"))
@@ -175,7 +175,7 @@ class ErrorHandlingIT extends AbstractIntegrationTest {
             mockMvc.perform(post("/api/customers/secondary")
                             .header("X-tenantId", "schema1")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(nullNameCustomer)))
+                            .content(jsonMapper.writeValueAsString(nullNameCustomer)))
                     .andExpect(status().isBadRequest())
                     .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                     .andExpect(jsonPath("$.violations[0].field").value("name"))
@@ -192,7 +192,7 @@ class ErrorHandlingIT extends AbstractIntegrationTest {
             mockMvc.perform(post("/api/customers/primary")
                             .header("X-tenantId", "primary")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(whitespaceCustomer)))
+                            .content(jsonMapper.writeValueAsString(whitespaceCustomer)))
                     .andExpect(status().isBadRequest())
                     .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                     .andExpect(jsonPath("$.violations[0].field").value("text"))
@@ -205,7 +205,7 @@ class ErrorHandlingIT extends AbstractIntegrationTest {
             mockMvc.perform(post("/api/customers/secondary")
                             .header("X-tenantId", "schema1")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(whitespaceSecondaryCustomer)))
+                            .content(jsonMapper.writeValueAsString(whitespaceSecondaryCustomer)))
                     .andExpect(status().isBadRequest())
                     .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                     .andExpect(jsonPath("$.violations[0].field").value("name"))
@@ -241,12 +241,12 @@ class ErrorHandlingIT extends AbstractIntegrationTest {
             MvcResult createResult = mockMvc.perform(post("/api/customers/secondary")
                             .header("X-tenantId", "schema1")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(customer)))
+                            .content(jsonMapper.writeValueAsString(customer)))
                     .andExpect(status().isCreated())
                     .andReturn();
 
             SecondaryCustomer savedCustomer =
-                    objectMapper.readValue(createResult.getResponse().getContentAsString(), SecondaryCustomer.class);
+                    jsonMapper.readValue(createResult.getResponse().getContentAsString(), SecondaryCustomer.class);
 
             // When/Then - Try to access from schema2
             mockMvc.perform(get("/api/customers/secondary/{id}", savedCustomer.getId())
@@ -265,7 +265,7 @@ class ErrorHandlingIT extends AbstractIntegrationTest {
             mockMvc.perform(put("/api/customers/primary/{id}", 99999L)
                             .header("X-tenantId", "primary")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(nonExistentCustomer)))
+                            .content(jsonMapper.writeValueAsString(nonExistentCustomer)))
                     .andExpect(status().isNotFound());
 
             // Given
@@ -276,7 +276,7 @@ class ErrorHandlingIT extends AbstractIntegrationTest {
             mockMvc.perform(put("/api/customers/secondary/{id}", 99999L)
                             .header("X-tenantId", "schema1")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(nonExistentSecondaryCustomer)))
+                            .content(jsonMapper.writeValueAsString(nonExistentSecondaryCustomer)))
                     .andExpect(status().isNotFound());
         }
 
@@ -329,7 +329,7 @@ class ErrorHandlingIT extends AbstractIntegrationTest {
             // When/Then
             mockMvc.perform(post("/api/customers/primary")
                             .header("X-tenantId", "primary")
-                            .content(objectMapper.writeValueAsString(customer)))
+                            .content(jsonMapper.writeValueAsString(customer)))
                     .andExpect(status().isUnsupportedMediaType());
         }
 
@@ -377,7 +377,7 @@ class ErrorHandlingIT extends AbstractIntegrationTest {
             mockMvc.perform(post("/api/customers/primary")
                             .header("X-tenantId", "primary")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(validCustomer)))
+                            .content(jsonMapper.writeValueAsString(validCustomer)))
                     .andExpect(status().isCreated());
 
             // Invalid request
@@ -385,7 +385,7 @@ class ErrorHandlingIT extends AbstractIntegrationTest {
             mockMvc.perform(post("/api/customers/primary")
                             .header("X-tenantId", "primary")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(invalidCustomer)))
+                            .content(jsonMapper.writeValueAsString(invalidCustomer)))
                     .andExpect(status().isBadRequest());
 
             // Another valid request
@@ -393,7 +393,7 @@ class ErrorHandlingIT extends AbstractIntegrationTest {
             mockMvc.perform(post("/api/customers/primary")
                             .header("X-tenantId", "primary")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(anotherValidCustomer)))
+                            .content(jsonMapper.writeValueAsString(anotherValidCustomer)))
                     .andExpect(status().isCreated());
 
             // Verify valid customers were saved
@@ -410,7 +410,7 @@ class ErrorHandlingIT extends AbstractIntegrationTest {
             mockMvc.perform(post("/api/customers/secondary")
                             .header("X-tenantId", "schema1")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(customer1)))
+                            .content(jsonMapper.writeValueAsString(customer1)))
                     .andExpect(status().isCreated());
 
             // Invalid tenant
@@ -418,7 +418,7 @@ class ErrorHandlingIT extends AbstractIntegrationTest {
             mockMvc.perform(post("/api/customers/secondary")
                             .header("X-tenantId", "invalid_tenant")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(customer2)))
+                            .content(jsonMapper.writeValueAsString(customer2)))
                     .andExpect(status().isForbidden());
 
             // Valid operation in schema2
@@ -426,7 +426,7 @@ class ErrorHandlingIT extends AbstractIntegrationTest {
             mockMvc.perform(post("/api/customers/secondary")
                             .header("X-tenantId", "schema2")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(customer3)))
+                            .content(jsonMapper.writeValueAsString(customer3)))
                     .andExpect(status().isCreated());
 
             // Verify data integrity
@@ -455,7 +455,7 @@ class ErrorHandlingIT extends AbstractIntegrationTest {
             MvcResult result = mockMvc.perform(post("/api/customers/primary")
                             .header("X-tenantId", "primary")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(specialCustomer)))
+                            .content(jsonMapper.writeValueAsString(specialCustomer)))
                     .andReturn();
 
             // Should be 201 (created) but not 5xx

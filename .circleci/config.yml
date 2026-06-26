@@ -14,6 +14,9 @@ jobs:
     executor: machine_executor_amd64
     steps:
       - checkout
+      - run:
+          name: Fetch full history for SonarCloud
+          command: git fetch --unshallow || git fetch --all
       
       # Restore Maven dependencies cache
       - restore_cache:
@@ -37,7 +40,7 @@ jobs:
       - run:
           name: Install Maven
           command: |
-            MAVEN_VERSION=3.9.12
+            MAVEN_VERSION=3.9.16
             wget https://archive.apache.org/dist/maven/maven-3/${MAVEN_VERSION}/binaries/apache-maven-${MAVEN_VERSION}-bin.tar.gz
             tar xzf apache-maven-${MAVEN_VERSION}-bin.tar.gz
             echo "export PATH=\$PATH:\$PWD/apache-maven-${MAVEN_VERSION}/bin" >> $BASH_ENV
@@ -63,7 +66,7 @@ jobs:
           name: Analyze on SonarCloud
           command: |
             source $BASH_ENV
-            mvn -T 1C verify sonar:sonar -Dsonar.projectKey=rajadilipkolli_my-spring-boot-experiments
+            mvn -T 1C verify sonar:sonar
           no_output_timeout: 45m
       
       # Save Maven dependencies cache

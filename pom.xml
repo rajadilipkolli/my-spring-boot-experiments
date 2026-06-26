@@ -9,10 +9,11 @@
     <packaging>pom</packaging>
 
     <properties>
-        <maven.compiler.release>21</maven.compiler.release>
+        <maven.compiler.release>25</maven.compiler.release>
+        <sonar.projectKey>rajadilipkolli_my-spring-boot-experiments</sonar.projectKey>
         <sonar.organization>rajadilipkolli</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
-        <jacoco-maven-plugin.version>0.8.14</jacoco-maven-plugin.version>
+        <jacoco-maven-plugin.version>0.8.15</jacoco-maven-plugin.version>
     </properties>
 
     <modules>
@@ -34,6 +35,7 @@
         <module>httpClients/boot-restclient</module>
         <module>httpClients/boot-rest-template</module>
         <module>httpClients/boot-web-client-mvc</module>
+        <module>httpClients/boot-spring-grpc</module>
         <module>httpClients/boot-web-client-webflux</module>
         <module>jpa/boot-data-customsequence</module>
         <module>jpa/boot-data-envers</module>

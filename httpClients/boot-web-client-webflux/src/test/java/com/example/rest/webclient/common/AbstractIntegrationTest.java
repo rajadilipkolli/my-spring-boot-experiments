@@ -8,7 +8,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webtestclient.autoconfigure.AutoConfigureWebTestClient;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.WebTestClient;
-import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 @ActiveProfiles({PROFILE_TEST})
 @SpringBootTest(webEnvironment = RANDOM_PORT)
@@ -17,5 +17,5 @@ public abstract class AbstractIntegrationTest {
 
     @Autowired protected WebTestClient webTestClient;
 
-    @Autowired protected ObjectMapper objectMapper;
+    @Autowired protected JsonMapper jsonMapper;
 }

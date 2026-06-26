@@ -143,7 +143,7 @@ class ActorControllerTest extends AbstractIntegrationTest {
                 .post()
                 .uri("/api/actors")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(newActorRequest))
+                .content(jsonMapper.writeValueAsString(newActorRequest))
                 .assertThat()
                 .hasStatus(HttpStatus.CREATED)
                 .hasContentType(MediaType.APPLICATION_JSON)
@@ -167,7 +167,7 @@ class ActorControllerTest extends AbstractIntegrationTest {
                 .post()
                 .uri("/api/actors")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(invalidActorRequest))
+                .content(jsonMapper.writeValueAsString(invalidActorRequest))
                 .assertThat()
                 .hasStatus(HttpStatus.BAD_REQUEST)
                 .hasContentType(MediaType.APPLICATION_PROBLEM_JSON);
@@ -182,7 +182,7 @@ class ActorControllerTest extends AbstractIntegrationTest {
                 .post()
                 .uri("/api/actors/batch")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(newActorsRequest))
+                .content(jsonMapper.writeValueAsString(newActorsRequest))
                 .assertThat()
                 .hasStatus(HttpStatus.CREATED)
                 .hasContentType(MediaType.APPLICATION_JSON)
@@ -206,7 +206,7 @@ class ActorControllerTest extends AbstractIntegrationTest {
                 .post()
                 .uri("/api/actors/batch")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(invalidActorsRequest))
+                .content(jsonMapper.writeValueAsString(invalidActorsRequest))
                 .assertThat()
                 .hasStatus(HttpStatus.BAD_REQUEST)
                 .hasContentType(MediaType.APPLICATION_PROBLEM_JSON);
@@ -220,7 +220,7 @@ class ActorControllerTest extends AbstractIntegrationTest {
                 .put()
                 .uri("/api/actors/{id}", testActor1.getId())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(updateRequest))
+                .content(jsonMapper.writeValueAsString(updateRequest))
                 .assertThat()
                 .hasStatusOk()
                 .hasContentType(MediaType.APPLICATION_JSON)
@@ -245,7 +245,7 @@ class ActorControllerTest extends AbstractIntegrationTest {
                 .put()
                 .uri("/api/actors/{id}", nonExistingId)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(updateRequest))
+                .content(jsonMapper.writeValueAsString(updateRequest))
                 .assertThat()
                 .hasStatus(HttpStatus.NOT_FOUND);
     }
@@ -258,7 +258,7 @@ class ActorControllerTest extends AbstractIntegrationTest {
                 .put()
                 .uri("/api/actors/{id}", testActor1.getId())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(invalidUpdateRequest))
+                .content(jsonMapper.writeValueAsString(invalidUpdateRequest))
                 .assertThat()
                 .hasStatus(HttpStatus.BAD_REQUEST)
                 .hasContentType(MediaType.APPLICATION_PROBLEM_JSON);
@@ -377,7 +377,7 @@ class ActorControllerTest extends AbstractIntegrationTest {
                 .post()
                 .uri("/api/actors")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(specialActorRequest))
+                .content(jsonMapper.writeValueAsString(specialActorRequest))
                 .assertThat()
                 .hasStatus(HttpStatus.CREATED);
 

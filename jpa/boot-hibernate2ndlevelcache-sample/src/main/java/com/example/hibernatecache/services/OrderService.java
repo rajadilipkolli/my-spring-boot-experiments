@@ -86,15 +86,19 @@ public class OrderService {
 
     @Transactional
     public void deleteOrderById(Long id) {
-        Order order = orderRepository.findById(id).orElseThrow(() -> new OrderNotFoundException(id));
-
-        // Delete order
-        orderRepository.deleteById(id);
-
-        // Force cache eviction for the customer's orders collection
-        entityManager
-                .getEntityManagerFactory()
-                .getCache()
-                .evict(Customer.class, order.getCustomer().getId());
+        orderRepository
+                .findById(id)
+                .ifPresentOrElse(
+                        order -> {
+                            orderRepository.delete(order);
+                            // Force cache eviction for the customer's orders collection
+                            entityManager
+                                    .getEntityManagerFactory()
+                                    .getCache()
+                                    .evict(Customer.class, order.getCustomer().getId());
+                        },
+                        () -> {
+                            throw new OrderNotFoundException(id);
+                        });
     }
 }

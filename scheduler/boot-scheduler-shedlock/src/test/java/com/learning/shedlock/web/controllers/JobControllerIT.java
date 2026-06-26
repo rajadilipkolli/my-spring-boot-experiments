@@ -74,7 +74,7 @@ class JobControllerIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(post("/api/jobs")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(jobRequest)))
+                        .content(jsonMapper.writeValueAsString(jobRequest)))
                 .andExpect(status().isCreated())
                 .andExpect(header().exists(HttpHeaders.LOCATION))
                 .andExpect(jsonPath("$.id", notNullValue()))
@@ -88,7 +88,7 @@ class JobControllerIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(post("/api/jobs")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(jobRequest)))
+                        .content(jsonMapper.writeValueAsString(jobRequest)))
                 .andExpect(status().isBadRequest())
                 .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                 .andExpect(jsonPath("$.type", is("http://api.boot-shedlock-sample.com/errors/validation-error")))
@@ -110,7 +110,7 @@ class JobControllerIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(put("/api/jobs/{id}", jobId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(jobRequest)))
+                        .content(jsonMapper.writeValueAsString(jobRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(jobId), Long.class))
                 .andExpect(jsonPath("$.text", is(jobRequest.text())));

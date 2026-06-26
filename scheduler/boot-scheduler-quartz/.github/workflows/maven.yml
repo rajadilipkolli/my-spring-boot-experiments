@@ -14,9 +14,9 @@ jobs:
         distribution: [ 'temurin' ]
         java: [ '25' ]
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
-      - name: Setup Java 21
+      - name: Setup Java 25
         uses: actions/setup-java@v5
         with:
           java-version: ${{ matrix.java }}

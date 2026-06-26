@@ -10,6 +10,10 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import org.springframework.core.convert.ConversionService;
+import org.springframework.data.domain.Limit;
+import org.springframework.data.domain.ScrollPosition;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Window;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -72,5 +76,11 @@ public class AuthorService {
 
     public boolean existsAuthorById(Long id) {
         return this.authorRepository.existsById(id);
+    }
+
+    public Window<AuthorResponse> findAllAuthors(ScrollPosition scrollPosition, int limit) {
+        var authorWindow = authorRepository.findAllBy(
+                scrollPosition == null ? ScrollPosition.offset() : scrollPosition, Limit.of(limit), Sort.by("id"));
+        return authorWindow.map(author -> appConversionService.convert(author, AuthorResponse.class));
     }
 }

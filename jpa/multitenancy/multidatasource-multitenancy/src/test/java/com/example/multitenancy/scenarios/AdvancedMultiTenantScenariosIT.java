@@ -142,7 +142,7 @@ class AdvancedMultiTenantScenariosIT extends AbstractIntegrationTest {
     @Test
     void httpRequestTenantIsolation() throws Exception {
         // Create data for different tenants via HTTP requests
-        String primaryCustomer = objectMapper.writeValueAsString(new PrimaryCustomerRequest("Primary-HTTP-Customer"));
+        String primaryCustomer = jsonMapper.writeValueAsString(new PrimaryCustomerRequest("Primary-HTTP-Customer"));
 
         mockMvc.perform(post("/api/customers/primary")
                         .header("X-TenantId", "primary")
@@ -150,8 +150,7 @@ class AdvancedMultiTenantScenariosIT extends AbstractIntegrationTest {
                         .content(primaryCustomer))
                 .andExpect(status().isCreated());
 
-        String secondaryCustomer =
-                objectMapper.writeValueAsString(new SecondaryCustomerRequest("Schema1-HTTP-Customer"));
+        String secondaryCustomer = jsonMapper.writeValueAsString(new SecondaryCustomerRequest("Schema1-HTTP-Customer"));
 
         mockMvc.perform(post("/api/customers/secondary")
                         .header("X-TenantId", "schema1")

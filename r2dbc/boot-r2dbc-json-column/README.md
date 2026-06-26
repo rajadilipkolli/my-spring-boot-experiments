@@ -16,7 +16,7 @@ This project demonstrates a reactive Spring Boot application using R2DBC with Po
 ---
 ## Prerequisites
 
-- JDK 21
+- JDK 25
 - Docker and Docker Compose
 - PostgreSQL 15+
 ---

@@ -98,7 +98,7 @@ class MovieControllerIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(post("/api/movies")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(movieRequest)))
+                        .content(jsonMapper.writeValueAsString(movieRequest)))
                 .andExpect(status().isCreated())
                 .andExpect(header().exists(HttpHeaders.LOCATION))
                 .andExpect(jsonPath("$.movieId", notNullValue()))
@@ -123,7 +123,7 @@ class MovieControllerIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(post("/api/movies")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(movieRequest)))
+                        .content(jsonMapper.writeValueAsString(movieRequest)))
                 .andExpect(status().isBadRequest())
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                 .andExpect(jsonPath("$.type", is("https://api.boot-jpa-locks.com/errors/constraint-violation")))
@@ -155,7 +155,7 @@ class MovieControllerIT extends AbstractIntegrationTest {
         this.mockMvc
                 .perform(put("/api/movies/{id}", movie.getMovieId())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(movieRequest)))
+                        .content(jsonMapper.writeValueAsString(movieRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.movieId", is(movie.getMovieId()), Long.class))
                 .andExpect(jsonPath("$.movieTitle", is(movieRequest.movieTitle())))
