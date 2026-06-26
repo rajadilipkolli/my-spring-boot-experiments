@@ -23,6 +23,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
+          persist-credentials: false
           fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
 
       - name: Set up JDK
@@ -33,7 +34,7 @@ jobs:
           cache: "maven"
       - name: Start up databases via docker compose
         run: |
-          docker compose up -d postgresql-master postgresql-slave
+          docker compose -f docker/docker-compose.yml up -d postgresql-master postgresql-slave
           sleep 5
           docker ps -a
       - name: Build and analyze
