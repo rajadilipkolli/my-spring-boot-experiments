@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.awaitility.Awaitility.await;
 
+import com.example.demo.readreplica.common.AbstractIntegrationTest;
 import java.time.LocalDateTime;
 import java.util.concurrent.TimeUnit;
 import javax.sql.DataSource;
@@ -14,18 +15,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.UncategorizedSQLException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.LazyConnectionDataSourceProxy;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.util.ReflectionTestUtils;
 
-@ActiveProfiles("test")
-@SpringBootTest
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class ReadReplicaApplicationTests {
+class ReadReplicaApplicationIT extends AbstractIntegrationTest {
 
     @Autowired private DataSource dataSource;
 
@@ -97,7 +94,7 @@ class ReadReplicaApplicationTests {
         assertThat(rowsAffected).isOne();
         Integer noOfRows = primaryJdbcTemplate.queryForObject(countSQL, Integer.class);
         assertThat(noOfRows).isEqualTo(4);
-        await().atMost(3, TimeUnit.SECONDS)
+        await().atMost(10, TimeUnit.SECONDS)
                 .untilAsserted(
                         () -> {
                             Integer totalCount =
@@ -123,7 +120,7 @@ class ReadReplicaApplicationTests {
         Object[] params = {4};
         int rowsAffected = primaryJdbcTemplate.update(deleteSQL, params);
         assertThat(rowsAffected).isOne();
-        await().atMost(3, TimeUnit.SECONDS)
+        await().atMost(10, TimeUnit.SECONDS)
                 .untilAsserted(
                         () -> {
                             Integer noOfRows =

@@ -46,13 +46,6 @@ jobs:
             echo "export PATH=\$PATH:\$PWD/apache-maven-${MAVEN_VERSION}/bin" >> $BASH_ENV
             source $BASH_ENV
             mvn -version
-
-      # Start required Docker containers for tests
-      - run:
-          name: Start Docker containers for tests
-          command: |
-            docker-compose -f boot-strategy-plugin/docker-compose.yml -f jpa/boot-read-replica-postgresql/docker-compose.yaml up -d
-          no_output_timeout: 5m
       
       # Validate project structure
       - run:
