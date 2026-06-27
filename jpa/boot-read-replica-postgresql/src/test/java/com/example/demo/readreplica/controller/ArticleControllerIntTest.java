@@ -2,6 +2,7 @@ package com.example.demo.readreplica.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.example.demo.readreplica.common.AbstractIntegrationTest;
 import com.example.demo.readreplica.domain.ArticleDTO;
 import com.example.demo.readreplica.domain.CommentDTO;
 import java.time.LocalDate;
@@ -9,26 +10,15 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.assertj.MockMvcTester;
-import tools.jackson.databind.json.JsonMapper;
 
-@SpringBootTest
-@AutoConfigureMockMvc
-class ArticleControllerIntTest {
-
-    @Autowired private MockMvcTester mvcTester;
-
-    @Autowired private JsonMapper jsonMapper;
+class ArticleControllerIntTest extends AbstractIntegrationTest {
 
     @Test
     void findArticleById() {
 
-        mvcTester
+        mockMvcTester
                 .get()
                 .uri("/articles/1")
                 .assertThat()
@@ -51,7 +41,7 @@ class ArticleControllerIntTest {
 
     @Test
     void shouldReturn404WhenFetchingNonExistingArticle() {
-        mvcTester.get().uri("/articles/99999").assertThat().hasStatus(HttpStatus.NOT_FOUND);
+        mockMvcTester.get().uri("/articles/99999").assertThat().hasStatus(HttpStatus.NOT_FOUND);
     }
 
     @Test
@@ -63,7 +53,7 @@ class ArticleControllerIntTest {
                         LocalDateTime.now(),
                         List.of(new CommentDTO("junitComment")));
         AtomicReference<String> location = new AtomicReference<>();
-        mvcTester
+        mockMvcTester
                 .post()
                 .uri("/articles/")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -76,7 +66,7 @@ class ArticleControllerIntTest {
                             assertThat(location.get()).isNotBlank().contains("/articles/");
                         });
 
-        mvcTester
+        mockMvcTester
                 .get()
                 .uri(location.get())
                 .assertThat()
@@ -98,11 +88,11 @@ class ArticleControllerIntTest {
                                     .hasOnlyElementsOfType(CommentDTO.class);
                         });
 
-        mvcTester.delete().uri(location.get()).assertThat().hasStatus(HttpStatus.ACCEPTED);
+        mockMvcTester.delete().uri(location.get()).assertThat().hasStatus(HttpStatus.ACCEPTED);
     }
 
     @Test
     void cantDeleteArticleWhenArticleNotFound() {
-        mvcTester.delete().uri("/articles/99999").assertThat().hasStatus(HttpStatus.NOT_FOUND);
+        mockMvcTester.delete().uri("/articles/99999").assertThat().hasStatus(HttpStatus.NOT_FOUND);
     }
 }
