@@ -20,25 +20,21 @@ import io.micrometer.core.instrument.MeterRegistry;
 import java.time.ZoneOffset;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionSynchronization;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
  * Command service for PostComment aggregate.
  * Handles all write operations and publishes domain events.
  */
 @Service
-@Transactional
 public class PostCommentCommandService {
 
     private static final Logger log = LoggerFactory.getLogger(PostCommentCommandService.class);
 
     private final PostQueryService postQueryService;
     private final PostCommentQueryService postCommentQueryService;
-    private final ApplicationEventPublisher events;
+    private final KafkaTemplate<String, Object> kafkaTemplate;
     private final Cache<String, String> localCache;
     private final PostCommentRedisRepository postCommentRedisRepository;
     private final PostCommentMapper postCommentMapper;
@@ -49,7 +45,7 @@ public class PostCommentCommandService {
     public PostCommentCommandService(
             PostQueryService postQueryService,
             PostCommentQueryService postCommentQueryService,
-            ApplicationEventPublisher events,
+            KafkaTemplate<String, Object> kafkaTemplate,
             Cache<String, String> localCache,
             PostCommentRedisRepository postCommentRedisRepository,
             PostCommentMapper postCommentMapper,
@@ -57,7 +53,7 @@ public class PostCommentCommandService {
             DeletionMarkerHandler deletionMarkerHandler) {
         this.postQueryService = postQueryService;
         this.postCommentQueryService = postCommentQueryService;
-        this.events = events;
+        this.kafkaTemplate = kafkaTemplate;
         this.localCache = localCache;
         this.postCommentRedisRepository = postCommentRedisRepository;
         this.postCommentMapper = postCommentMapper;
@@ -92,7 +88,7 @@ public class PostCommentCommandService {
                 cmd.published(),
                 request.publishedAt(),
                 request.createdAt().atOffset(ZoneOffset.UTC));
-        events.publishEvent(event);
+        kafkaTemplate.send("post-comments-aggregates", String.valueOf(commentId), event);
 
         // Increment counter
         eventsPublishedCounter.increment();
@@ -101,10 +97,8 @@ public class PostCommentCommandService {
         PostCommentCommandResult result = postCommentMapper.toResultFromRequest(request);
 
         // Eager cache updates
-        executeAfterCommit(() -> {
-            updateCaches(cmd.postId(), commentId, result);
-            log.info("Created post comment: postId={}, commentId={}", cmd.postId(), commentId);
-        });
+        updateCaches(cmd.postId(), commentId, result);
+        log.info("Created post comment: postId={}, commentId={}", cmd.postId(), commentId);
 
         return result;
     }
@@ -128,7 +122,8 @@ public class PostCommentCommandService {
                 request.publishedAt(),
                 request.createdAt(),
                 request.modifiedAt());
-        events.publishEvent(event);
+        kafkaTemplate.send(
+                "post-comments-aggregates", String.valueOf(cmd.commentId().id()), event);
 
         // Increment counter
         eventsPublishedCounter.increment();
@@ -137,13 +132,11 @@ public class PostCommentCommandService {
         PostCommentCommandResult result = postCommentMapper.toResultFromRequest(request);
 
         // Eager cache updates
-        executeAfterCommit(() -> {
-            updateCaches(cmd.postId(), cmd.commentId().id(), result);
-            log.info(
-                    "Updated post comment: postId={}, commentId={}",
-                    cmd.postId(),
-                    cmd.commentId().id());
-        });
+        updateCaches(cmd.postId(), cmd.commentId().id(), result);
+        log.info(
+                "Updated post comment: postId={}, commentId={}",
+                cmd.postId(),
+                cmd.commentId().id());
     }
 
     /**
@@ -153,42 +146,27 @@ public class PostCommentCommandService {
         var cacheKey = CacheKeyGenerator.generatePostCommentKey(postId, commentId.id());
 
         // 1. Publish tombstone event
-        events.publishEvent(new PostCommentDeletedEvent(commentId.id(), postId));
+        kafkaTemplate.send("post-comments-aggregates", cacheKey, new PostCommentDeletedEvent(commentId.id(), postId));
         tombstonesPublishedCounter.increment();
 
-        executeAfterCommit(() -> {
-            // 2. Invalidate local cache
-            try {
-                localCache.invalidate(cacheKey);
-            } catch (Exception e) {
-                log.warn("Failed to invalidate local cache for comment: {}", commentId.id(), e);
-            }
-
-            // 3. Remove from Redis
-            try {
-                postCommentRedisRepository.deleteById(cacheKey);
-            } catch (Exception e) {
-                log.warn("Failed to delete Redis entry for comment: {}", commentId.id(), e);
-            }
-
-            // 4. Mark deleted in Redis with TTL using unified handler
-            deletionMarkerHandler.markDeleted(DeletionMarkerHandler.POST_COMMENT, cacheKey);
-
-            log.info("Deleted post comment: postId={}, commentId={}", postId, commentId.id());
-        });
-    }
-
-    private void executeAfterCommit(Runnable task) {
-        if (TransactionSynchronizationManager.isActualTransactionActive()) {
-            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
-                @Override
-                public void afterCommit() {
-                    task.run();
-                }
-            });
-        } else {
-            task.run();
+        // 2. Invalidate local cache
+        try {
+            localCache.invalidate(cacheKey);
+        } catch (Exception e) {
+            log.warn("Failed to invalidate local cache for comment: {}", commentId.id(), e);
         }
+
+        // 3. Remove from Redis
+        try {
+            postCommentRedisRepository.deleteById(cacheKey);
+        } catch (Exception e) {
+            log.warn("Failed to delete Redis entry for comment: {}", commentId.id(), e);
+        }
+
+        // 4. Mark deleted in Redis with TTL using unified handler
+        deletionMarkerHandler.markDeleted(DeletionMarkerHandler.POST_COMMENT, cacheKey);
+
+        log.info("Deleted post comment: postId={}, commentId={}", postId, commentId.id());
     }
 
     private void updateCaches(Long postId, Long commentId, PostCommentCommandResult result) {

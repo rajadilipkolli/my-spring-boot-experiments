@@ -9,7 +9,6 @@ import com.example.highrps.shared.ResourceNotFoundException;
 import com.github.benmanes.caffeine.cache.Cache;
 import java.util.Locale;
 import java.util.Optional;
-import java.util.concurrent.locks.ReentrantLock;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StoreQueryParameters;
 import org.apache.kafka.streams.state.QueryableStoreTypes;
@@ -19,7 +18,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.kafka.config.StreamsBuilderFactoryBean;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.Assert;
 import tools.jackson.databind.json.JsonMapper;
 
 /**
@@ -38,9 +36,6 @@ public class AuthorQueryService {
     private final DeletionMarkerHandler deletionMarkerHandler;
     private final RequestCoalescer<AuthorRequest> requestCoalescer;
     private final JsonMapper jsonMapper;
-
-    private volatile ReadOnlyKeyValueStore<String, AuthorRequest> keyValueStore = null;
-    private final ReentrantLock keyValueStoreLock = new ReentrantLock();
 
     public AuthorQueryService(
             Cache<String, String> localCache,
@@ -90,8 +85,10 @@ public class AuthorQueryService {
 
         // 4. Kafka Streams state store
         try {
-            AuthorRequest streamsData = requestCoalescer.subscribe(
-                    cacheKey, () -> getKeyValueStore().get(cacheKey));
+            AuthorRequest streamsData = requestCoalescer.subscribe(cacheKey, () -> {
+                ReadOnlyKeyValueStore<String, AuthorRequest> store = getKeyValueStore();
+                return store != null ? store.get(cacheKey) : null;
+            });
 
             if (streamsData != null) {
                 log.debug("Hit Kafka Streams for email: {}", email);
@@ -111,7 +108,7 @@ public class AuthorQueryService {
                 return projection;
             }
         } catch (Exception e) {
-            log.error("Failed to query Kafka Streams for email: {}", email, e);
+            log.debug("Failed to query Kafka Streams for email: {} - {}", email, e.getMessage());
         }
 
         throw new ResourceNotFoundException("Author not found for email: " + email);
@@ -127,20 +124,12 @@ public class AuthorQueryService {
     }
 
     private ReadOnlyKeyValueStore<String, AuthorRequest> getKeyValueStore() {
-        if (keyValueStore == null) {
-            keyValueStoreLock.lock();
-            try {
-                if (keyValueStore == null) {
-                    KafkaStreams kafkaStreams = kafkaStreamsFactory.getKafkaStreams();
-                    Assert.notNull(kafkaStreams, () -> "Kafka Streams not initialized yet");
-                    keyValueStore = kafkaStreams.store(
-                            StoreQueryParameters.fromNameAndType("authors-store", QueryableStoreTypes.keyValueStore()));
-                }
-            } finally {
-                keyValueStoreLock.unlock();
-            }
+        KafkaStreams kafkaStreams = kafkaStreamsFactory.getKafkaStreams();
+        if (kafkaStreams == null || kafkaStreams.state() != KafkaStreams.State.RUNNING) {
+            return null;
         }
-        return keyValueStore;
+        return kafkaStreams.store(
+                StoreQueryParameters.fromNameAndType("authors-store", QueryableStoreTypes.keyValueStore()));
     }
 
     private AuthorProjection parseProjection(String json) {

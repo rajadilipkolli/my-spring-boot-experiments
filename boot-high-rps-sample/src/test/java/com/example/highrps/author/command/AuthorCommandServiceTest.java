@@ -2,6 +2,8 @@ package com.example.highrps.author.command;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
@@ -21,7 +23,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.kafka.core.KafkaTemplate;
 import tools.jackson.databind.json.JsonMapper;
 
 /**
@@ -35,7 +37,7 @@ class AuthorCommandServiceTest {
     private AuthorCommandService authorCommandService;
 
     @Mock
-    private ApplicationEventPublisher eventPublisher;
+    private KafkaTemplate<String, Object> kafkaTemplate;
 
     @Mock
     private Cache<String, String> localCache;
@@ -67,7 +69,7 @@ class AuthorCommandServiceTest {
         assertThat(result.email()).isEqualTo("john99001@example.com");
 
         // Verify event was published
-        verify(eventPublisher).publishEvent(any(AuthorCreatedEvent.class));
+        verify(kafkaTemplate).send(eq("authors-aggregates"), anyString(), any(AuthorCreatedEvent.class));
     }
 
     @Test
@@ -89,7 +91,7 @@ class AuthorCommandServiceTest {
         assertThat(result.email()).isEqualTo(email);
 
         // Verify event was published
-        verify(eventPublisher).publishEvent(any(AuthorUpdatedEvent.class));
+        verify(kafkaTemplate).send(eq("authors-aggregates"), anyString(), any(AuthorUpdatedEvent.class));
     }
 
     @Test
@@ -101,8 +103,8 @@ class AuthorCommandServiceTest {
         // Act
         authorCommandService.deleteAuthor(email);
 
-        // Verify event was published
-        verify(eventPublisher).publishEvent(any(AuthorDeletedEvent.class));
+        // Assert - verify event was published
+        verify(kafkaTemplate).send(eq("authors-aggregates"), anyString(), any(AuthorDeletedEvent.class));
         verify(deletionMarkerHandler).markDeleted("author", email);
     }
 }

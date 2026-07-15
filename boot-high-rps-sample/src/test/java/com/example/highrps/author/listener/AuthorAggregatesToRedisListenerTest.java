@@ -14,6 +14,7 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.springframework.data.redis.core.ListOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import tools.jackson.databind.json.JsonMapper;
 
@@ -29,7 +30,7 @@ class AuthorAggregatesToRedisListenerTest {
     @SuppressWarnings("unchecked")
     void setUp() {
         redisTemplate = mock(RedisTemplate.class);
-        var listOperations = mock(org.springframework.data.redis.core.ListOperations.class);
+        var listOperations = mock(ListOperations.class);
         when(redisTemplate.opsForList()).thenReturn(listOperations);
 
         jsonMapper = JsonMapper.builder().build();
