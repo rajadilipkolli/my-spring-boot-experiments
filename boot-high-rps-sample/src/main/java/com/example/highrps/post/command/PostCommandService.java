@@ -13,11 +13,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionSynchronization;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 import tools.jackson.databind.json.JsonMapper;
 
 /**
@@ -26,24 +23,23 @@ import tools.jackson.databind.json.JsonMapper;
  * events.
  */
 @Service
-@Transactional
 public class PostCommandService {
 
     private static final Logger log = LoggerFactory.getLogger(PostCommandService.class);
 
-    private final ApplicationEventPublisher events;
+    private final KafkaTemplate<String, Object> kafkaTemplate;
     private final Cache<String, String> localCache;
     private final PostRedisRepository postRedisRepository;
     private final JsonMapper jsonMapper;
     private final DeletionMarkerHandler deletionMarkerHandler;
 
     public PostCommandService(
-            ApplicationEventPublisher events,
+            KafkaTemplate<String, Object> kafkaTemplate,
             Cache<String, String> localCache,
             PostRedisRepository postRedisRepository,
             JsonMapper jsonMapper,
             DeletionMarkerHandler deletionMarkerHandler) {
-        this.events = events;
+        this.kafkaTemplate = kafkaTemplate;
         this.localCache = localCache;
         this.postRedisRepository = postRedisRepository;
         this.jsonMapper = jsonMapper;
@@ -82,9 +78,10 @@ public class PostCommandService {
                 now,
                 detailsResponse,
                 tags);
-        events.publishEvent(event);
+        // Send directly to Kafka
+        kafkaTemplate.send("posts-aggregates", String.valueOf(cmd.postId()), event);
 
-        // Eager cache update (best effort)
+        // Eager cache update
         PostCommandResult result = new PostCommandResult(
                 cmd.postId(),
                 cmd.title(),
@@ -97,11 +94,8 @@ public class PostCommandService {
                 detailsResponse,
                 tags);
 
-        // Eager cache update
-        executeAfterCommit(() -> {
-            updateCaches(cmd.postId(), result);
-            log.info("Post created successfully: {}", cmd.postId());
-        });
+        updateCaches(cmd.postId(), result);
+        log.info("Post created successfully: {}", cmd.postId());
 
         return result;
     }
@@ -127,7 +121,7 @@ public class PostCommandService {
                 ? cmd.tags().stream()
                         .map(t -> new TagResponse(null, t.tagName(), t.tagDescription()))
                         .toList()
-                : List.of();
+                : null;
 
         // Publish domain event
         PostUpdatedEvent event = new PostUpdatedEvent(
@@ -141,7 +135,8 @@ public class PostCommandService {
                 now,
                 detailsResponse,
                 tags);
-        events.publishEvent(event);
+        // Send directly to Kafka
+        kafkaTemplate.send("posts-aggregates", String.valueOf(cmd.postId()), event);
 
         // Eager cache update
         PostCommandResult result = new PostCommandResult(
@@ -156,11 +151,8 @@ public class PostCommandService {
                 detailsResponse,
                 tags);
 
-        // Eager cache update
-        executeAfterCommit(() -> {
-            updateCaches(cmd.postId(), result);
-            log.info("Post updated successfully: {}", cmd.postId());
-        });
+        updateCaches(cmd.postId(), result);
+        log.info("Post updated successfully: {}", cmd.postId());
 
         return result;
     }
@@ -169,38 +161,24 @@ public class PostCommandService {
         log.info("Deleting post with id: {}", postId);
 
         // 1. Publish tombstone event
-        events.publishEvent(new PostDeletedEvent(postId));
+        // 1. Send directly to Kafka
+        kafkaTemplate.send("posts-aggregates", String.valueOf(postId), new PostDeletedEvent(postId));
 
-        executeAfterCommit(() -> {
-            // 2. Invalidate local cache
-            String cacheKey = String.valueOf(postId);
-            localCache.invalidate(cacheKey);
+        // 2. Invalidate local cache
+        String cacheKey = String.valueOf(postId);
+        localCache.invalidate(cacheKey);
 
-            // 3. Remove from Redis
-            try {
-                postRedisRepository.deleteById(postId);
-            } catch (Exception e) {
-                log.warn("Failed to delete Redis entry for postId: {}", postId, e);
-            }
-
-            // 4. Mark deleted in Redis with TTL (prevents batch re-insertion)
-            deletionMarkerHandler.markDeleted(DeletionMarkerHandler.POST, String.valueOf(postId));
-
-            log.info("Post deleted successfully: {}", postId);
-        });
-    }
-
-    private void executeAfterCommit(Runnable task) {
-        if (TransactionSynchronizationManager.isActualTransactionActive()) {
-            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
-                @Override
-                public void afterCommit() {
-                    task.run();
-                }
-            });
-        } else {
-            task.run();
+        // 3. Remove from Redis
+        try {
+            postRedisRepository.deleteById(postId);
+        } catch (Exception e) {
+            log.warn("Failed to delete Redis entry for postId: {}", postId, e);
         }
+
+        // 4. Mark deleted in Redis with TTL (prevents batch re-insertion)
+        deletionMarkerHandler.markDeleted(DeletionMarkerHandler.POST, String.valueOf(postId));
+
+        log.info("Post deleted successfully: {}", postId);
     }
 
     private void updateCaches(Long postId, PostCommandResult result) {

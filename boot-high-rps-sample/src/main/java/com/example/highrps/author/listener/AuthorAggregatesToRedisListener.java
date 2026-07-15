@@ -83,10 +83,24 @@ public class AuthorAggregatesToRedisListener {
             }
 
             JsonNode node = jsonMapper.readTree(bytes);
-            if (node.isString() && node.asString().startsWith("eyJ")) {
-                log.info("Detected Base64 encoded JSON payload in authors-aggregates, decoding...");
-                bytes = java.util.Base64.getDecoder().decode(node.asString());
-                node = jsonMapper.readTree(bytes);
+
+            // Check for explicit deletion event (AuthorDeletedEvent has only email)
+            if (node.has("email") && node.size() == 1) {
+                log.info("Identified deletion event (AuthorDeletedEvent) for cacheKey: {}", key);
+                try {
+                    authorRedisRepository.deleteById(key);
+                } catch (Exception e) {
+                    log.warn("Failed to delete redis key for tombstone: {}", key, e);
+                }
+                try {
+                    deletionMarkerHandler.markDeleted(DeletionMarkerHandler.AUTHOR, key);
+                    String tombstoneJson = jsonMapper.writeValueAsString(
+                            Map.of("email", key, "__deleted", true, "__entity", "author"));
+                    redis.opsForList().leftPush(queueKey, tombstoneJson);
+                } catch (Exception e) {
+                    log.error("Failed to enqueue tombstone marker for key: {}, may lose durability", key, e);
+                }
+                return;
             }
 
             AuthorRequest payload = jsonMapper.treeToValue(node, AuthorRequest.class);

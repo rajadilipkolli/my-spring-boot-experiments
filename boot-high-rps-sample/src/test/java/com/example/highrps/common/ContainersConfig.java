@@ -24,13 +24,13 @@ public class ContainersConfig {
     @Bean
     @ServiceConnection(name = "redis")
     RedisContainer redisContainer() {
-        return new RedisContainer(DockerImageName.parse("redis").withTag("8.6.3-alpine")).withReuse(true);
+        return new RedisContainer(DockerImageName.parse("redis").withTag("8.8.0-alpine")).withReuse(true);
     }
 
     @Bean
     @ServiceConnection
     KafkaContainer kafkaContainer() {
-        return new KafkaContainer(DockerImageName.parse("apache/kafka-native").withTag("4.3.0")).withReuse(true);
+        return new KafkaContainer(DockerImageName.parse("apache/kafka-native").withTag("4.3.1")).withReuse(true);
     }
 
     @Bean

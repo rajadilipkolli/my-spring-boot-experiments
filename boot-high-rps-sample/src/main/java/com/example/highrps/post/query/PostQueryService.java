@@ -8,7 +8,6 @@ import com.example.highrps.post.domain.requests.NewPostRequest;
 import com.example.highrps.shared.ResourceNotFoundException;
 import com.github.benmanes.caffeine.cache.Cache;
 import java.util.Optional;
-import java.util.concurrent.locks.ReentrantLock;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StoreQueryParameters;
 import org.apache.kafka.streams.state.QueryableStoreTypes;
@@ -18,7 +17,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.kafka.config.StreamsBuilderFactoryBean;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.Assert;
 import tools.jackson.databind.json.JsonMapper;
 
 /**
@@ -38,9 +36,6 @@ public class PostQueryService {
     private final RequestCoalescer<NewPostRequest> requestCoalescer;
     private final JsonMapper jsonMapper;
 
-    private volatile ReadOnlyKeyValueStore<String, NewPostRequest> keyValueStore = null;
-    private final ReentrantLock keyValueStoreLock = new ReentrantLock();
-
     public PostQueryService(
             Cache<String, String> localCache,
             PostRedisRepository postRedisRepository,
@@ -55,7 +50,7 @@ public class PostQueryService {
         this.requestCoalescer = new RequestCoalescer<>();
     }
 
-    public PostProjection getPost(PostQuery query) {
+    public String getPost(PostQuery query) {
         Long postId = query.postId();
         log.debug("Querying post with id: {}", postId);
 
@@ -69,7 +64,7 @@ public class PostQueryService {
         String cached = localCache.getIfPresent(cacheKey);
         if (cached != null) {
             log.debug("Hit local cache for postId: {}", postId);
-            return parseProjection(cached);
+            return cached;
         }
 
         // 3. Redis materialized view (fast)
@@ -77,40 +72,43 @@ public class PostQueryService {
         if (redisPost.isPresent()) {
             log.debug("Hit Redis for postId: {}", postId);
             PostProjection projection = fromRedis(redisPost.get());
-            // Warm local cache
+            // Warm local cache and return JSON
             try {
                 String json = jsonMapper.writeValueAsString(projection);
                 localCache.put(cacheKey, json);
+                return json;
             } catch (Exception e) {
-                log.warn("Failed to warm local cache", e);
+                log.warn("Failed to serialize to JSON", e);
+                throw new RuntimeException("Serialization error", e);
             }
-            return projection;
         }
 
         // 4. Kafka Streams state store (recent events)
         try {
-            NewPostRequest streamsData = requestCoalescer.subscribe(
-                    cacheKey, () -> getKeyValueStore().get(cacheKey));
+            NewPostRequest streamsData = requestCoalescer.subscribe(cacheKey, () -> {
+                ReadOnlyKeyValueStore<String, NewPostRequest> store = getKeyValueStore();
+                return store != null ? store.get(cacheKey) : null;
+            });
 
             if (streamsData != null) {
                 log.debug("Hit Kafka Streams for postId: {}", postId);
                 PostProjection projection = fromNewPostRequest(streamsData);
 
-                // Warm both caches
+                // Warm both caches and return JSON
                 try {
                     String json = jsonMapper.writeValueAsString(projection);
                     localCache.put(cacheKey, json);
 
                     PostRedis redisEntity = toRedis(streamsData, postId);
                     postRedisRepository.save(redisEntity);
+                    return json;
                 } catch (Exception e) {
                     log.warn("Failed to warm caches from Streams", e);
+                    throw new RuntimeException("Serialization error", e);
                 }
-
-                return projection;
             }
         } catch (Exception e) {
-            log.error("Failed to query Kafka Streams for postId: {}", postId, e);
+            log.debug("Failed to query Kafka Streams for postId: {} - {}", postId, e.getMessage());
         }
 
         // Not found in any cache
@@ -127,20 +125,12 @@ public class PostQueryService {
     }
 
     private ReadOnlyKeyValueStore<String, NewPostRequest> getKeyValueStore() {
-        if (keyValueStore == null) {
-            keyValueStoreLock.lock();
-            try {
-                if (keyValueStore == null) {
-                    KafkaStreams kafkaStreams = kafkaStreamsFactory.getKafkaStreams();
-                    Assert.notNull(kafkaStreams, () -> "Kafka Streams not initialized yet");
-                    keyValueStore = kafkaStreams.store(
-                            StoreQueryParameters.fromNameAndType("posts-store", QueryableStoreTypes.keyValueStore()));
-                }
-            } finally {
-                keyValueStoreLock.unlock();
-            }
+        KafkaStreams kafkaStreams = kafkaStreamsFactory.getKafkaStreams();
+        if (kafkaStreams == null || kafkaStreams.state() != KafkaStreams.State.RUNNING) {
+            return null;
         }
-        return keyValueStore;
+        return kafkaStreams.store(
+                StoreQueryParameters.fromNameAndType("posts-store", QueryableStoreTypes.keyValueStore()));
     }
 
     private PostProjection parseProjection(String json) {

@@ -5,7 +5,6 @@ import com.example.highrps.post.command.PostCommandResult;
 import com.example.highrps.post.command.PostCommandService;
 import com.example.highrps.post.command.UpdatePostCommand;
 import com.example.highrps.post.domain.requests.NewPostRequest;
-import com.example.highrps.post.query.PostProjection;
 import com.example.highrps.post.query.PostQuery;
 import com.example.highrps.post.query.PostQueryService;
 import jakarta.validation.Valid;
@@ -34,10 +33,10 @@ public class PostController {
         this.postQueryService = postQueryService;
     }
 
-    @GetMapping("/posts/{postId}")
-    public ResponseEntity<PostProjection> getPostByPostId(@PathVariable @Positive Long postId) {
-        PostProjection postProjection = postQueryService.getPost(new PostQuery(postId));
-        return ResponseEntity.ok(postProjection);
+    @GetMapping(value = "/posts/{postId}", produces = "application/json")
+    public ResponseEntity<String> getPostByPostId(@PathVariable @Positive Long postId) {
+        String postJson = postQueryService.getPost(new PostQuery(postId));
+        return ResponseEntity.ok(postJson);
     }
 
     @PostMapping(value = "/posts")
