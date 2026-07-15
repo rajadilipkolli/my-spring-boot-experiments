@@ -18,6 +18,7 @@ import com.github.benmanes.caffeine.cache.Cache;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import java.time.ZoneOffset;
+import java.util.concurrent.CompletableFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -70,7 +71,7 @@ public class PostCommentCommandService {
     /**
      * Create a new comment with event-driven pattern using application events.
      */
-    public PostCommentCommandResult createComment(CreatePostCommentCommand cmd) {
+    public CompletableFuture<PostCommentCommandResult> createComment(CreatePostCommentCommand cmd) {
         // Validate post exists
         if (!postQueryService.exists(cmd.postId())) {
             throw new ResourceNotFoundException("Post not found with id: " + cmd.postId());
@@ -88,25 +89,32 @@ public class PostCommentCommandService {
                 cmd.published(),
                 request.publishedAt(),
                 request.createdAt().atOffset(ZoneOffset.UTC));
-        kafkaTemplate.send("post-comments-aggregates", String.valueOf(commentId), event);
-
-        // Increment counter
-        eventsPublishedCounter.increment();
-
         // Build result
         PostCommentCommandResult result = postCommentMapper.toResultFromRequest(request);
 
-        // Eager cache updates
-        updateCaches(cmd.postId(), commentId, result);
-        log.info("Created post comment: postId={}, commentId={}", cmd.postId(), commentId);
+        return kafkaTemplate
+                .send("post-comments-aggregates", String.valueOf(commentId), event)
+                .handle((res, err) -> {
+                    if (err != null) {
+                        log.error("Failed to publish create comment event for commentId: {}", commentId, err);
+                        throw new RuntimeException("Failed to publish create comment event", err);
+                    } else {
+                        log.info("Successfully published create comment event for commentId: {}", commentId);
+                        // Increment counter
+                        eventsPublishedCounter.increment();
 
-        return result;
+                        // Eager cache updates
+                        updateCaches(cmd.postId(), commentId, result);
+                        log.info("Created post comment: postId={}, commentId={}", cmd.postId(), commentId);
+                        return result;
+                    }
+                });
     }
 
     /**
      * Update a comment with event-driven pattern.
      */
-    public void updateComment(UpdatePostCommentCommand cmd) {
+    public CompletableFuture<Void> updateComment(UpdatePostCommentCommand cmd) {
         // Validate comment exists
         PostCommentCommandResult existing =
                 postCommentQueryService.getCommentById(new GetPostCommentQuery(cmd.postId(), cmd.commentId()));
@@ -122,51 +130,77 @@ public class PostCommentCommandService {
                 request.publishedAt(),
                 request.createdAt(),
                 request.modifiedAt());
-        kafkaTemplate.send(
-                "post-comments-aggregates", String.valueOf(cmd.commentId().id()), event);
-
-        // Increment counter
-        eventsPublishedCounter.increment();
-
         // Build result
         PostCommentCommandResult result = postCommentMapper.toResultFromRequest(request);
 
-        // Eager cache updates
-        updateCaches(cmd.postId(), cmd.commentId().id(), result);
-        log.info(
-                "Updated post comment: postId={}, commentId={}",
-                cmd.postId(),
-                cmd.commentId().id());
+        return kafkaTemplate
+                .send("post-comments-aggregates", String.valueOf(cmd.commentId().id()), event)
+                .handle((res, err) -> {
+                    if (err != null) {
+                        log.error(
+                                "Failed to publish update comment event for commentId: {}",
+                                cmd.commentId().id(),
+                                err);
+                        throw new RuntimeException("Failed to publish update comment event", err);
+                    } else {
+                        log.info(
+                                "Successfully published update comment event for commentId: {}",
+                                cmd.commentId().id());
+                        // Increment counter
+                        eventsPublishedCounter.increment();
+
+                        // Eager cache updates
+                        updateCaches(cmd.postId(), cmd.commentId().id(), result);
+                        log.info(
+                                "Updated post comment: postId={}, commentId={}",
+                                cmd.postId(),
+                                cmd.commentId().id());
+                        return null;
+                    }
+                });
     }
 
     /**
      * Delete a comment with event-driven pattern.
      */
-    public void deleteComment(PostCommentId commentId, Long postId) {
+    public CompletableFuture<Void> deleteComment(PostCommentId commentId, Long postId) {
         var cacheKey = CacheKeyGenerator.generatePostCommentKey(postId, commentId.id());
 
         // 1. Publish tombstone event
-        kafkaTemplate.send("post-comments-aggregates", cacheKey, new PostCommentDeletedEvent(commentId.id(), postId));
-        tombstonesPublishedCounter.increment();
+        return kafkaTemplate
+                .send(
+                        "post-comments-aggregates",
+                        String.valueOf(commentId.id()),
+                        new PostCommentDeletedEvent(commentId.id(), postId))
+                .handle((res, err) -> {
+                    if (err != null) {
+                        log.error("Failed to publish delete comment event for commentId: {}", commentId.id(), err);
+                        throw new RuntimeException("Failed to publish delete comment event", err);
+                    } else {
+                        log.info("Successfully published delete comment event for commentId: {}", commentId.id());
+                        tombstonesPublishedCounter.increment();
 
-        // 2. Invalidate local cache
-        try {
-            localCache.invalidate(cacheKey);
-        } catch (Exception e) {
-            log.warn("Failed to invalidate local cache for comment: {}", commentId.id(), e);
-        }
+                        // 2. Invalidate local cache
+                        try {
+                            localCache.invalidate(cacheKey);
+                        } catch (Exception e) {
+                            log.warn("Failed to invalidate local cache for comment: {}", commentId.id(), e);
+                        }
 
-        // 3. Remove from Redis
-        try {
-            postCommentRedisRepository.deleteById(cacheKey);
-        } catch (Exception e) {
-            log.warn("Failed to delete Redis entry for comment: {}", commentId.id(), e);
-        }
+                        // 3. Remove from Redis
+                        try {
+                            postCommentRedisRepository.deleteById(cacheKey);
+                        } catch (Exception e) {
+                            log.warn("Failed to delete Redis entry for comment: {}", commentId.id(), e);
+                        }
 
-        // 4. Mark deleted in Redis with TTL using unified handler
-        deletionMarkerHandler.markDeleted(DeletionMarkerHandler.POST_COMMENT, cacheKey);
+                        // 4. Mark deleted in Redis with TTL using unified handler
+                        deletionMarkerHandler.markDeleted(DeletionMarkerHandler.POST_COMMENT, cacheKey);
 
-        log.info("Deleted post comment: postId={}, commentId={}", postId, commentId.id());
+                        log.info("Deleted post comment: postId={}, commentId={}", postId, commentId.id());
+                        return null;
+                    }
+                });
     }
 
     private void updateCaches(Long postId, Long commentId, PostCommentCommandResult result) {

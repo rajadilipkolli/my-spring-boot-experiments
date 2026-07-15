@@ -321,7 +321,7 @@ class PostControllerIT extends AbstractIntegrationTest {
                             "createdBy": "JunitIteration"
                           }
                         }
-                        """.formatted(postId.get(), "delete-me"))
+                        """.formatted(postId.get(), title))
                 .contentType(MediaType.APPLICATION_JSON)
                 .exchange()
                 .assertThat()

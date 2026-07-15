@@ -80,7 +80,7 @@ class EventExternalizationIT extends AbstractIntegrationTest {
                 true,
                 new PostDetailsRequest("initial-key", "tester"),
                 List.of(new TagRequest("tag1", "desc1")));
-        postCommandService.createPost(createCmd);
+        postCommandService.createPost(createCmd).join();
 
         // Assert - Verify event was externalized to Kafka
         await().atMost(Duration.ofSeconds(30)).untilAsserted(() -> {
@@ -116,7 +116,7 @@ class EventExternalizationIT extends AbstractIntegrationTest {
         String email = "test-ext-" + UUID.randomUUID() + "@example.com";
         CreateAuthorCommand command =
                 new CreateAuthorCommand(email, "Test", null, "Author", 1234567890L, LocalDateTime.now());
-        authorCommandService.createAuthor(command);
+        authorCommandService.createAuthor(command).join();
 
         // Assert - Verify event was externalized to Kafka
         await().atMost(Duration.ofSeconds(30)).untilAsserted(() -> {
@@ -162,7 +162,7 @@ class EventExternalizationIT extends AbstractIntegrationTest {
         // Act - Create a comment (which should publish PostCommentCreatedEvent)
         CreatePostCommentCommand command =
                 new CreatePostCommentCommand("Great post!", "Excellent content", 54321L, true);
-        postCommentCommandService.createComment(command);
+        postCommentCommandService.createComment(command).join();
 
         // Assert - Verify event was externalized to Kafka
         await().atMost(Duration.ofSeconds(30)).untilAsserted(() -> {

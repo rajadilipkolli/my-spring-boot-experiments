@@ -2,7 +2,9 @@ package com.example.highrps.post.command;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
 import com.example.highrps.infrastructure.redis.DeletionMarkerHandler;
@@ -14,6 +16,7 @@ import com.example.highrps.post.domain.requests.PostDetailsRequest;
 import com.example.highrps.post.domain.requests.TagRequest;
 import com.github.benmanes.caffeine.cache.Cache;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -66,8 +69,10 @@ class PostCommandServiceTest {
                 new PostDetailsRequest("key1", "user1"),
                 List.of(new TagRequest("t1", "d1")));
 
+        given(kafkaTemplate.send(anyString(), anyString(), any())).willReturn(CompletableFuture.completedFuture(null));
+
         // Act
-        PostCommandResult result = postCommandService.createPost(command);
+        PostCommandResult result = postCommandService.createPost(command).join();
 
         // Assert
         assertThat(result).isNotNull();
@@ -93,8 +98,10 @@ class PostCommandServiceTest {
                 new PostDetailsRequest("key2", "user2"),
                 List.of(new TagRequest("t2", "d2")));
 
+        given(kafkaTemplate.send(anyString(), anyString(), any())).willReturn(CompletableFuture.completedFuture(null));
+
         // Act
-        PostCommandResult result = postCommandService.updatePost(updateCommand);
+        PostCommandResult result = postCommandService.updatePost(updateCommand).join();
 
         // Assert
         assertThat(result).isNotNull();
@@ -109,6 +116,8 @@ class PostCommandServiceTest {
     void shouldPublishEventWhenDeletingPost() {
         // Arrange
         Long postId = 99003L;
+
+        given(kafkaTemplate.send(anyString(), anyString(), any())).willReturn(CompletableFuture.completedFuture(null));
 
         // Act
         postCommandService.deletePost(postId);

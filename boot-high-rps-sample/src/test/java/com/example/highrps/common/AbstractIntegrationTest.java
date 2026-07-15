@@ -1,5 +1,6 @@
 package com.example.highrps.common;
 
+import static org.awaitility.Awaitility.await;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 import com.example.highrps.HighRpsApplication;
@@ -16,6 +17,7 @@ import com.example.highrps.postcomment.command.PostCommentCommandService;
 import com.example.highrps.postcomment.domain.PostCommentRepository;
 import com.github.benmanes.caffeine.cache.Cache;
 import io.micrometer.core.instrument.MeterRegistry;
+import java.time.Duration;
 import org.junit.jupiter.api.BeforeEach;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -96,6 +98,9 @@ public abstract class AbstractIntegrationTest {
     @Autowired
     protected KafkaConnectionDetails kafkaConnectionDetails;
 
+    @Autowired
+    protected org.springframework.kafka.config.StreamsBuilderFactoryBean streamsBuilderFactoryBean;
+
     @BeforeEach
     public void clearDatabase() {
         postCommentRepository.deleteAllInBatch();
@@ -113,5 +118,13 @@ public abstract class AbstractIntegrationTest {
                 },
                 true);
         localCache.invalidateAll();
+
+        // Wait for Kafka Streams to be ready before proceeding with tests
+        await().atMost(Duration.ofSeconds(30))
+                .pollInterval(Duration.ofMillis(500))
+                .until(() -> {
+                    org.apache.kafka.streams.KafkaStreams streams = streamsBuilderFactoryBean.getKafkaStreams();
+                    return streams != null && streams.state() == org.apache.kafka.streams.KafkaStreams.State.RUNNING;
+                });
     }
 }

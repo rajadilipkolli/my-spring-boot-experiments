@@ -4,8 +4,8 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
@@ -31,16 +31,16 @@ public class ApiLoadBenchmark {
     private ConfigurableApplicationContext context;
     private HttpClient client;
     private final AtomicLong counter = new AtomicLong();
-    private final List<Long> createdPostIds = new CopyOnWriteArrayList<>();
+    private final ConcurrentHashMap<Long, Long> createdPostIds = new ConcurrentHashMap<>();
+    private final AtomicLong postIdsCounter = new AtomicLong();
     private final JsonMapper jsonMapper = new JsonMapper();
+    private ExecutorService executorService;
 
     @Setup(Level.Trial)
     public void setup() {
         context = SpringApplication.run(HighRpsApplication.class, "--spring.profiles.active=local");
-
-        client = HttpClient.newBuilder()
-                .executor(Executors.newFixedThreadPool(250))
-                .build();
+        executorService = Executors.newFixedThreadPool(500);
+        client = HttpClient.newBuilder().executor(executorService).build();
     }
 
     @TearDown(Level.Trial)
@@ -48,11 +48,14 @@ public class ApiLoadBenchmark {
         if (context != null) {
             context.close();
         }
+        if (executorService != null) {
+            executorService.shutdownNow();
+        }
     }
 
     @Benchmark
     @Group("mix")
-    @GroupThreads(25)
+    @GroupThreads(50)
     public void createPostBenchmark() throws Exception {
         long id = counter.incrementAndGet();
         String payload = "{\"title\":\"Benchmark Post " + id
@@ -73,7 +76,8 @@ public class ApiLoadBenchmark {
         try {
             JsonNode node = jsonMapper.readTree(response.body());
             if (node.has("postId")) {
-                createdPostIds.add(node.get("postId").asLong());
+                createdPostIds.put(
+                        postIdsCounter.getAndIncrement(), node.get("postId").asLong());
             }
         } catch (Exception e) {
             // ignore parse errors
@@ -82,13 +86,19 @@ public class ApiLoadBenchmark {
 
     @Benchmark
     @Group("mix")
-    @GroupThreads(225)
+    @GroupThreads(450)
     public void readPostBenchmark() throws Exception {
+        long count = postIdsCounter.get();
         long idToRead;
-        if (createdPostIds.isEmpty()) {
+        if (count == 0) {
             return; // Skip read if nothing created yet
         } else {
-            idToRead = createdPostIds.get(ThreadLocalRandom.current().nextInt(createdPostIds.size()));
+            long index = ThreadLocalRandom.current().nextLong(count);
+            Long id = createdPostIds.get(index);
+            if (id == null) {
+                return;
+            }
+            idToRead = id;
         }
 
         HttpRequest request = HttpRequest.newBuilder()

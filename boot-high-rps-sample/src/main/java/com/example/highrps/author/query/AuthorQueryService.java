@@ -9,8 +9,10 @@ import com.example.highrps.shared.ResourceNotFoundException;
 import com.github.benmanes.caffeine.cache.Cache;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.concurrent.CompletionException;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StoreQueryParameters;
+import org.apache.kafka.streams.errors.InvalidStateStoreException;
 import org.apache.kafka.streams.state.QueryableStoreTypes;
 import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
 import org.slf4j.Logger;
@@ -84,31 +86,43 @@ public class AuthorQueryService {
         }
 
         // 4. Kafka Streams state store
+        AuthorRequest streamsData = null;
         try {
-            AuthorRequest streamsData = requestCoalescer.subscribe(cacheKey, () -> {
+            streamsData = requestCoalescer.subscribe(cacheKey, () -> {
                 ReadOnlyKeyValueStore<String, AuthorRequest> store = getKeyValueStore();
-                return store != null ? store.get(cacheKey) : null;
-            });
-
-            if (streamsData != null) {
-                log.debug("Hit Kafka Streams for email: {}", email);
-                AuthorProjection projection = fromAuthorRequest(streamsData);
-
-                // Warm both caches
-                try {
-                    String json = jsonMapper.writeValueAsString(projection);
-                    localCache.put(cacheKey, json);
-
-                    AuthorRedis redisEntity = toRedis(streamsData);
-                    authorRedisRepository.save(redisEntity);
-                } catch (Exception e) {
-                    log.warn("Failed to warm caches from Streams", e);
+                if (store == null) {
+                    throw new org.apache.kafka.streams.errors.InvalidStateStoreException(
+                            "State store is not available");
                 }
-
-                return projection;
+                return store.get(cacheKey);
+            });
+        } catch (CompletionException e) {
+            if (e.getCause() instanceof InvalidStateStoreException ise) {
+                throw ise;
             }
+            log.debug("Failed to query Kafka Streams for email: {} - {}", email, e.getMessage());
+        } catch (InvalidStateStoreException e) {
+            throw e;
         } catch (Exception e) {
             log.debug("Failed to query Kafka Streams for email: {} - {}", email, e.getMessage());
+        }
+
+        if (streamsData != null) {
+            log.debug("Hit Kafka Streams for email: {}", email);
+            AuthorProjection projection = fromAuthorRequest(streamsData);
+
+            // Warm both caches
+            try {
+                String json = jsonMapper.writeValueAsString(projection);
+                localCache.put(cacheKey, json);
+
+                AuthorRedis redisEntity = toRedis(streamsData);
+                authorRedisRepository.save(redisEntity);
+            } catch (Exception e) {
+                log.warn("Failed to warm caches from Streams", e);
+            }
+
+            return projection;
         }
 
         throw new ResourceNotFoundException("Author not found for email: " + email);

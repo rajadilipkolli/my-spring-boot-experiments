@@ -84,31 +84,32 @@ public class PostQueryService {
         }
 
         // 4. Kafka Streams state store (recent events)
+        NewPostRequest streamsData = null;
         try {
-            NewPostRequest streamsData = requestCoalescer.subscribe(cacheKey, () -> {
+            streamsData = requestCoalescer.subscribe(cacheKey, () -> {
                 ReadOnlyKeyValueStore<String, NewPostRequest> store = getKeyValueStore();
                 return store != null ? store.get(cacheKey) : null;
             });
-
-            if (streamsData != null) {
-                log.debug("Hit Kafka Streams for postId: {}", postId);
-                PostProjection projection = fromNewPostRequest(streamsData);
-
-                // Warm both caches and return JSON
-                try {
-                    String json = jsonMapper.writeValueAsString(projection);
-                    localCache.put(cacheKey, json);
-
-                    PostRedis redisEntity = toRedis(streamsData, postId);
-                    postRedisRepository.save(redisEntity);
-                    return json;
-                } catch (Exception e) {
-                    log.warn("Failed to warm caches from Streams", e);
-                    throw new RuntimeException("Serialization error", e);
-                }
-            }
         } catch (Exception e) {
             log.debug("Failed to query Kafka Streams for postId: {} - {}", postId, e.getMessage());
+        }
+
+        if (streamsData != null) {
+            log.debug("Hit Kafka Streams for postId: {}", postId);
+            PostProjection projection = fromNewPostRequest(streamsData);
+
+            // Warm both caches and return JSON
+            try {
+                String json = jsonMapper.writeValueAsString(projection);
+                localCache.put(cacheKey, json);
+
+                PostRedis redisEntity = toRedis(streamsData, postId);
+                postRedisRepository.save(redisEntity);
+                return json;
+            } catch (Exception e) {
+                log.warn("Failed to warm caches from Streams", e);
+                throw new RuntimeException("Serialization error", e);
+            }
         }
 
         // Not found in any cache

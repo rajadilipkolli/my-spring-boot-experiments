@@ -99,6 +99,7 @@ public class AuthorAggregatesToRedisListener {
                     redis.opsForList().leftPush(queueKey, tombstoneJson);
                 } catch (Exception e) {
                     log.error("Failed to enqueue tombstone marker for key: {}, may lose durability", key, e);
+                    throw new IllegalStateException("Failed to enqueue tombstone marker for key=" + key, e);
                 }
                 return;
             }

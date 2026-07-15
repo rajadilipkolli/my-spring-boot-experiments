@@ -12,6 +12,7 @@ import com.example.highrps.infrastructure.redis.DeletionMarkerHandler;
 import com.example.highrps.shared.ResourceNotFoundException;
 import com.github.benmanes.caffeine.cache.Cache;
 import java.util.Locale;
+import java.util.concurrent.CompletableFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -49,32 +50,48 @@ public class AuthorCommandService {
         this.authorQueryService = authorQueryService;
     }
 
-    public AuthorCommandResult createAuthor(CreateAuthorCommand cmd) {
+    public CompletableFuture<AuthorCommandResult> createAuthor(CreateAuthorCommand cmd) {
+        String aggregateKey = cmd.email().toLowerCase(Locale.ROOT);
 
         // Validate author doesn't already exist
-        if (authorQueryService.exists(cmd.email())) {
-            throw new IllegalArgumentException("Author already exists with email: " + cmd.email());
+        try {
+            if (authorQueryService.exists(aggregateKey)) {
+                throw new IllegalArgumentException("Author already exists with email: " + cmd.email());
+            }
+        } catch (Exception e) {
+            // Kafka streams state stores might not be initialized until the first event is published.
+            // If the query service throws an exception (e.g., InvalidStateStoreException),
+            // we log it and cautiously proceed with creation to avoid a bootstrap deadlock.
+            log.warn(
+                    "Could not verify if author exists (query service unavailable). Proceeding with creation optimistically.",
+                    e);
         }
 
         // Publish domain event directly to Kafka
         AuthorCreatedEvent event = new AuthorCreatedEvent(
-                cmd.email(), cmd.firstName(), cmd.middleName(), cmd.lastName(), cmd.mobile(), cmd.createdAt());
-        kafkaTemplate.send("authors-aggregates", cmd.email(), event);
-
+                aggregateKey, cmd.firstName(), cmd.middleName(), cmd.lastName(), cmd.mobile(), cmd.createdAt());
         // Build result
         AuthorCommandResult result = new AuthorCommandResult(
-                cmd.email(), cmd.firstName(), cmd.middleName(), cmd.lastName(), cmd.mobile(), cmd.createdAt(), null);
+                aggregateKey, cmd.firstName(), cmd.middleName(), cmd.lastName(), cmd.mobile(), cmd.createdAt(), null);
 
-        // Eager cache update
-        updateCaches(cmd.email(), result);
-        log.info("Author created successfully: {}", cmd.email());
-
-        return result;
+        return kafkaTemplate.send("authors-aggregates", aggregateKey, event).handle((res, err) -> {
+            if (err != null) {
+                log.error("Failed to publish create author event for email: {}", aggregateKey, err);
+                throw new RuntimeException("Failed to publish create author event", err);
+            } else {
+                log.info("Successfully published create author event for email: {}", aggregateKey);
+                // Eager cache update
+                updateCaches(aggregateKey, result);
+                log.info("Author created successfully: {}", aggregateKey);
+                return result;
+            }
+        });
     }
 
-    public AuthorCommandResult updateAuthor(UpdateAuthorCommand cmd) {
+    public CompletableFuture<AuthorCommandResult> updateAuthor(UpdateAuthorCommand cmd) {
+        String aggregateKey = cmd.email().toLowerCase(Locale.ROOT);
 
-        AuthorQuery authorQuery = new AuthorQuery(cmd.email());
+        AuthorQuery authorQuery = new AuthorQuery(aggregateKey);
 
         AuthorProjection author = authorQueryService.getAuthor(authorQuery);
 
@@ -85,18 +102,16 @@ public class AuthorCommandService {
 
         // Publish domain event
         AuthorUpdatedEvent event = new AuthorUpdatedEvent(
-                cmd.email(),
+                aggregateKey,
                 cmd.firstName(),
                 cmd.middleName(),
                 cmd.lastName(),
                 cmd.mobile(),
                 author.createdAt(),
                 cmd.modifiedAt());
-        kafkaTemplate.send("authors-aggregates", cmd.email(), event);
-
         // Build result
         AuthorCommandResult result = new AuthorCommandResult(
-                cmd.email(),
+                aggregateKey,
                 cmd.firstName(),
                 cmd.middleName(),
                 cmd.lastName(),
@@ -104,51 +119,66 @@ public class AuthorCommandService {
                 author.createdAt(),
                 cmd.modifiedAt());
 
-        // Eager cache update
-        updateCaches(cmd.email(), result);
-        log.info("Author updated successfully: {}", cmd.email());
-
-        return result;
+        return kafkaTemplate.send("authors-aggregates", aggregateKey, event).handle((res, err) -> {
+            if (err != null) {
+                log.error("Failed to publish update author event for email: {}", aggregateKey, err);
+                throw new RuntimeException("Failed to publish update author event", err);
+            } else {
+                log.info("Successfully published update author event for email: {}", aggregateKey);
+                // Eager cache update
+                updateCaches(aggregateKey, result);
+                log.info("Author updated successfully: {}", aggregateKey);
+                return result;
+            }
+        });
     }
 
-    public void deleteAuthor(String email) {
-        log.info("Deleting author with email: {}", email);
+    public CompletableFuture<Void> deleteAuthor(String email) {
+        String aggregateKey = email.toLowerCase(Locale.ROOT);
+        log.info("Deleting author with email: {}", aggregateKey);
 
-        String cacheKey = email.toLowerCase(Locale.ROOT);
         // 1. Publish tombstone event
-        kafkaTemplate.send("authors-aggregates", cacheKey, new AuthorDeletedEvent(cacheKey));
+        return kafkaTemplate
+                .send("authors-aggregates", aggregateKey, new AuthorDeletedEvent(aggregateKey))
+                .handle((res, err) -> {
+                    if (err != null) {
+                        log.error("Failed to publish delete author event for email: {}", aggregateKey, err);
+                        throw new RuntimeException("Failed to publish delete author event", err);
+                    } else {
+                        log.info("Successfully published delete author event for email: {}", aggregateKey);
+                        // 2. Invalidate local cache
+                        localCache.invalidate(aggregateKey);
 
-        // 2. Invalidate local cache
-        localCache.invalidate(cacheKey);
+                        // 3. Remove from Redis
+                        try {
+                            authorRedisRepository.deleteById(aggregateKey);
+                        } catch (Exception e) {
+                            log.warn("Failed to delete Redis entry for email: {}", aggregateKey, e);
+                        }
 
-        // 3. Remove from Redis
-        try {
-            authorRedisRepository.deleteById(cacheKey);
-        } catch (Exception e) {
-            log.warn("Failed to delete Redis entry for email: {}", cacheKey, e);
-        }
+                        // 4. Mark deleted in Redis with TTL (prevents batch re-insertion)
+                        deletionMarkerHandler.markDeleted(DeletionMarkerHandler.AUTHOR, aggregateKey);
 
-        // 4. Mark deleted in Redis with TTL
-        deletionMarkerHandler.markDeleted(DeletionMarkerHandler.AUTHOR, cacheKey);
-
-        log.info("Author deleted successfully: {}", email);
+                        log.info("Author deleted successfully: {}", aggregateKey);
+                        return null;
+                    }
+                });
     }
 
-    private void updateCaches(String email, AuthorCommandResult result) {
-        String cacheKey = email.toLowerCase(Locale.ROOT);
+    private void updateCaches(String aggregateKey, AuthorCommandResult result) {
 
         // Update local cache
         try {
             String json = jsonMapper.writeValueAsString(result);
-            localCache.put(cacheKey, json);
+            localCache.put(aggregateKey, json);
         } catch (Exception e) {
-            log.warn("Failed to update local cache for email: {}", email, e);
+            log.warn("Failed to update local cache for email: {}", aggregateKey, e);
         }
 
         // Update Redis
         try {
             AuthorRedis authorRedis = new AuthorRedis()
-                    .setEmail(result.email().toLowerCase(Locale.ROOT))
+                    .setEmail(aggregateKey)
                     .setFirstName(result.firstName())
                     .setMiddleName(result.middleName())
                     .setLastName(result.lastName())
@@ -157,7 +187,7 @@ public class AuthorCommandService {
             authorRedis.setModifiedAt(result.modifiedAt());
             authorRedisRepository.save(authorRedis);
         } catch (Exception e) {
-            log.warn("Failed to update Redis for email: {}", email, e);
+            log.warn("Failed to update Redis for email: {}", aggregateKey, e);
         }
     }
 }

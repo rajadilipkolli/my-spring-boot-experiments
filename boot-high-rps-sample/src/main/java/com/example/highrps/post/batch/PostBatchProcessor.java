@@ -103,12 +103,13 @@ public class PostBatchProcessor implements EntityBatchProcessor {
         List<String> emails = parsedPosts.stream()
                 .map(p -> p.request().email())
                 .filter(Objects::nonNull)
-                .map(String::toLowerCase)
+                .map(s -> s.toLowerCase(Locale.ROOT))
                 .distinct()
                 .toList();
 
         Map<String, AuthorEntity> authorByEmail = authorRepository.findByEmailInAllIgnoreCase(emails).stream()
-                .collect(Collectors.toMap(a -> a.getEmail().toLowerCase(), Function.identity(), (a, b) -> a));
+                .collect(
+                        Collectors.toMap(a -> a.getEmail().toLowerCase(Locale.ROOT), Function.identity(), (a, b) -> a));
 
         // Step 2.2: Bulk fetch and create tags
         Map<String, TagResponse> tagRequestsByName = parsedPosts.stream()
@@ -153,8 +154,9 @@ public class PostBatchProcessor implements EntityBatchProcessor {
                             mapper.updatePostEntity(parsed.request(), entity, tagMap);
                             log.debug("Updating existing post with postid: {}", parsed.postId());
                         } catch (Exception e) {
-                            log.warn("Failed to update post entity for postId: {}", parsed.postId(), e);
-                            return null;
+                            log.error("Failed to update post entity for postId: {}", parsed.postId(), e);
+                            throw new RuntimeException(
+                                    "Failed to update post entity for postId: " + parsed.postId(), e);
                         }
                     } else {
                         // Create new entity
@@ -163,13 +165,14 @@ public class PostBatchProcessor implements EntityBatchProcessor {
                             String authorEmail = parsed.request().email();
                             AuthorEntity author = null;
                             if (authorEmail != null) {
-                                author = authorByEmail.get(authorEmail.toLowerCase());
+                                author = authorByEmail.get(authorEmail.toLowerCase(Locale.ROOT));
                             }
                             entity.setAuthorEntity(author);
                             log.debug("Creating new post with postRefId: {}", parsed.postId());
                         } catch (Exception e) {
-                            log.warn("Failed to create post entity for postId: {}", parsed.postId(), e);
-                            return null;
+                            log.error("Failed to create post entity for postId: {}", parsed.postId(), e);
+                            throw new RuntimeException(
+                                    "Failed to create post entity for postId: " + parsed.postId(), e);
                         }
                     }
                     return entity;

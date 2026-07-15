@@ -17,6 +17,7 @@ import com.example.highrps.author.query.AuthorQueryService;
 import com.example.highrps.infrastructure.redis.DeletionMarkerHandler;
 import com.github.benmanes.caffeine.cache.Cache;
 import java.time.LocalDateTime;
+import java.util.concurrent.CompletableFuture;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -59,52 +60,59 @@ class AuthorCommandServiceTest {
     void shouldPublishEventWhenCreatingAuthor() {
         // Arrange
         CreateAuthorCommand command =
-                new CreateAuthorCommand("john99001@example.com", "John", null, "Doe", 1234567890L, LocalDateTime.now());
+                new CreateAuthorCommand("John99001@EXAMPLE.com", "John", null, "Doe", 1234567890L, LocalDateTime.now());
+        given(kafkaTemplate.send(anyString(), anyString(), any())).willReturn(CompletableFuture.completedFuture(null));
 
         // Act
-        AuthorCommandResult result = authorCommandService.createAuthor(command);
+        AuthorCommandResult result = authorCommandService.createAuthor(command).join();
 
         // Assert
         assertThat(result).isNotNull();
         assertThat(result.email()).isEqualTo("john99001@example.com");
 
         // Verify event was published
-        verify(kafkaTemplate).send(eq("authors-aggregates"), anyString(), any(AuthorCreatedEvent.class));
+        verify(kafkaTemplate)
+                .send(eq("authors-aggregates"), eq("john99001@example.com"), any(AuthorCreatedEvent.class));
     }
 
     @Test
     @DisplayName("Should publish AuthorUpdatedEvent when updating an author")
     void shouldPublishEventWhenUpdatingAuthor() {
         // Arrange
-        String email = "jane99002@example.com";
+        String email = "Jane99002@Example.COM";
+        String lowerEmail = "jane99002@example.com";
         UpdateAuthorCommand updateCommand =
                 new UpdateAuthorCommand(email, "Jane", null, "Smith", 9876543210L, LocalDateTime.now());
 
         AuthorProjection authorProjection = new AuthorProjection(
-                email, "Jane", null, "Smith", 9876543210L, LocalDateTime.now(), LocalDateTime.now(), null);
-        given(authorQueryService.getAuthor(new AuthorQuery(email))).willReturn(authorProjection);
+                lowerEmail, "Jane", null, "Smith", 9876543210L, LocalDateTime.now(), LocalDateTime.now(), null);
+        given(authorQueryService.getAuthor(new AuthorQuery(lowerEmail))).willReturn(authorProjection);
+        given(kafkaTemplate.send(anyString(), anyString(), any())).willReturn(CompletableFuture.completedFuture(null));
         // Act
-        AuthorCommandResult result = authorCommandService.updateAuthor(updateCommand);
+        AuthorCommandResult result =
+                authorCommandService.updateAuthor(updateCommand).join();
 
         // Assert
         assertThat(result).isNotNull();
-        assertThat(result.email()).isEqualTo(email);
+        assertThat(result.email()).isEqualTo(lowerEmail);
 
         // Verify event was published
-        verify(kafkaTemplate).send(eq("authors-aggregates"), anyString(), any(AuthorUpdatedEvent.class));
+        verify(kafkaTemplate).send(eq("authors-aggregates"), eq(lowerEmail), any(AuthorUpdatedEvent.class));
     }
 
     @Test
     @DisplayName("Should publish AuthorDeletedEvent when deleting an author")
     void shouldPublishEventWhenDeletingAuthor() {
         // Arrange
-        String email = "delete99003@example.com";
+        String email = "Delete99003@EXample.com";
+        String lowerEmail = "delete99003@example.com";
+        given(kafkaTemplate.send(anyString(), anyString(), any())).willReturn(CompletableFuture.completedFuture(null));
 
         // Act
         authorCommandService.deleteAuthor(email);
 
         // Assert - verify event was published
-        verify(kafkaTemplate).send(eq("authors-aggregates"), anyString(), any(AuthorDeletedEvent.class));
-        verify(deletionMarkerHandler).markDeleted("author", email);
+        verify(kafkaTemplate).send(eq("authors-aggregates"), eq(lowerEmail), any(AuthorDeletedEvent.class));
+        verify(deletionMarkerHandler).markDeleted("author", lowerEmail);
     }
 }
