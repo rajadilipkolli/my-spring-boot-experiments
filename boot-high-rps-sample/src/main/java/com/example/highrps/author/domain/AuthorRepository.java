@@ -1,6 +1,5 @@
 package com.example.highrps.author.domain;
 
-import com.example.highrps.shared.ResourceNotFoundException;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -28,6 +27,7 @@ public interface AuthorRepository extends JpaRepository<AuthorEntity, Long> {
     // Default convenience method
     default AuthorEntity getByEmail(String email) {
         return findByEmailIgnoreCase(email)
-                .orElseThrow(() -> new ResourceNotFoundException("Author not found with email: " + email));
+                .orElseThrow(() -> new com.example.highrps.shared.ResourceNotFoundException(
+                        "Author not found with email: " + email));
     }
 }

@@ -72,6 +72,11 @@ public class PostAggregatesToRedisListener {
             }
 
             JsonNode node = jsonMapper.readTree(bytes);
+            if (node.isString() && node.asString().startsWith("eyJ")) {
+                log.info("Detected Base64 encoded JSON payload in posts-aggregates, decoding...");
+                bytes = java.util.Base64.getDecoder().decode(node.asString());
+                node = jsonMapper.readTree(bytes);
+            }
 
             // Check for explicit deletion event (PostDeletedEvent has only postId)
             if (node.has("postId") && node.size() == 1) {

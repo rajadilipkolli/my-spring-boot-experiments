@@ -20,12 +20,12 @@ public record UpdatePostCommand(
         if (postId == null) {
             throw new IllegalArgumentException("postId must not be null");
         }
-        tags = tags == null ? null : List.copyOf(tags);
+        tags = tags == null ? List.of() : List.copyOf(tags);
     }
 
     public static UpdatePostCommand fromNewPostRequest(NewPostRequest newPostRequest, Long postId) {
         List<TagRequest> tagRequests = newPostRequest.tags() == null
-                ? null
+                ? List.of()
                 : newPostRequest.tags().stream()
                         .map(tag -> new TagRequest(tag.tagName(), tag.tagDescription()))
                         .toList();

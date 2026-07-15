@@ -312,7 +312,7 @@ class PostControllerIT extends AbstractIntegrationTest {
                 .content("""
                         {
                           "postId": %d,
-                          "title": "%s",
+                          "title": "delete-me",
                           "content": "Updated content before delete",
                           "email": "test@local.com",
                           "published": true,
@@ -321,7 +321,7 @@ class PostControllerIT extends AbstractIntegrationTest {
                             "createdBy": "JunitIteration"
                           }
                         }
-                        """.formatted(postId.get(), "delete-me"))
+                        """.formatted(postId.get()))
                 .contentType(MediaType.APPLICATION_JSON)
                 .exchange()
                 .assertThat()

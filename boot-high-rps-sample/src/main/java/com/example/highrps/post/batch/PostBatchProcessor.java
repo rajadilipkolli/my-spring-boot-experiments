@@ -6,21 +6,14 @@ import com.example.highrps.infrastructure.kafka.batch.EntityBatchProcessor;
 import com.example.highrps.infrastructure.redis.DeletionMarkerHandler;
 import com.example.highrps.post.domain.PostEntity;
 import com.example.highrps.post.domain.PostRepository;
-import com.example.highrps.post.domain.TagEntity;
 import com.example.highrps.post.domain.TagRepository;
-import com.example.highrps.post.domain.TagResponse;
 import com.example.highrps.post.domain.requests.NewPostRequest;
 import com.example.highrps.post.mapper.NewPostRequestToPostEntityMapper;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -91,57 +84,13 @@ public class PostBatchProcessor implements EntityBatchProcessor {
 
         // Step 2: Extract all postIds and fetch existing posts from DB
         List<Long> postIds = parsedPosts.stream()
-                .map(parsedPost -> Long.valueOf(parsedPost.postId()))
+                .map(parsedPost -> Long.valueOf(parsedPost.postId))
                 .toList();
 
         List<PostEntity> existingPosts = postRepository.findByPostRefIdIn(postIds);
 
         Map<Long, PostEntity> existingByPostId = existingPosts.stream()
                 .collect(Collectors.toMap(PostEntity::getPostRefId, Function.identity(), (e1, e2) -> e1));
-
-        // Step 2.1: Bulk fetch authors
-        List<String> emails = parsedPosts.stream()
-                .map(p -> p.request().email())
-                .filter(Objects::nonNull)
-                .map(String::toLowerCase)
-                .distinct()
-                .toList();
-
-        Map<String, AuthorEntity> authorByEmail = authorRepository.findByEmailInAllIgnoreCase(emails).stream()
-                .collect(Collectors.toMap(a -> a.getEmail().toLowerCase(), Function.identity(), (a, b) -> a));
-
-        // Step 2.2: Bulk fetch and create tags
-        Map<String, TagResponse> tagRequestsByName = parsedPosts.stream()
-                .flatMap(p -> {
-                    var tags = p.request().tags();
-                    return tags != null ? tags.stream() : Stream.<TagResponse>empty();
-                })
-                .collect(Collectors.toMap(t -> t.tagName().toLowerCase(Locale.ROOT), Function.identity(), (a, b) -> a));
-
-        List<String> tagNames = new ArrayList<>(tagRequestsByName.keySet());
-
-        Map<String, TagEntity> tagMap = new HashMap<>();
-        if (!tagNames.isEmpty()) {
-            List<TagEntity> existingTags = tagRepository.findByTagNameInAllIgnoreCase(tagNames);
-            existingTags.forEach(t -> tagMap.put(t.getTagName().toLowerCase(Locale.ROOT), t));
-
-            List<TagEntity> newTags = tagNames.stream()
-                    .filter(name -> !tagMap.containsKey(name))
-                    .map(name -> {
-                        TagResponse tr = tagRequestsByName.get(name);
-                        TagEntity tagEntity =
-                                new TagEntity().setTagName(tr.tagName()).setTagDescription(tr.tagDescription());
-                        tagEntity.setCreatedAt(LocalDateTime.now());
-                        return tagEntity;
-                    })
-                    .toList();
-
-            if (!newTags.isEmpty()) {
-                tagRepository
-                        .saveAll(newTags)
-                        .forEach(t -> tagMap.put(t.getTagName().toLowerCase(Locale.ROOT), t));
-            }
-        }
 
         // Step 3: Process each post - update existing or create new
         List<PostEntity> entitiesToSave = parsedPosts.stream()
@@ -150,7 +99,7 @@ public class PostBatchProcessor implements EntityBatchProcessor {
                     if (entity != null) {
                         // Update existing entity
                         try {
-                            mapper.updatePostEntity(parsed.request(), entity, tagMap);
+                            mapper.updatePostEntity(parsed.request(), entity, tagRepository);
                             log.debug("Updating existing post with postid: {}", parsed.postId());
                         } catch (Exception e) {
                             log.warn("Failed to update post entity for postId: {}", parsed.postId(), e);
@@ -159,11 +108,18 @@ public class PostBatchProcessor implements EntityBatchProcessor {
                     } else {
                         // Create new entity
                         try {
-                            entity = mapper.convert(parsed.request(), tagMap);
+                            entity = mapper.convert(parsed.request(), tagRepository);
                             String authorEmail = parsed.request().email();
                             AuthorEntity author = null;
-                            if (authorEmail != null) {
-                                author = authorByEmail.get(authorEmail.toLowerCase());
+                            try {
+                                if (authorRepository.existsByEmailIgnoreCase(authorEmail)) {
+                                    author = authorRepository.getReferenceByEmail(authorEmail);
+                                }
+                            } catch (Exception ex) {
+                                // Fallback to a safe lookup if reference retrieval fails
+                                author = authorRepository
+                                        .findByEmailIgnoreCase(authorEmail)
+                                        .orElse(null);
                             }
                             entity.setAuthorEntity(author);
                             log.debug("Creating new post with postRefId: {}", parsed.postId());

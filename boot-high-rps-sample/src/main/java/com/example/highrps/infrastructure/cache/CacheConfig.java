@@ -3,7 +3,6 @@ package com.example.highrps.infrastructure.cache;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import java.time.Duration;
-import java.util.concurrent.Executors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
@@ -25,7 +24,6 @@ public class CacheConfig {
         return Caffeine.newBuilder()
                 .maximumSize(10_000)
                 .expireAfterWrite(Duration.ofMinutes(5))
-                .executor(Executors.newVirtualThreadPerTaskExecutor())
                 .recordStats()
                 .removalListener((key, value, cause) -> {
                     // Log or emit metrics for evictions

@@ -55,7 +55,7 @@ class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(ResourceNotFoundException.class)
     public ProblemDetail handle(ResourceNotFoundException e) {
-        log.debug("Resource not found: {}", e.getMessage());
+        log.error("Resource not found", e);
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(NOT_FOUND, e.getMessage());
         problemDetail.setTitle("Resource Not Found");
         problemDetail.setProperty("errors", List.of(e.getMessage()));

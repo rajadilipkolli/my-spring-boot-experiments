@@ -2,7 +2,6 @@ package com.example.highrps.post.command;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 
 import com.example.highrps.infrastructure.redis.DeletionMarkerHandler;
@@ -22,7 +21,7 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.context.ApplicationEventPublisher;
 import tools.jackson.databind.json.JsonMapper;
 
 /**
@@ -36,7 +35,7 @@ class PostCommandServiceTest {
     private PostCommandService postCommandService;
 
     @Mock
-    private KafkaTemplate<String, Object> kafkaTemplate;
+    private ApplicationEventPublisher eventPublisher;
 
     @Mock
     private Cache<String, String> localCache;
@@ -75,7 +74,7 @@ class PostCommandServiceTest {
         assertThat(result.title()).isEqualTo("Test Title");
 
         // Verify event was published
-        verify(kafkaTemplate).send(eq("posts-aggregates"), eq("99001"), eventCaptor.capture());
+        verify(eventPublisher).publishEvent(eventCaptor.capture());
         PostCreatedEvent event = eventCaptor.getValue();
         assertThat(event.postId()).isEqualTo(99001L);
         assertThat(event.title()).isEqualTo("Test Title");
@@ -101,7 +100,7 @@ class PostCommandServiceTest {
         assertThat(result.postId()).isEqualTo(99002L);
 
         // Verify event was published
-        verify(kafkaTemplate).send(eq("posts-aggregates"), eq("99002"), any(PostUpdatedEvent.class));
+        verify(eventPublisher).publishEvent(any(PostUpdatedEvent.class));
     }
 
     @Test
@@ -114,7 +113,7 @@ class PostCommandServiceTest {
         postCommandService.deletePost(postId);
 
         // Assert - verify event was published
-        verify(kafkaTemplate).send(eq("posts-aggregates"), eq("99003"), any(PostDeletedEvent.class));
+        verify(eventPublisher).publishEvent(any(PostDeletedEvent.class));
         verify(deletionMarkerHandler).markDeleted("post", String.valueOf(postId));
     }
 }

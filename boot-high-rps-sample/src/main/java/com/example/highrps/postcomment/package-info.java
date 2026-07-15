@@ -3,7 +3,7 @@
  * <p>
  * This module handles all post comment operations following CQRS pattern.
  * <p>
- * Public API: {@link PostCommentController}
+ * Public API: {@link com.example.highrps.postcomment.rest.PostCommentController}
  * <p>
  * Allowed dependencies: post, author, shared, infrastructure
  * <p>
@@ -15,14 +15,7 @@
 @ApplicationModule(
         displayName = "PostComment Management",
         type = ApplicationModule.Type.OPEN,
-        allowedDependencies = {
-            "post",
-            "author",
-            "shared",
-            "infrastructure",
-            "infrastructure::cache",
-            "infrastructure::redis"
-        })
+        allowedDependencies = {"post", "author", "shared", "infrastructure"})
 package com.example.highrps.postcomment;
 
 import org.springframework.modulith.ApplicationModule;

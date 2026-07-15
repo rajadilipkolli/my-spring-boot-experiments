@@ -56,20 +56,11 @@ public class ScheduledBatchProcessor {
 
     @Scheduled(fixedDelayString = "${app.batch.delay-ms}")
     public void processBatch() {
-        boolean moreItems = true;
-        while (moreItems) {
-            List<String> items = redis.opsForList().rightPop(queueKey, batchSize);
-            if (items == null || items.isEmpty()) {
-                break;
-            }
-            if (items.size() < batchSize) {
-                moreItems = false;
-            }
-            processItems(items);
+        List<String> items = redis.opsForList().rightPop(queueKey, batchSize);
+        if (items == null || items.isEmpty()) {
+            return;
         }
-    }
 
-    private void processItems(List<String> items) {
         // NOTE: do not bind a single entity-type deleted set up front. We will check the per-entity
         // deleted set (e.g. deleted:posts, deleted:authors) when the entityType is known to avoid
         // re-inserting entities that were recently deleted.

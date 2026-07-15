@@ -14,8 +14,11 @@ import com.github.benmanes.caffeine.cache.Cache;
 import java.util.Locale;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import tools.jackson.databind.json.JsonMapper;
 
 /**
@@ -23,11 +26,12 @@ import tools.jackson.databind.json.JsonMapper;
  * Handles all write operations and publishes domain events.
  */
 @Service
+@Transactional
 public class AuthorCommandService {
 
     private static final Logger log = LoggerFactory.getLogger(AuthorCommandService.class);
 
-    private final KafkaTemplate<String, Object> kafkaTemplate;
+    private final ApplicationEventPublisher events;
     private final Cache<String, String> localCache;
     private final AuthorRedisRepository authorRedisRepository;
     private final JsonMapper jsonMapper;
@@ -35,13 +39,13 @@ public class AuthorCommandService {
     private final AuthorQueryService authorQueryService;
 
     public AuthorCommandService(
-            KafkaTemplate<String, Object> kafkaTemplate,
+            ApplicationEventPublisher events,
             Cache<String, String> localCache,
             AuthorRedisRepository authorRedisRepository,
             JsonMapper jsonMapper,
             DeletionMarkerHandler deletionMarkerHandler,
             AuthorQueryService authorQueryService) {
-        this.kafkaTemplate = kafkaTemplate;
+        this.events = events;
         this.localCache = localCache;
         this.authorRedisRepository = authorRedisRepository;
         this.jsonMapper = jsonMapper;
@@ -56,18 +60,20 @@ public class AuthorCommandService {
             throw new IllegalArgumentException("Author already exists with email: " + cmd.email());
         }
 
-        // Publish domain event directly to Kafka
+        // Publish domain event (transactional)
         AuthorCreatedEvent event = new AuthorCreatedEvent(
                 cmd.email(), cmd.firstName(), cmd.middleName(), cmd.lastName(), cmd.mobile(), cmd.createdAt());
-        kafkaTemplate.send("authors-aggregates", cmd.email(), event);
+        events.publishEvent(event);
 
         // Build result
         AuthorCommandResult result = new AuthorCommandResult(
                 cmd.email(), cmd.firstName(), cmd.middleName(), cmd.lastName(), cmd.mobile(), cmd.createdAt(), null);
 
         // Eager cache update
-        updateCaches(cmd.email(), result);
-        log.info("Author created successfully: {}", cmd.email());
+        executeAfterCommit(() -> {
+            updateCaches(cmd.email(), result);
+            log.info("Author created successfully: {}", cmd.email());
+        });
 
         return result;
     }
@@ -92,7 +98,7 @@ public class AuthorCommandService {
                 cmd.mobile(),
                 author.createdAt(),
                 cmd.modifiedAt());
-        kafkaTemplate.send("authors-aggregates", cmd.email(), event);
+        events.publishEvent(event);
 
         // Build result
         AuthorCommandResult result = new AuthorCommandResult(
@@ -105,8 +111,10 @@ public class AuthorCommandService {
                 cmd.modifiedAt());
 
         // Eager cache update
-        updateCaches(cmd.email(), result);
-        log.info("Author updated successfully: {}", cmd.email());
+        executeAfterCommit(() -> {
+            updateCaches(cmd.email(), result);
+            log.info("Author updated successfully: {}", cmd.email());
+        });
 
         return result;
     }
@@ -116,22 +124,37 @@ public class AuthorCommandService {
 
         String cacheKey = email.toLowerCase(Locale.ROOT);
         // 1. Publish tombstone event
-        kafkaTemplate.send("authors-aggregates", cacheKey, new AuthorDeletedEvent(cacheKey));
+        events.publishEvent(new AuthorDeletedEvent(cacheKey));
 
-        // 2. Invalidate local cache
-        localCache.invalidate(cacheKey);
+        executeAfterCommit(() -> {
+            // 2. Invalidate local cache
+            localCache.invalidate(cacheKey);
 
-        // 3. Remove from Redis
-        try {
-            authorRedisRepository.deleteById(cacheKey);
-        } catch (Exception e) {
-            log.warn("Failed to delete Redis entry for email: {}", cacheKey, e);
+            // 3. Remove from Redis
+            try {
+                authorRedisRepository.deleteById(cacheKey);
+            } catch (Exception e) {
+                log.warn("Failed to delete Redis entry for email: {}", cacheKey, e);
+            }
+
+            // 4. Mark deleted in Redis with TTL
+            deletionMarkerHandler.markDeleted(DeletionMarkerHandler.AUTHOR, cacheKey);
+
+            log.info("Author deleted successfully: {}", email);
+        });
+    }
+
+    private void executeAfterCommit(Runnable task) {
+        if (TransactionSynchronizationManager.isActualTransactionActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    task.run();
+                }
+            });
+        } else {
+            task.run();
         }
-
-        // 4. Mark deleted in Redis with TTL
-        deletionMarkerHandler.markDeleted(DeletionMarkerHandler.AUTHOR, cacheKey);
-
-        log.info("Author deleted successfully: {}", email);
     }
 
     private void updateCaches(String email, AuthorCommandResult result) {

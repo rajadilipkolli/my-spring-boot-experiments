@@ -1,8 +1,6 @@
 package com.example.highrps.postcomment.command;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -26,7 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.context.ApplicationEventPublisher;
 
 /**
  * Unit tests for PostCommentCommandService focusing on event publishing.
@@ -45,7 +43,7 @@ class PostCommentCommandServiceTest {
     private PostCommentQueryService postCommentQueryService;
 
     @Mock
-    private KafkaTemplate<String, Object> kafkaTemplate;
+    private ApplicationEventPublisher eventPublisher;
 
     @Mock
     private Cache<String, String> localCache;
@@ -74,7 +72,7 @@ class PostCommentCommandServiceTest {
         postCommentCommandService.createComment(command);
 
         // Assert - verify event was published
-        verify(kafkaTemplate).send(eq("post-comments-aggregates"), anyString(), any(PostCommentCreatedEvent.class));
+        verify(eventPublisher).publishEvent(any(PostCommentCreatedEvent.class));
     }
 
     @Test
@@ -100,7 +98,7 @@ class PostCommentCommandServiceTest {
         postCommentCommandService.updateComment(updateCommand);
 
         // Assert - verify event was published
-        verify(kafkaTemplate).send(eq("post-comments-aggregates"), anyString(), any(PostCommentUpdatedEvent.class));
+        verify(eventPublisher).publishEvent(any(PostCommentUpdatedEvent.class));
     }
 
     @Test
@@ -113,7 +111,7 @@ class PostCommentCommandServiceTest {
         postCommentCommandService.deleteComment(new PostCommentId(1002L), postId);
 
         // Assert - verify event was published
-        verify(kafkaTemplate).send(eq("post-comments-aggregates"), anyString(), any(PostCommentDeletedEvent.class));
+        verify(eventPublisher).publishEvent(any(PostCommentDeletedEvent.class));
         verify(deletionMarkerHandler).markDeleted(any(String.class), any(String.class));
     }
 }

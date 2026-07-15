@@ -4,12 +4,14 @@ import com.example.highrps.post.domain.PostDetailsResponse;
 import com.example.highrps.post.domain.TagResponse;
 import java.time.LocalDateTime;
 import java.util.List;
+import org.springframework.modulith.events.Externalized;
 
 /**
  * Domain event published when a new post is created.
  * This event is externalized to Kafka topic 'posts-aggregates' for downstream
  * consumers.
  */
+@Externalized("posts-aggregates::#{postId}")
 public record PostCreatedEvent(
         Long postId,
         String title,
