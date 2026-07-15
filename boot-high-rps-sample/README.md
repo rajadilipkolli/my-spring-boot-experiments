@@ -95,7 +95,7 @@ Kafka topics used
 
 Do we need 3 topics?
 
-Currently this module uses 2 application-level topics: `events` and `posts-aggregates`.
+Currently this module uses 4 application-level topics: `events`, `posts-aggregates`, `authors-aggregates`, and `post-comments-aggregates`.
 Kafka Streams will create internal changelog topics for state stores automatically. The blueprint sometimes describes a third topic for pre-aggregation or durable event storage, but in practice the Streams changelog covers that need. If you want a dedicated changelog-like topic for manual inspection or a separate compaction policy, you can add it, but it's not required for correctness.
 
 Redis keys
