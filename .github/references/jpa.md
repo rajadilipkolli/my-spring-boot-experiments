@@ -44,7 +44,11 @@ public class IdGenerator {
 ### Value Object for Primary Key
 
 ```java
-public record EventId(String id) {
+import jakarta.persistence.Embeddable;
+import java.io.Serializable;
+
+@Embeddable
+public record EventId(String id) implements Serializable {
     public EventId {
         if (id == null || id.trim().isBlank()) {
             throw new IllegalArgumentException("Event id cannot be null or empty");
