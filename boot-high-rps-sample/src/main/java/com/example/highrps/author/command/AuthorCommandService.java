@@ -13,6 +13,10 @@ import com.example.highrps.shared.ResourceNotFoundException;
 import com.github.benmanes.caffeine.cache.Cache;
 import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+import java.util.function.Supplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -27,8 +31,7 @@ import tools.jackson.databind.json.JsonMapper;
 public class AuthorCommandService {
 
     private static final Logger log = LoggerFactory.getLogger(AuthorCommandService.class);
-    private static final java.util.concurrent.Executor VIRTUAL_EXECUTOR =
-            java.util.concurrent.Executors.newVirtualThreadPerTaskExecutor();
+    private static final Executor VIRTUAL_EXECUTOR = Executors.newVirtualThreadPerTaskExecutor();
 
     private final KafkaTemplate<String, Object> kafkaTemplate;
     private final Cache<String, String> localCache;
@@ -36,6 +39,7 @@ public class AuthorCommandService {
     private final JsonMapper jsonMapper;
     private final DeletionMarkerHandler deletionMarkerHandler;
     private final AuthorQueryService authorQueryService;
+    private final ConcurrentHashMap<String, CompletableFuture<Void>> cacheMutationFutures = new ConcurrentHashMap<>();
 
     public AuthorCommandService(
             KafkaTemplate<String, Object> kafkaTemplate,
@@ -88,12 +92,17 @@ public class AuthorCommandService {
                                 throw new RuntimeException("Failed to publish create author event", err);
                             } else {
                                 log.info("Successfully published create author event for email: {}", aggregateKey);
-                                // Eager cache update
-                                updateCaches(aggregateKey, result);
-                                log.info("Author created successfully: {}", aggregateKey);
                                 return result;
                             }
                         },
+                        VIRTUAL_EXECUTOR)
+                .thenComposeAsync(
+                        authorCommandResult -> enqueueAggregateOperation(aggregateKey, () -> {
+                                    updateCaches(aggregateKey, authorCommandResult);
+                                    log.info("Author created successfully: {}", aggregateKey);
+                                    return CompletableFuture.completedFuture(null);
+                                })
+                                .thenApply(ignored -> authorCommandResult),
                         VIRTUAL_EXECUTOR);
     }
 
@@ -137,12 +146,17 @@ public class AuthorCommandService {
                                 throw new RuntimeException("Failed to publish update author event", err);
                             } else {
                                 log.info("Successfully published update author event for email: {}", aggregateKey);
-                                // Eager cache update
-                                updateCaches(aggregateKey, result);
-                                log.info("Author updated successfully: {}", aggregateKey);
                                 return result;
                             }
                         },
+                        VIRTUAL_EXECUTOR)
+                .thenComposeAsync(
+                        authorCommandResult -> enqueueAggregateOperation(aggregateKey, () -> {
+                                    updateCaches(aggregateKey, authorCommandResult);
+                                    log.info("Author updated successfully: {}", aggregateKey);
+                                    return CompletableFuture.completedFuture(null);
+                                })
+                                .thenApply(ignored -> authorCommandResult),
                         VIRTUAL_EXECUTOR);
     }
 
@@ -153,29 +167,50 @@ public class AuthorCommandService {
         // 1. Publish tombstone event
         return kafkaTemplate
                 .send("authors-aggregates", aggregateKey, new AuthorDeletedEvent(aggregateKey))
-                .handleAsync((res, err) -> {
-                    if (err != null) {
-                        log.error("Failed to publish delete author event for email: {}", aggregateKey, err);
-                        throw new RuntimeException("Failed to publish delete author event", err);
-                    } else {
-                        log.info("Successfully published delete author event for email: {}", aggregateKey);
-                        // 2. Invalidate local cache
-                        localCache.invalidate(aggregateKey);
+                .handleAsync(
+                        (res, err) -> {
+                            if (err != null) {
+                                log.error("Failed to publish delete author event for email: {}", aggregateKey, err);
+                                throw new RuntimeException("Failed to publish delete author event", err);
+                            } else {
+                                log.info("Successfully published delete author event for email: {}", aggregateKey);
+                                return null;
+                            }
+                        },
+                        VIRTUAL_EXECUTOR)
+                .thenComposeAsync(
+                        ignored -> enqueueAggregateOperation(aggregateKey, () -> {
+                            // 2. Invalidate local cache
+                            localCache.invalidate(aggregateKey);
 
-                        // 3. Remove from Redis
-                        try {
-                            authorRedisRepository.deleteById(aggregateKey);
-                        } catch (Exception e) {
-                            log.warn("Failed to delete Redis entry for email: {}", aggregateKey, e);
-                        }
+                            // 3. Mark deleted in Redis with TTL (prevents batch re-insertion)
+                            deletionMarkerHandler.markDeleted(DeletionMarkerHandler.AUTHOR, aggregateKey);
 
-                        // 4. Mark deleted in Redis with TTL (prevents batch re-insertion)
-                        deletionMarkerHandler.markDeleted(DeletionMarkerHandler.AUTHOR, aggregateKey);
+                            // 4. Remove from Redis
+                            try {
+                                authorRedisRepository.deleteById(aggregateKey);
+                            } catch (Exception e) {
+                                log.warn("Failed to delete Redis entry for email: {}", aggregateKey, e);
+                            }
 
-                        log.info("Author deleted successfully: {}", aggregateKey);
-                        return null;
-                    }
-                });
+                            log.info("Author deleted successfully: {}", aggregateKey);
+                            return CompletableFuture.completedFuture(null);
+                        }),
+                        VIRTUAL_EXECUTOR);
+    }
+
+    private CompletableFuture<Void> enqueueAggregateOperation(
+            String aggregateKey, Supplier<CompletableFuture<Void>> operation) {
+        CompletableFuture<Void> previous =
+                cacheMutationFutures.computeIfAbsent(aggregateKey, key -> CompletableFuture.completedFuture(null));
+        CompletableFuture<Void> current = previous.thenComposeAsync(ignored -> operation.get(), VIRTUAL_EXECUTOR);
+        cacheMutationFutures.put(aggregateKey, current);
+        current.whenComplete((ignored, throwable) -> {
+            if (cacheMutationFutures.get(aggregateKey) == current) {
+                cacheMutationFutures.remove(aggregateKey, current);
+            }
+        });
+        return current;
     }
 
     private void updateCaches(String aggregateKey, AuthorCommandResult result) {

@@ -19,6 +19,10 @@ import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import java.time.ZoneOffset;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+import java.util.function.Supplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -32,8 +36,7 @@ import org.springframework.stereotype.Service;
 public class PostCommentCommandService {
 
     private static final Logger log = LoggerFactory.getLogger(PostCommentCommandService.class);
-    private static final java.util.concurrent.Executor VIRTUAL_EXECUTOR =
-            java.util.concurrent.Executors.newVirtualThreadPerTaskExecutor();
+    private static final Executor VIRTUAL_EXECUTOR = Executors.newVirtualThreadPerTaskExecutor();
 
     private final PostQueryService postQueryService;
     private final PostCommentQueryService postCommentQueryService;
@@ -44,6 +47,7 @@ public class PostCommentCommandService {
     private final Counter eventsPublishedCounter;
     private final Counter tombstonesPublishedCounter;
     private final DeletionMarkerHandler deletionMarkerHandler;
+    private final ConcurrentHashMap<String, CompletableFuture<Void>> cacheMutationFutures = new ConcurrentHashMap<>();
 
     public PostCommentCommandService(
             PostQueryService postQueryService,
@@ -105,13 +109,21 @@ public class PostCommentCommandService {
                                 log.info("Successfully published create comment event for commentId: {}", commentId);
                                 // Increment counter
                                 eventsPublishedCounter.increment();
-
-                                // Eager cache updates
-                                updateCaches(cmd.postId(), commentId, result);
-                                log.info("Created post comment: postId={}, commentId={}", cmd.postId(), commentId);
                                 return result;
                             }
                         },
+                        VIRTUAL_EXECUTOR)
+                .thenComposeAsync(
+                        postCommentCommandResult -> enqueueAggregateOperation(
+                                        CacheKeyGenerator.generatePostCommentKey(cmd.postId(), commentId), () -> {
+                                            updateCaches(cmd.postId(), commentId, postCommentCommandResult);
+                                            log.info(
+                                                    "Created post comment: postId={}, commentId={}",
+                                                    cmd.postId(),
+                                                    commentId);
+                                            return CompletableFuture.completedFuture(null);
+                                        })
+                                .thenApply(ignored -> postCommentCommandResult),
                         VIRTUAL_EXECUTOR);
     }
 
@@ -153,16 +165,26 @@ public class PostCommentCommandService {
                                         cmd.commentId().id());
                                 // Increment counter
                                 eventsPublishedCounter.increment();
-
-                                // Eager cache updates
-                                updateCaches(cmd.postId(), cmd.commentId().id(), result);
-                                log.info(
-                                        "Updated post comment: postId={}, commentId={}",
-                                        cmd.postId(),
-                                        cmd.commentId().id());
                                 return result;
                             }
                         },
+                        VIRTUAL_EXECUTOR)
+                .thenComposeAsync(
+                        postCommentCommandResult -> enqueueAggregateOperation(
+                                        CacheKeyGenerator.generatePostCommentKey(
+                                                cmd.postId(), cmd.commentId().id()),
+                                        () -> {
+                                            updateCaches(
+                                                    cmd.postId(),
+                                                    cmd.commentId().id(),
+                                                    postCommentCommandResult);
+                                            log.info(
+                                                    "Updated post comment: postId={}, commentId={}",
+                                                    cmd.postId(),
+                                                    cmd.commentId().id());
+                                            return CompletableFuture.completedFuture(null);
+                                        })
+                                .thenApply(ignored -> postCommentCommandResult),
                         VIRTUAL_EXECUTOR);
     }
 
@@ -191,29 +213,47 @@ public class PostCommentCommandService {
                                         "Successfully published delete comment event for commentId: {}",
                                         commentId.id());
                                 tombstonesPublishedCounter.increment();
-
-                                // 2. Invalidate local cache
-                                try {
-                                    localCache.invalidate(cacheKey);
-                                } catch (Exception e) {
-                                    log.warn("Failed to invalidate local cache for comment: {}", commentId.id(), e);
-                                }
-
-                                // 3. Remove from Redis
-                                try {
-                                    postCommentRedisRepository.deleteById(cacheKey);
-                                } catch (Exception e) {
-                                    log.warn("Failed to delete Redis entry for comment: {}", commentId.id(), e);
-                                }
-
-                                // 4. Mark deleted in Redis with TTL using unified handler
-                                deletionMarkerHandler.markDeleted(DeletionMarkerHandler.POST_COMMENT, cacheKey);
-
-                                log.info("Deleted post comment: postId={}, commentId={}", postId, commentId.id());
                                 return null;
                             }
                         },
+                        VIRTUAL_EXECUTOR)
+                .thenComposeAsync(
+                        ignored -> enqueueAggregateOperation(cacheKey, () -> {
+                            // 2. Invalidate local cache
+                            try {
+                                localCache.invalidate(cacheKey);
+                            } catch (Exception e) {
+                                log.warn("Failed to invalidate local cache for comment: {}", commentId.id(), e);
+                            }
+
+                            // 3. Remove from Redis
+                            try {
+                                postCommentRedisRepository.deleteById(cacheKey);
+                            } catch (Exception e) {
+                                log.warn("Failed to delete Redis entry for comment: {}", commentId.id(), e);
+                            }
+
+                            // 4. Mark deleted in Redis with TTL using unified handler
+                            deletionMarkerHandler.markDeleted(DeletionMarkerHandler.POST_COMMENT, cacheKey);
+
+                            log.info("Deleted post comment: postId={}, commentId={}", postId, commentId.id());
+                            return CompletableFuture.completedFuture(null);
+                        }),
                         VIRTUAL_EXECUTOR);
+    }
+
+    private CompletableFuture<Void> enqueueAggregateOperation(
+            String aggregateKey, Supplier<CompletableFuture<Void>> operation) {
+        CompletableFuture<Void> previous =
+                cacheMutationFutures.computeIfAbsent(aggregateKey, key -> CompletableFuture.completedFuture(null));
+        CompletableFuture<Void> current = previous.thenComposeAsync(ignored -> operation.get(), VIRTUAL_EXECUTOR);
+        cacheMutationFutures.put(aggregateKey, current);
+        current.whenComplete((ignored, throwable) -> {
+            if (cacheMutationFutures.get(aggregateKey) == current) {
+                cacheMutationFutures.remove(aggregateKey, current);
+            }
+        });
+        return current;
     }
 
     private void updateCaches(Long postId, Long commentId, PostCommentCommandResult result) {

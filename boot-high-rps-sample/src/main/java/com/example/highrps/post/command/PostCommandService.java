@@ -12,6 +12,10 @@ import com.github.benmanes.caffeine.cache.Cache;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+import java.util.function.Supplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -27,14 +31,14 @@ import tools.jackson.databind.json.JsonMapper;
 public class PostCommandService {
 
     private static final Logger log = LoggerFactory.getLogger(PostCommandService.class);
-    private static final java.util.concurrent.Executor VIRTUAL_EXECUTOR =
-            java.util.concurrent.Executors.newVirtualThreadPerTaskExecutor();
+    private static final Executor VIRTUAL_EXECUTOR = Executors.newVirtualThreadPerTaskExecutor();
 
     private final KafkaTemplate<String, Object> kafkaTemplate;
     private final Cache<String, String> localCache;
     private final PostRedisRepository postRedisRepository;
     private final JsonMapper jsonMapper;
     private final DeletionMarkerHandler deletionMarkerHandler;
+    private final ConcurrentHashMap<String, CompletableFuture<Void>> cacheMutationFutures = new ConcurrentHashMap<>();
 
     public PostCommandService(
             KafkaTemplate<String, Object> kafkaTemplate,
@@ -103,12 +107,17 @@ public class PostCommandService {
                                 throw new RuntimeException("Failed to publish create post event", err);
                             } else {
                                 log.info("Successfully published create post event for postId: {}", cmd.postId());
-                                // Eager cache update
-                                updateCaches(cmd.postId(), result);
-                                log.info("Post created successfully: {}", cmd.postId());
                                 return result;
                             }
                         },
+                        VIRTUAL_EXECUTOR)
+                .thenComposeAsync(
+                        postCommandResult -> enqueueAggregateOperation(String.valueOf(cmd.postId()), () -> {
+                                    updateCaches(cmd.postId(), postCommandResult);
+                                    log.info("Post created successfully: {}", cmd.postId());
+                                    return CompletableFuture.completedFuture(null);
+                                })
+                                .thenApply(ignored -> postCommandResult),
                         VIRTUAL_EXECUTOR);
     }
 
@@ -158,7 +167,7 @@ public class PostCommandService {
                                 throw new RuntimeException("Failed to publish update post event", err);
                             } else {
                                 log.info("Successfully published update post event for postId: {}", cmd.postId());
-                                PostCommandResult result = new PostCommandResult(
+                                return new PostCommandResult(
                                         cmd.postId(),
                                         cmd.title(),
                                         cmd.content(),
@@ -169,12 +178,16 @@ public class PostCommandService {
                                         now,
                                         detailsResponse,
                                         tags);
-                                // Eager cache update
-                                updateCaches(cmd.postId(), result);
-                                log.info("Post updated successfully: {}", cmd.postId());
-                                return result;
                             }
                         },
+                        VIRTUAL_EXECUTOR)
+                .thenComposeAsync(
+                        postCommandResult -> enqueueAggregateOperation(String.valueOf(cmd.postId()), () -> {
+                                    updateCaches(cmd.postId(), postCommandResult);
+                                    log.info("Post updated successfully: {}", cmd.postId());
+                                    return CompletableFuture.completedFuture(null);
+                                })
+                                .thenApply(ignored -> postCommandResult),
                         VIRTUAL_EXECUTOR);
     }
 
@@ -192,25 +205,44 @@ public class PostCommandService {
                                 throw new RuntimeException("Failed to publish delete post event", err);
                             } else {
                                 log.info("Successfully published delete post event for postId: {}", postId);
-                                // 2. Invalidate local cache
-                                String cacheKey = String.valueOf(postId);
-                                localCache.invalidate(cacheKey);
-
-                                // 3. Remove from Redis
-                                try {
-                                    postRedisRepository.deleteById(postId);
-                                } catch (Exception e) {
-                                    log.warn("Failed to delete Redis entry for postId: {}", postId, e);
-                                }
-
-                                // 4. Mark deleted in Redis with TTL (prevents batch re-insertion)
-                                deletionMarkerHandler.markDeleted(DeletionMarkerHandler.POST, String.valueOf(postId));
-
-                                log.info("Post deleted successfully: {}", postId);
                                 return null;
                             }
                         },
+                        VIRTUAL_EXECUTOR)
+                .thenComposeAsync(
+                        ignored -> enqueueAggregateOperation(String.valueOf(postId), () -> {
+                            // 2. Invalidate local cache
+                            String cacheKey = String.valueOf(postId);
+                            localCache.invalidate(cacheKey);
+
+                            // 3. Mark deleted in Redis with TTL (prevents batch re-insertion)
+                            deletionMarkerHandler.markDeleted(DeletionMarkerHandler.POST, String.valueOf(postId));
+
+                            // 4. Remove from Redis
+                            try {
+                                postRedisRepository.deleteById(postId);
+                            } catch (Exception e) {
+                                log.warn("Failed to delete Redis entry for postId: {}", postId, e);
+                            }
+
+                            log.info("Post deleted successfully: {}", postId);
+                            return CompletableFuture.completedFuture(null);
+                        }),
                         VIRTUAL_EXECUTOR);
+    }
+
+    private CompletableFuture<Void> enqueueAggregateOperation(
+            String aggregateKey, Supplier<CompletableFuture<Void>> operation) {
+        CompletableFuture<Void> previous =
+                cacheMutationFutures.computeIfAbsent(aggregateKey, key -> CompletableFuture.completedFuture(null));
+        CompletableFuture<Void> current = previous.thenComposeAsync(ignored -> operation.get(), VIRTUAL_EXECUTOR);
+        cacheMutationFutures.put(aggregateKey, current);
+        current.whenComplete((ignored, throwable) -> {
+            if (cacheMutationFutures.get(aggregateKey) == current) {
+                cacheMutationFutures.remove(aggregateKey, current);
+            }
+        });
+        return current;
     }
 
     private void updateCaches(Long postId, PostCommandResult result) {
