@@ -58,6 +58,7 @@ public interface NewPostRequestToPostEntityMapper {
             return;
         }
         var requestedByName = newPostRequest.tags().stream()
+                .filter(t -> t != null && t.tagName() != null && !t.tagName().isBlank())
                 .collect(Collectors.toMap(t -> t.tagName().toLowerCase(Locale.ROOT), Function.identity(), (a, b) -> a));
 
         var existingByName = postEntity.getTags().stream()

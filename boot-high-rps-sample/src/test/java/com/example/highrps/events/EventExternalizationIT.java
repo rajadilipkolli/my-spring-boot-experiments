@@ -138,16 +138,20 @@ class EventExternalizationIT extends AbstractIntegrationTest {
     @DisplayName("Should externalize PostCommentCreatedEvent to Kafka topic 'post-comments-aggregates'")
     void shouldExternalizePostCommentCreatedEventToKafka() {
         String authorEmail = "comment-ext-author-" + UUID.randomUUID() + "@test.com";
-        authorCommandService.createAuthor(
-                new CreateAuthorCommand(authorEmail, "Comment", null, "Author", 9876543210L, LocalDateTime.now()));
-        postCommandService.createPost(new CreatePostCommand(
-                54321L,
-                "Post for Comment",
-                "Content",
-                authorEmail,
-                true,
-                new PostDetailsRequest("comment-key", "author"),
-                List.of(new TagRequest("comments", "desc"))));
+        authorCommandService
+                .createAuthor(new CreateAuthorCommand(
+                        authorEmail, "Comment", null, "Author", 9876543210L, LocalDateTime.now()))
+                .join();
+        postCommandService
+                .createPost(new CreatePostCommand(
+                        54321L,
+                        "Post for Comment",
+                        "Content",
+                        authorEmail,
+                        true,
+                        new PostDetailsRequest("comment-key", "author"),
+                        List.of(new TagRequest("comments", "desc"))))
+                .join();
 
         // Arrange - Set up Kafka consumer
         String topic = "post-comments-aggregates";

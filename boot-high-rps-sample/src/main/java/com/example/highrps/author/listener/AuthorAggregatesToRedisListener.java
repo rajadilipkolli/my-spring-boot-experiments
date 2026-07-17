@@ -57,6 +57,10 @@ public class AuthorAggregatesToRedisListener {
     public void handleAggregate(ConsumerRecord<String, byte[]> record) {
         try {
             String key = record.key();
+            if (key == null) {
+                log.warn("Received message with null key on authors-aggregates, ignoring.");
+                return;
+            }
             byte[] bytes = record.value();
             log.debug(
                     "Received authors-aggregates record: partition={}, offset={}, key={}, valueIsNull={}",

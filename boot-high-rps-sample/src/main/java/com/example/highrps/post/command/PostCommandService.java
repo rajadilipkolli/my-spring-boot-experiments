@@ -27,6 +27,8 @@ import tools.jackson.databind.json.JsonMapper;
 public class PostCommandService {
 
     private static final Logger log = LoggerFactory.getLogger(PostCommandService.class);
+    private static final java.util.concurrent.Executor VIRTUAL_EXECUTOR =
+            java.util.concurrent.Executors.newVirtualThreadPerTaskExecutor();
 
     private final KafkaTemplate<String, Object> kafkaTemplate;
     private final Cache<String, String> localCache;
@@ -94,18 +96,20 @@ public class PostCommandService {
 
         return kafkaTemplate
                 .send("posts-aggregates", String.valueOf(cmd.postId()), event)
-                .handle((res, err) -> {
-                    if (err != null) {
-                        log.error("Failed to publish create post event for postId: {}", cmd.postId(), err);
-                        throw new RuntimeException("Failed to publish create post event", err);
-                    } else {
-                        log.info("Successfully published create post event for postId: {}", cmd.postId());
-                        // Eager cache update
-                        updateCaches(cmd.postId(), result);
-                        log.info("Post created successfully: {}", cmd.postId());
-                        return result;
-                    }
-                });
+                .handleAsync(
+                        (res, err) -> {
+                            if (err != null) {
+                                log.error("Failed to publish create post event for postId: {}", cmd.postId(), err);
+                                throw new RuntimeException("Failed to publish create post event", err);
+                            } else {
+                                log.info("Successfully published create post event for postId: {}", cmd.postId());
+                                // Eager cache update
+                                updateCaches(cmd.postId(), result);
+                                log.info("Post created successfully: {}", cmd.postId());
+                                return result;
+                            }
+                        },
+                        VIRTUAL_EXECUTOR);
     }
 
     public CompletableFuture<PostCommandResult> updatePost(UpdatePostCommand cmd) {
@@ -147,29 +151,31 @@ public class PostCommandService {
 
         return kafkaTemplate
                 .send("posts-aggregates", String.valueOf(cmd.postId()), event)
-                .handle((res, err) -> {
-                    if (err != null) {
-                        log.error("Failed to publish update post event for postId: {}", cmd.postId(), err);
-                        throw new RuntimeException("Failed to publish update post event", err);
-                    } else {
-                        log.info("Successfully published update post event for postId: {}", cmd.postId());
-                        PostCommandResult result = new PostCommandResult(
-                                cmd.postId(),
-                                cmd.title(),
-                                cmd.content(),
-                                authorEmail,
-                                cmd.published() != null && cmd.published(),
-                                publishedAt,
-                                createdAt,
-                                now,
-                                detailsResponse,
-                                tags);
-                        // Eager cache update
-                        updateCaches(cmd.postId(), result);
-                        log.info("Post updated successfully: {}", cmd.postId());
-                        return result;
-                    }
-                });
+                .handleAsync(
+                        (res, err) -> {
+                            if (err != null) {
+                                log.error("Failed to publish update post event for postId: {}", cmd.postId(), err);
+                                throw new RuntimeException("Failed to publish update post event", err);
+                            } else {
+                                log.info("Successfully published update post event for postId: {}", cmd.postId());
+                                PostCommandResult result = new PostCommandResult(
+                                        cmd.postId(),
+                                        cmd.title(),
+                                        cmd.content(),
+                                        authorEmail,
+                                        cmd.published() != null && cmd.published(),
+                                        publishedAt,
+                                        createdAt,
+                                        now,
+                                        detailsResponse,
+                                        tags);
+                                // Eager cache update
+                                updateCaches(cmd.postId(), result);
+                                log.info("Post updated successfully: {}", cmd.postId());
+                                return result;
+                            }
+                        },
+                        VIRTUAL_EXECUTOR);
     }
 
     public CompletableFuture<Void> deletePost(Long postId) {
@@ -179,30 +185,32 @@ public class PostCommandService {
         // 1. Send directly to Kafka
         return kafkaTemplate
                 .send("posts-aggregates", String.valueOf(postId), new PostDeletedEvent(postId))
-                .handle((res, err) -> {
-                    if (err != null) {
-                        log.error("Failed to publish delete post event for postId: {}", postId, err);
-                        throw new RuntimeException("Failed to publish delete post event", err);
-                    } else {
-                        log.info("Successfully published delete post event for postId: {}", postId);
-                        // 2. Invalidate local cache
-                        String cacheKey = String.valueOf(postId);
-                        localCache.invalidate(cacheKey);
+                .handleAsync(
+                        (res, err) -> {
+                            if (err != null) {
+                                log.error("Failed to publish delete post event for postId: {}", postId, err);
+                                throw new RuntimeException("Failed to publish delete post event", err);
+                            } else {
+                                log.info("Successfully published delete post event for postId: {}", postId);
+                                // 2. Invalidate local cache
+                                String cacheKey = String.valueOf(postId);
+                                localCache.invalidate(cacheKey);
 
-                        // 3. Remove from Redis
-                        try {
-                            postRedisRepository.deleteById(postId);
-                        } catch (Exception e) {
-                            log.warn("Failed to delete Redis entry for postId: {}", postId, e);
-                        }
+                                // 3. Remove from Redis
+                                try {
+                                    postRedisRepository.deleteById(postId);
+                                } catch (Exception e) {
+                                    log.warn("Failed to delete Redis entry for postId: {}", postId, e);
+                                }
 
-                        // 4. Mark deleted in Redis with TTL (prevents batch re-insertion)
-                        deletionMarkerHandler.markDeleted(DeletionMarkerHandler.POST, String.valueOf(postId));
+                                // 4. Mark deleted in Redis with TTL (prevents batch re-insertion)
+                                deletionMarkerHandler.markDeleted(DeletionMarkerHandler.POST, String.valueOf(postId));
 
-                        log.info("Post deleted successfully: {}", postId);
-                        return null;
-                    }
-                });
+                                log.info("Post deleted successfully: {}", postId);
+                                return null;
+                            }
+                        },
+                        VIRTUAL_EXECUTOR);
     }
 
     private void updateCaches(Long postId, PostCommandResult result) {

@@ -77,11 +77,7 @@ public class PostCommentController {
                         request.title(),
                         request.content(),
                         request.published()))
-                .thenApply(v -> {
-                    PostCommentCommandResult result = queryService.getCommentById(
-                            new GetPostCommentQuery(postId, PostCommentId.of(postCommentId)));
-                    return ResponseEntity.ok(result);
-                });
+                .thenApply(ResponseEntity::ok);
     }
 
     @DeleteMapping("/{postCommentId}")

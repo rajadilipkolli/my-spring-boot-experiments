@@ -8,6 +8,7 @@ import com.example.highrps.common.AbstractIntegrationTest;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Locale;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -17,7 +18,7 @@ class AuthorControllerIT extends AbstractIntegrationTest {
 
     @Test
     void crudAuthorResourcesAPICheck() {
-        String email = "junitState@email.com";
+        String email = "junitState-" + UUID.randomUUID() + "@email.com";
         var emailKey = email.toLowerCase(Locale.ROOT);
 
         // 1) Create an author via API
@@ -28,10 +29,10 @@ class AuthorControllerIT extends AbstractIntegrationTest {
           {
             "firstName": "junitState",
             "lastName": "integration",
-            "email": "junitState@email.com",
+            "email": "%s",
             "mobile": 1234567890
           }
-          """)
+          """.formatted(email))
                 .contentType(MediaType.APPLICATION_JSON)
                 .exchange()
                 .assertThat()

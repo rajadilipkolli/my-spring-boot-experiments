@@ -57,6 +57,10 @@ public class PostAggregatesToRedisListener {
         // Log record metadata early to diagnose tombstone timing issues
         try {
             String cacheKey = record.key();
+            if (cacheKey == null) {
+                log.warn("Received message with null key on posts-aggregates, ignoring.");
+                return;
+            }
             byte[] bytes = record.value();
             log.debug(
                     "Received posts-aggregates record: partition={}, offset={}, cacheKey={}, valueIsNull={}",

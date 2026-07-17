@@ -109,7 +109,7 @@ class AuthorCommandServiceTest {
         given(kafkaTemplate.send(anyString(), anyString(), any())).willReturn(CompletableFuture.completedFuture(null));
 
         // Act
-        authorCommandService.deleteAuthor(email);
+        authorCommandService.deleteAuthor(email).join();
 
         // Assert - verify event was published
         verify(kafkaTemplate).send(eq("authors-aggregates"), eq(lowerEmail), any(AuthorDeletedEvent.class));

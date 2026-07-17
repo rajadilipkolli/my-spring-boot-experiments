@@ -120,7 +120,7 @@ class PostCommandServiceTest {
         given(kafkaTemplate.send(anyString(), anyString(), any())).willReturn(CompletableFuture.completedFuture(null));
 
         // Act
-        postCommandService.deletePost(postId);
+        postCommandService.deletePost(postId).join();
 
         // Assert - verify event was published
         verify(kafkaTemplate).send(eq("posts-aggregates"), eq("99003"), any(PostDeletedEvent.class));

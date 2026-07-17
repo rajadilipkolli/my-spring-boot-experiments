@@ -27,6 +27,8 @@ import tools.jackson.databind.json.JsonMapper;
 public class AuthorCommandService {
 
     private static final Logger log = LoggerFactory.getLogger(AuthorCommandService.class);
+    private static final java.util.concurrent.Executor VIRTUAL_EXECUTOR =
+            java.util.concurrent.Executors.newVirtualThreadPerTaskExecutor();
 
     private final KafkaTemplate<String, Object> kafkaTemplate;
     private final Cache<String, String> localCache;
@@ -54,10 +56,9 @@ public class AuthorCommandService {
         String aggregateKey = cmd.email().toLowerCase(Locale.ROOT);
 
         // Validate author doesn't already exist
+        boolean exists = false;
         try {
-            if (authorQueryService.exists(aggregateKey)) {
-                throw new IllegalArgumentException("Author already exists with email: " + cmd.email());
-            }
+            exists = authorQueryService.exists(aggregateKey);
         } catch (Exception e) {
             // Kafka streams state stores might not be initialized until the first event is published.
             // If the query service throws an exception (e.g., InvalidStateStoreException),
@@ -67,6 +68,10 @@ public class AuthorCommandService {
                     e);
         }
 
+        if (exists) {
+            throw new IllegalArgumentException("Author already exists with email: " + cmd.email());
+        }
+
         // Publish domain event directly to Kafka
         AuthorCreatedEvent event = new AuthorCreatedEvent(
                 aggregateKey, cmd.firstName(), cmd.middleName(), cmd.lastName(), cmd.mobile(), cmd.createdAt());
@@ -74,18 +79,22 @@ public class AuthorCommandService {
         AuthorCommandResult result = new AuthorCommandResult(
                 aggregateKey, cmd.firstName(), cmd.middleName(), cmd.lastName(), cmd.mobile(), cmd.createdAt(), null);
 
-        return kafkaTemplate.send("authors-aggregates", aggregateKey, event).handle((res, err) -> {
-            if (err != null) {
-                log.error("Failed to publish create author event for email: {}", aggregateKey, err);
-                throw new RuntimeException("Failed to publish create author event", err);
-            } else {
-                log.info("Successfully published create author event for email: {}", aggregateKey);
-                // Eager cache update
-                updateCaches(aggregateKey, result);
-                log.info("Author created successfully: {}", aggregateKey);
-                return result;
-            }
-        });
+        return kafkaTemplate
+                .send("authors-aggregates", aggregateKey, event)
+                .handleAsync(
+                        (res, err) -> {
+                            if (err != null) {
+                                log.error("Failed to publish create author event for email: {}", cmd.email(), err);
+                                throw new RuntimeException("Failed to publish create author event", err);
+                            } else {
+                                log.info("Successfully published create author event for email: {}", aggregateKey);
+                                // Eager cache update
+                                updateCaches(aggregateKey, result);
+                                log.info("Author created successfully: {}", aggregateKey);
+                                return result;
+                            }
+                        },
+                        VIRTUAL_EXECUTOR);
     }
 
     public CompletableFuture<AuthorCommandResult> updateAuthor(UpdateAuthorCommand cmd) {
@@ -119,18 +128,22 @@ public class AuthorCommandService {
                 author.createdAt(),
                 cmd.modifiedAt());
 
-        return kafkaTemplate.send("authors-aggregates", aggregateKey, event).handle((res, err) -> {
-            if (err != null) {
-                log.error("Failed to publish update author event for email: {}", aggregateKey, err);
-                throw new RuntimeException("Failed to publish update author event", err);
-            } else {
-                log.info("Successfully published update author event for email: {}", aggregateKey);
-                // Eager cache update
-                updateCaches(aggregateKey, result);
-                log.info("Author updated successfully: {}", aggregateKey);
-                return result;
-            }
-        });
+        return kafkaTemplate
+                .send("authors-aggregates", aggregateKey, event)
+                .handleAsync(
+                        (res, err) -> {
+                            if (err != null) {
+                                log.error("Failed to publish update author event for email: {}", cmd.email(), err);
+                                throw new RuntimeException("Failed to publish update author event", err);
+                            } else {
+                                log.info("Successfully published update author event for email: {}", aggregateKey);
+                                // Eager cache update
+                                updateCaches(aggregateKey, result);
+                                log.info("Author updated successfully: {}", aggregateKey);
+                                return result;
+                            }
+                        },
+                        VIRTUAL_EXECUTOR);
     }
 
     public CompletableFuture<Void> deleteAuthor(String email) {
@@ -140,7 +153,7 @@ public class AuthorCommandService {
         // 1. Publish tombstone event
         return kafkaTemplate
                 .send("authors-aggregates", aggregateKey, new AuthorDeletedEvent(aggregateKey))
-                .handle((res, err) -> {
+                .handleAsync((res, err) -> {
                     if (err != null) {
                         log.error("Failed to publish delete author event for email: {}", aggregateKey, err);
                         throw new RuntimeException("Failed to publish delete author event", err);

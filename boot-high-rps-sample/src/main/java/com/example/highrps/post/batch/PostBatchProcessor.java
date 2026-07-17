@@ -117,6 +117,7 @@ public class PostBatchProcessor implements EntityBatchProcessor {
                     var tags = p.request().tags();
                     return tags != null ? tags.stream() : Stream.<TagResponse>empty();
                 })
+                .filter(t -> t != null && t.tagName() != null && !t.tagName().isBlank())
                 .collect(Collectors.toMap(t -> t.tagName().toLowerCase(Locale.ROOT), Function.identity(), (a, b) -> a));
 
         List<String> tagNames = new ArrayList<>(tagRequestsByName.keySet());
