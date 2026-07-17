@@ -7,7 +7,6 @@ import com.example.highrps.postcomment.domain.PostCommentMapper;
 import com.example.highrps.postcomment.domain.PostCommentRedis;
 import com.example.highrps.postcomment.domain.PostCommentRedisRepository;
 import com.example.highrps.postcomment.domain.PostCommentRequest;
-import java.util.Base64;
 import java.util.Map;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.slf4j.Logger;
@@ -71,20 +70,6 @@ public class PostCommentAggregatesToRedisListener {
 
             JsonNode node = jsonMapper.readTree(bytes);
 
-            // Resilience: Detect and decode Base64 encoded JSON (Spring Modulith often does this when externalizing)
-            if (node.isString()) {
-                String text = node.asString();
-                if (text.startsWith("eyJ")) {
-                    log.info("Detected Base64 encoded JSON payload in post-comments-aggregates, decoding...");
-                    try {
-                        bytes = Base64.getDecoder().decode(text);
-                        node = jsonMapper.readTree(bytes);
-                    } catch (Exception e) {
-                        log.warn("Failed to decode base64 node: {}", text.substring(0, Math.min(text.length(), 20)), e);
-                    }
-                }
-            }
-
             // Check for Delete event (no content field)
             if (!node.has("content") && node.has("commentId")) {
                 long commentId = node.get("commentId").asLong();
@@ -93,9 +78,9 @@ public class PostCommentAggregatesToRedisListener {
                 log.info("Processing DELETE event for comment: {}", cacheKey);
 
                 try {
-                    postCommentRedisRepository.deleteById(cacheKey);
+                    postCommentRedisRepository.deleteById(String.valueOf(commentId));
                 } catch (Exception e) {
-                    log.warn("Failed to delete Redis entry: {}", cacheKey, e);
+                    log.warn("Failed to delete Redis entry: {}", commentId, e);
                 }
 
                 try {

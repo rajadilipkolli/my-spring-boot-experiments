@@ -11,6 +11,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import java.net.URI;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -49,36 +50,41 @@ public class PostCommentController {
     }
 
     @PostMapping
-    public ResponseEntity<PostCommentCommandResult> createComment(
+    public CompletableFuture<ResponseEntity<PostCommentCommandResult>> createComment(
             @PathVariable @Positive Long postId, @RequestBody @Valid CreatePostCommentRequest request) {
-        PostCommentCommandResult result = commandService.createComment(
-                new CreatePostCommentCommand(request.title(), request.content(), postId, request.published()));
-
-        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
-                .path("/{postCommentId}")
-                .buildAndExpand(result.id())
-                .toUri();
-
-        return ResponseEntity.created(location).body(result);
+        var uriBuilder = ServletUriComponentsBuilder.fromCurrentRequest();
+        return commandService
+                .createComment(
+                        new CreatePostCommentCommand(request.title(), request.content(), postId, request.published()))
+                .thenApply(result -> {
+                    URI location = uriBuilder
+                            .path("/{postCommentId}")
+                            .buildAndExpand(result.id())
+                            .toUri();
+                    return ResponseEntity.created(location).body(result);
+                });
     }
 
     @PutMapping("/{postCommentId}")
-    public ResponseEntity<PostCommentCommandResult> updateComment(
+    public CompletableFuture<ResponseEntity<PostCommentCommandResult>> updateComment(
             @PathVariable @Positive Long postId,
             @PathVariable @Positive Long postCommentId,
             @RequestBody @Valid UpdatePostCommentRequest request) {
-        commandService.updateComment(new UpdatePostCommentCommand(
-                PostCommentId.of(postCommentId), postId, request.title(), request.content(), request.published()));
-
-        PostCommentCommandResult result =
-                queryService.getCommentById(new GetPostCommentQuery(postId, PostCommentId.of(postCommentId)));
-        return ResponseEntity.ok(result);
+        return commandService
+                .updateComment(new UpdatePostCommentCommand(
+                        PostCommentId.of(postCommentId),
+                        postId,
+                        request.title(),
+                        request.content(),
+                        request.published()))
+                .thenApply(ResponseEntity::ok);
     }
 
     @DeleteMapping("/{postCommentId}")
-    public ResponseEntity<Void> deleteComment(
+    public CompletableFuture<ResponseEntity<Void>> deleteComment(
             @PathVariable @Positive Long postId, @PathVariable @Positive Long postCommentId) {
-        commandService.deleteComment(PostCommentId.of(postCommentId), postId);
-        return ResponseEntity.noContent().build();
+        return commandService
+                .deleteComment(PostCommentId.of(postCommentId), postId)
+                .thenApply(v -> ResponseEntity.noContent().build());
     }
 }

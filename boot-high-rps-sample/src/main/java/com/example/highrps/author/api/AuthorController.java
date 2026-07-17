@@ -13,6 +13,7 @@ import jakarta.validation.constraints.NotBlank;
 import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.Locale;
+import java.util.concurrent.CompletableFuture;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -37,7 +38,8 @@ public class AuthorController {
     }
 
     @PostMapping(value = "/author")
-    public ResponseEntity<AuthorCommandResult> createAuthor(@RequestBody @Valid AuthorRequest newAuthorRequest) {
+    public CompletableFuture<ResponseEntity<AuthorCommandResult>> createAuthor(
+            @RequestBody @Valid AuthorRequest newAuthorRequest) {
         CreateAuthorCommand cmd = new CreateAuthorCommand(
                 newAuthorRequest.email().toLowerCase(Locale.ROOT),
                 newAuthorRequest.firstName(),
@@ -45,16 +47,18 @@ public class AuthorController {
                 newAuthorRequest.lastName(),
                 newAuthorRequest.mobile(),
                 LocalDateTime.now());
-        AuthorCommandResult resp = authorCommandService.createAuthor(cmd);
-        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
-                .path("/{email}")
-                .buildAndExpand(newAuthorRequest.email())
-                .toUri();
-        return ResponseEntity.created(location).body(resp);
+        var uriBuilder = ServletUriComponentsBuilder.fromCurrentRequest();
+        return authorCommandService.createAuthor(cmd).thenApply(resp -> {
+            URI location = uriBuilder
+                    .path("/{email}")
+                    .buildAndExpand(newAuthorRequest.email())
+                    .toUri();
+            return ResponseEntity.created(location).body(resp);
+        });
     }
 
     @PutMapping(value = "/author/{email}")
-    public ResponseEntity<AuthorCommandResult> updateAuthor(
+    public CompletableFuture<ResponseEntity<AuthorCommandResult>> updateAuthor(
             @PathVariable String email, @RequestBody @Valid AuthorRequest newAuthorRequest) {
         String normalizedEmail = email.toLowerCase(Locale.ROOT);
         UpdateAuthorCommand cmd = new UpdateAuthorCommand(
@@ -64,14 +68,13 @@ public class AuthorController {
                 newAuthorRequest.lastName(),
                 newAuthorRequest.mobile(),
                 LocalDateTime.now());
-        AuthorCommandResult resp = authorCommandService.updateAuthor(cmd);
-        return ResponseEntity.ok(resp);
+        return authorCommandService.updateAuthor(cmd).thenApply(ResponseEntity::ok);
     }
 
     @DeleteMapping("/author/{email}")
-    public ResponseEntity<Void> deleteAuthor(@PathVariable @NotBlank String email) {
+    public CompletableFuture<ResponseEntity<Void>> deleteAuthor(@PathVariable @NotBlank String email) {
         String normalizedEmail = email.toLowerCase(Locale.ROOT);
-        authorCommandService.deleteAuthor(normalizedEmail);
-        return ResponseEntity.noContent().build();
+        return authorCommandService.deleteAuthor(normalizedEmail).thenApply(v -> ResponseEntity.noContent()
+                .build());
     }
 }

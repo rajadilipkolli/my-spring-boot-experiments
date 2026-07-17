@@ -4,7 +4,6 @@ import com.example.highrps.infrastructure.cache.CacheKeyGenerator;
 import com.example.highrps.infrastructure.redis.DeletionMarkerHandler;
 import com.example.highrps.post.query.PostQueryService;
 import com.example.highrps.postcomment.domain.PostCommentMapper;
-import com.example.highrps.postcomment.domain.PostCommentRedisRepository;
 import com.example.highrps.postcomment.domain.PostCommentRequest;
 import com.example.highrps.postcomment.domain.events.PostCommentCreatedEvent;
 import com.example.highrps.postcomment.domain.events.PostCommentDeletedEvent;
@@ -12,57 +11,56 @@ import com.example.highrps.postcomment.domain.events.PostCommentUpdatedEvent;
 import com.example.highrps.postcomment.domain.vo.PostCommentId;
 import com.example.highrps.postcomment.query.GetPostCommentQuery;
 import com.example.highrps.postcomment.query.PostCommentQueryService;
+import com.example.highrps.shared.AggregateOperationQueue;
 import com.example.highrps.shared.IdGenerator;
 import com.example.highrps.shared.ResourceNotFoundException;
 import com.github.benmanes.caffeine.cache.Cache;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import java.time.ZoneOffset;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionSynchronization;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
  * Command service for PostComment aggregate.
  * Handles all write operations and publishes domain events.
  */
 @Service
-@Transactional
 public class PostCommentCommandService {
 
     private static final Logger log = LoggerFactory.getLogger(PostCommentCommandService.class);
+    private static final Executor VIRTUAL_EXECUTOR = Executors.newVirtualThreadPerTaskExecutor();
 
     private final PostQueryService postQueryService;
     private final PostCommentQueryService postCommentQueryService;
-    private final ApplicationEventPublisher events;
+    private final KafkaTemplate<String, Object> kafkaTemplate;
     private final Cache<String, String> localCache;
-    private final PostCommentRedisRepository postCommentRedisRepository;
     private final PostCommentMapper postCommentMapper;
     private final Counter eventsPublishedCounter;
     private final Counter tombstonesPublishedCounter;
     private final DeletionMarkerHandler deletionMarkerHandler;
+    private final AggregateOperationQueue operationQueue;
 
     public PostCommentCommandService(
             PostQueryService postQueryService,
             PostCommentQueryService postCommentQueryService,
-            ApplicationEventPublisher events,
+            KafkaTemplate<String, Object> kafkaTemplate,
             Cache<String, String> localCache,
-            PostCommentRedisRepository postCommentRedisRepository,
             PostCommentMapper postCommentMapper,
             MeterRegistry meterRegistry,
             DeletionMarkerHandler deletionMarkerHandler) {
         this.postQueryService = postQueryService;
         this.postCommentQueryService = postCommentQueryService;
-        this.events = events;
+        this.kafkaTemplate = kafkaTemplate;
         this.localCache = localCache;
-        this.postCommentRedisRepository = postCommentRedisRepository;
         this.postCommentMapper = postCommentMapper;
         this.deletionMarkerHandler = deletionMarkerHandler;
-
+        this.operationQueue = new AggregateOperationQueue();
         this.eventsPublishedCounter = Counter.builder("post-comments.events.published")
                 .description("Number of post comment events published")
                 .register(meterRegistry);
@@ -74,7 +72,7 @@ public class PostCommentCommandService {
     /**
      * Create a new comment with event-driven pattern using application events.
      */
-    public PostCommentCommandResult createComment(CreatePostCommentCommand cmd) {
+    public CompletableFuture<PostCommentCommandResult> createComment(CreatePostCommentCommand cmd) {
         // Validate post exists
         if (!postQueryService.exists(cmd.postId())) {
             throw new ResourceNotFoundException("Post not found with id: " + cmd.postId());
@@ -92,27 +90,39 @@ public class PostCommentCommandService {
                 cmd.published(),
                 request.publishedAt(),
                 request.createdAt().atOffset(ZoneOffset.UTC));
-        events.publishEvent(event);
-
-        // Increment counter
-        eventsPublishedCounter.increment();
-
         // Build result
         PostCommentCommandResult result = postCommentMapper.toResultFromRequest(request);
 
-        // Eager cache updates
-        executeAfterCommit(() -> {
-            updateCaches(cmd.postId(), commentId, result);
-            log.info("Created post comment: postId={}, commentId={}", cmd.postId(), commentId);
-        });
-
-        return result;
+        return kafkaTemplate
+                .send("post-comments-aggregates", String.valueOf(commentId), event)
+                .handleAsync(
+                        (res, err) -> {
+                            if (err != null) {
+                                log.error("Failed to publish create comment event for commentId: {}", commentId, err);
+                                throw new RuntimeException("Failed to publish create comment event", err);
+                            } else {
+                                log.info("Successfully published create comment event for commentId: {}", commentId);
+                                // Increment counter
+                                eventsPublishedCounter.increment();
+                                return result;
+                            }
+                        },
+                        VIRTUAL_EXECUTOR)
+                .thenComposeAsync(
+                        postCommentCommandResult -> operationQueue
+                                .enqueue(CacheKeyGenerator.generatePostCommentKey(cmd.postId(), commentId), () -> {
+                                    updateCaches(cmd.postId(), commentId, postCommentCommandResult);
+                                    log.info("Created post comment: postId={}, commentId={}", cmd.postId(), commentId);
+                                    return CompletableFuture.completedFuture(null);
+                                })
+                                .thenApply(ignored -> postCommentCommandResult),
+                        VIRTUAL_EXECUTOR);
     }
 
     /**
      * Update a comment with event-driven pattern.
      */
-    public void updateComment(UpdatePostCommentCommand cmd) {
+    public CompletableFuture<PostCommentCommandResult> updateComment(UpdatePostCommentCommand cmd) {
         // Validate comment exists
         PostCommentCommandResult existing =
                 postCommentQueryService.getCommentById(new GetPostCommentQuery(cmd.postId(), cmd.commentId()));
@@ -128,67 +138,92 @@ public class PostCommentCommandService {
                 request.publishedAt(),
                 request.createdAt(),
                 request.modifiedAt());
-        events.publishEvent(event);
-
-        // Increment counter
-        eventsPublishedCounter.increment();
-
         // Build result
         PostCommentCommandResult result = postCommentMapper.toResultFromRequest(request);
 
-        // Eager cache updates
-        executeAfterCommit(() -> {
-            updateCaches(cmd.postId(), cmd.commentId().id(), result);
-            log.info(
-                    "Updated post comment: postId={}, commentId={}",
-                    cmd.postId(),
-                    cmd.commentId().id());
-        });
+        return kafkaTemplate
+                .send("post-comments-aggregates", String.valueOf(cmd.commentId().id()), event)
+                .handleAsync(
+                        (res, err) -> {
+                            if (err != null) {
+                                log.error(
+                                        "Failed to publish update comment event for commentId: {}",
+                                        cmd.commentId().id(),
+                                        err);
+                                throw new RuntimeException("Failed to publish update comment event", err);
+                            } else {
+                                log.info(
+                                        "Successfully published update comment event for commentId: {}",
+                                        cmd.commentId().id());
+                                // Increment counter
+                                eventsPublishedCounter.increment();
+                                return result;
+                            }
+                        },
+                        VIRTUAL_EXECUTOR)
+                .thenComposeAsync(
+                        postCommentCommandResult -> operationQueue
+                                .enqueue(
+                                        CacheKeyGenerator.generatePostCommentKey(
+                                                cmd.postId(), cmd.commentId().id()),
+                                        () -> {
+                                            updateCaches(
+                                                    cmd.postId(),
+                                                    cmd.commentId().id(),
+                                                    postCommentCommandResult);
+                                            log.info(
+                                                    "Updated post comment: postId={}, commentId={}",
+                                                    cmd.postId(),
+                                                    cmd.commentId().id());
+                                            return CompletableFuture.completedFuture(null);
+                                        })
+                                .thenApply(ignored -> postCommentCommandResult),
+                        VIRTUAL_EXECUTOR);
     }
 
     /**
      * Delete a comment with event-driven pattern.
      */
-    public void deleteComment(PostCommentId commentId, Long postId) {
+    public CompletableFuture<Void> deleteComment(PostCommentId commentId, Long postId) {
         var cacheKey = CacheKeyGenerator.generatePostCommentKey(postId, commentId.id());
 
         // 1. Publish tombstone event
-        events.publishEvent(new PostCommentDeletedEvent(commentId.id(), postId));
-        tombstonesPublishedCounter.increment();
+        return kafkaTemplate
+                .send(
+                        "post-comments-aggregates",
+                        String.valueOf(commentId.id()),
+                        new PostCommentDeletedEvent(commentId.id(), postId))
+                .handleAsync(
+                        (res, err) -> {
+                            if (err != null) {
+                                log.error(
+                                        "Failed to publish delete comment event for commentId: {}",
+                                        commentId.id(),
+                                        err);
+                                throw new RuntimeException("Failed to publish delete comment event", err);
+                            } else {
+                                log.info(
+                                        "Successfully published delete comment event for commentId: {}",
+                                        commentId.id());
+                                tombstonesPublishedCounter.increment();
+                                return null;
+                            }
+                        },
+                        VIRTUAL_EXECUTOR)
+                .thenComposeAsync(ignored -> operationQueue.enqueue(cacheKey, () -> {
+                    // 2. Invalidate local cache
+                    try {
+                        localCache.invalidate(cacheKey);
+                    } catch (Exception e) {
+                        log.warn("Failed to invalidate local cache for comment: {}", commentId.id(), e);
+                    }
 
-        executeAfterCommit(() -> {
-            // 2. Invalidate local cache
-            try {
-                localCache.invalidate(cacheKey);
-            } catch (Exception e) {
-                log.warn("Failed to invalidate local cache for comment: {}", commentId.id(), e);
-            }
+                    // 3. Mark deleted in Redis with TTL using unified handler
+                    deletionMarkerHandler.markDeleted(DeletionMarkerHandler.POST_COMMENT, cacheKey);
 
-            // 3. Remove from Redis
-            try {
-                postCommentRedisRepository.deleteById(cacheKey);
-            } catch (Exception e) {
-                log.warn("Failed to delete Redis entry for comment: {}", commentId.id(), e);
-            }
-
-            // 4. Mark deleted in Redis with TTL using unified handler
-            deletionMarkerHandler.markDeleted(DeletionMarkerHandler.POST_COMMENT, cacheKey);
-
-            log.info("Deleted post comment: postId={}, commentId={}", postId, commentId.id());
-        });
-    }
-
-    private void executeAfterCommit(Runnable task) {
-        if (TransactionSynchronizationManager.isActualTransactionActive()) {
-            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
-                @Override
-                public void afterCommit() {
-                    task.run();
-                }
-            });
-        } else {
-            task.run();
-        }
+                    log.info("Deleted post comment: postId={}, commentId={}", postId, commentId.id());
+                    return CompletableFuture.completedFuture(null);
+                }));
     }
 
     private void updateCaches(Long postId, Long commentId, PostCommentCommandResult result) {
@@ -200,14 +235,6 @@ public class PostCommentCommandService {
             localCache.put(cacheKey, json);
         } catch (Exception e) {
             log.warn("Failed to update local cache for comment: {}", commentId, e);
-        }
-
-        // Update Redis
-        try {
-            PostCommentRequest request = postCommentMapper.toRequestFromResult(result);
-            postCommentRedisRepository.save(postCommentMapper.toRedis(request));
-        } catch (Exception e) {
-            log.warn("Failed to update Redis for comment: {}", commentId, e);
         }
     }
 }

@@ -8,16 +8,17 @@ import com.example.highrps.post.domain.TagResponse;
 import com.example.highrps.post.domain.events.PostCreatedEvent;
 import com.example.highrps.post.domain.events.PostDeletedEvent;
 import com.example.highrps.post.domain.events.PostUpdatedEvent;
+import com.example.highrps.shared.AggregateOperationQueue;
 import com.github.benmanes.caffeine.cache.Cache;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionSynchronization;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 import tools.jackson.databind.json.JsonMapper;
 
 /**
@@ -26,31 +27,33 @@ import tools.jackson.databind.json.JsonMapper;
  * events.
  */
 @Service
-@Transactional
 public class PostCommandService {
 
     private static final Logger log = LoggerFactory.getLogger(PostCommandService.class);
+    private static final Executor VIRTUAL_EXECUTOR = Executors.newVirtualThreadPerTaskExecutor();
 
-    private final ApplicationEventPublisher events;
+    private final KafkaTemplate<String, Object> kafkaTemplate;
     private final Cache<String, String> localCache;
     private final PostRedisRepository postRedisRepository;
     private final JsonMapper jsonMapper;
     private final DeletionMarkerHandler deletionMarkerHandler;
+    private final AggregateOperationQueue operationQueue;
 
     public PostCommandService(
-            ApplicationEventPublisher events,
+            KafkaTemplate<String, Object> kafkaTemplate,
             Cache<String, String> localCache,
             PostRedisRepository postRedisRepository,
             JsonMapper jsonMapper,
             DeletionMarkerHandler deletionMarkerHandler) {
-        this.events = events;
+        this.kafkaTemplate = kafkaTemplate;
         this.localCache = localCache;
         this.postRedisRepository = postRedisRepository;
         this.jsonMapper = jsonMapper;
         this.deletionMarkerHandler = deletionMarkerHandler;
+        this.operationQueue = new AggregateOperationQueue();
     }
 
-    public PostCommandResult createPost(CreatePostCommand cmd) {
+    public CompletableFuture<PostCommandResult> createPost(CreatePostCommand cmd) {
         log.info("Creating post with id: {}", cmd.postId());
 
         // Generate timestamps
@@ -82,9 +85,7 @@ public class PostCommandService {
                 now,
                 detailsResponse,
                 tags);
-        events.publishEvent(event);
-
-        // Eager cache update (best effort)
+        // Send directly to Kafka
         PostCommandResult result = new PostCommandResult(
                 cmd.postId(),
                 cmd.title(),
@@ -97,16 +98,31 @@ public class PostCommandService {
                 detailsResponse,
                 tags);
 
-        // Eager cache update
-        executeAfterCommit(() -> {
-            updateCaches(cmd.postId(), result);
-            log.info("Post created successfully: {}", cmd.postId());
-        });
-
-        return result;
+        return kafkaTemplate
+                .send("posts-aggregates", String.valueOf(cmd.postId()), event)
+                .handleAsync(
+                        (res, err) -> {
+                            if (err != null) {
+                                log.error("Failed to publish create post event for postId: {}", cmd.postId(), err);
+                                throw new RuntimeException("Failed to publish create post event", err);
+                            } else {
+                                log.info("Successfully published create post event for postId: {}", cmd.postId());
+                                return result;
+                            }
+                        },
+                        VIRTUAL_EXECUTOR)
+                .thenComposeAsync(
+                        postCommandResult -> operationQueue
+                                .enqueue(String.valueOf(cmd.postId()), () -> {
+                                    updateCaches(cmd.postId(), postCommandResult);
+                                    log.info("Post created successfully: {}", cmd.postId());
+                                    return CompletableFuture.completedFuture(null);
+                                })
+                                .thenApply(ignored -> postCommandResult),
+                        VIRTUAL_EXECUTOR);
     }
 
-    public PostCommandResult updatePost(UpdatePostCommand cmd) {
+    public CompletableFuture<PostCommandResult> updatePost(UpdatePostCommand cmd) {
         log.info("Updating post with id: {}", cmd.postId());
 
         // Retrieve existing post info for createdAt
@@ -127,7 +143,7 @@ public class PostCommandService {
                 ? cmd.tags().stream()
                         .map(t -> new TagResponse(null, t.tagName(), t.tagDescription()))
                         .toList()
-                : List.of();
+                : null;
 
         // Publish domain event
         PostUpdatedEvent event = new PostUpdatedEvent(
@@ -141,66 +157,75 @@ public class PostCommandService {
                 now,
                 detailsResponse,
                 tags);
-        events.publishEvent(event);
+        // Send directly to Kafka
 
-        // Eager cache update
-        PostCommandResult result = new PostCommandResult(
-                cmd.postId(),
-                cmd.title(),
-                cmd.content(),
-                authorEmail,
-                cmd.published() != null && cmd.published(),
-                publishedAt,
-                createdAt,
-                now,
-                detailsResponse,
-                tags);
-
-        // Eager cache update
-        executeAfterCommit(() -> {
-            updateCaches(cmd.postId(), result);
-            log.info("Post updated successfully: {}", cmd.postId());
-        });
-
-        return result;
+        return kafkaTemplate
+                .send("posts-aggregates", String.valueOf(cmd.postId()), event)
+                .handleAsync(
+                        (res, err) -> {
+                            if (err != null) {
+                                log.error("Failed to publish update post event for postId: {}", cmd.postId(), err);
+                                throw new RuntimeException("Failed to publish update post event", err);
+                            } else {
+                                log.info("Successfully published update post event for postId: {}", cmd.postId());
+                                return new PostCommandResult(
+                                        cmd.postId(),
+                                        cmd.title(),
+                                        cmd.content(),
+                                        authorEmail,
+                                        cmd.published() != null && cmd.published(),
+                                        publishedAt,
+                                        createdAt,
+                                        now,
+                                        detailsResponse,
+                                        tags);
+                            }
+                        },
+                        VIRTUAL_EXECUTOR)
+                .thenComposeAsync(
+                        postCommandResult -> operationQueue
+                                .enqueue(String.valueOf(cmd.postId()), () -> {
+                                    updateCaches(cmd.postId(), postCommandResult);
+                                    log.info("Post updated successfully: {}", cmd.postId());
+                                    return CompletableFuture.completedFuture(null);
+                                })
+                                .thenApply(ignored -> postCommandResult),
+                        VIRTUAL_EXECUTOR);
     }
 
-    public void deletePost(Long postId) {
+    public CompletableFuture<Void> deletePost(Long postId) {
         log.info("Deleting post with id: {}", postId);
 
         // 1. Publish tombstone event
-        events.publishEvent(new PostDeletedEvent(postId));
+        // 1. Send directly to Kafka
+        return kafkaTemplate
+                .send("posts-aggregates", String.valueOf(postId), new PostDeletedEvent(postId))
+                .handleAsync(
+                        (res, err) -> {
+                            if (err != null) {
+                                log.error("Failed to publish delete post event for postId: {}", postId, err);
+                                throw new RuntimeException("Failed to publish delete post event", err);
+                            } else {
+                                log.info("Successfully published delete post event for postId: {}", postId);
+                                return null;
+                            }
+                        },
+                        VIRTUAL_EXECUTOR)
+                .thenComposeAsync(ignored -> operationQueue.enqueue(String.valueOf(postId), () -> {
+                    // 2. Invalidate local cache
+                    String cacheKey = String.valueOf(postId);
+                    localCache.invalidate(cacheKey);
 
-        executeAfterCommit(() -> {
-            // 2. Invalidate local cache
-            String cacheKey = String.valueOf(postId);
-            localCache.invalidate(cacheKey);
+                    // 3. Mark deleted in Redis with TTL (prevents batch re-insertion)
+                    deletionMarkerHandler.markDeleted(DeletionMarkerHandler.POST, String.valueOf(postId));
 
-            // 3. Remove from Redis
-            try {
-                postRedisRepository.deleteById(postId);
-            } catch (Exception e) {
-                log.warn("Failed to delete Redis entry for postId: {}", postId, e);
-            }
+                    // Note: We intentionally do NOT delete from postRedisRepository here.
+                    // The background AggregatesToRedisListener will process the tombstone
+                    // and delete the record asynchronously.
 
-            // 4. Mark deleted in Redis with TTL (prevents batch re-insertion)
-            deletionMarkerHandler.markDeleted(DeletionMarkerHandler.POST, String.valueOf(postId));
-
-            log.info("Post deleted successfully: {}", postId);
-        });
-    }
-
-    private void executeAfterCommit(Runnable task) {
-        if (TransactionSynchronizationManager.isActualTransactionActive()) {
-            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
-                @Override
-                public void afterCommit() {
-                    task.run();
-                }
-            });
-        } else {
-            task.run();
-        }
+                    log.info("Post deleted successfully: {}", postId);
+                    return CompletableFuture.completedFuture(null);
+                }));
     }
 
     private void updateCaches(Long postId, PostCommandResult result) {
@@ -214,24 +239,8 @@ public class PostCommandService {
             log.warn("Failed to update local cache for postId: {}", postId, e);
         }
 
-        // Update Redis
-        try {
-            PostRedis postRedis = new PostRedis()
-                    .setId(result.postId())
-                    .setTitle(result.title())
-                    .setContent(result.content())
-                    .setPublished(result.published())
-                    .setPublishedAt(result.publishedAt())
-                    .setAuthorEmail(result.authorEmail())
-                    .setDetails(result.details())
-                    .setTags(result.tags());
-            postRedis.setCreatedAt(result.createdAt());
-            postRedis.setModifiedAt(result.modifiedAt());
-
-            postRedisRepository.save(postRedis);
-        } catch (Exception e) {
-            log.warn("Failed to update Redis for postId: {}", postId, e);
-        }
+        // Note: We intentionally do NOT update postRedisRepository here.
+        // The background AggregatesToRedisListener will process the event and update Redis asynchronously.
     }
 
     private LocalDateTime getCreatedAt(Long postId) {

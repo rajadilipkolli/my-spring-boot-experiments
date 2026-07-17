@@ -13,7 +13,6 @@ import com.example.highrps.shared.ResourceNotFoundException;
 import com.github.benmanes.caffeine.cache.Cache;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.locks.ReentrantLock;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StoreQueryParameters;
 import org.apache.kafka.streams.state.QueryableStoreTypes;
@@ -23,7 +22,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.kafka.config.StreamsBuilderFactoryBean;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.Assert;
 
 /**
  * Query service for PostComment aggregate.
@@ -42,9 +40,6 @@ public class PostCommentQueryService {
     private final StreamsBuilderFactoryBean kafkaStreamsFactory;
     private final RequestCoalescer<PostCommentRequest> requestCoalescer;
     private final DeletionMarkerHandler deletionMarkerHandler;
-
-    private volatile ReadOnlyKeyValueStore<String, PostCommentRequest> keyValueStore = null;
-    private final ReentrantLock keyValueStoreLock = new ReentrantLock();
 
     public PostCommentQueryService(
             PostCommentRepository postCommentRepository,
@@ -108,13 +103,20 @@ public class PostCommentQueryService {
         }
 
         // 3. Redis materialized view
-        Optional<PostCommentRedis> byId = postCommentRedisRepository.findById(cacheKey);
+        Optional<PostCommentRedis> byId = postCommentRedisRepository.findById(
+                String.valueOf(query.commentId().id()));
         if (byId.isPresent()) {
+            PostCommentRedis redisEntity = byId.get();
+            if (!redisEntity.getPostId().equals(query.postId())) {
+                throw new ResourceNotFoundException(
+                        "PostComment not found with id: " + query.commentId().id() + " for post: " + query.postId());
+            }
+
             log.debug(
                     "Hit Redis for postId={} commentId={}",
                     query.postId(),
                     query.commentId().id());
-            PostCommentCommandResult result = postCommentMapper.toResultFromRedis(byId.get());
+            PostCommentCommandResult result = postCommentMapper.toResultFromRedis(redisEntity);
             // Warm local cache
             try {
                 var json = postCommentMapper.toJson(result);
@@ -127,9 +129,18 @@ public class PostCommentQueryService {
 
         // 4. Kafka Streams state store
         try {
-            PostCommentRequest cachedRequest = requestCoalescer.subscribe(
-                    cacheKey, () -> getKeyValueStore().get(cacheKey));
+            PostCommentRequest cachedRequest = requestCoalescer.subscribe(cacheKey, () -> {
+                ReadOnlyKeyValueStore<String, PostCommentRequest> store = getKeyValueStore();
+                return store != null
+                        ? store.get(String.valueOf(query.commentId().id()))
+                        : null;
+            });
             if (cachedRequest != null) {
+                if (!cachedRequest.postId().equals(query.postId())) {
+                    throw new ResourceNotFoundException("PostComment not found with id: "
+                            + query.commentId().id() + " for post: " + query.postId());
+                }
+
                 log.debug(
                         "Hit Kafka Streams for postId={} commentId={}",
                         query.postId(),
@@ -148,11 +159,11 @@ public class PostCommentQueryService {
                 return result;
             }
         } catch (Exception e) {
-            log.error(
-                    "Failed to query Kafka Streams for postId: {} commentId: {}",
+            log.debug(
+                    "Failed to query Kafka Streams for postId: {} commentId: {} - {}",
                     query.postId(),
                     query.commentId().id(),
-                    e);
+                    e.getMessage());
         }
 
         // 5. Fallback to database
@@ -171,38 +182,11 @@ public class PostCommentQueryService {
     }
 
     private ReadOnlyKeyValueStore<String, PostCommentRequest> getKeyValueStore() {
-        if (keyValueStore == null) {
-            keyValueStoreLock.lock();
-            try {
-                if (keyValueStore == null) {
-                    KafkaStreams kafkaStreams = kafkaStreamsFactory.getKafkaStreams();
-                    Assert.notNull(kafkaStreams, () -> "Kafka Streams not initialized yet");
-
-                    // Wait for streams to be RUNNING
-                    int attempts = 0;
-                    while (kafkaStreams.state() != KafkaStreams.State.RUNNING && attempts < 30) {
-                        log.info("Waiting for Kafka Streams to be RUNNING. Current state: {}", kafkaStreams.state());
-                        try {
-                            Thread.sleep(1000);
-                        } catch (InterruptedException e) {
-                            Thread.currentThread().interrupt();
-                            throw new RuntimeException("Interrupted while waiting for Kafka Streams", e);
-                        }
-                        attempts++;
-                    }
-
-                    if (kafkaStreams.state() != KafkaStreams.State.RUNNING) {
-                        throw new IllegalStateException(
-                                "Kafka Streams did not reach RUNNING state in time. Current: " + kafkaStreams.state());
-                    }
-
-                    keyValueStore = kafkaStreams.store(StoreQueryParameters.fromNameAndType(
-                            "post-comments-store", QueryableStoreTypes.keyValueStore()));
-                }
-            } finally {
-                keyValueStoreLock.unlock();
-            }
+        KafkaStreams kafkaStreams = kafkaStreamsFactory.getKafkaStreams();
+        if (kafkaStreams == null || kafkaStreams.state() != KafkaStreams.State.RUNNING) {
+            return null;
         }
-        return keyValueStore;
+        return kafkaStreams.store(
+                StoreQueryParameters.fromNameAndType("post-comments-store", QueryableStoreTypes.keyValueStore()));
     }
 }

@@ -15,6 +15,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.kafka.config.KafkaListenerEndpointRegistry;
+import org.springframework.kafka.listener.MessageListenerContainer;
 
 class PostControllerIT extends AbstractIntegrationTest {
 
@@ -187,6 +189,15 @@ class PostControllerIT extends AbstractIntegrationTest {
                 .assertThat()
                 .hasStatus(HttpStatus.NO_CONTENT);
 
+        // 4) Subsequent GET should return 404 immediately due to synchronous cache invalidation and tombstone marker
+        mockMvcTester
+                .get()
+                .uri("/api/posts/{postId}", postId.get())
+                .exchange()
+                .assertThat()
+                .hasStatus(HttpStatus.NOT_FOUND)
+                .hasContentType(MediaType.APPLICATION_PROBLEM_JSON);
+
         // Wait for deletion to propagate (DB entry removed, redis key removed, local cache invalidated)
         await().atMost(Duration.ofSeconds(60))
                 .pollInterval(Duration.ofSeconds(1))
@@ -195,17 +206,6 @@ class PostControllerIT extends AbstractIntegrationTest {
                     assertThat(postRedisRepository.existsById(postId.get())).isFalse();
                     assertThat(localCache.getIfPresent(cacheKey)).isNull();
                 });
-
-        // 4) Subsequent GET should return 404
-        await().atMost(Duration.ofSeconds(60))
-                .pollInterval(Duration.ofSeconds(1))
-                .untilAsserted(() -> mockMvcTester
-                        .get()
-                        .uri("/api/posts/{postId}", postId.get())
-                        .exchange()
-                        .assertThat()
-                        .hasStatus(HttpStatus.NOT_FOUND)
-                        .hasContentType(MediaType.APPLICATION_PROBLEM_JSON));
 
         // Also assert local cache and redis no longer have the key
         assertThat(localCache.getIfPresent(cacheKey)).isNull();
@@ -312,7 +312,7 @@ class PostControllerIT extends AbstractIntegrationTest {
                 .content("""
                         {
                           "postId": %d,
-                          "title": "delete-me",
+                          "title": "%s",
                           "content": "Updated content before delete",
                           "email": "test@local.com",
                           "published": true,
@@ -321,7 +321,7 @@ class PostControllerIT extends AbstractIntegrationTest {
                             "createdBy": "JunitIteration"
                           }
                         }
-                        """.formatted(postId.get()))
+                        """.formatted(postId.get(), title))
                 .contentType(MediaType.APPLICATION_JSON)
                 .exchange()
                 .assertThat()
@@ -364,6 +364,15 @@ class PostControllerIT extends AbstractIntegrationTest {
                 .assertThat()
                 .hasStatus(HttpStatus.NO_CONTENT);
 
+        // 4) Subsequent GET should return 404 immediately due to synchronous cache invalidation and tombstone marker
+        mockMvcTester
+                .get()
+                .uri("/api/posts/{postId}", postId.get())
+                .exchange()
+                .assertThat()
+                .hasStatus(HttpStatus.NOT_FOUND)
+                .hasContentType(MediaType.APPLICATION_PROBLEM_JSON);
+
         // Wait for asynchronous tombstone processing to complete: DB row removed, post-tag relations cleared, and redis
         // cacheKey removed
         await().atMost(Duration.ofSeconds(60))
@@ -376,17 +385,106 @@ class PostControllerIT extends AbstractIntegrationTest {
         // Ensure tags themselves are still present (should be 2)
         assertThat(tagRepository.count()).isEqualTo(2);
 
-        // 4) Subsequent GET should return 404
-        mockMvcTester
-                .get()
-                .uri("/api/posts/{postId}", postId.get())
-                .exchange()
-                .assertThat()
-                .hasStatus(HttpStatus.NOT_FOUND)
-                .hasContentType(MediaType.APPLICATION_PROBLEM_JSON);
-
         // Also assert local cache and redis no longer have the cacheKey
         assertThat(localCache.getIfPresent(cacheKey)).isNull();
         assertThat(postRedisRepository.existsById(postId.get())).isFalse();
+    }
+
+    @Test
+    void shouldFallbackToKafkaStreamsWhenCachesAreMissed() {
+        AuthorEntity entity = new AuthorEntity()
+                .setEmail("kafka@local.com")
+                .setFirstName("Kafka")
+                .setLastName("Streams")
+                .setMobile(1234567890L);
+        entity.setCreatedAt(LocalDateTime.now());
+        authorRepository.save(entity);
+
+        // 1) Create a post
+        AtomicReference<Long> postId = new AtomicReference<>();
+        mockMvcTester
+                .post()
+                .uri("/api/posts")
+                .content("""
+                        {
+                          "title": "Kafka Streams Fallback",
+                          "content": "This should be retrieved from Kafka Streams",
+                          "email": "kafka@local.com",
+                          "published": true,
+                          "details": {
+                              "detailsKey": "Test details",
+                              "createdBy": "Test runner"
+                          }
+                        }
+                        """)
+                .contentType(MediaType.APPLICATION_JSON)
+                .exchange()
+                .assertThat()
+                .hasStatus(HttpStatus.CREATED)
+                .bodyJson()
+                .convertTo(PostCommandResult.class)
+                .satisfies(postResponse -> postId.set(postResponse.postId()));
+
+        String cacheKey = String.valueOf(postId.get());
+
+        // Wait for it to be fully processed by Kafka Streams and written to Redis
+        await().atMost(Duration.ofSeconds(45))
+                .pollInterval(Duration.ofSeconds(1))
+                .untilAsserted(() ->
+                        assertThat(postRedisRepository.findById(postId.get())).isPresent());
+
+        // 2) Clear local cache and Redis
+        localCache.invalidate(cacheKey);
+        postRedisRepository.deleteById(postId.get());
+
+        // Assert caches are cleared
+        assertThat(localCache.getIfPresent(cacheKey)).isNull();
+        assertThat(postRedisRepository.findById(postId.get())).isEmpty();
+
+        // Stop the Kafka listener to prevent it from repopulating Redis asynchronously during the test,
+        // which forces the GET request to strictly rely on the Kafka Streams state store fallback.
+        KafkaListenerEndpointRegistry registry = applicationContext.getBean(KafkaListenerEndpointRegistry.class);
+        MessageListenerContainer listenerContainer = registry != null
+                ? registry.getListenerContainers().stream()
+                        .filter(c -> "new-posts-redis-writer".equals(c.getGroupId())
+                                || "posts-aggregates"
+                                        .equals(c.getContainerProperties().getTopics()[0]))
+                        .findFirst()
+                        .orElse(null)
+                : null;
+
+        if (listenerContainer != null) {
+            listenerContainer.pause();
+        }
+
+        try {
+            // 3) GET request should fall back to Kafka Streams and succeed
+            mockMvcTester
+                    .get()
+                    .uri("/api/posts/{postId}", postId.get())
+                    .exchange()
+                    .assertThat()
+                    .hasStatus(HttpStatus.OK)
+                    .hasContentType(MediaType.APPLICATION_JSON)
+                    .bodyJson()
+                    .convertTo(PostProjection.class)
+                    .satisfies(postResponse -> {
+                        assertThat(postResponse.postId()).isEqualTo(postId.get());
+                        assertThat(postResponse.title()).isEqualTo("Kafka Streams Fallback");
+                    });
+        } finally {
+            if (listenerContainer != null) {
+                listenerContainer.resume();
+            }
+        }
+
+        // 4) Assert Redis is populated again by the fallback warm-up logic
+        await().atMost(Duration.ofSeconds(10))
+                .pollInterval(Duration.ofMillis(500))
+                .untilAsserted(() ->
+                        assertThat(postRedisRepository.findById(postId.get())).isPresent());
+
+        // Assert local cache is also populated
+        assertThat(localCache.getIfPresent(cacheKey)).isNotNull();
     }
 }
