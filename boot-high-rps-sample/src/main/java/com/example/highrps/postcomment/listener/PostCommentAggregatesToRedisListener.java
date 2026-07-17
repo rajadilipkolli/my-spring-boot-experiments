@@ -97,6 +97,7 @@ public class PostCommentAggregatesToRedisListener extends AbstractAggregatesToRe
             redis.opsForList().leftPush(queueKey, tombstoneJson);
         } catch (Exception e) {
             log.error("Failed to enqueue delete marker: {}", cacheKey, e);
+            throw new RuntimeException("Failed to enqueue delete marker for comment: " + cacheKey, e);
         }
     }
 
