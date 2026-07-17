@@ -158,16 +158,14 @@ class AuthorControllerIT extends AbstractIntegrationTest {
                             .isEqualTo("1");
                 });
 
-        // 4) Subsequent GET should return 404
-        await().atMost(Duration.ofSeconds(15))
-                .pollInterval(Duration.ofMillis(500))
-                .untilAsserted(() -> mockMvcTester
-                        .get()
-                        .uri("/api/author/" + email)
-                        .exchange()
-                        .assertThat()
-                        .hasStatus(HttpStatus.NOT_FOUND)
-                        .hasContentType(MediaType.APPLICATION_PROBLEM_JSON));
+        // 4) Subsequent GET should return 404 immediately due to synchronous cache invalidation and tombstone marker
+        mockMvcTester
+                .get()
+                .uri("/api/author/" + email)
+                .exchange()
+                .assertThat()
+                .hasStatus(HttpStatus.NOT_FOUND)
+                .hasContentType(MediaType.APPLICATION_PROBLEM_JSON);
 
         // Also assert local cache and redis no longer have the key
         assertThat(localCache.getIfPresent(emailKey)).isNull();

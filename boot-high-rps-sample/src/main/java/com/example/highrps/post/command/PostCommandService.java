@@ -218,12 +218,9 @@ public class PostCommandService {
                             // 3. Mark deleted in Redis with TTL (prevents batch re-insertion)
                             deletionMarkerHandler.markDeleted(DeletionMarkerHandler.POST, String.valueOf(postId));
 
-                            // 4. Remove from Redis
-                            try {
-                                postRedisRepository.deleteById(postId);
-                            } catch (Exception e) {
-                                log.warn("Failed to delete Redis entry for postId: {}", postId, e);
-                            }
+                            // Note: We intentionally do NOT delete from postRedisRepository here.
+                            // The background AggregatesToRedisListener will process the tombstone
+                            // and delete the record asynchronously.
 
                             log.info("Post deleted successfully: {}", postId);
                             return CompletableFuture.completedFuture(null);
@@ -256,24 +253,8 @@ public class PostCommandService {
             log.warn("Failed to update local cache for postId: {}", postId, e);
         }
 
-        // Update Redis
-        try {
-            PostRedis postRedis = new PostRedis()
-                    .setId(result.postId())
-                    .setTitle(result.title())
-                    .setContent(result.content())
-                    .setPublished(result.published())
-                    .setPublishedAt(result.publishedAt())
-                    .setAuthorEmail(result.authorEmail())
-                    .setDetails(result.details())
-                    .setTags(result.tags());
-            postRedis.setCreatedAt(result.createdAt());
-            postRedis.setModifiedAt(result.modifiedAt());
-
-            postRedisRepository.save(postRedis);
-        } catch (Exception e) {
-            log.warn("Failed to update Redis for postId: {}", postId, e);
-        }
+        // Note: We intentionally do NOT update postRedisRepository here.
+        // The background AggregatesToRedisListener will process the event and update Redis asynchronously.
     }
 
     private LocalDateTime getCreatedAt(Long postId) {

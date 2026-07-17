@@ -1,6 +1,5 @@
 package com.example.highrps.author.command;
 
-import com.example.highrps.author.domain.AuthorRedis;
 import com.example.highrps.author.domain.AuthorRedisRepository;
 import com.example.highrps.author.domain.events.AuthorCreatedEvent;
 import com.example.highrps.author.domain.events.AuthorDeletedEvent;
@@ -35,7 +34,6 @@ public class AuthorCommandService {
 
     private final KafkaTemplate<String, Object> kafkaTemplate;
     private final Cache<String, String> localCache;
-    private final AuthorRedisRepository authorRedisRepository;
     private final JsonMapper jsonMapper;
     private final DeletionMarkerHandler deletionMarkerHandler;
     private final AuthorQueryService authorQueryService;
@@ -50,7 +48,6 @@ public class AuthorCommandService {
             AuthorQueryService authorQueryService) {
         this.kafkaTemplate = kafkaTemplate;
         this.localCache = localCache;
-        this.authorRedisRepository = authorRedisRepository;
         this.jsonMapper = jsonMapper;
         this.deletionMarkerHandler = deletionMarkerHandler;
         this.authorQueryService = authorQueryService;
@@ -186,13 +183,6 @@ public class AuthorCommandService {
                             // 3. Mark deleted in Redis with TTL (prevents batch re-insertion)
                             deletionMarkerHandler.markDeleted(DeletionMarkerHandler.AUTHOR, aggregateKey);
 
-                            // 4. Remove from Redis
-                            try {
-                                authorRedisRepository.deleteById(aggregateKey);
-                            } catch (Exception e) {
-                                log.warn("Failed to delete Redis entry for email: {}", aggregateKey, e);
-                            }
-
                             log.info("Author deleted successfully: {}", aggregateKey);
                             return CompletableFuture.completedFuture(null);
                         }),
@@ -221,21 +211,6 @@ public class AuthorCommandService {
             localCache.put(aggregateKey, json);
         } catch (Exception e) {
             log.warn("Failed to update local cache for email: {}", aggregateKey, e);
-        }
-
-        // Update Redis
-        try {
-            AuthorRedis authorRedis = new AuthorRedis()
-                    .setEmail(aggregateKey)
-                    .setFirstName(result.firstName())
-                    .setMiddleName(result.middleName())
-                    .setLastName(result.lastName())
-                    .setMobile(result.mobile());
-            authorRedis.setCreatedAt(result.createdAt());
-            authorRedis.setModifiedAt(result.modifiedAt());
-            authorRedisRepository.save(authorRedis);
-        } catch (Exception e) {
-            log.warn("Failed to update Redis for email: {}", aggregateKey, e);
         }
     }
 }

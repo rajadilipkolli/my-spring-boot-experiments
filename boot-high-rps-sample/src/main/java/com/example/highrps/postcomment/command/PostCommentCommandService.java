@@ -42,7 +42,6 @@ public class PostCommentCommandService {
     private final PostCommentQueryService postCommentQueryService;
     private final KafkaTemplate<String, Object> kafkaTemplate;
     private final Cache<String, String> localCache;
-    private final PostCommentRedisRepository postCommentRedisRepository;
     private final PostCommentMapper postCommentMapper;
     private final Counter eventsPublishedCounter;
     private final Counter tombstonesPublishedCounter;
@@ -62,7 +61,6 @@ public class PostCommentCommandService {
         this.postCommentQueryService = postCommentQueryService;
         this.kafkaTemplate = kafkaTemplate;
         this.localCache = localCache;
-        this.postCommentRedisRepository = postCommentRedisRepository;
         this.postCommentMapper = postCommentMapper;
         this.deletionMarkerHandler = deletionMarkerHandler;
 
@@ -226,14 +224,7 @@ public class PostCommentCommandService {
                                 log.warn("Failed to invalidate local cache for comment: {}", commentId.id(), e);
                             }
 
-                            // 3. Remove from Redis
-                            try {
-                                postCommentRedisRepository.deleteById(cacheKey);
-                            } catch (Exception e) {
-                                log.warn("Failed to delete Redis entry for comment: {}", commentId.id(), e);
-                            }
-
-                            // 4. Mark deleted in Redis with TTL using unified handler
+                            // 3. Mark deleted in Redis with TTL using unified handler
                             deletionMarkerHandler.markDeleted(DeletionMarkerHandler.POST_COMMENT, cacheKey);
 
                             log.info("Deleted post comment: postId={}, commentId={}", postId, commentId.id());
@@ -265,14 +256,6 @@ public class PostCommentCommandService {
             localCache.put(cacheKey, json);
         } catch (Exception e) {
             log.warn("Failed to update local cache for comment: {}", commentId, e);
-        }
-
-        // Update Redis
-        try {
-            PostCommentRequest request = postCommentMapper.toRequestFromResult(result);
-            postCommentRedisRepository.save(postCommentMapper.toRedis(request));
-        } catch (Exception e) {
-            log.warn("Failed to update Redis for comment: {}", commentId, e);
         }
     }
 }
