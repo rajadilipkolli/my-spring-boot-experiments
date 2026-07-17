@@ -50,7 +50,7 @@ public record EventCode(
         @NotBlank(message = "Event code cannot be null or empty")
         String code
 ) {
-    @JsonCreator
+    @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
     public EventCode {
         if (code == null || code.trim().isEmpty()) {
             throw new IllegalArgumentException("Event code cannot be null");
@@ -202,7 +202,7 @@ class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 .map(DefaultMessageSourceResolvable::getDefaultMessage)
                 .toList();
 
-        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(BAD_REQUEST, ex.getMessage());
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(UNPROCESSABLE_CONTENT, ex.getMessage());
         problemDetail.setTitle("Validation Error");
         problemDetail.setProperty("errors", errors);
         return ResponseEntity.status(UNPROCESSABLE_CONTENT).body(problemDetail);
@@ -250,12 +250,12 @@ class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
 #### Error Response Examples
 
-**Validation Error (400):**
+**Validation Error (422):**
 ```json
 {
   "type": "about:blank",
   "title": "Validation Error",
-  "status": 400,
+  "status": 422,
   "detail": "Validation failed for argument...",
   "errors": [
     "Title is required",
