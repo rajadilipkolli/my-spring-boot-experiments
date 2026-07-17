@@ -25,7 +25,7 @@ public record NewPostRequest(
         LocalDateTime createdAt,
         LocalDateTime modifiedAt,
         @Valid @NotNull PostDetailsResponse details,
-        @Valid List<TagResponse> tags)
+        List<@Valid TagResponse> tags)
         implements Serializable {
 
     public NewPostRequest withPublishedAt(LocalDateTime publishedAt) {
