@@ -72,8 +72,9 @@ class EventExternalizationIT extends AbstractIntegrationTest {
 
         // Act - Create a post (which should publish PostCreatedEvent)
         String email = "author-" + UUID.randomUUID() + "@test.com";
+        Long postId = com.example.highrps.shared.IdGenerator.generateLong();
         CreatePostCommand createCmd = new CreatePostCommand(
-                12345L,
+                postId,
                 "Test Post",
                 "Test Content",
                 email,
@@ -89,7 +90,7 @@ class EventExternalizationIT extends AbstractIntegrationTest {
             assertThat(rawJson).isNotNull();
             System.out.println("Received PostCreatedEvent JSON: " + rawJson);
             var json = jsonMapper.readTree(rawJson);
-            assertThat(json.get("postId").asLong()).isEqualTo(12345L);
+            assertThat(json.get("postId").asLong()).isEqualTo(postId);
             assertThat(json.get("title").asString()).isEqualTo("Test Post");
             assertThat(json.get("content").asString()).isEqualTo("Test Content");
             assertThat(json.get("authorEmail").asString()).isEqualTo(email);
@@ -142,9 +143,10 @@ class EventExternalizationIT extends AbstractIntegrationTest {
                 .createAuthor(new CreateAuthorCommand(
                         authorEmail, "Comment", null, "Author", 9876543210L, LocalDateTime.now()))
                 .join();
+        Long postCommentPostId = com.example.highrps.shared.IdGenerator.generateLong();
         postCommandService
                 .createPost(new CreatePostCommand(
-                        54321L,
+                        postCommentPostId,
                         "Post for Comment",
                         "Content",
                         authorEmail,
@@ -165,7 +167,7 @@ class EventExternalizationIT extends AbstractIntegrationTest {
 
         // Act - Create a comment (which should publish PostCommentCreatedEvent)
         CreatePostCommentCommand command =
-                new CreatePostCommentCommand("Great post!", "Excellent content", 54321L, true);
+                new CreatePostCommentCommand("Great post!", "Excellent content", postCommentPostId, true);
         postCommentCommandService.createComment(command).join();
 
         // Assert - Verify event was externalized to Kafka
@@ -176,7 +178,7 @@ class EventExternalizationIT extends AbstractIntegrationTest {
             System.out.println("Received PostCommentCreatedEvent JSON: " + rawJson);
             var json = jsonMapper.readTree(rawJson);
             assertThat(json.get("commentId").asLong()).isPositive();
-            assertThat(json.get("postId").asLong()).isEqualTo(54321L);
+            assertThat(json.get("postId").asLong()).isEqualTo(postCommentPostId);
             assertThat(json.get("content").asString()).isEqualTo("Excellent content");
         });
 

@@ -16,6 +16,7 @@ import com.example.highrps.author.query.AuthorQuery;
 import com.example.highrps.author.query.AuthorQueryService;
 import com.example.highrps.infrastructure.redis.DeletionMarkerHandler;
 import com.github.benmanes.caffeine.cache.Cache;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.concurrent.CompletableFuture;
 import org.junit.jupiter.api.DisplayName;
@@ -24,6 +25,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.kafka.core.KafkaTemplate;
 import tools.jackson.databind.json.JsonMapper;
 
@@ -55,12 +58,21 @@ class AuthorCommandServiceTest {
     @Mock
     private AuthorQueryService authorQueryService;
 
+    @Mock
+    private RedisTemplate<String, String> redisTemplate;
+
+    @Mock
+    private ValueOperations<String, String> valueOperations;
+
     @Test
     @DisplayName("Should publish AuthorCreatedEvent when creating an author")
     void shouldPublishEventWhenCreatingAuthor() {
         // Arrange
         CreateAuthorCommand command =
                 new CreateAuthorCommand("John99001@EXAMPLE.com", "John", null, "Doe", 1234567890L, LocalDateTime.now());
+        given(redisTemplate.opsForValue()).willReturn(valueOperations);
+        given(valueOperations.setIfAbsent(anyString(), anyString(), any(Duration.class)))
+                .willReturn(true);
         given(kafkaTemplate.send(anyString(), anyString(), any())).willReturn(CompletableFuture.completedFuture(null));
 
         // Act

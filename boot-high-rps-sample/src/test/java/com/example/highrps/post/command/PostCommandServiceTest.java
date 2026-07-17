@@ -53,6 +53,15 @@ class PostCommandServiceTest {
     @Mock
     private JsonMapper jsonMapper;
 
+    @Mock
+    private com.example.highrps.post.query.PostQueryService postQueryService;
+
+    @Mock
+    private org.springframework.data.redis.core.RedisTemplate<String, String> redisTemplate;
+
+    @Mock
+    private org.springframework.data.redis.core.ValueOperations<String, String> valueOperations;
+
     @Captor
     private ArgumentCaptor<PostCreatedEvent> eventCaptor;
 
@@ -69,6 +78,9 @@ class PostCommandServiceTest {
                 new PostDetailsRequest("key1", "user1"),
                 List.of(new TagRequest("t1", "d1")));
 
+        given(redisTemplate.opsForValue()).willReturn(valueOperations);
+        given(valueOperations.setIfAbsent(anyString(), anyString(), any(java.time.Duration.class)))
+                .willReturn(true);
         given(kafkaTemplate.send(anyString(), anyString(), any())).willReturn(CompletableFuture.completedFuture(null));
 
         // Act

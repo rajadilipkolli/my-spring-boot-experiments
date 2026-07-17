@@ -405,9 +405,10 @@ class PostCommentControllerIT extends AbstractIntegrationTest {
                         .orElse(null)
                 : null;
 
-        if (listenerContainer != null) {
-            listenerContainer.pause();
-        }
+        assertThat(listenerContainer)
+                .as("Targeted Redis-writer listener container must be found")
+                .isNotNull();
+        listenerContainer.pause();
 
         try {
             // 3) GET request should fall back to Kafka Streams and succeed
@@ -424,19 +425,20 @@ class PostCommentControllerIT extends AbstractIntegrationTest {
                         assertThat(response.id()).isEqualTo(commentId);
                         assertThat(response.title()).isEqualTo("Fallback Streams");
                     });
+
+            // 4) Assert Redis is populated again by the fallback warm-up logic
+            await().atMost(Duration.ofSeconds(10))
+                    .pollInterval(Duration.ofMillis(500))
+                    .untilAsserted(() -> assertThat(postCommentRedisRepository.findById(String.valueOf(commentId)))
+                            .isPresent());
+
+            // Assert local cache is also populated
+            assertThat(localCache.getIfPresent(cacheKey)).isNotNull();
+
         } finally {
             if (listenerContainer != null) {
                 listenerContainer.resume();
             }
         }
-
-        // 4) Assert Redis is populated again by the fallback warm-up logic
-        await().atMost(Duration.ofSeconds(10))
-                .pollInterval(Duration.ofMillis(500))
-                .untilAsserted(() -> assertThat(postCommentRedisRepository.findById(String.valueOf(commentId)))
-                        .isPresent());
-
-        // Assert local cache is also populated
-        assertThat(localCache.getIfPresent(cacheKey)).isNotNull();
     }
 }
