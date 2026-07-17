@@ -4,7 +4,6 @@ import com.example.highrps.infrastructure.cache.CacheKeyGenerator;
 import com.example.highrps.infrastructure.redis.DeletionMarkerHandler;
 import com.example.highrps.post.query.PostQueryService;
 import com.example.highrps.postcomment.domain.PostCommentMapper;
-import com.example.highrps.postcomment.domain.PostCommentRedisRepository;
 import com.example.highrps.postcomment.domain.PostCommentRequest;
 import com.example.highrps.postcomment.domain.events.PostCommentCreatedEvent;
 import com.example.highrps.postcomment.domain.events.PostCommentDeletedEvent;
@@ -12,6 +11,7 @@ import com.example.highrps.postcomment.domain.events.PostCommentUpdatedEvent;
 import com.example.highrps.postcomment.domain.vo.PostCommentId;
 import com.example.highrps.postcomment.query.GetPostCommentQuery;
 import com.example.highrps.postcomment.query.PostCommentQueryService;
+import com.example.highrps.shared.AggregateOperationQueue;
 import com.example.highrps.shared.IdGenerator;
 import com.example.highrps.shared.ResourceNotFoundException;
 import com.github.benmanes.caffeine.cache.Cache;
@@ -19,10 +19,8 @@ import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import java.time.ZoneOffset;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
-import java.util.function.Supplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -46,14 +44,13 @@ public class PostCommentCommandService {
     private final Counter eventsPublishedCounter;
     private final Counter tombstonesPublishedCounter;
     private final DeletionMarkerHandler deletionMarkerHandler;
-    private final ConcurrentHashMap<String, CompletableFuture<Void>> cacheMutationFutures = new ConcurrentHashMap<>();
+    private final AggregateOperationQueue operationQueue;
 
     public PostCommentCommandService(
             PostQueryService postQueryService,
             PostCommentQueryService postCommentQueryService,
             KafkaTemplate<String, Object> kafkaTemplate,
             Cache<String, String> localCache,
-            PostCommentRedisRepository postCommentRedisRepository,
             PostCommentMapper postCommentMapper,
             MeterRegistry meterRegistry,
             DeletionMarkerHandler deletionMarkerHandler) {
@@ -63,7 +60,7 @@ public class PostCommentCommandService {
         this.localCache = localCache;
         this.postCommentMapper = postCommentMapper;
         this.deletionMarkerHandler = deletionMarkerHandler;
-
+        this.operationQueue = new AggregateOperationQueue();
         this.eventsPublishedCounter = Counter.builder("post-comments.events.published")
                 .description("Number of post comment events published")
                 .register(meterRegistry);
@@ -112,15 +109,12 @@ public class PostCommentCommandService {
                         },
                         VIRTUAL_EXECUTOR)
                 .thenComposeAsync(
-                        postCommentCommandResult -> enqueueAggregateOperation(
-                                        CacheKeyGenerator.generatePostCommentKey(cmd.postId(), commentId), () -> {
-                                            updateCaches(cmd.postId(), commentId, postCommentCommandResult);
-                                            log.info(
-                                                    "Created post comment: postId={}, commentId={}",
-                                                    cmd.postId(),
-                                                    commentId);
-                                            return CompletableFuture.completedFuture(null);
-                                        })
+                        postCommentCommandResult -> operationQueue
+                                .enqueue(CacheKeyGenerator.generatePostCommentKey(cmd.postId(), commentId), () -> {
+                                    updateCaches(cmd.postId(), commentId, postCommentCommandResult);
+                                    log.info("Created post comment: postId={}, commentId={}", cmd.postId(), commentId);
+                                    return CompletableFuture.completedFuture(null);
+                                })
                                 .thenApply(ignored -> postCommentCommandResult),
                         VIRTUAL_EXECUTOR);
     }
@@ -168,7 +162,8 @@ public class PostCommentCommandService {
                         },
                         VIRTUAL_EXECUTOR)
                 .thenComposeAsync(
-                        postCommentCommandResult -> enqueueAggregateOperation(
+                        postCommentCommandResult -> operationQueue
+                                .enqueue(
                                         CacheKeyGenerator.generatePostCommentKey(
                                                 cmd.postId(), cmd.commentId().id()),
                                         () -> {
@@ -215,36 +210,20 @@ public class PostCommentCommandService {
                             }
                         },
                         VIRTUAL_EXECUTOR)
-                .thenComposeAsync(
-                        ignored -> enqueueAggregateOperation(cacheKey, () -> {
-                            // 2. Invalidate local cache
-                            try {
-                                localCache.invalidate(cacheKey);
-                            } catch (Exception e) {
-                                log.warn("Failed to invalidate local cache for comment: {}", commentId.id(), e);
-                            }
+                .thenComposeAsync(ignored -> operationQueue.enqueue(cacheKey, () -> {
+                    // 2. Invalidate local cache
+                    try {
+                        localCache.invalidate(cacheKey);
+                    } catch (Exception e) {
+                        log.warn("Failed to invalidate local cache for comment: {}", commentId.id(), e);
+                    }
 
-                            // 3. Mark deleted in Redis with TTL using unified handler
-                            deletionMarkerHandler.markDeleted(DeletionMarkerHandler.POST_COMMENT, cacheKey);
+                    // 3. Mark deleted in Redis with TTL using unified handler
+                    deletionMarkerHandler.markDeleted(DeletionMarkerHandler.POST_COMMENT, cacheKey);
 
-                            log.info("Deleted post comment: postId={}, commentId={}", postId, commentId.id());
-                            return CompletableFuture.completedFuture(null);
-                        }),
-                        VIRTUAL_EXECUTOR);
-    }
-
-    private CompletableFuture<Void> enqueueAggregateOperation(
-            String aggregateKey, Supplier<CompletableFuture<Void>> operation) {
-        CompletableFuture<Void> previous =
-                cacheMutationFutures.computeIfAbsent(aggregateKey, key -> CompletableFuture.completedFuture(null));
-        CompletableFuture<Void> current = previous.thenComposeAsync(ignored -> operation.get(), VIRTUAL_EXECUTOR);
-        cacheMutationFutures.put(aggregateKey, current);
-        current.whenComplete((ignored, throwable) -> {
-            if (cacheMutationFutures.get(aggregateKey) == current) {
-                cacheMutationFutures.remove(aggregateKey, current);
-            }
-        });
-        return current;
+                    log.info("Deleted post comment: postId={}, commentId={}", postId, commentId.id());
+                    return CompletableFuture.completedFuture(null);
+                }));
     }
 
     private void updateCaches(Long postId, Long commentId, PostCommentCommandResult result) {

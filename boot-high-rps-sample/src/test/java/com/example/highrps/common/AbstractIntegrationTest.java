@@ -14,20 +14,22 @@ import com.example.highrps.post.domain.PostRepository;
 import com.example.highrps.post.domain.PostTagRepository;
 import com.example.highrps.post.domain.TagRepository;
 import com.example.highrps.postcomment.command.PostCommentCommandService;
+import com.example.highrps.postcomment.domain.PostCommentRedisRepository;
 import com.example.highrps.postcomment.domain.PostCommentRepository;
 import com.github.benmanes.caffeine.cache.Cache;
 import io.micrometer.core.instrument.MeterRegistry;
 import java.time.Duration;
+import org.apache.kafka.streams.KafkaStreams;
 import org.junit.jupiter.api.BeforeEach;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.kafka.autoconfigure.KafkaConnectionDetails;
 import org.springframework.boot.micrometer.metrics.test.autoconfigure.AutoConfigureMetrics;
 import org.springframework.boot.micrometer.tracing.test.autoconfigure.AutoConfigureTracing;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.context.ApplicationContext;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.kafka.config.StreamsBuilderFactoryBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
 import org.testcontainers.kafka.KafkaContainer;
@@ -41,8 +43,6 @@ import tools.jackson.databind.json.JsonMapper;
 @AutoConfigureTracing
 @AutoConfigureMetrics
 public abstract class AbstractIntegrationTest {
-
-    private static final Logger log = LoggerFactory.getLogger(AbstractIntegrationTest.class);
 
     @Autowired
     protected MockMvcTester mockMvcTester;
@@ -78,6 +78,9 @@ public abstract class AbstractIntegrationTest {
     protected PostRedisRepository postRedisRepository;
 
     @Autowired
+    protected PostCommentRedisRepository postCommentRedisRepository;
+
+    @Autowired
     protected AuthorBatchProcessor authorBatchProcessor;
 
     @Autowired
@@ -99,7 +102,10 @@ public abstract class AbstractIntegrationTest {
     protected KafkaConnectionDetails kafkaConnectionDetails;
 
     @Autowired
-    protected org.springframework.kafka.config.StreamsBuilderFactoryBean streamsBuilderFactoryBean;
+    protected StreamsBuilderFactoryBean streamsBuilderFactoryBean;
+
+    @Autowired
+    protected ApplicationContext applicationContext;
 
     @BeforeEach
     public void clearDatabase() {
@@ -111,6 +117,7 @@ public abstract class AbstractIntegrationTest {
 
         authorRedisRepository.deleteAll();
         postRedisRepository.deleteAll();
+        postCommentRedisRepository.deleteAll();
         redisTemplate.execute(
                 connection -> {
                     connection.serverCommands().flushDb();
@@ -123,8 +130,8 @@ public abstract class AbstractIntegrationTest {
         await().atMost(Duration.ofSeconds(30))
                 .pollInterval(Duration.ofMillis(500))
                 .until(() -> {
-                    org.apache.kafka.streams.KafkaStreams streams = streamsBuilderFactoryBean.getKafkaStreams();
-                    return streams != null && streams.state() == org.apache.kafka.streams.KafkaStreams.State.RUNNING;
+                    KafkaStreams streams = streamsBuilderFactoryBean.getKafkaStreams();
+                    return streams != null && streams.state() == KafkaStreams.State.RUNNING;
                 });
     }
 }

@@ -1,6 +1,5 @@
 package com.example.highrps.author.command;
 
-import com.example.highrps.author.domain.AuthorRedisRepository;
 import com.example.highrps.author.domain.events.AuthorCreatedEvent;
 import com.example.highrps.author.domain.events.AuthorDeletedEvent;
 import com.example.highrps.author.domain.events.AuthorUpdatedEvent;
@@ -8,14 +7,13 @@ import com.example.highrps.author.query.AuthorProjection;
 import com.example.highrps.author.query.AuthorQuery;
 import com.example.highrps.author.query.AuthorQueryService;
 import com.example.highrps.infrastructure.redis.DeletionMarkerHandler;
+import com.example.highrps.shared.AggregateOperationQueue;
 import com.example.highrps.shared.ResourceNotFoundException;
 import com.github.benmanes.caffeine.cache.Cache;
 import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
-import java.util.function.Supplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -37,12 +35,11 @@ public class AuthorCommandService {
     private final JsonMapper jsonMapper;
     private final DeletionMarkerHandler deletionMarkerHandler;
     private final AuthorQueryService authorQueryService;
-    private final ConcurrentHashMap<String, CompletableFuture<Void>> cacheMutationFutures = new ConcurrentHashMap<>();
+    private final AggregateOperationQueue operationQueue = new AggregateOperationQueue();
 
     public AuthorCommandService(
             KafkaTemplate<String, Object> kafkaTemplate,
             Cache<String, String> localCache,
-            AuthorRedisRepository authorRedisRepository,
             JsonMapper jsonMapper,
             DeletionMarkerHandler deletionMarkerHandler,
             AuthorQueryService authorQueryService) {
@@ -94,7 +91,8 @@ public class AuthorCommandService {
                         },
                         VIRTUAL_EXECUTOR)
                 .thenComposeAsync(
-                        authorCommandResult -> enqueueAggregateOperation(aggregateKey, () -> {
+                        authorCommandResult -> operationQueue
+                                .enqueue(aggregateKey, () -> {
                                     updateCaches(aggregateKey, authorCommandResult);
                                     log.info("Author created successfully: {}", aggregateKey);
                                     return CompletableFuture.completedFuture(null);
@@ -148,7 +146,8 @@ public class AuthorCommandService {
                         },
                         VIRTUAL_EXECUTOR)
                 .thenComposeAsync(
-                        authorCommandResult -> enqueueAggregateOperation(aggregateKey, () -> {
+                        authorCommandResult -> operationQueue
+                                .enqueue(aggregateKey, () -> {
                                     updateCaches(aggregateKey, authorCommandResult);
                                     log.info("Author updated successfully: {}", aggregateKey);
                                     return CompletableFuture.completedFuture(null);
@@ -175,32 +174,16 @@ public class AuthorCommandService {
                             }
                         },
                         VIRTUAL_EXECUTOR)
-                .thenComposeAsync(
-                        ignored -> enqueueAggregateOperation(aggregateKey, () -> {
-                            // 2. Invalidate local cache
-                            localCache.invalidate(aggregateKey);
+                .thenComposeAsync(ignored -> operationQueue.enqueue(aggregateKey, () -> {
+                    // 2. Invalidate local cache
+                    localCache.invalidate(aggregateKey);
 
-                            // 3. Mark deleted in Redis with TTL (prevents batch re-insertion)
-                            deletionMarkerHandler.markDeleted(DeletionMarkerHandler.AUTHOR, aggregateKey);
+                    // 3. Mark deleted in Redis with TTL (prevents batch re-insertion)
+                    deletionMarkerHandler.markDeleted(DeletionMarkerHandler.AUTHOR, aggregateKey);
 
-                            log.info("Author deleted successfully: {}", aggregateKey);
-                            return CompletableFuture.completedFuture(null);
-                        }),
-                        VIRTUAL_EXECUTOR);
-    }
-
-    private CompletableFuture<Void> enqueueAggregateOperation(
-            String aggregateKey, Supplier<CompletableFuture<Void>> operation) {
-        CompletableFuture<Void> previous =
-                cacheMutationFutures.computeIfAbsent(aggregateKey, key -> CompletableFuture.completedFuture(null));
-        CompletableFuture<Void> current = previous.thenComposeAsync(ignored -> operation.get(), VIRTUAL_EXECUTOR);
-        cacheMutationFutures.put(aggregateKey, current);
-        current.whenComplete((ignored, throwable) -> {
-            if (cacheMutationFutures.get(aggregateKey) == current) {
-                cacheMutationFutures.remove(aggregateKey, current);
-            }
-        });
-        return current;
+                    log.info("Author deleted successfully: {}", aggregateKey);
+                    return CompletableFuture.completedFuture(null);
+                }));
     }
 
     private void updateCaches(String aggregateKey, AuthorCommandResult result) {

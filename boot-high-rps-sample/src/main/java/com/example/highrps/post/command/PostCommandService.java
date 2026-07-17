@@ -8,14 +8,13 @@ import com.example.highrps.post.domain.TagResponse;
 import com.example.highrps.post.domain.events.PostCreatedEvent;
 import com.example.highrps.post.domain.events.PostDeletedEvent;
 import com.example.highrps.post.domain.events.PostUpdatedEvent;
+import com.example.highrps.shared.AggregateOperationQueue;
 import com.github.benmanes.caffeine.cache.Cache;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
-import java.util.function.Supplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -38,7 +37,7 @@ public class PostCommandService {
     private final PostRedisRepository postRedisRepository;
     private final JsonMapper jsonMapper;
     private final DeletionMarkerHandler deletionMarkerHandler;
-    private final ConcurrentHashMap<String, CompletableFuture<Void>> cacheMutationFutures = new ConcurrentHashMap<>();
+    private final AggregateOperationQueue operationQueue;
 
     public PostCommandService(
             KafkaTemplate<String, Object> kafkaTemplate,
@@ -51,6 +50,7 @@ public class PostCommandService {
         this.postRedisRepository = postRedisRepository;
         this.jsonMapper = jsonMapper;
         this.deletionMarkerHandler = deletionMarkerHandler;
+        this.operationQueue = new AggregateOperationQueue();
     }
 
     public CompletableFuture<PostCommandResult> createPost(CreatePostCommand cmd) {
@@ -112,7 +112,8 @@ public class PostCommandService {
                         },
                         VIRTUAL_EXECUTOR)
                 .thenComposeAsync(
-                        postCommandResult -> enqueueAggregateOperation(String.valueOf(cmd.postId()), () -> {
+                        postCommandResult -> operationQueue
+                                .enqueue(String.valueOf(cmd.postId()), () -> {
                                     updateCaches(cmd.postId(), postCommandResult);
                                     log.info("Post created successfully: {}", cmd.postId());
                                     return CompletableFuture.completedFuture(null);
@@ -182,7 +183,8 @@ public class PostCommandService {
                         },
                         VIRTUAL_EXECUTOR)
                 .thenComposeAsync(
-                        postCommandResult -> enqueueAggregateOperation(String.valueOf(cmd.postId()), () -> {
+                        postCommandResult -> operationQueue
+                                .enqueue(String.valueOf(cmd.postId()), () -> {
                                     updateCaches(cmd.postId(), postCommandResult);
                                     log.info("Post updated successfully: {}", cmd.postId());
                                     return CompletableFuture.completedFuture(null);
@@ -209,37 +211,21 @@ public class PostCommandService {
                             }
                         },
                         VIRTUAL_EXECUTOR)
-                .thenComposeAsync(
-                        ignored -> enqueueAggregateOperation(String.valueOf(postId), () -> {
-                            // 2. Invalidate local cache
-                            String cacheKey = String.valueOf(postId);
-                            localCache.invalidate(cacheKey);
+                .thenComposeAsync(ignored -> operationQueue.enqueue(String.valueOf(postId), () -> {
+                    // 2. Invalidate local cache
+                    String cacheKey = String.valueOf(postId);
+                    localCache.invalidate(cacheKey);
 
-                            // 3. Mark deleted in Redis with TTL (prevents batch re-insertion)
-                            deletionMarkerHandler.markDeleted(DeletionMarkerHandler.POST, String.valueOf(postId));
+                    // 3. Mark deleted in Redis with TTL (prevents batch re-insertion)
+                    deletionMarkerHandler.markDeleted(DeletionMarkerHandler.POST, String.valueOf(postId));
 
-                            // Note: We intentionally do NOT delete from postRedisRepository here.
-                            // The background AggregatesToRedisListener will process the tombstone
-                            // and delete the record asynchronously.
+                    // Note: We intentionally do NOT delete from postRedisRepository here.
+                    // The background AggregatesToRedisListener will process the tombstone
+                    // and delete the record asynchronously.
 
-                            log.info("Post deleted successfully: {}", postId);
-                            return CompletableFuture.completedFuture(null);
-                        }),
-                        VIRTUAL_EXECUTOR);
-    }
-
-    private CompletableFuture<Void> enqueueAggregateOperation(
-            String aggregateKey, Supplier<CompletableFuture<Void>> operation) {
-        CompletableFuture<Void> previous =
-                cacheMutationFutures.computeIfAbsent(aggregateKey, key -> CompletableFuture.completedFuture(null));
-        CompletableFuture<Void> current = previous.thenComposeAsync(ignored -> operation.get(), VIRTUAL_EXECUTOR);
-        cacheMutationFutures.put(aggregateKey, current);
-        current.whenComplete((ignored, throwable) -> {
-            if (cacheMutationFutures.get(aggregateKey) == current) {
-                cacheMutationFutures.remove(aggregateKey, current);
-            }
-        });
-        return current;
+                    log.info("Post deleted successfully: {}", postId);
+                    return CompletableFuture.completedFuture(null);
+                }));
     }
 
     private void updateCaches(Long postId, PostCommandResult result) {

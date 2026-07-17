@@ -103,13 +103,20 @@ public class PostCommentQueryService {
         }
 
         // 3. Redis materialized view
-        Optional<PostCommentRedis> byId = postCommentRedisRepository.findById(cacheKey);
+        Optional<PostCommentRedis> byId = postCommentRedisRepository.findById(
+                String.valueOf(query.commentId().id()));
         if (byId.isPresent()) {
+            PostCommentRedis redisEntity = byId.get();
+            if (!redisEntity.getPostId().equals(query.postId())) {
+                throw new ResourceNotFoundException(
+                        "PostComment not found with id: " + query.commentId().id() + " for post: " + query.postId());
+            }
+
             log.debug(
                     "Hit Redis for postId={} commentId={}",
                     query.postId(),
                     query.commentId().id());
-            PostCommentCommandResult result = postCommentMapper.toResultFromRedis(byId.get());
+            PostCommentCommandResult result = postCommentMapper.toResultFromRedis(redisEntity);
             // Warm local cache
             try {
                 var json = postCommentMapper.toJson(result);
@@ -124,9 +131,16 @@ public class PostCommentQueryService {
         try {
             PostCommentRequest cachedRequest = requestCoalescer.subscribe(cacheKey, () -> {
                 ReadOnlyKeyValueStore<String, PostCommentRequest> store = getKeyValueStore();
-                return store != null ? store.get(cacheKey) : null;
+                return store != null
+                        ? store.get(String.valueOf(query.commentId().id()))
+                        : null;
             });
             if (cachedRequest != null) {
+                if (!cachedRequest.postId().equals(query.postId())) {
+                    throw new ResourceNotFoundException("PostComment not found with id: "
+                            + query.commentId().id() + " for post: " + query.postId());
+                }
+
                 log.debug(
                         "Hit Kafka Streams for postId={} commentId={}",
                         query.postId(),

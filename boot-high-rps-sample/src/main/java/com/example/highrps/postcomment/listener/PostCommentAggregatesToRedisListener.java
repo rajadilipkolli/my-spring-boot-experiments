@@ -78,9 +78,9 @@ public class PostCommentAggregatesToRedisListener {
                 log.info("Processing DELETE event for comment: {}", cacheKey);
 
                 try {
-                    postCommentRedisRepository.deleteById(cacheKey);
+                    postCommentRedisRepository.deleteById(String.valueOf(commentId));
                 } catch (Exception e) {
-                    log.warn("Failed to delete Redis entry: {}", cacheKey, e);
+                    log.warn("Failed to delete Redis entry: {}", commentId, e);
                 }
 
                 try {
