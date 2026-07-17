@@ -143,6 +143,7 @@ public abstract class AbstractAggregatesToRedisListener<T> {
                 redis.opsForList().leftPush(queueKey, jsonString);
             } catch (Exception e) {
                 log.error("Failed to enqueue payload for DB write, cacheKey: {}, may lose durability", key, e);
+                throw new IllegalStateException("Failed to enqueue payload for DB write, key=" + key, e);
             }
         } catch (Exception e) {
             log.error("Unhandled exception in handleAggregate for topic {}", topicName, e);
