@@ -7,15 +7,15 @@ import com.example.highrps.author.query.AuthorProjection;
 import com.example.highrps.author.query.AuthorQuery;
 import com.example.highrps.author.query.AuthorQueryService;
 import com.example.highrps.infrastructure.redis.DeletionMarkerHandler;
-import com.example.highrps.shared.AggregateOperationQueue;
+import com.example.highrps.shared.AbstractCommandService;
 import com.example.highrps.shared.ResourceNotFoundException;
 import com.github.benmanes.caffeine.cache.Cache;
+import java.time.Duration;
 import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import tools.jackson.databind.json.JsonMapper;
@@ -25,44 +25,49 @@ import tools.jackson.databind.json.JsonMapper;
  * Handles all write operations and publishes domain events.
  */
 @Service
-public class AuthorCommandService {
+public class AuthorCommandService extends AbstractCommandService {
 
     private static final Logger log = LoggerFactory.getLogger(AuthorCommandService.class);
-    private static final Executor VIRTUAL_EXECUTOR = Executors.newVirtualThreadPerTaskExecutor();
 
-    private final KafkaTemplate<String, Object> kafkaTemplate;
     private final Cache<String, String> localCache;
     private final JsonMapper jsonMapper;
     private final DeletionMarkerHandler deletionMarkerHandler;
     private final AuthorQueryService authorQueryService;
-    private final AggregateOperationQueue operationQueue = new AggregateOperationQueue();
+    private final RedisTemplate<String, String> redisTemplate;
 
     public AuthorCommandService(
             KafkaTemplate<String, Object> kafkaTemplate,
             Cache<String, String> localCache,
             JsonMapper jsonMapper,
             DeletionMarkerHandler deletionMarkerHandler,
-            AuthorQueryService authorQueryService) {
-        this.kafkaTemplate = kafkaTemplate;
+            AuthorQueryService authorQueryService,
+            RedisTemplate<String, String> redisTemplate) {
+        super(kafkaTemplate);
         this.localCache = localCache;
         this.jsonMapper = jsonMapper;
         this.deletionMarkerHandler = deletionMarkerHandler;
         this.authorQueryService = authorQueryService;
+        this.redisTemplate = redisTemplate;
     }
 
     public CompletableFuture<AuthorCommandResult> createAuthor(CreateAuthorCommand cmd) {
         String aggregateKey = cmd.email().toLowerCase(Locale.ROOT);
 
-        // Validate author doesn't already exist
+        String reservationKey = "reservation:author:" + aggregateKey;
+        // Acquire an atomic distributed reservation to prevent concurrent duplicate creations
+        Boolean acquired = redisTemplate.opsForValue().setIfAbsent(reservationKey, "1", Duration.ofMinutes(5));
+
+        if (Boolean.FALSE.equals(acquired)) {
+            throw new IllegalArgumentException("Author already exists with email: " + cmd.email());
+        }
+
+        // Validate author doesn't already exist in the read model as a fallback
         boolean exists = false;
         try {
             exists = authorQueryService.exists(aggregateKey);
         } catch (Exception e) {
-            // Kafka streams state stores might not be initialized until the first event is published.
-            // If the query service throws an exception (e.g., InvalidStateStoreException),
-            // we log it and cautiously proceed with creation to avoid a bootstrap deadlock.
             log.warn(
-                    "Could not verify if author exists (query service unavailable). Proceeding with creation optimistically.",
+                    "Could not verify if author exists (query service unavailable). Relying on distributed reservation.",
                     e);
         }
 
@@ -77,28 +82,25 @@ public class AuthorCommandService {
         AuthorCommandResult result = new AuthorCommandResult(
                 aggregateKey, cmd.firstName(), cmd.middleName(), cmd.lastName(), cmd.mobile(), cmd.createdAt(), null);
 
-        return kafkaTemplate
-                .send("authors-aggregates", aggregateKey, event)
-                .handleAsync(
-                        (res, err) -> {
-                            if (err != null) {
-                                log.error("Failed to publish create author event for email: {}", cmd.email(), err);
-                                throw new RuntimeException("Failed to publish create author event", err);
-                            } else {
-                                log.info("Successfully published create author event for email: {}", aggregateKey);
-                                return result;
-                            }
-                        },
-                        VIRTUAL_EXECUTOR)
-                .thenComposeAsync(
-                        authorCommandResult -> operationQueue
-                                .enqueue(aggregateKey, () -> {
-                                    updateCaches(aggregateKey, authorCommandResult);
-                                    log.info("Author created successfully: {}", aggregateKey);
-                                    return CompletableFuture.completedFuture(null);
-                                })
-                                .thenApply(ignored -> authorCommandResult),
-                        VIRTUAL_EXECUTOR);
+        return executeCommand(
+                        "authors-aggregates",
+                        aggregateKey,
+                        aggregateKey,
+                        event,
+                        result,
+                        () -> updateCaches(aggregateKey, result),
+                        "create author",
+                        "Author")
+                .whenComplete((res, err) -> {
+                    if (err != null) {
+                        try {
+                            redisTemplate.delete(reservationKey);
+                        } catch (Exception e) {
+                            log.warn(
+                                    "Failed to clean up reservation key after creation failure: {}", reservationKey, e);
+                        }
+                    }
+                });
     }
 
     public CompletableFuture<AuthorCommandResult> updateAuthor(UpdateAuthorCommand cmd) {
@@ -132,28 +134,15 @@ public class AuthorCommandService {
                 author.createdAt(),
                 cmd.modifiedAt());
 
-        return kafkaTemplate
-                .send("authors-aggregates", aggregateKey, event)
-                .handleAsync(
-                        (res, err) -> {
-                            if (err != null) {
-                                log.error("Failed to publish update author event for email: {}", cmd.email(), err);
-                                throw new RuntimeException("Failed to publish update author event", err);
-                            } else {
-                                log.info("Successfully published update author event for email: {}", aggregateKey);
-                                return result;
-                            }
-                        },
-                        VIRTUAL_EXECUTOR)
-                .thenComposeAsync(
-                        authorCommandResult -> operationQueue
-                                .enqueue(aggregateKey, () -> {
-                                    updateCaches(aggregateKey, authorCommandResult);
-                                    log.info("Author updated successfully: {}", aggregateKey);
-                                    return CompletableFuture.completedFuture(null);
-                                })
-                                .thenApply(ignored -> authorCommandResult),
-                        VIRTUAL_EXECUTOR);
+        return executeCommand(
+                "authors-aggregates",
+                aggregateKey,
+                aggregateKey,
+                event,
+                result,
+                () -> updateCaches(aggregateKey, result),
+                "update author",
+                "Author");
     }
 
     public CompletableFuture<Void> deleteAuthor(String email) {
@@ -161,29 +150,20 @@ public class AuthorCommandService {
         log.info("Deleting author with email: {}", aggregateKey);
 
         // 1. Publish tombstone event
-        return kafkaTemplate
-                .send("authors-aggregates", aggregateKey, new AuthorDeletedEvent(aggregateKey))
-                .handleAsync(
-                        (res, err) -> {
-                            if (err != null) {
-                                log.error("Failed to publish delete author event for email: {}", aggregateKey, err);
-                                throw new RuntimeException("Failed to publish delete author event", err);
-                            } else {
-                                log.info("Successfully published delete author event for email: {}", aggregateKey);
-                                return null;
-                            }
-                        },
-                        VIRTUAL_EXECUTOR)
-                .thenComposeAsync(ignored -> operationQueue.enqueue(aggregateKey, () -> {
+        return executeCommand(
+                "authors-aggregates",
+                aggregateKey,
+                aggregateKey,
+                new AuthorDeletedEvent(aggregateKey),
+                null, // Void result
+                () -> {
                     // 2. Invalidate local cache
                     localCache.invalidate(aggregateKey);
-
                     // 3. Mark deleted in Redis with TTL (prevents batch re-insertion)
                     deletionMarkerHandler.markDeleted(DeletionMarkerHandler.AUTHOR, aggregateKey);
-
-                    log.info("Author deleted successfully: {}", aggregateKey);
-                    return CompletableFuture.completedFuture(null);
-                }));
+                },
+                "delete author",
+                "Author");
     }
 
     private void updateCaches(String aggregateKey, AuthorCommandResult result) {

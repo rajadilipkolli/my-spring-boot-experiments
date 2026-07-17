@@ -9,9 +9,11 @@ import com.example.highrps.post.command.PostCommandResult;
 import com.example.highrps.post.domain.PostDetailsResponse;
 import com.example.highrps.post.domain.PostRedis;
 import com.example.highrps.post.query.PostProjection;
+import com.example.highrps.shared.IdGenerator;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.concurrent.atomic.AtomicReference;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -486,5 +488,56 @@ class PostControllerIT extends AbstractIntegrationTest {
 
         // Assert local cache is also populated
         assertThat(localCache.getIfPresent(cacheKey)).isNotNull();
+    }
+
+    @Test
+    @DisplayName("Should reject duplicate post creation with same postId")
+    void testShouldRejectDuplicatePost() {
+        Long duplicatePostId = IdGenerator.generateLong();
+
+        // Create initial post
+        mockMvcTester
+                .post()
+                .uri("/api/posts")
+                .content("""
+                        {
+                            "postId": %d,
+                            "title": "First Post",
+                            "content": "Initial content",
+                            "email": "author@example.com",
+                            "published": true,
+                            "details": {
+                                "detailsKey": "key1",
+                                "createdBy": "user1"
+                            }
+                        }
+                        """.formatted(duplicatePostId))
+                .contentType(MediaType.APPLICATION_JSON)
+                .exchange()
+                .assertThat()
+                .hasStatus(HttpStatus.CREATED);
+
+        // Attempt to create duplicate post
+        mockMvcTester
+                .post()
+                .uri("/api/posts")
+                .content("""
+                        {
+                            "postId": %d,
+                            "title": "Duplicate Post",
+                            "content": "Duplicate content",
+                            "email": "author@example.com",
+                            "published": true,
+                            "details": {
+                                "detailsKey": "key1",
+                                "createdBy": "user1"
+                            }
+                        }
+                        """.formatted(duplicatePostId))
+                .contentType(MediaType.APPLICATION_JSON)
+                .exchange()
+                .assertThat()
+                .hasStatus(HttpStatus.BAD_REQUEST)
+                .hasContentType(MediaType.APPLICATION_PROBLEM_JSON);
     }
 }

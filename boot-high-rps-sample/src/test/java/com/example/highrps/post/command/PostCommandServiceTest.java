@@ -14,7 +14,9 @@ import com.example.highrps.post.domain.events.PostDeletedEvent;
 import com.example.highrps.post.domain.events.PostUpdatedEvent;
 import com.example.highrps.post.domain.requests.PostDetailsRequest;
 import com.example.highrps.post.domain.requests.TagRequest;
+import com.example.highrps.post.query.PostQueryService;
 import com.github.benmanes.caffeine.cache.Cache;
+import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import org.junit.jupiter.api.DisplayName;
@@ -25,6 +27,8 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.kafka.core.KafkaTemplate;
 import tools.jackson.databind.json.JsonMapper;
 
@@ -53,6 +57,15 @@ class PostCommandServiceTest {
     @Mock
     private JsonMapper jsonMapper;
 
+    @Mock
+    private PostQueryService postQueryService;
+
+    @Mock
+    private RedisTemplate<String, String> redisTemplate;
+
+    @Mock
+    private ValueOperations<String, String> valueOperations;
+
     @Captor
     private ArgumentCaptor<PostCreatedEvent> eventCaptor;
 
@@ -69,6 +82,9 @@ class PostCommandServiceTest {
                 new PostDetailsRequest("key1", "user1"),
                 List.of(new TagRequest("t1", "d1")));
 
+        given(redisTemplate.opsForValue()).willReturn(valueOperations);
+        given(valueOperations.setIfAbsent(anyString(), anyString(), any(Duration.class)))
+                .willReturn(true);
         given(kafkaTemplate.send(anyString(), anyString(), any())).willReturn(CompletableFuture.completedFuture(null));
 
         // Act

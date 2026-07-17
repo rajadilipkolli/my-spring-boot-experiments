@@ -239,9 +239,10 @@ class AuthorControllerIT extends AbstractIntegrationTest {
                         .orElse(null)
                 : null;
 
-        if (listenerContainer != null) {
-            listenerContainer.pause();
-        }
+        assertThat(listenerContainer)
+                .as("Targeted Redis-writer listener container must be found")
+                .isNotNull();
+        listenerContainer.pause();
 
         try {
             // 3) GET request should fall back to Kafka Streams and succeed
@@ -258,19 +259,19 @@ class AuthorControllerIT extends AbstractIntegrationTest {
                         assertThat(authorProjection.email()).isEqualTo(emailKey);
                         assertThat(authorProjection.firstName()).isEqualTo("Streams");
                     });
+
+            // 4) Assert Redis is populated again by the fallback warm-up logic
+            await().atMost(Duration.ofSeconds(10))
+                    .pollInterval(Duration.ofMillis(500))
+                    .untilAsserted(() ->
+                            assertThat(authorRedisRepository.findById(emailKey)).isPresent());
+
+            // Assert local cache is also populated
+            assertThat(localCache.getIfPresent(emailKey)).isNotNull();
         } finally {
             if (listenerContainer != null) {
                 listenerContainer.resume();
             }
         }
-
-        // 4) Assert Redis is populated again by the fallback warm-up logic
-        await().atMost(Duration.ofSeconds(10))
-                .pollInterval(Duration.ofMillis(500))
-                .untilAsserted(() ->
-                        assertThat(authorRedisRepository.findById(emailKey)).isPresent());
-
-        // Assert local cache is also populated
-        assertThat(localCache.getIfPresent(emailKey)).isNotNull();
     }
 }
