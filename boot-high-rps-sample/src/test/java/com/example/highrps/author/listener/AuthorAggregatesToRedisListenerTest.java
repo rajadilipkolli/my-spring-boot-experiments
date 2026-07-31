@@ -67,5 +67,6 @@ class AuthorAggregatesToRedisListenerTest {
         assertThat(savedEntity.getEmail()).isEqualTo(email);
         assertThat(savedEntity.getCreatedAt()).isEqualTo(request.createdAt());
         assertThat(savedEntity.getModifiedAt()).isEqualTo(request.modifiedAt());
+        verify(ack).acknowledge();
     }
 }

@@ -7,6 +7,7 @@ import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.CooperativeStickyAssignor;
 import org.apache.kafka.common.serialization.ByteArrayDeserializer;
 import org.apache.kafka.common.serialization.StringDeserializer;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.kafka.autoconfigure.KafkaConnectionDetails;
 import org.springframework.context.annotation.Bean;
@@ -15,7 +16,12 @@ import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.core.KafkaAdmin;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.listener.ContainerProperties;
+import org.springframework.kafka.listener.DeadLetterPublishingRecoverer;
+import org.springframework.kafka.listener.DefaultErrorHandler;
+import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
+import org.springframework.util.backoff.FixedBackOff;
 
 @Configuration(proxyBeanMethods = false)
 public class KafkaConfig {
@@ -26,20 +32,36 @@ public class KafkaConfig {
         Map<String, Object> cfg = new HashMap<>();
         cfg.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaConnectionDetails.getBootstrapServers());
         cfg.put(ConsumerConfig.GROUP_ID_CONFIG, "new-posts-redis-writer");
-        cfg.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-        cfg.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ByteArrayDeserializer.class);
+        return getStringConsumerFactory(cfg);
+    }
+
+    @NonNull
+    private ConsumerFactory<String, byte[]> getStringConsumerFactory(Map<String, Object> cfg) {
+        cfg.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false);
+        cfg.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, ErrorHandlingDeserializer.class);
+        cfg.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ErrorHandlingDeserializer.class);
+        cfg.put(ErrorHandlingDeserializer.KEY_DESERIALIZER_CLASS, StringDeserializer.class);
+        cfg.put(ErrorHandlingDeserializer.VALUE_DESERIALIZER_CLASS, ByteArrayDeserializer.class);
         cfg.put(ConsumerConfig.PARTITION_ASSIGNMENT_STRATEGY_CONFIG, CooperativeStickyAssignor.class.getName());
         return new DefaultKafkaConsumerFactory<>(cfg);
     }
 
     @Bean
     ConcurrentKafkaListenerContainerFactory<String, byte[]> newPostKafkaListenerContainerFactory(
-            ConsumerFactory<String, byte[]> newPostConsumerFactory) {
+            ConsumerFactory<String, byte[]> newPostConsumerFactory, KafkaTemplate<String, Object> kafkaTemplate) {
+        return getStringConcurrentKafkaListenerContainerFactory(newPostConsumerFactory, kafkaTemplate);
+    }
+
+    @NonNull
+    private ConcurrentKafkaListenerContainerFactory<String, byte[]> getStringConcurrentKafkaListenerContainerFactory(
+            ConsumerFactory<String, byte[]> newPostConsumerFactory, KafkaTemplate<String, Object> kafkaTemplate) {
         var f = new ConcurrentKafkaListenerContainerFactory<String, byte[]>();
         f.setConsumerFactory(newPostConsumerFactory);
         f.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL_IMMEDIATE);
         f.getContainerProperties().setStopImmediate(false);
         f.setConcurrency(32);
+        f.setCommonErrorHandler(
+                new DefaultErrorHandler(new DeadLetterPublishingRecoverer(kafkaTemplate), new FixedBackOff(1000L, 2L)));
         return f;
     }
 
@@ -49,21 +71,13 @@ public class KafkaConfig {
         Map<String, Object> cfg = new HashMap<>();
         cfg.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaConnectionDetails.getBootstrapServers());
         cfg.put(ConsumerConfig.GROUP_ID_CONFIG, "authors-redis-writer");
-        cfg.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-        cfg.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ByteArrayDeserializer.class);
-        cfg.put(ConsumerConfig.PARTITION_ASSIGNMENT_STRATEGY_CONFIG, CooperativeStickyAssignor.class.getName());
-        return new DefaultKafkaConsumerFactory<>(cfg);
+        return getStringConsumerFactory(cfg);
     }
 
     @Bean
     ConcurrentKafkaListenerContainerFactory<String, byte[]> authorKafkaListenerContainerFactory(
-            ConsumerFactory<String, byte[]> authorConsumerFactory) {
-        var f = new ConcurrentKafkaListenerContainerFactory<String, byte[]>();
-        f.setConsumerFactory(authorConsumerFactory);
-        f.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL_IMMEDIATE);
-        f.getContainerProperties().setStopImmediate(false);
-        f.setConcurrency(32);
-        return f;
+            ConsumerFactory<String, byte[]> authorConsumerFactory, KafkaTemplate<String, Object> kafkaTemplate) {
+        return getStringConcurrentKafkaListenerContainerFactory(authorConsumerFactory, kafkaTemplate);
     }
 
     // Consumer factory for PostComment bytes
@@ -72,21 +86,13 @@ public class KafkaConfig {
         Map<String, Object> cfg = new HashMap<>();
         cfg.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaConnectionDetails.getBootstrapServers());
         cfg.put(ConsumerConfig.GROUP_ID_CONFIG, "post-comments-redis-writer");
-        cfg.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-        cfg.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ByteArrayDeserializer.class);
-        cfg.put(ConsumerConfig.PARTITION_ASSIGNMENT_STRATEGY_CONFIG, CooperativeStickyAssignor.class.getName());
-        return new DefaultKafkaConsumerFactory<>(cfg);
+        return getStringConsumerFactory(cfg);
     }
 
     @Bean
     ConcurrentKafkaListenerContainerFactory<String, byte[]> postCommentKafkaListenerContainerFactory(
-            ConsumerFactory<String, byte[]> postCommentConsumerFactory) {
-        var f = new ConcurrentKafkaListenerContainerFactory<String, byte[]>();
-        f.setConsumerFactory(postCommentConsumerFactory);
-        f.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL_IMMEDIATE);
-        f.getContainerProperties().setStopImmediate(false);
-        f.setConcurrency(32);
-        return f;
+            ConsumerFactory<String, byte[]> postCommentConsumerFactory, KafkaTemplate<String, Object> kafkaTemplate) {
+        return getStringConcurrentKafkaListenerContainerFactory(postCommentConsumerFactory, kafkaTemplate);
     }
 
     // Application-level topics. Kafka Streams will create internal changelog topics

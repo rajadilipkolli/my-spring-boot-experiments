@@ -2,9 +2,12 @@ package com.example.highrps.infrastructure.kafka.batch;
 
 import com.example.highrps.infrastructure.redis.DeletionMarkerHandler;
 import jakarta.annotation.PostConstruct;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,6 +39,7 @@ public class ScheduledBatchProcessor {
 
     private final String queueKey;
     private final int batchSize;
+    private final String consumerName;
 
     public ScheduledBatchProcessor(
             RedisTemplate<String, String> redis,
@@ -49,6 +53,7 @@ public class ScheduledBatchProcessor {
         this.queueKey = queueKey;
         this.batchSize = batchSize;
         this.deletionMarkerHandler = deletionMarkerHandler;
+        this.consumerName = createConsumerName(getHostname(), UUID.randomUUID());
 
         // Build registry of processors by entity type
         this.processorsByEntityType =
@@ -61,7 +66,18 @@ public class ScheduledBatchProcessor {
     }
 
     private static final String CONSUMER_GROUP = "batch-processor-group";
-    private static final String CONSUMER_NAME = "processor-1";
+
+    static String createConsumerName(String hostname, UUID uuid) {
+        return "processor-" + hostname + "-" + uuid;
+    }
+
+    private static String getHostname() {
+        try {
+            return InetAddress.getLocalHost().getHostName();
+        } catch (UnknownHostException e) {
+            return "unknown-host";
+        }
+    }
 
     @PostConstruct
     public void init() {
@@ -90,7 +106,7 @@ public class ScheduledBatchProcessor {
             try {
                 records = redis.opsForStream()
                         .read(
-                                Consumer.from(CONSUMER_GROUP, CONSUMER_NAME),
+                                Consumer.from(CONSUMER_GROUP, consumerName),
                                 StreamReadOptions.empty().count(batchSize),
                                 StreamOffset.create(queueKey, offset));
             } catch (Exception e) {
