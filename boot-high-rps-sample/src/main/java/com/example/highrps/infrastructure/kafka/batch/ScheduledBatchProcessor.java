@@ -6,6 +6,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -79,6 +80,19 @@ public class ScheduledBatchProcessor {
         }
     }
 
+    static boolean isBusyGroupException(Throwable throwable) {
+        if (throwable == null) {
+            return false;
+        }
+
+        String message = throwable.getMessage();
+        if (message != null && message.toUpperCase(Locale.ROOT).contains("BUSYGROUP")) {
+            return true;
+        }
+
+        return isBusyGroupException(throwable.getCause());
+    }
+
     @PostConstruct
     public void init() {
         try {
@@ -87,7 +101,15 @@ public class ScheduledBatchProcessor {
             }
             redis.opsForStream().createGroup(queueKey, ReadOffset.from("0"), CONSUMER_GROUP);
         } catch (Exception e) {
-            log.info("Consumer group might already exist: {}", e.getMessage());
+            if (isBusyGroupException(e)) {
+                log.info("Consumer group already exists: {}", CONSUMER_GROUP);
+            } else {
+                log.error(
+                        "Failed to initialize Redis stream consumer group {} for queue {}",
+                        CONSUMER_GROUP,
+                        queueKey,
+                        e);
+            }
         }
     }
 
