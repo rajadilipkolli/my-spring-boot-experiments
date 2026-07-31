@@ -74,7 +74,8 @@ public class AuthorController {
     @DeleteMapping("/author/{email}")
     public CompletableFuture<ResponseEntity<Void>> deleteAuthor(@PathVariable @NotBlank String email) {
         String normalizedEmail = email.toLowerCase(Locale.ROOT);
-        return authorCommandService.deleteAuthor(normalizedEmail).thenApply(v -> ResponseEntity.noContent()
-                .build());
+        return authorCommandService
+                .deleteAuthor(normalizedEmail)
+                .thenApply(v -> ResponseEntity.noContent().build());
     }
 }

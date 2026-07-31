@@ -63,7 +63,8 @@ public class PostController {
 
     @DeleteMapping("/posts/{postId}")
     public CompletableFuture<ResponseEntity<Void>> deletePost(@PathVariable @Positive Long postId) {
-        return postCommandService.deletePost(postId).thenApply(v -> ResponseEntity.noContent()
-                .build());
+        return postCommandService
+                .deletePost(postId)
+                .thenApply(v -> ResponseEntity.noContent().build());
     }
 }

@@ -91,8 +91,7 @@ public class AuthorQueryService {
             streamsData = requestCoalescer.subscribe(cacheKey, () -> {
                 ReadOnlyKeyValueStore<String, AuthorRequest> store = getKeyValueStore();
                 if (store == null) {
-                    throw new org.apache.kafka.streams.errors.InvalidStateStoreException(
-                            "State store is not available");
+                    throw new InvalidStateStoreException("State store is not available");
                 }
                 return store.get(cacheKey);
             });
