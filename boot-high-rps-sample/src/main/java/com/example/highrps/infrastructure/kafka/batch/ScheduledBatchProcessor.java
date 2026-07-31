@@ -1,6 +1,7 @@
 package com.example.highrps.infrastructure.kafka.batch;
 
 import com.example.highrps.infrastructure.redis.DeletionMarkerHandler;
+import jakarta.annotation.PostConstruct;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -8,6 +9,11 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.connection.stream.Consumer;
+import org.springframework.data.redis.connection.stream.MapRecord;
+import org.springframework.data.redis.connection.stream.ReadOffset;
+import org.springframework.data.redis.connection.stream.StreamOffset;
+import org.springframework.data.redis.connection.stream.StreamReadOptions;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -54,18 +60,67 @@ public class ScheduledBatchProcessor {
                 processorsByEntityType.keySet());
     }
 
+    private static final String CONSUMER_GROUP = "batch-processor-group";
+    private static final String CONSUMER_NAME = "processor-1";
+
+    @PostConstruct
+    public void init() {
+        try {
+            if (!Boolean.TRUE.equals(redis.hasKey(queueKey))) {
+                redis.opsForStream().add(queueKey, Map.of("_init", "true"));
+            }
+            redis.opsForStream().createGroup(queueKey, ReadOffset.from("0"), CONSUMER_GROUP);
+        } catch (Exception e) {
+            log.info("Consumer group might already exist: {}", e.getMessage());
+        }
+    }
+
     @Scheduled(fixedDelayString = "${app.batch.delay-ms}")
     public void processBatch() {
+        // First process any pending messages from a previous crash
+        processRecords(ReadOffset.from("0"));
+        // Then process new messages
+        processRecords(ReadOffset.lastConsumed());
+    }
+
+    private void processRecords(ReadOffset offset) {
         boolean moreItems = true;
         while (moreItems) {
-            List<String> items = redis.opsForList().rightPop(queueKey, batchSize);
-            if (items == null || items.isEmpty()) {
+            List<MapRecord<String, Object, Object>> records;
+            try {
+                records = redis.opsForStream()
+                        .read(
+                                Consumer.from(CONSUMER_GROUP, CONSUMER_NAME),
+                                StreamReadOptions.empty().count(batchSize),
+                                StreamOffset.create(queueKey, offset));
+            } catch (Exception e) {
+                log.error("Failed to read from Redis Stream: {}", queueKey, e);
                 break;
             }
-            if (items.size() < batchSize) {
+
+            if (records == null || records.isEmpty()) {
+                break;
+            }
+
+            List<String> items = records.stream()
+                    .map(r -> {
+                        Object val = r.getValue().get("payload");
+                        return val != null ? val.toString() : null;
+                    })
+                    .collect(Collectors.toList());
+
+            processItems(items);
+
+            String[] recordIds = records.stream().map(r -> r.getId().getValue()).toArray(String[]::new);
+            try {
+                redis.opsForStream().acknowledge(queueKey, CONSUMER_GROUP, recordIds);
+            } catch (Exception e) {
+                log.error("Failed to XACK records in Redis Stream: {}", queueKey, e);
+            }
+
+            if (records.size() < batchSize) {
                 moreItems = false;
             }
-            processItems(items);
         }
     }
 

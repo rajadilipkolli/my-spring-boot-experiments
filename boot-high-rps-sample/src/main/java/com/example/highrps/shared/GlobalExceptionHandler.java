@@ -3,10 +3,13 @@ package com.example.highrps.shared;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE;
 
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.CompletionException;
+import java.util.concurrent.ExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
@@ -51,6 +54,36 @@ class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         problemDetail.setTitle("Bad Request");
         problemDetail.setProperty("errors", List.of(e.getMessage()));
         return problemDetail;
+    }
+
+    @ExceptionHandler(KafkaPublishException.class)
+    public ProblemDetail handle(KafkaPublishException e) {
+        log.error("Kafka publish error", e);
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(SERVICE_UNAVAILABLE, e.getMessage());
+        problemDetail.setTitle("Service Unavailable");
+        problemDetail.setProperty("errors", List.of(e.getMessage()));
+        return problemDetail;
+    }
+
+    @ExceptionHandler({CompletionException.class, ExecutionException.class})
+    public ProblemDetail handleCompletionException(Exception e) {
+        Throwable cause = e.getCause();
+        if (cause instanceof KafkaPublishException kpe) {
+            return handle(kpe);
+        }
+        if (cause instanceof DomainException de) {
+            return handle(de);
+        }
+        if (cause instanceof IllegalArgumentException iae) {
+            return handle(iae);
+        }
+        if (cause instanceof ResourceNotFoundException rnfe) {
+            return handle(rnfe);
+        }
+        if (cause instanceof Exception ex) {
+            return handleUnexpected(ex);
+        }
+        return handleUnexpected(e);
     }
 
     @ExceptionHandler(IllegalArgumentException.class)

@@ -21,6 +21,7 @@ import java.time.ZoneOffset;
 import java.util.concurrent.CompletableFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
@@ -48,8 +49,9 @@ public class PostCommentCommandService extends AbstractCommandService {
             Cache<String, String> localCache,
             PostCommentMapper postCommentMapper,
             MeterRegistry meterRegistry,
-            DeletionMarkerHandler deletionMarkerHandler) {
-        super(kafkaTemplate);
+            DeletionMarkerHandler deletionMarkerHandler,
+            @Value("${app.kafka.publish-time-out-ms:5000}") long publishTimeOutMs) {
+        super(kafkaTemplate, publishTimeOutMs);
         this.postQueryService = postQueryService;
         this.postCommentQueryService = postCommentQueryService;
         this.localCache = localCache;

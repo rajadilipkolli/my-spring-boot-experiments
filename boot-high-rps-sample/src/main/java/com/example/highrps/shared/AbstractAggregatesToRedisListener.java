@@ -7,6 +7,7 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.kafka.support.Acknowledgment;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.json.JsonMapper;
 
@@ -93,11 +94,12 @@ public abstract class AbstractAggregatesToRedisListener<T> {
     /**
      * Primary template method to process aggregate messages.
      */
-    protected void processAggregate(ConsumerRecord<String, byte[]> record, String topicName) {
+    protected void processAggregate(ConsumerRecord<String, byte[]> record, String topicName, Acknowledgment ack) {
         try {
             String key = record.key();
             if (key == null) {
                 log.warn("Received message with null key on {}, ignoring.", topicName);
+                if (ack != null) ack.acknowledge();
                 return;
             }
             byte[] bytes = record.value();
@@ -112,6 +114,7 @@ public abstract class AbstractAggregatesToRedisListener<T> {
             // If payload is null -> tombstone: remove Redis key and enqueue delete marker
             if (bytes == null) {
                 handleTombstone(key, topicName);
+                if (ack != null) ack.acknowledge();
                 return;
             }
 
@@ -120,6 +123,7 @@ public abstract class AbstractAggregatesToRedisListener<T> {
             // Check for explicit deletion event
             if (isDeletionEvent(node)) {
                 processDeletionEvent(node, key, topicName);
+                if (ack != null) ack.acknowledge();
                 return;
             }
 
@@ -140,7 +144,8 @@ public abstract class AbstractAggregatesToRedisListener<T> {
             // Enqueue payload for asynchronous DB writes
             try {
                 String jsonString = prepareEnqueuePayload(node, payload);
-                redis.opsForList().leftPush(queueKey, jsonString);
+                redis.opsForStream().add(queueKey, java.util.Collections.singletonMap("payload", jsonString));
+                if (ack != null) ack.acknowledge();
             } catch (Exception e) {
                 log.error("Failed to enqueue payload for DB write, cacheKey: {}, may lose durability", key, e);
                 throw new IllegalStateException("Failed to enqueue payload for DB write, key=" + key, e);
@@ -173,7 +178,7 @@ public abstract class AbstractAggregatesToRedisListener<T> {
             deletionMarkerHandler.markDeleted(getMarkerType(), cacheKey);
             String tombstoneJson = jsonMapper.writeValueAsString(Map.of(
                     getDeletionIdentifierField(), repositoryKey, "__deleted", true, "__entity", getEntityType()));
-            redis.opsForList().leftPush(queueKey, tombstoneJson);
+            redis.opsForStream().add(queueKey, java.util.Collections.singletonMap("payload", tombstoneJson));
         } catch (Exception e) {
             log.error("Failed to enqueue tombstone marker for key: {}, may lose durability", markerKey, e);
             throw new IllegalStateException("Failed to enqueue tombstone marker for key=" + markerKey, e);

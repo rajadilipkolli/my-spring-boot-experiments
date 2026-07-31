@@ -15,6 +15,7 @@ import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
@@ -41,8 +42,9 @@ public class AuthorCommandService extends AbstractCommandService {
             JsonMapper jsonMapper,
             DeletionMarkerHandler deletionMarkerHandler,
             AuthorQueryService authorQueryService,
-            RedisTemplate<String, String> redisTemplate) {
-        super(kafkaTemplate);
+            RedisTemplate<String, String> redisTemplate,
+            @Value("${app.kafka.publish-time-out-ms:5000}") long publishTimeOutMs) {
+        super(kafkaTemplate, publishTimeOutMs);
         this.localCache = localCache;
         this.jsonMapper = jsonMapper;
         this.deletionMarkerHandler = deletionMarkerHandler;

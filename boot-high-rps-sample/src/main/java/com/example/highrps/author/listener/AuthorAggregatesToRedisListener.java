@@ -14,6 +14,7 @@ import org.springframework.kafka.annotation.DltHandler;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.annotation.RetryableTopic;
 import org.springframework.kafka.retrytopic.TopicSuffixingStrategy;
+import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
@@ -76,8 +77,8 @@ public class AuthorAggregatesToRedisListener extends AbstractAggregatesToRedisLi
             attempts = "4",
             backOff = @BackOff(delay = 500, multiplier = 2.0),
             topicSuffixingStrategy = TopicSuffixingStrategy.SUFFIX_WITH_INDEX_VALUE)
-    public void handleAggregate(ConsumerRecord<String, byte[]> record) {
-        processAggregate(record, "authors-aggregates");
+    public void handleAggregate(ConsumerRecord<String, byte[]> record, Acknowledgment ack) {
+        processAggregate(record, "authors-aggregates", ack);
     }
 
     @DltHandler

@@ -19,10 +19,10 @@ import com.github.benmanes.caffeine.cache.Cache;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.concurrent.CompletableFuture;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -37,7 +37,6 @@ import tools.jackson.databind.json.JsonMapper;
 @ExtendWith(MockitoExtension.class)
 class AuthorCommandServiceTest {
 
-    @InjectMocks
     private AuthorCommandService authorCommandService;
 
     @Mock
@@ -63,6 +62,12 @@ class AuthorCommandServiceTest {
 
     @Mock
     private ValueOperations<String, String> valueOperations;
+
+    @BeforeEach
+    void setUp() {
+        authorCommandService = new AuthorCommandService(
+                kafkaTemplate, localCache, jsonMapper, deletionMarkerHandler, authorQueryService, redisTemplate, 5000L);
+    }
 
     @Test
     @DisplayName("Should publish AuthorCreatedEvent when creating an author")

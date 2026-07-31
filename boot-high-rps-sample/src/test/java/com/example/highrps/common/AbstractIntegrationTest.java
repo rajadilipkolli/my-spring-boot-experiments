@@ -8,6 +8,7 @@ import com.example.highrps.author.batch.AuthorBatchProcessor;
 import com.example.highrps.author.command.AuthorCommandService;
 import com.example.highrps.author.domain.AuthorRedisRepository;
 import com.example.highrps.author.domain.AuthorRepository;
+import com.example.highrps.infrastructure.kafka.batch.ScheduledBatchProcessor;
 import com.example.highrps.post.command.PostCommandService;
 import com.example.highrps.post.domain.PostRedisRepository;
 import com.example.highrps.post.domain.PostRepository;
@@ -19,9 +20,12 @@ import com.example.highrps.postcomment.domain.PostCommentRepository;
 import com.github.benmanes.caffeine.cache.Cache;
 import io.micrometer.core.instrument.MeterRegistry;
 import java.time.Duration;
+import java.util.List;
 import org.apache.kafka.streams.KafkaStreams;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.kafka.autoconfigure.KafkaConnectionDetails;
 import org.springframework.boot.micrometer.metrics.test.autoconfigure.AutoConfigureMetrics;
 import org.springframework.boot.micrometer.tracing.test.autoconfigure.AutoConfigureTracing;
@@ -30,6 +34,7 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.kafka.config.StreamsBuilderFactoryBean;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
 import org.testcontainers.kafka.KafkaContainer;
@@ -105,6 +110,19 @@ public abstract class AbstractIntegrationTest {
     protected StreamsBuilderFactoryBean streamsBuilderFactoryBean;
 
     @Autowired
+    protected KafkaTemplate<String, Object> kafkaTemplate;
+
+    @Autowired
+    protected List<ScheduledBatchProcessor> scheduledBatchProcessors;
+
+    @Autowired
+    @Qualifier("scheduledBatchProcessor")
+    protected ScheduledBatchProcessor batchProcessor;
+
+    @Value("${app.batch.queue-key}")
+    protected String queueKey;
+
+    @Autowired
     protected ApplicationContext applicationContext;
 
     @BeforeEach
@@ -125,6 +143,11 @@ public abstract class AbstractIntegrationTest {
                 },
                 true);
         localCache.invalidateAll();
+
+        // Re-initialize consumer groups after flushDb
+        if (scheduledBatchProcessors != null) {
+            scheduledBatchProcessors.forEach(ScheduledBatchProcessor::init);
+        }
 
         // Wait for Kafka Streams to be ready before proceeding with tests
         await().atMost(Duration.ofSeconds(30))

@@ -19,12 +19,12 @@ import com.github.benmanes.caffeine.cache.Cache;
 import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -39,7 +39,6 @@ import tools.jackson.databind.json.JsonMapper;
 @ExtendWith(MockitoExtension.class)
 class PostCommandServiceTest {
 
-    @InjectMocks
     private PostCommandService postCommandService;
 
     @Mock
@@ -68,6 +67,19 @@ class PostCommandServiceTest {
 
     @Captor
     private ArgumentCaptor<PostCreatedEvent> eventCaptor;
+
+    @BeforeEach
+    void setUp() {
+        postCommandService = new PostCommandService(
+                kafkaTemplate,
+                localCache,
+                postRedisRepository,
+                jsonMapper,
+                deletionMarkerHandler,
+                postQueryService,
+                redisTemplate,
+                5000L);
+    }
 
     @Test
     @DisplayName("Should publish PostCreatedEvent when creating a post")

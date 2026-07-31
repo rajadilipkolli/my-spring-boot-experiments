@@ -16,6 +16,8 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.data.redis.core.ListOperations;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StreamOperations;
+import org.springframework.kafka.support.Acknowledgment;
 import tools.jackson.databind.json.JsonMapper;
 
 class AuthorAggregatesToRedisListenerTest {
@@ -32,6 +34,8 @@ class AuthorAggregatesToRedisListenerTest {
         redisTemplate = mock(RedisTemplate.class);
         var listOperations = mock(ListOperations.class);
         when(redisTemplate.opsForList()).thenReturn(listOperations);
+        var streamOperations = mock(StreamOperations.class);
+        when(redisTemplate.opsForStream()).thenReturn(streamOperations);
 
         jsonMapper = JsonMapper.builder().build();
         authorRedisRepository = mock(AuthorRedisRepository.class);
@@ -50,9 +54,10 @@ class AuthorAggregatesToRedisListenerTest {
 
         byte[] payload = jsonMapper.writeValueAsBytes(request);
         ConsumerRecord<String, byte[]> record = new ConsumerRecord<>("authors-aggregates", 0, 0, email, payload);
+        Acknowledgment ack = mock(Acknowledgment.class);
 
         // Act
-        listener.handleAggregate(record);
+        listener.handleAggregate(record, ack);
 
         // Assert
         ArgumentCaptor<AuthorRedis> captor = ArgumentCaptor.forClass(AuthorRedis.class);

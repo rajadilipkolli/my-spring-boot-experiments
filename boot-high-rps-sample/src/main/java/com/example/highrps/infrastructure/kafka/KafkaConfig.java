@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.clients.consumer.CooperativeStickyAssignor;
 import org.apache.kafka.common.serialization.ByteArrayDeserializer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,6 +15,7 @@ import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.core.KafkaAdmin;
+import org.springframework.kafka.listener.ContainerProperties;
 
 @Configuration(proxyBeanMethods = false)
 public class KafkaConfig {
@@ -26,6 +28,7 @@ public class KafkaConfig {
         cfg.put(ConsumerConfig.GROUP_ID_CONFIG, "new-posts-redis-writer");
         cfg.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         cfg.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ByteArrayDeserializer.class);
+        cfg.put(ConsumerConfig.PARTITION_ASSIGNMENT_STRATEGY_CONFIG, CooperativeStickyAssignor.class.getName());
         return new DefaultKafkaConsumerFactory<>(cfg);
     }
 
@@ -34,6 +37,9 @@ public class KafkaConfig {
             ConsumerFactory<String, byte[]> newPostConsumerFactory) {
         var f = new ConcurrentKafkaListenerContainerFactory<String, byte[]>();
         f.setConsumerFactory(newPostConsumerFactory);
+        f.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL_IMMEDIATE);
+        f.getContainerProperties().setStopImmediate(false);
+        f.setConcurrency(32);
         return f;
     }
 
@@ -45,6 +51,7 @@ public class KafkaConfig {
         cfg.put(ConsumerConfig.GROUP_ID_CONFIG, "authors-redis-writer");
         cfg.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         cfg.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ByteArrayDeserializer.class);
+        cfg.put(ConsumerConfig.PARTITION_ASSIGNMENT_STRATEGY_CONFIG, CooperativeStickyAssignor.class.getName());
         return new DefaultKafkaConsumerFactory<>(cfg);
     }
 
@@ -53,6 +60,9 @@ public class KafkaConfig {
             ConsumerFactory<String, byte[]> authorConsumerFactory) {
         var f = new ConcurrentKafkaListenerContainerFactory<String, byte[]>();
         f.setConsumerFactory(authorConsumerFactory);
+        f.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL_IMMEDIATE);
+        f.getContainerProperties().setStopImmediate(false);
+        f.setConcurrency(32);
         return f;
     }
 
@@ -64,6 +74,7 @@ public class KafkaConfig {
         cfg.put(ConsumerConfig.GROUP_ID_CONFIG, "post-comments-redis-writer");
         cfg.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         cfg.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ByteArrayDeserializer.class);
+        cfg.put(ConsumerConfig.PARTITION_ASSIGNMENT_STRATEGY_CONFIG, CooperativeStickyAssignor.class.getName());
         return new DefaultKafkaConsumerFactory<>(cfg);
     }
 
@@ -72,6 +83,9 @@ public class KafkaConfig {
             ConsumerFactory<String, byte[]> postCommentConsumerFactory) {
         var f = new ConcurrentKafkaListenerContainerFactory<String, byte[]>();
         f.setConsumerFactory(postCommentConsumerFactory);
+        f.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL_IMMEDIATE);
+        f.getContainerProperties().setStopImmediate(false);
+        f.setConcurrency(32);
         return f;
     }
 
