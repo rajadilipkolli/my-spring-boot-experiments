@@ -1,5 +1,6 @@
 package com.example.highrps.postcomment.domain.events;
 
+import com.example.highrps.shared.DomainEvent;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 
@@ -14,4 +15,5 @@ public record PostCommentUpdatedEvent(
         boolean published,
         OffsetDateTime publishedAt,
         LocalDateTime createdAt,
-        LocalDateTime modifiedAt) {}
+        LocalDateTime modifiedAt)
+        implements DomainEvent {}

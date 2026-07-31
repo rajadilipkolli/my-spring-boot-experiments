@@ -1,6 +1,8 @@
 package com.example.highrps.infrastructure.kafka.batch;
 
 import com.example.highrps.infrastructure.redis.DeletionMarkerHandler;
+import io.github.resilience4j.bulkhead.annotation.Bulkhead;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import jakarta.annotation.PostConstruct;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -114,6 +116,8 @@ public class ScheduledBatchProcessor {
     }
 
     @Scheduled(fixedDelayString = "${app.batch.delay-ms}")
+    @CircuitBreaker(name = "dbBatchWrites")
+    @Bulkhead(name = "dbBatchWrites")
     public void processBatch() {
         // First process any pending messages from a previous crash
         processRecords(ReadOffset.from("0"));

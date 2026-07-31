@@ -8,13 +8,11 @@ import com.example.highrps.author.query.AuthorQuery;
 import com.example.highrps.author.query.AuthorQueryService;
 import com.example.highrps.infrastructure.redis.DeletionMarkerHandler;
 import com.example.highrps.shared.AbstractCommandService;
-import com.example.highrps.shared.KafkaPublishPendingException;
 import com.example.highrps.shared.ResourceNotFoundException;
 import com.github.benmanes.caffeine.cache.Cache;
 import java.time.Duration;
 import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -96,9 +94,7 @@ public class AuthorCommandService extends AbstractCommandService {
                         "create author",
                         "Author")
                 .whenComplete((res, err) -> {
-                    if (err != null
-                            && !(err instanceof CompletionException ce
-                                    && ce.getCause() instanceof KafkaPublishPendingException)) {
+                    if (err != null && !isPendingPublishFailure(err)) {
                         try {
                             redisTemplate.delete(reservationKey);
                         } catch (Exception e) {

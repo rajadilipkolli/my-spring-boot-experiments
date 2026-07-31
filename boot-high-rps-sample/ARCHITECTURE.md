@@ -111,5 +111,23 @@ To add a new domain (e.g., "Notification"):
 - **Spring Modulith**: Structural verification and event externalization.
 - **Kafka**: External event broker for consistency and materialization.
 - **Redis**: Distributed read models and batch persistence queue.
-- **Caffeine**: Local high-performance cache.
 - **PostgreSQL**: Primary source of truth.
+
+## Schema Versioning and Compatibility
+
+To support forward and backward compatibility, all domain events implement the `DomainEvent` interface, which defines a default `schemaVersion` property.
+Jackson serialization is configured to:
+1. Always serialize `schemaVersion="1.0"` via a default method in the base interface.
+2. Tolerate unknown properties during deserialization (`@JsonIgnoreProperties(ignoreUnknown = true)`). This allows older consumers to deserialize payloads from newer producers without failing on new fields, supporting graceful forward-compatibility.
+3. Validate schemas conditionally (e.g., checking `schemaVersion` upon processing if breaking changes are introduced).
+
+## Production Operations Prerequisites
+
+When deploying `boot-high-rps-sample` to a production environment, several critical operational prerequisites must be satisfied to guarantee the designed durability and resilience:
+
+1. **Multi-Broker Kafka Cluster**: The system is designed for a highly available Kafka cluster with at least 3 brokers.
+2. **Durability Configs**:
+   - `replication.factor` must be at least `3` for all domain and aggregate topics.
+   - `min.insync.replicas` must be set to at least `2`. This ensures that a write is only acknowledged if written to a quorum, preventing data loss on broker failure.
+3. **Producer Acks**: Producers are configured with `acks=all` and idempotence enabled. This requires the aforementioned `min.insync.replicas` setting to be active.
+4. **Security**: Production deployments should configure secure transport (e.g., SASL/SCRAM with TLS) using environment variables (e.g., `KAFKA_SECURITY_PROTOCOL`). These are template-ready in `application-production.properties`.

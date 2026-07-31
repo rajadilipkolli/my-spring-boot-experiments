@@ -2,6 +2,7 @@ package com.example.highrps.post.domain.events;
 
 import com.example.highrps.post.domain.PostDetailsResponse;
 import com.example.highrps.post.domain.TagResponse;
+import com.example.highrps.shared.DomainEvent;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -19,4 +20,5 @@ public record PostCreatedEvent(
         LocalDateTime publishedAt,
         LocalDateTime createdAt,
         PostDetailsResponse details,
-        List<TagResponse> tags) {}
+        List<TagResponse> tags)
+        implements DomainEvent {}

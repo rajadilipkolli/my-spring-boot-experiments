@@ -91,7 +91,7 @@ public class PostCommentCommandService extends AbstractCommandService {
 
         return executeCommand(
                 "post-comments-aggregates",
-                String.valueOf(commentId),
+                String.valueOf(cmd.postId()),
                 CacheKeyGenerator.generatePostCommentKey(cmd.postId(), commentId),
                 event,
                 result,
@@ -127,7 +127,7 @@ public class PostCommentCommandService extends AbstractCommandService {
 
         return executeCommand(
                 "post-comments-aggregates",
-                String.valueOf(cmd.commentId().id()),
+                String.valueOf(cmd.postId()),
                 CacheKeyGenerator.generatePostCommentKey(
                         cmd.postId(), cmd.commentId().id()),
                 event,
@@ -149,7 +149,7 @@ public class PostCommentCommandService extends AbstractCommandService {
         // 1. Publish tombstone event
         return executeCommand(
                 "post-comments-aggregates",
-                String.valueOf(commentId.id()),
+                String.valueOf(postId),
                 cacheKey,
                 new PostCommentDeletedEvent(commentId.id(), postId),
                 null, // Void result

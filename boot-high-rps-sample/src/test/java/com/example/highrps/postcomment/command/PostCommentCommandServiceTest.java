@@ -93,8 +93,7 @@ class PostCommentCommandServiceTest {
         ArgumentCaptor<String> keyCaptor = ArgumentCaptor.forClass(String.class);
         ArgumentCaptor<PostCommentCreatedEvent> eventCaptor = ArgumentCaptor.forClass(PostCommentCreatedEvent.class);
         verify(kafkaTemplate).send(eq("post-comments-aggregates"), keyCaptor.capture(), eventCaptor.capture());
-        assertThat(keyCaptor.getValue())
-                .isEqualTo(String.valueOf(eventCaptor.getValue().commentId()));
+        assertThat(keyCaptor.getValue()).isEqualTo(String.valueOf(postId));
     }
 
     @Test
@@ -122,10 +121,7 @@ class PostCommentCommandServiceTest {
 
         // Assert - verify event was published
         verify(kafkaTemplate)
-                .send(
-                        eq("post-comments-aggregates"),
-                        eq(String.valueOf(updateCommand.commentId().id())),
-                        any(PostCommentUpdatedEvent.class));
+                .send(eq("post-comments-aggregates"), eq(String.valueOf(postId)), any(PostCommentUpdatedEvent.class));
     }
 
     @Test
@@ -141,10 +137,7 @@ class PostCommentCommandServiceTest {
 
         // Assert - verify event was published
         verify(kafkaTemplate)
-                .send(
-                        eq("post-comments-aggregates"),
-                        eq(String.valueOf(commentId.id())),
-                        any(PostCommentDeletedEvent.class));
+                .send(eq("post-comments-aggregates"), eq(String.valueOf(postId)), any(PostCommentDeletedEvent.class));
         verify(deletionMarkerHandler).markDeleted(any(String.class), any(String.class));
     }
 }

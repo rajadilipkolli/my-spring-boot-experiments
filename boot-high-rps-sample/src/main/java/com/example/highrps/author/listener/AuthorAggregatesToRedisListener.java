@@ -5,6 +5,7 @@ import com.example.highrps.author.domain.AuthorRedisRepository;
 import com.example.highrps.author.dto.AuthorRequest;
 import com.example.highrps.infrastructure.redis.DeletionMarkerHandler;
 import com.example.highrps.shared.AbstractAggregatesToRedisListener;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import java.util.Locale;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.beans.factory.annotation.Value;
@@ -77,6 +78,7 @@ public class AuthorAggregatesToRedisListener extends AbstractAggregatesToRedisLi
             attempts = "4",
             backOff = @BackOff(delay = 500, multiplier = 2.0),
             topicSuffixingStrategy = TopicSuffixingStrategy.SUFFIX_WITH_INDEX_VALUE)
+    @CircuitBreaker(name = "redisProjection")
     public void handleAggregate(ConsumerRecord<String, byte[]> record, Acknowledgment ack) {
         processAggregate(record, "authors-aggregates", ack);
     }

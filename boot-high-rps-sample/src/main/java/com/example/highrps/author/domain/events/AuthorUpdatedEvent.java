@@ -1,5 +1,6 @@
 package com.example.highrps.author.domain.events;
 
+import com.example.highrps.shared.DomainEvent;
 import java.time.LocalDateTime;
 
 /**
@@ -12,4 +13,5 @@ public record AuthorUpdatedEvent(
         String lastName,
         Long mobile,
         LocalDateTime createdAt,
-        LocalDateTime modifiedAt) {}
+        LocalDateTime modifiedAt)
+        implements DomainEvent {}

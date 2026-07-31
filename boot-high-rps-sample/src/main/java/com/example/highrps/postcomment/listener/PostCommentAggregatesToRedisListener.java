@@ -8,6 +8,7 @@ import com.example.highrps.postcomment.domain.PostCommentRedis;
 import com.example.highrps.postcomment.domain.PostCommentRedisRepository;
 import com.example.highrps.postcomment.domain.PostCommentRequest;
 import com.example.highrps.shared.AbstractAggregatesToRedisListener;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import java.util.Collections;
 import java.util.Map;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -133,6 +134,7 @@ public class PostCommentAggregatesToRedisListener extends AbstractAggregatesToRe
             attempts = "4",
             backOff = @BackOff(delay = 500, multiplier = 2.0),
             topicSuffixingStrategy = TopicSuffixingStrategy.SUFFIX_WITH_INDEX_VALUE)
+    @CircuitBreaker(name = "redisProjection")
     public void handleAggregate(ConsumerRecord<String, byte[]> record, Acknowledgment ack) {
         processAggregate(record, "post-comments-aggregates", ack);
     }

@@ -9,13 +9,11 @@ import com.example.highrps.post.domain.events.PostCreatedEvent;
 import com.example.highrps.post.domain.events.PostDeletedEvent;
 import com.example.highrps.post.domain.events.PostUpdatedEvent;
 import com.example.highrps.shared.AbstractCommandService;
-import com.example.highrps.shared.KafkaPublishPendingException;
 import com.github.benmanes.caffeine.cache.Cache;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -131,9 +129,7 @@ public class PostCommandService extends AbstractCommandService {
                         "create post",
                         "Post")
                 .whenComplete((res, err) -> {
-                    if (err != null
-                            && !(err instanceof CompletionException ce
-                                    && ce.getCause() instanceof KafkaPublishPendingException)) {
+                    if (err != null && !isPendingPublishFailure(err)) {
                         try {
                             redisTemplate.delete(reservationKey);
                         } catch (Exception e) {

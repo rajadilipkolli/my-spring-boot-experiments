@@ -1,6 +1,7 @@
 package com.example.highrps.shared;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -92,5 +93,9 @@ public abstract class AbstractCommandService {
                                 })
                                 .thenApply(ignored -> cmdResult),
                         VIRTUAL_EXECUTOR);
+    }
+
+    protected boolean isPendingPublishFailure(Throwable err) {
+        return err instanceof CompletionException ce && ce.getCause() instanceof KafkaPublishPendingException;
     }
 }

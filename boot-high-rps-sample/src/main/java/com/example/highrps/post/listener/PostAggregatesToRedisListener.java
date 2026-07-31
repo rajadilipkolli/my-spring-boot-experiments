@@ -5,6 +5,7 @@ import com.example.highrps.post.domain.PostRedis;
 import com.example.highrps.post.domain.PostRedisRepository;
 import com.example.highrps.post.domain.requests.NewPostRequest;
 import com.example.highrps.shared.AbstractAggregatesToRedisListener;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -78,6 +79,7 @@ public class PostAggregatesToRedisListener extends AbstractAggregatesToRedisList
             attempts = "4",
             backOff = @BackOff(delay = 500, multiplier = 2.0),
             topicSuffixingStrategy = TopicSuffixingStrategy.SUFFIX_WITH_INDEX_VALUE)
+    @CircuitBreaker(name = "redisProjection")
     public void handleAggregate(ConsumerRecord<String, byte[]> record, Acknowledgment ack) {
         processAggregate(record, "posts-aggregates", ack);
     }
