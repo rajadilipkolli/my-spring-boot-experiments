@@ -1,10 +1,12 @@
 package com.example.highrps.post.command;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import com.example.highrps.infrastructure.redis.DeletionMarkerHandler;
@@ -112,6 +114,41 @@ class PostCommandServiceTest {
         PostCreatedEvent event = eventCaptor.getValue();
         assertThat(event.postId()).isEqualTo(99001L);
         assertThat(event.title()).isEqualTo("Test Title");
+    }
+
+    @Test
+    @DisplayName("Should not delete post reservation when publish is pending")
+    void shouldNotDeleteReservationWhenPublishIsPending() {
+        CreatePostCommand command = new CreatePostCommand(
+                99004L,
+                "Pending Title",
+                "Pending Content",
+                "author@example.com",
+                true,
+                new PostDetailsRequest("key1", "user1"),
+                List.of(new TagRequest("t1", "d1")));
+
+        given(redisTemplate.opsForValue()).willReturn(valueOperations);
+        given(valueOperations.setIfAbsent(anyString(), anyString(), any(Duration.class)))
+                .willReturn(true);
+        CompletableFuture<org.springframework.kafka.support.SendResult<String, Object>> pendingSend =
+                new CompletableFuture<>();
+        given(kafkaTemplate.send(anyString(), anyString(), any())).willReturn(pendingSend);
+
+        PostCommandService pendingPostCommandService = new PostCommandService(
+                kafkaTemplate,
+                localCache,
+                postRedisRepository,
+                jsonMapper,
+                deletionMarkerHandler,
+                postQueryService,
+                redisTemplate,
+                1L);
+
+        assertThatThrownBy(() -> pendingPostCommandService.createPost(command).join())
+                .isInstanceOf(java.util.concurrent.CompletionException.class);
+
+        verify(redisTemplate, never()).delete(anyString());
     }
 
     @Test

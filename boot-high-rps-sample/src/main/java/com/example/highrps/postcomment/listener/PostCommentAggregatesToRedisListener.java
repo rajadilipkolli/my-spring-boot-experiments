@@ -8,6 +8,7 @@ import com.example.highrps.postcomment.domain.PostCommentRedis;
 import com.example.highrps.postcomment.domain.PostCommentRedisRepository;
 import com.example.highrps.postcomment.domain.PostCommentRequest;
 import com.example.highrps.shared.AbstractAggregatesToRedisListener;
+import java.util.Collections;
 import java.util.Map;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.slf4j.Logger;
@@ -95,7 +96,7 @@ public class PostCommentAggregatesToRedisListener extends AbstractAggregatesToRe
             deletionMarkerHandler.markDeleted(DeletionMarkerHandler.POST_COMMENT, cacheKey);
             String tombstoneJson = jsonMapper.writeValueAsString(
                     Map.of("id", commentId, "postId", postId, "__deleted", true, "__entity", "post-comment"));
-            redis.opsForList().leftPush(queueKey, tombstoneJson);
+            redis.opsForStream().add(queueKey, Collections.singletonMap("payload", tombstoneJson));
         } catch (Exception e) {
             log.error("Failed to enqueue delete marker: {}", cacheKey, e);
             throw new RuntimeException("Failed to enqueue delete marker for comment: " + cacheKey, e);

@@ -9,10 +9,13 @@ import com.example.highrps.post.domain.events.PostCreatedEvent;
 import com.example.highrps.post.domain.events.PostDeletedEvent;
 import com.example.highrps.post.domain.events.PostUpdatedEvent;
 import com.example.highrps.shared.AbstractCommandService;
+import com.example.highrps.shared.KafkaPublishPendingException;
 import com.github.benmanes.caffeine.cache.Cache;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -59,8 +62,7 @@ public class PostCommandService extends AbstractCommandService {
         log.info("Creating post with id: {}", cmd.postId());
 
         String reservationKey = "reservation:post:" + cmd.postId();
-        Boolean acquired =
-                redisTemplate.opsForValue().setIfAbsent(reservationKey, "1", java.time.Duration.ofMinutes(5));
+        Boolean acquired = redisTemplate.opsForValue().setIfAbsent(reservationKey, "1", Duration.ofMinutes(5));
 
         if (Boolean.FALSE.equals(acquired)) {
             throw new IllegalArgumentException("Post already exists with id: " + cmd.postId());
@@ -129,7 +131,9 @@ public class PostCommandService extends AbstractCommandService {
                         "create post",
                         "Post")
                 .whenComplete((res, err) -> {
-                    if (err != null) {
+                    if (err != null
+                            && !(err instanceof CompletionException ce
+                                    && ce.getCause() instanceof KafkaPublishPendingException)) {
                         try {
                             redisTemplate.delete(reservationKey);
                         } catch (Exception e) {

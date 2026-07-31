@@ -4,6 +4,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -66,6 +67,14 @@ public abstract class AbstractCommandService {
                 .handleAsync(
                         (res, err) -> {
                             if (err != null) {
+                                if (err instanceof TimeoutException || err.getCause() instanceof TimeoutException) {
+                                    log.warn(
+                                            "Publish for {} event for key: {} is still pending after timeout",
+                                            actionLogName,
+                                            kafkaKey);
+                                    throw new KafkaPublishPendingException(
+                                            "Publish for " + actionLogName + " event is still pending", err);
+                                }
                                 log.error("Failed to publish {} event for key: {}", actionLogName, kafkaKey, err);
                                 throw new KafkaPublishException("Failed to publish " + actionLogName + " event", err);
                             } else {
