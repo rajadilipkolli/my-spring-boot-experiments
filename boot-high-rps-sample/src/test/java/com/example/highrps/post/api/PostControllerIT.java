@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 import java.util.concurrent.atomic.AtomicReference;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StoreQueryParameters;
+import org.apache.kafka.streams.errors.InvalidStateStoreException;
 import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -458,7 +459,7 @@ class PostControllerIT extends AbstractIntegrationTest {
                                         "posts-store",
                                         org.apache.kafka.streams.state.QueryableStoreTypes.keyValueStore()));
                         return store.get(cacheKey) != null;
-                    } catch (Exception e) {
+                    } catch (InvalidStateStoreException e) {
                         return false;
                     }
                 });

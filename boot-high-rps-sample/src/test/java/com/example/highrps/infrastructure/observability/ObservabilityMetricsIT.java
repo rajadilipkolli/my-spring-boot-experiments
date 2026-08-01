@@ -5,10 +5,14 @@ import static org.awaitility.Awaitility.await;
 
 import com.example.highrps.common.AbstractIntegrationTest;
 import java.time.Duration;
+import java.util.concurrent.TimeUnit;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.slf4j.MDC;
 import org.springframework.kafka.core.ConsumerFactory;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.support.SendResult;
 
 class ObservabilityMetricsIT extends AbstractIntegrationTest {
 
@@ -20,13 +24,13 @@ class ObservabilityMetricsIT extends AbstractIntegrationTest {
 
         try {
             // Trigger producer action which will fire the MdcProducerInterceptor
-            org.springframework.kafka.support.SendResult<String, Object> sendResult = kafkaTemplate
-                    .send("events", "test-key", "test-payload")
-                    .get(5, java.util.concurrent.TimeUnit.SECONDS);
+            SendResult<String, Object> sendResult =
+                    kafkaTemplate.send("events", "test-key", "test-payload").get(5, TimeUnit.SECONDS);
 
-            kafkaTemplate.setConsumerFactory(
+            KafkaTemplate<String, Object> localKafkaTemplate = new KafkaTemplate<>(producerFactory);
+            localKafkaTemplate.setConsumerFactory(
                     applicationContext.getBean("newPostConsumerFactory", ConsumerFactory.class));
-            org.apache.kafka.clients.consumer.ConsumerRecord<String, Object> record = kafkaTemplate.receive(
+            ConsumerRecord<String, Object> record = localKafkaTemplate.receive(
                     "events",
                     sendResult.getRecordMetadata().partition(),
                     sendResult.getRecordMetadata().offset(),

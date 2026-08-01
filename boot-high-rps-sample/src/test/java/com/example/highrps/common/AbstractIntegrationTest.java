@@ -136,6 +136,10 @@ public abstract class AbstractIntegrationTest {
     protected ApplicationContext applicationContext;
 
     public void clearDatabase() {
+        clearDatabase(false);
+    }
+
+    public void clearDatabase(boolean faultInjectionOptIn) {
         postCommentRepository.deleteAllInBatch();
         postTagRepository.deleteAllInBatch();
         postRepository.deleteAllInBatch();
@@ -167,9 +171,14 @@ public abstract class AbstractIntegrationTest {
                         return streams != null && streams.state() == KafkaStreams.State.RUNNING;
                     });
         } catch (ConditionTimeoutException e) {
-            log.warn(
-                    "Kafka Streams did not become RUNNING within 30 seconds. Proceeding anyway. State may have been affected by Toxiproxy.",
-                    e);
+            if (faultInjectionOptIn) {
+                log.warn(
+                        "Kafka Streams did not become RUNNING within 30 seconds. Proceeding anyway. State may have been affected by Toxiproxy.",
+                        e);
+            } else {
+                log.error("Kafka Streams did not become RUNNING within 30 seconds.", e);
+                throw e;
+            }
         }
     }
 }

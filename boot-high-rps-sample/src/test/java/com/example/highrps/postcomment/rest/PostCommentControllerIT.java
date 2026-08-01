@@ -16,6 +16,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StoreQueryParameters;
+import org.apache.kafka.streams.errors.InvalidStateStoreException;
 import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.BeforeEach;
@@ -402,7 +403,7 @@ class PostCommentControllerIT extends AbstractIntegrationTest {
                                         "post-comments-store",
                                         org.apache.kafka.streams.state.QueryableStoreTypes.keyValueStore()));
                         return store.get(String.valueOf(commentId)) != null;
-                    } catch (Exception e) {
+                    } catch (InvalidStateStoreException e) {
                         return false;
                     }
                 });
