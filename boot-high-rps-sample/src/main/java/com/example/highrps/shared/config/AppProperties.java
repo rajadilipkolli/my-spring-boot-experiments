@@ -2,9 +2,7 @@ package com.example.highrps.shared.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
-import org.springframework.context.annotation.Configuration;
 
-@Configuration
 @ConfigurationProperties(prefix = "app")
 public class AppProperties {
 
@@ -129,6 +127,7 @@ public class AppProperties {
     public static class Batch {
         private String queueKey = "events:queue";
         private int size = 5000;
+        private long delayMs = 500;
 
         public String getQueueKey() {
             return queueKey;
@@ -144,6 +143,14 @@ public class AppProperties {
 
         public void setSize(int size) {
             this.size = size;
+        }
+
+        public long getDelayMs() {
+            return delayMs;
+        }
+
+        public void setDelayMs(long delayMs) {
+            this.delayMs = delayMs;
         }
     }
 }

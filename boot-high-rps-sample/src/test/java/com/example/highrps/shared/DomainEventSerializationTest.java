@@ -26,7 +26,7 @@ class DomainEventSerializationTest {
 
         String json = jsonMapper.writeValueAsString(event);
 
-        assertThat(json).contains("\"schemaVersion\"");
+        assertThat(json).contains("\"schemaVersion\":\"1.0\"");
         assertThat(json).contains("\"email\":\"test@example.com\"");
     }
 
@@ -49,5 +49,6 @@ class DomainEventSerializationTest {
 
         assertThat(event.email()).isEqualTo("test@example.com");
         assertThat(event.firstName()).isEqualTo("John");
+        assertThat(event.schemaVersion()).isEqualTo("1.0");
     }
 }

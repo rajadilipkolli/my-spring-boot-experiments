@@ -48,11 +48,14 @@ import tools.jackson.databind.json.JsonMapper;
         classes = {HighRpsApplication.class, ContainersConfig.class, SQLContainerConfig.class})
 @Testcontainers
 @ActiveProfiles("test")
-@TestPropertySource(properties = {"spring.kafka.streams.state-dir=${java.io.tmpdir}/kafka-streams-${random.uuid}"})
+@TestPropertySource(
+        properties = {"spring.kafka.streams.cleanup.on-startup=true", "spring.kafka.streams.cleanup.on-shutdown=true"})
 @AutoConfigureMockMvc
 @AutoConfigureTracing
 @AutoConfigureMetrics
 public abstract class AbstractIntegrationTest {
+
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AbstractIntegrationTest.class);
 
     @Autowired
     protected MockMvcTester mockMvcTester;
@@ -157,17 +160,16 @@ public abstract class AbstractIntegrationTest {
 
         // Wait for Kafka Streams to be ready before proceeding with tests
         try {
-            await().atMost(Duration.ofSeconds(15))
+            await().atMost(Duration.ofSeconds(30))
                     .pollInterval(Duration.ofMillis(500))
                     .until(() -> {
                         KafkaStreams streams = streamsBuilderFactoryBean.getKafkaStreams();
-                        return streams != null
-                                && (streams.state() == KafkaStreams.State.RUNNING
-                                        || streams.state() == KafkaStreams.State.REBALANCING);
+                        return streams != null && streams.state() == KafkaStreams.State.RUNNING;
                     });
         } catch (ConditionTimeoutException e) {
-            System.err.println(
-                    "WARNING: Kafka Streams did not become RUNNING within 15 seconds. Proceeding anyway. State may have been affected by Toxiproxy.");
+            log.warn(
+                    "Kafka Streams did not become RUNNING within 30 seconds. Proceeding anyway. State may have been affected by Toxiproxy.",
+                    e);
         }
     }
 }

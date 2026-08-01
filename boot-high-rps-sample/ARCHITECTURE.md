@@ -1,4 +1,4 @@
--hi# ARCHITECTURE: High-Throughput Event-Driven CQRS
+# ARCHITECTURE: High-Throughput Event-Driven CQRS
 
 This application (`boot-high-rps-sample`) demonstrates an ultra-high-throughput, event-driven CQRS architecture. It completely decouples the synchronous HTTP command path from the relational database to achieve maximum performance and resilience.
 
@@ -46,7 +46,7 @@ The Query side serves data from highly optimized read models.
 
 ## Fault Tolerance & Reliability Patterns
 
-1. **Dead Letter Queues (DLQ)**: Deserialization failures (via `ErrorHandlingDeserializer`) and business-logic errors automatically route to a resilient Redis-backed DLQ system.
+1. **Dead Letter Queues (DLQ)**: Deserialization failures (via `ErrorHandlingDeserializer`) and business-logic errors automatically route to a Kafka-backed DLT. `KafkaConfig` uses `DeadLetterPublishingRecoverer` with `KafkaTemplate` to publish failures to `<source>-dlt` topics. The required DLT topics must be provisioned.
 2. **Circuit Breakers**: `Resilience4j` Circuit Breakers and Bulkheads wrap the Redis projections and database batch writes to halt processing gracefully during backend degradation.
 3. **Idempotency via Natural Keys**: Because `ScheduledBatchProcessor` operations use natural-key `upserts`, redelivery caused by a crash between the database write (Step 9) and the Redis `XACK` (Step 10) is completely safe.
 4. **Graceful Deletions**: Deletions are processed as Tombstone events, with unified logic managed by `DeletionMarkerHandler`.

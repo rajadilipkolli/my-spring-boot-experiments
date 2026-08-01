@@ -8,18 +8,34 @@ import java.time.Duration;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.slf4j.MDC;
+import org.springframework.kafka.core.ConsumerFactory;
 
 class ObservabilityMetricsIT extends AbstractIntegrationTest {
 
     @Test
     @DisplayName("Should export Kafka client metrics and propagate correlationId via MDC")
-    void shouldExportKafkaMetricsAndMDC() {
+    void shouldExportKafkaMetricsAndMDC() throws Exception {
         String correlationId = "observability-corr-id";
         MDC.put("correlationId", correlationId);
 
         try {
             // Trigger producer action which will fire the MdcProducerInterceptor
-            kafkaTemplate.send("events", "test-key", "test-payload");
+            org.springframework.kafka.support.SendResult<String, Object> sendResult = kafkaTemplate
+                    .send("events", "test-key", "test-payload")
+                    .get(5, java.util.concurrent.TimeUnit.SECONDS);
+
+            kafkaTemplate.setConsumerFactory(
+                    applicationContext.getBean("newPostConsumerFactory", ConsumerFactory.class));
+            org.apache.kafka.clients.consumer.ConsumerRecord<String, Object> record = kafkaTemplate.receive(
+                    "events",
+                    sendResult.getRecordMetadata().partition(),
+                    sendResult.getRecordMetadata().offset(),
+                    Duration.ofSeconds(5));
+
+            assertThat(record).isNotNull();
+            assertThat(record.headers().lastHeader("correlationId")).isNotNull();
+            assertThat(new String(record.headers().lastHeader("correlationId").value()))
+                    .isEqualTo(correlationId);
 
             await().atMost(Duration.ofSeconds(10)).untilAsserted(() -> {
                 // Assert that Kafka client metrics are registered

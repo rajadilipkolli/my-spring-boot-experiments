@@ -55,6 +55,6 @@ class PostPublishTimeoutIT extends AbstractIntegrationTest {
         // Assert ProblemDetail shape
         ProblemDetail body = jsonMapper.readValue(response.getResponse().getContentAsString(), ProblemDetail.class);
         assertThat(body.getTitle()).isEqualTo("Service Unavailable");
-        assertThat(body.getDetail()).asString().contains("Failed to publish create post event");
+        assertThat(body.getDetail()).asString().contains("Publish for create post event is still pending");
     }
 }

@@ -5,6 +5,7 @@ import com.example.highrps.post.domain.PostRedis;
 import com.example.highrps.post.domain.PostRedisRepository;
 import com.example.highrps.post.domain.requests.NewPostRequest;
 import com.example.highrps.shared.AbstractAggregatesToRedisListener;
+import com.example.highrps.shared.config.AppProperties;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -27,7 +28,7 @@ public class PostAggregatesToRedisListener extends AbstractAggregatesToRedisList
     public PostAggregatesToRedisListener(
             RedisTemplate<String, String> redis,
             JsonMapper jsonMapper,
-            com.example.highrps.shared.config.AppProperties appProperties,
+            AppProperties appProperties,
             PostRedisRepository postRedisRepository,
             DeletionMarkerHandler deletionMarkerHandler) {
         super(redis, appProperties.getBatch().getQueueKey(), jsonMapper, deletionMarkerHandler, NewPostRequest.class);

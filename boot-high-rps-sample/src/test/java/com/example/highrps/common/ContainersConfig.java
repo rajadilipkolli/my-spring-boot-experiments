@@ -37,10 +37,15 @@ public class ContainersConfig {
     }
 
     @Bean
-    KafkaContainer kafkaContainer(Network testNetwork) {
-        return new KafkaContainer(DockerImageName.parse("apache/kafka-native").withTag("4.3.1"))
-                .withNetwork(testNetwork)
+    KafkaContainer kafkaContainer(Network testNetwork, ToxiproxyContainer toxiproxyContainer) {
+        return new KafkaContainer(DockerImageName.parse("apache/kafka-native").withTag("4.3.1")) {
+            @Override
+            public String getBootstrapServers() {
+                return toxiproxyContainer.getHost() + ":" + toxiproxyContainer.getMappedPort(8666);
+            }
+        }.withNetwork(testNetwork)
                 .withNetworkAliases("kafka")
+                .dependsOn(toxiproxyContainer)
                 .withReuse(true);
     }
 
@@ -52,22 +57,21 @@ public class ContainersConfig {
     }
 
     @Bean
-    Proxy kafkaProxy(ToxiproxyContainer toxiproxyContainer, KafkaContainer kafkaContainer) throws Exception {
+    Proxy kafkaProxy(ToxiproxyContainer toxiproxyContainer) throws Exception {
         ToxiproxyClient toxiproxyClient =
                 new ToxiproxyClient(toxiproxyContainer.getHost(), toxiproxyContainer.getControlPort());
-        return toxiproxyClient.createProxy(
-                "kafka", "0.0.0.0:8666", kafkaContainer.getNetworkAliases().getFirst() + ":9092");
+        return toxiproxyClient.createProxy("kafka", "0.0.0.0:8666", "kafka:9092");
     }
 
     @Bean
-    DynamicPropertyRegistrar dynamicPropertyRegistrar(
-            RedisContainer redisContainer, ToxiproxyContainer toxiproxyContainer) {
+    DynamicPropertyRegistrar dynamicPropertyRegistrar(RedisContainer redisContainer, KafkaContainer kafkaContainer) {
+        String stateDir =
+                System.getProperty("java.io.tmpdir") + "/kafka-streams-test-state-" + java.util.UUID.randomUUID();
         return registry -> {
             registry.add("spring.data.redis.host", redisContainer::getHost);
             registry.add("spring.data.redis.port", redisContainer::getFirstMappedPort);
-            registry.add(
-                    "spring.kafka.bootstrap-servers",
-                    () -> toxiproxyContainer.getHost() + ":" + toxiproxyContainer.getMappedPort(8666));
+            registry.add("spring.kafka.bootstrap-servers", kafkaContainer::getBootstrapServers);
+            registry.add("spring.kafka.streams.state-dir", () -> stateDir);
         };
     }
 }

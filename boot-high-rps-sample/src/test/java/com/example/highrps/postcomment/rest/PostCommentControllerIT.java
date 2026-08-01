@@ -14,12 +14,16 @@ import com.example.highrps.shared.IdGenerator;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
+import org.apache.kafka.streams.KafkaStreams;
+import org.apache.kafka.streams.StoreQueryParameters;
+import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.kafka.config.KafkaListenerEndpointRegistry;
+import org.springframework.kafka.config.StreamsBuilderFactoryBean;
 import org.springframework.kafka.listener.MessageListenerContainer;
 import org.springframework.test.context.TestContextManager;
 
@@ -383,6 +387,25 @@ class PostCommentControllerIT extends AbstractIntegrationTest {
                 .pollInterval(Duration.ofSeconds(1))
                 .untilAsserted(() -> assertThat(postCommentRedisRepository.findById(String.valueOf(commentId)))
                         .isPresent());
+
+        // Also wait for Kafka Streams to process it so the fallback test works
+        StreamsBuilderFactoryBean streamsFactory =
+                applicationContext.getBean(org.springframework.kafka.config.StreamsBuilderFactoryBean.class);
+        await().atMost(Duration.ofSeconds(45))
+                .pollInterval(Duration.ofSeconds(1))
+                .until(() -> {
+                    KafkaStreams streams = streamsFactory.getKafkaStreams();
+                    if (streams == null || streams.state() != KafkaStreams.State.RUNNING) return false;
+                    try {
+                        ReadOnlyKeyValueStore<String, Object> store =
+                                streams.store(StoreQueryParameters.fromNameAndType(
+                                        "post-comments-store",
+                                        org.apache.kafka.streams.state.QueryableStoreTypes.keyValueStore()));
+                        return store.get(String.valueOf(commentId)) != null;
+                    } catch (Exception e) {
+                        return false;
+                    }
+                });
 
         // 2) Clear local cache and Redis
         localCache.invalidate(cacheKey);

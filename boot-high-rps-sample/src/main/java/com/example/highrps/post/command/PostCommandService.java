@@ -9,6 +9,7 @@ import com.example.highrps.post.domain.events.PostCreatedEvent;
 import com.example.highrps.post.domain.events.PostDeletedEvent;
 import com.example.highrps.post.domain.events.PostUpdatedEvent;
 import com.example.highrps.shared.AbstractCommandService;
+import com.example.highrps.shared.config.AppProperties;
 import com.github.benmanes.caffeine.cache.Cache;
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -45,7 +46,7 @@ public class PostCommandService extends AbstractCommandService {
             DeletionMarkerHandler deletionMarkerHandler,
             com.example.highrps.post.query.PostQueryService postQueryService,
             org.springframework.data.redis.core.RedisTemplate<String, String> redisTemplate,
-            com.example.highrps.shared.config.AppProperties appProperties) {
+            AppProperties appProperties) {
         super(kafkaTemplate, appProperties.getKafka().getPublishTimeOutMs());
         this.localCache = localCache;
         this.postRedisRepository = postRedisRepository;

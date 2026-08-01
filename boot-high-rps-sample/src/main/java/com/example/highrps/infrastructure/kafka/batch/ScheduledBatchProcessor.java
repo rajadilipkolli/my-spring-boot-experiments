@@ -112,7 +112,7 @@ public class ScheduledBatchProcessor {
         }
     }
 
-    @Scheduled(fixedDelayString = "${app.batch.delay-ms:500}")
+    @Scheduled(fixedDelayString = "${app.batch.delay-ms}")
     @CircuitBreaker(name = "dbBatchWrites")
     @Bulkhead(name = "dbBatchWrites")
     public void processBatch() {
@@ -152,6 +152,11 @@ public class ScheduledBatchProcessor {
                                             this.consumerName,
                                             Duration.ofMinutes(1),
                                             recordIdsToClaim.toArray(new RecordId[0]));
+                            if (recordIdsToClaim.size() == count) {
+                                log.info(
+                                        "Deleting inactive consumer {} after reclaiming all pending records", consumer);
+                                redis.opsForStream().deleteConsumer(queueKey, Consumer.from(CONSUMER_GROUP, consumer));
+                            }
                         }
                     }
                 });
@@ -163,14 +168,18 @@ public class ScheduledBatchProcessor {
 
     private void processRecords(ReadOffset offset) {
         boolean moreItems = true;
-        while (moreItems) {
+        int maxIterations = 100;
+        int iterations = 0;
+        ReadOffset currentOffset = offset;
+        while (moreItems && iterations < maxIterations) {
+            iterations++;
             List<MapRecord<String, Object, Object>> records;
             try {
                 records = redis.opsForStream()
                         .read(
                                 Consumer.from(CONSUMER_GROUP, consumerName),
                                 StreamReadOptions.empty().count(batchSize),
-                                StreamOffset.create(queueKey, offset));
+                                StreamOffset.create(queueKey, currentOffset));
             } catch (Exception e) {
                 log.error("Failed to read from Redis Stream: {}", queueKey, e);
                 break;
@@ -196,6 +205,9 @@ public class ScheduledBatchProcessor {
                     log.error("Failed to XACK records in Redis Stream: {}", queueKey, e);
                 }
             }
+
+            currentOffset =
+                    ReadOffset.from(records.get(records.size() - 1).getId().getValue());
 
             if (records.size() < batchSize) {
                 moreItems = false;
