@@ -8,10 +8,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
-import org.springframework.test.context.TestPropertySource;
 
-@TestPropertySource(
-        properties = {"app.kafka.publish-time-out-ms=100", "spring.kafka.producer.properties.max.block.ms=100"})
 class PostPublishTimeoutIT extends AbstractIntegrationTest {
 
     @BeforeEach

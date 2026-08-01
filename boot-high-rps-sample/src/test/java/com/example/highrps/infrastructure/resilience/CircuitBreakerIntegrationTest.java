@@ -7,10 +7,7 @@ import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.TestPropertySource;
 
-@TestPropertySource(
-        properties = {"spring.kafka.consumer.auto-offset-reset=earliest", "spring.kafka.listener.auto-startup=false"})
 public class CircuitBreakerIntegrationTest extends AbstractIntegrationTest {
 
     @Autowired

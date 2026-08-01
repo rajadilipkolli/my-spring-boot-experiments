@@ -13,6 +13,7 @@ import com.example.highrps.shared.IdGenerator;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.concurrent.atomic.AtomicReference;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
@@ -21,6 +22,11 @@ import org.springframework.kafka.config.KafkaListenerEndpointRegistry;
 import org.springframework.kafka.listener.MessageListenerContainer;
 
 class PostControllerIT extends AbstractIntegrationTest {
+
+    @BeforeEach
+    void setUp() {
+        super.clearDatabase();
+    }
 
     @Test
     void createPost() {

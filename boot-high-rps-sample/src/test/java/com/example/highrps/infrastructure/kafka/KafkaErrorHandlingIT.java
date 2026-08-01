@@ -6,10 +6,16 @@ import static org.awaitility.Awaitility.await;
 import com.example.highrps.common.AbstractIntegrationTest;
 import java.time.Duration;
 import org.apache.kafka.streams.KafkaStreams;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 class KafkaErrorHandlingIT extends AbstractIntegrationTest {
+
+    @BeforeEach
+    void setUp() {
+        super.clearDatabase();
+    }
 
     @Test
     @DisplayName("Should route poison pill from consumer to DLT and save to Redis")

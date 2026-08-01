@@ -1,133 +1,56 @@
-# ARCHITECTURE: Spring Modulithic CQRS Architecture
+# ARCHITECTURE: High-Throughput Event-Driven CQRS
 
-This application uses a modern **Spring Modulithic** approach combined with **CQRS (Command-Query Responsibility Segregation)** to achieve high performance and maintainable modularity.
+This application (`boot-high-rps-sample`) demonstrates an ultra-high-throughput, event-driven CQRS architecture. It completely decouples the synchronous HTTP command path from the relational database to achieve maximum performance and resilience.
 
 ## Core Architectural Principles
 
-1.  **Spring Modulith**: The system is organized into modular domains (`author`, `post`, `postcomment`). Each module is a self-contained unit that communicates with others primarily through domain events.
-2.  **CQRS**: We strictly separate the **Command** (write operations) from the **Query** (read operations) side to allow independent optimization and scaling.
-3.  **Event-Driven**: Internal state changes trigger domain events, which are then externalized to Kafka for building materialized views and cross-module synchronization.
-4.  **Materialized Views**: Reads are served from highly optimized materialized views in **Redis** and **Caffeine**, reducing the load on the primary PostgreSQL database.
+1. **No Synchronous DB Blocking**: The command path (write operations) strictly avoids writing to PostgreSQL synchronously.
+2. **Kafka as the Immediate Ledger**: State mutations are validated and published directly to Kafka (`acks=all`, idempotence enabled) as the immediate durable ledger.
+3. **At-Least-Once Materialization**: Kafka listeners consume events, hand them off to Redis Streams (`XADD`) for durable queueing, and acknowledge the Kafka offset only after the Redis write succeeds.
+4. **Bulk Upsert Batching**: Scheduled processors read from Redis Streams (`XREADGROUP`), execute natural-key upserts against PostgreSQL in bulk, and acknowledge (`XACK`) only after the DB transaction commits.
 
-## Architecture Overview
+## Architecture Data Flow
 
-```text
-┌───────────────────────────────────────────────────────────┐
-│                    HTTP REST API LAYER                    │
-│      (PostController, AuthorController, etc.)             │
-└───────────────┬───────────────────────────────┬───────────┘
-                ▼                               ▼
-┌───────────────────────────────┐     ┌─────────────────────────────┐
-│       COMMAND SIDE (Writres)  │     │      QUERY SIDE (Reads)     │
-│   (PostCommandService, etc.)  │     │   (PostQueryService, etc.)  │
-└───────────────┬───────────────┘     └───────────────┬─────────────┘
-                │                                     │
-       1. Write to DB (Transactional)                 │
-       2. Publish Domain Event                        │ 1. Read from Store
-                │                                     │ (Layered Strategy)
-                ▼                                     ▼
-┌───────────────────────────────┐     ┌─────────────────────────────┐
-│    EVENT EXTERNALIZATION      │     │    MATERIALIZED VIEWS       │
-│     (Kafka / Application)     │     │ (Local Cache -> Redis -> DB) │
-└───────────────┬───────────────┘     └─────────────────────────────┘
-                │
-       3. Update Read Models
-       (Async / Defer to afterCommit)
+```mermaid
+flowchart TD
+    Client((Client)) -->|1. HTTP POST| REST(REST Controllers)
+    REST -->|2. Validate & Command| Service(Command Services)
+    Service -->|3. Produce Event| KafkaRaw[(Kafka: events topic)]
+    
+    KafkaRaw -->|4. Consume| KStreams(Kafka Streams)
+    KStreams -->|5. Aggregate| KafkaAgg[(Kafka: *-aggregates topics)]
+    
+    KafkaAgg -->|6. Consume| Listener(Kafka Listeners)
+    Listener -->|7. XADD| RedisStreams[(Redis Streams)]
+    
+    RedisStreams -->|8. XREADGROUP| Batch(Scheduled Batch Processors)
+    Batch -->|9. Bulk Upsert| Postgres[(PostgreSQL)]
+    Batch -.->|10. XACK on Commit| RedisStreams
 ```
 
-## Module Structure (Spring Modulith)
-
-The application follows a modular package structure:
-- `com.example.highrps.author`: Module for author management.
-- `com.example.highrps.post`: Module for blog post operations.
-- `com.example.highrps.postcomment`: Module for managing comments on posts.
-
-Each module contains:
-- **`command`**: Services handling write operations and publishing domain events.
-- **`query`**: Services handling read operations from materialized views.
-- **`domain`**: Domain-specific objects, events, and mappers.
-- **`api`**: REST controllers.
-
-## CQRS Implementation
+## Detailed CQRS Implementation
 
 ### Command Side (Writes)
-The Command side is responsible for handling state changes.
-- **Service Pattern**: Uses `CommandService` (e.g., `AuthorCommandService`).
-- **Validation**: Ensures that the request is valid according to business rules.
-- **Transaction**: Performs atomic updates to the primary database.
-- **Consistency**: Uses `TransactionSynchronizationManager` to defer cache and Redis updates until **after** the database transaction successfully commits.
+The Command side handles state changes at thousands of RPS by bypassing the database.
+- **Service Pattern**: Commands (e.g., `AuthorCommandService`) acquire distributed reservations (Redis) to prevent duplicate creation, then immediately publish domain events (e.g., `AuthorCreatedEvent`) directly to Kafka.
+- **Resilience**: Bounded publish timeouts prevent thread exhaustion if brokers fail. The system gracefully returns HTTP 503 instead of 500 when Kafka is unreachable (`KafkaPublishPendingException`).
 
 ### Query Side (Reads)
-The Query side serves data from optimized read models.
-- **Service Pattern**: Uses `QueryService` (e.g., `AuthorQueryService`).
-- **Read Strategy**:
-  1.  **Local Caffeine Cache**: Ultra-fast in-memory cache for hot keys.
-  2.  **Redis Cache**: Distributed materialized view for broader visibility.
-  3.  **PostgreSQL**: Source of truth fallback for cold data.
+The Query side serves data from highly optimized read models.
+- **Layered Caching Strategy**:
+  1. **Caffeine**: Ultra-fast, localized in-memory cache.
+  2. **Redis**: Distributed materialized view (updated directly by the Kafka-to-Redis listeners).
+  3. **PostgreSQL**: Source of truth fallback and interactive query target.
+- **Interactive Queries**: Kafka Streams interactive queries are utilized for global state lookups.
 
-## Transactional Consistency
+## Fault Tolerance & Reliability Patterns
 
-To prevent "phantom state" (where a cache is updated but the database transaction fails and rolls back), we use a deferred synchronization strategy:
+1. **Dead Letter Queues (DLQ)**: Deserialization failures (via `ErrorHandlingDeserializer`) and business-logic errors automatically route to a resilient Redis-backed DLQ system.
+2. **Circuit Breakers**: `Resilience4j` Circuit Breakers and Bulkheads wrap the Redis projections and database batch writes to halt processing gracefully during backend degradation.
+3. **Idempotency via Natural Keys**: Because `BatchProcessor` operations use natural-key `upserts`, redelivery caused by a crash between the database write (Step 9) and the Redis `XACK` (Step 10) is completely safe.
+4. **Graceful Shutdown & Offsets**: Auto-commit is disabled (`enable-auto-commit=false`). Manual acks are only issued *after* the durable handoff, ensuring zero data loss during rebalances.
 
-```java
-private void executeAfterCommit(Runnable task) {
-    if (TransactionSynchronizationManager.isActualTransactionActive()) {
-        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
-            @Override
-            public void afterCommit() {
-                task.run();
-            }
-        });
-    } else {
-        task.run();
-    }
-}
-```
+## Observability
 
-This ensures that side-effects like cache invalidation, Redis updates, and tombstone markers only occur **after** a successful commit.
-
-## Data Flow (Post Domain Example)
-
-1.  **Create Post**: `PostCommandService` saves the post, publishes a `PostCreatedEvent` (transactional).
-2.  **Event externalization**: `PostCreatedEvent` is published to Kafka.
-3.  **Read Model Update**: `PostAggregatesToRedisListener` consumes the event and updates the Redis materialized view.
-4.  **Query**: `PostQueryService` retrieves the post from Redis or local cache for subsequent read requests.
-
-## How to Add a New Domain
-
-To add a new domain (e.g., "Notification"):
-
-1.  **Create Package**: Create `com.example.highrps.notification`.
-2.  **Command Side**: Create `NotificationCommandService` and commands (`CreateNotificationCommand`).
-3.  **Query Side**: Create `NotificationQueryService` and query results.
-4.  **Events**: Define internal domain events (e.g., `NotificationSentEvent`).
-5.  **Listener**: Add a listener to update the Notification materialized view in Redis.
-6.  **Controller**: Add `NotificationController` to expose REST endpoints.
-
-## Technology Stack
-
-- **Java**: Version 25 (GraalVM).
-- **Spring Boot**: Core framework.
-- **Spring Modulith**: Structural verification and event externalization.
-- **Kafka**: External event broker for consistency and materialization.
-- **Redis**: Distributed read models and batch persistence queue.
-- **PostgreSQL**: Primary source of truth.
-
-## Schema Versioning and Compatibility
-
-To support forward and backward compatibility, all domain events implement the `DomainEvent` interface, which defines a default `schemaVersion` property.
-Jackson serialization is configured to:
-1. Always serialize `schemaVersion="1.0"` via a default method in the base interface.
-2. Tolerate unknown properties during deserialization (`@JsonIgnoreProperties(ignoreUnknown = true)`). This allows older consumers to deserialize payloads from newer producers without failing on new fields, supporting graceful forward-compatibility.
-3. Validate schemas conditionally (e.g., checking `schemaVersion` upon processing if breaking changes are introduced).
-
-## Production Operations Prerequisites
-
-When deploying `boot-high-rps-sample` to a production environment, several critical operational prerequisites must be satisfied to guarantee the designed durability and resilience:
-
-1. **Multi-Broker Kafka Cluster**: The system is designed for a highly available Kafka cluster with at least 3 brokers.
-2. **Durability Configs**:
-   - `replication.factor` must be at least `3` for all domain and aggregate topics.
-   - `min.insync.replicas` must be set to at least `2`. This ensures that a write is only acknowledged if written to a quorum, preventing data loss on broker failure.
-3. **Producer Acks**: Producers are configured with `acks=all` and idempotence enabled. This requires the aforementioned `min.insync.replicas` setting to be active.
-4. **Security**: Production deployments should configure secure transport (e.g., SASL/SCRAM with TLS) using environment variables (e.g., `KAFKA_SECURITY_PROTOCOL`). These are template-ready in `application-production.properties`.
+- **MDC Propagation**: Correlation IDs are generated at the HTTP layer (`CorrelationIdFilter`) and propagated natively across thread and network boundaries as Kafka headers via an `MdcProducerInterceptor`.
+- **OpenTelemetry (OTel)**: Metrics, consumer lags, and distributed traces are seamlessly exported to a Grafana/Prometheus (LGTM) stack.

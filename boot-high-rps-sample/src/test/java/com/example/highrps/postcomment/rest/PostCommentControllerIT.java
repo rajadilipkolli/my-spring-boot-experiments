@@ -29,6 +29,7 @@ class PostCommentControllerIT extends AbstractIntegrationTest {
 
     @BeforeEach
     void setUp() {
+        super.clearDatabase();
         // Create an author
         AuthorEntity author = new AuthorEntity()
                 .setEmail("comment-test@example.com")

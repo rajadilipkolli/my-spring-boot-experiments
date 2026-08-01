@@ -9,6 +9,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Locale;
 import java.util.UUID;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -17,6 +18,11 @@ import org.springframework.kafka.config.KafkaListenerEndpointRegistry;
 import org.springframework.kafka.listener.MessageListenerContainer;
 
 class AuthorControllerIT extends AbstractIntegrationTest {
+
+    @BeforeEach
+    void setUp() {
+        super.clearDatabase();
+    }
 
     @Test
     void crudAuthorResourcesAPICheck() {

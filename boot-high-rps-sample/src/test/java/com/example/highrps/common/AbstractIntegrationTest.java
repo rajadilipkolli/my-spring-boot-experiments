@@ -22,7 +22,6 @@ import io.micrometer.core.instrument.MeterRegistry;
 import java.time.Duration;
 import java.util.List;
 import org.apache.kafka.streams.KafkaStreams;
-import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.kafka.autoconfigure.KafkaConnectionDetails;
@@ -124,7 +123,6 @@ public abstract class AbstractIntegrationTest {
     @Autowired
     protected ApplicationContext applicationContext;
 
-    @BeforeEach
     public void clearDatabase() {
         postCommentRepository.deleteAllInBatch();
         postTagRepository.deleteAllInBatch();

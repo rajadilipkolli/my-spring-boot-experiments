@@ -9,9 +9,15 @@ import com.example.highrps.post.domain.PostEntity;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 class BatchProcessorIdempotencyIT extends AbstractIntegrationTest {
+
+    @BeforeEach
+    void setUp() {
+        super.clearDatabase();
+    }
 
     @Test
     void testPostBatchProcessorIdempotency() {
