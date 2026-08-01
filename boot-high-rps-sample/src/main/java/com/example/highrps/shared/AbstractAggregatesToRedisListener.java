@@ -196,6 +196,7 @@ public abstract class AbstractAggregatesToRedisListener<T> {
             redis.opsForList().leftPush(dlqKey, payload);
         } catch (Exception e) {
             log.warn("Failed to push to DLQ: {}", dlqKey, e);
+            throw new RuntimeException("Failed to push to DLQ", e);
         }
     }
 }

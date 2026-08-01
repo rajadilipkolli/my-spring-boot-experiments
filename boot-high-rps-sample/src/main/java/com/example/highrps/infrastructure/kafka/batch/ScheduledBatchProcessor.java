@@ -6,6 +6,8 @@ import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import jakarta.annotation.PostConstruct;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.time.Duration;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -15,11 +17,7 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.connection.stream.Consumer;
-import org.springframework.data.redis.connection.stream.MapRecord;
-import org.springframework.data.redis.connection.stream.ReadOffset;
-import org.springframework.data.redis.connection.stream.StreamOffset;
-import org.springframework.data.redis.connection.stream.StreamReadOptions;
+import org.springframework.data.redis.connection.stream.*;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -44,12 +42,14 @@ public class ScheduledBatchProcessor {
     private final int batchSize;
     private final String consumerName;
 
+    private record QueueItem(String recordId, String payload) {}
+
     public ScheduledBatchProcessor(
             RedisTemplate<String, String> redis,
             JsonMapper jsonMapper,
             List<EntityBatchProcessor> processors,
-            @Value("${app.batch.queue-key}") String queueKey,
-            @Value("${app.batch.size}") int batchSize,
+            @Value("${app.batch.queue-key:events:queue}") String queueKey,
+            @Value("${app.batch.size:5000}") int batchSize,
             DeletionMarkerHandler deletionMarkerHandler) {
         this.redis = redis;
         this.jsonMapper = jsonMapper;
@@ -86,12 +86,10 @@ public class ScheduledBatchProcessor {
         if (throwable == null) {
             return false;
         }
-
         String message = throwable.getMessage();
         if (message != null && message.toUpperCase(Locale.ROOT).contains("BUSYGROUP")) {
             return true;
         }
-
         return isBusyGroupException(throwable.getCause());
     }
 
@@ -115,14 +113,53 @@ public class ScheduledBatchProcessor {
         }
     }
 
-    @Scheduled(fixedDelayString = "${app.batch.delay-ms}")
+    @Scheduled(fixedDelayString = "${app.batch.delay-ms:500}")
     @CircuitBreaker(name = "dbBatchWrites")
     @Bulkhead(name = "dbBatchWrites")
     public void processBatch() {
-        // First process any pending messages from a previous crash
+        claimPendingRecords();
         processRecords(ReadOffset.from("0"));
         // Then process new messages
         processRecords(ReadOffset.lastConsumed());
+    }
+
+    private void claimPendingRecords() {
+        try {
+            PendingMessagesSummary summary = redis.opsForStream().pending(queueKey, CONSUMER_GROUP);
+            if (summary != null) {
+                summary.getPendingMessagesPerConsumer().forEach((consumer, count) -> {
+                    if (!consumer.equals(this.consumerName) && count > 0) {
+                        PendingMessages pendingRecords = redis.opsForStream()
+                                .pending(
+                                        queueKey,
+                                        Consumer.from(CONSUMER_GROUP, consumer),
+                                        org.springframework.data.domain.Range.unbounded(),
+                                        batchSize);
+
+                        List<RecordId> recordIdsToClaim = pendingRecords.stream()
+                                .filter(p -> p.getElapsedTimeSinceLastDelivery().toMillis() > 60000)
+                                .map(PendingMessage::getId)
+                                .toList();
+
+                        if (!recordIdsToClaim.isEmpty()) {
+                            log.info(
+                                    "Claiming {} pending records from inactive consumer {}",
+                                    recordIdsToClaim.size(),
+                                    consumer);
+                            redis.opsForStream()
+                                    .claim(
+                                            queueKey,
+                                            CONSUMER_GROUP,
+                                            this.consumerName,
+                                            Duration.ofMinutes(1),
+                                            recordIdsToClaim.toArray(new RecordId[0]));
+                        }
+                    }
+                });
+            }
+        } catch (Exception e) {
+            log.warn("Failed to claim pending records from Redis Stream: {}", queueKey, e);
+        }
     }
 
     private void processRecords(ReadOffset offset) {
@@ -144,20 +181,21 @@ public class ScheduledBatchProcessor {
                 break;
             }
 
-            List<String> items = records.stream()
+            List<QueueItem> items = records.stream()
                     .map(r -> {
                         Object val = r.getValue().get("payload");
-                        return val != null ? val.toString() : null;
+                        return new QueueItem(r.getId().getValue(), val != null ? val.toString() : null);
                     })
-                    .collect(Collectors.toList());
+                    .toList();
 
-            processItems(items);
+            List<String> ackIds = processItems(items);
 
-            String[] recordIds = records.stream().map(r -> r.getId().getValue()).toArray(String[]::new);
-            try {
-                redis.opsForStream().acknowledge(queueKey, CONSUMER_GROUP, recordIds);
-            } catch (Exception e) {
-                log.error("Failed to XACK records in Redis Stream: {}", queueKey, e);
+            if (!ackIds.isEmpty()) {
+                try {
+                    redis.opsForStream().acknowledge(queueKey, CONSUMER_GROUP, ackIds.toArray(new String[0]));
+                } catch (Exception e) {
+                    log.error("Failed to XACK records in Redis Stream: {}", queueKey, e);
+                }
             }
 
             if (records.size() < batchSize) {
@@ -166,19 +204,18 @@ public class ScheduledBatchProcessor {
         }
     }
 
-    private void processItems(List<String> items) {
-        // NOTE: do not bind a single entity-type deleted set up front. We will check the per-entity
-        // deleted set (e.g. deleted:posts, deleted:authors) when the entityType is known to avoid
-        // re-inserting entities that were recently deleted.
-
-        // Group items by entity type, then deduplicate by key within each entity type
+    private List<String> processItems(List<QueueItem> items) {
         Map<String, Map<String, PayloadOrTombstone>> groupedByEntityType = new HashMap<>();
+        List<String> ackIds = new ArrayList<>();
 
-        for (String item : items) {
-            if (item == null) continue;
+        for (QueueItem item : items) {
+            if (item.payload() == null || item.payload().equals("null")) {
+                ackIds.add(item.recordId());
+                continue;
+            }
 
             try {
-                var node = jsonMapper.readTree(item);
+                var node = jsonMapper.readTree(item.payload());
                 String entityType = node.has("__entity") ? node.get("__entity").asString() : null;
                 boolean isDeleted =
                         node.has("__deleted") && node.get("__deleted").asBoolean(false);
@@ -186,12 +223,14 @@ public class ScheduledBatchProcessor {
                 EntityBatchProcessor processor = processorsByEntityType.get(entityType);
                 if (processor == null) {
                     log.warn("No processor found for entity type: {}", entityType);
+                    ackIds.add(item.recordId());
                     continue;
                 }
 
-                String key = processor.extractKey(item);
+                String key = processor.extractKey(item.payload());
                 if (key == null) {
                     log.warn("Failed to extract key from payload for entity type: {}", entityType);
+                    ackIds.add(item.recordId());
                     continue;
                 }
 
@@ -203,6 +242,7 @@ public class ScheduledBatchProcessor {
                                 "Skipping queued upsert because it is marked deleted: entity={}, key={}",
                                 entityType,
                                 key);
+                        ackIds.add(item.recordId());
                         continue;
                     }
                 }
@@ -211,24 +251,23 @@ public class ScheduledBatchProcessor {
                 var perKey = groupedByEntityType.computeIfAbsent(entityType, k -> new HashMap<>());
                 PayloadOrTombstone existing = perKey.get(key);
                 if (isDeleted) {
-                    // Always prefer tombstone for this key and store the original raw tombstone payload so it can
-                    // be re-queued if downstream processing fails.
-                    log.debug("Grouping: tombstone for entity={}, key={}", entityType, key);
-                    perKey.put(key, PayloadOrTombstone.tombstone(item, key));
+                    if (existing != null) {
+                        ackIds.add(existing.recordId()); // Ack superseded
+                    }
+                    perKey.put(key, PayloadOrTombstone.tombstone(item.payload(), key, item.recordId()));
                 } else {
-                    log.debug("Grouping: upsert for entity={}, key={}", entityType, key);
-                    // Only store payload if we don't already have a tombstone for this key
                     if (existing == null || !existing.isTombstone()) {
-                        perKey.put(key, PayloadOrTombstone.payload(item));
+                        if (existing != null) {
+                            ackIds.add(existing.recordId()); // Ack superseded
+                        }
+                        perKey.put(key, PayloadOrTombstone.payload(item.payload(), key, item.recordId()));
                     } else {
-                        log.debug(
-                                "Skipping upsert because tombstone already present for entity={}, key={}",
-                                entityType,
-                                key);
+                        ackIds.add(item.recordId());
                     }
                 }
             } catch (Exception e) {
-                log.warn("Failed to parse queued item: {}", item, e);
+                log.warn("Failed to parse queued item: {}", item.payload(), e);
+                ackIds.add(item.recordId());
             }
         }
 
@@ -237,97 +276,92 @@ public class ScheduledBatchProcessor {
             EntityBatchProcessor processor = processorsByEntityType.get(entityType);
             if (processor == null) return;
 
-            // Separate deletes and upserts
-            List<String> deletes = payloadsByKey.values().stream()
+            List<PayloadOrTombstone> deletes = payloadsByKey.values().stream()
                     .filter(PayloadOrTombstone::isTombstone)
-                    .map(PayloadOrTombstone::key)
                     .toList();
 
-            List<String> upserts = payloadsByKey.values().stream()
+            List<PayloadOrTombstone> upserts = payloadsByKey.values().stream()
                     .filter(p -> !p.isTombstone())
-                    .map(PayloadOrTombstone::payload)
                     .toList();
 
-            try {
-                log.debug(
-                        "Processing batch for entity={}, deletes={}, upserts= {}",
-                        entityType,
-                        deletes.size(),
-                        upserts.size());
-
-                if (!upserts.isEmpty()) {
-                    try {
-                        processor.processUpserts(upserts);
-                    } catch (Exception e) {
-                        log.warn(
-                                "Batch upsert failed for entity type: {}, attempting individual processing to isolate poison pills",
-                                entityType);
-                        processUpsertsIndividually(processor, upserts);
-                    }
+            if (!upserts.isEmpty()) {
+                try {
+                    processor.processUpserts(
+                            upserts.stream().map(PayloadOrTombstone::payload).toList());
+                    ackIds.addAll(
+                            upserts.stream().map(PayloadOrTombstone::recordId).toList());
+                } catch (Exception e) {
+                    log.warn("Batch upsert failed for entity type: {}", entityType);
+                    ackIds.addAll(processUpsertsIndividually(processor, upserts));
                 }
+            }
 
-                if (!deletes.isEmpty()) {
-                    try {
-                        processor.processDeletes(deletes);
-                    } catch (Exception e) {
-                        log.warn(
-                                "Batch delete failed for entity type: {}, attempting individual processing",
-                                entityType);
-                        processDeletesIndividually(processor, deletes);
-                    }
+            if (!deletes.isEmpty()) {
+                try {
+                    processor.processDeletes(
+                            deletes.stream().map(PayloadOrTombstone::key).toList());
+                    ackIds.addAll(
+                            deletes.stream().map(PayloadOrTombstone::recordId).toList());
+                } catch (Exception e) {
+                    log.warn("Batch delete failed for entity type: {}", entityType);
+                    ackIds.addAll(processDeletesIndividually(processor, deletes));
                 }
-            } catch (Exception e) {
-                log.error("Unexpected error in batch processing for entity type: {}", entityType, e);
             }
         });
+        return ackIds;
     }
 
-    private void processUpsertsIndividually(EntityBatchProcessor processor, List<String> payloads) {
+    private List<String> processUpsertsIndividually(EntityBatchProcessor processor, List<PayloadOrTombstone> payloads) {
         String entityType = processor.getEntityType();
         String dlqKey = "dlq:batch:" + entityType;
+        List<String> ackIds = new ArrayList<>();
 
-        for (String payload : payloads) {
+        for (PayloadOrTombstone p : payloads) {
             try {
-                processor.processUpserts(List.of(payload));
+                processor.processUpserts(List.of(p.payload()));
+                ackIds.add(p.recordId());
             } catch (Exception e) {
-                log.error("Failed to process individual upsert for {}, moving to DLQ: {}", entityType, payload, e);
+                log.error("Failed individual upsert for {}, moving to DLQ", entityType, e);
                 try {
-                    redis.opsForList().leftPush(dlqKey, payload);
+                    redis.opsForList().leftPush(dlqKey, p.payload());
+                    ackIds.add(p.recordId()); // Ack only if DLQ succeeds
                 } catch (Exception re) {
                     log.error("CRITICAL: Failed to push poison pill to DLQ: {}", dlqKey, re);
                 }
             }
         }
+        return ackIds;
     }
 
-    private void processDeletesIndividually(EntityBatchProcessor processor, List<String> keys) {
+    private List<String> processDeletesIndividually(EntityBatchProcessor processor, List<PayloadOrTombstone> keys) {
         String entityType = processor.getEntityType();
         String dlqKey = "dlq:batch:deletes:" + entityType;
+        List<String> ackIds = new ArrayList<>();
 
-        for (String key : keys) {
+        for (PayloadOrTombstone p : keys) {
             try {
-                processor.processDeletes(List.of(key));
+                processor.processDeletes(List.of(p.key()));
+                ackIds.add(p.recordId());
             } catch (Exception e) {
-                log.error("Failed to process individual delete for {} key {}, moving to DLQ", entityType, key, e);
+                log.error("Failed individual delete for {} key {}, moving to DLQ", entityType, p.key(), e);
                 try {
-                    redis.opsForList().leftPush(dlqKey, key);
+                    redis.opsForList().leftPush(dlqKey, p.payload());
+                    ackIds.add(p.recordId());
                 } catch (Exception re) {
                     log.error("CRITICAL: Failed to push delete failure to DLQ: {}", dlqKey, re);
                 }
             }
         }
+        return ackIds;
     }
 
-    /**
-     * Internal record to represent either a payload to persist or a tombstone (delete marker).
-     */
-    private record PayloadOrTombstone(String payload, String key, boolean isTombstone) {
-        static PayloadOrTombstone payload(String payload) {
-            return new PayloadOrTombstone(payload, null, false);
+    private record PayloadOrTombstone(String payload, String key, String recordId, boolean isTombstone) {
+        static PayloadOrTombstone payload(String payload, String key, String recordId) {
+            return new PayloadOrTombstone(payload, key, recordId, false);
         }
 
-        static PayloadOrTombstone tombstone(String payload, String key) {
-            return new PayloadOrTombstone(payload, key, true);
+        static PayloadOrTombstone tombstone(String payload, String key, String recordId) {
+            return new PayloadOrTombstone(payload, key, recordId, true);
         }
     }
 }

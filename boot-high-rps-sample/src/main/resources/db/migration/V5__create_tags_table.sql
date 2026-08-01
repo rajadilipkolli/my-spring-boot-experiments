@@ -9,6 +9,6 @@ CREATE TABLE tags
     CONSTRAINT pk_tags PRIMARY KEY (id)
 );
 
-CREATE UNIQUE INDEX uc_tag_name ON tags (LOWER(tag_name));
+CREATE UNIQUE INDEX IF NOT EXISTS uc_tag_name ON tags (LOWER(tag_name));
 
-create sequence IF NOT EXISTS tags_seq start with 1 increment by 5;
+CREATE SEQUENCE IF NOT EXISTS tags_seq START WITH 1 INCREMENT BY 5;

@@ -22,6 +22,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.AdminClientConfig;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -55,6 +56,22 @@ class EventExternalizationIT extends AbstractIntegrationTest {
             var topics = adminClient.listTopics().names().get();
             System.out.println("Available Kafka Topics: " + topics);
         }
+    }
+
+    @Test
+    @DisplayName("Should configure Kafka Producer with resilience settings")
+    void shouldConfigureProducerWithResilienceSettings() {
+        Map<String, Object> props = producerFactory.getConfigurationProperties();
+
+        assertThat(props.get(ProducerConfig.ACKS_CONFIG)).isEqualTo("all");
+        assertThat(props.get(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG)).isEqualTo("true");
+        assertThat(props.get(ProducerConfig.MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION))
+                .isEqualTo("5");
+        assertThat(props.get(ProducerConfig.DELIVERY_TIMEOUT_MS_CONFIG)).isEqualTo(120000);
+        assertThat(props.get(ProducerConfig.RETRY_BACKOFF_MS_CONFIG)).isEqualTo(100);
+        assertThat(props.get(ProducerConfig.BATCH_SIZE_CONFIG)).isEqualTo(65536);
+        assertThat(props.get(ProducerConfig.LINGER_MS_CONFIG)).isEqualTo(10);
+        assertThat(props.get(ProducerConfig.COMPRESSION_TYPE_CONFIG)).isEqualTo("lz4");
     }
 
     @Test

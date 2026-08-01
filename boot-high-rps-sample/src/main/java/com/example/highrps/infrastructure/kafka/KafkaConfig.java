@@ -9,6 +9,7 @@ import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.ByteArrayDeserializer;
 import org.apache.kafka.common.serialization.ByteArraySerializer;
 import org.apache.kafka.common.serialization.StringDeserializer;
+import org.apache.kafka.common.serialization.StringSerializer;
 import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.kafka.autoconfigure.KafkaConnectionDetails;
@@ -20,6 +21,7 @@ import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaAdmin;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.listener.ConsumerRecordRecoverer;
 import org.springframework.kafka.listener.ContainerProperties;
 import org.springframework.kafka.listener.DeadLetterPublishingRecoverer;
 import org.springframework.kafka.listener.DefaultErrorHandler;
@@ -50,32 +52,48 @@ public class KafkaConfig {
     }
 
     @Bean
-    public DeadLetterPublishingRecoverer deadLetterPublishingRecoverer(KafkaTemplate<String, Object> kafkaTemplate) {
-        Map<String, Object> producerProps =
+    ConsumerRecordRecoverer deadLetterPublishingRecoverer(KafkaTemplate<String, Object> kafkaTemplate) {
+        Map<String, Object> stringProps =
                 new HashMap<>(kafkaTemplate.getProducerFactory().getConfigurationProperties());
-        producerProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, ByteArraySerializer.class);
-        producerProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, ByteArraySerializer.class);
-        DefaultKafkaProducerFactory<Object, Object> pf = new DefaultKafkaProducerFactory<>(producerProps);
-        KafkaTemplate<Object, Object> dltTemplate = new KafkaTemplate<>(pf);
-        return new DeadLetterPublishingRecoverer(dltTemplate);
+        stringProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+        stringProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, ByteArraySerializer.class);
+        DeadLetterPublishingRecoverer stringRecoverer =
+                new DeadLetterPublishingRecoverer(new KafkaTemplate<>(new DefaultKafkaProducerFactory<>(stringProps)));
+
+        Map<String, Object> byteProps =
+                new HashMap<>(kafkaTemplate.getProducerFactory().getConfigurationProperties());
+        byteProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, ByteArraySerializer.class);
+        byteProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, ByteArraySerializer.class);
+        DeadLetterPublishingRecoverer byteRecoverer =
+                new DeadLetterPublishingRecoverer(new KafkaTemplate<>(new DefaultKafkaProducerFactory<>(byteProps)));
+
+        return (record, exception) -> {
+            if (record.key() instanceof byte[]) {
+                byteRecoverer.accept(record, exception);
+            } else {
+                stringRecoverer.accept(record, exception);
+            }
+        };
     }
 
     @Bean
     ConcurrentKafkaListenerContainerFactory<String, byte[]> newPostKafkaListenerContainerFactory(
-            ConsumerFactory<String, byte[]> newPostConsumerFactory, DeadLetterPublishingRecoverer recoverer) {
+            ConsumerFactory<String, byte[]> newPostConsumerFactory, ConsumerRecordRecoverer recoverer) {
         return getStringConcurrentKafkaListenerContainerFactory(newPostConsumerFactory, recoverer);
     }
 
     @NonNull
     private ConcurrentKafkaListenerContainerFactory<String, byte[]> getStringConcurrentKafkaListenerContainerFactory(
-            ConsumerFactory<String, byte[]> consumerFactory, DeadLetterPublishingRecoverer recoverer) {
+            ConsumerFactory<String, byte[]> consumerFactory, ConsumerRecordRecoverer recoverer) {
         var f = new ConcurrentKafkaListenerContainerFactory<String, byte[]>();
         f.setConsumerFactory(consumerFactory);
         f.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL_IMMEDIATE);
         f.getContainerProperties().setStopImmediate(false);
         f.setConcurrency(32);
 
-        f.setCommonErrorHandler(new DefaultErrorHandler(recoverer, new FixedBackOff(1000L, 2L)));
+        DefaultErrorHandler errorHandler = new DefaultErrorHandler(recoverer, new FixedBackOff(1000L, 2L));
+        errorHandler.setCommitRecovered(true);
+        f.setCommonErrorHandler(errorHandler);
         return f;
     }
 
@@ -90,7 +108,7 @@ public class KafkaConfig {
 
     @Bean
     ConcurrentKafkaListenerContainerFactory<String, byte[]> authorKafkaListenerContainerFactory(
-            ConsumerFactory<String, byte[]> authorConsumerFactory, DeadLetterPublishingRecoverer recoverer) {
+            ConsumerFactory<String, byte[]> authorConsumerFactory, ConsumerRecordRecoverer recoverer) {
         return getStringConcurrentKafkaListenerContainerFactory(authorConsumerFactory, recoverer);
     }
 
@@ -105,7 +123,7 @@ public class KafkaConfig {
 
     @Bean
     ConcurrentKafkaListenerContainerFactory<String, byte[]> postCommentKafkaListenerContainerFactory(
-            ConsumerFactory<String, byte[]> postCommentConsumerFactory, DeadLetterPublishingRecoverer recoverer) {
+            ConsumerFactory<String, byte[]> postCommentConsumerFactory, ConsumerRecordRecoverer recoverer) {
         return getStringConcurrentKafkaListenerContainerFactory(postCommentConsumerFactory, recoverer);
     }
 

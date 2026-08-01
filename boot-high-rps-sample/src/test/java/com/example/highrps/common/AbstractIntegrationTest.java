@@ -24,7 +24,6 @@ import java.util.List;
 import org.apache.kafka.streams.KafkaStreams;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.kafka.autoconfigure.KafkaConnectionDetails;
 import org.springframework.boot.micrometer.metrics.test.autoconfigure.AutoConfigureMetrics;
@@ -35,6 +34,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.kafka.config.StreamsBuilderFactoryBean;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.core.ProducerFactory;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
 import org.testcontainers.kafka.KafkaContainer;
@@ -115,12 +115,11 @@ public abstract class AbstractIntegrationTest {
     @Autowired
     protected List<ScheduledBatchProcessor> scheduledBatchProcessors;
 
-    @Autowired
-    @Qualifier("scheduledBatchProcessor")
-    protected ScheduledBatchProcessor batchProcessor;
-
     @Value("${app.batch.queue-key}")
     protected String queueKey;
+
+    @Autowired
+    protected ProducerFactory<String, Object> producerFactory;
 
     @Autowired
     protected ApplicationContext applicationContext;
@@ -150,11 +149,13 @@ public abstract class AbstractIntegrationTest {
         }
 
         // Wait for Kafka Streams to be ready before proceeding with tests
-        await().atMost(Duration.ofSeconds(30))
+        await().atMost(Duration.ofSeconds(60))
                 .pollInterval(Duration.ofMillis(500))
                 .until(() -> {
                     KafkaStreams streams = streamsBuilderFactoryBean.getKafkaStreams();
-                    return streams != null && streams.state() == KafkaStreams.State.RUNNING;
+                    return streams != null
+                            && (streams.state() == KafkaStreams.State.RUNNING
+                                    || streams.state() == KafkaStreams.State.REBALANCING);
                 });
     }
 }

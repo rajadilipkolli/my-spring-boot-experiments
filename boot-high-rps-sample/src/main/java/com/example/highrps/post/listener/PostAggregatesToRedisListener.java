@@ -85,7 +85,11 @@ public class PostAggregatesToRedisListener extends AbstractAggregatesToRedisList
     }
 
     @DltHandler
-    public void dlt(ConsumerRecord<String, byte[]> record, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
+    public void dlt(
+            ConsumerRecord<String, byte[]> record,
+            @Header(KafkaHeaders.RECEIVED_TOPIC) String topic,
+            Acknowledgment ack) {
         handleDlt(record, topic);
+        if (ack != null) ack.acknowledge();
     }
 }
