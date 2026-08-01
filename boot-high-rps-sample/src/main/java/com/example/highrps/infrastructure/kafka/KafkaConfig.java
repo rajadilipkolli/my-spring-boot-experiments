@@ -1,5 +1,6 @@
 package com.example.highrps.infrastructure.kafka;
 
+import com.example.highrps.shared.config.AppProperties;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.kafka.clients.admin.NewTopic;
@@ -11,7 +12,6 @@ import org.apache.kafka.common.serialization.ByteArraySerializer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.jspecify.annotations.NonNull;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.kafka.autoconfigure.KafkaConnectionDetails;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -130,18 +130,23 @@ public class KafkaConfig {
     // Application-level topics. Kafka Streams will create internal changelog topics
     // automatically.
     @Bean
-    KafkaAdmin.NewTopics eventsTopic(
-            @Value("${app.kafka.events-topic.partitions:3}") int eventsPartitions,
-            @Value("${app.kafka.events-topic.replication-factor:1}") short eventsReplication,
-            @Value("${app.kafka.posts-aggregates-topic.partitions:3}") int postsAggregatesPartitions,
-            @Value("${app.kafka.posts-aggregates-topic.replication-factor:1}") short postsAggregatesReplication,
-            @Value("${app.kafka.authors-aggregates-topic.partitions:3}") int authorsAggregatesPartitions,
-            @Value("${app.kafka.authors-aggregates-topic.replication-factor:1}") short authorsAggregatesReplication,
-            @Value("${app.kafka.post-comments-aggregates-topic.partitions:3}") int postCommentsAggregatesPartitions,
-            @Value("${app.kafka.post-comments-aggregates-topic.replication-factor:1}")
-                    short postCommentsAggregatesReplication,
-            @Value("${app.kafka.events-topic.tombstone-retention-ms:604800000}") long tombstoneRetentionMs,
-            @Value("${app.kafka.min-insync-replicas:1}") String minInSyncReplicas) {
+    KafkaAdmin.NewTopics eventsTopic(AppProperties appProperties) {
+        int eventsPartitions = appProperties.getKafka().getEventsTopic().getPartitions();
+        short eventsReplication = appProperties.getKafka().getEventsTopic().getReplicationFactor();
+        int postsAggregatesPartitions =
+                appProperties.getKafka().getPostsAggregatesTopic().getPartitions();
+        short postsAggregatesReplication =
+                appProperties.getKafka().getPostsAggregatesTopic().getReplicationFactor();
+        int authorsAggregatesPartitions =
+                appProperties.getKafka().getAuthorsAggregatesTopic().getPartitions();
+        short authorsAggregatesReplication =
+                appProperties.getKafka().getAuthorsAggregatesTopic().getReplicationFactor();
+        int postCommentsAggregatesPartitions =
+                appProperties.getKafka().getPostCommentsAggregatesTopic().getPartitions();
+        short postCommentsAggregatesReplication =
+                appProperties.getKafka().getPostCommentsAggregatesTopic().getReplicationFactor();
+        long tombstoneRetentionMs = appProperties.getKafka().getEventsTopic().getTombstoneRetentionMs();
+        String minInSyncReplicas = appProperties.getKafka().getMinInsyncReplicas();
 
         NewTopic events = new NewTopic("events", eventsPartitions, eventsReplication);
         Map<String, String> eventsCfg = new HashMap<>();

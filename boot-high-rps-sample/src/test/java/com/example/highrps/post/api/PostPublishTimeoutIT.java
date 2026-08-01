@@ -3,30 +3,30 @@ package com.example.highrps.post.api;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.example.highrps.common.AbstractIntegrationTest;
+import java.io.IOException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.TestPropertySource;
 
+@TestPropertySource(
+        properties = {"app.kafka.publish-time-out-ms=100", "spring.kafka.producer.properties.max.block.ms=100"})
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 class PostPublishTimeoutIT extends AbstractIntegrationTest {
 
     @BeforeEach
-    void setup() {
-        // Pause Kafka to simulate failure
-        kafkaContainer
-                .getDockerClient()
-                .pauseContainerCmd(kafkaContainer.getContainerId())
-                .exec();
+    void setup() throws IOException {
+        // Cut connection via Toxiproxy to simulate failure
+        kafkaProxy.disable();
     }
 
     @AfterEach
-    void tearDown() {
-        // Unpause Kafka to recover the environment for other tests
-        kafkaContainer
-                .getDockerClient()
-                .unpauseContainerCmd(kafkaContainer.getContainerId())
-                .exec();
+    void tearDown() throws IOException {
+        // Restore Toxiproxy connection to recover the environment for other tests
+        kafkaProxy.enable();
     }
 
     @Test

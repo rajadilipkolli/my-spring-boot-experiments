@@ -17,6 +17,7 @@ import com.example.highrps.post.domain.events.PostUpdatedEvent;
 import com.example.highrps.post.domain.requests.PostDetailsRequest;
 import com.example.highrps.post.domain.requests.TagRequest;
 import com.example.highrps.post.query.PostQueryService;
+import com.example.highrps.shared.config.AppProperties;
 import com.github.benmanes.caffeine.cache.Cache;
 import java.time.Duration;
 import java.util.List;
@@ -72,6 +73,8 @@ class PostCommandServiceTest {
 
     @BeforeEach
     void setUp() {
+        AppProperties appProperties = new AppProperties();
+        appProperties.getKafka().setPublishTimeOutMs(5000L);
         postCommandService = new PostCommandService(
                 kafkaTemplate,
                 localCache,
@@ -80,7 +83,7 @@ class PostCommandServiceTest {
                 deletionMarkerHandler,
                 postQueryService,
                 redisTemplate,
-                5000L);
+                appProperties);
     }
 
     @Test
@@ -135,6 +138,8 @@ class PostCommandServiceTest {
                 new CompletableFuture<>();
         given(kafkaTemplate.send(anyString(), anyString(), any())).willReturn(pendingSend);
 
+        AppProperties pendingAppProperties = new AppProperties();
+        pendingAppProperties.getKafka().setPublishTimeOutMs(1L);
         PostCommandService pendingPostCommandService = new PostCommandService(
                 kafkaTemplate,
                 localCache,
@@ -143,7 +148,7 @@ class PostCommandServiceTest {
                 deletionMarkerHandler,
                 postQueryService,
                 redisTemplate,
-                1L);
+                pendingAppProperties);
 
         assertThatThrownBy(() -> pendingPostCommandService.createPost(command).join())
                 .isInstanceOf(java.util.concurrent.CompletionException.class);

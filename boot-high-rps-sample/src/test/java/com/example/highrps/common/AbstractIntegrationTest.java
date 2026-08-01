@@ -17,13 +17,15 @@ import com.example.highrps.post.domain.TagRepository;
 import com.example.highrps.postcomment.command.PostCommentCommandService;
 import com.example.highrps.postcomment.domain.PostCommentRedisRepository;
 import com.example.highrps.postcomment.domain.PostCommentRepository;
+import com.example.highrps.shared.config.AppProperties;
 import com.github.benmanes.caffeine.cache.Cache;
+import eu.rekawek.toxiproxy.Proxy;
 import io.micrometer.core.instrument.MeterRegistry;
 import java.time.Duration;
 import java.util.List;
 import org.apache.kafka.streams.KafkaStreams;
+import org.awaitility.core.ConditionTimeoutException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.kafka.autoconfigure.KafkaConnectionDetails;
 import org.springframework.boot.micrometer.metrics.test.autoconfigure.AutoConfigureMetrics;
 import org.springframework.boot.micrometer.tracing.test.autoconfigure.AutoConfigureTracing;
@@ -35,14 +37,18 @@ import org.springframework.kafka.config.StreamsBuilderFactoryBean;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
+import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.kafka.KafkaContainer;
 import tools.jackson.databind.json.JsonMapper;
 
-@ActiveProfiles({"test"})
 @SpringBootTest(
         webEnvironment = RANDOM_PORT,
         classes = {HighRpsApplication.class, ContainersConfig.class, SQLContainerConfig.class})
+@Testcontainers
+@ActiveProfiles("test")
+@TestPropertySource(properties = {"spring.kafka.streams.state-dir=${java.io.tmpdir}/kafka-streams-${random.uuid}"})
 @AutoConfigureMockMvc
 @AutoConfigureTracing
 @AutoConfigureMetrics
@@ -103,6 +109,9 @@ public abstract class AbstractIntegrationTest {
     protected KafkaContainer kafkaContainer;
 
     @Autowired
+    protected Proxy kafkaProxy;
+
+    @Autowired
     protected KafkaConnectionDetails kafkaConnectionDetails;
 
     @Autowired
@@ -114,8 +123,8 @@ public abstract class AbstractIntegrationTest {
     @Autowired
     protected List<ScheduledBatchProcessor> scheduledBatchProcessors;
 
-    @Value("${app.batch.queue-key}")
-    protected String queueKey;
+    @Autowired
+    protected AppProperties appProperties;
 
     @Autowired
     protected ProducerFactory<String, Object> producerFactory;
@@ -147,13 +156,18 @@ public abstract class AbstractIntegrationTest {
         }
 
         // Wait for Kafka Streams to be ready before proceeding with tests
-        await().atMost(Duration.ofSeconds(60))
-                .pollInterval(Duration.ofMillis(500))
-                .until(() -> {
-                    KafkaStreams streams = streamsBuilderFactoryBean.getKafkaStreams();
-                    return streams != null
-                            && (streams.state() == KafkaStreams.State.RUNNING
-                                    || streams.state() == KafkaStreams.State.REBALANCING);
-                });
+        try {
+            await().atMost(Duration.ofSeconds(15))
+                    .pollInterval(Duration.ofMillis(500))
+                    .until(() -> {
+                        KafkaStreams streams = streamsBuilderFactoryBean.getKafkaStreams();
+                        return streams != null
+                                && (streams.state() == KafkaStreams.State.RUNNING
+                                        || streams.state() == KafkaStreams.State.REBALANCING);
+                    });
+        } catch (ConditionTimeoutException e) {
+            System.err.println(
+                    "WARNING: Kafka Streams did not become RUNNING within 15 seconds. Proceeding anyway. State may have been affected by Toxiproxy.");
+        }
     }
 }

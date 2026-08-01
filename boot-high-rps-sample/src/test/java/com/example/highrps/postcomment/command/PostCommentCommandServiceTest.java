@@ -18,6 +18,7 @@ import com.example.highrps.postcomment.domain.events.PostCommentUpdatedEvent;
 import com.example.highrps.postcomment.domain.vo.PostCommentId;
 import com.example.highrps.postcomment.query.GetPostCommentQuery;
 import com.example.highrps.postcomment.query.PostCommentQueryService;
+import com.example.highrps.shared.config.AppProperties;
 import com.github.benmanes.caffeine.cache.Cache;
 import io.micrometer.core.instrument.MeterRegistry;
 import java.time.LocalDateTime;
@@ -66,6 +67,8 @@ class PostCommentCommandServiceTest {
 
     @BeforeEach
     void setUp() {
+        AppProperties appProperties = new AppProperties();
+        appProperties.getKafka().setPublishTimeOutMs(5000L);
         postCommentCommandService = new PostCommentCommandService(
                 postQueryService,
                 postCommentQueryService,
@@ -74,7 +77,7 @@ class PostCommentCommandServiceTest {
                 postCommentMapper,
                 meterRegistry,
                 deletionMarkerHandler,
-                5000L);
+                appProperties);
     }
 
     @Test

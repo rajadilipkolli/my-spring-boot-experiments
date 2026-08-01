@@ -8,13 +8,13 @@ import com.example.highrps.postcomment.domain.PostCommentRedis;
 import com.example.highrps.postcomment.domain.PostCommentRedisRepository;
 import com.example.highrps.postcomment.domain.PostCommentRequest;
 import com.example.highrps.shared.AbstractAggregatesToRedisListener;
+import com.example.highrps.shared.config.AppProperties;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import java.util.Collections;
 import java.util.Map;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.kafka.annotation.BackOff;
 import org.springframework.kafka.annotation.DltHandler;
@@ -38,12 +38,17 @@ public class PostCommentAggregatesToRedisListener extends AbstractAggregatesToRe
 
     public PostCommentAggregatesToRedisListener(
             RedisTemplate<String, String> redis,
-            PostCommentMapper mapper,
-            @Value("${app.batch.queue-key:events:queue}") String queueKey,
             JsonMapper jsonMapper,
+            AppProperties appProperties,
+            PostCommentMapper mapper,
             PostCommentRedisRepository postCommentRedisRepository,
             DeletionMarkerHandler deletionMarkerHandler) {
-        super(redis, queueKey, jsonMapper, deletionMarkerHandler, PostCommentRequest.class);
+        super(
+                redis,
+                appProperties.getBatch().getQueueKey(),
+                jsonMapper,
+                deletionMarkerHandler,
+                PostCommentRequest.class);
         this.mapper = mapper;
         this.postCommentRedisRepository = postCommentRedisRepository;
     }

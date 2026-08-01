@@ -17,7 +17,9 @@ import com.example.highrps.author.query.AuthorProjection;
 import com.example.highrps.author.query.AuthorQuery;
 import com.example.highrps.author.query.AuthorQueryService;
 import com.example.highrps.infrastructure.redis.DeletionMarkerHandler;
+import com.example.highrps.shared.config.AppProperties;
 import com.github.benmanes.caffeine.cache.Cache;
+import io.micrometer.core.instrument.MeterRegistry;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.concurrent.CompletableFuture;
@@ -65,10 +67,21 @@ class AuthorCommandServiceTest {
     @Mock
     private ValueOperations<String, String> valueOperations;
 
+    @Mock
+    private MeterRegistry meterRegistry;
+
     @BeforeEach
     void setUp() {
+        AppProperties appProperties = new AppProperties();
+        appProperties.getKafka().setPublishTimeOutMs(5000L);
         authorCommandService = new AuthorCommandService(
-                kafkaTemplate, localCache, jsonMapper, deletionMarkerHandler, authorQueryService, redisTemplate, 5000L);
+                kafkaTemplate,
+                localCache,
+                jsonMapper,
+                deletionMarkerHandler,
+                authorQueryService,
+                redisTemplate,
+                appProperties);
     }
 
     @Test
@@ -106,8 +119,16 @@ class AuthorCommandServiceTest {
                 new CompletableFuture<>();
         given(kafkaTemplate.send(anyString(), anyString(), any())).willReturn(pendingSend);
 
+        AppProperties pendingAppProperties = new AppProperties();
+        pendingAppProperties.getKafka().setPublishTimeOutMs(1L);
         AuthorCommandService pendingAuthorCommandService = new AuthorCommandService(
-                kafkaTemplate, localCache, jsonMapper, deletionMarkerHandler, authorQueryService, redisTemplate, 1L);
+                kafkaTemplate,
+                localCache,
+                jsonMapper,
+                deletionMarkerHandler,
+                authorQueryService,
+                redisTemplate,
+                pendingAppProperties);
 
         assertThatThrownBy(
                         () -> pendingAuthorCommandService.createAuthor(command).join())

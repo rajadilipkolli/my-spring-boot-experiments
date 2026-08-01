@@ -1,6 +1,7 @@
 package com.example.highrps.infrastructure.kafka.batch;
 
 import com.example.highrps.infrastructure.redis.DeletionMarkerHandler;
+import com.example.highrps.shared.config.AppProperties;
 import io.github.resilience4j.bulkhead.annotation.Bulkhead;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import jakarta.annotation.PostConstruct;
@@ -16,7 +17,6 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.connection.stream.*;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -48,13 +48,12 @@ public class ScheduledBatchProcessor {
             RedisTemplate<String, String> redis,
             JsonMapper jsonMapper,
             List<EntityBatchProcessor> processors,
-            @Value("${app.batch.queue-key:events:queue}") String queueKey,
-            @Value("${app.batch.size:5000}") int batchSize,
+            AppProperties appProperties,
             DeletionMarkerHandler deletionMarkerHandler) {
         this.redis = redis;
         this.jsonMapper = jsonMapper;
-        this.queueKey = queueKey;
-        this.batchSize = batchSize;
+        this.queueKey = appProperties.getBatch().getQueueKey();
+        this.batchSize = appProperties.getBatch().getSize();
         this.deletionMarkerHandler = deletionMarkerHandler;
         this.consumerName = createConsumerName(getHostname(), UUID.randomUUID());
 

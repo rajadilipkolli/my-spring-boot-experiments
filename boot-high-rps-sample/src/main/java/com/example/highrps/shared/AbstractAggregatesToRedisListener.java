@@ -67,9 +67,10 @@ public abstract class AbstractAggregatesToRedisListener<T> {
 
     /**
      * Check if the parsed node represents a deletion event.
+     * Deletion events usually only contain the identifier and potentially schemaVersion.
      */
     protected boolean isDeletionEvent(JsonNode node) {
-        return node.has(getDeletionIdentifierField()) && node.size() == 1;
+        return node.has(getDeletionIdentifierField()) && node.size() <= 2;
     }
 
     /**

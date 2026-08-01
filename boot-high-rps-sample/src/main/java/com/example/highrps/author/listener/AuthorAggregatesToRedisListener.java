@@ -5,10 +5,10 @@ import com.example.highrps.author.domain.AuthorRedisRepository;
 import com.example.highrps.author.dto.AuthorRequest;
 import com.example.highrps.infrastructure.redis.DeletionMarkerHandler;
 import com.example.highrps.shared.AbstractAggregatesToRedisListener;
+import com.example.highrps.shared.config.AppProperties;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import java.util.Locale;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.kafka.annotation.BackOff;
 import org.springframework.kafka.annotation.DltHandler;
@@ -28,11 +28,11 @@ public class AuthorAggregatesToRedisListener extends AbstractAggregatesToRedisLi
 
     public AuthorAggregatesToRedisListener(
             RedisTemplate<String, String> redis,
-            @Value("${app.batch.queue-key:events:queue}") String queueKey,
             JsonMapper jsonMapper,
+            AppProperties appProperties,
             AuthorRedisRepository authorRedisRepository,
             DeletionMarkerHandler deletionMarkerHandler) {
-        super(redis, queueKey, jsonMapper, deletionMarkerHandler, AuthorRequest.class);
+        super(redis, appProperties.getBatch().getQueueKey(), jsonMapper, deletionMarkerHandler, AuthorRequest.class);
         this.authorRedisRepository = authorRedisRepository;
     }
 

@@ -52,6 +52,7 @@ class BatchProcessorIdempotencyIT extends AbstractIntegrationTest {
             """;
 
         // Enqueue duplicate payloads (same postId)
+        String queueKey = appProperties.getBatch().getQueueKey();
         redisTemplate.opsForStream().add(queueKey, Map.of("payload", postPayload1));
         redisTemplate.opsForStream().add(queueKey, Map.of("payload", postPayload2));
 

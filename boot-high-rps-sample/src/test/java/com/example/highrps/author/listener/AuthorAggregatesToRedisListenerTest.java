@@ -40,8 +40,11 @@ class AuthorAggregatesToRedisListenerTest {
         jsonMapper = JsonMapper.builder().build();
         authorRedisRepository = mock(AuthorRedisRepository.class);
         deletionMarkerHandler = mock(DeletionMarkerHandler.class);
+        com.example.highrps.shared.config.AppProperties appProperties =
+                new com.example.highrps.shared.config.AppProperties();
+        appProperties.getBatch().setQueueKey("events:queue");
         listener = new AuthorAggregatesToRedisListener(
-                redisTemplate, "events:queue", jsonMapper, authorRedisRepository, deletionMarkerHandler);
+                redisTemplate, jsonMapper, appProperties, authorRedisRepository, deletionMarkerHandler);
     }
 
     @Test

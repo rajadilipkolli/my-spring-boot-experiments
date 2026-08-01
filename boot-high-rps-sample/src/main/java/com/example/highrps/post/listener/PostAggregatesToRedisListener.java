@@ -7,7 +7,6 @@ import com.example.highrps.post.domain.requests.NewPostRequest;
 import com.example.highrps.shared.AbstractAggregatesToRedisListener;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.kafka.annotation.BackOff;
 import org.springframework.kafka.annotation.DltHandler;
@@ -27,11 +26,11 @@ public class PostAggregatesToRedisListener extends AbstractAggregatesToRedisList
 
     public PostAggregatesToRedisListener(
             RedisTemplate<String, String> redis,
-            @Value("${app.batch.queue-key:events:queue}") String queueKey,
             JsonMapper jsonMapper,
+            com.example.highrps.shared.config.AppProperties appProperties,
             PostRedisRepository postRedisRepository,
             DeletionMarkerHandler deletionMarkerHandler) {
-        super(redis, queueKey, jsonMapper, deletionMarkerHandler, NewPostRequest.class);
+        super(redis, appProperties.getBatch().getQueueKey(), jsonMapper, deletionMarkerHandler, NewPostRequest.class);
         this.postRedisRepository = postRedisRepository;
     }
 
