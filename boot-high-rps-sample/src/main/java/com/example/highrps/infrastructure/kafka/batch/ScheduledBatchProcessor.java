@@ -19,6 +19,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Range;
 import org.springframework.data.redis.connection.stream.*;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -40,10 +41,9 @@ public class ScheduledBatchProcessor {
     private final Map<String, EntityBatchProcessor> processorsByEntityType;
     private final DeletionMarkerHandler deletionMarkerHandler;
 
-    private final String queueKey;
-    private final int batchSize;
     private final String consumerName;
     private final MeterRegistry meterRegistry;
+    private final AppProperties appProperties;
 
     private record QueueItem(String recordId, String payload) {}
 
@@ -56,8 +56,7 @@ public class ScheduledBatchProcessor {
             MeterRegistry meterRegistry) {
         this.redis = redis;
         this.jsonMapper = jsonMapper;
-        this.queueKey = appProperties.getBatch().getQueueKey();
-        this.batchSize = appProperties.getBatch().getSize();
+        this.appProperties = appProperties;
         this.deletionMarkerHandler = deletionMarkerHandler;
         this.meterRegistry = meterRegistry;
         this.consumerName = createConsumerName(getHostname(), UUID.randomUUID());
@@ -99,6 +98,7 @@ public class ScheduledBatchProcessor {
 
     @PostConstruct
     public void init() {
+        String queueKey = appProperties.getBatch().getQueueKey();
         try {
             if (!Boolean.TRUE.equals(redis.hasKey(queueKey))) {
                 redis.opsForStream().add(queueKey, Map.of("_init", "true"));
@@ -133,6 +133,7 @@ public class ScheduledBatchProcessor {
     }
 
     private void claimPendingRecords() {
+        String queueKey = appProperties.getBatch().getQueueKey();
         try {
             PendingMessagesSummary summary = redis.opsForStream().pending(queueKey, CONSUMER_GROUP);
             if (summary != null) {
@@ -142,8 +143,8 @@ public class ScheduledBatchProcessor {
                                 .pending(
                                         queueKey,
                                         Consumer.from(CONSUMER_GROUP, consumer),
-                                        org.springframework.data.domain.Range.unbounded(),
-                                        batchSize);
+                                        Range.unbounded(),
+                                        appProperties.getBatch().getSize());
 
                         List<RecordId> recordIdsToClaim = pendingRecords.stream()
                                 .filter(p -> p.getElapsedTimeSinceLastDelivery().toMillis() > 60000)
@@ -184,6 +185,8 @@ public class ScheduledBatchProcessor {
         while (moreItems && iterations < maxIterations) {
             iterations++;
             List<MapRecord<String, Object, Object>> records;
+            String queueKey = appProperties.getBatch().getQueueKey();
+            int batchSize = appProperties.getBatch().getSize();
             try {
                 records = redis.opsForStream()
                         .read(
