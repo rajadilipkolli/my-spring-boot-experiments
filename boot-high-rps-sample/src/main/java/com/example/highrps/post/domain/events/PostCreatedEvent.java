@@ -2,6 +2,8 @@ package com.example.highrps.post.domain.events;
 
 import com.example.highrps.post.domain.PostDetailsResponse;
 import com.example.highrps.post.domain.TagResponse;
+import com.example.highrps.shared.DomainEvent;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -10,6 +12,7 @@ import java.util.List;
  * This event is externalized to Kafka topic 'posts-aggregates' for downstream
  * consumers.
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public record PostCreatedEvent(
         Long postId,
         String title,
@@ -19,4 +22,5 @@ public record PostCreatedEvent(
         LocalDateTime publishedAt,
         LocalDateTime createdAt,
         PostDetailsResponse details,
-        List<TagResponse> tags) {}
+        List<TagResponse> tags)
+        implements DomainEvent {}

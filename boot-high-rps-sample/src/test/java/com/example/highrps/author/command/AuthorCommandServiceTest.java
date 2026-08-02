@@ -1,10 +1,12 @@
 package com.example.highrps.author.command;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import com.example.highrps.author.domain.AuthorRedisRepository;
@@ -15,14 +17,16 @@ import com.example.highrps.author.query.AuthorProjection;
 import com.example.highrps.author.query.AuthorQuery;
 import com.example.highrps.author.query.AuthorQueryService;
 import com.example.highrps.infrastructure.redis.DeletionMarkerHandler;
+import com.example.highrps.shared.config.AppProperties;
 import com.github.benmanes.caffeine.cache.Cache;
+import io.micrometer.core.instrument.MeterRegistry;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.concurrent.CompletableFuture;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -37,7 +41,6 @@ import tools.jackson.databind.json.JsonMapper;
 @ExtendWith(MockitoExtension.class)
 class AuthorCommandServiceTest {
 
-    @InjectMocks
     private AuthorCommandService authorCommandService;
 
     @Mock
@@ -64,6 +67,23 @@ class AuthorCommandServiceTest {
     @Mock
     private ValueOperations<String, String> valueOperations;
 
+    @Mock
+    private MeterRegistry meterRegistry;
+
+    @BeforeEach
+    void setUp() {
+        AppProperties appProperties = new AppProperties();
+        appProperties.getKafka().setPublishTimeOutMs(5000L);
+        authorCommandService = new AuthorCommandService(
+                kafkaTemplate,
+                localCache,
+                jsonMapper,
+                deletionMarkerHandler,
+                authorQueryService,
+                redisTemplate,
+                appProperties);
+    }
+
     @Test
     @DisplayName("Should publish AuthorCreatedEvent when creating an author")
     void shouldPublishEventWhenCreatingAuthor() {
@@ -85,6 +105,36 @@ class AuthorCommandServiceTest {
         // Verify event was published
         verify(kafkaTemplate)
                 .send(eq("authors-aggregates"), eq("john99001@example.com"), any(AuthorCreatedEvent.class));
+    }
+
+    @Test
+    @DisplayName("Should not delete author reservation when publish is pending")
+    void shouldNotDeleteReservationWhenPublishIsPending() {
+        CreateAuthorCommand command = new CreateAuthorCommand(
+                "JohnTimeout@EXAMPLE.com", "John", null, "Doe", 1234567890L, LocalDateTime.now());
+        given(redisTemplate.opsForValue()).willReturn(valueOperations);
+        given(valueOperations.setIfAbsent(anyString(), anyString(), any(Duration.class)))
+                .willReturn(true);
+        CompletableFuture<org.springframework.kafka.support.SendResult<String, Object>> pendingSend =
+                new CompletableFuture<>();
+        given(kafkaTemplate.send(anyString(), anyString(), any())).willReturn(pendingSend);
+
+        AppProperties pendingAppProperties = new AppProperties();
+        pendingAppProperties.getKafka().setPublishTimeOutMs(1L);
+        AuthorCommandService pendingAuthorCommandService = new AuthorCommandService(
+                kafkaTemplate,
+                localCache,
+                jsonMapper,
+                deletionMarkerHandler,
+                authorQueryService,
+                redisTemplate,
+                pendingAppProperties);
+
+        assertThatThrownBy(
+                        () -> pendingAuthorCommandService.createAuthor(command).join())
+                .isInstanceOf(java.util.concurrent.CompletionException.class);
+
+        verify(redisTemplate, never()).delete(anyString());
     }
 
     @Test

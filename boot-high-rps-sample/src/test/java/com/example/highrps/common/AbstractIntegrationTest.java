@@ -8,6 +8,7 @@ import com.example.highrps.author.batch.AuthorBatchProcessor;
 import com.example.highrps.author.command.AuthorCommandService;
 import com.example.highrps.author.domain.AuthorRedisRepository;
 import com.example.highrps.author.domain.AuthorRepository;
+import com.example.highrps.infrastructure.kafka.batch.ScheduledBatchProcessor;
 import com.example.highrps.post.command.PostCommandService;
 import com.example.highrps.post.domain.PostRedisRepository;
 import com.example.highrps.post.domain.PostRepository;
@@ -16,11 +17,14 @@ import com.example.highrps.post.domain.TagRepository;
 import com.example.highrps.postcomment.command.PostCommentCommandService;
 import com.example.highrps.postcomment.domain.PostCommentRedisRepository;
 import com.example.highrps.postcomment.domain.PostCommentRepository;
+import com.example.highrps.shared.config.AppProperties;
 import com.github.benmanes.caffeine.cache.Cache;
+import eu.rekawek.toxiproxy.Proxy;
 import io.micrometer.core.instrument.MeterRegistry;
 import java.time.Duration;
+import java.util.List;
 import org.apache.kafka.streams.KafkaStreams;
-import org.junit.jupiter.api.BeforeEach;
+import org.awaitility.core.ConditionTimeoutException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.kafka.autoconfigure.KafkaConnectionDetails;
 import org.springframework.boot.micrometer.metrics.test.autoconfigure.AutoConfigureMetrics;
@@ -30,19 +34,32 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.kafka.config.StreamsBuilderFactoryBean;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.core.ProducerFactory;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
+import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.kafka.KafkaContainer;
 import tools.jackson.databind.json.JsonMapper;
 
-@ActiveProfiles({"test"})
 @SpringBootTest(
         webEnvironment = RANDOM_PORT,
         classes = {HighRpsApplication.class, ContainersConfig.class, SQLContainerConfig.class})
+@Testcontainers
+@ActiveProfiles("test")
+@TestPropertySource(
+        properties = {
+            "spring.kafka.streams.cleanup.on-startup=true",
+            "spring.kafka.streams.cleanup.on-shutdown=true",
+            "app.batch.delay-ms=99999999"
+        })
 @AutoConfigureMockMvc
 @AutoConfigureTracing
 @AutoConfigureMetrics
 public abstract class AbstractIntegrationTest {
+
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AbstractIntegrationTest.class);
 
     @Autowired
     protected MockMvcTester mockMvcTester;
@@ -99,16 +116,34 @@ public abstract class AbstractIntegrationTest {
     protected KafkaContainer kafkaContainer;
 
     @Autowired
+    protected Proxy kafkaProxy;
+
+    @Autowired
     protected KafkaConnectionDetails kafkaConnectionDetails;
 
     @Autowired
     protected StreamsBuilderFactoryBean streamsBuilderFactoryBean;
 
     @Autowired
+    protected KafkaTemplate<String, Object> kafkaTemplate;
+
+    @Autowired
+    protected List<ScheduledBatchProcessor> scheduledBatchProcessors;
+
+    @Autowired
+    protected AppProperties appProperties;
+
+    @Autowired
+    protected ProducerFactory<String, Object> producerFactory;
+
+    @Autowired
     protected ApplicationContext applicationContext;
 
-    @BeforeEach
     public void clearDatabase() {
+        clearDatabase(false);
+    }
+
+    public void clearDatabase(boolean faultInjectionOptIn) {
         postCommentRepository.deleteAllInBatch();
         postTagRepository.deleteAllInBatch();
         postRepository.deleteAllInBatch();
@@ -126,12 +161,28 @@ public abstract class AbstractIntegrationTest {
                 true);
         localCache.invalidateAll();
 
+        // Re-initialize consumer groups after flushDb
+        if (scheduledBatchProcessors != null) {
+            scheduledBatchProcessors.forEach(ScheduledBatchProcessor::init);
+        }
+
         // Wait for Kafka Streams to be ready before proceeding with tests
-        await().atMost(Duration.ofSeconds(30))
-                .pollInterval(Duration.ofMillis(500))
-                .until(() -> {
-                    KafkaStreams streams = streamsBuilderFactoryBean.getKafkaStreams();
-                    return streams != null && streams.state() == KafkaStreams.State.RUNNING;
-                });
+        try {
+            await().atMost(Duration.ofSeconds(30))
+                    .pollInterval(Duration.ofMillis(500))
+                    .until(() -> {
+                        KafkaStreams streams = streamsBuilderFactoryBean.getKafkaStreams();
+                        return streams != null && streams.state() == KafkaStreams.State.RUNNING;
+                    });
+        } catch (ConditionTimeoutException e) {
+            if (faultInjectionOptIn) {
+                log.warn(
+                        "Kafka Streams did not become RUNNING within 30 seconds. Proceeding anyway. State may have been affected by Toxiproxy.",
+                        e);
+            } else {
+                log.error("Kafka Streams did not become RUNNING within 30 seconds.", e);
+                throw e;
+            }
+        }
     }
 }

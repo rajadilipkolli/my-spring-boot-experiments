@@ -2,13 +2,11 @@ package com.example.highrps.postcomment.domain;
 
 import com.example.highrps.postcomment.command.CreatePostCommentCommand;
 import com.example.highrps.postcomment.command.UpdatePostCommentCommand;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 
-/**
- * Request/Event DTO for PostComment operations.
- * Used as Kafka event payload and for internal service communication.
- */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public record PostCommentRequest(
         Long commentId,
         Long postId,

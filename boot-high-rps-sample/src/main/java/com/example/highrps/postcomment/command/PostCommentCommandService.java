@@ -14,6 +14,7 @@ import com.example.highrps.postcomment.query.PostCommentQueryService;
 import com.example.highrps.shared.AbstractCommandService;
 import com.example.highrps.shared.IdGenerator;
 import com.example.highrps.shared.ResourceNotFoundException;
+import com.example.highrps.shared.config.AppProperties;
 import com.github.benmanes.caffeine.cache.Cache;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -48,8 +49,9 @@ public class PostCommentCommandService extends AbstractCommandService {
             Cache<String, String> localCache,
             PostCommentMapper postCommentMapper,
             MeterRegistry meterRegistry,
-            DeletionMarkerHandler deletionMarkerHandler) {
-        super(kafkaTemplate);
+            DeletionMarkerHandler deletionMarkerHandler,
+            AppProperties appProperties) {
+        super(kafkaTemplate, appProperties.getKafka().getPublishTimeOutMs());
         this.postQueryService = postQueryService;
         this.postCommentQueryService = postCommentQueryService;
         this.localCache = localCache;

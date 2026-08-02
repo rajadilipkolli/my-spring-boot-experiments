@@ -5,6 +5,7 @@ import static org.awaitility.Awaitility.await;
 
 import com.example.highrps.author.domain.AuthorEntity;
 import com.example.highrps.common.AbstractIntegrationTest;
+import com.example.highrps.infrastructure.kafka.batch.ScheduledBatchProcessor;
 import com.example.highrps.post.command.PostCommandResult;
 import com.example.highrps.post.domain.PostDetailsResponse;
 import com.example.highrps.post.domain.PostRedis;
@@ -13,18 +14,29 @@ import com.example.highrps.shared.IdGenerator;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.concurrent.atomic.AtomicReference;
+import org.apache.kafka.streams.KafkaStreams;
+import org.apache.kafka.streams.StoreQueryParameters;
+import org.apache.kafka.streams.errors.InvalidStateStoreException;
+import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.kafka.config.KafkaListenerEndpointRegistry;
+import org.springframework.kafka.config.StreamsBuilderFactoryBean;
 import org.springframework.kafka.listener.MessageListenerContainer;
 
 class PostControllerIT extends AbstractIntegrationTest {
 
+    @BeforeEach
+    void setUp() {
+        super.clearDatabase();
+    }
+
     @Test
     void createPost() {
-        mockMvcTester
+        var result = mockMvcTester
                 .post()
                 .content("""
                         {
@@ -39,11 +51,24 @@ class PostControllerIT extends AbstractIntegrationTest {
                         """)
                 .uri("/api/posts")
                 .contentType(MediaType.APPLICATION_JSON)
-                .exchange()
-                .assertThat()
+                .exchange();
+
+        result.assertThat()
                 .hasStatus(HttpStatus.CREATED)
                 .hasContentType(MediaType.APPLICATION_JSON)
                 .containsHeader("Location");
+
+        String location = result.getResponse().getHeader("Location");
+        Long postId = Long.parseLong(location.substring(location.lastIndexOf('/') + 1));
+
+        await().atMost(Duration.ofSeconds(10)).untilAsserted(() -> {
+            mockMvcTester
+                    .get()
+                    .uri("/api/posts/{postId}", postId)
+                    .exchange()
+                    .assertThat()
+                    .hasStatus(HttpStatus.OK);
+        });
     }
 
     @Test
@@ -302,6 +327,7 @@ class PostControllerIT extends AbstractIntegrationTest {
         await().atMost(Duration.ofSeconds(30))
                 .pollInterval(Duration.ofSeconds(1))
                 .untilAsserted(() -> {
+                    scheduledBatchProcessors.forEach(ScheduledBatchProcessor::processBatch);
                     assertThat(postRepository.existsByPostRefId(postId.get())).isTrue();
                     assertThat(tagRepository.count()).isEqualTo(2);
                     assertThat(postTagRepository.countByPostEntity_Title(title)).isEqualTo(2);
@@ -339,6 +365,7 @@ class PostControllerIT extends AbstractIntegrationTest {
         await().atMost(Duration.ofSeconds(30))
                 .pollInterval(Duration.ofSeconds(1))
                 .untilAsserted(() -> {
+                    scheduledBatchProcessors.forEach(ScheduledBatchProcessor::processBatch);
                     assertThat(postRepository.existsByPostRefId(postId.get())).isTrue();
                     assertThat(tagRepository.count()).isEqualTo(2);
                     assertThat(postTagRepository.countByPostEntity_Title(title)).isEqualTo(2);
@@ -380,6 +407,7 @@ class PostControllerIT extends AbstractIntegrationTest {
         await().atMost(Duration.ofSeconds(60))
                 .pollInterval(Duration.ofSeconds(1))
                 .untilAsserted(() -> {
+                    scheduledBatchProcessors.forEach(ScheduledBatchProcessor::processBatch);
                     assertThat(postRepository.existsByPostRefId(postId.get())).isFalse();
                     assertThat(postTagRepository.countByPostEntity_Title(title)).isEqualTo(0);
                 });
@@ -434,6 +462,24 @@ class PostControllerIT extends AbstractIntegrationTest {
                 .pollInterval(Duration.ofSeconds(1))
                 .untilAsserted(() ->
                         assertThat(postRedisRepository.findById(postId.get())).isPresent());
+
+        // Also wait for Kafka Streams to process it so the fallback test works
+        StreamsBuilderFactoryBean streamsFactory = applicationContext.getBean(StreamsBuilderFactoryBean.class);
+        await().atMost(Duration.ofSeconds(45))
+                .pollInterval(Duration.ofSeconds(1))
+                .until(() -> {
+                    KafkaStreams streams = streamsFactory.getKafkaStreams();
+                    if (streams == null || streams.state() != KafkaStreams.State.RUNNING) return false;
+                    try {
+                        ReadOnlyKeyValueStore<String, Object> store =
+                                streams.store(StoreQueryParameters.fromNameAndType(
+                                        "posts-store",
+                                        org.apache.kafka.streams.state.QueryableStoreTypes.keyValueStore()));
+                        return store.get(cacheKey) != null;
+                    } catch (InvalidStateStoreException e) {
+                        return false;
+                    }
+                });
 
         // 2) Clear local cache and Redis
         localCache.invalidate(cacheKey);

@@ -116,6 +116,11 @@
             <artifactId>hypersistence-utils-hibernate-71</artifactId>
             <version>3.15.4</version>
         </dependency>
+        <dependency>
+            <groupId>io.github.resilience4j</groupId>
+            <artifactId>resilience4j-spring-boot4</artifactId>
+            <version>2.4.0</version>
+        </dependency>
 
         <dependency>
             <groupId>org.springdoc</groupId>
@@ -181,6 +186,11 @@
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>testcontainers-grafana</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers-toxiproxy</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -324,7 +334,7 @@
                 <configuration>
                     <java>
                         <palantirJavaFormat>
-                            <version>2.83.0</version>
+                            <version>2.96.0</version>
                         </palantirJavaFormat>
                         <importOrder/>
                         <removeUnusedImports/>

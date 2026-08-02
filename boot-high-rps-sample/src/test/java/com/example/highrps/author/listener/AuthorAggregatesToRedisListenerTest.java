@@ -16,6 +16,8 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.data.redis.core.ListOperations;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StreamOperations;
+import org.springframework.kafka.support.Acknowledgment;
 import tools.jackson.databind.json.JsonMapper;
 
 class AuthorAggregatesToRedisListenerTest {
@@ -32,12 +34,17 @@ class AuthorAggregatesToRedisListenerTest {
         redisTemplate = mock(RedisTemplate.class);
         var listOperations = mock(ListOperations.class);
         when(redisTemplate.opsForList()).thenReturn(listOperations);
+        var streamOperations = mock(StreamOperations.class);
+        when(redisTemplate.opsForStream()).thenReturn(streamOperations);
 
         jsonMapper = JsonMapper.builder().build();
         authorRedisRepository = mock(AuthorRedisRepository.class);
         deletionMarkerHandler = mock(DeletionMarkerHandler.class);
+        com.example.highrps.shared.config.AppProperties appProperties =
+                new com.example.highrps.shared.config.AppProperties();
+        appProperties.getBatch().setQueueKey("events:queue");
         listener = new AuthorAggregatesToRedisListener(
-                redisTemplate, "events:queue", jsonMapper, authorRedisRepository, deletionMarkerHandler);
+                redisTemplate, jsonMapper, appProperties, authorRedisRepository, deletionMarkerHandler);
     }
 
     @Test
@@ -50,9 +57,10 @@ class AuthorAggregatesToRedisListenerTest {
 
         byte[] payload = jsonMapper.writeValueAsBytes(request);
         ConsumerRecord<String, byte[]> record = new ConsumerRecord<>("authors-aggregates", 0, 0, email, payload);
+        Acknowledgment ack = mock(Acknowledgment.class);
 
         // Act
-        listener.handleAggregate(record);
+        listener.handleAggregate(record, ack);
 
         // Assert
         ArgumentCaptor<AuthorRedis> captor = ArgumentCaptor.forClass(AuthorRedis.class);
@@ -62,5 +70,6 @@ class AuthorAggregatesToRedisListenerTest {
         assertThat(savedEntity.getEmail()).isEqualTo(email);
         assertThat(savedEntity.getCreatedAt()).isEqualTo(request.createdAt());
         assertThat(savedEntity.getModifiedAt()).isEqualTo(request.modifiedAt());
+        verify(ack).acknowledge();
     }
 }

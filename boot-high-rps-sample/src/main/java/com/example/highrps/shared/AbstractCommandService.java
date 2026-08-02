@@ -1,11 +1,15 @@
 package com.example.highrps.shared;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.support.SendResult;
 
 /**
  * Base template class for command services.
@@ -19,10 +23,12 @@ public abstract class AbstractCommandService {
 
     protected final KafkaTemplate<String, Object> kafkaTemplate;
     protected final AggregateOperationQueue operationQueue;
+    protected final long publishTimeOutMs;
 
-    protected AbstractCommandService(KafkaTemplate<String, Object> kafkaTemplate) {
+    protected AbstractCommandService(KafkaTemplate<String, Object> kafkaTemplate, long publishTimeOutMs) {
         this.kafkaTemplate = kafkaTemplate;
         this.operationQueue = new AggregateOperationQueue();
+        this.publishTimeOutMs = publishTimeOutMs;
     }
 
     /**
@@ -49,13 +55,33 @@ public abstract class AbstractCommandService {
             String actionLogName,
             String entityLogName) {
 
-        return kafkaTemplate
-                .send(topic, kafkaKey, event)
+        CompletableFuture<SendResult<String, Object>> sendFuture;
+        try {
+            sendFuture = kafkaTemplate.send(topic, kafkaKey, event);
+        } catch (Exception e) {
+            log.error("Synchronous failure publishing {} event for key: {}", actionLogName, kafkaKey, e);
+            sendFuture = CompletableFuture.failedFuture(e);
+        }
+
+        return sendFuture
+                .orTimeout(publishTimeOutMs, TimeUnit.MILLISECONDS)
                 .handleAsync(
                         (res, err) -> {
                             if (err != null) {
+                                boolean isTimeout =
+                                        err instanceof TimeoutException || err.getCause() instanceof TimeoutException;
+                                boolean isKafkaTimeout = err instanceof org.apache.kafka.common.errors.TimeoutException
+                                        || err.getCause() instanceof org.apache.kafka.common.errors.TimeoutException;
+                                if (isTimeout || isKafkaTimeout) {
+                                    log.warn(
+                                            "Publish for {} event for key: {} is still pending after timeout",
+                                            actionLogName,
+                                            kafkaKey);
+                                    throw new KafkaPublishPendingException(
+                                            "Publish for " + actionLogName + " event is still pending", err);
+                                }
                                 log.error("Failed to publish {} event for key: {}", actionLogName, kafkaKey, err);
-                                throw new RuntimeException("Failed to publish " + actionLogName + " event", err);
+                                throw new KafkaPublishException("Failed to publish " + actionLogName + " event", err);
                             } else {
                                 log.info("Successfully published {} event for key: {}", actionLogName, kafkaKey);
                                 return result;
@@ -71,5 +97,9 @@ public abstract class AbstractCommandService {
                                 })
                                 .thenApply(ignored -> cmdResult),
                         VIRTUAL_EXECUTOR);
+    }
+
+    protected boolean isPendingPublishFailure(Throwable err) {
+        return err instanceof CompletionException ce && ce.getCause() instanceof KafkaPublishPendingException;
     }
 }

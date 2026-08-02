@@ -18,11 +18,13 @@ import com.example.highrps.postcomment.domain.events.PostCommentUpdatedEvent;
 import com.example.highrps.postcomment.domain.vo.PostCommentId;
 import com.example.highrps.postcomment.query.GetPostCommentQuery;
 import com.example.highrps.postcomment.query.PostCommentQueryService;
+import com.example.highrps.shared.config.AppProperties;
 import com.github.benmanes.caffeine.cache.Cache;
 import io.micrometer.core.instrument.MeterRegistry;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.concurrent.CompletableFuture;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -37,7 +39,6 @@ import org.springframework.kafka.core.KafkaTemplate;
 @ExtendWith(MockitoExtension.class)
 class PostCommentCommandServiceTest {
 
-    @InjectMocks
     private PostCommentCommandService postCommentCommandService;
 
     @Mock
@@ -63,6 +64,21 @@ class PostCommentCommandServiceTest {
 
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private MeterRegistry meterRegistry;
+
+    @BeforeEach
+    void setUp() {
+        AppProperties appProperties = new AppProperties();
+        appProperties.getKafka().setPublishTimeOutMs(5000L);
+        postCommentCommandService = new PostCommentCommandService(
+                postQueryService,
+                postCommentQueryService,
+                kafkaTemplate,
+                localCache,
+                postCommentMapper,
+                meterRegistry,
+                deletionMarkerHandler,
+                appProperties);
+    }
 
     @Test
     @DisplayName("Should publish PostCommentCreatedEvent when creating a comment")

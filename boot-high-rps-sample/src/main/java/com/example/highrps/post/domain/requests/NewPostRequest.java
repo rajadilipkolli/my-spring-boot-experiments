@@ -4,6 +4,7 @@ import com.example.highrps.post.domain.PostDetailsResponse;
 import com.example.highrps.post.domain.TagResponse;
 import com.example.highrps.shared.IdGenerator;
 import com.fasterxml.jackson.annotation.JsonAlias;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -12,6 +13,7 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.List;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public record NewPostRequest(
         Long postId,
         @NotBlank(message = "PostTitle must not be blank") String title,

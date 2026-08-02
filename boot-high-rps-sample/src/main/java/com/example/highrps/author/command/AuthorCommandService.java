@@ -9,6 +9,7 @@ import com.example.highrps.author.query.AuthorQueryService;
 import com.example.highrps.infrastructure.redis.DeletionMarkerHandler;
 import com.example.highrps.shared.AbstractCommandService;
 import com.example.highrps.shared.ResourceNotFoundException;
+import com.example.highrps.shared.config.AppProperties;
 import com.github.benmanes.caffeine.cache.Cache;
 import java.time.Duration;
 import java.util.Locale;
@@ -41,8 +42,9 @@ public class AuthorCommandService extends AbstractCommandService {
             JsonMapper jsonMapper,
             DeletionMarkerHandler deletionMarkerHandler,
             AuthorQueryService authorQueryService,
-            RedisTemplate<String, String> redisTemplate) {
-        super(kafkaTemplate);
+            RedisTemplate<String, String> redisTemplate,
+            AppProperties appProperties) {
+        super(kafkaTemplate, appProperties.getKafka().getPublishTimeOutMs());
         this.localCache = localCache;
         this.jsonMapper = jsonMapper;
         this.deletionMarkerHandler = deletionMarkerHandler;
@@ -92,7 +94,7 @@ public class AuthorCommandService extends AbstractCommandService {
                         "create author",
                         "Author")
                 .whenComplete((res, err) -> {
-                    if (err != null) {
+                    if (err != null && !isPendingPublishFailure(err)) {
                         try {
                             redisTemplate.delete(reservationKey);
                         } catch (Exception e) {
