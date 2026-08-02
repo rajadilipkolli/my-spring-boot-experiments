@@ -1,0 +1,28 @@
+name: boot-ultimate-postgres
+
+on:
+  push:
+    paths:
+      - "boot-ultimate-postgres/**"
+      - ".github/workflows/boot-ultimate-postgres.yml"
+  pull_request:
+    paths:
+      - "boot-ultimate-postgres/**"
+      - ".github/workflows/boot-ultimate-postgres.yml"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: boot-ultimate-postgres
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: '25'
+          distribution: 'temurin'
+          cache: 'maven'
+      - name: Build with Maven
+        run: ../mvnw clean verify -pl boot-ultimate-postgres

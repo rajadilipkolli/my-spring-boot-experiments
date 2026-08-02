@@ -27,6 +27,7 @@
         <module>boot-rest-docs-sample</module>
         <module>boot-strategy-plugin</module>
         <module>boot-togglz-sample</module>
+        <module>boot-ultimate-postgres</module>
         <module>boot-ultimate-redis</module>
         <module>graphql/boot-graphql-querydsl</module>
         <module>graphql/boot-graphql-webflux</module>

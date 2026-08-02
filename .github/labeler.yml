@@ -30,6 +30,10 @@
   - changed-files:
       - any-glob-to-any-file:
           - boot-togglz-sample/**/*
+"component: ultimate-postgres":
+  - changed-files:
+      - any-glob-to-any-file:
+          - boot-ultimate-postgres/**/*
 "component: ultimate-redis":
   - changed-files:
       - any-glob-to-any-file:
@@ -141,6 +145,7 @@
           - boot-rest-docs-sample/pom.xml
           - boot-strategy-plugin/pom.xml
           - boot-togglz-sample/pom.xml
+          - boot-ultimate-postgres/pom.xml
           - boot-ultimate-redis/pom.xml
           - graphql/boot-graphql-querydsl/pom.xml
           - graphql/boot-graphql-webflux/pom.xml

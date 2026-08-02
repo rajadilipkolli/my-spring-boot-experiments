@@ -1,0 +1,5 @@
+databaseChangeLog:
+  - include:
+      file: db/changelog/changes/v1-create-cache-table.sql
+  - include:
+      file: db/changelog/changes/v2-create-job-queue-table.sql

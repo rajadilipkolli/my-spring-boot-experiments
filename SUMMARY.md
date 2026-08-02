@@ -10,6 +10,7 @@
 * [boot-rest-docs-sample](boot-rest-docs-sample/README.md)
 * [boot-strategy-plugin](boot-strategy-plugin/ReadMe.md)
 * [spring-boot-togglz-sample](boot-togglz-sample/README.md)
+* [spring-boot-ultimate-postgres](boot-ultimate-postgres/README.md)
 * [spring-boot-ultimate-redis](boot-ultimate-redis/README.md)
 * [GraphQL](graphql/README.md)
   * [spring-boot-graphql-querydsl](graphql/boot-graphql-querydsl/README.md)
