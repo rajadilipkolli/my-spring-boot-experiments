@@ -5,10 +5,14 @@ on:
     paths:
       - "boot-ultimate-postgres/**"
       - ".github/workflows/boot-ultimate-postgres.yml"
+    branches: [main]
   pull_request:
     paths:
       - "boot-ultimate-postgres/**"
-      - ".github/workflows/boot-ultimate-postgres.yml"
+    types:
+      - opened
+      - synchronize
+      - reopened
 
 jobs:
   build:
@@ -16,13 +20,16 @@ jobs:
     defaults:
       run:
         working-directory: boot-ultimate-postgres
+
     steps:
-      - uses: actions/checkout@v4
-      - name: Set up Java
-        uses: actions/setup-java@v4
+      - uses: actions/checkout@v7
         with:
-          java-version: '25'
-          distribution: 'temurin'
-          cache: 'maven'
-      - name: Build with Maven
-        run: ../mvnw clean verify -pl boot-ultimate-postgres
+          fetch-depth: 0
+      - name: Set up JDK
+        uses: actions/setup-java@v5.7.0
+        with:
+          java-version: 25
+          distribution: "temurin"
+          cache: "maven"
+      - name: Build and analyze
+        run: ./mvnw clean verify
