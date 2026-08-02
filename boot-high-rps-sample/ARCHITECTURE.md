@@ -14,19 +14,19 @@ This application (`boot-high-rps-sample`) demonstrates an ultra-high-throughput,
 
 ```mermaid
 flowchart TD
-    Client((Client)) -->|1. HTTP POST| REST(REST Controllers)
-    REST -->|2. Validate & Command| Service(Command Services)
+    Client(("Client")) -->|"1. HTTP POST"| REST("REST Controllers")
+    REST -->|"2. Validate & Command"| Service("Command Services")
     
-    Service -->|3. Local Cache Update| Cache[(Caffeine Local Cache)]
-    Service -->|4. Produce Event| KafkaAgg[(Kafka: *-aggregates topics)]
+    Service -->|"3. Produce Event"| KafkaAgg[("Kafka: *-aggregates topics")]
+    Service -.->|"4. Local Cache Update (Post-Ack)"| Cache[("Caffeine Local Cache")]
     
-    KafkaAgg -->|5. Consume| Listener(Kafka Listeners)
-    Listener -->|6. XADD| RedisStreams[(Redis Streams)]
-    Listener -->|7. Update Materialized View| RedisCache[(Redis KV Projections)]
+    KafkaAgg -->|"5. Consume"| Listener("Kafka Listeners")
+    Listener -->|"6. XADD"| RedisStreams[("Redis Streams")]
+    Listener -->|"7. Update Materialized View"| RedisCache[("Redis KV Projections")]
     
-    RedisStreams -->|8. XREADGROUP| Batch(Scheduled Batch Processors)
-    Batch -->|9. Bulk Upsert| Postgres[(PostgreSQL)]
-    Batch -.->|10. XACK on Commit| RedisStreams
+    RedisStreams -->|"8. XREADGROUP"| Batch("Scheduled Batch Processors")
+    Batch -->|"9. Bulk Upsert"| Postgres[("PostgreSQL")]
+    Batch -.->|"10. XACK on Commit"| RedisStreams
 ```
 
 ## Detailed CQRS Implementation
@@ -42,15 +42,15 @@ The Query side serves data from highly optimized read models.
 - **Layered Caching Strategy**:
   1. **Caffeine**: Ultra-fast, localized in-memory cache, updated synchronously during writes.
   2. **Redis**: Distributed materialized view (updated directly by the Kafka-to-Redis listeners).
-  3. **PostgreSQL**: Source of truth fallback and interactive query target.
+  3. **PostgreSQL**: Read-model fallback materialized from Kafka, and interactive query target. Kafka serves as the immediate ledger, with scheduled background workers reconciling its state into PostgreSQL.
 
 ## Fault Tolerance & Reliability Patterns
 
 1. **Dead Letter Queues (DLQ)**: Deserialization failures (via `ErrorHandlingDeserializer`) and business-logic errors automatically route to a Kafka-backed DLT. `KafkaConfig` uses `DeadLetterPublishingRecoverer` with `KafkaTemplate` to publish failures to `<source>-dlt` topics. The required DLT topics must be provisioned.
 2. **Circuit Breakers**: `Resilience4j` Circuit Breakers and Bulkheads wrap the Redis projections and database batch writes to halt processing gracefully during backend degradation.
-3. **Idempotency via Natural Keys**: Because `ScheduledBatchProcessor` operations use natural-key `upserts`, redelivery caused by a crash between the database write (Step 9) and the Redis `XACK` (Step 10) is completely safe.
+3. **Idempotency via Natural Keys**: Because `ScheduledBatchProcessor` operations use natural-key `upserts`, redelivery caused by a crash between the database write (Step 9) and the Redis `XACK` (Step 10) is safe, provided the handoff to Redis Streams is durable and upserts remain strictly idempotent.
 4. **Graceful Deletions**: Deletions are processed as Tombstone events, with unified logic managed by `DeletionMarkerHandler`.
-5. **Strict Commit Semantics**: Auto-commit is disabled (`enable-auto-commit=false`). Manual acks are only issued *after* the durable handoff to Redis Streams, ensuring zero data loss during rebalances.
+5. **Strict Commit Semantics**: Auto-commit is disabled (`enable-auto-commit=false`). Manual acks are only issued *after* the durable handoff to Redis Streams, which prevents data loss under the conditions of durable handoff and idempotent processing.
 
 ## Observability & Configuration
 

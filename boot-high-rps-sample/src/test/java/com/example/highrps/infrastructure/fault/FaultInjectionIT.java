@@ -19,7 +19,7 @@ import org.springframework.test.context.TestPropertySource;
 
 @TestPropertySource(
         properties = {
-            "app.kafka.publish-time-out-ms=2000",
+            "app.kafka.publish-time-out-ms=1000",
             "spring.kafka.producer.properties.max.block.ms=2000",
             "spring.kafka.producer.properties.request.timeout.ms=1000",
             "spring.kafka.producer.properties.delivery.timeout.ms=2000"
@@ -30,7 +30,7 @@ class FaultInjectionIT extends AbstractIntegrationTest {
     private static final Logger log = LoggerFactory.getLogger(FaultInjectionIT.class);
 
     @Test
-    @DisplayName("Should return HTTP 503 (KafkaPublishException) on command path during broker outage")
+    @DisplayName("Should return KafkaPublishPendingException on command path during broker outage")
     void shouldFailSafelyDuringBrokerOutage() throws java.io.IOException {
         log.info("Cutting connection via Toxiproxy to simulate broker outage...");
         kafkaProxy.disable();

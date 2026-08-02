@@ -49,7 +49,11 @@ import tools.jackson.databind.json.JsonMapper;
 @Testcontainers
 @ActiveProfiles("test")
 @TestPropertySource(
-        properties = {"spring.kafka.streams.cleanup.on-startup=true", "spring.kafka.streams.cleanup.on-shutdown=true"})
+        properties = {
+            "spring.kafka.streams.cleanup.on-startup=true",
+            "spring.kafka.streams.cleanup.on-shutdown=true",
+            "app.batch.delay-ms=99999999"
+        })
 @AutoConfigureMockMvc
 @AutoConfigureTracing
 @AutoConfigureMetrics

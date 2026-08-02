@@ -70,7 +70,10 @@ public abstract class AbstractAggregatesToRedisListener<T> {
      * Deletion events usually only contain the identifier and potentially schemaVersion.
      */
     protected boolean isDeletionEvent(JsonNode node) {
-        return node.has(getDeletionIdentifierField()) && node.size() <= 2;
+        if (!node.has(getDeletionIdentifierField())) {
+            return false;
+        }
+        return node.size() == 1 || (node.size() == 2 && node.has("schemaVersion"));
     }
 
     /**

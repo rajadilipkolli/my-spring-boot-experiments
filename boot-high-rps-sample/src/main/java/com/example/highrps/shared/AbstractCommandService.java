@@ -70,13 +70,8 @@ public abstract class AbstractCommandService {
                             if (err != null) {
                                 boolean isTimeout =
                                         err instanceof TimeoutException || err.getCause() instanceof TimeoutException;
-                                boolean isKafkaTimeout =
-                                        err.getClass().getName().contains("TimeoutException")
-                                                || (err.getCause() != null
-                                                        && err.getCause()
-                                                                .getClass()
-                                                                .getName()
-                                                                .contains("TimeoutException"));
+                                boolean isKafkaTimeout = err instanceof org.apache.kafka.common.errors.TimeoutException
+                                        || err.getCause() instanceof org.apache.kafka.common.errors.TimeoutException;
                                 if (isTimeout || isKafkaTimeout) {
                                     log.warn(
                                             "Publish for {} event for key: {} is still pending after timeout",

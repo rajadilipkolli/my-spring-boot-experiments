@@ -5,6 +5,7 @@ import static org.awaitility.Awaitility.await;
 
 import com.example.highrps.author.domain.AuthorEntity;
 import com.example.highrps.common.AbstractIntegrationTest;
+import com.example.highrps.infrastructure.kafka.batch.ScheduledBatchProcessor;
 import com.example.highrps.post.domain.PostDetailsEntity;
 import com.example.highrps.post.domain.PostDetailsResponse;
 import com.example.highrps.post.domain.PostEntity;
@@ -66,7 +67,7 @@ class PostCommentControllerIT extends AbstractIntegrationTest {
     @Test
     void shouldCreatePostComment() {
         long count = postCommentRepository.count();
-        mockMvcTester
+        var result = mockMvcTester
                 .post()
                 .uri("/api/posts/{postId}/comments", postId)
                 .content("""
@@ -77,8 +78,9 @@ class PostCommentControllerIT extends AbstractIntegrationTest {
                                                 }
                                                 """)
                 .contentType(MediaType.APPLICATION_JSON)
-                .exchange()
-                .assertThat()
+                .exchange();
+
+        result.assertThat()
                 .hasStatus(HttpStatus.CREATED)
                 .hasContentType(MediaType.APPLICATION_JSON)
                 .containsHeader("Location")
@@ -95,10 +97,25 @@ class PostCommentControllerIT extends AbstractIntegrationTest {
                     assertThat(response.modifiedAt()).isNull();
                 });
 
+        String location = result.getResponse().getHeader("Location");
+        Long commentId = Long.parseLong(location.substring(location.lastIndexOf('/') + 1));
+
+        await().atMost(Duration.ofSeconds(10)).untilAsserted(() -> {
+            mockMvcTester
+                    .get()
+                    .uri("/api/posts/{postId}/comments/{id}", postId, commentId)
+                    .exchange()
+                    .assertThat()
+                    .hasStatus(HttpStatus.OK);
+        });
+
         await().atMost(Duration.ofSeconds(60))
                 .pollDelay(Duration.ofSeconds(1))
                 .pollInterval(Duration.ofMillis(500))
-                .untilAsserted(() -> assertThat(postCommentRepository.count()).isEqualTo(count + 1));
+                .untilAsserted(() -> {
+                    scheduledBatchProcessors.forEach(ScheduledBatchProcessor::processBatch);
+                    assertThat(postCommentRepository.count()).isEqualTo(count + 1);
+                });
     }
 
     @Test
@@ -149,8 +166,11 @@ class PostCommentControllerIT extends AbstractIntegrationTest {
         await().atMost(Duration.ofSeconds(60))
                 .pollDelay(Duration.ofSeconds(1))
                 .pollInterval(Duration.ofMillis(500))
-                .untilAsserted(() -> assertThat(postCommentRepository.findByCommentRefIdAndPostRefId(commentId, postId))
-                        .isPresent());
+                .untilAsserted(() -> {
+                    scheduledBatchProcessors.forEach(ScheduledBatchProcessor::processBatch);
+                    assertThat(postCommentRepository.findByCommentRefIdAndPostRefId(commentId, postId))
+                            .isPresent();
+                });
     }
 
     @Test
@@ -256,15 +276,18 @@ class PostCommentControllerIT extends AbstractIntegrationTest {
         await().atMost(Duration.ofSeconds(60))
                 .pollDelay(Duration.ofSeconds(1))
                 .pollInterval(Duration.ofMillis(500))
-                .untilAsserted(() -> assertThat(postCommentRepository.findByCommentRefIdAndPostRefId(commentId, postId))
-                        .hasValueSatisfying(commentEntity -> {
-                            assertThat(commentEntity.getTitle()).isEqualTo("Updated Title");
-                            assertThat(commentEntity.getContent()).isEqualTo("Updated content");
-                            assertThat(commentEntity.isPublished()).isTrue();
-                            assertThat(commentEntity.getPublishedAt()).isNotNull();
-                            assertThat(commentEntity.getCreatedAt()).isNotNull();
-                            assertThat(commentEntity.getModifiedAt()).isNotNull();
-                        }));
+                .untilAsserted(() -> {
+                    scheduledBatchProcessors.forEach(ScheduledBatchProcessor::processBatch);
+                    assertThat(postCommentRepository.findByCommentRefIdAndPostRefId(commentId, postId))
+                            .hasValueSatisfying(commentEntity -> {
+                                assertThat(commentEntity.getTitle()).isEqualTo("Updated Title");
+                                assertThat(commentEntity.getContent()).isEqualTo("Updated content");
+                                assertThat(commentEntity.isPublished()).isTrue();
+                                assertThat(commentEntity.getPublishedAt()).isNotNull();
+                                assertThat(commentEntity.getCreatedAt()).isNotNull();
+                                assertThat(commentEntity.getModifiedAt()).isNotNull();
+                            });
+                });
     }
 
     @Test
@@ -309,8 +332,11 @@ class PostCommentControllerIT extends AbstractIntegrationTest {
 
         await().atMost(Duration.ofSeconds(60))
                 .pollInterval(Duration.ofSeconds(1))
-                .untilAsserted(() -> assertThat(postCommentRepository.findByCommentRefIdAndPostRefId(commentId, postId))
-                        .isEmpty());
+                .untilAsserted(() -> {
+                    scheduledBatchProcessors.forEach(ScheduledBatchProcessor::processBatch);
+                    assertThat(postCommentRepository.findByCommentRefIdAndPostRefId(commentId, postId))
+                            .isEmpty();
+                });
     }
 
     @Test

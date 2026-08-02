@@ -60,7 +60,11 @@ public class ContainersConfig {
     Proxy kafkaProxy(ToxiproxyContainer toxiproxyContainer) throws Exception {
         ToxiproxyClient toxiproxyClient =
                 new ToxiproxyClient(toxiproxyContainer.getHost(), toxiproxyContainer.getControlPort());
-        return toxiproxyClient.createProxy("kafka", "0.0.0.0:8666", "kafka:9092");
+        try {
+            return toxiproxyClient.getProxy("kafka");
+        } catch (Exception e) {
+            return toxiproxyClient.createProxy("kafka", "0.0.0.0:8666", "kafka:9092");
+        }
     }
 
     @Bean

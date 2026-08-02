@@ -28,7 +28,11 @@ class KafkaErrorHandlingIT extends AbstractIntegrationTest {
         // Act: send poison pill
         String poisonPillKey = "poison-pill-key";
         byte[] poisonPillValue = "invalid-json-not-base64".getBytes();
-        kafkaTemplate.send(topic, poisonPillKey, poisonPillValue);
+        try {
+            kafkaTemplate.send(topic, poisonPillKey, poisonPillValue).get(10, java.util.concurrent.TimeUnit.SECONDS);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
 
         // Assert: verify the poison pill arrives in DLT and is written to Redis by @DltHandler
         await().atMost(Duration.ofSeconds(10)).untilAsserted(() -> {
@@ -55,19 +59,5 @@ class KafkaErrorHandlingIT extends AbstractIntegrationTest {
         // Note: Kafka Streams doesn't automatically route to DLT for deserialization errors
         // without explicit RecoveringDeserializationExceptionHandler configuration.
         // We only assert it didn't crash here.
-        /*
-        Map<String, Object> consumerProps =
-                KafkaTestUtils.consumerProps(kafkaContainer.getBootstrapServers(), "test-dlt-group", Boolean.TRUE);
-        consumerProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-        try (Consumer<byte[], byte[]> consumer =
-                new KafkaConsumer<>(consumerProps, new ByteArrayDeserializer(), new ByteArrayDeserializer())) {
-
-            consumer.subscribe(Collections.singletonList("events.DLT"));
-            ConsumerRecord<byte[], byte[]> dltRecord =
-                    KafkaTestUtils.getSingleRecord(consumer, "events.DLT", Duration.ofSeconds(10));
-            assertThat(dltRecord).isNotNull();
-            assertThat(new String(dltRecord.value())).isEqualTo("not-a-valid-json");
-        }
-        */
     }
 }

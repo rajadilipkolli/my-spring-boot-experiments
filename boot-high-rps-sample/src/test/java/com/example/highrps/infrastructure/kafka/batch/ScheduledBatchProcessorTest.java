@@ -22,6 +22,9 @@ class ScheduledBatchProcessorTest {
     void shouldIdentifyBusyGroupExceptions() {
         assertTrue(ScheduledBatchProcessor.isBusyGroupException(
                 new RuntimeException("BUSYGROUP Consumer Group name already exists")));
+        assertTrue(ScheduledBatchProcessor.isBusyGroupException(
+                new RuntimeException("Wrapper exception", new RuntimeException("BUSYGROUP error"))));
         assertFalse(ScheduledBatchProcessor.isBusyGroupException(new RuntimeException("connection refused")));
+        assertFalse(ScheduledBatchProcessor.isBusyGroupException(new RuntimeException((String) null)));
     }
 }

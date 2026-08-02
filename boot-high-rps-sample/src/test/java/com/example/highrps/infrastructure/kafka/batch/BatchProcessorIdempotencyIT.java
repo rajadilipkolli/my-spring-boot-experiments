@@ -56,6 +56,9 @@ class BatchProcessorIdempotencyIT extends AbstractIntegrationTest {
         redisTemplate.opsForStream().add(queueKey, Map.of("payload", postPayload1));
         redisTemplate.opsForStream().add(queueKey, Map.of("payload", postPayload2));
 
+        // Execute batch processor explicitly since scheduling is disabled
+        scheduledBatchProcessors.forEach(ScheduledBatchProcessor::processBatch);
+
         // Verify that only one record was inserted, and it's the latter one (upserted)
         await().atMost(Duration.ofSeconds(10)).untilAsserted(() -> {
             List<PostEntity> posts = postRepository.findByPostRefIdIn(List.of(1001L));

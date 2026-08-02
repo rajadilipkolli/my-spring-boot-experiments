@@ -5,6 +5,7 @@ import static org.awaitility.Awaitility.await;
 
 import com.example.highrps.author.domain.AuthorEntity;
 import com.example.highrps.common.AbstractIntegrationTest;
+import com.example.highrps.infrastructure.kafka.batch.ScheduledBatchProcessor;
 import com.example.highrps.post.command.PostCommandResult;
 import com.example.highrps.post.domain.PostDetailsResponse;
 import com.example.highrps.post.domain.PostRedis;
@@ -35,7 +36,7 @@ class PostControllerIT extends AbstractIntegrationTest {
 
     @Test
     void createPost() {
-        mockMvcTester
+        var result = mockMvcTester
                 .post()
                 .content("""
                         {
@@ -50,11 +51,24 @@ class PostControllerIT extends AbstractIntegrationTest {
                         """)
                 .uri("/api/posts")
                 .contentType(MediaType.APPLICATION_JSON)
-                .exchange()
-                .assertThat()
+                .exchange();
+
+        result.assertThat()
                 .hasStatus(HttpStatus.CREATED)
                 .hasContentType(MediaType.APPLICATION_JSON)
                 .containsHeader("Location");
+
+        String location = result.getResponse().getHeader("Location");
+        Long postId = Long.parseLong(location.substring(location.lastIndexOf('/') + 1));
+
+        await().atMost(Duration.ofSeconds(10)).untilAsserted(() -> {
+            mockMvcTester
+                    .get()
+                    .uri("/api/posts/{postId}", postId)
+                    .exchange()
+                    .assertThat()
+                    .hasStatus(HttpStatus.OK);
+        });
     }
 
     @Test
@@ -313,6 +327,7 @@ class PostControllerIT extends AbstractIntegrationTest {
         await().atMost(Duration.ofSeconds(30))
                 .pollInterval(Duration.ofSeconds(1))
                 .untilAsserted(() -> {
+                    scheduledBatchProcessors.forEach(ScheduledBatchProcessor::processBatch);
                     assertThat(postRepository.existsByPostRefId(postId.get())).isTrue();
                     assertThat(tagRepository.count()).isEqualTo(2);
                     assertThat(postTagRepository.countByPostEntity_Title(title)).isEqualTo(2);
@@ -350,6 +365,7 @@ class PostControllerIT extends AbstractIntegrationTest {
         await().atMost(Duration.ofSeconds(30))
                 .pollInterval(Duration.ofSeconds(1))
                 .untilAsserted(() -> {
+                    scheduledBatchProcessors.forEach(ScheduledBatchProcessor::processBatch);
                     assertThat(postRepository.existsByPostRefId(postId.get())).isTrue();
                     assertThat(tagRepository.count()).isEqualTo(2);
                     assertThat(postTagRepository.countByPostEntity_Title(title)).isEqualTo(2);
@@ -391,6 +407,7 @@ class PostControllerIT extends AbstractIntegrationTest {
         await().atMost(Duration.ofSeconds(60))
                 .pollInterval(Duration.ofSeconds(1))
                 .untilAsserted(() -> {
+                    scheduledBatchProcessors.forEach(ScheduledBatchProcessor::processBatch);
                     assertThat(postRepository.existsByPostRefId(postId.get())).isFalse();
                     assertThat(postTagRepository.countByPostEntity_Title(title)).isEqualTo(0);
                 });
