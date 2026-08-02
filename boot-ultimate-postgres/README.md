@@ -38,4 +38,4 @@ The `Initializer` will automatically run on startup and demonstrate adding to th
 ### Pub/Sub Endpoints
 - **Publish**: `POST /api/pubsub/publish` (Body: `your message here`)
 - **Messages**: `GET /api/pubsub/messages`
-- **Combined**: `POST /api/pubsub/combined/{id}` (Body: `combined payload`)
+- **Combined**: `POST /api/pubsub/combined/{id}` (Body: `{"task": "combined payload"}`)

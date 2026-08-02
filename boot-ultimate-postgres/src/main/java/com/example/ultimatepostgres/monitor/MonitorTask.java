@@ -25,8 +25,8 @@ public class MonitorTask {
     @Transactional(readOnly = true)
     public void monitor() {
         long cacheSize = cacheRepository.count();
-        long queueDepth = jobQueueRepository.count(); // could be refined to count only PENDING
+        long totalJobs = jobQueueRepository.count();
 
-        log.info("System Monitor: Cache Size = {}, Queue Depth = {}", cacheSize, queueDepth);
+        log.info("System Monitor: Cache Size = {}, Total Jobs = {}", cacheSize, totalJobs);
     }
 }

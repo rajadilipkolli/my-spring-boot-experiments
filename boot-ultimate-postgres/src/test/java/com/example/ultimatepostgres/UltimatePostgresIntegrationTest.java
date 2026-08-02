@@ -59,13 +59,18 @@ class UltimatePostgresIntegrationTest extends AbstractIntegrationTest {
             latch.countDown();
         };
 
-        executor.submit(worker);
-        executor.submit(worker);
+        try {
+            executor.submit(worker);
+            executor.submit(worker);
 
-        latch.await(5, TimeUnit.SECONDS);
+            boolean completed = latch.await(5, TimeUnit.SECONDS);
+            assertThat(completed).isTrue();
 
-        // Since SKIP LOCKED is used, both workers should be able to claim 10 disjoint jobs concurrently
-        assertThat(totalProcessed.get()).isEqualTo(20);
+            // Since SKIP LOCKED is used, both workers should be able to claim 10 disjoint jobs concurrently
+            assertThat(totalProcessed.get()).isEqualTo(20);
+        } finally {
+            executor.shutdownNow();
+        }
     }
 
     @Test

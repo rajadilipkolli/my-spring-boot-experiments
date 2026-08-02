@@ -20,7 +20,10 @@ public class CacheService {
 
     @Transactional
     public void put(String key, JsonNode value, long ttlMillis) {
-        OffsetDateTime expiresAt = OffsetDateTime.now().plusNanos(ttlMillis * 1_000_000);
+        if (ttlMillis <= 0 || ttlMillis > 31536000000L) {
+            throw new IllegalArgumentException("TTL must be positive and within 1 year");
+        }
+        OffsetDateTime expiresAt = OffsetDateTime.now().plus(ttlMillis, java.time.temporal.ChronoUnit.MILLIS);
         cacheRepository.upsert(key, value.toString(), expiresAt);
     }
 
@@ -31,7 +34,8 @@ public class CacheService {
 
     @Transactional(readOnly = true)
     public List<JsonNode> getByPrefix(String prefix) {
-        return cacheRepository.findValidByPrefix(prefix + "%", OffsetDateTime.now()).stream()
+        String escapedPrefix = prefix.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_");
+        return cacheRepository.findValidByPrefix(escapedPrefix + "%", OffsetDateTime.now()).stream()
                 .map(CacheEntity::getValue)
                 .toList();
     }

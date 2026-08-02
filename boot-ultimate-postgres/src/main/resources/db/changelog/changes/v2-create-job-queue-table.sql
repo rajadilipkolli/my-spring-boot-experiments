@@ -12,4 +12,4 @@ CREATE TABLE job_queue (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX idx_job_queue_status_available_at_priority ON job_queue (status, available_at, priority DESC);
+CREATE INDEX idx_job_queue_status_available_at_priority ON job_queue (status, priority DESC, id ASC, available_at);

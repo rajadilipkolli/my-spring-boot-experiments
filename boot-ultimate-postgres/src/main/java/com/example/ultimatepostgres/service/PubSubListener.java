@@ -1,5 +1,6 @@
 package com.example.ultimatepostgres.service;
 
+import com.zaxxer.hikari.HikariDataSource;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import java.sql.Connection;
@@ -8,6 +9,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.sql.DataSource;
 import org.postgresql.PGConnection;
@@ -29,6 +31,14 @@ public class PubSubListener {
 
     public PubSubListener(DataSource dataSource) {
         this.dataSource = dataSource;
+        if (dataSource instanceof HikariDataSource hikariDataSource) {
+            int maxPoolSize = hikariDataSource.getMaximumPoolSize();
+            if (maxPoolSize < 11) {
+                log.warn(
+                        "Hikari pool size is {}, which might be too small for dedicated LISTEN connection",
+                        maxPoolSize);
+            }
+        }
     }
 
     @PostConstruct
@@ -49,25 +59,40 @@ public class PubSubListener {
     }
 
     private void listen() {
-        try (Connection conn = dataSource.getConnection();
-                Statement stmt = conn.createStatement()) {
+        while (running.get()) {
+            try (Connection conn = dataSource.getConnection();
+                    Statement stmt = conn.createStatement()) {
 
-            PGConnection pgConn = conn.unwrap(PGConnection.class);
-            stmt.execute("LISTEN " + CHANNEL);
-            log.info("Listening on channel: {}", CHANNEL);
+                PGConnection pgConn = conn.unwrap(PGConnection.class);
+                stmt.execute("LISTEN " + CHANNEL);
+                log.info("Listening on channel: {}", CHANNEL);
 
-            while (running.get()) {
-                PGNotification[] notifications = pgConn.getNotifications(1000);
-                if (notifications != null) {
-                    for (PGNotification notification : notifications) {
-                        String payload = notification.getParameter();
-                        log.info("Received notification on {}: {}", notification.getName(), payload);
-                        receivedMessages.add(payload);
+                while (running.get()) {
+                    PGNotification[] notifications = pgConn.getNotifications(1000);
+                    if (notifications != null) {
+                        for (PGNotification notification : notifications) {
+                            String payload = notification.getParameter();
+                            log.info("Received notification on {}: {}", notification.getName(), payload);
+                            synchronized (receivedMessages) {
+                                receivedMessages.add(payload);
+                                if (receivedMessages.size() > 100) {
+                                    receivedMessages.remove(0);
+                                }
+                            }
+                        }
+                    }
+                }
+            } catch (SQLException e) {
+                if (running.get()) {
+                    log.error("PubSubListener error, retrying in 5 seconds...", e);
+                    try {
+                        TimeUnit.SECONDS.sleep(5);
+                    } catch (InterruptedException ie) {
+                        Thread.currentThread().interrupt();
+                        break;
                     }
                 }
             }
-        } catch (SQLException e) {
-            log.error("PubSubListener error", e);
         }
     }
 

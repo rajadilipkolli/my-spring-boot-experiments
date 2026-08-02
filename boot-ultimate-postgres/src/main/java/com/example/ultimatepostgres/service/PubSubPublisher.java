@@ -14,6 +14,9 @@ public class PubSubPublisher {
     }
 
     public void publish(String message) {
+        if (message != null && message.getBytes(java.nio.charset.StandardCharsets.UTF_8).length >= 8000) {
+            throw new IllegalArgumentException("Payload size must be less than 8000 bytes");
+        }
         jdbcTemplate.queryForObject("SELECT pg_notify(?, ?)", String.class, CHANNEL, message);
     }
 }

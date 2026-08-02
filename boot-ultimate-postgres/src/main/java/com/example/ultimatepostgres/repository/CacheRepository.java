@@ -14,7 +14,9 @@ public interface CacheRepository extends JpaRepository<CacheEntity, String> {
     @Query(value = "SELECT * FROM cache_entries WHERE key = :key AND expires_at > :now", nativeQuery = true)
     Optional<CacheEntity> findValidByKey(@Param("key") String key, @Param("now") OffsetDateTime now);
 
-    @Query(value = "SELECT * FROM cache_entries WHERE key LIKE :prefix AND expires_at > :now", nativeQuery = true)
+    @Query(
+            value = "SELECT * FROM cache_entries WHERE key LIKE :prefix ESCAPE '\\' AND expires_at > :now",
+            nativeQuery = true)
     List<CacheEntity> findValidByPrefix(@Param("prefix") String prefix, @Param("now") OffsetDateTime now);
 
     @Modifying

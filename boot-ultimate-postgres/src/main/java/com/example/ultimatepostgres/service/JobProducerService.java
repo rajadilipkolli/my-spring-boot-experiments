@@ -20,7 +20,7 @@ public class JobProducerService {
     public JobQueueEntity enqueue(JsonNode payload, int priority) {
         JobQueueEntity job = new JobQueueEntity();
         job.setPayload(payload);
-        job.setStatus("PENDING");
+        job.setStatus(com.example.ultimatepostgres.model.JobStatus.PENDING);
         job.setAvailableAt(OffsetDateTime.now());
         job.setPriority(priority);
         return jobQueueRepository.save(job);

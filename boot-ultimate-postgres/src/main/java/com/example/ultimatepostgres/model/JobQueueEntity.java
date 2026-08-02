@@ -18,8 +18,9 @@ public class JobQueueEntity extends BaseEntity {
     @Column(name = "payload", nullable = false, columnDefinition = "jsonb")
     private JsonNode payload;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
-    private String status;
+    private JobStatus status;
 
     @Column(name = "available_at", nullable = false)
     private OffsetDateTime availableAt;
@@ -46,11 +47,11 @@ public class JobQueueEntity extends BaseEntity {
         this.payload = payload;
     }
 
-    public String getStatus() {
+    public JobStatus getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(JobStatus status) {
         this.status = status;
     }
 
