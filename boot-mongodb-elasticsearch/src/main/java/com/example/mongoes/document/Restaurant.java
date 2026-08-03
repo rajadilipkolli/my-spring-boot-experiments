@@ -32,7 +32,7 @@ public class Restaurant {
     @Field(value = "restaurant_name", fielddata = true, type = FieldType.Text)
     private String name;
 
-    @Field(type = FieldType.Nested, includeInParent = true)
+    @Field(type = FieldType.Object)
     private Address address;
 
     @NotBlank(message = "Borough Can't be Blank")

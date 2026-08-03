@@ -7,6 +7,7 @@ import com.example.mongoes.common.AbstractIntegrationTest;
 import com.example.mongoes.document.Address;
 import com.example.mongoes.document.Grades;
 import com.example.mongoes.document.Restaurant;
+import com.example.mongoes.model.response.ResultData;
 import com.example.mongoes.model.response.SearchPageResponse;
 import java.net.URI;
 import java.time.Duration;
@@ -14,7 +15,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.function.Function;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.core.ParameterizedTypeReference;
@@ -40,7 +40,7 @@ class SearchControllerIntTest extends AbstractIntegrationTest {
         restaurant1.setCuisine("Chinese");
         Address otherAddress =
                 new Address()
-                        .setLocation(new Point(-74.0, 40.7))
+                        .setLocation(new Point(-75.0, 41.0))
                         .setBuilding("otherBuilding")
                         .setZipcode(11111)
                         .setStreet("otherStreet");
@@ -127,7 +127,7 @@ class SearchControllerIntTest extends AbstractIntegrationTest {
                             assertThat(first.getGrades()).hasSize(2);
                             assertThat(first.getAddress()).isNotNull();
                             assertThat(first.getAddress().getLocation())
-                                    .isEqualTo(new Point(-74.0, 40.7));
+                                    .isEqualTo(new Point(-75.0, 41.0));
                             assertThat(page.pageNumber()).isOne();
                             assertThat(page.totalPages()).isOne();
                             assertThat(page.isFirst()).isTrue();
@@ -509,14 +509,13 @@ class SearchControllerIntTest extends AbstractIntegrationTest {
     }
 
     @Test
-    @Disabled
     void withInRangeEndPoint() {
         Function<UriBuilder, URI> uriFunction =
                 uriBuilder ->
                         uriBuilder
                                 .path("/search/restaurant/withInRange")
-                                .queryParam("lat", -73.9)
-                                .queryParam("lon", 40.8)
+                                .queryParam("lat", 40.8)
+                                .queryParam("lon", -73.9)
                                 .queryParam("distance", 50)
                                 .queryParam("unit", "km")
                                 .build();
@@ -528,7 +527,7 @@ class SearchControllerIntTest extends AbstractIntegrationTest {
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBodyList(String.class)
+                .expectBodyList(ResultData.class)
                 .hasSize(1);
     }
 }

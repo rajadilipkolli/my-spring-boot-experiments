@@ -12,7 +12,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,15 +38,21 @@ class RestaurantESRepositoryIntegrationTest extends AbstractIntegrationTest {
 
     @BeforeAll
     void setUpData() {
-        Restaurant restaurant = createRestaurant(2L, RESTAURANT_NAME, BOROUGH_NAME, CUISINE_NAME);
-        Restaurant restaurant1 = createRestaurant(40363920L, "Yono gardens", "Brooklyn", "Chinese");
+        Restaurant restaurant =
+                createRestaurant(
+                        2L, RESTAURANT_NAME, BOROUGH_NAME, CUISINE_NAME, new Point(-73.9, 40.8));
+        Restaurant restaurant1 =
+                createRestaurant(
+                        40363920L, "Yono gardens", "Brooklyn", "Chinese", new Point(-75.0, 41.0));
 
         this.restaurantESRepository
                 .deleteAll()
                 .log()
                 .thenMany(this.restaurantESRepository.saveAll(List.of(restaurant, restaurant1)))
                 .log("saving restaurant")
-                .subscribe();
+                .then()
+                .then(this.reactiveElasticsearchOperations.indexOps(Restaurant.class).refresh())
+                .block(Duration.ofSeconds(10));
 
         await().atMost(Duration.ofSeconds(10))
                 .pollInterval(Duration.ofSeconds(1))
@@ -55,14 +60,15 @@ class RestaurantESRepositoryIntegrationTest extends AbstractIntegrationTest {
                         () -> assertThat(this.restaurantESRepository.count().block()).isEqualTo(2));
     }
 
-    private Restaurant createRestaurant(long id, String name, String borough, String cuisine) {
+    private Restaurant createRestaurant(
+            long id, String name, String borough, String cuisine, Point location) {
         Restaurant restaurant = new Restaurant();
         restaurant.setRestaurantId(id);
         restaurant.setName(name);
         restaurant.setBorough(borough);
         restaurant.setCuisine(cuisine);
         Address address = new Address();
-        address.setLocation(new Point(-73.9, 40.8));
+        address.setLocation(location);
         restaurant.setAddress(address);
         Grades grade = new Grades("A", LocalDateTime.of(2022, 1, 1, 1, 1, 1), 15);
         Grades grade1 = new Grades("B", LocalDateTime.of(2022, 3, 31, 23, 59, 59), 15);
@@ -144,7 +150,6 @@ class RestaurantESRepositoryIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    @Disabled
     void searchWithin() {
         Flux<SearchHit<Restaurant>> searchHitFlux =
                 this.restaurantESRepository.searchWithin(new GeoPoint(40.8, -73.9), 50d, "km");
