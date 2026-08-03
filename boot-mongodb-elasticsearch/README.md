@@ -17,22 +17,47 @@ A reactive Spring Boot application demonstrating seamless integration between Mo
 The application follows a reactive architecture pattern using Spring WebFlux:
 
 ```mermaid
-sequenceDiagram
-participant Client
-participant RestaurantController
-participant RestaurantService
-participant MongoDB
-participant ChangeStreamResume
-participant Elasticsearch
-
-Client->>RestaurantController: Create/Update Restaurant
-RestaurantController->>RestaurantService: Process Request
-RestaurantService->>MongoDB: Save Data
-MongoDB-->>ChangeStreamResume: Trigger Change Stream
-ChangeStreamResume->>Elasticsearch: Sync Changes
-Note over ChangeStreamResume,Elasticsearch: Resume Token Management
-RestaurantService-->>RestaurantController: Return Response
-RestaurantController-->>Client: HTTP Response
+flowchart TB
+    %% Definitions
+    Client([Client / Web Browser])
+    
+    subgraph SpringBoot [Spring Boot Application]
+        direction TB
+        Controllers[WebFlux Controllers\nRestaurant / Search API]
+        Services[Business Logic Services\nReactive Mono/Flux]
+        
+        subgraph DataAccess [Data Access Layer]
+            MongoRepo[(MongoDB \n Reactive Repo)]
+            ESRepo[(Elasticsearch \n Reactive Repo)]
+            Listener[ChangeStream\nStartup Listener]
+        end
+        
+        Controllers --> |Process Request| Services
+        Services --> |Save Primary Data| MongoRepo
+        Services --> |Execute Search| ESRepo
+        Listener -.-> |Sync Docs| ESRepo
+    end
+    
+    subgraph Infrastructure [Data Infrastructure]
+        direction LR
+        MongoDB[(MongoDB\nReplica Set)]
+        Elastic[(Elasticsearch 8.x)]
+        
+        MongoDB -.-> |Emit Change Streams| Listener
+    end
+    
+    %% Connections
+    Client <--> |HTTP/REST| Controllers
+    MongoRepo <--> |Reactive Driver| MongoDB
+    ESRepo <--> |Reactive client| Elastic
+    
+    classDef primary fill:#e1f5fe,stroke:#01579b,stroke-width:2px;
+    classDef secondary fill:#f3e5f5,stroke:#4a148c,stroke-width:2px;
+    classDef db fill:#e8f5e9,stroke:#1b5e20,stroke-width:2px;
+    
+    class SpringBoot primary;
+    class Infrastructure secondary;
+    class MongoDB,Elastic db;
 ```
 ---
 

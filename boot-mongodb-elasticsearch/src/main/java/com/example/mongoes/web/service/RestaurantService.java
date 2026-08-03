@@ -13,7 +13,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.elasticsearch.core.SearchPage;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Mono;
 
 @Service
@@ -35,7 +34,6 @@ public class RestaurantService {
         return this.restaurantESRepository.findAll(pageable);
     }
 
-    @Transactional
     public Mono<Restaurant> addGrade(GradesRequest gradesRequest, Long restaurantId) {
         return this.restaurantRepository
                 .findByRestaurantId(restaurantId)
@@ -46,7 +44,6 @@ public class RestaurantService {
                         });
     }
 
-    @Transactional
     public Mono<Restaurant> updateGrades(List<GradesRequest> gradesRequestList, Long restaurantId) {
         return this.restaurantRepository
                 .findByRestaurantId(restaurantId)

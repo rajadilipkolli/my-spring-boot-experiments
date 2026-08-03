@@ -73,36 +73,39 @@ public class ChangeStreamStartupListener {
                                         .listen())
                 .delayElements(Duration.ofMillis(1))
                 .publishOn(Schedulers.boundedElastic())
-                .doOnNext(
+                .concatMap(
                         restaurantChangeStreamEvent -> {
                             log.info(
                                     "processed at {} ", restaurantChangeStreamEvent.getTimestamp());
                             Restaurant restaurant = restaurantChangeStreamEvent.getBody();
+                            Mono<Void> elasticsearchOp = Mono.empty();
+
                             if (restaurant != null) {
                                 if (restaurantChangeStreamEvent.getOperationType()
                                         == OperationType.DELETE) {
-                                    this.restaurantESRepository
-                                            .delete(restaurant)
-                                            .log()
-                                            .doOnError(
-                                                    error ->
-                                                            log.error(
-                                                                    "Error deleting restaurant: {}",
-                                                                    error.getMessage()))
-                                            .subscribe();
+                                    elasticsearchOp =
+                                            this.restaurantESRepository
+                                                    .delete(restaurant)
+                                                    .log()
+                                                    .doOnError(
+                                                            error ->
+                                                                    log.error(
+                                                                            "Error deleting restaurant: {}",
+                                                                            error.getMessage()));
                                 } else if (restaurantChangeStreamEvent.getOperationType()
                                                 == OperationType.REPLACE
                                         || restaurantChangeStreamEvent.getOperationType()
                                                 == OperationType.INSERT) {
-                                    this.restaurantESRepository
-                                            .save(restaurant)
-                                            .log()
-                                            .doOnError(
-                                                    error ->
-                                                            log.error(
-                                                                    "Error saving restaurant: {}",
-                                                                    error.getMessage()))
-                                            .subscribe();
+                                    elasticsearchOp =
+                                            this.restaurantESRepository
+                                                    .save(restaurant)
+                                                    .log()
+                                                    .doOnError(
+                                                            error ->
+                                                                    log.error(
+                                                                            "Error saving restaurant: {}",
+                                                                            error.getMessage()))
+                                                    .then();
                                 }
                             } else {
                                 ChangeStreamDocument<Document> eventRaw =
@@ -116,14 +119,15 @@ public class ChangeStreamStartupListener {
                                                         .asObjectId()
                                                         .getValue()
                                                         .toString();
-                                        this.restaurantESRepository
-                                                .deleteById(objectId)
-                                                .doOnError(
-                                                        error ->
-                                                                log.error(
-                                                                        "Error deleting restaurant by ID: {}",
-                                                                        error.getMessage()))
-                                                .subscribe();
+                                        elasticsearchOp =
+                                                this.restaurantESRepository
+                                                        .deleteById(objectId)
+                                                        .doOnError(
+                                                                error ->
+                                                                        log.error(
+                                                                                "Error deleting restaurant by ID: {}",
+                                                                                error
+                                                                                        .getMessage()));
                                     } else {
                                         log.warn(
                                                 "Document key is null for DELETE operation. Cannot delete restaurant from repository.");
@@ -131,18 +135,19 @@ public class ChangeStreamStartupListener {
                                 }
                             }
 
-                            this.changeStreamResumeRepository
-                                    .update(restaurantChangeStreamEvent.getBsonTimestamp())
-                                    .log()
-                                    .retryWhen(
-                                            Retry.backoff(3, Duration.ofSeconds(1))
-                                                    .maxBackoff(Duration.ofSeconds(10)))
-                                    .doOnError(
-                                            error ->
-                                                    log.error(
-                                                            "Failed to update resume token: {}",
-                                                            error.getMessage()))
-                                    .subscribe();
+                            return elasticsearchOp.then(
+                                    this.changeStreamResumeRepository
+                                            .update(restaurantChangeStreamEvent.getBsonTimestamp())
+                                            .log()
+                                            .retryWhen(
+                                                    Retry.backoff(3, Duration.ofSeconds(1))
+                                                            .maxBackoff(Duration.ofSeconds(10)))
+                                            .doOnError(
+                                                    error ->
+                                                            log.error(
+                                                                    "Failed to update resume token: {}",
+                                                                    error.getMessage()))
+                                            .then(Mono.just(restaurantChangeStreamEvent)));
                         });
     }
 

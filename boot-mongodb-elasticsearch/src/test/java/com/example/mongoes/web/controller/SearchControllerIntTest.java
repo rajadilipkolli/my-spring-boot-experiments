@@ -499,8 +499,8 @@ class SearchControllerIntTest extends AbstractIntegrationTest {
                             assertThat(cuisineAgg).containsKey("chinese");
                             assertThat(cuisineAgg.get("chinese")).isPositive();
                             var boroughAgg = page.facets().get("MyBorough");
-                            assertThat(boroughAgg).containsKey("chinese");
-                            assertThat(boroughAgg.get("chinese")).isPositive();
+                            assertThat(boroughAgg).containsKey("brooklyn");
+                            assertThat(boroughAgg.get("brooklyn")).isPositive();
                             assertThat(page.isFirst()).isTrue();
                             assertThat(page.isLast()).isTrue();
                             assertThat(page.hasNext()).isFalse();
@@ -528,6 +528,13 @@ class SearchControllerIntTest extends AbstractIntegrationTest {
                 .expectStatus()
                 .isOk()
                 .expectBodyList(ResultData.class)
-                .hasSize(1);
+                .hasSize(1)
+                .value(
+                        resultDataList -> {
+                            var first = resultDataList.getFirst();
+                            assertThat(first.name()).isEqualTo(RESTAURANT_NAME);
+                            assertThat(first.location()).isEqualTo(new Point(-73.9, 40.8));
+                            assertThat(first.dist()).isNotNegative();
+                        });
     }
 }
