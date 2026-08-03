@@ -430,7 +430,7 @@ class RestaurantControllerTest {
                 .expectStatus()
                 .isCreated()
                 .expectHeader()
-                .valueEquals("Location", "/api/restaurant/name/Test+Restaurant");
+                .valueEquals("Location", "/api/restaurant/name/Test%20Restaurant");
     }
 
     @Test

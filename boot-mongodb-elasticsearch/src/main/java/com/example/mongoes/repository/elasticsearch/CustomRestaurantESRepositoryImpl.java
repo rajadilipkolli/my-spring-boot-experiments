@@ -28,7 +28,6 @@ import reactor.core.publisher.Mono;
 
 public class CustomRestaurantESRepositoryImpl implements CustomRestaurantESRepository {
 
-    private static final int PAGE_SIZE = 1_000;
     private final ReactiveElasticsearchOperations reactiveElasticsearchOperations;
 
     public CustomRestaurantESRepositoryImpl(
@@ -390,11 +389,11 @@ public class CustomRestaurantESRepositoryImpl implements CustomRestaurantESRepos
             String[] sortFields) {
         Aggregation cuisineTermsBuilder =
                 AggregationBuilders.terms(
-                        builder -> builder.field(AppConstants.CUISINE).size(PAGE_SIZE));
+                        builder -> builder.field(AppConstants.CUISINE).size(limit));
         // .order(BucketOrder.count(false));
         Aggregation boroughTermsBuilder =
                 AggregationBuilders.terms(
-                        builder -> builder.field(AppConstants.CUISINE).size(PAGE_SIZE));
+                        builder -> builder.field(AppConstants.BOROUGH).size(limit));
         // .order(BucketOrder.count(false));
         Aggregation dateRangeBuilder =
                 AggregationBuilders.dateRange(

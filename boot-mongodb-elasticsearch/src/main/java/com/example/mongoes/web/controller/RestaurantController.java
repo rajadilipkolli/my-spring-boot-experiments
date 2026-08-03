@@ -7,14 +7,13 @@ import com.example.mongoes.web.api.RestaurantApi;
 import com.example.mongoes.web.service.RestaurantService;
 import io.micrometer.core.annotation.Timed;
 import java.net.URI;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import org.springframework.data.elasticsearch.core.SearchPage;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Mono;
 
 @RestController
@@ -74,7 +73,9 @@ class RestaurantController implements RestaurantApi {
     }
 
     private URI createRestaurantUri(String restaurantName) {
-        String encodedName = URLEncoder.encode(restaurantName, StandardCharsets.UTF_8);
-        return URI.create("/api/restaurant/name/%s".formatted(encodedName));
+        return UriComponentsBuilder.fromPath("/api/restaurant/name/{restaurantName}")
+                .buildAndExpand(restaurantName)
+                .encode()
+                .toUri();
     }
 }
