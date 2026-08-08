@@ -25,11 +25,13 @@ Available options: MASTER, REPLICA_PREFERRED, MASTER_PREFERRED, etc.
 ## Advanced Features
 
 - Smart GZIP Compression with threshold-based serialization
-- Pattern-based key operations for maintenance
-- Redis Lua scripting support for complex atomic operations
-- Rate limiting with token bucket algorithm
+- Redis 8 Advanced Operations: CAS (`SET IFEQ`/`IFDNE`), `DIGEST` commands, and atomic range increments
+- Paginated Key Management via `SCAN` for safety and performance
+- Rate limiting with token bucket algorithm (using Lua scripts)
+- Pub/Sub Messaging with Spring Data Redis `@RedisListener`
 - Key expiry management with different TTLs for different caches
-- Health check endpoint for monitoring Redis status
+- Performance Metrics & Tracing via OpenTelemetry and Micrometer
+- Health check endpoint and detailed topology monitoring (Cluster/Sentinel)
 
 ## Getting Started
 

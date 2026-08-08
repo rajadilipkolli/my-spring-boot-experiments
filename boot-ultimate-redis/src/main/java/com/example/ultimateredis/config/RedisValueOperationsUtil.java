@@ -1,8 +1,12 @@
 package com.example.ultimateredis.config;
 
+import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import org.springframework.data.redis.core.Cursor;
+import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Component;
 
@@ -15,6 +19,10 @@ public class RedisValueOperationsUtil<T> {
     public RedisValueOperationsUtil(RedisTemplate<String, T> redisTemplate) {
         this.redisTemplate = redisTemplate;
         this.valueOperations = redisTemplate.opsForValue();
+    }
+
+    public RedisTemplate<String, T> getRedisTemplate() {
+        return redisTemplate;
     }
 
     public void putValue(String key, T value) {
@@ -30,12 +38,26 @@ public class RedisValueOperationsUtil<T> {
     }
 
     public Set<String> getKeysWithPattern(String pattern) {
-        return redisTemplate.keys(pattern);
+        return getKeysWithPattern(pattern, 100);
+    }
+
+    public Set<String> getKeysWithPattern(String pattern, long count) {
+        return redisTemplate.execute((RedisCallback<Set<String>>) connection -> {
+            Set<String> keys = new HashSet<>();
+            ScanOptions options =
+                    ScanOptions.scanOptions().match(pattern).count(count).build();
+            try (Cursor<byte[]> cursor = connection.keyCommands().scan(options)) {
+                while (cursor.hasNext()) {
+                    keys.add(new String(cursor.next()));
+                }
+            }
+            return keys;
+        });
     }
 
     public void deleteByPattern(String pattern) {
-        Set<String> keys = redisTemplate.keys(pattern);
-        if (!keys.isEmpty()) {
+        Set<String> keys = getKeysWithPattern(pattern, 100);
+        if (keys != null && !keys.isEmpty()) {
             redisTemplate.delete(keys);
         }
     }

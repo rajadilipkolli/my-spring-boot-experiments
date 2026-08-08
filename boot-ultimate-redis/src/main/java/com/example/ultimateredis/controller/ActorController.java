@@ -1,5 +1,7 @@
 package com.example.ultimateredis.controller;
 
+import com.example.ultimateredis.exception.ActorNotFoundException;
+import com.example.ultimateredis.exception.ResourceNotFoundException;
 import com.example.ultimateredis.model.Actor;
 import com.example.ultimateredis.model.ActorRequest;
 import com.example.ultimateredis.model.GenericResponse;
@@ -7,7 +9,6 @@ import com.example.ultimateredis.service.ActorService;
 import jakarta.validation.Valid;
 import java.net.URI;
 import java.util.List;
-import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -44,29 +45,28 @@ public class ActorController {
     @GetMapping("/{id}")
     public ResponseEntity<GenericResponse<Actor>> getActorById(@PathVariable String id) {
         log.info("Fetching actor with id: {}", id);
-        return actorService
-                .findActorById(id)
-                .map(actor -> ResponseEntity.ok(new GenericResponse<>(actor)))
-                .orElse(ResponseEntity.notFound().build());
+        Actor actor = actorService.findActorById(id).orElseThrow(() -> new ActorNotFoundException(id));
+        return ResponseEntity.ok(new GenericResponse<>(actor));
     }
 
     @GetMapping("/search/by-name")
     public ResponseEntity<GenericResponse<Actor>> getActorByName(@RequestParam String name) {
         log.info("Fetching actor with name: {}", name);
-        return actorService
+        Actor actor = actorService
                 .findActorByName(name)
-                .map(actor -> ResponseEntity.ok(new GenericResponse<>(actor)))
-                .orElse(ResponseEntity.notFound().build());
+                .orElseThrow(() -> new ResourceNotFoundException("Actor with name " + name + " not found"));
+        return ResponseEntity.ok(new GenericResponse<>(actor));
     }
 
     @GetMapping("/search/by-name-and-age")
     public ResponseEntity<GenericResponse<Actor>> getActorByNameAndAge(
             @RequestParam String name, @RequestParam int age) {
         log.info("Fetching actor with name: {} and age: {}", name, age);
-        return actorService
+        Actor actor = actorService
                 .findActorByNameAndAge(name, age)
-                .map(actor -> ResponseEntity.ok(new GenericResponse<>(actor)))
-                .orElse(ResponseEntity.notFound().build());
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Actor with name " + name + " and age " + age + " not found"));
+        return ResponseEntity.ok(new GenericResponse<>(actor));
     }
 
     @PostMapping
@@ -99,12 +99,8 @@ public class ActorController {
             @PathVariable String id, @Valid @RequestBody ActorRequest actorRequest) {
         log.info("Updating actor with id: {}", id);
 
-        Optional<Actor> existingActorOpt = actorService.findActorById(id);
-        if (existingActorOpt.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
+        Actor existingActor = actorService.findActorById(id).orElseThrow(() -> new ActorNotFoundException(id));
 
-        Actor existingActor = existingActorOpt.get();
         existingActor.setName(actorRequest.name());
         existingActor.setAge(actorRequest.age());
 
@@ -117,7 +113,7 @@ public class ActorController {
         log.info("Deleting actor with id: {}", id);
 
         if (actorService.findActorById(id).isEmpty()) {
-            return ResponseEntity.notFound().build();
+            throw new ActorNotFoundException(id);
         }
 
         actorService.deleteActorById(id);

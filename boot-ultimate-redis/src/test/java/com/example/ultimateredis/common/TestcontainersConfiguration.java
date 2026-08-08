@@ -12,6 +12,7 @@ import org.springframework.boot.testcontainers.service.connection.ServiceConnect
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Profile;
 import org.springframework.test.context.DynamicPropertyRegistrar;
+import org.testcontainers.grafana.LgtmStackContainer;
 import org.testcontainers.utility.DockerImageName;
 
 @TestConfiguration(proxyBeanMethods = false)
@@ -41,6 +42,14 @@ public class TestcontainersConfiguration {
     @ServiceConnection("redis")
     @Profile(AppConstants.PROFILE_NOT_CLUSTER)
     RedisContainer redisContainer() {
-        return new RedisContainer(DockerImageName.parse("redis").withTag("8.6.1-alpine"));
+        return new RedisContainer(DockerImageName.parse("redis").withTag("8.10.0-alpine"));
+    }
+
+    @Bean
+    @ServiceConnection
+    LgtmStackContainer lgtmContainer() {
+        return new LgtmStackContainer(DockerImageName.parse("grafana/otel-lgtm:0.30.1"))
+                .withStartupTimeout(Duration.ofMinutes(2))
+                .withReuse(true);
     }
 }

@@ -2,6 +2,8 @@ package com.example.ultimateredis.controller;
 
 import com.example.ultimateredis.model.AddRedisRequest;
 import com.example.ultimateredis.model.GenericResponse;
+import com.example.ultimateredis.service.RedisCasService;
+import com.example.ultimateredis.service.RedisProducer;
 import com.example.ultimateredis.service.RedisService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -21,9 +23,13 @@ import org.springframework.web.bind.annotation.RestController;
 public class RedisController {
 
     private final RedisService redisService;
+    private final RedisCasService redisCasService;
+    private final RedisProducer redisProducer;
 
-    public RedisController(RedisService redisService) {
+    public RedisController(RedisService redisService, RedisCasService redisCasService, RedisProducer redisProducer) {
         this.redisService = redisService;
+        this.redisCasService = redisCasService;
+        this.redisProducer = redisProducer;
     }
 
     @PostMapping("/add")
@@ -63,6 +69,36 @@ public class RedisController {
             throw new IllegalArgumentException("Deleting all keys is not allowed for safety reasons");
         }
         redisService.deleteByPattern(pattern);
+        return ResponseEntity.ok(new GenericResponse<>(Boolean.TRUE));
+    }
+
+    @PostMapping("/cas/set-ifeq")
+    public ResponseEntity<GenericResponse<Boolean>> setIfEqual(
+            @RequestParam String key, @RequestParam String value, @RequestParam String expectedValue) {
+        return ResponseEntity.ok(new GenericResponse<>(redisCasService.setIfEqual(key, value, expectedValue)));
+    }
+
+    @PostMapping("/cas/set-ifdne")
+    public ResponseEntity<GenericResponse<Boolean>> setIfDoesNotEqual(
+            @RequestParam String key, @RequestParam String value, @RequestParam String expectedValue) {
+        return ResponseEntity.ok(new GenericResponse<>(redisCasService.setIfDoesNotEqual(key, value, expectedValue)));
+    }
+
+    @DeleteMapping("/cas/delex")
+    public ResponseEntity<GenericResponse<Long>> deleteExpected(
+            @RequestParam String key, @RequestParam String expectedValue) {
+        return ResponseEntity.ok(new GenericResponse<>(redisCasService.deleteExpected(key, expectedValue)));
+    }
+
+    @GetMapping("/digest")
+    public ResponseEntity<GenericResponse<String>> getDigest(@RequestParam String key) {
+        return ResponseEntity.ok(new GenericResponse<>(redisService.digest(key)));
+    }
+
+    @PostMapping("/pubsub/publish")
+    public ResponseEntity<GenericResponse<Boolean>> publishMessage(
+            @RequestParam String topic, @RequestParam String message) {
+        redisProducer.publishMessage(topic, message);
         return ResponseEntity.ok(new GenericResponse<>(Boolean.TRUE));
     }
 }

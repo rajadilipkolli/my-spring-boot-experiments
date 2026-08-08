@@ -14,8 +14,15 @@ import org.springframework.data.redis.serializer.SerializationException;
 
 public class RedisCacheGZIPSerializer extends JdkSerializationRedisSerializer {
 
-    // Only compress data larger than 1KB
-    private static final int COMPRESSION_THRESHOLD = 1024;
+    private final int compressionThreshold;
+
+    public RedisCacheGZIPSerializer(int compressionThreshold) {
+        this.compressionThreshold = compressionThreshold;
+    }
+
+    public RedisCacheGZIPSerializer() {
+        this.compressionThreshold = 1024; // default
+    }
 
     // Magic bytes to identify compressed data
     private static final byte[] GZIP_MARKER = "GZIP".getBytes(StandardCharsets.UTF_8);
@@ -48,7 +55,7 @@ public class RedisCacheGZIPSerializer extends JdkSerializationRedisSerializer {
         byte[] serialized = super.serialize(o);
 
         // Only compress if above threshold
-        if (serialized.length > COMPRESSION_THRESHOLD) {
+        if (serialized.length > compressionThreshold) {
             byte[] compressed = compress(serialized);
 
             // Add marker to identify compressed data

@@ -1,6 +1,8 @@
 package com.example.ultimateredis.config;
 
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.data.redis.core.script.RedisScript;
@@ -11,6 +13,7 @@ import org.springframework.stereotype.Component;
 public class RedisScriptExecutor {
 
     private final RedisTemplate<String, Object> redisTemplate;
+    private final Map<String, RedisScript<?>> scriptCache = new ConcurrentHashMap<>();
 
     public RedisScriptExecutor(RedisTemplate<String, Object> redisTemplate) {
         this.redisTemplate = redisTemplate;
@@ -26,8 +29,10 @@ public class RedisScriptExecutor {
      * @return The result of script execution
      */
     public <T> T executeScript(String script, List<String> keys, Object... args) {
-        RedisScript<T> redisScript = new DefaultRedisScript<>(script, (Class<T>) Object.class);
-        return (T) redisTemplate.execute(redisScript, keys, args);
+        @SuppressWarnings("unchecked")
+        RedisScript<T> redisScript =
+                (RedisScript<T>) scriptCache.computeIfAbsent(script, s -> new DefaultRedisScript<>(s, Object.class));
+        return redisTemplate.execute(redisScript, keys, args);
     }
 
     /**
@@ -41,7 +46,9 @@ public class RedisScriptExecutor {
      * @return The result of script execution
      */
     public <T> T executeScript(String script, Class<T> returnType, List<String> keys, Object... args) {
-        RedisScript<T> redisScript = new DefaultRedisScript<>(script, returnType);
+        @SuppressWarnings("unchecked")
+        RedisScript<T> redisScript =
+                (RedisScript<T>) scriptCache.computeIfAbsent(script, s -> new DefaultRedisScript<>(s, returnType));
         return redisTemplate.execute(redisScript, keys, args);
     }
 
@@ -54,8 +61,7 @@ public class RedisScriptExecutor {
      * @return The new value after incrementing
      */
     public Long incrementWithinRange(String key, long min, long max) {
-        String script =
-                """
+        String script = """
                 local current = tonumber(redis.call('get', KEYS[1])) or ARGV[1] - 1
                 current = current + 1
                 if current >= tonumber(ARGV[2]) then
@@ -76,8 +82,7 @@ public class RedisScriptExecutor {
      * @return true if set, false if already exists
      */
     public Boolean setIfNotExists(String key, String value, long ttlSeconds) {
-        String script =
-                """
+        String script = """
                 if redis.call('exists', KEYS[1]) == 0 then
                     redis.call('set', KEYS[1], ARGV[1], 'EX', ARGV[2])
                     return 1

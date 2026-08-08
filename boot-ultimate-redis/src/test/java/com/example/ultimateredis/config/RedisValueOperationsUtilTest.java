@@ -1,6 +1,7 @@
 package com.example.ultimateredis.config;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -13,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 
@@ -80,14 +82,14 @@ class RedisValueOperationsUtilTest {
         // Arrange
         String pattern = "test*";
         Set<String> expectedKeys = Set.of("test1", "test2", "test3");
-        when(redisTemplate.keys(pattern)).thenReturn(expectedKeys);
+        when(redisTemplate.execute(any(RedisCallback.class))).thenReturn(expectedKeys);
 
         // Act
         Set<String> result = redisValueOpsUtil.getKeysWithPattern(pattern);
 
         // Assert
         assertThat(result).hasSameElementsAs(expectedKeys);
-        verify(redisTemplate).keys(pattern);
+        verify(redisTemplate).execute(any(RedisCallback.class));
     }
 
     @Test
@@ -95,13 +97,13 @@ class RedisValueOperationsUtilTest {
         // Arrange
         String pattern = "test*";
         Set<String> matchingKeys = Set.of("test1", "test2");
-        when(redisTemplate.keys(pattern)).thenReturn(matchingKeys);
+        when(redisTemplate.execute(any(RedisCallback.class))).thenReturn(matchingKeys);
 
         // Act
         redisValueOpsUtil.deleteByPattern(pattern);
 
         // Assert
-        verify(redisTemplate).keys(pattern);
+        verify(redisTemplate).execute(any(RedisCallback.class));
         verify(redisTemplate).delete(matchingKeys);
     }
 
@@ -110,13 +112,13 @@ class RedisValueOperationsUtilTest {
         // Arrange
         String pattern = "test*";
         Set<String> emptySet = Collections.emptySet();
-        when(redisTemplate.keys(pattern)).thenReturn(emptySet);
+        when(redisTemplate.execute(any(RedisCallback.class))).thenReturn(emptySet);
 
         // Act
         redisValueOpsUtil.deleteByPattern(pattern);
 
         // Assert
-        verify(redisTemplate).keys(pattern);
+        verify(redisTemplate).execute(any(RedisCallback.class));
         verify(redisTemplate, never()).delete(emptySet);
     }
 }
