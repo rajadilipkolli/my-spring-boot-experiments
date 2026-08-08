@@ -22,18 +22,22 @@ public class RedisMetricsAspect {
         this.meterRegistry = meterRegistry;
     }
 
-    @Pointcut(
-            "execution(* com.example.ultimateredis.service.RedisService.*(..)) || execution(* *..TestRedisService.*(..))")
+    @Pointcut("execution(* com.example.ultimateredis.service.RedisService.*(..)) "
+            + "|| execution(* com.example.ultimateredis.config.RedisRateLimiter.*(..)) "
+            + "|| execution(* com.example.ultimateredis.service.RedisCasService.*(..)) "
+            + "|| execution(* *..TestRedisService.*(..))")
     public void redisServiceMethods() {}
 
     @Around("redisServiceMethods()")
     public Object measureRedisOperationTime(ProceedingJoinPoint joinPoint) throws Throwable {
         String methodName = joinPoint.getSignature().getName();
 
-        Timer timer = timerCache.computeIfAbsent(methodName, m -> Timer.builder("redis.operation")
-                .tag("method", m)
-                .description("Time taken for Redis operations")
-                .register(meterRegistry));
+        Timer timer = timerCache.computeIfAbsent(
+                methodName,
+                m -> Timer.builder("redis.operation")
+                        .tag("method", m)
+                        .description("Time taken for Redis operations")
+                        .register(meterRegistry));
 
         long start = System.nanoTime();
         boolean error = false;

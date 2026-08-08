@@ -1,8 +1,12 @@
 package com.example.ultimateredis.config;
 
+import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import org.springframework.data.redis.core.Cursor;
+import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Component;
 
@@ -17,6 +21,10 @@ public class RedisValueOperationsUtil<T> {
         this.valueOperations = redisTemplate.opsForValue();
     }
 
+    public RedisTemplate<String, T> getRedisTemplate() {
+        return redisTemplate;
+    }
+
     public void putValue(String key, T value) {
         valueOperations.set(key, value);
     }
@@ -25,17 +33,35 @@ public class RedisValueOperationsUtil<T> {
         return valueOperations.get(key);
     }
 
+    public void putValue(String key, T value, long timeout, TimeUnit unit) {
+        valueOperations.set(key, value, timeout, unit);
+    }
+
     public void setExpire(String key, long timeout, TimeUnit unit) {
         redisTemplate.expire(key, timeout, unit);
     }
 
     public Set<String> getKeysWithPattern(String pattern) {
-        return redisTemplate.keys(pattern);
+        return getKeysWithPattern(pattern, 100);
+    }
+
+    public Set<String> getKeysWithPattern(String pattern, long count) {
+        return redisTemplate.execute((RedisCallback<Set<String>>) connection -> {
+            Set<String> keys = new HashSet<>();
+            ScanOptions options =
+                    ScanOptions.scanOptions().match(pattern).count(count).build();
+            try (Cursor<byte[]> cursor = connection.keyCommands().scan(options)) {
+                while (cursor.hasNext()) {
+                    keys.add((String) redisTemplate.getKeySerializer().deserialize(cursor.next()));
+                }
+            }
+            return keys;
+        });
     }
 
     public void deleteByPattern(String pattern) {
-        Set<String> keys = redisTemplate.keys(pattern);
-        if (!keys.isEmpty()) {
+        Set<String> keys = getKeysWithPattern(pattern, 100);
+        if (keys != null && !keys.isEmpty()) {
             redisTemplate.delete(keys);
         }
     }

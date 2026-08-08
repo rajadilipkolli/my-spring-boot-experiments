@@ -20,6 +20,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
+import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.GenericJacksonJsonRedisSerializer;
@@ -28,7 +29,7 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 import tools.jackson.databind.json.JsonMapper;
 
 @Configuration(proxyBeanMethods = false)
-@EnableConfigurationProperties(CacheConfigurationProperties.class)
+@EnableConfigurationProperties({CacheConfigurationProperties.class, RedisProperties.class})
 @EnableCaching
 public class CacheConfig implements CachingConfigurer {
 
@@ -36,27 +37,24 @@ public class CacheConfig implements CachingConfigurer {
 
     @Bean
     public ApplicationListener<@NonNull ContextRefreshedEvent> redisCacheMigrationListener(
-            RedisTemplate<String, Object> redisTemplate) {
+            RedisCacheManager redisCacheManager) {
         return event -> {
             try {
-                redisTemplate
-                        .getConnectionFactory()
-                        .getConnection()
-                        .serverCommands()
-                        .flushAll();
-                log.info("Redis cache flushed successfully during context refresh");
+                redisCacheManager.resetCaches();
+                log.info("Redis cache reset successfully during context refresh");
             } catch (Exception e) {
-                log.warn("Failed to flush Redis cache during migration: {}", e.getMessage());
+                log.warn("Failed to reset Redis cache during migration: {}", e.getMessage());
             }
         };
     }
 
     @Bean
     RedisCacheManagerBuilderCustomizer redisCacheManagerBuilderCustomizer(
-            CacheConfigurationProperties cacheConfigurationProperties) {
-        RedisCacheGZIPSerializer serializerGzip = new RedisCacheGZIPSerializer();
+            CacheConfigurationProperties cacheConfigurationProperties, RedisProperties redisProperties) {
+        RedisCacheGZIPSerializer serializerGzip = new RedisCacheGZIPSerializer(redisProperties.getGzipThresholdBytes());
         return builder -> {
-            builder.cacheDefaults()
+            builder.enableStatistics()
+                    .cacheDefaults()
                     .disableCachingNullValues()
                     .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(serializerGzip));
             cacheConfigurationProperties
@@ -69,8 +67,10 @@ public class CacheConfig implements CachingConfigurer {
 
     @Bean
     @Profile(AppConstants.PROFILE_SENTINEL)
-    LettuceClientConfigurationBuilderCustomizer lettuceClientConfigurationBuilderCustomizer() {
-        return clientConfigurationBuilder -> clientConfigurationBuilder.readFrom(ReadFrom.REPLICA_PREFERRED);
+    LettuceClientConfigurationBuilderCustomizer lettuceClientConfigurationBuilderCustomizer(
+            RedisProperties redisProperties) {
+        return clientConfigurationBuilder ->
+                clientConfigurationBuilder.readFrom(ReadFrom.valueOf(redisProperties.getReadFrom()));
     }
 
     @Bean
@@ -94,23 +94,27 @@ public class CacheConfig implements CachingConfigurer {
 
             @Override
             public void handleCacheGetError(RuntimeException exception, Cache cache, Object key) {
-                // your custom error handling logic
+                log.warn("Cache get error for key {} in cache {}: {}", key, cache.getName(), exception.getMessage());
+                // Swallow read error to fall back to the source of truth
             }
 
             @Override
             public void handleCachePutError(
                     RuntimeException exception, Cache cache, Object key, @Nullable Object value) {
-                // your custom error handling logic
+                log.error("Cache put error for key {} in cache {}: {}", key, cache.getName(), exception.getMessage());
+                throw exception;
             }
 
             @Override
             public void handleCacheEvictError(RuntimeException exception, Cache cache, Object key) {
-                // your custom error handling logic
+                log.error("Cache evict error for key {} in cache {}: {}", key, cache.getName(), exception.getMessage());
+                throw exception;
             }
 
             @Override
             public void handleCacheClearError(RuntimeException exception, Cache cache) {
-                // your custom error handling logic
+                log.error("Cache clear error in cache {}: {}", cache.getName(), exception.getMessage());
+                throw exception;
             }
         };
     }

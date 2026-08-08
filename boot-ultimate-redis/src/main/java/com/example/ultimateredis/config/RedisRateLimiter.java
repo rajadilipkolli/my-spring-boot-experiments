@@ -28,8 +28,7 @@ public class RedisRateLimiter {
     public boolean tryAcquire(String key, double tokensPerSecond, int burstCapacity) {
         String rateLimiterKey = "rate-limiter:" + key;
 
-        String script =
-                """
+        String script = """
                 local tokens_key = KEYS[1]
                 local timestamp_key = KEYS[2]
 

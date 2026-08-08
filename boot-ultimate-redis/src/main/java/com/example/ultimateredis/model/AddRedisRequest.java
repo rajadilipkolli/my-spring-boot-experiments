@@ -1,3 +1,10 @@
 package com.example.ultimateredis.model;
 
-public record AddRedisRequest(String key, String value, Integer expireMinutes) {}
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+
+public record AddRedisRequest(
+        @NotBlank String key,
+        @NotBlank String value,
+        @NotNull @Positive Integer expireMinutes) {}
