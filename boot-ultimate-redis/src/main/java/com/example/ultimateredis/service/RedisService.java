@@ -1,5 +1,6 @@
 package com.example.ultimateredis.service;
 
+import com.example.ultimateredis.config.RedisProperties;
 import com.example.ultimateredis.config.RedisValueOperationsUtil;
 import com.example.ultimateredis.model.AddRedisRequest;
 import java.util.Set;
@@ -17,21 +18,15 @@ public class RedisService {
     private static final Logger log = LoggerFactory.getLogger(RedisService.class);
 
     private final RedisValueOperationsUtil<String> redisStringUtil;
-    private final String keyPrefix;
-    private final String keyVersion;
+    private final RedisProperties redisProperties;
 
-    public RedisService(
-            RedisValueOperationsUtil<String> redisValueOpsUtil,
-            @org.springframework.beans.factory.annotation.Value("${ultimate.redis.key-prefix:app:}") String keyPrefix,
-            @org.springframework.beans.factory.annotation.Value("${ultimate.redis.key-version:v1:}")
-                    String keyVersion) {
+    public RedisService(RedisValueOperationsUtil<String> redisValueOpsUtil, RedisProperties redisProperties) {
         this.redisStringUtil = redisValueOpsUtil;
-        this.keyPrefix = keyPrefix;
-        this.keyVersion = keyVersion;
+        this.redisProperties = redisProperties;
     }
 
     private String buildKey(String rawKey) {
-        return keyPrefix + keyVersion + rawKey;
+        return redisProperties.getKeyPrefix() + redisProperties.getKeyVersion() + rawKey;
     }
 
     @Retryable(
@@ -41,9 +36,8 @@ public class RedisService {
     public void addRedis(AddRedisRequest request) {
         String key = buildKey(request.key());
         log.info("add redis {}", request);
-        redisStringUtil.putValue(key, request.value());
         log.info("adding expiry for key {} as: {} minutes", key, request.expireMinutes());
-        redisStringUtil.setExpire(key, request.expireMinutes(), TimeUnit.MINUTES);
+        redisStringUtil.putValue(key, request.value(), request.expireMinutes(), TimeUnit.MINUTES);
     }
 
     @Retryable(
@@ -62,7 +56,7 @@ public class RedisService {
     @ConcurrencyLimit(limit = 5)
     public Set<String> getKeysByPattern(String pattern) {
         log.info("getting keys matching pattern: {}", pattern);
-        return redisStringUtil.getKeysWithPattern(pattern);
+        return redisStringUtil.getKeysWithPattern(buildKey(pattern));
     }
 
     @Retryable(
@@ -71,9 +65,13 @@ public class RedisService {
     @ConcurrencyLimit(limit = 5)
     public void deleteByPattern(String pattern) {
         log.info("deleting keys matching pattern: {}", pattern);
-        redisStringUtil.deleteByPattern(pattern);
+        redisStringUtil.deleteByPattern(buildKey(pattern));
     }
 
+    @Retryable(
+            includes = {RedisConnectionFailureException.class},
+            maxRetries = 3)
+    @ConcurrencyLimit(limit = 5)
     public String digest(String key) {
         String fullKey = buildKey(key);
         return redisStringUtil.getRedisTemplate().execute((org.springframework.data.redis.core.RedisCallback<String>)

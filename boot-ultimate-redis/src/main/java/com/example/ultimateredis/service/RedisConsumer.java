@@ -14,7 +14,7 @@ public class RedisConsumer {
 
     @RedisListener(topic = "app-events")
     public void handleMessage(String message) {
-        log.info("Received message from channel 'app-events': {}", message);
+        log.info("Received message from channel 'app-events'");
         lastReceivedMessage.set(message);
     }
 

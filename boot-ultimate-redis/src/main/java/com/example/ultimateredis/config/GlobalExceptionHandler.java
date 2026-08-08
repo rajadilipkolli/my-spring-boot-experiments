@@ -1,5 +1,6 @@
 package com.example.ultimateredis.config;
 
+import com.example.ultimateredis.exception.RateLimitExceededException;
 import com.example.ultimateredis.exception.ResourceNotFoundException;
 import java.net.URI;
 import java.util.stream.Collectors;
@@ -28,6 +29,14 @@ public class GlobalExceptionHandler {
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, errors);
         problemDetail.setTitle("Validation Failed");
         problemDetail.setType(URI.create("https://api.boot-ultimate-redis.com/errors/validation"));
+        return problemDetail;
+    }
+
+    @ExceptionHandler(RateLimitExceededException.class)
+    public ProblemDetail handleRateLimitExceededException(RateLimitExceededException ex) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.TOO_MANY_REQUESTS, ex.getMessage());
+        problemDetail.setTitle("Rate Limit Exceeded");
+        problemDetail.setType(URI.create("https://api.boot-ultimate-redis.com/errors/rate-limit"));
         return problemDetail;
     }
 }

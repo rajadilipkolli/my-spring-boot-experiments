@@ -7,6 +7,7 @@ import com.example.ultimateredis.service.RedisProducer;
 import com.example.ultimateredis.service.RedisService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import jakarta.validation.Valid;
 import java.util.Set;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,7 +34,7 @@ public class RedisController {
     }
 
     @PostMapping("/add")
-    public ResponseEntity<GenericResponse<Boolean>> addRedisKeyValue(@RequestBody AddRedisRequest redisRequest) {
+    public ResponseEntity<GenericResponse<Boolean>> addRedisKeyValue(@Valid @RequestBody AddRedisRequest redisRequest) {
 
         redisService.addRedis(redisRequest);
         return new ResponseEntity<>(new GenericResponse<>(Boolean.TRUE), HttpStatus.CREATED);

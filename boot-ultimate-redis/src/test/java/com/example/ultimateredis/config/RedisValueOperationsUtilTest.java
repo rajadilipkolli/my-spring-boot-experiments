@@ -14,9 +14,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.redis.connection.RedisConnection;
+import org.springframework.data.redis.connection.RedisKeyCommands;
+import org.springframework.data.redis.core.Cursor;
 import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.data.redis.serializer.RedisSerializer;
 
 @ExtendWith(MockitoExtension.class)
 class RedisValueOperationsUtilTest {
@@ -78,18 +83,36 @@ class RedisValueOperationsUtilTest {
     }
 
     @Test
-    void getKeysWithPattern_shouldReturnMatchingKeys() {
+    void getKeysWithPattern_shouldReturnMatchingKeys() throws Exception {
         // Arrange
         String pattern = "test*";
-        Set<String> expectedKeys = Set.of("test1", "test2", "test3");
-        when(redisTemplate.execute(any(RedisCallback.class))).thenReturn(expectedKeys);
+        RedisConnection connection = org.mockito.Mockito.mock(RedisConnection.class);
+        RedisKeyCommands keyCommands = org.mockito.Mockito.mock(RedisKeyCommands.class);
+        Cursor<byte[]> cursor = org.mockito.Mockito.mock(Cursor.class);
+        RedisSerializer<?> serializer = org.mockito.Mockito.mock(RedisSerializer.class);
+
+        when(connection.keyCommands()).thenReturn(keyCommands);
+        when(keyCommands.scan(any(ScanOptions.class))).thenReturn(cursor);
+        when(cursor.hasNext()).thenReturn(true, true, false);
+        when(cursor.next()).thenReturn("test1".getBytes(), "test2".getBytes());
+        when(redisTemplate.getKeySerializer()).thenReturn((RedisSerializer) serializer);
+        when(serializer.deserialize(any(byte[].class))).thenReturn("test1", "test2");
+
+        org.mockito.ArgumentCaptor<RedisCallback<Set<String>>> captor =
+                org.mockito.ArgumentCaptor.forClass(RedisCallback.class);
+
+        when(redisTemplate.execute(captor.capture())).thenAnswer(invocation -> {
+            RedisCallback<Set<String>> callback = invocation.getArgument(0);
+            return callback.doInRedis(connection);
+        });
 
         // Act
         Set<String> result = redisValueOpsUtil.getKeysWithPattern(pattern);
 
         // Assert
-        assertThat(result).hasSameElementsAs(expectedKeys);
+        assertThat(result).containsExactlyInAnyOrder("test1", "test2");
         verify(redisTemplate).execute(any(RedisCallback.class));
+        verify(cursor).close();
     }
 
     @Test

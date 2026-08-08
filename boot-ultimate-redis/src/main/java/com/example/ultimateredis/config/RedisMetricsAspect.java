@@ -23,7 +23,6 @@ public class RedisMetricsAspect {
     }
 
     @Pointcut("execution(* com.example.ultimateredis.service.RedisService.*(..)) "
-            + "|| execution(* com.example.ultimateredis.service.ActorService.*(..)) "
             + "|| execution(* com.example.ultimateredis.config.RedisRateLimiter.*(..)) "
             + "|| execution(* com.example.ultimateredis.service.RedisCasService.*(..)) "
             + "|| execution(* *..TestRedisService.*(..))")

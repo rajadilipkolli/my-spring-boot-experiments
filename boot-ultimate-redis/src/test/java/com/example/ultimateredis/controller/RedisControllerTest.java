@@ -6,6 +6,7 @@ import static org.awaitility.Awaitility.await;
 import com.example.ultimateredis.common.AbstractIntegrationTest;
 import com.example.ultimateredis.model.AddRedisRequest;
 import com.example.ultimateredis.model.GenericResponse;
+import io.micrometer.core.instrument.Timer;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
@@ -76,7 +77,7 @@ class RedisControllerTest extends AbstractIntegrationTest {
         this.mockMvcTester
                 .get()
                 .uri("/v1/redis/keys")
-                .param("pattern", "app:v1:test:*")
+                .param("pattern", "test:*")
                 .assertThat()
                 .hasStatusOk()
                 .hasContentType(MediaType.APPLICATION_JSON)
@@ -97,7 +98,7 @@ class RedisControllerTest extends AbstractIntegrationTest {
         this.mockMvcTester
                 .delete()
                 .uri("/v1/redis/keys")
-                .param("pattern", "app:v1:test:*")
+                .param("pattern", "test:*")
                 .assertThat()
                 .hasStatusOk()
                 .hasContentType(MediaType.APPLICATION_JSON)
@@ -110,7 +111,7 @@ class RedisControllerTest extends AbstractIntegrationTest {
                 .untilAsserted(() -> this.mockMvcTester
                         .get()
                         .uri("/v1/redis/keys")
-                        .param("pattern", "app:v1:test:*")
+                        .param("pattern", "test:*")
                         .assertThat()
                         .hasStatusOk()
                         .bodyJson()
@@ -126,7 +127,9 @@ class RedisControllerTest extends AbstractIntegrationTest {
     @Order(5)
     void expireFromCache() {
         // Manually speed up the expiry for the test so we don't wait 1 minute
-        stringRedisTemplate.expire("app:v1:junittimeout", 2, TimeUnit.SECONDS);
+        stringRedisTemplate.opsForValue().set("app:v1:junittimeout", "some-value");
+        Boolean expired = stringRedisTemplate.expire("app:v1:junittimeout", 2, TimeUnit.SECONDS);
+        assertThat(expired).isTrue();
 
         await().pollDelay(Duration.ofSeconds(1))
                 .pollInterval(Duration.ofSeconds(1))
@@ -147,17 +150,16 @@ class RedisControllerTest extends AbstractIntegrationTest {
     @Order(6)
     void testCasAndDigest() {
         String casKey = "cas-test-key";
-        String prefixedKey = "app:v1:" + casKey;
 
         // 1. Initial setup using CAS SET-IFDNE (this writes raw bytes to Redis)
-        // Since the key doesn't exist, we can use a dummy expected value, but wait, IFDNE checks if it DOES NOT equal.
+        // Since the key doesn't exist, we can use a dummy 16-hex character digest
         // If the key doesn't exist, IFDNE creates it in Redis 8.4.
         this.mockMvcTester
                 .post()
                 .uri("/v1/redis/cas/set-ifdne")
-                .param("key", prefixedKey)
+                .param("key", casKey)
                 .param("value", "initial-value")
-                .param("expectedValue", "non-existent")
+                .param("expectedValue", "0123456789abcdef")
                 .assertThat()
                 .hasStatusOk();
 
@@ -176,7 +178,7 @@ class RedisControllerTest extends AbstractIntegrationTest {
         this.mockMvcTester
                 .post()
                 .uri("/v1/redis/cas/set-ifeq")
-                .param("key", prefixedKey)
+                .param("key", casKey)
                 .param("value", "new-value")
                 .param("expectedValue", "initial-value")
                 .assertThat()
@@ -189,9 +191,9 @@ class RedisControllerTest extends AbstractIntegrationTest {
         this.mockMvcTester
                 .post()
                 .uri("/v1/redis/cas/set-ifdne")
-                .param("key", prefixedKey)
+                .param("key", casKey)
                 .param("value", "another-value")
-                .param("expectedValue", "wrong-value") // it is currently "new-value"
+                .param("expectedValue", "0123456789abcdef") // Dummy 16-hex char digest
                 .assertThat()
                 .hasStatusOk()
                 .bodyJson()
@@ -202,15 +204,38 @@ class RedisControllerTest extends AbstractIntegrationTest {
     @Test
     @Order(7)
     void testMetricsExposed() {
+        // Capture baseline
+        Timer timer = meterRegistry
+                .find("redis.operation")
+                .tag("method", "setIfEqual")
+                .timer();
+        long baselineTimerCount = timer != null ? timer.count() : 0;
+
+        io.micrometer.core.instrument.Counter counter = meterRegistry
+                .find("redis.operations")
+                .tag("method", "setIfEqual")
+                .tag("outcome", "success")
+                .counter();
+        double baselineCounterCount = counter != null ? counter.count() : 0;
+
+        // Execute a successful setIfEqual
+        this.mockMvcTester
+                .post()
+                .uri("/v1/redis/cas/set-ifeq")
+                .param("key", "cas-test-key")
+                .param("value", "another-value")
+                .param("expectedValue", "new-value") // From previous test
+                .assertThat()
+                .hasStatusOk();
+
         // Wait briefly if needed for metrics to flush
         await().atMost(Duration.ofSeconds(2)).untilAsserted(() -> {
-            // Check that the timer for 'setIfEqual' was recorded (since we run this test alone sometimes)
             assertThat(meterRegistry
                             .find("redis.operation")
                             .tag("method", "setIfEqual")
                             .timer())
                     .isNotNull()
-                    .satisfies(timer -> assertThat(timer.count()).isGreaterThan(0));
+                    .satisfies(t -> assertThat(t.count()).isGreaterThan(baselineTimerCount));
 
             // Check that the counter for success operations was recorded
             assertThat(meterRegistry
@@ -219,7 +244,7 @@ class RedisControllerTest extends AbstractIntegrationTest {
                             .tag("outcome", "success")
                             .counter())
                     .isNotNull()
-                    .satisfies(counter -> assertThat(counter.count()).isGreaterThan(0));
+                    .satisfies(c -> assertThat(c.count()).isGreaterThan(baselineCounterCount));
         });
     }
 }

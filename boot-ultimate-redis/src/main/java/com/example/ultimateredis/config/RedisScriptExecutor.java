@@ -29,9 +29,10 @@ public class RedisScriptExecutor {
      * @return The result of script execution
      */
     public <T> T executeScript(String script, List<String> keys, Object... args) {
+        String cacheKey = script + "_" + Object.class.getName();
         @SuppressWarnings("unchecked")
-        RedisScript<T> redisScript =
-                (RedisScript<T>) scriptCache.computeIfAbsent(script, s -> new DefaultRedisScript<>(s, Object.class));
+        RedisScript<T> redisScript = (RedisScript<T>)
+                scriptCache.computeIfAbsent(cacheKey, s -> new DefaultRedisScript<>(script, Object.class));
         return redisTemplate.execute(redisScript, keys, args);
     }
 
@@ -46,9 +47,10 @@ public class RedisScriptExecutor {
      * @return The result of script execution
      */
     public <T> T executeScript(String script, Class<T> returnType, List<String> keys, Object... args) {
+        String cacheKey = script + "_" + returnType.getName();
         @SuppressWarnings("unchecked")
-        RedisScript<T> redisScript =
-                (RedisScript<T>) scriptCache.computeIfAbsent(script, s -> new DefaultRedisScript<>(s, returnType));
+        RedisScript<T> redisScript = (RedisScript<T>)
+                scriptCache.computeIfAbsent(cacheKey, s -> new DefaultRedisScript<>(script, returnType));
         return redisTemplate.execute(redisScript, keys, args);
     }
 

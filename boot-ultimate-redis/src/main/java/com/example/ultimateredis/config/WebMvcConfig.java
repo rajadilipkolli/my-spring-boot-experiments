@@ -1,5 +1,6 @@
 package com.example.ultimateredis.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
@@ -10,6 +11,9 @@ class WebMvcConfig implements WebMvcConfigurer {
     private final ApplicationProperties applicationProperties;
     private final RateLimitInterceptor rateLimitInterceptor;
 
+    @Value("${app.rate-limit.enabled:true}")
+    private boolean rateLimitEnabled;
+
     WebMvcConfig(ApplicationProperties applicationProperties, RateLimitInterceptor rateLimitInterceptor) {
         this.applicationProperties = applicationProperties;
         this.rateLimitInterceptor = rateLimitInterceptor;
@@ -19,14 +23,16 @@ class WebMvcConfig implements WebMvcConfigurer {
     public void addCorsMappings(CorsRegistry registry) {
         ApplicationProperties.Cors propertiesCors = applicationProperties.getCors();
         registry.addMapping(propertiesCors.getPathPattern())
-                .allowedMethods(propertiesCors.getAllowedMethods())
-                .allowedHeaders(propertiesCors.getAllowedHeaders())
-                .allowedOriginPatterns(propertiesCors.getAllowedOriginPatterns())
+                .allowedMethods(propertiesCors.getAllowedMethods().split(","))
+                .allowedHeaders(propertiesCors.getAllowedHeaders().split(","))
+                .allowedOriginPatterns(propertiesCors.getAllowedOriginPatterns().split(","))
                 .allowCredentials(propertiesCors.isAllowCredentials());
     }
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(rateLimitInterceptor).addPathPatterns("/api/**", "/v1/**");
+        if (rateLimitEnabled) {
+            registry.addInterceptor(rateLimitInterceptor).addPathPatterns("/api/**", "/v1/**");
+        }
     }
 }

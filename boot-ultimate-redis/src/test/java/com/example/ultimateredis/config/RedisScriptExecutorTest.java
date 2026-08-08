@@ -125,4 +125,28 @@ class RedisScriptExecutorTest {
         // Verify script execution
         verify(redisTemplate).execute(any(RedisScript.class), eq(List.of(key)), eq(value), eq(ttl));
     }
+
+    @Test
+    void executeScript_shouldDistinguishScriptsWithDifferentReturnTypes() {
+        // Arrange
+        String script = "return 1";
+        List<String> keys = List.of("key");
+
+        when(redisTemplate.execute(any(RedisScript.class), anyList(), any(Object[].class)))
+                .thenReturn(1L)
+                .thenReturn(true);
+
+        // Act
+        scriptExecutor.executeScript(script, Long.class, keys);
+        scriptExecutor.executeScript(script, Boolean.class, keys);
+
+        // Assert
+        verify(redisTemplate, org.mockito.Mockito.times(2)).execute(scriptCaptor.capture(), eq(keys));
+
+        List<RedisScript<Object>> scripts = scriptCaptor.getAllValues();
+        assertThat(scripts).hasSize(2);
+        assertThat(scripts.get(0).getResultType()).isEqualTo(Long.class);
+        assertThat(scripts.get(1).getResultType()).isEqualTo(Boolean.class);
+        assertThat(scripts.get(0)).isNotSameAs(scripts.get(1));
+    }
 }

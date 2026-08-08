@@ -55,18 +55,16 @@ public class RedisStatusMonitor {
                     usedMemory);
 
             if (Arrays.asList(environment.getActiveProfiles()).contains("cluster")) {
-                try {
-                    RedisClusterConnection clusterConnection = redisConnectionFactory.getClusterConnection();
+                try (RedisClusterConnection clusterConnection = redisConnectionFactory.getClusterConnection()) {
                     long nodesCount = StreamSupport.stream(
                                     clusterConnection.clusterGetNodes().spliterator(), false)
                             .count();
-                    log.info("Redis Cluster Status: nodes={}, slots={}", nodesCount, "OK (simulated slot check)");
+                    log.info("Redis Cluster Status: nodes={}", nodesCount);
                 } catch (Exception ex) {
                     log.warn("Failed to retrieve cluster status: {}", ex.getMessage());
                 }
             } else if (Arrays.asList(environment.getActiveProfiles()).contains("sentinel")) {
-                try {
-                    RedisSentinelConnection sentinelConnection = redisConnectionFactory.getSentinelConnection();
+                try (RedisSentinelConnection sentinelConnection = redisConnectionFactory.getSentinelConnection()) {
                     NamedNode masterNode = () -> sentinelMaster;
                     long replicasCount = sentinelConnection.replicas(masterNode).size();
                     log.info("Redis Sentinel Status: master={}, replicas={}", sentinelMaster, replicasCount);

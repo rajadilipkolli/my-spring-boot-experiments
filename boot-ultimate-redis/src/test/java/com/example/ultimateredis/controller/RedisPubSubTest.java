@@ -31,7 +31,7 @@ class RedisPubSubTest extends AbstractIntegrationTest {
         await().atMost(Duration.ofSeconds(5)).untilAsserted(() -> {
             String received = redisConsumer.getLastReceivedMessage();
             assertThat(received).isNotNull();
-            assertThat(received.replace("\"", "")).isEqualTo(message);
+            assertThat(received).isEqualTo(message);
         });
     }
 }

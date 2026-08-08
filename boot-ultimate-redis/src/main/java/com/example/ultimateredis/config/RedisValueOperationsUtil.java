@@ -33,6 +33,10 @@ public class RedisValueOperationsUtil<T> {
         return valueOperations.get(key);
     }
 
+    public void putValue(String key, T value, long timeout, TimeUnit unit) {
+        valueOperations.set(key, value, timeout, unit);
+    }
+
     public void setExpire(String key, long timeout, TimeUnit unit) {
         redisTemplate.expire(key, timeout, unit);
     }
@@ -48,7 +52,7 @@ public class RedisValueOperationsUtil<T> {
                     ScanOptions.scanOptions().match(pattern).count(count).build();
             try (Cursor<byte[]> cursor = connection.keyCommands().scan(options)) {
                 while (cursor.hasNext()) {
-                    keys.add(new String(cursor.next()));
+                    keys.add((String) redisTemplate.getKeySerializer().deserialize(cursor.next()));
                 }
             }
             return keys;

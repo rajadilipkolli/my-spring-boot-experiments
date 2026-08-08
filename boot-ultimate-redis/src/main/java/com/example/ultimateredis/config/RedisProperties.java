@@ -1,7 +1,6 @@
 package com.example.ultimateredis.config;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
@@ -19,8 +18,8 @@ public class RedisProperties {
     @NotBlank
     private String keyPrefix = "app:";
 
-    @NotNull
-    private Security security = new Security();
+    @NotBlank
+    private String keyVersion = "v1:";
 
     public String getReadFrom() {
         return readFrom;
@@ -46,32 +45,11 @@ public class RedisProperties {
         this.keyPrefix = keyPrefix;
     }
 
-    public Security getSecurity() {
-        return security;
+    public String getKeyVersion() {
+        return keyVersion;
     }
 
-    public void setSecurity(Security security) {
-        this.security = security;
-    }
-
-    public static class Security {
-        private boolean tlsEnabled = false;
-        private String aclUsername;
-
-        public boolean isTlsEnabled() {
-            return tlsEnabled;
-        }
-
-        public void setTlsEnabled(boolean tlsEnabled) {
-            this.tlsEnabled = tlsEnabled;
-        }
-
-        public String getAclUsername() {
-            return aclUsername;
-        }
-
-        public void setAclUsername(String aclUsername) {
-            this.aclUsername = aclUsername;
-        }
+    public void setKeyVersion(String keyVersion) {
+        this.keyVersion = keyVersion;
     }
 }

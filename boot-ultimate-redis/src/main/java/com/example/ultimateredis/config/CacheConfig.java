@@ -102,16 +102,19 @@ public class CacheConfig implements CachingConfigurer {
             public void handleCachePutError(
                     RuntimeException exception, Cache cache, Object key, @Nullable Object value) {
                 log.error("Cache put error for key {} in cache {}: {}", key, cache.getName(), exception.getMessage());
+                throw exception;
             }
 
             @Override
             public void handleCacheEvictError(RuntimeException exception, Cache cache, Object key) {
                 log.error("Cache evict error for key {} in cache {}: {}", key, cache.getName(), exception.getMessage());
+                throw exception;
             }
 
             @Override
             public void handleCacheClearError(RuntimeException exception, Cache cache) {
                 log.error("Cache clear error in cache {}: {}", cache.getName(), exception.getMessage());
+                throw exception;
             }
         };
     }
