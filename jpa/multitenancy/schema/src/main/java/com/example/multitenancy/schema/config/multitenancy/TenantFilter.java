@@ -1,8 +1,9 @@
 package com.example.multitenancy.schema.config.multitenancy;
 
+import static com.example.multitenancy.schema.config.multitenancy.TenantContextHolder.CURRENT_TENANT;
+
 import com.example.multitenancy.schema.utils.TenantNameType;
 import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -21,8 +22,6 @@ import tools.jackson.databind.json.JsonMapper;
 public class TenantFilter extends OncePerRequestFilter {
 
     private final JsonMapper jsonMapper;
-
-    public static final ScopedValue<String> CURRENT_TENANT = ScopedValue.newInstance();
 
     public TenantFilter(JsonMapper jsonMapper) {
         this.jsonMapper = jsonMapper;
@@ -56,13 +55,14 @@ public class TenantFilter extends OncePerRequestFilter {
             }
         }
 
-        ScopedValue.where(CURRENT_TENANT, tenant).run(() -> {
-            try {
+        try {
+            ScopedValue.where(CURRENT_TENANT, tenant).call(() -> {
                 filterChain.doFilter(request, response);
-            } catch (IOException | ServletException e) {
-                throw new RuntimeException(e);
-            }
-        });
+                return null;
+            });
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private void writeProblem(
