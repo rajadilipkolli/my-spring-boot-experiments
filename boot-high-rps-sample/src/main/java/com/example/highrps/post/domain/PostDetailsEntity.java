@@ -9,7 +9,9 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.MapsId;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 import java.util.Objects;
+import org.hibernate.Hibernate;
 
 @Entity
 @Table(name = "post_details")
@@ -18,10 +20,14 @@ public class PostDetailsEntity extends BaseEntity {
     @Id
     private Long id;
 
+    @Column(length = 255)
     private String detailsKey;
 
     @Column(name = "created_by")
     private String createdBy;
+
+    @Version
+    private Short version;
 
     @OneToOne(fetch = FetchType.LAZY)
     @MapsId
@@ -64,23 +70,29 @@ public class PostDetailsEntity extends BaseEntity {
         return postEntity;
     }
 
+    public Short getVersion() {
+        return version;
+    }
+
+    public PostDetailsEntity setVersion(Short version) {
+        this.version = version;
+        return this;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {
             return true;
         }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
+        if (obj == null || Hibernate.getClass(this) != Hibernate.getClass(obj)) {
             return false;
         }
         PostDetailsEntity other = (PostDetailsEntity) obj;
-        return Objects.equals(this.createdBy, other.createdBy);
+        return id != null && Objects.equals(this.id, other.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(this.createdBy);
+        return Objects.hash(id);
     }
 }

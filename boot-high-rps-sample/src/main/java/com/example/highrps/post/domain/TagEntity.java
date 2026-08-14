@@ -11,6 +11,7 @@ import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import jakarta.persistence.Version;
 import java.util.Objects;
+import org.hibernate.annotations.NaturalId;
 
 @Entity
 @Table(
@@ -23,6 +24,7 @@ public class TagEntity extends BaseEntity {
     @SequenceGenerator(name = "tags_seq", sequenceName = "tags_seq", allocationSize = 5)
     private Long id;
 
+    @NaturalId
     @Column(nullable = false, unique = true, name = "tag_name")
     private String tagName;
 
@@ -75,11 +77,11 @@ public class TagEntity extends BaseEntity {
         if (this == obj) {
             return true;
         }
-        if (obj == null || getClass() != obj.getClass()) {
+        if (obj == null || org.hibernate.Hibernate.getClass(this) != org.hibernate.Hibernate.getClass(obj)) {
             return false;
         }
         TagEntity other = (TagEntity) obj;
-        return Objects.equals(this.tagName, other.tagName);
+        return tagName != null && Objects.equals(this.tagName, other.tagName);
     }
 
     @Override

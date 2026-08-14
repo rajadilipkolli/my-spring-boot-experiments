@@ -7,6 +7,7 @@ import com.example.highrps.shared.BaseEntity;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -23,6 +24,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import org.hibernate.Hibernate;
+import org.hibernate.annotations.NaturalId;
 import org.jspecify.annotations.Nullable;
 
 @Entity
@@ -39,6 +41,7 @@ public class PostEntity extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
 
+    @NaturalId
     @Column(name = "post_ref_id", unique = true, nullable = false)
     private Long postRefId;
 
@@ -61,13 +64,16 @@ public class PostEntity extends BaseEntity {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "postEntity", orphanRemoval = true)
     private List<PostCommentEntity> comments = new ArrayList<>();
 
-    @OneToOne(mappedBy = "postEntity", cascade = CascadeType.ALL, optional = false)
+    @OneToOne(mappedBy = "postEntity", cascade = CascadeType.ALL, optional = false, fetch = FetchType.LAZY)
     private PostDetailsEntity details;
 
     @OneToMany(mappedBy = "postEntity", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PostTagEntity> tags = new ArrayList<>();
 
-    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @ManyToOne(
+            cascade = {CascadeType.PERSIST, CascadeType.MERGE},
+            fetch = FetchType.LAZY,
+            optional = false)
     @JoinColumn(name = "author_id", nullable = false)
     private AuthorEntity authorEntity;
 
@@ -243,14 +249,11 @@ public class PostEntity extends BaseEntity {
         if (this == o) return true;
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
         PostEntity postEntity = (PostEntity) o;
-        return id != null
-                && title != null
-                && Objects.equals(id, postEntity.id)
-                && Objects.equals(this.title, postEntity.title);
+        return postRefId != null && Objects.equals(postRefId, postEntity.postRefId);
     }
 
     @Override
     public int hashCode() {
-        return getClass().hashCode();
+        return Objects.hash(postRefId);
     }
 }

@@ -17,6 +17,7 @@ import jakarta.persistence.Version;
 import java.time.OffsetDateTime;
 import java.util.Objects;
 import org.hibernate.Hibernate;
+import org.hibernate.annotations.NaturalId;
 
 @Entity
 @Table(
@@ -32,6 +33,7 @@ public class PostCommentEntity extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
 
+    @NaturalId
     @Column(name = "comment_ref_id", unique = true, nullable = false)
     private Long commentRefId;
 
@@ -51,7 +53,7 @@ public class PostCommentEntity extends BaseEntity {
     @Column(name = "version", nullable = false)
     private Short version;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "post_id", nullable = false)
     private PostEntity postEntity;
 
@@ -154,12 +156,12 @@ public class PostCommentEntity extends BaseEntity {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
-        PostCommentEntity postCommentEntity = (PostCommentEntity) o;
-        return id != null && Objects.equals(id, postCommentEntity.id);
+        PostCommentEntity that = (PostCommentEntity) o;
+        return commentRefId != null && Objects.equals(commentRefId, that.commentRefId);
     }
 
     @Override
     public int hashCode() {
-        return getClass().hashCode();
+        return Objects.hash(commentRefId);
     }
 }

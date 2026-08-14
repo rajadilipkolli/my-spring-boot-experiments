@@ -15,6 +15,7 @@ import jakarta.persistence.Version;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import org.hibernate.annotations.NaturalId;
 import org.jspecify.annotations.Nullable;
 
 @Entity
@@ -37,6 +38,7 @@ public class AuthorEntity extends BaseEntity {
     @Column(nullable = false, length = 15)
     private Long mobile;
 
+    @NaturalId
     @Column(nullable = false, unique = true, length = 50)
     private String email;
 
