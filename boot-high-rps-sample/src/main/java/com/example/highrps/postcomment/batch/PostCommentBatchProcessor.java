@@ -207,8 +207,7 @@ public class PostCommentBatchProcessor implements EntityBatchProcessor {
     }
 
     private PostCommentEntity createCommentEntity(PostCommentCommandResult result, PostEntity postEntity) {
-        PostCommentEntity entity = new PostCommentEntity(result.title(), result.content(), postEntity);
-        entity.setCommentRefId(result.id());
+        PostCommentEntity entity = new PostCommentEntity(result.title(), result.content(), postEntity, result.id());
         entity.setPublished(result.published());
         entity.setPublishedAt(result.publishedAt());
         entity.setCreatedAt(result.createdAt());

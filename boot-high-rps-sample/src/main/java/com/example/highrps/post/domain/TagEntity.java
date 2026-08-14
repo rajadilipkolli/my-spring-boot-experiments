@@ -1,5 +1,6 @@
 package com.example.highrps.post.domain;
 
+import com.example.highrps.shared.AssertUtil;
 import com.example.highrps.shared.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -37,6 +38,10 @@ public class TagEntity extends BaseEntity {
 
     public TagEntity() {}
 
+    public TagEntity(String tagName) {
+        this.tagName = AssertUtil.requireNotBlank(tagName, "tagName cannot be null or empty");
+    }
+
     public TagEntity setId(Long id) {
         this.id = id;
         return this;
@@ -55,7 +60,10 @@ public class TagEntity extends BaseEntity {
     }
 
     public TagEntity setTagName(String tagName) {
-        this.tagName = tagName;
+        if (this.tagName != null) {
+            throw new IllegalStateException("Tag name is immutable after construction");
+        }
+        this.tagName = AssertUtil.requireNotBlank(tagName, "tagName cannot be null or empty");
         return this;
     }
 

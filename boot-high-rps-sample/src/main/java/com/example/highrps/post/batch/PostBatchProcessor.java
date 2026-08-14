@@ -131,8 +131,8 @@ public class PostBatchProcessor implements EntityBatchProcessor {
                     .filter(name -> !tagMap.containsKey(name))
                     .map(name -> {
                         TagResponse tr = tagRequestsByName.get(name);
-                        TagEntity tagEntity =
-                                new TagEntity().setTagName(tr.tagName()).setTagDescription(tr.tagDescription());
+                        TagEntity tagEntity = new TagEntity(tr.tagName());
+                        tagEntity.setTagDescription(tr.tagDescription());
                         tagEntity.setCreatedAt(LocalDateTime.now());
                         return tagEntity;
                     })
