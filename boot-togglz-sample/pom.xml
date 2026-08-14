@@ -20,7 +20,7 @@
 
         <java.version>25</java.version>
         <springdoc-openapi.version>3.1.0</springdoc-openapi.version>
-        <togglz.version>4.6.3</togglz.version>
+        <togglz.version>4.6.4</togglz.version>
 
         <project.testresult.directory>${project.build.directory}/test-results</project.testresult.directory>
         <spotless.version>3.9.0</spotless.version>
