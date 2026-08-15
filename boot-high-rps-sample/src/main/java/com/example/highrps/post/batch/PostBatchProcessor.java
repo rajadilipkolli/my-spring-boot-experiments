@@ -11,6 +11,7 @@ import com.example.highrps.post.domain.TagResponse;
 import com.example.highrps.post.domain.requests.NewPostRequest;
 import com.example.highrps.post.mapper.NewPostRequestToPostEntityMapper;
 import com.example.highrps.shared.redis.DeletionMarkerHandler;
+import jakarta.persistence.EntityManager;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -21,6 +22,8 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.hibernate.KeyType;
+import org.hibernate.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -38,6 +41,7 @@ public class PostBatchProcessor implements EntityBatchProcessor {
     private final JsonMapper jsonMapper;
     private final AuthorRepository authorRepository;
     private final DeletionMarkerHandler deletionMarkerHandler;
+    private final EntityManager entityManager;
 
     public PostBatchProcessor(
             NewPostRequestToPostEntityMapper mapper,
@@ -45,13 +49,15 @@ public class PostBatchProcessor implements EntityBatchProcessor {
             TagRepository tagRepository,
             JsonMapper jsonMapper,
             AuthorRepository authorRepository,
-            DeletionMarkerHandler deletionMarkerHandler) {
+            DeletionMarkerHandler deletionMarkerHandler,
+            EntityManager entityManager) {
         this.mapper = mapper;
         this.postRepository = postRepository;
         this.tagRepository = tagRepository;
         this.jsonMapper = jsonMapper;
         this.authorRepository = authorRepository;
         this.deletionMarkerHandler = deletionMarkerHandler;
+        this.entityManager = entityManager;
     }
 
     @Override
@@ -94,9 +100,11 @@ public class PostBatchProcessor implements EntityBatchProcessor {
                 .map(parsedPost -> Long.valueOf(parsedPost.postId()))
                 .toList();
 
-        List<PostEntity> existingPosts = postRepository.findByPostRefIdIn(postIds);
+        List<PostEntity> existingPosts =
+                entityManager.unwrap(Session.class).findMultiple(PostEntity.class, postIds, KeyType.NATURAL);
 
         Map<Long, PostEntity> existingByPostId = existingPosts.stream()
+                .filter(Objects::nonNull)
                 .collect(Collectors.toMap(PostEntity::getPostRefId, Function.identity(), (e1, e2) -> e1));
 
         // Step 2.1: Bulk fetch authors
@@ -167,6 +175,13 @@ public class PostBatchProcessor implements EntityBatchProcessor {
                             AuthorEntity author = null;
                             if (authorEmail != null) {
                                 author = authorByEmail.get(authorEmail.toLowerCase(Locale.ROOT));
+                            }
+                            if (author == null) {
+                                log.warn(
+                                        "Author not found for email {}, rejecting post {}",
+                                        authorEmail,
+                                        parsed.postId());
+                                return null; // Reject the corresponding post explicitly
                             }
                             entity.setAuthorEntity(author);
                             log.debug("Creating new post with postRefId: {}", parsed.postId());

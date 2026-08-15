@@ -60,6 +60,7 @@ import tools.jackson.databind.json.JsonMapper;
 public abstract class AbstractIntegrationTest {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AbstractIntegrationTest.class);
+    private static final int KAFKA_STREAMS_TIMEOUT_SECONDS = 120;
 
     @Autowired
     protected MockMvcTester mockMvcTester;
@@ -168,7 +169,7 @@ public abstract class AbstractIntegrationTest {
 
         // Wait for Kafka Streams to be ready before proceeding with tests
         try {
-            await().atMost(Duration.ofSeconds(60))
+            await().atMost(Duration.ofSeconds(KAFKA_STREAMS_TIMEOUT_SECONDS))
                     .pollInterval(Duration.ofMillis(500))
                     .until(() -> {
                         KafkaStreams streams = streamsBuilderFactoryBean.getKafkaStreams();
@@ -177,10 +178,11 @@ public abstract class AbstractIntegrationTest {
         } catch (ConditionTimeoutException e) {
             if (faultInjectionOptIn) {
                 log.warn(
-                        "Kafka Streams did not become RUNNING within 30 seconds. Proceeding anyway. State may have been affected by Toxiproxy.",
+                        "Kafka Streams did not become RUNNING within {} seconds. Proceeding anyway. State may have been affected by Toxiproxy.",
+                        KAFKA_STREAMS_TIMEOUT_SECONDS,
                         e);
             } else {
-                log.error("Kafka Streams did not become RUNNING within 30 seconds.", e);
+                log.error("Kafka Streams did not become RUNNING within {} seconds.", KAFKA_STREAMS_TIMEOUT_SECONDS, e);
                 throw e;
             }
         }
