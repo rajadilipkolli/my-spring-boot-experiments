@@ -12,19 +12,21 @@ import org.springframework.stereotype.Component;
 public class TenantIdentifierResolver
         implements CurrentTenantIdentifierResolver<String>, HibernatePropertiesCustomizer {
 
-    private static final ThreadLocal<String> currentTenant = new ThreadLocal<>();
-
     public void setCurrentTenant(@Nullable String tenant) {
-        currentTenant.set(Objects.requireNonNullElse(tenant, "unknown"));
+        TenantContextHolder.CURRENT_TENANT_THREAD_LOCAL.set(Objects.requireNonNullElse(tenant, "unknown"));
     }
 
     public void clearCurrentTenant() {
-        currentTenant.remove();
+        TenantContextHolder.CURRENT_TENANT_THREAD_LOCAL.remove();
     }
 
     @Override
     public String resolveCurrentTenantIdentifier() {
-        String tenant = currentTenant.get();
+        if (TenantContextHolder.CURRENT_TENANT.isBound()) {
+            String tenant = TenantContextHolder.CURRENT_TENANT.get();
+            return tenant != null ? tenant : "unknown";
+        }
+        String tenant = TenantContextHolder.CURRENT_TENANT_THREAD_LOCAL.get();
         return tenant != null ? tenant : "unknown";
     }
 

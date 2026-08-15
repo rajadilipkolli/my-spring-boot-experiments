@@ -1,5 +1,6 @@
 package com.example.multitenancy.config.multidatasource;
 
+import com.example.multitenancy.config.multitenant.TenantContextHolder;
 import com.example.multitenancy.config.multitenant.TenantIdentifierResolver;
 import com.example.multitenancy.secondary.entities.SecondaryCustomer;
 import com.example.multitenancy.secondary.repositories.SecondaryCustomerRepository;
@@ -51,12 +52,16 @@ public class SecondaryDataSourceConfiguration {
         hibernateProps.putAll(this.jpaProperties.getProperties());
         // needs to set tenantIdentifier for connecting to secondary datasource and fetching the
         // metadata
-        tenantIdentifierResolver.setCurrentTenant(DatabaseType.SECONDARY.getSchemaName());
-        return builder.dataSource(tenantRoutingDatasource)
-                .properties(hibernateProps)
-                .persistenceUnit("secondary")
-                .packages(SecondaryCustomer.class)
-                .build();
+        try {
+            return ScopedValue.where(TenantContextHolder.CURRENT_TENANT, DatabaseType.SECONDARY.getSchemaName())
+                    .call(() -> builder.dataSource(tenantRoutingDatasource)
+                            .properties(hibernateProps)
+                            .persistenceUnit("secondary")
+                            .packages(SecondaryCustomer.class)
+                            .build());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Bean

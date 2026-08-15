@@ -31,14 +31,14 @@ class SecondaryCustomerControllerIT extends AbstractIntegrationTest {
     @BeforeEach
     void setUp() {
         // Clean up data from both schemas before each test
-        tenantIdentifierResolver.setCurrentTenant("schema1");
+        setCurrentTenant("schema1");
         secondaryCustomerRepository.deleteAllInBatch();
 
-        tenantIdentifierResolver.setCurrentTenant("schema2");
+        setCurrentTenant("schema2");
         secondaryCustomerRepository.deleteAllInBatch();
 
         // Set back to schema1 and create test data
-        tenantIdentifierResolver.setCurrentTenant("schema1");
+        setCurrentTenant("schema1");
         secondaryCustomerList = new ArrayList<>();
         secondaryCustomerList.add(new SecondaryCustomer().setName("First Customer"));
         secondaryCustomerList.add(new SecondaryCustomer().setName("Second Customer"));

@@ -25,7 +25,7 @@ class RepositoryIntegrationTest extends AbstractIntegrationTest {
 
         @BeforeEach
         void setUp() {
-            tenantIdentifierResolver.setCurrentTenant("primary");
+            setCurrentTenant("primary");
             primaryCustomerRepository.deleteAllInBatch();
         }
 
@@ -167,7 +167,7 @@ class RepositoryIntegrationTest extends AbstractIntegrationTest {
 
         @BeforeEach
         void setUp() {
-            tenantIdentifierResolver.setCurrentTenant("schema1");
+            setCurrentTenant("schema1");
             secondaryCustomerRepository.deleteAllInBatch();
         }
 
@@ -269,7 +269,7 @@ class RepositoryIntegrationTest extends AbstractIntegrationTest {
             secondaryCustomerRepository.save(new SecondaryCustomer().setName("Schema1 Customer"));
 
             // When - Switch to schema2 and check
-            tenantIdentifierResolver.setCurrentTenant("schema2");
+            setCurrentTenant("schema2");
             secondaryCustomerRepository.deleteAllInBatch(); // Clear schema2
 
             List<SecondaryCustomer> schema2Customers = secondaryCustomerRepository.findAll();
@@ -278,7 +278,7 @@ class RepositoryIntegrationTest extends AbstractIntegrationTest {
             assertThat(schema2Customers).isEmpty();
 
             // Switch back to schema1 and verify data is still there
-            tenantIdentifierResolver.setCurrentTenant("schema1");
+            setCurrentTenant("schema1");
             List<SecondaryCustomer> schema1Customers = secondaryCustomerRepository.findAll();
             assertThat(schema1Customers).hasSize(1);
             assertThat(schema1Customers.getFirst().getName()).isEqualTo("Schema1 Customer");
@@ -288,18 +288,18 @@ class RepositoryIntegrationTest extends AbstractIntegrationTest {
         @DisplayName("Should handle concurrent operations across schemas")
         void shouldHandleConcurrentOperationsAcrossSchemas() {
             // Given
-            tenantIdentifierResolver.setCurrentTenant("schema1");
+            setCurrentTenant("schema1");
             SecondaryCustomer schema1Customer = new SecondaryCustomer().setName("Schema1 Concurrent");
 
-            tenantIdentifierResolver.setCurrentTenant("schema2");
+            setCurrentTenant("schema2");
             secondaryCustomerRepository.deleteAllInBatch();
             SecondaryCustomer schema2Customer = new SecondaryCustomer().setName("Schema2 Concurrent");
 
             // When - Save in both schemas
-            tenantIdentifierResolver.setCurrentTenant("schema1");
+            setCurrentTenant("schema1");
             SecondaryCustomer saved1 = secondaryCustomerRepository.save(schema1Customer);
 
-            tenantIdentifierResolver.setCurrentTenant("schema2");
+            setCurrentTenant("schema2");
             SecondaryCustomer saved2 = secondaryCustomerRepository.save(schema2Customer);
 
             // Then
@@ -310,7 +310,7 @@ class RepositoryIntegrationTest extends AbstractIntegrationTest {
             List<SecondaryCustomer> schema2List = secondaryCustomerRepository.findAll();
             assertThat(schema2List).hasSize(1);
 
-            tenantIdentifierResolver.setCurrentTenant("schema1");
+            setCurrentTenant("schema1");
             List<SecondaryCustomer> schema1List = secondaryCustomerRepository.findAll();
             assertThat(schema1List).hasSize(1);
         }
@@ -322,10 +322,10 @@ class RepositoryIntegrationTest extends AbstractIntegrationTest {
 
         @BeforeEach
         void setUp() {
-            tenantIdentifierResolver.setCurrentTenant("primary");
+            setCurrentTenant("primary");
             primaryCustomerRepository.deleteAllInBatch();
 
-            tenantIdentifierResolver.setCurrentTenant("schema1");
+            setCurrentTenant("schema1");
             secondaryCustomerRepository.deleteAllInBatch();
         }
 
@@ -333,19 +333,19 @@ class RepositoryIntegrationTest extends AbstractIntegrationTest {
         @DisplayName("Should maintain complete isolation between primary and secondary datasources")
         void shouldMaintainCompleteIsolationBetweenDatasources() {
             // Given
-            tenantIdentifierResolver.setCurrentTenant("primary");
+            setCurrentTenant("primary");
             primaryCustomerRepository.save(new PrimaryCustomer().setText("Primary Customer"));
 
-            tenantIdentifierResolver.setCurrentTenant("schema1");
+            setCurrentTenant("schema1");
             secondaryCustomerRepository.save(new SecondaryCustomer().setName("Secondary Customer"));
 
             // When/Then - Verify each datasource only sees its own data
-            tenantIdentifierResolver.setCurrentTenant("primary");
+            setCurrentTenant("primary");
             List<PrimaryCustomer> primaryCustomers = primaryCustomerRepository.findAll();
             assertThat(primaryCustomers).hasSize(1);
             assertThat(primaryCustomers.getFirst().getText()).isEqualTo("Primary Customer");
 
-            tenantIdentifierResolver.setCurrentTenant("schema1");
+            setCurrentTenant("schema1");
             List<SecondaryCustomer> secondaryCustomers = secondaryCustomerRepository.findAll();
             assertThat(secondaryCustomers).hasSize(1);
             assertThat(secondaryCustomers.getFirst().getName()).isEqualTo("Secondary Customer");
@@ -355,11 +355,11 @@ class RepositoryIntegrationTest extends AbstractIntegrationTest {
         @DisplayName("Should handle ID generation independently")
         void shouldHandleIdGenerationIndependently() {
             // Given
-            tenantIdentifierResolver.setCurrentTenant("primary");
+            setCurrentTenant("primary");
             PrimaryCustomer primary1 = primaryCustomerRepository.save(new PrimaryCustomer().setText("Primary 1"));
             PrimaryCustomer primary2 = primaryCustomerRepository.save(new PrimaryCustomer().setText("Primary 2"));
 
-            tenantIdentifierResolver.setCurrentTenant("schema1");
+            setCurrentTenant("schema1");
             SecondaryCustomer secondary1 =
                     secondaryCustomerRepository.save(new SecondaryCustomer().setName("Secondary 1"));
             SecondaryCustomer secondary2 =
@@ -390,17 +390,17 @@ class RepositoryIntegrationTest extends AbstractIntegrationTest {
                     new SecondaryCustomer().setName("Bulk Secondary 2"));
 
             // When
-            tenantIdentifierResolver.setCurrentTenant("primary");
+            setCurrentTenant("primary");
             primaryCustomerRepository.saveAll(primaryCustomers);
 
-            tenantIdentifierResolver.setCurrentTenant("schema1");
+            setCurrentTenant("schema1");
             secondaryCustomerRepository.saveAll(secondaryCustomers);
 
             // Then
-            tenantIdentifierResolver.setCurrentTenant("primary");
+            setCurrentTenant("primary");
             assertThat(primaryCustomerRepository.count()).isEqualTo(3);
 
-            tenantIdentifierResolver.setCurrentTenant("schema1");
+            setCurrentTenant("schema1");
             assertThat(secondaryCustomerRepository.count()).isEqualTo(2);
         }
 
@@ -408,24 +408,24 @@ class RepositoryIntegrationTest extends AbstractIntegrationTest {
         @DisplayName("Should handle batch deletions independently")
         void shouldHandleBatchDeletionsIndependently() {
             // Given - Setup data in both datasources
-            tenantIdentifierResolver.setCurrentTenant("primary");
+            setCurrentTenant("primary");
             primaryCustomerRepository.saveAll(
                     List.of(new PrimaryCustomer().setText("Primary 1"), new PrimaryCustomer().setText("Primary 2")));
 
-            tenantIdentifierResolver.setCurrentTenant("schema1");
+            setCurrentTenant("schema1");
             secondaryCustomerRepository.saveAll(List.of(
                     new SecondaryCustomer().setName("Secondary 1"),
                     new SecondaryCustomer().setName("Secondary 2"),
                     new SecondaryCustomer().setName("Secondary 3")));
 
             // When - Delete all from primary datasource only
-            tenantIdentifierResolver.setCurrentTenant("primary");
+            setCurrentTenant("primary");
             primaryCustomerRepository.deleteAllInBatch();
 
             // Then - Primary should be empty, secondary should be unaffected
             assertThat(primaryCustomerRepository.count()).isZero();
 
-            tenantIdentifierResolver.setCurrentTenant("schema1");
+            setCurrentTenant("schema1");
             assertThat(secondaryCustomerRepository.count()).isEqualTo(3);
         }
     }
@@ -436,10 +436,10 @@ class RepositoryIntegrationTest extends AbstractIntegrationTest {
 
         @BeforeEach
         void setUp() {
-            tenantIdentifierResolver.setCurrentTenant("primary");
+            setCurrentTenant("primary");
             primaryCustomerRepository.deleteAllInBatch();
 
-            tenantIdentifierResolver.setCurrentTenant("schema1");
+            setCurrentTenant("schema1");
             secondaryCustomerRepository.deleteAllInBatch();
         }
 
@@ -447,7 +447,7 @@ class RepositoryIntegrationTest extends AbstractIntegrationTest {
         @DisplayName("Should handle large dataset efficiently")
         void shouldHandleLargeDatasetEfficiently() {
             // Given
-            tenantIdentifierResolver.setCurrentTenant("schema1");
+            setCurrentTenant("schema1");
 
             // When - Create a large number of customers
             for (int i = 1; i <= 100; i++) {
@@ -470,19 +470,19 @@ class RepositoryIntegrationTest extends AbstractIntegrationTest {
         void shouldHandleRapidTenantSwitching() {
             // Given/When - Rapidly switch between tenants and perform operations
             for (int i = 0; i < 10; i++) {
-                tenantIdentifierResolver.setCurrentTenant("schema1");
+                setCurrentTenant("schema1");
                 secondaryCustomerRepository.save(new SecondaryCustomer().setName("Schema1 Customer " + i));
 
-                tenantIdentifierResolver.setCurrentTenant("schema2");
+                setCurrentTenant("schema2");
                 secondaryCustomerRepository.save(new SecondaryCustomer().setName("Schema2 Customer " + i));
             }
 
             // Then
-            tenantIdentifierResolver.setCurrentTenant("schema1");
+            setCurrentTenant("schema1");
             long schema1Count = secondaryCustomerRepository.count();
             assertThat(schema1Count).isEqualTo(10);
 
-            tenantIdentifierResolver.setCurrentTenant("schema2");
+            setCurrentTenant("schema2");
             long schema2Count = secondaryCustomerRepository.count();
             assertThat(schema2Count).isEqualTo(10);
         }

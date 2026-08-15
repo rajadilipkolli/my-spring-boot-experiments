@@ -29,7 +29,7 @@ class PrimaryCustomerControllerIT extends AbstractIntegrationTest {
 
     @BeforeEach
     void setUp() {
-        tenantIdentifierResolver.setCurrentTenant("primary");
+        setCurrentTenant("primary");
         primaryCustomerRepository.deleteAllInBatch();
 
         primaryCustomerList = new ArrayList<>();

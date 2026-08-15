@@ -22,13 +22,13 @@ class ErrorHandlingIT extends AbstractIntegrationTest {
     @BeforeEach
     void setUp() {
         // Clean up all data sources
-        tenantIdentifierResolver.setCurrentTenant("primary");
+        setCurrentTenant("primary");
         primaryCustomerRepository.deleteAllInBatch();
 
-        tenantIdentifierResolver.setCurrentTenant("schema1");
+        setCurrentTenant("schema1");
         secondaryCustomerRepository.deleteAllInBatch();
 
-        tenantIdentifierResolver.setCurrentTenant("schema2");
+        setCurrentTenant("schema2");
         secondaryCustomerRepository.deleteAllInBatch();
     }
 
