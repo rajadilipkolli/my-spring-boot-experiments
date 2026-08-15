@@ -8,7 +8,7 @@ import static org.mockito.Mockito.when;
 import com.example.highrps.author.domain.AuthorRedis;
 import com.example.highrps.author.domain.AuthorRedisRepository;
 import com.example.highrps.author.dto.AuthorRequest;
-import com.example.highrps.infrastructure.redis.DeletionMarkerHandler;
+import com.example.highrps.shared.redis.DeletionMarkerHandler;
 import java.time.LocalDateTime;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.junit.jupiter.api.BeforeEach;

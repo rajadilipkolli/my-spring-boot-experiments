@@ -1,7 +1,6 @@
 package com.example.highrps.postcomment.listener;
 
 import com.example.highrps.infrastructure.cache.CacheKeyGenerator;
-import com.example.highrps.infrastructure.redis.DeletionMarkerHandler;
 import com.example.highrps.postcomment.command.PostCommentCommandResult;
 import com.example.highrps.postcomment.domain.PostCommentMapper;
 import com.example.highrps.postcomment.domain.PostCommentRedis;
@@ -9,6 +8,7 @@ import com.example.highrps.postcomment.domain.PostCommentRedisRepository;
 import com.example.highrps.postcomment.domain.PostCommentRequest;
 import com.example.highrps.shared.AbstractAggregatesToRedisListener;
 import com.example.highrps.shared.config.AppProperties;
+import com.example.highrps.shared.redis.DeletionMarkerHandler;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import java.util.Collections;
 import java.util.Map;

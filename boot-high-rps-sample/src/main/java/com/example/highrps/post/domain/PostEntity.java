@@ -1,12 +1,12 @@
 package com.example.highrps.post.domain;
 
 import com.example.highrps.author.domain.AuthorEntity;
-import com.example.highrps.postcomment.domain.PostCommentEntity;
 import com.example.highrps.shared.AssertUtil;
 import com.example.highrps.shared.BaseEntity;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -23,6 +23,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import org.hibernate.Hibernate;
+import org.hibernate.annotations.NaturalId;
 import org.jspecify.annotations.Nullable;
 
 @Entity
@@ -39,6 +40,7 @@ public class PostEntity extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
 
+    @NaturalId
     @Column(name = "post_ref_id", unique = true, nullable = false)
     private Long postRefId;
 
@@ -58,16 +60,13 @@ public class PostEntity extends BaseEntity {
     @Column(name = "version", nullable = false)
     private Short version;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "postEntity", orphanRemoval = true)
-    private List<PostCommentEntity> comments = new ArrayList<>();
-
-    @OneToOne(mappedBy = "postEntity", cascade = CascadeType.ALL, optional = false)
+    @OneToOne(mappedBy = "postEntity", cascade = CascadeType.ALL, optional = false, fetch = FetchType.LAZY)
     private PostDetailsEntity details;
 
     @OneToMany(mappedBy = "postEntity", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PostTagEntity> tags = new ArrayList<>();
 
-    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "author_id", nullable = false)
     private AuthorEntity authorEntity;
 
@@ -80,7 +79,6 @@ public class PostEntity extends BaseEntity {
         this.content = AssertUtil.requireNotBlank(content, "Post content cannot be null or empty");
         this.authorEntity = authorEntity;
         this.published = false;
-        this.comments = new ArrayList<>();
         this.tags = new ArrayList<>();
     }
 
@@ -103,6 +101,12 @@ public class PostEntity extends BaseEntity {
     }
 
     public PostEntity setPostRefId(Long postRefId) {
+        if (postRefId == null) {
+            throw new IllegalArgumentException("The postRefId cannot be null.");
+        }
+        if (this.postRefId != null && !this.postRefId.equals(postRefId)) {
+            throw new IllegalStateException("The postRefId cannot be changed once set.");
+        }
         this.postRefId = postRefId;
         return this;
     }
@@ -138,18 +142,6 @@ public class PostEntity extends BaseEntity {
         return publishedAt;
     }
 
-    public PostEntity setComments(@Nullable List<PostCommentEntity> comments) {
-        if (comments == null) {
-            comments = new ArrayList<>();
-        }
-        this.comments = comments;
-        return this;
-    }
-
-    public List<PostCommentEntity> getComments() {
-        return comments;
-    }
-
     public PostEntity setTags(@Nullable List<PostTagEntity> tags) {
         if (tags == null) {
             tags = new ArrayList<>();
@@ -169,16 +161,6 @@ public class PostEntity extends BaseEntity {
 
     public AuthorEntity getAuthorEntity() {
         return authorEntity;
-    }
-
-    public void addComment(PostCommentEntity comment) {
-        this.comments.add(comment);
-        comment.setPostEntity(this);
-    }
-
-    public void removeComment(PostCommentEntity comment) {
-        this.comments.remove(comment);
-        comment.setPostEntity(null);
     }
 
     public void setDetails(@Nullable PostDetailsEntity details) {
@@ -243,14 +225,11 @@ public class PostEntity extends BaseEntity {
         if (this == o) return true;
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
         PostEntity postEntity = (PostEntity) o;
-        return id != null
-                && title != null
-                && Objects.equals(id, postEntity.id)
-                && Objects.equals(this.title, postEntity.title);
+        return postRefId != null && Objects.equals(postRefId, postEntity.postRefId);
     }
 
     @Override
     public int hashCode() {
-        return getClass().hashCode();
+        return Objects.hash(postRefId);
     }
 }

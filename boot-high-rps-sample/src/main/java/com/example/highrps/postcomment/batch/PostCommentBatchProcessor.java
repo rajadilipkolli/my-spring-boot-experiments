@@ -1,12 +1,12 @@
 package com.example.highrps.postcomment.batch;
 
 import com.example.highrps.infrastructure.kafka.batch.EntityBatchProcessor;
-import com.example.highrps.infrastructure.redis.DeletionMarkerHandler;
 import com.example.highrps.post.domain.PostEntity;
 import com.example.highrps.post.domain.PostRepository;
 import com.example.highrps.postcomment.command.PostCommentCommandResult;
 import com.example.highrps.postcomment.domain.PostCommentEntity;
 import com.example.highrps.postcomment.domain.PostCommentRepository;
+import com.example.highrps.shared.redis.DeletionMarkerHandler;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;

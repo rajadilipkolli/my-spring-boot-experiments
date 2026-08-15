@@ -13,7 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 public interface PostCommentRepository extends JpaRepository<PostCommentEntity, Long> {
 
     @Transactional
-    @Modifying
+    @Modifying(clearAutomatically = true)
     @Query("DELETE FROM PostCommentEntity pc WHERE pc.commentRefId IN :commentRefIds")
     long deleteByCommentRefIdIn(@Param("commentRefIds") List<Long> commentRefIds);
 

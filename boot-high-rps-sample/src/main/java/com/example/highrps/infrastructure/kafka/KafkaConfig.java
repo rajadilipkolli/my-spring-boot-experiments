@@ -15,6 +15,7 @@ import org.jspecify.annotations.NonNull;
 import org.springframework.boot.kafka.autoconfigure.KafkaConnectionDetails;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.kafka.annotation.EnableKafkaStreams;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
@@ -29,6 +30,7 @@ import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
 import org.springframework.util.backoff.FixedBackOff;
 
 @Configuration(proxyBeanMethods = false)
+@EnableKafkaStreams
 public class KafkaConfig {
 
     // Consumer factory for raw bytes (used by listeners that handle manual deserialization)

@@ -17,7 +17,7 @@ public interface AuthorRepository extends JpaRepository<AuthorEntity, Long> {
     List<AuthorEntity> findByEmailInAllIgnoreCase(@Param("emails") List<String> emails);
 
     @Transactional
-    @Modifying
+    @Modifying(clearAutomatically = true)
     @Query("delete from AuthorEntity a where lower(a.email) in :emails")
     int deleteByEmailInAllIgnoreCase(@Param("emails") List<String> emails);
 

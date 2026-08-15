@@ -1,21 +1,16 @@
 package com.example.highrps.author.domain;
 
-import com.example.highrps.post.domain.PostEntity;
 import com.example.highrps.shared.AssertUtil;
 import com.example.highrps.shared.BaseEntity;
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import org.jspecify.annotations.Nullable;
+import org.hibernate.annotations.NaturalId;
 
 @Entity
 @Table(name = "authors")
@@ -37,6 +32,7 @@ public class AuthorEntity extends BaseEntity {
     @Column(nullable = false, length = 15)
     private Long mobile;
 
+    @NaturalId
     @Column(nullable = false, unique = true, length = 50)
     private String email;
 
@@ -45,9 +41,6 @@ public class AuthorEntity extends BaseEntity {
     @Version
     @Column(nullable = false)
     private Short version;
-
-    @OneToMany(mappedBy = "authorEntity", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<PostEntity> postEntities = new ArrayList<>();
 
     // Protected no-arg constructor for JPA and tests
     public AuthorEntity() {}
@@ -58,7 +51,6 @@ public class AuthorEntity extends BaseEntity {
         this.lastName = AssertUtil.requireNotBlank(lastName, "Last name cannot be null or empty");
         this.email = AssertUtil.requireNotBlank(email, "Email cannot be null or empty");
         this.mobile = AssertUtil.requireNotNull(mobile, "Mobile cannot be null");
-        this.postEntities = new ArrayList<>();
         this.registeredAt = LocalDateTime.now();
     }
 
@@ -132,27 +124,5 @@ public class AuthorEntity extends BaseEntity {
 
     public Short getVersion() {
         return version;
-    }
-
-    public AuthorEntity setPostEntities(@Nullable List<PostEntity> postEntities) {
-        if (postEntities == null) {
-            postEntities = new ArrayList<>();
-        }
-        this.postEntities = postEntities;
-        return this;
-    }
-
-    public List<PostEntity> getPostEntities() {
-        return postEntities;
-    }
-
-    public PostEntity addPost(PostEntity postEntity) {
-        this.postEntities.add(postEntity);
-        return postEntity.setAuthorEntity(this);
-    }
-
-    public void removePost(PostEntity postEntity) {
-        this.postEntities.remove(postEntity);
-        postEntity.setAuthorEntity(null);
     }
 }

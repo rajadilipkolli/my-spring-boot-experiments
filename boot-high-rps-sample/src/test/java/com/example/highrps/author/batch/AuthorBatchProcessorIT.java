@@ -20,10 +20,12 @@ class AuthorBatchProcessorIT extends AbstractIntegrationTest {
 
     @Test
     void processUpserts_insertsNewAuthors_and_updatesExisting() {
-        String payload1 =
-                "{\"firstName\":\"John\",\"middleName\":\"M\",\"lastName\":\"Doe\",\"mobile\":1234567890,\"email\":\"John@Example.com\"}";
-        String payload2 =
-                "{\"firstName\":\"Jane\",\"middleName\":\"A\",\"lastName\":\"Smith\",\"mobile\":9876543210,\"email\":\"jane@example.com\"}";
+        String payload1 = """
+                {"firstName":"John","middleName":"M","lastName":"Doe","mobile":1234567890,"email":"john@example.com"}
+                """;
+        String payload2 = """
+                {"firstName":"Jane","middleName":"A","lastName":"Smith","mobile":9876543210,"email":"jane@example.com"}
+                """;
 
         authorBatchProcessor.processUpserts(List.of(payload1, payload2));
 
@@ -37,8 +39,9 @@ class AuthorBatchProcessorIT extends AbstractIntegrationTest {
         assertThat(byEmail.get("john@example.com").getFirstName()).isEqualTo("John");
 
         // Now update John
-        String updateJohn =
-                "{\"firstName\":\"Johnny\",\"middleName\":\"M\",\"lastName\":\"Doe\",\"mobile\":1234567890,\"email\":\"john@example.com\"}";
+        String updateJohn = """
+                {"firstName":"Johnny","middleName":"M","lastName":"Doe","mobile":1234567890,"email":"john@example.com"}
+                """;
         authorBatchProcessor.processUpserts(List.of(updateJohn));
 
         AuthorEntity updated = authorRepository.findAll().stream()
@@ -51,9 +54,9 @@ class AuthorBatchProcessorIT extends AbstractIntegrationTest {
     @Test
     void processUpserts_skipsWhenTombstoneExists() {
         String email = "tomb@example.com";
-        String payload =
-                "{\"firstName\":\"Tomb\",\"middleName\":null,\"lastName\":\"Stone\",\"mobile\":1111111111,\"email\":\""
-                        + email + "\"}";
+        String payload = """
+                {"firstName":"Tomb","middleName":null,"lastName":"Stone","mobile":1111111111,"email":"%s"}
+                """.formatted(email);
 
         // mark tombstone in Redis with unified key format
         redisTemplate.opsForValue().set("deleted:author:" + email, "1", Duration.ofSeconds(60));

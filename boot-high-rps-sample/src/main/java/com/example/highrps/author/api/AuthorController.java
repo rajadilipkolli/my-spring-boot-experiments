@@ -21,6 +21,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @Validated
 @RestController
+@RequestMapping("/author")
 public class AuthorController {
 
     private final AuthorCommandService authorCommandService;
@@ -31,13 +32,13 @@ public class AuthorController {
         this.authorQueryService = authorQueryService;
     }
 
-    @GetMapping("/author/{email}")
+    @GetMapping("/{email}")
     public ResponseEntity<AuthorProjection> getAuthorByEmail(@PathVariable String email) {
         AuthorProjection resp = authorQueryService.getAuthor(new AuthorQuery(email.toLowerCase(Locale.ROOT)));
         return ResponseEntity.ok(resp);
     }
 
-    @PostMapping(value = "/author")
+    @PostMapping
     public CompletableFuture<ResponseEntity<AuthorCommandResult>> createAuthor(
             @RequestBody @Valid AuthorRequest newAuthorRequest) {
         CreateAuthorCommand cmd = new CreateAuthorCommand(
@@ -57,7 +58,7 @@ public class AuthorController {
         });
     }
 
-    @PutMapping(value = "/author/{email}")
+    @PutMapping("/{email}")
     public CompletableFuture<ResponseEntity<AuthorCommandResult>> updateAuthor(
             @PathVariable String email, @RequestBody @Valid AuthorRequest newAuthorRequest) {
         String normalizedEmail = email.toLowerCase(Locale.ROOT);
@@ -71,7 +72,7 @@ public class AuthorController {
         return authorCommandService.updateAuthor(cmd).thenApply(ResponseEntity::ok);
     }
 
-    @DeleteMapping("/author/{email}")
+    @DeleteMapping("/{email}")
     public CompletableFuture<ResponseEntity<Void>> deleteAuthor(@PathVariable @NotBlank String email) {
         String normalizedEmail = email.toLowerCase(Locale.ROOT);
         return authorCommandService

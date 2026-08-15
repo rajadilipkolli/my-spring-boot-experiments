@@ -4,6 +4,7 @@ import com.redis.testcontainers.RedisContainer;
 import eu.rekawek.toxiproxy.Proxy;
 import eu.rekawek.toxiproxy.ToxiproxyClient;
 import java.time.Duration;
+import java.util.UUID;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.context.annotation.Bean;
@@ -69,8 +70,7 @@ public class ContainersConfig {
 
     @Bean
     DynamicPropertyRegistrar dynamicPropertyRegistrar(RedisContainer redisContainer, KafkaContainer kafkaContainer) {
-        String stateDir =
-                System.getProperty("java.io.tmpdir") + "/kafka-streams-test-state-" + java.util.UUID.randomUUID();
+        String stateDir = System.getProperty("java.io.tmpdir") + "/kafka-streams-test-state-" + UUID.randomUUID();
         return registry -> {
             registry.add("spring.data.redis.host", redisContainer::getHost);
             registry.add("spring.data.redis.port", redisContainer::getFirstMappedPort);

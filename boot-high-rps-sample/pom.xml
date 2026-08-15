@@ -128,7 +128,12 @@
             <version>${springdoc-openapi.version}</version>
         </dependency>
 
-
+        <dependency>
+            <groupId>com.julien-dubois.bootui</groupId>
+            <artifactId>bootui-spring-boot-starter</artifactId>
+            <version>1.13.1</version>
+            <scope>runtime</scope>
+        </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>

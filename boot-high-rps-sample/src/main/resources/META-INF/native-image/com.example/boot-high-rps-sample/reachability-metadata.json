@@ -1,0 +1,393 @@
+{
+  "reflection": [
+    {
+      "condition": {"typeReached": "com.example.highrps.author.batch.AuthorBatchProcessor$ParsedAuthor"},
+      "type": "com.example.highrps.author.batch.AuthorBatchProcessor$ParsedAuthor",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "condition": {"typeReached": "com.example.highrps.author.command.AuthorCommandResult"},
+      "type": "com.example.highrps.author.command.AuthorCommandResult",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "condition": {"typeReached": "com.example.highrps.author.command.CreateAuthorCommand"},
+      "type": "com.example.highrps.author.command.CreateAuthorCommand",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "condition": {"typeReached": "com.example.highrps.author.command.UpdateAuthorCommand"},
+      "type": "com.example.highrps.author.command.UpdateAuthorCommand",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "condition": {"typeReached": "com.example.highrps.author.domain.AuthorEntity"},
+      "type": "com.example.highrps.author.domain.AuthorEntity",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "condition": {"typeReached": "com.example.highrps.author.domain.AuthorRedis"},
+      "type": "com.example.highrps.author.domain.AuthorRedis",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true,
+      "serializable": true
+    },
+    {
+      "condition": {"typeReached": "com.example.highrps.author.domain.events.AuthorCreatedEvent"},
+      "type": "com.example.highrps.author.domain.events.AuthorCreatedEvent",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "condition": {"typeReached": "com.example.highrps.author.domain.events.AuthorDeletedEvent"},
+      "type": "com.example.highrps.author.domain.events.AuthorDeletedEvent",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "condition": {"typeReached": "com.example.highrps.author.domain.events.AuthorUpdatedEvent"},
+      "type": "com.example.highrps.author.domain.events.AuthorUpdatedEvent",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "condition": {"typeReached": "com.example.highrps.author.dto.AuthorRequest"},
+      "type": "com.example.highrps.author.dto.AuthorRequest",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true,
+      "serializable": true
+    },
+    {
+      "condition": {"typeReached": "com.example.highrps.author.query.AuthorProjection"},
+      "type": "com.example.highrps.author.query.AuthorProjection",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "condition": {"typeReached": "com.example.highrps.author.query.AuthorQuery"},
+      "type": "com.example.highrps.author.query.AuthorQuery",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "condition": {"typeReached": "com.example.highrps.infrastructure.kafka.batch.ScheduledBatchProcessor$PayloadOrTombstone"},
+      "type": "com.example.highrps.infrastructure.kafka.batch.ScheduledBatchProcessor$PayloadOrTombstone",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "condition": {"typeReached": "com.example.highrps.infrastructure.kafka.batch.ScheduledBatchProcessor$QueueItem"},
+      "type": "com.example.highrps.infrastructure.kafka.batch.ScheduledBatchProcessor$QueueItem",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "condition": {"typeReached": "com.example.highrps.post.batch.PostBatchProcessor$ParsedPost"},
+      "type": "com.example.highrps.post.batch.PostBatchProcessor$ParsedPost",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "condition": {"typeReached": "com.example.highrps.post.command.CreatePostCommand"},
+      "type": "com.example.highrps.post.command.CreatePostCommand",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "condition": {"typeReached": "com.example.highrps.post.command.PostCommandResult"},
+      "type": "com.example.highrps.post.command.PostCommandResult",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "condition": {"typeReached": "com.example.highrps.post.command.UpdatePostCommand"},
+      "type": "com.example.highrps.post.command.UpdatePostCommand",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "condition": {"typeReached": "com.example.highrps.post.domain.PostDetailsEntity"},
+      "type": "com.example.highrps.post.domain.PostDetailsEntity",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "condition": {"typeReached": "com.example.highrps.post.domain.PostDetailsResponse"},
+      "type": "com.example.highrps.post.domain.PostDetailsResponse",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "condition": {"typeReached": "com.example.highrps.post.domain.PostEntity"},
+      "type": "com.example.highrps.post.domain.PostEntity",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "condition": {"typeReached": "com.example.highrps.post.domain.PostRedis"},
+      "type": "com.example.highrps.post.domain.PostRedis",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true,
+      "serializable": true
+    },
+    {
+      "condition": {"typeReached": "com.example.highrps.post.domain.PostTagEntity"},
+      "type": "com.example.highrps.post.domain.PostTagEntity",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true,
+      "serializable": true
+    },
+    {
+      "condition": {"typeReached": "com.example.highrps.post.domain.PostTagId"},
+      "type": "com.example.highrps.post.domain.PostTagId",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true,
+      "serializable": true
+    },
+    {
+      "condition": {"typeReached": "com.example.highrps.post.domain.TagEntity"},
+      "type": "com.example.highrps.post.domain.TagEntity",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "condition": {"typeReached": "com.example.highrps.post.domain.TagResponse"},
+      "type": "com.example.highrps.post.domain.TagResponse",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "condition": {"typeReached": "com.example.highrps.post.domain.events.PostCreatedEvent"},
+      "type": "com.example.highrps.post.domain.events.PostCreatedEvent",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "condition": {"typeReached": "com.example.highrps.post.domain.events.PostDeletedEvent"},
+      "type": "com.example.highrps.post.domain.events.PostDeletedEvent",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "condition": {"typeReached": "com.example.highrps.post.domain.events.PostUpdatedEvent"},
+      "type": "com.example.highrps.post.domain.events.PostUpdatedEvent",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "condition": {"typeReached": "com.example.highrps.post.domain.requests.NewPostRequest"},
+      "type": "com.example.highrps.post.domain.requests.NewPostRequest",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true,
+      "serializable": true
+    },
+    {
+      "condition": {"typeReached": "com.example.highrps.post.domain.requests.PostDetailsRequest"},
+      "type": "com.example.highrps.post.domain.requests.PostDetailsRequest",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "condition": {"typeReached": "com.example.highrps.post.domain.requests.TagRequest"},
+      "type": "com.example.highrps.post.domain.requests.TagRequest",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "condition": {"typeReached": "com.example.highrps.post.query.PostProjection"},
+      "type": "com.example.highrps.post.query.PostProjection",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "condition": {"typeReached": "com.example.highrps.post.query.PostQuery"},
+      "type": "com.example.highrps.post.query.PostQuery",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "condition": {"typeReached": "com.example.highrps.postcomment.batch.PostCommentBatchProcessor$ParsedComment"},
+      "type": "com.example.highrps.postcomment.batch.PostCommentBatchProcessor$ParsedComment",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "condition": {"typeReached": "com.example.highrps.postcomment.command.CreatePostCommentCommand"},
+      "type": "com.example.highrps.postcomment.command.CreatePostCommentCommand",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "condition": {"typeReached": "com.example.highrps.postcomment.command.PostCommentCommandResult"},
+      "type": "com.example.highrps.postcomment.command.PostCommentCommandResult",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "condition": {"typeReached": "com.example.highrps.postcomment.command.UpdatePostCommentCommand"},
+      "type": "com.example.highrps.postcomment.command.UpdatePostCommentCommand",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "condition": {"typeReached": "com.example.highrps.postcomment.domain.PostCommentEntity"},
+      "type": "com.example.highrps.postcomment.domain.PostCommentEntity",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "condition": {"typeReached": "com.example.highrps.postcomment.domain.PostCommentRedis"},
+      "type": "com.example.highrps.postcomment.domain.PostCommentRedis",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true,
+      "serializable": true
+    },
+    {
+      "condition": {"typeReached": "com.example.highrps.postcomment.domain.PostCommentRequest"},
+      "type": "com.example.highrps.postcomment.domain.PostCommentRequest",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "condition": {"typeReached": "com.example.highrps.postcomment.domain.events.PostCommentCreatedEvent"},
+      "type": "com.example.highrps.postcomment.domain.events.PostCommentCreatedEvent",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "condition": {"typeReached": "com.example.highrps.postcomment.domain.events.PostCommentDeletedEvent"},
+      "type": "com.example.highrps.postcomment.domain.events.PostCommentDeletedEvent",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "condition": {"typeReached": "com.example.highrps.postcomment.domain.events.PostCommentUpdatedEvent"},
+      "type": "com.example.highrps.postcomment.domain.events.PostCommentUpdatedEvent",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "condition": {"typeReached": "com.example.highrps.postcomment.domain.vo.PostCommentId"},
+      "type": "com.example.highrps.postcomment.domain.vo.PostCommentId",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "condition": {"typeReached": "com.example.highrps.postcomment.query.GetPostCommentQuery"},
+      "type": "com.example.highrps.postcomment.query.GetPostCommentQuery",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "condition": {"typeReached": "com.example.highrps.postcomment.rest.CreatePostCommentRequest"},
+      "type": "com.example.highrps.postcomment.rest.CreatePostCommentRequest",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "condition": {"typeReached": "com.example.highrps.postcomment.rest.UpdatePostCommentRequest"},
+      "type": "com.example.highrps.postcomment.rest.UpdatePostCommentRequest",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "condition": {"typeReached": "com.example.highrps.shared.BaseEntity"},
+      "type": "com.example.highrps.shared.BaseEntity",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true
+    },
+    {
+      "condition": {"typeReached": "com.example.highrps.shared.DomainException"},
+      "type": "com.example.highrps.shared.DomainException",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true,
+      "serializable": true
+    },
+    {
+      "condition": {"typeReached": "com.example.highrps.shared.KafkaPublishException"},
+      "type": "com.example.highrps.shared.KafkaPublishException",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true,
+      "serializable": true
+    },
+    {
+      "condition": {"typeReached": "com.example.highrps.shared.KafkaPublishPendingException"},
+      "type": "com.example.highrps.shared.KafkaPublishPendingException",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true,
+      "serializable": true
+    },
+    {
+      "condition": {"typeReached": "com.example.highrps.shared.ResourceNotFoundException"},
+      "type": "com.example.highrps.shared.ResourceNotFoundException",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true,
+      "serializable": true
+    }
+  ],
+  "resources": [
+    {"glob": "application*.properties"},
+    {"glob": "application*.yml"},
+    {"glob": "application*.yaml"},
+    {"glob": "logback-spring.xml"},
+    {"glob": "log4j2-spring.xml"}
+  ]
+}

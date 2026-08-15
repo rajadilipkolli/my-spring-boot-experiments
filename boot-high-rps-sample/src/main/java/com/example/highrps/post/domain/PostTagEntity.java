@@ -11,6 +11,7 @@ import jakarta.persistence.Table;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Objects;
+import org.hibernate.Hibernate;
 
 @Entity(name = "PostTag")
 @Table(name = "post_tag")
@@ -19,12 +20,12 @@ public class PostTagEntity implements Serializable {
     @EmbeddedId
     private PostTagId id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @MapsId("postId")
     @JoinColumn(name = "post_id", nullable = false)
     private PostEntity postEntity;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @MapsId("tagId")
     @JoinColumn(name = "tag_id", nullable = false)
     private TagEntity tagEntity;
@@ -85,15 +86,15 @@ public class PostTagEntity implements Serializable {
             return true;
         }
 
-        if (o == null || getClass() != o.getClass()) {
+        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) {
             return false;
         }
         PostTagEntity that = (PostTagEntity) o;
-        return Objects.equals(this.postEntity, that.postEntity) && Objects.equals(this.tagEntity, that.tagEntity);
+        return id != null && Objects.equals(this.id, that.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(this.postEntity, this.tagEntity);
+        return Objects.hash(this.id);
     }
 }

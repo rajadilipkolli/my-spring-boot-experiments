@@ -36,3 +36,4 @@ build/
 *.log
 .DS_Store
 *.gz
+*.tmp
