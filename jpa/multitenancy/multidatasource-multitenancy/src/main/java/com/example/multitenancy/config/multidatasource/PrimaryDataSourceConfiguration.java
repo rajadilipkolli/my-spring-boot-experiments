@@ -1,6 +1,5 @@
 package com.example.multitenancy.config.multidatasource;
 
-import com.example.multitenancy.config.multitenant.TenantContextHolder;
 import com.example.multitenancy.config.multitenant.TenantIdentifierResolver;
 import com.example.multitenancy.primary.entities.PrimaryCustomer;
 import com.example.multitenancy.primary.repositories.PrimaryCustomerRepository;
@@ -50,16 +49,12 @@ public class PrimaryDataSourceConfiguration {
         hibernateProps.putAll(this.jpaProperties.getProperties());
         // needs to set tenantIdentifier for connecting to primary datasource and fetching the
         // metadata
-        try {
-            return ScopedValue.where(TenantContextHolder.CURRENT_TENANT, DatabaseType.PRIMARY.getSchemaName())
-                    .call(() -> builder.dataSource(tenantRoutingDatasource)
-                            .persistenceUnit("primary")
-                            .properties(hibernateProps)
-                            .packages(PrimaryCustomer.class)
-                            .build());
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        tenantIdentifierResolver.setCurrentTenant(DatabaseType.PRIMARY.getSchemaName());
+        return builder.dataSource(tenantRoutingDatasource)
+                .persistenceUnit("primary")
+                .properties(hibernateProps)
+                .packages(PrimaryCustomer.class)
+                .build();
     }
 
     @Bean

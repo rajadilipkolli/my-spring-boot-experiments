@@ -3,11 +3,9 @@ package com.example.multitenancy.common;
 import static com.example.multitenancy.utils.AppConstants.PROFILE_TEST;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
-import com.example.multitenancy.config.multitenant.TenantContextHolder;
 import com.example.multitenancy.config.multitenant.TenantIdentifierResolver;
 import com.example.multitenancy.primary.repositories.PrimaryCustomerRepository;
 import com.example.multitenancy.secondary.repositories.SecondaryCustomerRepository;
-import java.util.Objects;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
@@ -34,9 +32,4 @@ public abstract class AbstractIntegrationTest {
 
     @Autowired
     protected TenantIdentifierResolver tenantIdentifierResolver;
-
-    protected void setCurrentTenant(String tenant) {
-        // Sets the ThreadLocal fallback for tests
-        TenantContextHolder.CURRENT_TENANT_THREAD_LOCAL.set(Objects.requireNonNullElse(tenant, "unknown"));
-    }
 }

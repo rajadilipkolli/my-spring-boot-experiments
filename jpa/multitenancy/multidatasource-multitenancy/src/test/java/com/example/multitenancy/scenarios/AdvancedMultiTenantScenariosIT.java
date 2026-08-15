@@ -33,38 +33,38 @@ class AdvancedMultiTenantScenariosIT extends AbstractIntegrationTest {
     @BeforeEach
     void setUp() {
         // Clean up all data before each test - use correct tenant identifiers
-        setCurrentTenant("primary");
+        tenantIdentifierResolver.setCurrentTenant("primary");
         primaryCustomerRepository.deleteAll();
 
-        setCurrentTenant("schema1");
+        tenantIdentifierResolver.setCurrentTenant("schema1");
         secondaryCustomerRepository.deleteAll();
 
-        setCurrentTenant("schema2");
+        tenantIdentifierResolver.setCurrentTenant("schema2");
         secondaryCustomerRepository.deleteAll();
 
         // Reset to default
-        setCurrentTenant("primary");
+        tenantIdentifierResolver.setCurrentTenant("primary");
     }
 
     @Test
     void tenantDataIsolation() {
         // Create data for primary tenant
-        setCurrentTenant("primary");
+        tenantIdentifierResolver.setCurrentTenant("primary");
         createTestDataForTenant("Primary");
 
         // Create data for schema1 tenant
-        setCurrentTenant("schema1");
+        tenantIdentifierResolver.setCurrentTenant("schema1");
         createTestDataForTenant("Schema1");
 
         // Verify primary tenant data isolation
-        setCurrentTenant("primary");
+        tenantIdentifierResolver.setCurrentTenant("primary");
         List<PrimaryCustomer> primaryCustomers = primaryCustomerRepository.findAll();
 
         assertThat(primaryCustomers).isNotEmpty().hasSize(2);
         assertThat(primaryCustomers.getFirst().getText()).startsWith("Primary");
 
         // Verify schema1 tenant data isolation
-        setCurrentTenant("schema1");
+        tenantIdentifierResolver.setCurrentTenant("schema1");
         List<SecondaryCustomer> schema1Customers = secondaryCustomerRepository.findAll();
 
         assertThat(schema1Customers).isNotEmpty().hasSize(2);
@@ -78,7 +78,7 @@ class AdvancedMultiTenantScenariosIT extends AbstractIntegrationTest {
 
         for (int i = 0; i < tenants.length; i++) {
             String tenant = tenants[i];
-            setCurrentTenant(tenant);
+            tenantIdentifierResolver.setCurrentTenant(tenant);
 
             createTestDataForTenant("Tenant" + (i + 1));
 
@@ -98,14 +98,14 @@ class AdvancedMultiTenantScenariosIT extends AbstractIntegrationTest {
     @Test
     void dataIsolationBetweenTenants() {
         // Test that data operations in one tenant don't affect other tenants
-        setCurrentTenant("primary");
+        tenantIdentifierResolver.setCurrentTenant("primary");
         createTestDataForTenant("Primary");
 
         // Verify primary data exists before schema1 operations
         List<PrimaryCustomer> primaryDataBefore = primaryCustomerRepository.findAll();
         assertThat(primaryDataBefore).hasSize(2);
 
-        setCurrentTenant("schema1");
+        tenantIdentifierResolver.setCurrentTenant("schema1");
         // Save initial customer in schema1
         SecondaryCustomer customer = new SecondaryCustomer();
         customer.setName("Schema1-Customer1");
@@ -125,7 +125,7 @@ class AdvancedMultiTenantScenariosIT extends AbstractIntegrationTest {
         assertThat(schema1Data).hasSize(3);
 
         // Switch back to primary and verify data is still intact
-        setCurrentTenant("primary");
+        tenantIdentifierResolver.setCurrentTenant("primary");
         List<PrimaryCustomer> primaryDataAfter = primaryCustomerRepository.findAll();
         assertThat(primaryDataAfter).hasSize(2).isNotEmpty();
         assertThat(primaryDataAfter.getFirst().getText()).startsWith("Primary");
@@ -134,7 +134,7 @@ class AdvancedMultiTenantScenariosIT extends AbstractIntegrationTest {
         assertThat(primaryDataAfter).hasSameSizeAs(primaryDataBefore);
 
         // Switch to schema2 and verify it has no data from schema1 operations
-        setCurrentTenant("schema2");
+        tenantIdentifierResolver.setCurrentTenant("schema2");
         List<SecondaryCustomer> schema2Data = secondaryCustomerRepository.findAll();
         assertThat(schema2Data).isEmpty();
     }
@@ -174,7 +174,7 @@ class AdvancedMultiTenantScenariosIT extends AbstractIntegrationTest {
     @Test
     void errorHandlingWithTenantContext() {
         // Test that errors don't corrupt tenant context
-        setCurrentTenant("primary");
+        tenantIdentifierResolver.setCurrentTenant("primary");
 
         // Test that validation errors don't corrupt tenant context
         assertThatThrownBy(() -> {
@@ -197,14 +197,14 @@ class AdvancedMultiTenantScenariosIT extends AbstractIntegrationTest {
     @Test
     void bulkOperationsWithTenantIsolation() {
         // Test bulk operations respect tenant boundaries
-        setCurrentTenant("primary");
+        tenantIdentifierResolver.setCurrentTenant("primary");
         for (int i = 1; i <= 5; i++) {
             PrimaryCustomer customer = new PrimaryCustomer();
             customer.setText("Primary-Bulk-" + i);
             primaryCustomerRepository.save(customer);
         }
 
-        setCurrentTenant("schema1");
+        tenantIdentifierResolver.setCurrentTenant("schema1");
         for (int i = 1; i <= 3; i++) {
             SecondaryCustomer customer = new SecondaryCustomer();
             customer.setName("Schema1-Bulk-" + i);
@@ -212,30 +212,30 @@ class AdvancedMultiTenantScenariosIT extends AbstractIntegrationTest {
         }
 
         // Verify counts per tenant
-        setCurrentTenant("primary");
+        tenantIdentifierResolver.setCurrentTenant("primary");
         assertThat(primaryCustomerRepository.count()).isEqualTo(5);
 
-        setCurrentTenant("schema1");
+        tenantIdentifierResolver.setCurrentTenant("schema1");
         assertThat(secondaryCustomerRepository.count()).isEqualTo(3);
 
         // Test bulk delete for one tenant
-        setCurrentTenant("primary");
+        tenantIdentifierResolver.setCurrentTenant("primary");
         primaryCustomerRepository.deleteAll();
 
         // Verify primary data is gone but schema1 data remains
         assertThat(primaryCustomerRepository.count()).isZero();
 
-        setCurrentTenant("schema1");
+        tenantIdentifierResolver.setCurrentTenant("schema1");
         assertThat(secondaryCustomerRepository.count()).isEqualTo(3);
     }
 
     @Test
     void tenantContextClearing() {
         // Test that clearing context works properly
-        setCurrentTenant("primary");
+        tenantIdentifierResolver.setCurrentTenant("primary");
         assertThat(tenantIdentifierResolver.resolveCurrentTenantIdentifier()).isEqualTo("primary");
 
-        setCurrentTenant(null);
+        tenantIdentifierResolver.setCurrentTenant(null);
         assertThat(tenantIdentifierResolver.resolveCurrentTenantIdentifier()).isEqualTo("unknown");
 
         // Test operations without tenant context (should fail gracefully with known exception)
