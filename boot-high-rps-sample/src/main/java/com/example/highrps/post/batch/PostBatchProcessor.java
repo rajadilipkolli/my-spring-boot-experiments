@@ -107,6 +107,8 @@ public class PostBatchProcessor implements EntityBatchProcessor {
                 .filter(Objects::nonNull)
                 .collect(Collectors.toMap(PostEntity::getPostRefId, Function.identity(), (e1, e2) -> e1));
 
+        int updateCount = existingByPostId.size();
+
         // Step 2.1: Bulk fetch authors
         List<String> emails = parsedPosts.stream()
                 .map(p -> p.request().email())
@@ -203,8 +205,8 @@ public class PostBatchProcessor implements EntityBatchProcessor {
                 log.debug(
                         "Persisted batch of {} post entities ({} updates, {} inserts)",
                         entitiesToSave.size(),
-                        existingPosts.size(),
-                        entitiesToSave.size() - existingPosts.size());
+                        updateCount,
+                        entitiesToSave.size() - updateCount);
             } catch (Exception e) {
                 log.error("Failed to persist batch of {} post entities", entitiesToSave.size(), e);
                 throw e;

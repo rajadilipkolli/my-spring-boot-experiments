@@ -101,6 +101,9 @@ public class PostEntity extends BaseEntity {
     }
 
     public PostEntity setPostRefId(Long postRefId) {
+        if (postRefId == null) {
+            throw new IllegalArgumentException("The postRefId cannot be null.");
+        }
         if (this.postRefId != null && !this.postRefId.equals(postRefId)) {
             throw new IllegalStateException("The postRefId cannot be changed once set.");
         }
