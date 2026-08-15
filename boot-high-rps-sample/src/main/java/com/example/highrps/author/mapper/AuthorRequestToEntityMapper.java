@@ -18,7 +18,6 @@ import org.springframework.core.convert.converter.Converter;
 public interface AuthorRequestToEntityMapper extends Converter<@NonNull AuthorRequest, @NonNull AuthorEntity> {
 
     @Mapping(target = "registeredAt", expression = "java(LocalDateTime.now())")
-    @Mapping(target = "postEntities", ignore = true)
     @Mapping(target = "version", ignore = true)
     @Mapping(target = "id", ignore = true)
     AuthorEntity convert(AuthorRequest authorRequest);

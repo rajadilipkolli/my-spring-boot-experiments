@@ -3,7 +3,6 @@ package com.example.highrps.post.batch;
 import com.example.highrps.author.domain.AuthorEntity;
 import com.example.highrps.author.domain.AuthorRepository;
 import com.example.highrps.infrastructure.kafka.batch.EntityBatchProcessor;
-import com.example.highrps.infrastructure.redis.DeletionMarkerHandler;
 import com.example.highrps.post.domain.PostEntity;
 import com.example.highrps.post.domain.PostRepository;
 import com.example.highrps.post.domain.TagEntity;
@@ -11,6 +10,7 @@ import com.example.highrps.post.domain.TagRepository;
 import com.example.highrps.post.domain.TagResponse;
 import com.example.highrps.post.domain.requests.NewPostRequest;
 import com.example.highrps.post.mapper.NewPostRequestToPostEntityMapper;
+import com.example.highrps.shared.redis.DeletionMarkerHandler;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -131,8 +131,8 @@ public class PostBatchProcessor implements EntityBatchProcessor {
                     .filter(name -> !tagMap.containsKey(name))
                     .map(name -> {
                         TagResponse tr = tagRequestsByName.get(name);
-                        TagEntity tagEntity = new TagEntity(tr.tagName());
-                        tagEntity.setTagDescription(tr.tagDescription());
+                        TagEntity tagEntity =
+                                new TagEntity().setTagName(tr.tagName()).setTagDescription(tr.tagDescription());
                         tagEntity.setCreatedAt(LocalDateTime.now());
                         return tagEntity;
                     })

@@ -1,6 +1,5 @@
 package com.example.highrps.post.command;
 
-import com.example.highrps.infrastructure.redis.DeletionMarkerHandler;
 import com.example.highrps.post.domain.PostDetailsResponse;
 import com.example.highrps.post.domain.PostRedis;
 import com.example.highrps.post.domain.PostRedisRepository;
@@ -10,6 +9,7 @@ import com.example.highrps.post.domain.events.PostDeletedEvent;
 import com.example.highrps.post.domain.events.PostUpdatedEvent;
 import com.example.highrps.shared.AbstractCommandService;
 import com.example.highrps.shared.config.AppProperties;
+import com.example.highrps.shared.redis.DeletionMarkerHandler;
 import com.github.benmanes.caffeine.cache.Cache;
 import java.time.Duration;
 import java.time.LocalDateTime;

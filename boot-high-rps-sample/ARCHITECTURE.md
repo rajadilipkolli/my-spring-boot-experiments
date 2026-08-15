@@ -57,3 +57,13 @@ The Query side serves data from highly optimized read models.
 - **Structured Configuration**: Type-safe Spring Boot `@ConfigurationProperties` drive all parameters, making environments easily tunable.
 - **MDC Propagation**: Correlation IDs are generated at the HTTP layer (`CorrelationIdFilter`) and propagated natively across thread and network boundaries as Kafka headers via an `MdcProducerInterceptor`.
 - **OpenTelemetry (OTel)**: Metrics, consumer lags, and distributed traces are seamlessly exported to a Grafana/Prometheus (LGTM) stack.
+
+## Spring Modulith
+
+The application enforces strict architectural boundaries using Spring Modulith.
+
+- **Dependency Direction**: Module dependencies flow strictly in one direction: `postcomment → post → author`. Bidirectional JPA associations are disallowed; cross-module relationships must use identifiers and query services.
+- **Shared Kernel**: The `shared` module is a pure kernel. It has no outgoing dependencies to other modules.
+- **Infrastructure Supplier**: The `infrastructure` module acts as a supplier, depending only on `shared`. It provides cross-cutting concerns (Kafka, Redis, Cache).
+- **Module API Boundaries**: Domain modules expose specific packages via `@NamedInterface` to limit access (e.g., `infrastructure::cache`, `infrastructure::redis`, and `infrastructure::kafka`).
+- **Validation**: `ModulithStructureTest` continuously verifies these boundaries during the build and generates PlantUML diagrams representing the architecture.

@@ -47,8 +47,11 @@ class PostCommentControllerIT extends AbstractIntegrationTest {
         PostEntity postEntity = new PostEntity("Test Post for Comments", "Post content", author);
         postEntity.setPostRefId(IdGenerator.generateLong());
         postEntity.setDetails(postDetailsEntity);
-        author.addPost(postEntity);
+        // No reverse mapping: author.addPost(postEntity) is removed.
+        // The owning side (PostEntity) already has the reference.
         AuthorEntity authorEntity = authorRepository.save(author);
+        postEntity.setAuthorEntity(authorEntity);
+        postEntity = postRepository.save(postEntity);
         // saving to redis such that getPost will return data
         PostRedis postRedis = new PostRedis()
                 .setId(postEntity.getPostRefId())
@@ -61,7 +64,7 @@ class PostCommentControllerIT extends AbstractIntegrationTest {
                         postDetailsEntity.getDetailsKey(), LocalDateTime.now(), postDetailsEntity.getCreatedBy()))
                 .setTags(List.of());
         postRedisRepository.save(postRedis);
-        postId = authorEntity.getPostEntities().getFirst().getPostRefId();
+        postId = postEntity.getPostRefId();
     }
 
     @Test

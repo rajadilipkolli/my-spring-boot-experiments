@@ -9,7 +9,6 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
-import com.example.highrps.infrastructure.redis.DeletionMarkerHandler;
 import com.example.highrps.post.domain.PostRedisRepository;
 import com.example.highrps.post.domain.events.PostCreatedEvent;
 import com.example.highrps.post.domain.events.PostDeletedEvent;
@@ -18,6 +17,7 @@ import com.example.highrps.post.domain.requests.PostDetailsRequest;
 import com.example.highrps.post.domain.requests.TagRequest;
 import com.example.highrps.post.query.PostQueryService;
 import com.example.highrps.shared.config.AppProperties;
+import com.example.highrps.shared.redis.DeletionMarkerHandler;
 import com.github.benmanes.caffeine.cache.Cache;
 import java.time.Duration;
 import java.util.List;

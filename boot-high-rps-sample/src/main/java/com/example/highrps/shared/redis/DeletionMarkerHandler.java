@@ -1,4 +1,4 @@
-package com.example.highrps.infrastructure.redis;
+package com.example.highrps.shared.redis;
 
 import java.time.Duration;
 import java.util.Objects;

@@ -1,7 +1,7 @@
 package com.example.highrps.infrastructure.kafka.batch;
 
-import com.example.highrps.infrastructure.redis.DeletionMarkerHandler;
 import com.example.highrps.shared.config.AppProperties;
+import com.example.highrps.shared.redis.DeletionMarkerHandler;
 import io.github.resilience4j.bulkhead.annotation.Bulkhead;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.micrometer.core.instrument.MeterRegistry;

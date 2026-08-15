@@ -1,6 +1,6 @@
 package com.example.highrps.shared;
 
-import com.example.highrps.infrastructure.redis.DeletionMarkerHandler;
+import com.example.highrps.shared.redis.DeletionMarkerHandler;
 import java.util.Locale;
 import java.util.Map;
 import org.apache.kafka.clients.consumer.ConsumerRecord;

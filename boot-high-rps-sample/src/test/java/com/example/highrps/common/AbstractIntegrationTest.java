@@ -168,7 +168,7 @@ public abstract class AbstractIntegrationTest {
 
         // Wait for Kafka Streams to be ready before proceeding with tests
         try {
-            await().atMost(Duration.ofSeconds(30))
+            await().atMost(Duration.ofSeconds(60))
                     .pollInterval(Duration.ofMillis(500))
                     .until(() -> {
                         KafkaStreams streams = streamsBuilderFactoryBean.getKafkaStreams();

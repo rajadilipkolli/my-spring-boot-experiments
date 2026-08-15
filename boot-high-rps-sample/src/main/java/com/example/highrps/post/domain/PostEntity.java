@@ -1,7 +1,6 @@
 package com.example.highrps.post.domain;
 
 import com.example.highrps.author.domain.AuthorEntity;
-import com.example.highrps.postcomment.domain.PostCommentEntity;
 import com.example.highrps.shared.AssertUtil;
 import com.example.highrps.shared.BaseEntity;
 import jakarta.persistence.CascadeType;
@@ -61,19 +60,13 @@ public class PostEntity extends BaseEntity {
     @Column(name = "version", nullable = false)
     private Short version;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "postEntity", orphanRemoval = true)
-    private List<PostCommentEntity> comments = new ArrayList<>();
-
     @OneToOne(mappedBy = "postEntity", cascade = CascadeType.ALL, optional = false, fetch = FetchType.LAZY)
     private PostDetailsEntity details;
 
     @OneToMany(mappedBy = "postEntity", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PostTagEntity> tags = new ArrayList<>();
 
-    @ManyToOne(
-            cascade = {CascadeType.PERSIST, CascadeType.MERGE},
-            fetch = FetchType.LAZY,
-            optional = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "author_id", nullable = false)
     private AuthorEntity authorEntity;
 
@@ -86,7 +79,6 @@ public class PostEntity extends BaseEntity {
         this.content = AssertUtil.requireNotBlank(content, "Post content cannot be null or empty");
         this.authorEntity = authorEntity;
         this.published = false;
-        this.comments = new ArrayList<>();
         this.tags = new ArrayList<>();
     }
 
@@ -144,18 +136,6 @@ public class PostEntity extends BaseEntity {
         return publishedAt;
     }
 
-    public PostEntity setComments(@Nullable List<PostCommentEntity> comments) {
-        if (comments == null) {
-            comments = new ArrayList<>();
-        }
-        this.comments = comments;
-        return this;
-    }
-
-    public List<PostCommentEntity> getComments() {
-        return comments;
-    }
-
     public PostEntity setTags(@Nullable List<PostTagEntity> tags) {
         if (tags == null) {
             tags = new ArrayList<>();
@@ -175,16 +155,6 @@ public class PostEntity extends BaseEntity {
 
     public AuthorEntity getAuthorEntity() {
         return authorEntity;
-    }
-
-    public void addComment(PostCommentEntity comment) {
-        this.comments.add(comment);
-        comment.setPostEntity(this);
-    }
-
-    public void removeComment(PostCommentEntity comment) {
-        this.comments.remove(comment);
-        comment.setPostEntity(null);
     }
 
     public void setDetails(@Nullable PostDetailsEntity details) {

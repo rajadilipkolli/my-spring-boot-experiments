@@ -7,7 +7,7 @@
             "infrastructure",
             "infrastructure::cache",
             "infrastructure::redis",
-            "postcomment"
+            "infrastructure::kafka"
         })
 package com.example.highrps.post;
 

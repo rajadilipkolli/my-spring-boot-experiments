@@ -5,7 +5,7 @@ import com.example.highrps.author.domain.AuthorRepository;
 import com.example.highrps.author.dto.AuthorRequest;
 import com.example.highrps.author.mapper.AuthorRequestToEntityMapper;
 import com.example.highrps.infrastructure.kafka.batch.EntityBatchProcessor;
-import com.example.highrps.infrastructure.redis.DeletionMarkerHandler;
+import com.example.highrps.shared.redis.DeletionMarkerHandler;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;

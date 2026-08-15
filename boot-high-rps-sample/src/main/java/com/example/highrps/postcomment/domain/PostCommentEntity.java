@@ -68,14 +68,6 @@ public class PostCommentEntity extends BaseEntity {
         this.published = false;
     }
 
-    public PostCommentEntity(String title, String content, PostEntity postEntity, Long commentRefId) {
-        this.title = AssertUtil.requireNotBlank(title, "Comment title cannot be null or empty");
-        this.content = AssertUtil.requireNotBlank(content, "Comment content cannot be null or empty");
-        this.postEntity = postEntity;
-        this.commentRefId = AssertUtil.requireNotNull(commentRefId, "commentRefId cannot be null");
-        this.published = false;
-    }
-
     public PostCommentEntity setId(Long id) {
         this.id = id;
         return this;
@@ -86,10 +78,7 @@ public class PostCommentEntity extends BaseEntity {
     }
 
     public PostCommentEntity setCommentRefId(Long commentRefId) {
-        if (this.commentRefId != null) {
-            throw new IllegalStateException("Comment ref ID is immutable after construction");
-        }
-        this.commentRefId = AssertUtil.requireNotNull(commentRefId, "commentRefId cannot be null");
+        this.commentRefId = commentRefId;
         return this;
     }
 

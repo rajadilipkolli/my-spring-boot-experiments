@@ -1,11 +1,11 @@
 package com.example.highrps.post.listener;
 
-import com.example.highrps.infrastructure.redis.DeletionMarkerHandler;
 import com.example.highrps.post.domain.PostRedis;
 import com.example.highrps.post.domain.PostRedisRepository;
 import com.example.highrps.post.domain.requests.NewPostRequest;
 import com.example.highrps.shared.AbstractAggregatesToRedisListener;
 import com.example.highrps.shared.config.AppProperties;
+import com.example.highrps.shared.redis.DeletionMarkerHandler;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.data.redis.core.RedisTemplate;
