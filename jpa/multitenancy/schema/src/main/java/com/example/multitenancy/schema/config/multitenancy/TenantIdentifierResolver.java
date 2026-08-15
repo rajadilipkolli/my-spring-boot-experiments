@@ -1,6 +1,6 @@
 package com.example.multitenancy.schema.config.multitenancy;
 
-import static com.example.multitenancy.schema.config.multitenancy.TenantFilter.CURRENT_TENANT;
+import static com.example.multitenancy.schema.config.multitenancy.TenantContextHolder.CURRENT_TENANT;
 
 import java.util.Map;
 import org.hibernate.cfg.AvailableSettings;

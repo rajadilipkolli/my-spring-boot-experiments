@@ -12,7 +12,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.example.multitenancy.schema.common.AbstractIntegrationTest;
-import com.example.multitenancy.schema.config.multitenancy.TenantFilter;
+import com.example.multitenancy.schema.config.multitenancy.TenantContextHolder;
 import com.example.multitenancy.schema.domain.request.CustomerDto;
 import com.example.multitenancy.schema.entities.Customer;
 import java.util.ArrayList;
@@ -39,7 +39,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
     }
 
     private void cleanupTenant(String tenantId) {
-        ScopedValue.where(TenantFilter.CURRENT_TENANT, tenantId).run(() -> {
+        ScopedValue.where(TenantContextHolder.CURRENT_TENANT, tenantId).run(() -> {
             customerRepository.deleteAll();
         });
     }
@@ -49,7 +49,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
         for (String name : customerNames) {
             customers.add(new Customer().setName(name));
         }
-        return ScopedValue.where(TenantFilter.CURRENT_TENANT, tenantId)
+        return ScopedValue.where(TenantContextHolder.CURRENT_TENANT, tenantId)
                 .call(() -> customerRepository.saveAll(customers));
     }
 
@@ -152,8 +152,8 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                     .andExpect(jsonPath("$.name", is("New Customer")));
 
             // Verify customer was created in tenant1
-            List<Customer> customers =
-                    ScopedValue.where(TenantFilter.CURRENT_TENANT, TENANT_1).call(() -> customerRepository.findAll());
+            List<Customer> customers = ScopedValue.where(TenantContextHolder.CURRENT_TENANT, TENANT_1)
+                    .call(() -> customerRepository.findAll());
             assertThat(customers).hasSize(1);
             assertThat(customers.getFirst().getName()).isEqualTo("New Customer");
         }
@@ -173,7 +173,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                     .andExpect(jsonPath("$.name", is("Updated Customer")));
 
             // Verify customer was updated in tenant1
-            Customer updatedCustomer = ScopedValue.where(TenantFilter.CURRENT_TENANT, TENANT_1)
+            Customer updatedCustomer = ScopedValue.where(TenantContextHolder.CURRENT_TENANT, TENANT_1)
                     .call(() -> customerRepository.findById(customer.getId()).orElseThrow());
 
             assertThat(updatedCustomer.getName()).isEqualTo("Updated Customer");
@@ -190,7 +190,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                     .andExpect(jsonPath("$.name", is("Customer to Delete")));
 
             // Verify customer was deleted from tenant1
-            Optional<Customer> customer1 = ScopedValue.where(TenantFilter.CURRENT_TENANT, TENANT_1)
+            Optional<Customer> customer1 = ScopedValue.where(TenantContextHolder.CURRENT_TENANT, TENANT_1)
                     .call(() -> customerRepository.findById(customer.getId()));
             assertThat(customer1).isEmpty();
         }
@@ -235,8 +235,8 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                     .andExpect(jsonPath("$.name", is("New Tenant2 Customer")));
 
             // Verify customer was created in tenant2
-            List<Customer> customers =
-                    ScopedValue.where(TenantFilter.CURRENT_TENANT, TENANT_2).call(() -> customerRepository.findAll());
+            List<Customer> customers = ScopedValue.where(TenantContextHolder.CURRENT_TENANT, TENANT_2)
+                    .call(() -> customerRepository.findAll());
             assertThat(customers).hasSize(1);
             assertThat(customers.getFirst().getName()).isEqualTo("New Tenant2 Customer");
         }
@@ -256,7 +256,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                     .andExpect(jsonPath("$.name", is("Updated Tenant2 Customer")));
 
             // Verify customer was updated in tenant2
-            Customer updatedCustomer = ScopedValue.where(TenantFilter.CURRENT_TENANT, TENANT_2)
+            Customer updatedCustomer = ScopedValue.where(TenantContextHolder.CURRENT_TENANT, TENANT_2)
                     .call(() -> customerRepository.findById(customer.getId()).orElseThrow());
             assertThat(updatedCustomer.getName()).isEqualTo("Updated Tenant2 Customer");
         }
@@ -272,7 +272,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                     .andExpect(jsonPath("$.name", is("Tenant2 Customer to Delete")));
 
             // Verify customer was deleted from tenant2
-            assertThat(ScopedValue.where(TenantFilter.CURRENT_TENANT, TENANT_2)
+            assertThat(ScopedValue.where(TenantContextHolder.CURRENT_TENANT, TENANT_2)
                             .call(() -> customerRepository.findById(customer.getId())))
                     .isEmpty();
         }
