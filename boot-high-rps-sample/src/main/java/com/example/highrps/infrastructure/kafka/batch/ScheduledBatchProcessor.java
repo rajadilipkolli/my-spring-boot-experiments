@@ -248,18 +248,21 @@ public class ScheduledBatchProcessor {
                 if (processor == null) {
                     log.warn("No processor found for entity type: {}", entityType);
                     moveToDlq(
-                            "events:dlq",
+                            appProperties.getBatch().getQueueKey(),
                             item.payload(),
                             "no_processor_for_entity: " + entityType,
-                            item.recordId(),
-                            ackIds);
+                            item.recordId());
                     continue;
                 }
 
                 String key = processor.extractKey(item.payload());
                 if (key == null) {
                     log.warn("Failed to extract key from payload for entity type: {}", entityType);
-                    moveToDlq("events:dlq", item.payload(), "failed_to_extract_key", item.recordId(), ackIds);
+                    moveToDlq(
+                            appProperties.getBatch().getQueueKey(),
+                            item.payload(),
+                            "failed_to_extract_key",
+                            item.recordId());
                     continue;
                 }
 
@@ -292,7 +295,11 @@ public class ScheduledBatchProcessor {
                 }
             } catch (Exception e) {
                 log.warn("Failed to parse queued item: {}", item.payload(), e);
-                moveToDlq("events:dlq", item.payload(), "parse_error: " + e.getMessage(), item.recordId(), ackIds);
+                moveToDlq(
+                        appProperties.getBatch().getQueueKey(),
+                        item.payload(),
+                        "parse_error: " + e.getMessage(),
+                        item.recordId());
             }
         }
 
@@ -336,17 +343,27 @@ public class ScheduledBatchProcessor {
         return ackIds;
     }
 
-    private void moveToDlq(String queueKey, String payload, String reason, String recordId, List<String> ackIds) {
-        try {
-            Map<String, String> dlqMessage = new HashMap<>();
-            if (payload != null) {
-                dlqMessage.put("payload", payload);
-            }
-            dlqMessage.put("reason", reason);
-            dlqMessage.put("originalRecordId", recordId);
+    private static final org.springframework.data.redis.core.script.RedisScript<Long> MOVE_TO_DLQ_SCRIPT =
+            new org.springframework.data.redis.core.script.DefaultRedisScript<>(
+                    "local dlq_key = KEYS[1]\n" + "local queue_key = KEYS[2]\n"
+                            + "local payload = ARGV[1]\n"
+                            + "local reason = ARGV[2]\n"
+                            + "local record_id = ARGV[3]\n"
+                            + "local consumer_group = ARGV[4]\n"
+                            + "if payload == \"\" then\n"
+                            + "    redis.call('XADD', dlq_key, '*', 'reason', reason, 'originalRecordId', record_id)\n"
+                            + "else\n"
+                            + "    redis.call('XADD', dlq_key, '*', 'payload', payload, 'reason', reason, 'originalRecordId', record_id)\n"
+                            + "end\n"
+                            + "redis.call('XACK', queue_key, consumer_group, record_id)\n"
+                            + "return 1\n",
+                    Long.class);
 
-            redis.opsForStream().add("events:dlq", dlqMessage);
-            ackIds.add(recordId);
+    private void moveToDlq(String queueKey, String payload, String reason, String recordId) {
+        try {
+            String safePayload = payload == null ? "" : payload;
+            redis.execute(
+                    MOVE_TO_DLQ_SCRIPT, List.of("events:dlq", queueKey), safePayload, reason, recordId, CONSUMER_GROUP);
             log.info("Sidelined poisoned record {} to events:dlq. Reason: {}", recordId, reason);
         } catch (Exception e) {
             log.error("CRITICAL: Failed to push to events:dlq stream for record {}", recordId, e);
@@ -364,7 +381,10 @@ public class ScheduledBatchProcessor {
             } catch (Exception e) {
                 log.error("Failed individual upsert for {}, moving to DLQ", entityType, e);
                 moveToDlq(
-                        "events:dlq", p.payload(), "individual_upsert_failed: " + e.getMessage(), p.recordId(), ackIds);
+                        appProperties.getBatch().getQueueKey(),
+                        p.payload(),
+                        "individual_upsert_failed: " + e.getMessage(),
+                        p.recordId());
             }
         }
         return ackIds;
@@ -381,7 +401,10 @@ public class ScheduledBatchProcessor {
             } catch (Exception e) {
                 log.error("Failed individual delete for {} key {}, moving to DLQ", entityType, p.key(), e);
                 moveToDlq(
-                        "events:dlq", p.payload(), "individual_delete_failed: " + e.getMessage(), p.recordId(), ackIds);
+                        appProperties.getBatch().getQueueKey(),
+                        p.payload(),
+                        "individual_delete_failed: " + e.getMessage(),
+                        p.recordId());
             }
         }
         return ackIds;

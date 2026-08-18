@@ -161,7 +161,7 @@ public class PostCommandService extends AbstractCommandService {
                 ? cmd.tags().stream()
                         .map(t -> new TagResponse(null, t.tagName(), t.tagDescription()))
                         .toList()
-                : null;
+                : getExistingTags(cmd.postId());
 
         // Publish domain event
         PostUpdatedEvent event = new PostUpdatedEvent(
@@ -278,6 +278,15 @@ public class PostCommandService extends AbstractCommandService {
         } catch (Exception e) {
             log.warn("Failed to get createdAt for postId: {}, using now()", postId, e);
             return LocalDateTime.now();
+        }
+    }
+
+    private List<TagResponse> getExistingTags(Long postId) {
+        try {
+            return postRedisRepository.findById(postId).map(PostRedis::getTags).orElse(null);
+        } catch (Exception e) {
+            log.warn("Failed to get existing tags for postId: {}", postId, e);
+            return null;
         }
     }
 
