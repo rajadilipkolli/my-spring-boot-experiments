@@ -213,10 +213,18 @@ public class PostCommandService extends AbstractCommandService {
                 () -> {
                     // 2. Invalidate local cache
                     String cacheKey = String.valueOf(postId);
-                    localCache.invalidate(cacheKey);
+                    try {
+                        localCache.invalidate(cacheKey);
+                    } catch (Exception e) {
+                        log.warn("Failed to invalidate local cache for post: {}", postId, e);
+                    }
 
                     // 3. Mark deleted in Redis with TTL (prevents batch re-insertion)
-                    deletionMarkerHandler.markDeleted(DeletionMarkerHandler.POST, String.valueOf(postId));
+                    try {
+                        deletionMarkerHandler.markDeleted(DeletionMarkerHandler.POST, String.valueOf(postId));
+                    } catch (Exception e) {
+                        log.warn("Failed to mark post deleted in Redis: {}", postId, e);
+                    }
                 },
                 "delete post",
                 "Post");
@@ -233,8 +241,31 @@ public class PostCommandService extends AbstractCommandService {
             log.warn("Failed to update local cache for postId: {}", postId, e);
         }
 
-        // Note: We intentionally do NOT update postRedisRepository here.
-        // The background AggregatesToRedisListener will process the event and update Redis asynchronously.
+        // Update Redis synchronously for guaranteed read-your-writes
+        try {
+            PostRedis redisEntity = new PostRedis()
+                    .setId(postId)
+                    .setTitle(result.title())
+                    .setContent(result.content())
+                    .setAuthorEmail(result.authorEmail())
+                    .setPublished(result.published())
+                    .setPublishedAt(result.publishedAt());
+
+            if (result.details() != null) {
+                redisEntity.setDetails(result.details());
+            }
+
+            if (result.tags() != null) {
+                redisEntity.setTags(result.tags());
+            }
+
+            redisEntity.setCreatedAt(result.createdAt());
+            redisEntity.setModifiedAt(result.modifiedAt());
+            postRedisRepository.save(redisEntity);
+            log.debug("Synchronously updated Redis for post: {}", postId);
+        } catch (Exception e) {
+            log.error("Failed to synchronously update Redis for post: {}", postId, e);
+        }
     }
 
     private LocalDateTime getCreatedAt(Long postId) {

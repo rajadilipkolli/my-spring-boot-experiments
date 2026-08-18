@@ -77,6 +77,7 @@ class PostCommentCommandServiceTest {
                 postCommentMapper,
                 meterRegistry,
                 deletionMarkerHandler,
+                postCommentRedisRepository,
                 appProperties);
     }
 

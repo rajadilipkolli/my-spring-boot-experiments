@@ -5,7 +5,7 @@ This application (`boot-high-rps-sample`) demonstrates an ultra-high-throughput,
 ## Core Architectural Principles
 
 1. **No Synchronous DB Blocking**: The command path (write operations) strictly avoids writing to PostgreSQL synchronously.
-2. **Kafka as the Immediate Ledger**: State mutations are validated and published directly to Kafka (`acks=all`, idempotence enabled) as the immediate durable ledger. 
+2. **Kafka as the Immediate Ledger**: State mutations are validated and published directly to Kafka (`acks=all`, idempotence enabled) as the immediate durable ledger.
 3. **Direct-To-Aggregates Publishing**: The application writes events directly to entity-specific Kafka aggregate topics (e.g., `authors-aggregates`), bypassing intermediate processing for maximum speed.
 4. **At-Least-Once Materialization**: Kafka listeners consume events, hand them off to Redis Streams (`XADD`) for durable queueing, and acknowledge the Kafka offset only after the Redis write succeeds.
 5. **Bulk Upsert Batching**: Scheduled processors read from Redis Streams (`XREADGROUP`), execute natural-key upserts against PostgreSQL in bulk, and acknowledge (`XACK`) only after the DB transaction commits.

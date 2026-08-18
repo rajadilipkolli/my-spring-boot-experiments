@@ -68,6 +68,16 @@ Production tuning notes
 - Kafka Streams: ensure sufficient partitions and state-store placement to handle load.
 - JVM: prefer ZGC for low pause times; size heap conservatively.
 
+## Multi-Node Deployment Consistency
+
+To ensure the application functions correctly in a multi-node (load-balanced) distributed environment, it provides strict **"Read-Your-Writes" consistency**.
+
+When an entity (Author, Post, PostComment) is created or updated:
+1. The API's `CommandService` validates the request and synchronously writes the updated state directly to the shared distributed cache (**Redis**).
+2. Simultaneously, it fires an asynchronous event to **Kafka** for durable event-sourcing and subsequent batch processing to the database.
+
+Because Redis is updated synchronously on the API hot path, if a client creates a record on Node A and their subsequent `GET` request is routed to Node B, Node B will immediately find the fresh record in the shared Redis cluster. This avoids eventual consistency gaps (e.g., returning a `404 Not Found`) that would occur if the application relied solely on asynchronous Kafka consumers to populate the cache.
+
 Suggestions & next steps
 - Add an HTTP readiness probe that confirms `posts-store` is queryable before serving interactive queries.
 - Add observability: meters for `posts-store` misses, Streams state, Redis RTT, and batch processing throughput.

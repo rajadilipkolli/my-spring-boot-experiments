@@ -32,6 +32,7 @@ class AuthorControllerIT extends AbstractIntegrationTest {
         // 1) Create an author via API
         mockMvcTester
                 .post()
+                .header("Idempotency-Key", java.util.UUID.randomUUID().toString())
                 .uri("/api/author")
                 .content("""
           {
@@ -77,7 +78,7 @@ class AuthorControllerIT extends AbstractIntegrationTest {
                             });
                 });
 
-        // Assert local cache has the key (redis may be populated asynchronously)
+        // Assert local cache and redis have the key synchronously for read-your-writes
         String cached = localCache.getIfPresent(emailKey);
         assertThat(cached).isNotNull();
         AuthorProjection cachedProjection = jsonMapper.readValue(cached, AuthorProjection.class);
@@ -92,6 +93,7 @@ class AuthorControllerIT extends AbstractIntegrationTest {
         // 2) Update the author via the new PUT endpoint to change content
         mockMvcTester
                 .put()
+                .header("Idempotency-Key", java.util.UUID.randomUUID().toString())
                 .uri("/api/author/" + email)
                 .content("""
                         {
@@ -149,6 +151,7 @@ class AuthorControllerIT extends AbstractIntegrationTest {
         // 3) Delete the author via API
         mockMvcTester
                 .delete()
+                .header("Idempotency-Key", java.util.UUID.randomUUID().toString())
                 .uri("/api/author/" + email)
                 .exchange()
                 .assertThat()
@@ -206,6 +209,7 @@ class AuthorControllerIT extends AbstractIntegrationTest {
         // 1) Create an author
         mockMvcTester
                 .post()
+                .header("Idempotency-Key", java.util.UUID.randomUUID().toString())
                 .uri("/api/author")
                 .content("""
                         {

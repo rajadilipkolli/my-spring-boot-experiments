@@ -1,5 +1,7 @@
 package com.example.highrps.author.command;
 
+import com.example.highrps.author.domain.AuthorRedis;
+import com.example.highrps.author.domain.AuthorRedisRepository;
 import com.example.highrps.author.domain.events.AuthorCreatedEvent;
 import com.example.highrps.author.domain.events.AuthorDeletedEvent;
 import com.example.highrps.author.domain.events.AuthorUpdatedEvent;
@@ -35,6 +37,7 @@ public class AuthorCommandService extends AbstractCommandService {
     private final DeletionMarkerHandler deletionMarkerHandler;
     private final AuthorQueryService authorQueryService;
     private final RedisTemplate<String, String> redisTemplate;
+    private final AuthorRedisRepository authorRedisRepository;
 
     public AuthorCommandService(
             KafkaTemplate<String, Object> kafkaTemplate,
@@ -43,6 +46,7 @@ public class AuthorCommandService extends AbstractCommandService {
             DeletionMarkerHandler deletionMarkerHandler,
             AuthorQueryService authorQueryService,
             RedisTemplate<String, String> redisTemplate,
+            AuthorRedisRepository authorRedisRepository,
             AppProperties appProperties) {
         super(kafkaTemplate, appProperties.getKafka().getPublishTimeOutMs());
         this.localCache = localCache;
@@ -50,6 +54,7 @@ public class AuthorCommandService extends AbstractCommandService {
         this.deletionMarkerHandler = deletionMarkerHandler;
         this.authorQueryService = authorQueryService;
         this.redisTemplate = redisTemplate;
+        this.authorRedisRepository = authorRedisRepository;
     }
 
     public CompletableFuture<AuthorCommandResult> createAuthor(CreateAuthorCommand cmd) {
@@ -160,9 +165,17 @@ public class AuthorCommandService extends AbstractCommandService {
                 null, // Void result
                 () -> {
                     // 2. Invalidate local cache
-                    localCache.invalidate(aggregateKey);
+                    try {
+                        localCache.invalidate(aggregateKey);
+                    } catch (Exception e) {
+                        log.warn("Failed to invalidate local cache for email: {}", aggregateKey, e);
+                    }
                     // 3. Mark deleted in Redis with TTL (prevents batch re-insertion)
-                    deletionMarkerHandler.markDeleted(DeletionMarkerHandler.AUTHOR, aggregateKey);
+                    try {
+                        deletionMarkerHandler.markDeleted(DeletionMarkerHandler.AUTHOR, aggregateKey);
+                    } catch (Exception e) {
+                        log.warn("Failed to mark author deleted in Redis: {}", aggregateKey, e);
+                    }
                 },
                 "delete author",
                 "Author");
@@ -176,6 +189,22 @@ public class AuthorCommandService extends AbstractCommandService {
             localCache.put(aggregateKey, json);
         } catch (Exception e) {
             log.warn("Failed to update local cache for email: {}", aggregateKey, e);
+        }
+
+        // Update Redis synchronously for guaranteed read-your-writes
+        try {
+            AuthorRedis redisEntity = new AuthorRedis()
+                    .setEmail(result.email())
+                    .setFirstName(result.firstName())
+                    .setMiddleName(result.middleName())
+                    .setLastName(result.lastName())
+                    .setMobile(result.mobile());
+            redisEntity.setCreatedAt(result.createdAt());
+            redisEntity.setModifiedAt(result.modifiedAt());
+            authorRedisRepository.save(redisEntity);
+            log.debug("Synchronously updated Redis for author: {}", aggregateKey);
+        } catch (Exception e) {
+            log.error("Failed to synchronously update Redis for author: {}", aggregateKey, e);
         }
     }
 }

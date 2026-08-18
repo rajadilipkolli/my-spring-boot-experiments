@@ -81,6 +81,7 @@ class AuthorCommandServiceTest {
                 deletionMarkerHandler,
                 authorQueryService,
                 redisTemplate,
+                authorRedisRepository,
                 appProperties);
     }
 
@@ -128,6 +129,7 @@ class AuthorCommandServiceTest {
                 deletionMarkerHandler,
                 authorQueryService,
                 redisTemplate,
+                authorRedisRepository,
                 pendingAppProperties);
 
         assertThatThrownBy(
