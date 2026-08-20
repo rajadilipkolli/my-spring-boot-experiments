@@ -68,6 +68,16 @@ Production tuning notes
 - Kafka Streams: ensure sufficient partitions and state-store placement to handle load.
 - JVM: prefer ZGC for low pause times; size heap conservatively.
 
+## Multi-Node Deployment Consistency
+
+To ensure the application functions correctly in a multi-node (load-balanced) distributed environment, it provides strict **"Read-Your-Writes" consistency**.
+
+When an entity (Author, Post, PostComment) is created or updated:
+1. The API's `CommandService` validates the request and synchronously writes the updated state directly to the shared distributed cache (**Redis**).
+2. Simultaneously, it fires an asynchronous event to **Kafka** for durable event-sourcing and subsequent batch processing to the database.
+
+Because Redis is updated synchronously on the API hot path, if a client creates a record on Node A and their subsequent `GET` request is routed to Node B, Node B will immediately find the fresh record in the shared Redis cluster. This avoids eventual consistency gaps (e.g., returning a `404 Not Found`) that would occur if the application relied solely on asynchronous Kafka consumers to populate the cache.
+
 Suggestions & next steps
 - Add an HTTP readiness probe that confirms `posts-store` is queryable before serving interactive queries.
 - Add observability: meters for `posts-store` misses, Streams state, Redis RTT, and batch processing throughput.
@@ -89,3 +99,6 @@ We ran JMH benchmarks on the local environment simulating a workload of 90% read
 - **Zero-Serialization Reads**: Utilizing a multi-layered local Caffeine cache in combination with Redis and Kafka Streams State Stores allows `GET` queries to bypass JSON serialization overhead entirely. The read throughput achieves native memory-like speed.
 - **N+1 Optimization**: During heavy load (500 concurrent connections), the background Kafka-to-PostgreSQL batch processors initially timed out. Pre-extracting aggregate data and doing singular bulk queries (`findByEmailInAllIgnoreCase`, `findByTagNameInAllIgnoreCase`) solved the issue, eliminating all `BatchUpdateException` errors.
 - The 100-thread setup is the sweet spot for maximizing JMH throughput locally before Tomcat and the JVM experience excessive context switching overhead.
+
+
+**Note on Idempotency Performance:** Implementing idempotency within the Spring Boot application layer via HandlerInterceptor caused write-throughput to plummet from ~100 ops/s to ~8 ops/s, even after optimizing with single-round-trip Redis Lua scripts. The synchronous nature of blocking on Redis for every mutating request starved the connection pools. **Industry standard for High RPS:** To maintain 100,000+ RPS, idempotency checking MUST be offloaded to the API Gateway (e.g., Kong, AWS API Gateway) to keep the Spring Boot hot-path completely non-blocking.

@@ -161,7 +161,7 @@ public class PostCommandService extends AbstractCommandService {
                 ? cmd.tags().stream()
                         .map(t -> new TagResponse(null, t.tagName(), t.tagDescription()))
                         .toList()
-                : null;
+                : getExistingTags(cmd.postId());
 
         // Publish domain event
         PostUpdatedEvent event = new PostUpdatedEvent(
@@ -213,7 +213,11 @@ public class PostCommandService extends AbstractCommandService {
                 () -> {
                     // 2. Invalidate local cache
                     String cacheKey = String.valueOf(postId);
-                    localCache.invalidate(cacheKey);
+                    try {
+                        localCache.invalidate(cacheKey);
+                    } catch (Exception e) {
+                        log.warn("Failed to invalidate local cache for post: {}", postId, e);
+                    }
 
                     // 3. Mark deleted in Redis with TTL (prevents batch re-insertion)
                     deletionMarkerHandler.markDeleted(DeletionMarkerHandler.POST, String.valueOf(postId));
@@ -233,8 +237,31 @@ public class PostCommandService extends AbstractCommandService {
             log.warn("Failed to update local cache for postId: {}", postId, e);
         }
 
-        // Note: We intentionally do NOT update postRedisRepository here.
-        // The background AggregatesToRedisListener will process the event and update Redis asynchronously.
+        // Update Redis synchronously for guaranteed read-your-writes
+        try {
+            PostRedis redisEntity = new PostRedis()
+                    .setId(postId)
+                    .setTitle(result.title())
+                    .setContent(result.content())
+                    .setAuthorEmail(result.authorEmail())
+                    .setPublished(result.published())
+                    .setPublishedAt(result.publishedAt());
+
+            if (result.details() != null) {
+                redisEntity.setDetails(result.details());
+            }
+
+            if (result.tags() != null) {
+                redisEntity.setTags(result.tags());
+            }
+
+            redisEntity.setCreatedAt(result.createdAt());
+            redisEntity.setModifiedAt(result.modifiedAt());
+            postRedisRepository.save(redisEntity);
+            log.debug("Synchronously updated Redis for post: {}", postId);
+        } catch (Exception e) {
+            log.error("Failed to synchronously update Redis for post: {}", postId, e);
+        }
     }
 
     private LocalDateTime getCreatedAt(Long postId) {
@@ -248,6 +275,13 @@ public class PostCommandService extends AbstractCommandService {
             log.warn("Failed to get createdAt for postId: {}, using now()", postId, e);
             return LocalDateTime.now();
         }
+    }
+
+    private List<TagResponse> getExistingTags(Long postId) {
+        return postRedisRepository
+                .findById(postId)
+                .map(PostRedis::getTags)
+                .orElseThrow(() -> new IllegalStateException("Post not found for tag lookup: " + postId));
     }
 
     private String getAuthorEmail(Long postId) {

@@ -91,8 +91,16 @@ public abstract class AbstractCommandService {
                 .thenComposeAsync(
                         cmdResult -> operationQueue
                                 .enqueue(lockKey, () -> {
-                                    postPublishAction.run();
-                                    log.info("{} {} successfully: {}", entityLogName, actionLogName, lockKey);
+                                    try {
+                                        postPublishAction.run();
+                                        log.info("{} {} successfully: {}", entityLogName, actionLogName, lockKey);
+                                    } catch (Exception e) {
+                                        log.warn(
+                                                "Post-publish action failed for {} {}, but event was published. It will be healed eventually.",
+                                                entityLogName,
+                                                actionLogName,
+                                                e);
+                                    }
                                     return CompletableFuture.completedFuture(null);
                                 })
                                 .thenApply(ignored -> cmdResult),

@@ -3,6 +3,8 @@ package com.example.highrps.postcomment.command;
 import com.example.highrps.infrastructure.cache.CacheKeyGenerator;
 import com.example.highrps.post.query.PostQueryService;
 import com.example.highrps.postcomment.domain.PostCommentMapper;
+import com.example.highrps.postcomment.domain.PostCommentRedis;
+import com.example.highrps.postcomment.domain.PostCommentRedisRepository;
 import com.example.highrps.postcomment.domain.PostCommentRequest;
 import com.example.highrps.postcomment.domain.events.PostCommentCreatedEvent;
 import com.example.highrps.postcomment.domain.events.PostCommentDeletedEvent;
@@ -41,6 +43,7 @@ public class PostCommentCommandService extends AbstractCommandService {
     private final Counter eventsPublishedCounter;
     private final Counter tombstonesPublishedCounter;
     private final DeletionMarkerHandler deletionMarkerHandler;
+    private final PostCommentRedisRepository postCommentRedisRepository;
 
     public PostCommentCommandService(
             PostQueryService postQueryService,
@@ -50,6 +53,7 @@ public class PostCommentCommandService extends AbstractCommandService {
             PostCommentMapper postCommentMapper,
             MeterRegistry meterRegistry,
             DeletionMarkerHandler deletionMarkerHandler,
+            PostCommentRedisRepository postCommentRedisRepository,
             AppProperties appProperties) {
         super(kafkaTemplate, appProperties.getKafka().getPublishTimeOutMs());
         this.postQueryService = postQueryService;
@@ -57,6 +61,7 @@ public class PostCommentCommandService extends AbstractCommandService {
         this.localCache = localCache;
         this.postCommentMapper = postCommentMapper;
         this.deletionMarkerHandler = deletionMarkerHandler;
+        this.postCommentRedisRepository = postCommentRedisRepository;
         this.eventsPublishedCounter = Counter.builder("post-comments.events.published")
                 .description("Number of post comment events published")
                 .register(meterRegistry);
@@ -162,7 +167,11 @@ public class PostCommentCommandService extends AbstractCommandService {
                         log.warn("Failed to invalidate local cache for comment: {}", commentId.id(), e);
                     }
                     // 3. Mark deleted in Redis with TTL using unified handler
-                    deletionMarkerHandler.markDeleted(DeletionMarkerHandler.POST_COMMENT, cacheKey);
+                    try {
+                        deletionMarkerHandler.markDeleted(DeletionMarkerHandler.POST_COMMENT, cacheKey);
+                    } catch (Exception e) {
+                        log.warn("Failed to mark post comment deleted in Redis: {}", cacheKey, e);
+                    }
                 },
                 "delete post comment",
                 "PostComment");
@@ -177,6 +186,23 @@ public class PostCommentCommandService extends AbstractCommandService {
             localCache.put(cacheKey, json);
         } catch (Exception e) {
             log.warn("Failed to update local cache for comment: {}", commentId, e);
+        }
+
+        // Update Redis synchronously for guaranteed read-your-writes
+        try {
+            PostCommentRedis redisEntity = new PostCommentRedis()
+                    .setCommentId(String.valueOf(commentId))
+                    .setTitle(result.title())
+                    .setContent(result.content())
+                    .setPublished(result.published())
+                    .setPublishedAt(result.publishedAt())
+                    .setPostId(postId);
+            redisEntity.setCreatedAt(result.createdAt());
+            redisEntity.setModifiedAt(result.modifiedAt());
+            postCommentRedisRepository.save(redisEntity);
+            log.debug("Synchronously updated Redis for post comment: {}", commentId);
+        } catch (Exception e) {
+            log.error("Failed to synchronously update Redis for post comment: {}", commentId, e);
         }
     }
 }

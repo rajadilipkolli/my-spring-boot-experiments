@@ -5,7 +5,6 @@ import com.example.highrps.shared.redis.DeletionMarkerHandler;
 import io.github.resilience4j.bulkhead.annotation.Bulkhead;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.micrometer.core.instrument.MeterRegistry;
-import io.micrometer.core.instrument.Tags;
 import jakarta.annotation.PostConstruct;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -248,14 +247,22 @@ public class ScheduledBatchProcessor {
                 EntityBatchProcessor processor = processorsByEntityType.get(entityType);
                 if (processor == null) {
                     log.warn("No processor found for entity type: {}", entityType);
-                    ackIds.add(item.recordId());
+                    moveToDlq(
+                            appProperties.getBatch().getQueueKey(),
+                            item.payload(),
+                            "no_processor_for_entity: " + entityType,
+                            item.recordId());
                     continue;
                 }
 
                 String key = processor.extractKey(item.payload());
                 if (key == null) {
                     log.warn("Failed to extract key from payload for entity type: {}", entityType);
-                    ackIds.add(item.recordId());
+                    moveToDlq(
+                            appProperties.getBatch().getQueueKey(),
+                            item.payload(),
+                            "failed_to_extract_key",
+                            item.recordId());
                     continue;
                 }
 
@@ -288,7 +295,11 @@ public class ScheduledBatchProcessor {
                 }
             } catch (Exception e) {
                 log.warn("Failed to parse queued item: {}", item.payload(), e);
-                ackIds.add(item.recordId());
+                moveToDlq(
+                        appProperties.getBatch().getQueueKey(),
+                        item.payload(),
+                        "parse_error: " + e.getMessage(),
+                        item.recordId());
             }
         }
 
@@ -332,9 +343,35 @@ public class ScheduledBatchProcessor {
         return ackIds;
     }
 
+    private static final org.springframework.data.redis.core.script.RedisScript<Long> MOVE_TO_DLQ_SCRIPT =
+            new org.springframework.data.redis.core.script.DefaultRedisScript<>(
+                    "local dlq_key = KEYS[1]\n" + "local queue_key = KEYS[2]\n"
+                            + "local payload = ARGV[1]\n"
+                            + "local reason = ARGV[2]\n"
+                            + "local record_id = ARGV[3]\n"
+                            + "local consumer_group = ARGV[4]\n"
+                            + "if payload == \"\" then\n"
+                            + "    redis.call('XADD', dlq_key, '*', 'reason', reason, 'originalRecordId', record_id)\n"
+                            + "else\n"
+                            + "    redis.call('XADD', dlq_key, '*', 'payload', payload, 'reason', reason, 'originalRecordId', record_id)\n"
+                            + "end\n"
+                            + "redis.call('XACK', queue_key, consumer_group, record_id)\n"
+                            + "return 1\n",
+                    Long.class);
+
+    private void moveToDlq(String queueKey, String payload, String reason, String recordId) {
+        try {
+            String safePayload = payload == null ? "" : payload;
+            redis.execute(
+                    MOVE_TO_DLQ_SCRIPT, List.of("events:dlq", queueKey), safePayload, reason, recordId, CONSUMER_GROUP);
+            log.info("Sidelined poisoned record {} to events:dlq. Reason: {}", recordId, reason);
+        } catch (Exception e) {
+            log.error("CRITICAL: Failed to push to events:dlq stream for record {}", recordId, e);
+        }
+    }
+
     private List<String> processUpsertsIndividually(EntityBatchProcessor processor, List<PayloadOrTombstone> payloads) {
         String entityType = processor.getEntityType();
-        String dlqKey = "dlq:batch:" + entityType;
         List<String> ackIds = new ArrayList<>();
 
         for (PayloadOrTombstone p : payloads) {
@@ -343,18 +380,11 @@ public class ScheduledBatchProcessor {
                 ackIds.add(p.recordId());
             } catch (Exception e) {
                 log.error("Failed individual upsert for {}, moving to DLQ", entityType, e);
-                try {
-                    redis.opsForList().leftPush(dlqKey, p.payload());
-                    redis.opsForList().trim(dlqKey, 0, 1000);
-                    meterRegistry.gauge(
-                            "kafka.batch.dlq.size", Tags.of("entity", entityType, "operation", "upsert"), redis, r -> {
-                                Long s = r.opsForList().size(dlqKey);
-                                return s == null ? 0 : s.doubleValue();
-                            });
-                    ackIds.add(p.recordId()); // Ack only if DLQ succeeds
-                } catch (Exception re) {
-                    log.error("CRITICAL: Failed to push poison pill to DLQ: {}", dlqKey, re);
-                }
+                moveToDlq(
+                        appProperties.getBatch().getQueueKey(),
+                        p.payload(),
+                        "individual_upsert_failed: " + e.getMessage(),
+                        p.recordId());
             }
         }
         return ackIds;
@@ -362,7 +392,6 @@ public class ScheduledBatchProcessor {
 
     private List<String> processDeletesIndividually(EntityBatchProcessor processor, List<PayloadOrTombstone> keys) {
         String entityType = processor.getEntityType();
-        String dlqKey = "dlq:batch:deletes:" + entityType;
         List<String> ackIds = new ArrayList<>();
 
         for (PayloadOrTombstone p : keys) {
@@ -371,18 +400,11 @@ public class ScheduledBatchProcessor {
                 ackIds.add(p.recordId());
             } catch (Exception e) {
                 log.error("Failed individual delete for {} key {}, moving to DLQ", entityType, p.key(), e);
-                try {
-                    redis.opsForList().leftPush(dlqKey, p.payload());
-                    redis.opsForList().trim(dlqKey, 0, 1000);
-                    meterRegistry.gauge(
-                            "kafka.batch.dlq.size", Tags.of("entity", entityType, "operation", "delete"), redis, r -> {
-                                Long s = r.opsForList().size(dlqKey);
-                                return s == null ? 0 : s.doubleValue();
-                            });
-                    ackIds.add(p.recordId());
-                } catch (Exception re) {
-                    log.error("CRITICAL: Failed to push delete failure to DLQ: {}", dlqKey, re);
-                }
+                moveToDlq(
+                        appProperties.getBatch().getQueueKey(),
+                        p.payload(),
+                        "individual_delete_failed: " + e.getMessage(),
+                        p.recordId());
             }
         }
         return ackIds;

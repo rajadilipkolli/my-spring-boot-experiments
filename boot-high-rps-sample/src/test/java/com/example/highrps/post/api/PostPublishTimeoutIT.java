@@ -45,6 +45,7 @@ class PostPublishTimeoutIT extends AbstractIntegrationTest {
 
         var response = mockMvcTester
                 .post()
+                .header("Idempotency-Key", java.util.UUID.randomUUID().toString())
                 .uri("/api/posts")
                 .contentType("application/json")
                 .content(payload)

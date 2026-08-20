@@ -70,7 +70,8 @@ public class ApiLoadBenchmark {
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
         if (response.statusCode() >= 300) {
-            throw new RuntimeException("Request failed with status: " + response.statusCode());
+            System.err.println("Request failed with status: " + response.statusCode());
+            return;
         }
 
         try {

@@ -72,6 +72,7 @@ class PostCommentControllerIT extends AbstractIntegrationTest {
         long count = postCommentRepository.count();
         var result = mockMvcTester
                 .post()
+                .header("Idempotency-Key", java.util.UUID.randomUUID().toString())
                 .uri("/api/posts/{postId}/comments", postId)
                 .content("""
                                                 {
@@ -127,6 +128,7 @@ class PostCommentControllerIT extends AbstractIntegrationTest {
         Long[] commentIdHolder = new Long[1];
         mockMvcTester
                 .post()
+                .header("Idempotency-Key", java.util.UUID.randomUUID().toString())
                 .uri("/api/posts/{postId}/comments", postId)
                 .content("""
                                                                 {
@@ -181,6 +183,7 @@ class PostCommentControllerIT extends AbstractIntegrationTest {
         // Create multiple comments
         mockMvcTester
                 .post()
+                .header("Idempotency-Key", java.util.UUID.randomUUID().toString())
                 .uri("/api/posts/{postId}/comments", postId)
                 .content("""
                                                 {
@@ -196,6 +199,7 @@ class PostCommentControllerIT extends AbstractIntegrationTest {
 
         mockMvcTester
                 .post()
+                .header("Idempotency-Key", java.util.UUID.randomUUID().toString())
                 .uri("/api/posts/{postId}/comments", postId)
                 .content("""
                                                 {
@@ -231,6 +235,7 @@ class PostCommentControllerIT extends AbstractIntegrationTest {
         Long[] commentIdHolder = new Long[1];
         mockMvcTester
                 .post()
+                .header("Idempotency-Key", java.util.UUID.randomUUID().toString())
                 .uri("/api/posts/{postId}/comments", postId)
                 .content("""
                                                                 {
@@ -252,6 +257,7 @@ class PostCommentControllerIT extends AbstractIntegrationTest {
         // Update the comment
         mockMvcTester
                 .put()
+                .header("Idempotency-Key", java.util.UUID.randomUUID().toString())
                 .uri("/api/posts/{postId}/comments/{postCommentId}", postId, commentId)
                 .content("""
                                                 {
@@ -299,6 +305,7 @@ class PostCommentControllerIT extends AbstractIntegrationTest {
         Long[] commentIdHolder = new Long[1];
         mockMvcTester
                 .post()
+                .header("Idempotency-Key", java.util.UUID.randomUUID().toString())
                 .uri("/api/posts/{postId}/comments", postId)
                 .content("""
                                                                 {
@@ -320,6 +327,7 @@ class PostCommentControllerIT extends AbstractIntegrationTest {
         // Delete the comment
         mockMvcTester
                 .delete()
+                .header("Idempotency-Key", java.util.UUID.randomUUID().toString())
                 .uri("/api/posts/{postId}/comments/{postCommentId}", postId, commentId)
                 .exchange()
                 .assertThat()
@@ -359,6 +367,7 @@ class PostCommentControllerIT extends AbstractIntegrationTest {
         Long[] commentIdHolder = new Long[1];
         mockMvcTester
                 .post()
+                .header("Idempotency-Key", java.util.UUID.randomUUID().toString())
                 .uri("/api/posts/{postId}/comments", postId)
                 .content("""
                                                                 {
@@ -392,6 +401,7 @@ class PostCommentControllerIT extends AbstractIntegrationTest {
         Long[] commentIdHolder = new Long[1];
         mockMvcTester
                 .post()
+                .header("Idempotency-Key", java.util.UUID.randomUUID().toString())
                 .uri("/api/posts/{postId}/comments", postId)
                 .content("""
                         {
@@ -412,11 +422,9 @@ class PostCommentControllerIT extends AbstractIntegrationTest {
         String cacheKey =
                 com.example.highrps.infrastructure.cache.CacheKeyGenerator.generatePostCommentKey(postId, commentId);
 
-        // Wait for it to be fully processed by Kafka Streams and written to Redis
-        await().atMost(Duration.ofSeconds(45))
-                .pollInterval(Duration.ofSeconds(1))
-                .untilAsserted(() -> assertThat(postCommentRedisRepository.findById(String.valueOf(commentId)))
-                        .isPresent());
+        // Redis is populated synchronously
+        assertThat(postCommentRedisRepository.findById(String.valueOf(commentId)))
+                .isPresent();
 
         // Also wait for Kafka Streams to process it so the fallback test works
         StreamsBuilderFactoryBean streamsFactory =
@@ -481,10 +489,8 @@ class PostCommentControllerIT extends AbstractIntegrationTest {
                     });
 
             // 4) Assert Redis is populated again by the fallback warm-up logic
-            await().atMost(Duration.ofSeconds(10))
-                    .pollInterval(Duration.ofMillis(500))
-                    .untilAsserted(() -> assertThat(postCommentRedisRepository.findById(String.valueOf(commentId)))
-                            .isPresent());
+            assertThat(postCommentRedisRepository.findById(String.valueOf(commentId)))
+                    .isPresent();
 
             // Assert local cache is also populated
             assertThat(localCache.getIfPresent(cacheKey)).isNotNull();
