@@ -220,11 +220,7 @@ public class PostCommandService extends AbstractCommandService {
                     }
 
                     // 3. Mark deleted in Redis with TTL (prevents batch re-insertion)
-                    try {
-                        deletionMarkerHandler.markDeleted(DeletionMarkerHandler.POST, String.valueOf(postId));
-                    } catch (Exception e) {
-                        log.warn("Failed to mark post deleted in Redis: {}", postId, e);
-                    }
+                    deletionMarkerHandler.markDeleted(DeletionMarkerHandler.POST, String.valueOf(postId));
                 },
                 "delete post",
                 "Post");
@@ -282,12 +278,10 @@ public class PostCommandService extends AbstractCommandService {
     }
 
     private List<TagResponse> getExistingTags(Long postId) {
-        try {
-            return postRedisRepository.findById(postId).map(PostRedis::getTags).orElse(null);
-        } catch (Exception e) {
-            log.warn("Failed to get existing tags for postId: {}", postId, e);
-            return null;
-        }
+        return postRedisRepository
+                .findById(postId)
+                .map(PostRedis::getTags)
+                .orElseThrow(() -> new IllegalStateException("Post not found for tag lookup: " + postId));
     }
 
     private String getAuthorEmail(Long postId) {
