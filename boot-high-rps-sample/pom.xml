@@ -113,8 +113,8 @@
         </dependency>
         <dependency>
             <groupId>io.hypersistence</groupId>
-            <artifactId>hypersistence-utils-hibernate-71</artifactId>
-            <version>3.15.4</version>
+            <artifactId>hypersistence-utils-hibernate-73</artifactId>
+            <version>3.15.5</version>
         </dependency>
         <dependency>
             <groupId>io.github.resilience4j</groupId>
@@ -131,8 +131,9 @@
         <dependency>
             <groupId>com.julien-dubois.bootui</groupId>
             <artifactId>bootui-spring-boot-starter</artifactId>
-            <version>1.13.1</version>
+            <version>1.14.1</version>
             <scope>runtime</scope>
+            <optional>true</optional>
         </dependency>
 
         <dependency>

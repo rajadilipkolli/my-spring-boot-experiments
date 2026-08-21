@@ -278,10 +278,7 @@ public class PostCommandService extends AbstractCommandService {
     }
 
     private List<TagResponse> getExistingTags(Long postId) {
-        return postRedisRepository
-                .findById(postId)
-                .map(PostRedis::getTags)
-                .orElseThrow(() -> new IllegalStateException("Post not found for tag lookup: " + postId));
+        return postRedisRepository.findById(postId).map(PostRedis::getTags).orElse(List.of());
     }
 
     private String getAuthorEmail(Long postId) {
