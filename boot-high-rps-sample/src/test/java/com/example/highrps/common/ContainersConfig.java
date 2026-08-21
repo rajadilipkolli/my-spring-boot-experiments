@@ -29,7 +29,7 @@ public class ContainersConfig {
     @Bean
     @ServiceConnection(name = "redis")
     RedisContainer redisContainer() {
-        return new RedisContainer(DockerImageName.parse("redis").withTag("8.10.0-alpine")).withReuse(true);
+        return new RedisContainer(DockerImageName.parse("redis").withTag("8.10.1-alpine")).withReuse(true);
     }
 
     @Bean(destroyMethod = "close")
