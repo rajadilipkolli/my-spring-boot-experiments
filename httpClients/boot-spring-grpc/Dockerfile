@@ -1,10 +1,10 @@
-FROM eclipse-temurin:25.0.3_9-jre-alpine as builder
+FROM eclipse-temurin:25.0.4_7-jre-alpine as builder
 WORKDIR /app
 ARG JAR_FILE=target/*.jar
 COPY ${JAR_FILE} application.jar
 RUN java -Djarmode=layertools -jar application.jar extract
 
-FROM eclipse-temurin:25.0.3_9-jre-alpine
+FROM eclipse-temurin:25.0.4_7-jre-alpine
 WORKDIR /app
 COPY --from=builder /app/dependencies/ ./
 COPY --from=builder /app/spring-boot-loader/ ./
