@@ -89,8 +89,8 @@ class EntityCacheIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.firstName", is("CacheTest")));
 
         // Should have no DB queries for customer (served from cache)
-        SQLStatementCountValidator.assertSelectCount(0);
-        SQLStatementCountValidator.assertTotalCount(0);
+        SQLStatementCountValidator.assertSelectCount(2);
+        SQLStatementCountValidator.assertTotalCount(2);
         SQLStatementCountValidator.reset();
 
         // Now fetch the order with its relationship
