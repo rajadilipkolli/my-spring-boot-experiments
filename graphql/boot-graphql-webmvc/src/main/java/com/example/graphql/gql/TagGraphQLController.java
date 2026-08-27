@@ -27,8 +27,16 @@ public class TagGraphQLController {
     }
 
     @QueryMapping
-    public List<TagResponse> allTags() {
-        FindQuery findQuery = new FindQuery(0, 100, "id", "asc");
+    public List<TagResponse> allTags(
+            @Argument(name = "pageNo") Integer pageNo,
+            @Argument(name = "pageSize") Integer pageSize,
+            @Argument(name = "sortBy") String sortBy,
+            @Argument(name = "sortDir") String sortDir) {
+        int page = pageNo != null ? pageNo : 0;
+        int size = pageSize != null ? pageSize : 100;
+        String sort = sortBy != null ? sortBy : "id";
+        String direction = sortDir != null ? sortDir : "asc";
+        FindQuery findQuery = new FindQuery(page, size, sort, direction);
         return this.tagService.findAllTags(findQuery).data();
     }
 

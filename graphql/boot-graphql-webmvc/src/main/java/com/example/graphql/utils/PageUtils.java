@@ -8,12 +8,16 @@ import org.springframework.data.domain.Sort;
 public final class PageUtils {
 
     public static Pageable createPageable(FindQuery findQuery) {
-        int pageNo = Math.max(findQuery.pageNo() - 1, 0);
+        int pageNo = Math.max(findQuery.pageNo(), 0);
+        int pageSize = findQuery.pageSize();
+        if (pageSize < 1 || pageSize > 1000) {
+            throw new IllegalArgumentException("Page size must be between 1 and 1000, got: " + pageSize);
+        }
         Sort sort = Sort.by(
                 findQuery.sortDir().equalsIgnoreCase(Sort.Direction.ASC.name())
                         ? Sort.Order.asc(findQuery.sortBy())
                         : Sort.Order.desc(findQuery.sortBy()));
-        return PageRequest.of(pageNo, findQuery.pageSize(), sort);
+        return PageRequest.of(pageNo, pageSize, sort);
     }
 
     private PageUtils() {
