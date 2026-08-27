@@ -168,13 +168,13 @@ class PostCommentEntityControllerTest {
     void shouldReturn404WhenUpdatingNonExistingPostComment() throws Exception {
         Long postCommentId = 1L;
         given(postCommentService.findPostCommentById(postCommentId)).willReturn(Optional.empty());
-        PostCommentEntity postCommentEntity =
-                new PostCommentEntity().setId(postCommentId).setTitle("Updated PostComment");
+        PostCommentRequest postCommentRequest =
+                new PostCommentRequest("First Title", "First Content", String.valueOf(postCommentId), true);
 
         this.mockMvc
                 .perform(put("/api/post/comments/{id}", postCommentId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonMapper.writeValueAsString(postCommentEntity)))
+                        .content(jsonMapper.writeValueAsString(postCommentRequest)))
                 .andExpect(status().isNotFound());
     }
 
@@ -182,8 +182,7 @@ class PostCommentEntityControllerTest {
     void shouldDeletePostComment() throws Exception {
         PostCommentResponse postCommentResponse = postCommentResponseList.getFirst();
         Long postCommentId = postCommentResponse.postId();
-        given(postCommentService.findPostCommentById(postCommentId))
-                .willReturn(Optional.of(postCommentResponseList.getFirst()));
+        given(postCommentService.existsPostCommentById(postCommentId)).willReturn(true);
         doNothing().when(postCommentService).deletePostCommentById(postCommentId);
 
         this.mockMvc
@@ -195,7 +194,7 @@ class PostCommentEntityControllerTest {
     @Test
     void shouldReturn404WhenDeletingNonExistingPostComment() throws Exception {
         Long postCommentId = 1L;
-        given(postCommentService.findPostCommentById(postCommentId)).willReturn(Optional.empty());
+        given(postCommentService.existsPostCommentById(postCommentId)).willReturn(false);
 
         this.mockMvc.perform(delete("/api/post/comments/{id}", postCommentId)).andExpect(status().isNotFound());
     }

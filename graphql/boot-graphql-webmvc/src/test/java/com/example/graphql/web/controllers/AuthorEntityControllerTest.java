@@ -15,8 +15,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.example.graphql.entities.AuthorEntity;
+import com.example.graphql.model.query.FindQuery;
 import com.example.graphql.model.request.AuthorRequest;
 import com.example.graphql.model.response.AuthorResponse;
+import com.example.graphql.model.response.PagedResult;
 import com.example.graphql.services.AuthorService;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -26,6 +28,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
@@ -62,12 +66,22 @@ class AuthorEntityControllerTest {
     @Test
     void shouldFetchAllAuthors() throws Exception {
 
-        given(authorService.findAllAuthors()).willReturn(this.authorEntityList);
+        FindQuery findQuery = new FindQuery(0, 10, "id", "asc");
+        Page<AuthorResponse> page = new PageImpl<>(authorEntityList);
+        PagedResult<AuthorResponse> authorPagedResult = new PagedResult<>(page, authorEntityList);
+        given(authorService.findAllAuthors(findQuery)).willReturn(authorPagedResult);
 
         this.mockMvc
                 .perform(get("/api/authors"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.size()", is(authorEntityList.size())));
+                .andExpect(jsonPath("$.data.size()", is(authorEntityList.size())))
+                .andExpect(jsonPath("$.totalElements", is(3)))
+                .andExpect(jsonPath("$.pageNumber", is(1)))
+                .andExpect(jsonPath("$.totalPages", is(1)))
+                .andExpect(jsonPath("$.isFirst", is(true)))
+                .andExpect(jsonPath("$.isLast", is(true)))
+                .andExpect(jsonPath("$.hasNext", is(false)))
+                .andExpect(jsonPath("$.hasPrevious", is(false)));
     }
 
     @Test

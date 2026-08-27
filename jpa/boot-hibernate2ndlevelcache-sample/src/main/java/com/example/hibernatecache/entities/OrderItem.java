@@ -20,7 +20,9 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.proxy.HibernateProxy;
 
 @Entity
-@Table(name = "order_items")
+@Table(
+        name = "order_items",
+        indexes = {@jakarta.persistence.Index(name = "idx_order_items_order_id", columnList = "order_id")})
 @Cacheable
 @Cache(region = "orderItemCache", usage = CacheConcurrencyStrategy.READ_WRITE)
 public class OrderItem implements Serializable {
@@ -35,13 +37,13 @@ public class OrderItem implements Serializable {
     @Column(nullable = false)
     private String itemCode;
 
-    @Column(nullable = false)
+    @Column(nullable = false, precision = 19, scale = 2)
     private BigDecimal price;
 
     @Column(nullable = false)
     private Integer quantity;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "order_id", nullable = false)
     private Order order;
 

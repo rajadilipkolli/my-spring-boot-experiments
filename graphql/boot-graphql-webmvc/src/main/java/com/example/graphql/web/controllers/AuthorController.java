@@ -2,27 +2,25 @@ package com.example.graphql.web.controllers;
 
 import com.example.graphql.config.logging.Loggable;
 import com.example.graphql.exception.AuthorNotFoundException;
+import com.example.graphql.model.query.FindQuery;
 import com.example.graphql.model.request.AuthorRequest;
 import com.example.graphql.model.response.AuthorResponse;
+import com.example.graphql.model.response.PagedResult;
 import com.example.graphql.services.AuthorService;
-import java.util.List;
+import com.example.graphql.utils.AppConstants;
+import jakarta.validation.Valid;
+import java.net.URI;
 import org.jspecify.annotations.NonNull;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @RestController
 @RequestMapping("/api/authors")
 @Loggable
+@Validated
 public class AuthorController {
 
     private final AuthorService authorService;
@@ -32,8 +30,13 @@ public class AuthorController {
     }
 
     @GetMapping
-    public List<AuthorResponse> getAllAuthors() {
-        return authorService.findAllAuthors();
+    ResponseEntity<PagedResult<AuthorResponse>> getAllAuthors(
+            @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_NUMBER, required = false) int pageNo,
+            @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_SIZE, required = false) int pageSize,
+            @RequestParam(defaultValue = AppConstants.DEFAULT_SORT_BY, required = false) String sortBy,
+            @RequestParam(defaultValue = AppConstants.DEFAULT_SORT_DIRECTION, required = false) String sortDir) {
+        FindQuery findQuery = new FindQuery(pageNo, pageSize, sortBy, sortDir);
+        return ResponseEntity.ok(authorService.findAllAuthors(findQuery));
     }
 
     @GetMapping("/{id}")
@@ -44,15 +47,19 @@ public class AuthorController {
                 .orElseThrow(() -> new AuthorNotFoundException(id));
     }
 
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public AuthorResponse createAuthor(@RequestBody @Validated AuthorRequest authorRequest) {
-        return authorService.saveAuthor(authorRequest);
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<@NonNull AuthorResponse> createAuthor(@RequestBody @Valid AuthorRequest authorRequest) {
+        AuthorResponse authorResponse = authorService.saveAuthor(authorRequest);
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(authorResponse.id())
+                .toUri();
+        return ResponseEntity.created(location).body(authorResponse);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<@NonNull AuthorResponse> updateAuthor(
-            @PathVariable Long id, @RequestBody AuthorRequest authorRequest) {
+            @PathVariable Long id, @RequestBody @Valid AuthorRequest authorRequest) {
         return authorService
                 .updateAuthor(authorRequest, id)
                 .map(ResponseEntity::ok)

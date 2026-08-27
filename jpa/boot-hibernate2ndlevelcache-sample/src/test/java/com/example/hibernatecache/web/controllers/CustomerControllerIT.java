@@ -86,8 +86,8 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.hasNext", is(false)))
                 .andExpect(jsonPath("$.hasPrevious", is(false)));
 
-        SQLStatementCountValidator.assertSelectCount(5);
-        SQLStatementCountValidator.assertTotalCount(5);
+        SQLStatementCountValidator.assertSelectCount(3);
+        SQLStatementCountValidator.assertTotalCount(3);
     }
 
     @Test

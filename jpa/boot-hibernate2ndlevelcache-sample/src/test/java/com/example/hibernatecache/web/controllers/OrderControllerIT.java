@@ -82,8 +82,8 @@ class OrderControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.hasNext", is(false)))
                 .andExpect(jsonPath("$.hasPrevious", is(false)));
 
-        SQLStatementCountValidator.assertSelectCount(4);
-        SQLStatementCountValidator.assertTotalCount(4);
+        SQLStatementCountValidator.assertSelectCount(2);
+        SQLStatementCountValidator.assertTotalCount(2);
     }
 
     @Test

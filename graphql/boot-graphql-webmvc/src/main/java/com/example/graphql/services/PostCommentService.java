@@ -95,4 +95,8 @@ public class PostCommentService {
         PostCommentEntity persistedPostComment = postCommentRepository.save(postCommentEntity);
         return appConversionService.convert(persistedPostComment, PostCommentResponse.class);
     }
+
+    public boolean existsPostCommentById(Long id) {
+        return postCommentRepository.existsById(id);
+    }
 }

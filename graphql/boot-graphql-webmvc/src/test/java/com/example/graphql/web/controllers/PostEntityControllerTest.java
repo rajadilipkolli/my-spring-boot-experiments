@@ -15,8 +15,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.example.graphql.entities.PostEntity;
+import com.example.graphql.model.query.FindQuery;
 import com.example.graphql.model.request.NewPostRequest;
 import com.example.graphql.model.request.PostDetailsRequest;
+import com.example.graphql.model.response.PagedResult;
 import com.example.graphql.model.response.PostResponse;
 import com.example.graphql.services.PostService;
 import java.util.ArrayList;
@@ -26,6 +28,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
@@ -49,9 +53,9 @@ class PostEntityControllerTest {
     private List<PostEntity> postEntityList;
 
     private final List<PostResponse> postResponseList = List.of(
-            new PostResponse(null, "First Post", false, null, null, null, null, new ArrayList<>()),
-            new PostResponse(null, "Second Post", false, null, null, null, null, new ArrayList<>()),
-            new PostResponse(null, "Third Post", false, null, null, null, null, new ArrayList<>()));
+            new PostResponse(1L, null, "First Post", false, null, null, null, null, new ArrayList<>()),
+            new PostResponse(2L, null, "Second Post", false, null, null, null, null, new ArrayList<>()),
+            new PostResponse(3L, null, "Third Post", false, null, null, null, null, new ArrayList<>()));
 
     @BeforeEach
     void setUp() {
@@ -64,12 +68,22 @@ class PostEntityControllerTest {
 
     @Test
     void shouldFetchAllPosts() throws Exception {
-        given(postService.findAllPosts()).willReturn(this.postResponseList);
+        FindQuery findQuery = new FindQuery(0, 10, "id", "asc");
+        Page<PostEntity> page = new PageImpl<>(postEntityList);
+        PagedResult<PostResponse> postPagedResult = new PagedResult<>(page, postResponseList);
+        given(postService.findAllPosts(findQuery)).willReturn(postPagedResult);
 
         this.mockMvc
                 .perform(get("/api/posts"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.size()", is(postEntityList.size())));
+                .andExpect(jsonPath("$.data.size()", is(postResponseList.size())))
+                .andExpect(jsonPath("$.totalElements", is(3)))
+                .andExpect(jsonPath("$.pageNumber", is(1)))
+                .andExpect(jsonPath("$.totalPages", is(1)))
+                .andExpect(jsonPath("$.isFirst", is(true)))
+                .andExpect(jsonPath("$.isLast", is(true)))
+                .andExpect(jsonPath("$.hasNext", is(false)))
+                .andExpect(jsonPath("$.hasPrevious", is(false)));
     }
 
     @Test
@@ -152,7 +166,7 @@ class PostEntityControllerTest {
                 new PostDetailsRequest("detailsKey", "JunitCreatedBy"),
                 null);
         PostResponse value =
-                new PostResponse(null, "Updated Content", false, null, null, null, null, new ArrayList<>());
+                new PostResponse(1L, null, "Updated Content", false, null, null, null, null, new ArrayList<>());
         given(postService.updatePost(postId, postEntity)).willReturn(Optional.of(value));
 
         this.mockMvc
@@ -167,12 +181,18 @@ class PostEntityControllerTest {
     void shouldReturn404WhenUpdatingNonExistingPost() throws Exception {
         Long postId = 1L;
         given(postService.findPostById(postId)).willReturn(Optional.empty());
-        PostEntity postEntity = new PostEntity().setId(postId).setContent("Updated Post");
+        NewPostRequest newPostRequest = new NewPostRequest(
+                "First Title",
+                "Updated Content",
+                "junit1@email.com",
+                false,
+                new PostDetailsRequest("detailsKey", "JunitCreatedBy"),
+                null);
 
         this.mockMvc
                 .perform(put("/api/posts/{id}", postId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonMapper.writeValueAsString(postEntity)))
+                        .content(jsonMapper.writeValueAsString(newPostRequest)))
                 .andExpect(status().isNotFound())
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                 .andExpect(jsonPath("$.type", is("https://api.graphql-webmvc.com/errors/not-found")))

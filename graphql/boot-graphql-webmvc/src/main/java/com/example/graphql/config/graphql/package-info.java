@@ -1,4 +1,4 @@
-@NonNullApi
+@NullMarked
 package com.example.graphql.config.graphql;
 
-import org.springframework.lang.NonNullApi;
+import org.jspecify.annotations.NullMarked;

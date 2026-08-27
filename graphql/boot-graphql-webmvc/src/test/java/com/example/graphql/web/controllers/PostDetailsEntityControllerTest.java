@@ -99,8 +99,7 @@ class PostDetailsEntityControllerTest {
     void shouldReturn404WhenUpdatingNonExistingPostDetails() throws Exception {
         Long postDetailsId = 1L;
         given(postDetailsService.findPostDetailsById(postDetailsId)).willReturn(Optional.empty());
-        PostDetailsEntity postDetails =
-                new PostDetailsEntity().setId(postDetailsId).setCreatedBy("Junit1");
+        PostDetailsRequest postDetails = new PostDetailsRequest("junitDetailsKey", "junitCreatedBy");
 
         this.mockMvc
                 .perform(put("/api/post/details/{id}", postDetailsId)

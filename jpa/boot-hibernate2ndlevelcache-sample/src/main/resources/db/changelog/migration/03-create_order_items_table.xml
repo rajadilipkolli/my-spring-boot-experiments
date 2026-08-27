@@ -34,4 +34,20 @@
             <column name="version" type="SMALLINT" defaultValueNumeric="0"/>
         </createTable>
     </changeSet>
+
+    <changeSet author="app" id="add-foreign-key-constraints">
+        <addForeignKeyConstraint
+                baseTableName="order_items"
+                baseColumnNames="order_id"
+                constraintName="fk_order_items_order_id"
+                referencedTableName="orders"
+                referencedColumnNames="id"
+                onDelete="CASCADE"/>
+    </changeSet>
+
+    <changeSet author="app" id="add-foreign-key-indexes">
+        <createIndex indexName="idx_order_items_order_id" tableName="order_items">
+            <column name="order_id"/>
+        </createIndex>
+    </changeSet>
 </databaseChangeLog>

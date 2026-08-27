@@ -1,6 +1,7 @@
 package com.example.graphql.gql;
 
 import com.example.graphql.exception.TagNotFoundException;
+import com.example.graphql.model.query.FindQuery;
 import com.example.graphql.model.response.TagResponse;
 import com.example.graphql.services.TagService;
 import jakarta.validation.constraints.NotBlank;
@@ -27,7 +28,8 @@ public class TagGraphQLController {
 
     @QueryMapping
     public List<TagResponse> allTags() {
-        return this.tagService.findAllTags();
+        FindQuery findQuery = new FindQuery(0, 100, "id", "asc");
+        return this.tagService.findAllTags(findQuery).data();
     }
 
     @QueryMapping
