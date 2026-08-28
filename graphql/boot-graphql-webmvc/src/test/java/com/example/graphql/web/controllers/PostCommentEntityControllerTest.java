@@ -167,7 +167,7 @@ class PostCommentEntityControllerTest {
     @Test
     void shouldReturn404WhenUpdatingNonExistingPostComment() throws Exception {
         Long postCommentId = 1L;
-        given(postCommentService.findPostCommentById(postCommentId)).willReturn(Optional.empty());
+        given(postCommentService.findCommentById(postCommentId)).willReturn(Optional.empty());
         PostCommentRequest postCommentRequest =
                 new PostCommentRequest("First Title", "First Content", String.valueOf(postCommentId), true);
 

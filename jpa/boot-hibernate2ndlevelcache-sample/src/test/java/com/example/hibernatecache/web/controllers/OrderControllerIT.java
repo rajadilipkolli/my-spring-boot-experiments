@@ -100,7 +100,7 @@ class OrderControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.name", is(order.getName())))
                 .andExpect(jsonPath("$.price", is(10 * 10))) // price * quantity
                 .andExpect(jsonPath("$.orderItems.size()", is(1)))
-                .andExpect(jsonPath("$.orderItems[0].price", is(10)))
+                .andExpect(jsonPath("$.orderItems[0].price", is(10.0)))
                 .andExpect(jsonPath("$.orderItems[0].quantity", is(10)))
                 .andExpect(jsonPath("$.orderItems[0].itemCode", is("ITM001")))
                 .andExpect(jsonPath("$.orderItems[0].orderItemId", notNullValue()));
@@ -191,7 +191,7 @@ class OrderControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.name", is("Updated Order")))
                 .andExpect(jsonPath("$.price", is(10 * 10))) // price * quantity
                 .andExpect(jsonPath("$.orderItems.size()", is(1)))
-                .andExpect(jsonPath("$.orderItems[0].price", is(10)))
+                .andExpect(jsonPath("$.orderItems[0].price", is(10.0)))
                 .andExpect(jsonPath("$.orderItems[0].quantity", is(10)))
                 .andExpect(jsonPath("$.orderItems[0].itemCode", is("ITM001")))
                 .andExpect(jsonPath("$.orderItems[0].orderItemId", notNullValue()));

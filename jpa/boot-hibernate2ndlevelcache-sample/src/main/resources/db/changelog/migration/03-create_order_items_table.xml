@@ -22,7 +22,7 @@
             <column name="item_code" type="${string.type}">
                 <constraints nullable="false"/>
             </column>
-            <column name="price" type="java.math.BigDecimal">
+            <column name="price" type="DECIMAL(19, 2)">
                 <constraints nullable="false"/>
             </column>
             <column name="quantity" type="integer">
