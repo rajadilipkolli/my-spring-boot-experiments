@@ -8,7 +8,7 @@ import org.springframework.data.domain.Sort;
 public final class PageUtils {
 
     public static Pageable createPageable(FindQuery findQuery) {
-        int pageNo = Math.max(findQuery.pageNo() -1, 0);
+        int pageNo = Math.max(findQuery.pageNo() - 1, 0);
         int pageSize = findQuery.pageSize();
         if (pageSize < 1 || pageSize > 1000) {
             throw new IllegalArgumentException("Page size must be between 1 and 1000, got: " + pageSize);
