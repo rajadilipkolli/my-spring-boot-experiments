@@ -17,7 +17,7 @@ public record PagedResult<T>(
         this(
                 data,
                 page.getTotalElements(),
-                page.getNumber(),
+                page.getNumber() + 1,
                 page.getTotalPages(),
                 page.isFirst(),
                 page.isLast(),
