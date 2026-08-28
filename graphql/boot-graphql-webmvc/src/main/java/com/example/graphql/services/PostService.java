@@ -3,17 +3,22 @@ package com.example.graphql.services;
 import com.example.graphql.config.logging.Loggable;
 import com.example.graphql.entities.PostEntity;
 import com.example.graphql.mapper.NewPostRequestToPostEntityMapper;
+import com.example.graphql.model.query.FindQuery;
 import com.example.graphql.model.request.NewPostRequest;
+import com.example.graphql.model.response.PagedResult;
 import com.example.graphql.model.response.PostResponse;
 import com.example.graphql.projections.PostInfo;
 import com.example.graphql.repositories.AuthorRepository;
 import com.example.graphql.repositories.PostRepository;
 import com.example.graphql.repositories.TagRepository;
+import com.example.graphql.utils.PageUtils;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.springframework.core.convert.ConversionService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,10 +47,17 @@ public class PostService {
         this.mapNewPostRequestToPostEntityMapper = mapNewPostRequestToPostEntityMapper;
     }
 
-    public List<PostResponse> findAllPosts() {
-        return postRepository.findAll().stream()
+    public PagedResult<PostResponse> findAllPosts(FindQuery findQuery) {
+        // create Pageable instance
+        Pageable pageable = PageUtils.createPageable(findQuery);
+
+        Page<PostEntity> postsPage = postRepository.findAll(pageable);
+
+        List<PostResponse> postResponseList = postsPage.getContent().stream()
                 .map(post -> appConversionService.convert(post, PostResponse.class))
                 .toList();
+
+        return new PagedResult<>(postsPage, postResponseList);
     }
 
     public List<PostInfo> findAllPostsByAuthorEmail(String emailId) {

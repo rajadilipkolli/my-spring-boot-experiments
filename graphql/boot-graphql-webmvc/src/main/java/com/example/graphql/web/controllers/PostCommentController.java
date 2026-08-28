@@ -1,12 +1,15 @@
 package com.example.graphql.web.controllers;
 
 import com.example.graphql.config.logging.Loggable;
+import com.example.graphql.exception.PostCommentNotFoundException;
 import com.example.graphql.model.request.PostCommentRequest;
 import com.example.graphql.model.response.PostCommentResponse;
 import com.example.graphql.services.PostCommentService;
+import jakarta.validation.Valid;
+import java.net.URI;
 import java.util.List;
 import org.jspecify.annotations.NonNull;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -16,12 +19,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @RestController
 @RequestMapping("/api/post/comments")
 @Loggable
+@Validated
 public class PostCommentController {
 
     private final PostCommentService postCommentService;
@@ -40,33 +44,37 @@ public class PostCommentController {
         return postCommentService
                 .findPostCommentById(id)
                 .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+                .orElseThrow(() -> new PostCommentNotFoundException(id));
     }
 
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public PostCommentResponse createPostComment(@RequestBody @Validated PostCommentRequest postCommentRequest) {
-        return postCommentService.addCommentToPost(postCommentRequest);
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<@NonNull PostCommentResponse> createPostComment(
+            @RequestBody @Valid PostCommentRequest postCommentRequest) {
+        PostCommentResponse postCommentResponse = postCommentService.addCommentToPost(postCommentRequest);
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(postCommentResponse.commentId())
+                .toUri();
+        return ResponseEntity.created(location).body(postCommentResponse);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<@NonNull PostCommentResponse> updatePostComment(
-            @PathVariable Long id, @RequestBody PostCommentRequest postCommentRequest) {
+            @PathVariable Long id, @RequestBody @Valid PostCommentRequest postCommentRequest) {
         return postCommentService
                 .findCommentById(id)
                 .map(postCommentObj ->
                         ResponseEntity.ok(postCommentService.updatePostComment(postCommentObj, postCommentRequest)))
-                .orElseGet(() -> ResponseEntity.notFound().build());
+                .orElseThrow(() -> new PostCommentNotFoundException(id));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Object> deletePostComment(@PathVariable Long id) {
-        return postCommentService
-                .findPostCommentById(id)
-                .map(postComment -> {
-                    postCommentService.deletePostCommentById(id);
-                    return ResponseEntity.accepted().build();
-                })
-                .orElseGet(() -> ResponseEntity.notFound().build());
+    public ResponseEntity<Void> deletePostComment(@PathVariable Long id) {
+        if (postCommentService.existsPostCommentById(id)) {
+            postCommentService.deletePostCommentById(id);
+            return ResponseEntity.accepted().build();
+        } else {
+            throw new PostCommentNotFoundException(id);
+        }
     }
 }

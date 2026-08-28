@@ -17,7 +17,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.example.graphql.entities.TagEntity;
+import com.example.graphql.model.query.FindQuery;
 import com.example.graphql.model.request.TagsRequest;
+import com.example.graphql.model.response.PagedResult;
 import com.example.graphql.model.response.TagResponse;
 import com.example.graphql.services.TagService;
 import java.util.ArrayList;
@@ -27,6 +29,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
@@ -62,12 +66,23 @@ class TagEntityControllerTest {
         TagResponse tagResponse1 = new TagResponse(null, "tag1", "desc1");
         TagResponse tagResponse2 = new TagResponse(null, "tag2", "desc2");
         TagResponse tagResponse3 = new TagResponse(null, "tag3", "desc3");
-        given(tagService.findAllTags()).willReturn(List.of(tagResponse1, tagResponse2, tagResponse3));
+        FindQuery findQuery = new FindQuery(0, 10, "id", "asc");
+        Page<TagResponse> page = new PageImpl<>(List.of(tagResponse1, tagResponse2, tagResponse3));
+        PagedResult<TagResponse> tagPagedResult =
+                new PagedResult<>(page, List.of(tagResponse1, tagResponse2, tagResponse3));
+        given(tagService.findAllTags(findQuery)).willReturn(tagPagedResult);
 
         this.mockMvc
                 .perform(get("/api/tags"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.size()", is(tagEntityList.size())));
+                .andExpect(jsonPath("$.data.size()", is(tagEntityList.size())))
+                .andExpect(jsonPath("$.totalElements", is(3)))
+                .andExpect(jsonPath("$.pageNumber", is(1)))
+                .andExpect(jsonPath("$.totalPages", is(1)))
+                .andExpect(jsonPath("$.isFirst", is(true)))
+                .andExpect(jsonPath("$.isLast", is(true)))
+                .andExpect(jsonPath("$.hasNext", is(false)))
+                .andExpect(jsonPath("$.hasPrevious", is(false)));
     }
 
     @Test

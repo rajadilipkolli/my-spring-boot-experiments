@@ -3,17 +3,17 @@ package com.example.graphql.services;
 import com.example.graphql.config.logging.Loggable;
 import com.example.graphql.entities.AuthorEntity;
 import com.example.graphql.mapper.AuthorRequestToEntityMapper;
+import com.example.graphql.model.query.FindQuery;
 import com.example.graphql.model.request.AuthorRequest;
 import com.example.graphql.model.response.AuthorResponse;
+import com.example.graphql.model.response.PagedResult;
 import com.example.graphql.repositories.AuthorRepository;
+import com.example.graphql.utils.PageUtils;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import org.springframework.core.convert.ConversionService;
-import org.springframework.data.domain.Limit;
-import org.springframework.data.domain.ScrollPosition;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.Window;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,10 +35,17 @@ public class AuthorService {
         this.authorRequestToEntityMapper = authorRequestToEntityMapper;
     }
 
-    public List<AuthorResponse> findAllAuthors() {
-        return authorRepository.findAll().stream()
+    public PagedResult<AuthorResponse> findAllAuthors(FindQuery findQuery) {
+        // create Pageable instance
+        Pageable pageable = PageUtils.createPageable(findQuery);
+
+        Page<AuthorEntity> authorsPage = authorRepository.findAll(pageable);
+
+        List<AuthorResponse> authorResponseList = authorsPage.getContent().stream()
                 .map(author -> appConversionService.convert(author, AuthorResponse.class))
                 .toList();
+
+        return new PagedResult<>(authorsPage, authorResponseList);
     }
 
     public Optional<AuthorResponse> findAuthorById(Long id) {

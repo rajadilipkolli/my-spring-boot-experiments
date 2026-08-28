@@ -36,11 +36,16 @@ class PostCommentEntityControllerIT extends AbstractIntegrationTest {
         postEntity.setDetails(postDetailsEntity);
 
         List<PostCommentEntity> postCommentEntityList = new ArrayList<>();
+        postCommentEntityList.add(new PostCommentEntity()
+                .setTitle("First PostComment")
+                .setContent("First Content")
+                .setPublished(true));
+        postCommentEntityList.add(new PostCommentEntity()
+                .setTitle("Second PostComment")
+                .setContent("Second Content")
+                .setPublished(false));
         postCommentEntityList.add(
-                new PostCommentEntity().setTitle("First PostComment").setPublished(true));
-        postCommentEntityList.add(
-                new PostCommentEntity().setTitle("Second PostComment").setPublished(false));
-        postCommentEntityList.add(new PostCommentEntity().setTitle("Third PostComment"));
+                new PostCommentEntity().setTitle("Third PostComment").setContent("Third Content"));
         postCommentEntityList.forEach(postCommentEntity -> postEntity.addComment(postCommentEntity));
         postRepository.save(postEntity);
     }

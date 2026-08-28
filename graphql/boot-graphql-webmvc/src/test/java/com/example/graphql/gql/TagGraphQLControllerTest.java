@@ -7,6 +7,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import com.example.graphql.config.graphql.GraphQlConfiguration;
+import com.example.graphql.model.query.FindQuery;
+import com.example.graphql.model.response.PagedResult;
 import com.example.graphql.model.response.TagResponse;
 import com.example.graphql.services.TagService;
 import java.util.List;
@@ -15,6 +17,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.graphql.test.autoconfigure.GraphQlTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.graphql.test.tester.GraphQlTester;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
@@ -32,7 +36,12 @@ class TagGraphQLControllerTest {
     void allTags() {
         TagResponse tag1 = new TagResponse(null, "tag1", "desc1");
         TagResponse tag2 = new TagResponse(null, "tag2", "desc2");
-        given(tagService.findAllTags()).willReturn(List.of(tag1, tag2));
+
+        FindQuery findQuery = new FindQuery(0, 100, "id", "asc");
+        List<TagResponse> tagResponseList = List.of(tag1, tag2);
+        Page<TagResponse> page = new PageImpl<>(tagResponseList);
+        PagedResult<TagResponse> tagPagedResult = new PagedResult<>(page, tagResponseList);
+        given(tagService.findAllTags(findQuery)).willReturn(tagPagedResult);
 
         var query = """
                     query {
@@ -48,7 +57,7 @@ class TagGraphQLControllerTest {
                 .entityList(String.class)
                 .satisfies(names -> assertThat(names).containsExactlyInAnyOrder("tag1", "tag2"));
 
-        verify(tagService, times(1)).findAllTags();
+        verify(tagService, times(1)).findAllTags(findQuery);
         verifyNoMoreInteractions(tagService);
     }
 

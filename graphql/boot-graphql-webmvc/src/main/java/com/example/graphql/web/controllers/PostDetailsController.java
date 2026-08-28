@@ -4,9 +4,12 @@ import com.example.graphql.config.logging.Loggable;
 import com.example.graphql.model.request.PostDetailsRequest;
 import com.example.graphql.model.response.PostDetailsResponse;
 import com.example.graphql.services.PostDetailsService;
+import jakarta.validation.Valid;
 import java.util.List;
 import org.jspecify.annotations.NonNull;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -17,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/post/details")
 @Loggable
+@Validated
 public class PostDetailsController {
 
     private final PostDetailsService postDetailsService;
@@ -38,9 +42,9 @@ public class PostDetailsController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    @PutMapping("/{id}")
+    @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<@NonNull PostDetailsResponse> updatePostDetails(
-            @PathVariable Long id, @RequestBody PostDetailsRequest postDetailsEntity) {
+            @PathVariable Long id, @RequestBody @Valid PostDetailsRequest postDetailsEntity) {
         return postDetailsService
                 .findDetailsById(id)
                 .flatMap(postDetailsObj -> postDetailsService.updatePostDetails(postDetailsObj, postDetailsEntity))

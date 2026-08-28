@@ -30,4 +30,11 @@
             <column name="version" type="SMALLINT" defaultValueNumeric="0"/>
         </createTable>
     </changeSet>
+
+    <changeSet author="app" id="add-unique-constraint-customer-email">
+        <addUniqueConstraint
+                tableName="customers"
+                columnNames="email"
+                constraintName="uc_customer_email" />
+    </changeSet>
 </databaseChangeLog>

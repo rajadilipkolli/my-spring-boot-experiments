@@ -2,16 +2,21 @@ package com.example.graphql.services;
 
 import com.example.graphql.entities.PostTagEntity;
 import com.example.graphql.entities.TagEntity;
+import com.example.graphql.model.query.FindQuery;
 import com.example.graphql.model.request.TagsRequest;
+import com.example.graphql.model.response.PagedResult;
 import com.example.graphql.model.response.TagResponse;
 import com.example.graphql.repositories.PostTagRepository;
 import com.example.graphql.repositories.TagRepository;
+import com.example.graphql.utils.PageUtils;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.jspecify.annotations.Nullable;
 import org.springframework.core.convert.ConversionService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,10 +35,17 @@ public class TagService {
         this.appConversionService = appConversionService;
     }
 
-    public List<TagResponse> findAllTags() {
-        return tagRepository.findAll().stream()
-                .map(tagEntity -> appConversionService.convert(tagEntity, TagResponse.class))
-                .collect(Collectors.toList());
+    public PagedResult<TagResponse> findAllTags(FindQuery findQuery) {
+        // create Pageable instance
+        Pageable pageable = PageUtils.createPageable(findQuery);
+
+        Page<TagEntity> tagsPage = tagRepository.findAll(pageable);
+
+        List<TagResponse> tagResponseList = tagsPage.getContent().stream()
+                .map(tag -> appConversionService.convert(tag, TagResponse.class))
+                .toList();
+
+        return new PagedResult<>(tagsPage, tagResponseList);
     }
 
     public Optional<TagResponse> findTagById(Long id) {

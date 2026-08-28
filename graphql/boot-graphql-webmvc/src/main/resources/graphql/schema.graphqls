@@ -47,7 +47,7 @@ type PostDetails {
 type Query {
     allAuthors(first: Int, after: String): AuthorConnection
     findAuthorByEmailId(email: String!): Author
-    allTags: [Tags!]
+    allTags(pageNo: Int, pageSize: Int, sortBy: String, sortDir: String): [Tags!]
     findTagByName(tagName: String!) : Tags
     allPostsByEmail(email: String!): [Post]
 }
