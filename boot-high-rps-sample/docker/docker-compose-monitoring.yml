@@ -13,7 +13,7 @@ services:
     ports:
       - "9187:9187"
     environment:
-      DATA_SOURCE_NAME: postgresql://user:password@host.docker.internal:5432/highrps?sslmode=disable
+      DATA_SOURCE_NAME: postgresql://appuser:secret@host.docker.internal:5432/statsdb?sslmode=disable
     networks:
       - metrics-network
 
