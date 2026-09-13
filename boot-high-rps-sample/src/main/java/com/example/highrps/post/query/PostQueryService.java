@@ -1,8 +1,7 @@
 package com.example.highrps.post.query;
 
 import com.example.highrps.infrastructure.cache.RequestCoalescer;
-import com.example.highrps.post.domain.PostRedis;
-import com.example.highrps.post.domain.PostRedisRepository;
+import com.example.highrps.post.domain.*;
 import com.example.highrps.post.domain.requests.NewPostRequest;
 import com.example.highrps.shared.ResourceNotFoundException;
 import com.example.highrps.shared.redis.DeletionMarkerHandler;
@@ -35,21 +34,41 @@ public class PostQueryService {
     private final DeletionMarkerHandler deletionMarkerHandler;
     private final RequestCoalescer<NewPostRequest> requestCoalescer;
     private final JsonMapper jsonMapper;
+    private final PostRepository postRepository;
 
+    /**
+     * Creates a post query service backed by local, Redis, stream, and database views.
+     *
+     * @param localCache local post cache
+     * @param postRedisRepository Redis post repository
+     * @param postRepository database post repository
+     * @param kafkaStreamsFactory Kafka Streams lifecycle access
+     * @param jsonMapper serializer for cached values
+     * @param deletionMarkerHandler handler for deleted aggregates
+     */
     public PostQueryService(
             Cache<String, String> localCache,
             PostRedisRepository postRedisRepository,
+            PostRepository postRepository,
             StreamsBuilderFactoryBean kafkaStreamsFactory,
             JsonMapper jsonMapper,
             DeletionMarkerHandler deletionMarkerHandler) {
         this.localCache = localCache;
         this.postRedisRepository = postRedisRepository;
+        this.postRepository = postRepository;
         this.kafkaStreamsFactory = kafkaStreamsFactory;
         this.jsonMapper = jsonMapper;
         this.deletionMarkerHandler = deletionMarkerHandler;
         this.requestCoalescer = new RequestCoalescer<>();
     }
 
+    /**
+     * Resolves a post from the read caches, stream state, or database and warms faster cache layers when possible.
+     *
+     * @param query the post ID query
+     * @return the matching post serialized as JSON
+     * @throws ResourceNotFoundException if the post is marked as deleted or cannot be found
+     */
     public String getPost(PostQuery query) {
         Long postId = query.postId();
         log.debug("Querying post with id: {}", postId);
@@ -74,9 +93,10 @@ public class PostQueryService {
             PostProjection projection = fromRedis(redisPost.get());
             // Warm local cache and return JSON
             try {
-                String json = jsonMapper.writeValueAsString(projection);
-                localCache.put(cacheKey, json);
-                return json;
+                String jsonStr = jsonMapper.writeValueAsString(projection);
+                localCache.put(cacheKey, jsonStr);
+                return jsonStr;
+
             } catch (Exception e) {
                 log.warn("Failed to serialize to JSON", e);
                 throw new RuntimeException("Serialization error", e);
@@ -100,22 +120,43 @@ public class PostQueryService {
 
             // Warm both caches and return JSON
             try {
-                String json = jsonMapper.writeValueAsString(projection);
-                localCache.put(cacheKey, json);
+                String jsonStr = jsonMapper.writeValueAsString(projection);
+                localCache.put(cacheKey, jsonStr);
 
                 PostRedis redisEntity = toRedis(streamsData, postId);
                 postRedisRepository.save(redisEntity);
-                return json;
+                return jsonStr;
+
             } catch (Exception e) {
                 log.warn("Failed to warm caches from Streams", e);
                 throw new RuntimeException("Serialization error", e);
             }
         }
 
-        // Not found in any cache
-        throw new ResourceNotFoundException("Post not found for id: " + postId);
+        // 5. Database fallback
+        return postRepository
+                .findByPostRefId(postId)
+                .map(entity -> {
+                    log.debug("Hit DB for postId: {}", postId);
+                    PostProjection projection = fromEntity(entity);
+                    try {
+                        String jsonStr = jsonMapper.writeValueAsString(projection);
+                        localCache.put(cacheKey, jsonStr);
+                        return jsonStr;
+
+                    } catch (Exception e) {
+                        throw new RuntimeException("Serialization error", e);
+                    }
+                })
+                .orElseThrow(() -> new ResourceNotFoundException("Post not found for id: " + postId));
     }
 
+    /**
+     * Checks whether a post can be resolved by identifier.
+     *
+     * @param postId the post identifier
+     * @return {@code true} when the post exists
+     */
     public boolean exists(Long postId) {
         try {
             getPost(new PostQuery(postId));
@@ -125,6 +166,11 @@ public class PostQueryService {
         }
     }
 
+    /**
+     * Returns the post state store when Kafka Streams is running.
+     *
+     * @return the post store, or {@code null} while streams are unavailable
+     */
     private ReadOnlyKeyValueStore<String, NewPostRequest> getKeyValueStore() {
         KafkaStreams kafkaStreams = kafkaStreamsFactory.getKafkaStreams();
         if (kafkaStreams == null || kafkaStreams.state() != KafkaStreams.State.RUNNING) {
@@ -134,14 +180,42 @@ public class PostQueryService {
                 StoreQueryParameters.fromNameAndType("posts-store", QueryableStoreTypes.keyValueStore()));
     }
 
-    private PostProjection parseProjection(String json) {
-        try {
-            return jsonMapper.readValue(json, PostProjection.class);
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to parse PostProjection from JSON", e);
-        }
+    /**
+     * Maps a database post to its read projection.
+     *
+     * @param entity the database post
+     * @return the post projection
+     */
+    private PostProjection fromEntity(PostEntity entity) {
+        return new PostProjection(
+                entity.getPostRefId(),
+                entity.getTitle(),
+                entity.getContent(),
+                entity.getAuthorEntity().getEmail(),
+                entity.isPublished(),
+                entity.getPublishedAt(),
+                entity.getCreatedAt(),
+                entity.getModifiedAt(),
+                entity.getDetails() == null
+                        ? null
+                        : new PostDetailsResponse(
+                                entity.getDetails().getDetailsKey(),
+                                entity.getDetails().getCreatedAt(),
+                                entity.getDetails().getCreatedBy()),
+                entity.getTags().stream()
+                        .map(postTag -> {
+                            TagEntity tag = postTag.getTagEntity();
+                            return new TagResponse(tag.getId(), tag.getTagName(), tag.getTagDescription());
+                        })
+                        .toList());
     }
 
+    /**
+     * Maps a Redis post to its read projection.
+     *
+     * @param postRedis the cached post
+     * @return the post projection
+     */
     private PostProjection fromRedis(PostRedis postRedis) {
         return new PostProjection(
                 postRedis.getId(),

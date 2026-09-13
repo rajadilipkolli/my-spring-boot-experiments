@@ -14,16 +14,19 @@ import com.example.highrps.postcomment.query.GetPostCommentQuery;
 import com.example.highrps.postcomment.query.PostCommentQueryService;
 import com.example.highrps.shared.AbstractCommandService;
 import com.example.highrps.shared.IdGenerator;
+import com.example.highrps.shared.ResourceConflictException;
 import com.example.highrps.shared.ResourceNotFoundException;
 import com.example.highrps.shared.config.AppProperties;
 import com.example.highrps.shared.redis.DeletionMarkerHandler;
 import com.github.benmanes.caffeine.cache.Cache;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
+import java.time.Duration;
 import java.time.ZoneOffset;
 import java.util.concurrent.CompletableFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
@@ -44,7 +47,22 @@ public class PostCommentCommandService extends AbstractCommandService {
     private final Counter tombstonesPublishedCounter;
     private final DeletionMarkerHandler deletionMarkerHandler;
     private final PostCommentRedisRepository postCommentRedisRepository;
+    private final RedisTemplate<String, String> redisTemplate;
 
+    /**
+     * Creates a comment command service with its event, cache, and persistence collaborators.
+     *
+     * @param postQueryService post read service
+     * @param postCommentQueryService comment read service
+     * @param kafkaTemplate publisher for comment events
+     * @param localCache local comment cache
+     * @param postCommentMapper comment mapper
+     * @param meterRegistry metrics registry
+     * @param deletionMarkerHandler handler for deleted aggregates
+     * @param postCommentRedisRepository Redis comment repository
+     * @param appProperties application configuration
+     * @param redisTemplate Redis operations used for reservations
+     */
     public PostCommentCommandService(
             PostQueryService postQueryService,
             PostCommentQueryService postCommentQueryService,
@@ -54,7 +72,8 @@ public class PostCommentCommandService extends AbstractCommandService {
             MeterRegistry meterRegistry,
             DeletionMarkerHandler deletionMarkerHandler,
             PostCommentRedisRepository postCommentRedisRepository,
-            AppProperties appProperties) {
+            AppProperties appProperties,
+            RedisTemplate<String, String> redisTemplate) {
         super(kafkaTemplate, appProperties.getKafka().getPublishTimeOutMs());
         this.postQueryService = postQueryService;
         this.postCommentQueryService = postCommentQueryService;
@@ -62,6 +81,7 @@ public class PostCommentCommandService extends AbstractCommandService {
         this.postCommentMapper = postCommentMapper;
         this.deletionMarkerHandler = deletionMarkerHandler;
         this.postCommentRedisRepository = postCommentRedisRepository;
+        this.redisTemplate = redisTemplate;
         this.eventsPublishedCounter = Counter.builder("post-comments.events.published")
                 .description("Number of post comment events published")
                 .register(meterRegistry);
@@ -71,12 +91,25 @@ public class PostCommentCommandService extends AbstractCommandService {
     }
 
     /**
-     * Create a new comment with event-driven pattern using application events.
+     * Creates a comment for an existing post and publishes its creation event.
+     *
+     * @param cmd the comment data and parent post ID
+     * @return a future completed with the created comment after the event is published
+     * @throws ResourceNotFoundException if the parent post cannot be found
+     * @throws ResourceConflictException if the post and comment title are already reserved
      */
     public CompletableFuture<PostCommentCommandResult> createComment(CreatePostCommentCommand cmd) {
         // Validate post exists
         if (!postQueryService.exists(cmd.postId())) {
             throw new ResourceNotFoundException("Post not found with id: " + cmd.postId());
+        }
+
+        String reservationKey = "reservation:postcomment:" + cmd.postId() + ":" + cmd.title();
+        Boolean acquired = redisTemplate.opsForValue().setIfAbsent(reservationKey, "1", Duration.ofMinutes(5));
+
+        if (Boolean.FALSE.equals(acquired)) {
+            throw new ResourceConflictException(
+                    "Comment already exists with title: " + cmd.title() + " for post: " + cmd.postId());
         }
 
         Long commentId = IdGenerator.generateLong();
@@ -95,17 +128,27 @@ public class PostCommentCommandService extends AbstractCommandService {
         PostCommentCommandResult result = postCommentMapper.toResultFromRequest(request);
 
         return executeCommand(
-                "post-comments-aggregates",
-                String.valueOf(commentId),
-                CacheKeyGenerator.generatePostCommentKey(cmd.postId(), commentId),
-                event,
-                result,
-                () -> {
-                    updateCaches(cmd.postId(), commentId, result);
-                    eventsPublishedCounter.increment();
-                },
-                "create post comment",
-                "PostComment");
+                        "post-comments-aggregates",
+                        String.valueOf(commentId),
+                        CacheKeyGenerator.generatePostCommentKey(cmd.postId(), commentId),
+                        event,
+                        result,
+                        () -> {
+                            updateCaches(cmd.postId(), commentId, result);
+                            eventsPublishedCounter.increment();
+                        },
+                        "create post comment",
+                        "PostComment")
+                .whenComplete((_, err) -> {
+                    if (err != null && !isPendingPublishFailure(err)) {
+                        try {
+                            redisTemplate.delete(reservationKey);
+                        } catch (Exception e) {
+                            log.warn(
+                                    "Failed to clean up reservation key after creation failure: {}", reservationKey, e);
+                        }
+                    }
+                });
     }
 
     /**
@@ -177,12 +220,19 @@ public class PostCommentCommandService extends AbstractCommandService {
                 "PostComment");
     }
 
+    /**
+     * Updates local and Redis read caches after a comment mutation.
+     *
+     * @param postId the parent post identifier
+     * @param commentId the comment identifier
+     * @param result the current comment state
+     */
     private void updateCaches(Long postId, Long commentId, PostCommentCommandResult result) {
         String cacheKey = CacheKeyGenerator.generatePostCommentKey(postId, commentId);
 
         // Update local cache
         try {
-            String json = postCommentMapper.toJson(result);
+            String json = result.toJson();
             localCache.put(cacheKey, json);
         } catch (Exception e) {
             log.warn("Failed to update local cache for comment: {}", commentId, e);

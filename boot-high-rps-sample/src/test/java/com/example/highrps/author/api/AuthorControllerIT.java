@@ -24,6 +24,9 @@ class AuthorControllerIT extends AbstractIntegrationTest {
         super.clearDatabase();
     }
 
+    /**
+     * Verifies the complete author API lifecycle and its read models.
+     */
     @Test
     void crudAuthorResourcesAPICheck() {
         String email = "junitState-" + UUID.randomUUID() + "@email.com";
@@ -32,7 +35,7 @@ class AuthorControllerIT extends AbstractIntegrationTest {
         // 1) Create an author via API
         mockMvcTester
                 .post()
-                .header("Idempotency-Key", java.util.UUID.randomUUID().toString())
+                .header("Idempotency-Key", UUID.randomUUID().toString())
                 .uri("/api/author")
                 .content("""
           {
@@ -93,7 +96,7 @@ class AuthorControllerIT extends AbstractIntegrationTest {
         // 2) Update the author via the new PUT endpoint to change content
         mockMvcTester
                 .put()
-                .header("Idempotency-Key", java.util.UUID.randomUUID().toString())
+                .header("Idempotency-Key", UUID.randomUUID().toString())
                 .uri("/api/author/" + email)
                 .content("""
                         {
@@ -151,7 +154,7 @@ class AuthorControllerIT extends AbstractIntegrationTest {
         // 3) Delete the author via API
         mockMvcTester
                 .delete()
-                .header("Idempotency-Key", java.util.UUID.randomUUID().toString())
+                .header("Idempotency-Key", UUID.randomUUID().toString())
                 .uri("/api/author/" + email)
                 .exchange()
                 .assertThat()
@@ -201,6 +204,9 @@ class AuthorControllerIT extends AbstractIntegrationTest {
          */
     }
 
+    /**
+     * Verifies author reads fall back to Kafka Streams after cache misses.
+     */
     @Test
     void shouldFallbackToKafkaStreamsWhenCachesAreMissed() {
         String email = "streams-fallback-" + UUID.randomUUID() + "@email.com";
@@ -209,7 +215,7 @@ class AuthorControllerIT extends AbstractIntegrationTest {
         // 1) Create an author
         mockMvcTester
                 .post()
-                .header("Idempotency-Key", java.util.UUID.randomUUID().toString())
+                .header("Idempotency-Key", UUID.randomUUID().toString())
                 .uri("/api/author")
                 .content("""
                         {

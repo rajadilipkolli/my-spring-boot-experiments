@@ -9,6 +9,7 @@ import com.example.highrps.author.query.AuthorProjection;
 import com.example.highrps.author.query.AuthorQuery;
 import com.example.highrps.author.query.AuthorQueryService;
 import com.example.highrps.shared.AbstractCommandService;
+import com.example.highrps.shared.ResourceConflictException;
 import com.example.highrps.shared.ResourceNotFoundException;
 import com.example.highrps.shared.config.AppProperties;
 import com.example.highrps.shared.redis.DeletionMarkerHandler;
@@ -39,6 +40,18 @@ public class AuthorCommandService extends AbstractCommandService {
     private final RedisTemplate<String, String> redisTemplate;
     private final AuthorRedisRepository authorRedisRepository;
 
+    /**
+     * Creates an author command service with its event, cache, and persistence collaborators.
+     *
+     * @param kafkaTemplate publisher for author events
+     * @param localCache local author cache
+     * @param jsonMapper serializer for cached values
+     * @param deletionMarkerHandler handler for deleted aggregates
+     * @param authorQueryService author read service
+     * @param redisTemplate Redis operations used for reservations
+     * @param authorRedisRepository Redis author repository
+     * @param appProperties application configuration
+     */
     public AuthorCommandService(
             KafkaTemplate<String, Object> kafkaTemplate,
             Cache<String, String> localCache,
@@ -57,6 +70,13 @@ public class AuthorCommandService extends AbstractCommandService {
         this.authorRedisRepository = authorRedisRepository;
     }
 
+    /**
+     * Creates an author and publishes its creation event, using a lowercase email as the aggregate key.
+     *
+     * @param cmd the author data to create
+     * @return a future completed with the created author after the event is published
+     * @throws ResourceConflictException if the email is already reserved or is detected in the read model
+     */
     public CompletableFuture<AuthorCommandResult> createAuthor(CreateAuthorCommand cmd) {
         String aggregateKey = cmd.email().toLowerCase(Locale.ROOT);
 
@@ -65,7 +85,7 @@ public class AuthorCommandService extends AbstractCommandService {
         Boolean acquired = redisTemplate.opsForValue().setIfAbsent(reservationKey, "1", Duration.ofMinutes(5));
 
         if (Boolean.FALSE.equals(acquired)) {
-            throw new IllegalArgumentException("Author already exists with email: " + cmd.email());
+            throw new ResourceConflictException("Author already exists with email: " + cmd.email());
         }
 
         // Validate author doesn't already exist in the read model as a fallback
@@ -79,7 +99,7 @@ public class AuthorCommandService extends AbstractCommandService {
         }
 
         if (exists) {
-            throw new IllegalArgumentException("Author already exists with email: " + cmd.email());
+            throw new ResourceConflictException("Author already exists with email: " + cmd.email());
         }
 
         // Publish domain event directly to Kafka

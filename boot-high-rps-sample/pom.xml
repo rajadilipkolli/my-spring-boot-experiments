@@ -21,6 +21,8 @@
         <mapstruct.version>1.6.3</mapstruct.version>
         <datasource-micrometer-boot.version>2.3.0</datasource-micrometer-boot.version>
         <spring-modulith.version>2.1.1</spring-modulith.version>
+        <gatling.version>3.15.1</gatling.version>
+        <gatling-maven-plugin.version>4.21.12</gatling-maven-plugin.version>
 
         <project.testresult.directory>${project.build.directory}/test-results</project.testresult.directory>
         <spotless.version>3.10.2</spotless.version>
@@ -208,6 +210,12 @@
         <dependency>
             <groupId>org.springframework.modulith</groupId>
             <artifactId>spring-modulith-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.gatling.highcharts</groupId>
+            <artifactId>gatling-charts-highcharts</artifactId>
+            <version>${gatling.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -450,6 +458,11 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>io.gatling</groupId>
+                <artifactId>gatling-maven-plugin</artifactId>
+                <version>${gatling-maven-plugin.version}</version>
             </plugin>
         </plugins>
     </build>

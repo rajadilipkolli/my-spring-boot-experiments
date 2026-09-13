@@ -53,6 +53,11 @@ public class ApiLoadBenchmark {
         }
     }
 
+    /**
+     * Benchmarks concurrent post creation requests.
+     *
+     * @throws Exception when the HTTP request fails
+     */
     @Benchmark
     @Group("mix")
     @GroupThreads(50)
@@ -74,14 +79,10 @@ public class ApiLoadBenchmark {
             return;
         }
 
-        try {
-            JsonNode node = jsonMapper.readTree(response.body());
-            if (node.has("postId")) {
-                createdPostIds.put(
-                        postIdsCounter.getAndIncrement(), node.get("postId").asLong());
-            }
-        } catch (Exception e) {
-            // ignore parse errors
+        JsonNode node = jsonMapper.readTree(response.body());
+        if (node.has("postId")) {
+            createdPostIds.put(
+                    postIdsCounter.getAndIncrement(), node.get("postId").asLong());
         }
     }
 

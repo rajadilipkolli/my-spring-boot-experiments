@@ -8,6 +8,7 @@ import com.example.highrps.post.domain.events.PostCreatedEvent;
 import com.example.highrps.post.domain.events.PostDeletedEvent;
 import com.example.highrps.post.domain.events.PostUpdatedEvent;
 import com.example.highrps.shared.AbstractCommandService;
+import com.example.highrps.shared.ResourceConflictException;
 import com.example.highrps.shared.config.AppProperties;
 import com.example.highrps.shared.redis.DeletionMarkerHandler;
 import com.github.benmanes.caffeine.cache.Cache;
@@ -38,6 +39,18 @@ public class PostCommandService extends AbstractCommandService {
     private final com.example.highrps.post.query.PostQueryService postQueryService;
     private final org.springframework.data.redis.core.RedisTemplate<String, String> redisTemplate;
 
+    /**
+     * Creates a post command service with its event, cache, and persistence collaborators.
+     *
+     * @param kafkaTemplate publisher for post events
+     * @param localCache local post cache
+     * @param postRedisRepository Redis post repository
+     * @param jsonMapper serializer for cached values
+     * @param deletionMarkerHandler handler for deleted aggregates
+     * @param postQueryService post read service
+     * @param redisTemplate Redis operations used for reservations
+     * @param appProperties application configuration
+     */
     public PostCommandService(
             KafkaTemplate<String, Object> kafkaTemplate,
             Cache<String, String> localCache,
@@ -56,6 +69,13 @@ public class PostCommandService extends AbstractCommandService {
         this.redisTemplate = redisTemplate;
     }
 
+    /**
+     * Creates a post and publishes its creation event.
+     *
+     * @param cmd the post data to create
+     * @return a future completed with the created post after the event is published
+     * @throws ResourceConflictException if the post ID is already reserved or is detected by the query service
+     */
     public CompletableFuture<PostCommandResult> createPost(CreatePostCommand cmd) {
         log.info("Creating post with id: {}", cmd.postId());
 
@@ -63,7 +83,7 @@ public class PostCommandService extends AbstractCommandService {
         Boolean acquired = redisTemplate.opsForValue().setIfAbsent(reservationKey, "1", Duration.ofMinutes(5));
 
         if (Boolean.FALSE.equals(acquired)) {
-            throw new IllegalArgumentException("Post already exists with id: " + cmd.postId());
+            throw new ResourceConflictException("Post already exists with id: " + cmd.postId());
         }
 
         boolean exists = false;
@@ -74,7 +94,7 @@ public class PostCommandService extends AbstractCommandService {
         }
 
         if (exists) {
-            throw new IllegalArgumentException("Post already exists with id: " + cmd.postId());
+            throw new ResourceConflictException("Post already exists with id: " + cmd.postId());
         }
 
         // Generate timestamps

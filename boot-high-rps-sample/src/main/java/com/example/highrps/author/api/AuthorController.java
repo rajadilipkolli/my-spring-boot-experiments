@@ -14,6 +14,7 @@ import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -32,13 +33,25 @@ public class AuthorController {
         this.authorQueryService = authorQueryService;
     }
 
+    /**
+     * Retrieves an author by email address.
+     *
+     * @param email the author's email address
+     * @return the matching author
+     */
     @GetMapping("/{email}")
     public ResponseEntity<AuthorProjection> getAuthorByEmail(@PathVariable String email) {
         AuthorProjection resp = authorQueryService.getAuthor(new AuthorQuery(email.toLowerCase(Locale.ROOT)));
         return ResponseEntity.ok(resp);
     }
 
-    @PostMapping
+    /**
+     * Creates an author from the supplied request.
+     *
+     * @param newAuthorRequest the author details
+     * @return a future containing the created author response
+     */
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public CompletableFuture<ResponseEntity<AuthorCommandResult>> createAuthor(
             @RequestBody @Valid AuthorRequest newAuthorRequest) {
         CreateAuthorCommand cmd = new CreateAuthorCommand(
@@ -58,7 +71,17 @@ public class AuthorController {
         });
     }
 
-    @PutMapping("/{email}")
+    /**
+     * Updates the author identified by email.
+     *
+     * @param email the author's current email address
+     * @param newAuthorRequest the replacement author details
+     * @return a future containing the updated author response
+     */
+    @PutMapping(
+            value = "/{email}",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
     public CompletableFuture<ResponseEntity<AuthorCommandResult>> updateAuthor(
             @PathVariable String email, @RequestBody @Valid AuthorRequest newAuthorRequest) {
         String normalizedEmail = email.toLowerCase(Locale.ROOT);

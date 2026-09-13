@@ -1,6 +1,7 @@
 package com.example.highrps.shared;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.CONFLICT;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE;
@@ -56,6 +57,12 @@ class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return problemDetail;
     }
 
+    /**
+     * Converts a Kafka publishing failure into an HTTP 503 problem response.
+     *
+     * @param e the publishing failure
+     * @return problem details containing the failure message
+     */
     @ExceptionHandler(KafkaPublishException.class)
     public ProblemDetail handle(KafkaPublishException e) {
         log.error("Kafka publish error", e);
@@ -65,6 +72,12 @@ class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return problemDetail;
     }
 
+    /**
+     * Unwraps an asynchronous request failure and delegates recognized causes to their direct exception handlers.
+     *
+     * @param e the asynchronous wrapper exception
+     * @return problem details for the wrapped failure
+     */
     @ExceptionHandler({CompletionException.class, ExecutionException.class})
     public ProblemDetail handleCompletionException(Exception e) {
         Throwable cause = e.getCause();
@@ -77,6 +90,9 @@ class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         if (cause instanceof IllegalArgumentException iae) {
             return handle(iae);
         }
+        if (cause instanceof ResourceConflictException rce) {
+            return handle(rce);
+        }
         if (cause instanceof ResourceNotFoundException rnfe) {
             return handle(rnfe);
         }
@@ -86,6 +102,12 @@ class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return handleUnexpected(e);
     }
 
+    /**
+     * Converts an invalid argument into an HTTP 400 problem response.
+     *
+     * @param e the invalid argument failure
+     * @return problem details containing the failure message
+     */
     @ExceptionHandler(IllegalArgumentException.class)
     public ProblemDetail handle(IllegalArgumentException e) {
         log.info("Illegal argument", e);
@@ -95,6 +117,27 @@ class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return problemDetail;
     }
 
+    /**
+     * Converts a resource conflict into an HTTP 409 problem response.
+     *
+     * @param e the conflict to report
+     * @return problem details containing the conflict message
+     */
+    @ExceptionHandler(ResourceConflictException.class)
+    public ProblemDetail handle(ResourceConflictException e) {
+        log.info("Resource conflict", e);
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(CONFLICT, e.getMessage());
+        problemDetail.setTitle("Conflict");
+        problemDetail.setProperty("errors", List.of(e.getMessage()));
+        return problemDetail;
+    }
+
+    /**
+     * Converts a missing resource into an HTTP 404 problem response.
+     *
+     * @param e the missing-resource failure
+     * @return problem details containing the failure message
+     */
     @ExceptionHandler(ResourceNotFoundException.class)
     public ProblemDetail handle(ResourceNotFoundException e) {
         log.debug("Resource not found: {}", e.getMessage());

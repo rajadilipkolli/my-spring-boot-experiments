@@ -15,6 +15,7 @@ import com.example.highrps.shared.IdGenerator;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StoreQueryParameters;
 import org.apache.kafka.streams.errors.InvalidStateStoreException;
@@ -67,12 +68,15 @@ class PostCommentControllerIT extends AbstractIntegrationTest {
         postId = postEntity.getPostRefId();
     }
 
+    /**
+     * Verifies a post comment can be created.
+     */
     @Test
     void shouldCreatePostComment() {
         long count = postCommentRepository.count();
         var result = mockMvcTester
                 .post()
-                .header("Idempotency-Key", java.util.UUID.randomUUID().toString())
+                .header("Idempotency-Key", UUID.randomUUID().toString())
                 .uri("/api/posts/{postId}/comments", postId)
                 .content("""
                                                 {
@@ -122,13 +126,16 @@ class PostCommentControllerIT extends AbstractIntegrationTest {
                 });
     }
 
+    /**
+     * Verifies a post comment can be retrieved by identifier.
+     */
     @Test
     void shouldGetPostCommentById() {
         // Create a comment first
         Long[] commentIdHolder = new Long[1];
         mockMvcTester
                 .post()
-                .header("Idempotency-Key", java.util.UUID.randomUUID().toString())
+                .header("Idempotency-Key", UUID.randomUUID().toString())
                 .uri("/api/posts/{postId}/comments", postId)
                 .content("""
                                                                 {
@@ -178,12 +185,15 @@ class PostCommentControllerIT extends AbstractIntegrationTest {
                 });
     }
 
+    /**
+     * Verifies all comments for a post can be listed.
+     */
     @Test
     void shouldGetAllCommentsForPost() {
         // Create multiple comments
         mockMvcTester
                 .post()
-                .header("Idempotency-Key", java.util.UUID.randomUUID().toString())
+                .header("Idempotency-Key", UUID.randomUUID().toString())
                 .uri("/api/posts/{postId}/comments", postId)
                 .content("""
                                                 {
@@ -199,7 +209,7 @@ class PostCommentControllerIT extends AbstractIntegrationTest {
 
         mockMvcTester
                 .post()
-                .header("Idempotency-Key", java.util.UUID.randomUUID().toString())
+                .header("Idempotency-Key", UUID.randomUUID().toString())
                 .uri("/api/posts/{postId}/comments", postId)
                 .content("""
                                                 {
@@ -229,13 +239,16 @@ class PostCommentControllerIT extends AbstractIntegrationTest {
                         .hasSize(2));
     }
 
+    /**
+     * Verifies a post comment can be updated.
+     */
     @Test
     void shouldUpdatePostComment() {
         // Create a comment
         Long[] commentIdHolder = new Long[1];
         mockMvcTester
                 .post()
-                .header("Idempotency-Key", java.util.UUID.randomUUID().toString())
+                .header("Idempotency-Key", UUID.randomUUID().toString())
                 .uri("/api/posts/{postId}/comments", postId)
                 .content("""
                                                                 {
@@ -257,7 +270,7 @@ class PostCommentControllerIT extends AbstractIntegrationTest {
         // Update the comment
         mockMvcTester
                 .put()
-                .header("Idempotency-Key", java.util.UUID.randomUUID().toString())
+                .header("Idempotency-Key", UUID.randomUUID().toString())
                 .uri("/api/posts/{postId}/comments/{postCommentId}", postId, commentId)
                 .content("""
                                                 {
@@ -299,13 +312,16 @@ class PostCommentControllerIT extends AbstractIntegrationTest {
                 });
     }
 
+    /**
+     * Verifies a post comment can be deleted.
+     */
     @Test
     void shouldDeletePostComment() {
         // Create a comment
         Long[] commentIdHolder = new Long[1];
         mockMvcTester
                 .post()
-                .header("Idempotency-Key", java.util.UUID.randomUUID().toString())
+                .header("Idempotency-Key", UUID.randomUUID().toString())
                 .uri("/api/posts/{postId}/comments", postId)
                 .content("""
                                                                 {
@@ -327,7 +343,7 @@ class PostCommentControllerIT extends AbstractIntegrationTest {
         // Delete the comment
         mockMvcTester
                 .delete()
-                .header("Idempotency-Key", java.util.UUID.randomUUID().toString())
+                .header("Idempotency-Key", UUID.randomUUID().toString())
                 .uri("/api/posts/{postId}/comments/{postCommentId}", postId, commentId)
                 .exchange()
                 .assertThat()
@@ -350,6 +366,51 @@ class PostCommentControllerIT extends AbstractIntegrationTest {
                 });
     }
 
+    /**
+     * Verifies duplicate comment titles on one post produce a conflict response.
+     */
+    @Test
+    void shouldRejectDuplicateCommentTitleForSamePost() {
+        String title = "Unique Title For Duplicate Test " + UUID.randomUUID();
+
+        // First comment should succeed
+        mockMvcTester
+                .post()
+                .header("Idempotency-Key", UUID.randomUUID().toString())
+                .uri("/api/posts/{postId}/comments", postId)
+                .content("""
+                        {
+                          "title": "%s",
+                          "content": "First comment content",
+                          "published": true
+                        }
+                        """.formatted(title))
+                .contentType(MediaType.APPLICATION_JSON)
+                .exchange()
+                .assertThat()
+                .hasStatus(HttpStatus.CREATED);
+
+        // Second comment with the same title and same postId should fail with 400 Bad Request
+        mockMvcTester
+                .post()
+                .header("Idempotency-Key", UUID.randomUUID().toString())
+                .uri("/api/posts/{postId}/comments", postId)
+                .content("""
+                        {
+                          "title": "%s",
+                          "content": "Second comment content",
+                          "published": true
+                        }
+                        """.formatted(title))
+                .contentType(MediaType.APPLICATION_JSON)
+                .exchange()
+                .assertThat()
+                .hasStatus(HttpStatus.CONFLICT);
+    }
+
+    /**
+     * Verifies an unknown comment identifier produces a not-found response.
+     */
     @Test
     void shouldReturn404WhenCommentNotFound() {
         mockMvcTester
@@ -361,13 +422,16 @@ class PostCommentControllerIT extends AbstractIntegrationTest {
                 .hasContentType(MediaType.APPLICATION_PROBLEM_JSON);
     }
 
+    /**
+     * Verifies a comment cannot be read through a different parent post.
+     */
     @Test
     void shouldReturn404WhenCommentDoesNotBelongToPost() {
         // Create a comment for this post
         Long[] commentIdHolder = new Long[1];
         mockMvcTester
                 .post()
-                .header("Idempotency-Key", java.util.UUID.randomUUID().toString())
+                .header("Idempotency-Key", UUID.randomUUID().toString())
                 .uri("/api/posts/{postId}/comments", postId)
                 .content("""
                                                                 {
@@ -395,13 +459,16 @@ class PostCommentControllerIT extends AbstractIntegrationTest {
                 .hasStatus(HttpStatus.NOT_FOUND);
     }
 
+    /**
+     * Verifies comment reads fall back to Kafka Streams after cache misses.
+     */
     @Test
     void shouldFallbackToKafkaStreamsWhenCachesAreMissed() {
         // 1) Create a comment
         Long[] commentIdHolder = new Long[1];
         mockMvcTester
                 .post()
-                .header("Idempotency-Key", java.util.UUID.randomUUID().toString())
+                .header("Idempotency-Key", UUID.randomUUID().toString())
                 .uri("/api/posts/{postId}/comments", postId)
                 .content("""
                         {

@@ -116,15 +116,29 @@ public class PostCommentAggregatesToRedisListener extends AbstractAggregatesToRe
         // We do not have postId here, so we cannot form the CacheKey. We rely on processDeletionEvent.
     }
 
+    /**
+     * Builds the cache key for a comment payload.
+     *
+     * @param payload the comment payload
+     * @param key the event key
+     * @return the post-scoped comment cache key
+     */
     @Override
     protected String getCacheKey(PostCommentRequest payload, String key) {
         return CacheKeyGenerator.generatePostCommentKey(payload.postId(), payload.commentId());
     }
 
+    /**
+     * Converts a comment payload into the enriched JSON queued for projection.
+     *
+     * @param node the source event node
+     * @param payload the deserialized comment payload
+     * @return JSON containing the projection entity marker
+     */
     @Override
-    protected String prepareEnqueuePayload(JsonNode node, PostCommentRequest payload) throws Exception {
+    protected String prepareEnqueuePayload(JsonNode node, PostCommentRequest payload) {
         PostCommentCommandResult result = mapper.toResultFromRequest(payload);
-        String jsonToEnqueue = mapper.toJson(result);
+        String jsonToEnqueue = result.toJson();
         if (jsonToEnqueue.startsWith("{")) {
             jsonToEnqueue = "{\"__entity\":\"post-comment\"," + jsonToEnqueue.substring(1);
         }

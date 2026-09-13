@@ -1,0 +1,222 @@
+name: boot-high-rps-sample-perf
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "boot-high-rps-sample/**"
+  schedule:
+    - cron: '0 2 * * *' # Every day at 2 AM
+  workflow_dispatch:
+    inputs:
+      profile:
+        description: 'Load Profile (normal, high, stress)'
+        required: true
+        default: 'normal'
+      durationMinutes:
+        description: 'Duration (minutes)'
+        required: false
+        default: '15'
+      targetRps:
+        description: 'Target RPS (if overriding profile default)'
+        required: false
+
+jobs:
+  performance-comparison:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: boot-high-rps-sample
+
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up JDK
+        uses: actions/setup-java@v6
+        with:
+          java-version: 25
+          distribution: "temurin"
+          cache: "maven"
+
+      - name: Setup Profile Inputs
+        id: config
+        env:
+          PROFILE_INPUT: ${{ github.event.inputs.profile || 'normal' }}
+          DURATION_INPUT: ${{ github.event.inputs.durationMinutes || '15' }}
+          TARGET_RPS_INPUT: ${{ github.event.inputs.targetRps }}
+        run: |
+          case "$PROFILE_INPUT" in
+            normal|high|stress) ;;
+            *) echo "::error::profile must be one of: normal, high, stress"; exit 1 ;;
+          esac
+
+          if [[ ! "$DURATION_INPUT" =~ ^[1-9][0-9]*$ ]]; then
+            echo "::error::durationMinutes must be a positive integer"
+            exit 1
+          fi
+
+          if [[ -n "$TARGET_RPS_INPUT" && ! "$TARGET_RPS_INPUT" =~ ^([1-9][0-9]*([.][0-9]+)?|0[.][0-9]*[1-9][0-9]*)$ ]]; then
+            echo "::error::targetRps must be a positive number"
+            exit 1
+          fi
+          printf 'PROFILE=%s\n' "$PROFILE_INPUT" >> "$GITHUB_ENV"
+          printf 'DURATION=%s\n' "$DURATION_INPUT" >> "$GITHUB_ENV"
+          printf 'TARGET_RPS=%s\n' "$TARGET_RPS_INPUT" >> "$GITHUB_ENV"
+          printf 'CURRENT_HEAD=%s\n' "$(git rev-parse HEAD)" >> "$GITHUB_ENV"
+
+      - name: Run Baseline (HEAD~1)
+        run: |
+          APP_PID=""
+          cleanup() {
+            if [[ -n "$APP_PID" ]] && kill -0 "$APP_PID" 2>/dev/null; then
+              kill "$APP_PID"
+            fi
+            docker compose -f docker/docker-compose.yml down -v || true
+            docker compose -f docker/docker-compose-monitoring.yml down -v || true
+          }
+          trap cleanup EXIT
+
+          # Run the baseline application with the current revision's load-test harness.
+          git checkout "$CURRENT_HEAD~1"
+          git checkout "$CURRENT_HEAD" -- pom.xml src/test/java/com/example/highrps/gatling src/test/resources/load-test.properties
+          
+          # Start Infra and Monitoring
+          docker compose -f docker/docker-compose.yml up -d
+          docker compose -f docker/docker-compose-monitoring.yml up -d
+          
+          # Build & Start App
+          ./mvnw -DskipTests clean package
+          java -jar target/boot-high-rps-sample-0.1.0-SNAPSHOT.jar --spring.profiles.active=local \
+            > "$RUNNER_TEMP/baseline-app.log" 2>&1 &
+          APP_PID=$!
+          
+          echo "Waiting for /actuator/health to report UP..."
+          deadline=$((SECONDS + 120))
+          until curl --fail --silent --show-error --max-time 5 http://localhost:8080/actuator/health \
+            | grep -q '"status":"UP"'; do
+            if (( SECONDS >= deadline )); then
+              echo "::error::Baseline application did not become healthy within 120 seconds"
+              ps -p "$APP_PID" -f || true
+              tail -n 200 "$RUNNER_TEMP/baseline-app.log" || true
+              docker compose -f docker/docker-compose.yml ps || true
+              docker compose -f docker/docker-compose.yml logs --no-color --tail=100 || true
+              exit 1
+            fi
+            sleep 2
+          done
+
+          # Generate Data
+          ./mvnw exec:java -Dexec.mainClass="com.example.highrps.gatling.setup.DataGenerator" \
+            -Dexec.classpathScope=test -DdataDir=target/loadtest-data -DdataSeed=2674
+          
+          # Run Gatling
+          MAVEN_ARGS=(-Dprofile="$PROFILE" -DdurationMinutes="$DURATION")
+          if [[ -n "$TARGET_RPS" ]]; then
+            MAVEN_ARGS+=(-DtargetRps="$TARGET_RPS")
+          fi
+          set +e
+          ./mvnw gatling:test "${MAVEN_ARGS[@]}"
+          GATLING_STATUS=$?
+          set -e
+          
+          # Save Stats
+          if [[ -d target/gatling ]]; then
+            STATS_FILE=$(find target/gatling -name "stats.json" -print -quit)
+            if [[ -n "$STATS_FILE" ]]; then
+              cp "$STATS_FILE" ../baseline-stats.json
+            fi
+            mv target/gatling ../baseline-report
+          fi
+
+          exit "$GATLING_STATUS"
+          
+      - name: Run High RPS (HEAD)
+        if: ${{ always() && env.CURRENT_HEAD != '' }}
+        run: |
+          APP_PID=""
+          cleanup() {
+            if [[ -n "$APP_PID" ]] && kill -0 "$APP_PID" 2>/dev/null; then
+              kill "$APP_PID"
+            fi
+            docker compose -f docker/docker-compose.yml down -v || true
+            docker compose -f docker/docker-compose-monitoring.yml down -v || true
+          }
+          trap cleanup EXIT
+
+          # Checkout HEAD
+          git checkout "$CURRENT_HEAD"
+          
+          # Start Infra and Monitoring
+          docker compose -f docker/docker-compose.yml up -d
+          docker compose -f docker/docker-compose-monitoring.yml up -d
+          
+          # Build & Start App
+          ./mvnw -DskipTests clean package
+          java -jar target/boot-high-rps-sample-0.1.0-SNAPSHOT.jar --spring.profiles.active=local \
+            > "$RUNNER_TEMP/head-app.log" 2>&1 &
+          APP_PID=$!
+
+          echo "Waiting for /actuator/health to report UP..."
+          deadline=$((SECONDS + 120))
+          until curl --fail --silent --show-error --max-time 5 http://localhost:8080/actuator/health \
+            | grep -q '"status":"UP"'; do
+            if (( SECONDS >= deadline )); then
+              echo "::error::HEAD application did not become healthy within 120 seconds"
+              ps -p "$APP_PID" -f || true
+              tail -n 200 "$RUNNER_TEMP/head-app.log" || true
+              docker compose -f docker/docker-compose.yml ps || true
+              docker compose -f docker/docker-compose.yml logs --no-color --tail=100 || true
+              exit 1
+            fi
+            sleep 2
+          done
+          
+          # Generate Data
+          ./mvnw exec:java -Dexec.mainClass="com.example.highrps.gatling.setup.DataGenerator" \
+            -Dexec.classpathScope=test -DdataDir=target/loadtest-data -DdataSeed=2674
+          
+          # Run Gatling
+          MAVEN_ARGS=(-Dprofile="$PROFILE" -DdurationMinutes="$DURATION")
+          if [[ -n "$TARGET_RPS" ]]; then
+            MAVEN_ARGS+=(-DtargetRps="$TARGET_RPS")
+          fi
+          set +e
+          ./mvnw gatling:test "${MAVEN_ARGS[@]}"
+          GATLING_STATUS=$?
+          set -e
+          
+          # Save Stats
+          if [[ -d target/gatling ]]; then
+            STATS_FILE=$(find target/gatling -name "stats.json" -print -quit)
+            if [[ -n "$STATS_FILE" ]]; then
+              cp "$STATS_FILE" ../head-stats.json
+            fi
+            mv target/gatling ../head-report
+          fi
+
+          exit "$GATLING_STATUS"
+          
+      - name: Compare Results
+        if: ${{ always() }}
+        run: |
+          pwsh scripts/compare-results.ps1 -BaselineStats ../baseline-stats.json -HighRpsStats ../head-stats.json > comparison.md
+          cat comparison.md >> $GITHUB_STEP_SUMMARY
+          
+      - name: Upload Baseline Report
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v5
+        with:
+          name: gatling-baseline-report
+          path: baseline-report/
+          retention-days: 14
+
+      - name: Upload HEAD Report
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v5
+        with:
+          name: gatling-head-report
+          path: head-report/
+          retention-days: 14

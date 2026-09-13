@@ -13,6 +13,7 @@ import com.example.highrps.post.query.PostProjection;
 import com.example.highrps.shared.IdGenerator;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StoreQueryParameters;
@@ -34,11 +35,14 @@ class PostControllerIT extends AbstractIntegrationTest {
         super.clearDatabase();
     }
 
+    /**
+     * Verifies that the post creation endpoint persists a post.
+     */
     @Test
     void createPost() {
         var result = mockMvcTester
                 .post()
-                .header("Idempotency-Key", java.util.UUID.randomUUID().toString())
+                .header("Idempotency-Key", UUID.randomUUID().toString())
                 .content("""
                         {
                           "title": "High RPS with Spring Boot",
@@ -83,6 +87,9 @@ class PostControllerIT extends AbstractIntegrationTest {
                 .hasContentType(MediaType.APPLICATION_PROBLEM_JSON);
     }
 
+    /**
+     * Verifies the complete post API lifecycle.
+     */
     @Test
     void crudPostResourcesAPICheck() {
         String title = "sample-post";
@@ -98,7 +105,7 @@ class PostControllerIT extends AbstractIntegrationTest {
         AtomicReference<Long> postId = new AtomicReference<>();
         mockMvcTester
                 .post()
-                .header("Idempotency-Key", java.util.UUID.randomUUID().toString())
+                .header("Idempotency-Key", UUID.randomUUID().toString())
                 .uri("/api/posts")
                 .content("""
           {
@@ -167,7 +174,7 @@ class PostControllerIT extends AbstractIntegrationTest {
         // 2) Update the post via the new PUT endpoint to change content
         mockMvcTester
                 .put()
-                .header("Idempotency-Key", java.util.UUID.randomUUID().toString())
+                .header("Idempotency-Key", UUID.randomUUID().toString())
                 .uri("/api/posts/" + postId.get())
                 .content("""
                         {
@@ -214,7 +221,7 @@ class PostControllerIT extends AbstractIntegrationTest {
         // 3) Delete the post
         mockMvcTester
                 .delete()
-                .header("Idempotency-Key", java.util.UUID.randomUUID().toString())
+                .header("Idempotency-Key", UUID.randomUUID().toString())
                 .uri("/api/posts/{postId}", postId.get())
                 .exchange()
                 .assertThat()
@@ -242,6 +249,9 @@ class PostControllerIT extends AbstractIntegrationTest {
         assertThat(localCache.getIfPresent(cacheKey)).isNull();
     }
 
+    /**
+     * Verifies post mutations are reflected in stream and cache state.
+     */
     @Test
     void crudPostResourcesWithStateCheck() {
         String title = "delete-me";
@@ -259,7 +269,7 @@ class PostControllerIT extends AbstractIntegrationTest {
         AtomicReference<Long> postId = new AtomicReference<>();
         mockMvcTester
                 .post()
-                .header("Idempotency-Key", java.util.UUID.randomUUID().toString())
+                .header("Idempotency-Key", UUID.randomUUID().toString())
                 .uri("/api/posts")
                 .content("""
           {
@@ -341,7 +351,7 @@ class PostControllerIT extends AbstractIntegrationTest {
         // 2) Update the post via the new PUT endpoint to change content
         mockMvcTester
                 .put()
-                .header("Idempotency-Key", java.util.UUID.randomUUID().toString())
+                .header("Idempotency-Key", UUID.randomUUID().toString())
                 .uri("/api/posts/{postId}", postId.get())
                 .content("""
                         {
@@ -394,7 +404,7 @@ class PostControllerIT extends AbstractIntegrationTest {
         // 3) Delete the post
         mockMvcTester
                 .delete()
-                .header("Idempotency-Key", java.util.UUID.randomUUID().toString())
+                .header("Idempotency-Key", UUID.randomUUID().toString())
                 .uri("/api/posts/{postId}", postId.get())
                 .exchange()
                 .assertThat()
@@ -427,6 +437,9 @@ class PostControllerIT extends AbstractIntegrationTest {
         assertThat(postRedisRepository.existsById(postId.get())).isFalse();
     }
 
+    /**
+     * Verifies post reads fall back to Kafka Streams after cache misses.
+     */
     @Test
     void shouldFallbackToKafkaStreamsWhenCachesAreMissed() {
         AuthorEntity entity = new AuthorEntity()
@@ -441,7 +454,7 @@ class PostControllerIT extends AbstractIntegrationTest {
         AtomicReference<Long> postId = new AtomicReference<>();
         mockMvcTester
                 .post()
-                .header("Idempotency-Key", java.util.UUID.randomUUID().toString())
+                .header("Idempotency-Key", UUID.randomUUID().toString())
                 .uri("/api/posts")
                 .content("""
                         {
@@ -544,6 +557,9 @@ class PostControllerIT extends AbstractIntegrationTest {
         assertThat(localCache.getIfPresent(cacheKey)).isNotNull();
     }
 
+    /**
+     * Verifies duplicate post identifiers produce a conflict response.
+     */
     @Test
     @DisplayName("Should reject duplicate post creation with same postId")
     void testShouldRejectDuplicatePost() {
@@ -552,7 +568,7 @@ class PostControllerIT extends AbstractIntegrationTest {
         // Create initial post
         mockMvcTester
                 .post()
-                .header("Idempotency-Key", java.util.UUID.randomUUID().toString())
+                .header("Idempotency-Key", UUID.randomUUID().toString())
                 .uri("/api/posts")
                 .content("""
                         {
@@ -575,7 +591,7 @@ class PostControllerIT extends AbstractIntegrationTest {
         // Attempt to create duplicate post
         mockMvcTester
                 .post()
-                .header("Idempotency-Key", java.util.UUID.randomUUID().toString())
+                .header("Idempotency-Key", UUID.randomUUID().toString())
                 .uri("/api/posts")
                 .content("""
                         {
@@ -593,7 +609,7 @@ class PostControllerIT extends AbstractIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .exchange()
                 .assertThat()
-                .hasStatus(HttpStatus.BAD_REQUEST)
+                .hasStatus(HttpStatus.CONFLICT)
                 .hasContentType(MediaType.APPLICATION_PROBLEM_JSON);
     }
 }

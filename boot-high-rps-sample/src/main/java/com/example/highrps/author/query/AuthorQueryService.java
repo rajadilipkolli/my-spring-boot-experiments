@@ -1,7 +1,9 @@
 package com.example.highrps.author.query;
 
+import com.example.highrps.author.domain.AuthorEntity;
 import com.example.highrps.author.domain.AuthorRedis;
 import com.example.highrps.author.domain.AuthorRedisRepository;
+import com.example.highrps.author.domain.AuthorRepository;
 import com.example.highrps.author.dto.AuthorRequest;
 import com.example.highrps.infrastructure.cache.RequestCoalescer;
 import com.example.highrps.shared.ResourceNotFoundException;
@@ -38,21 +40,41 @@ public class AuthorQueryService {
     private final DeletionMarkerHandler deletionMarkerHandler;
     private final RequestCoalescer<AuthorRequest> requestCoalescer;
     private final JsonMapper jsonMapper;
+    private final AuthorRepository authorRepository;
 
+    /**
+     * Creates an author query service backed by local, Redis, stream, and database views.
+     *
+     * @param localCache local author cache
+     * @param authorRedisRepository Redis author repository
+     * @param authorRepository database author repository
+     * @param kafkaStreamsFactory Kafka Streams lifecycle access
+     * @param jsonMapper serializer for cached values
+     * @param deletionMarkerHandler handler for deleted aggregates
+     */
     public AuthorQueryService(
             Cache<String, String> localCache,
             AuthorRedisRepository authorRedisRepository,
+            AuthorRepository authorRepository,
             StreamsBuilderFactoryBean kafkaStreamsFactory,
             JsonMapper jsonMapper,
             DeletionMarkerHandler deletionMarkerHandler) {
         this.localCache = localCache;
         this.authorRedisRepository = authorRedisRepository;
+        this.authorRepository = authorRepository;
         this.kafkaStreamsFactory = kafkaStreamsFactory;
         this.jsonMapper = jsonMapper;
         this.deletionMarkerHandler = deletionMarkerHandler;
         this.requestCoalescer = new RequestCoalescer<>();
     }
 
+    /**
+     * Resolves an author from the read caches, stream state, or database and warms faster cache layers when possible.
+     *
+     * @param query the email-based author query
+     * @return the matching author projection
+     * @throws ResourceNotFoundException if the author is marked as deleted or cannot be found
+     */
     public AuthorProjection getAuthor(AuthorQuery query) {
         String email = query.email();
         log.debug("Querying author with email: {}", email);
@@ -124,9 +146,35 @@ public class AuthorQueryService {
             return projection;
         }
 
-        throw new ResourceNotFoundException("Author not found for email: " + email);
+        // 5. Database fallback
+        AuthorEntity authorEntity = authorRepository.getByEmail(email);
+        log.debug("Hit DB for email: {}", email);
+        AuthorProjection projection = fromEntity(authorEntity);
+        // Warm both caches and return
+        try {
+            String json = jsonMapper.writeValueAsString(projection);
+            localCache.put(cacheKey, json);
+
+            authorRedisRepository.save(toRedis(new AuthorRequest(
+                    authorEntity.getFirstName(),
+                    authorEntity.getMiddleName(),
+                    authorEntity.getLastName(),
+                    authorEntity.getMobile(),
+                    authorEntity.getEmail(),
+                    authorEntity.getRegisteredAt(),
+                    authorEntity.getCreatedAt(),
+                    authorEntity.getModifiedAt())));
+        } catch (Exception _) {
+        }
+        return projection;
     }
 
+    /**
+     * Checks whether an author can be resolved by email.
+     *
+     * @param email the email to check
+     * @return {@code true} when the author exists
+     */
     public boolean exists(String email) {
         try {
             getAuthor(new AuthorQuery(email));
@@ -145,6 +193,12 @@ public class AuthorQueryService {
                 StoreQueryParameters.fromNameAndType("authors-store", QueryableStoreTypes.keyValueStore()));
     }
 
+    /**
+     * Deserializes a cached author projection.
+     *
+     * @param json the cached JSON value
+     * @return the deserialized projection
+     */
     private AuthorProjection parseProjection(String json) {
         try {
             return jsonMapper.readValue(json, AuthorProjection.class);
@@ -153,6 +207,30 @@ public class AuthorQueryService {
         }
     }
 
+    /**
+     * Maps a database author to its read projection.
+     *
+     * @param entity the database author
+     * @return the author projection
+     */
+    private AuthorProjection fromEntity(AuthorEntity entity) {
+        return new AuthorProjection(
+                entity.getEmail(),
+                entity.getFirstName(),
+                entity.getMiddleName(),
+                entity.getLastName(),
+                entity.getMobile(),
+                entity.getRegisteredAt(),
+                entity.getCreatedAt(),
+                entity.getModifiedAt());
+    }
+
+    /**
+     * Maps a Redis author to its read projection.
+     *
+     * @param authorRedis the cached author
+     * @return the author projection
+     */
     private AuthorProjection fromRedis(AuthorRedis authorRedis) {
         return new AuthorProjection(
                 authorRedis.getEmail(),
