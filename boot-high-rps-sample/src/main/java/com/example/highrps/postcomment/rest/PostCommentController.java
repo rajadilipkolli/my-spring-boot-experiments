@@ -12,6 +12,7 @@ import jakarta.validation.constraints.Positive;
 import java.net.URI;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -36,12 +37,12 @@ public class PostCommentController {
         this.queryService = queryService;
     }
 
-    @GetMapping
+    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<PostCommentCommandResult>> getAllComments(@PathVariable @Positive Long postId) {
         return ResponseEntity.ok(queryService.getCommentsByPostId(postId));
     }
 
-    @GetMapping("/{postCommentId}")
+    @GetMapping(value = "/{postCommentId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<PostCommentCommandResult> getComment(
             @PathVariable @Positive Long postId, @PathVariable @Positive Long postCommentId) {
         PostCommentCommandResult result =
@@ -49,7 +50,7 @@ public class PostCommentController {
         return ResponseEntity.ok(result);
     }
 
-    @PostMapping
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public CompletableFuture<ResponseEntity<PostCommentCommandResult>> createComment(
             @PathVariable @Positive Long postId, @RequestBody @Valid CreatePostCommentRequest request) {
         var uriBuilder = ServletUriComponentsBuilder.fromCurrentRequest();
@@ -65,7 +66,10 @@ public class PostCommentController {
                 });
     }
 
-    @PutMapping("/{postCommentId}")
+    @PutMapping(
+            value = "/{postCommentId}",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
     public CompletableFuture<ResponseEntity<PostCommentCommandResult>> updateComment(
             @PathVariable @Positive Long postId,
             @PathVariable @Positive Long postCommentId,

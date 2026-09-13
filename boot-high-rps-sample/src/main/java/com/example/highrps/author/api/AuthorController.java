@@ -14,6 +14,7 @@ import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -38,7 +39,7 @@ public class AuthorController {
         return ResponseEntity.ok(resp);
     }
 
-    @PostMapping
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public CompletableFuture<ResponseEntity<AuthorCommandResult>> createAuthor(
             @RequestBody @Valid AuthorRequest newAuthorRequest) {
         CreateAuthorCommand cmd = new CreateAuthorCommand(
@@ -58,7 +59,10 @@ public class AuthorController {
         });
     }
 
-    @PutMapping("/{email}")
+    @PutMapping(
+            value = "/{email}",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
     public CompletableFuture<ResponseEntity<AuthorCommandResult>> updateAuthor(
             @PathVariable String email, @RequestBody @Valid AuthorRequest newAuthorRequest) {
         String normalizedEmail = email.toLowerCase(Locale.ROOT);

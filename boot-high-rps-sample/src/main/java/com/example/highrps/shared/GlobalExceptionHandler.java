@@ -1,6 +1,7 @@
 package com.example.highrps.shared;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.CONFLICT;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE;
@@ -77,6 +78,9 @@ class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         if (cause instanceof IllegalArgumentException iae) {
             return handle(iae);
         }
+        if (cause instanceof ResourceConflictException rce) {
+            return handle(rce);
+        }
         if (cause instanceof ResourceNotFoundException rnfe) {
             return handle(rnfe);
         }
@@ -91,6 +95,15 @@ class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         log.info("Illegal argument", e);
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(BAD_REQUEST, e.getMessage());
         problemDetail.setTitle("Bad Request");
+        problemDetail.setProperty("errors", List.of(e.getMessage()));
+        return problemDetail;
+    }
+
+    @ExceptionHandler(ResourceConflictException.class)
+    public ProblemDetail handle(ResourceConflictException e) {
+        log.info("Resource conflict", e);
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(CONFLICT, e.getMessage());
+        problemDetail.setTitle("Conflict");
         problemDetail.setProperty("errors", List.of(e.getMessage()));
         return problemDetail;
     }

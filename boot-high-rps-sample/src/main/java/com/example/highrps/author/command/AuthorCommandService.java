@@ -9,6 +9,7 @@ import com.example.highrps.author.query.AuthorProjection;
 import com.example.highrps.author.query.AuthorQuery;
 import com.example.highrps.author.query.AuthorQueryService;
 import com.example.highrps.shared.AbstractCommandService;
+import com.example.highrps.shared.ResourceConflictException;
 import com.example.highrps.shared.ResourceNotFoundException;
 import com.example.highrps.shared.config.AppProperties;
 import com.example.highrps.shared.redis.DeletionMarkerHandler;
@@ -65,7 +66,7 @@ public class AuthorCommandService extends AbstractCommandService {
         Boolean acquired = redisTemplate.opsForValue().setIfAbsent(reservationKey, "1", Duration.ofMinutes(5));
 
         if (Boolean.FALSE.equals(acquired)) {
-            throw new IllegalArgumentException("Author already exists with email: " + cmd.email());
+            throw new ResourceConflictException("Author already exists with email: " + cmd.email());
         }
 
         // Validate author doesn't already exist in the read model as a fallback
@@ -79,7 +80,7 @@ public class AuthorCommandService extends AbstractCommandService {
         }
 
         if (exists) {
-            throw new IllegalArgumentException("Author already exists with email: " + cmd.email());
+            throw new ResourceConflictException("Author already exists with email: " + cmd.email());
         }
 
         // Publish domain event directly to Kafka

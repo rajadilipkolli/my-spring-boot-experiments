@@ -122,9 +122,9 @@ public class PostCommentAggregatesToRedisListener extends AbstractAggregatesToRe
     }
 
     @Override
-    protected String prepareEnqueuePayload(JsonNode node, PostCommentRequest payload) throws Exception {
+    protected String prepareEnqueuePayload(JsonNode node, PostCommentRequest payload) {
         PostCommentCommandResult result = mapper.toResultFromRequest(payload);
-        String jsonToEnqueue = mapper.toJson(result);
+        String jsonToEnqueue = result.toJson();
         if (jsonToEnqueue.startsWith("{")) {
             jsonToEnqueue = "{\"__entity\":\"post-comment\"," + jsonToEnqueue.substring(1);
         }

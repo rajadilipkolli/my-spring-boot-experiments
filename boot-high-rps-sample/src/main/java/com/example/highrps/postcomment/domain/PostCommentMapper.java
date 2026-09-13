@@ -8,15 +8,9 @@ import java.util.List;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
-import org.springframework.beans.factory.annotation.Autowired;
-import tools.jackson.core.JacksonException;
-import tools.jackson.databind.json.JsonMapper;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 public abstract class PostCommentMapper {
-
-    @Autowired
-    protected JsonMapper jsonMapper;
 
     @Mapping(target = "postId", source = "postEntity.postRefId")
     @Mapping(target = "id", source = "commentRefId")
@@ -38,10 +32,9 @@ public abstract class PostCommentMapper {
     @Mapping(source = "postId", target = "postId")
     public abstract PostCommentRedis toRedis(PostCommentRequest request);
 
-    @Mapping(source = "id", target = "commentId")
-    @Mapping(source = "postId", target = "postId")
-    @Mapping(target = "publishedAt", source = "publishedAt")
-    public abstract PostCommentRequest toRequestFromResult(PostCommentCommandResult result);
+    @Mapping(source = "commentRefId", target = "commentId")
+    @Mapping(source = "postEntity.postRefId", target = "postId")
+    public abstract PostCommentRedis toRedisFromEntity(PostCommentEntity comment);
 
     // Helper methods for type conversion
     protected LocalDateTime map(OffsetDateTime value) {
@@ -50,27 +43,5 @@ public abstract class PostCommentMapper {
 
     protected OffsetDateTime map(LocalDateTime value) {
         return value != null ? value.atZone(ZoneId.systemDefault()).toOffsetDateTime() : null;
-    }
-
-    /**
-     * Serialize PostCommentCommandResult to JSON string for local cache.
-     */
-    public String toJson(PostCommentCommandResult result) {
-        try {
-            return jsonMapper.writeValueAsString(result);
-        } catch (JacksonException e) {
-            throw new IllegalStateException("Failed to serialize PostCommentCommandResult to JSON", e);
-        }
-    }
-
-    /**
-     * Deserialize JSON string to PostCommentCommandResult from local cache.
-     */
-    public PostCommentCommandResult fromJson(String json) {
-        try {
-            return jsonMapper.readValue(json, PostCommentCommandResult.class);
-        } catch (JacksonException e) {
-            throw new IllegalStateException("Failed to deserialize PostCommentCommandResult from JSON", e);
-        }
     }
 }

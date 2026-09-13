@@ -32,7 +32,7 @@ class AuthorControllerIT extends AbstractIntegrationTest {
         // 1) Create an author via API
         mockMvcTester
                 .post()
-                .header("Idempotency-Key", java.util.UUID.randomUUID().toString())
+                .header("Idempotency-Key", UUID.randomUUID().toString())
                 .uri("/api/author")
                 .content("""
           {
@@ -93,7 +93,7 @@ class AuthorControllerIT extends AbstractIntegrationTest {
         // 2) Update the author via the new PUT endpoint to change content
         mockMvcTester
                 .put()
-                .header("Idempotency-Key", java.util.UUID.randomUUID().toString())
+                .header("Idempotency-Key", UUID.randomUUID().toString())
                 .uri("/api/author/" + email)
                 .content("""
                         {
@@ -151,7 +151,7 @@ class AuthorControllerIT extends AbstractIntegrationTest {
         // 3) Delete the author via API
         mockMvcTester
                 .delete()
-                .header("Idempotency-Key", java.util.UUID.randomUUID().toString())
+                .header("Idempotency-Key", UUID.randomUUID().toString())
                 .uri("/api/author/" + email)
                 .exchange()
                 .assertThat()
@@ -209,7 +209,7 @@ class AuthorControllerIT extends AbstractIntegrationTest {
         // 1) Create an author
         mockMvcTester
                 .post()
-                .header("Idempotency-Key", java.util.UUID.randomUUID().toString())
+                .header("Idempotency-Key", UUID.randomUUID().toString())
                 .uri("/api/author")
                 .content("""
                         {

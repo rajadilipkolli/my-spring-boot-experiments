@@ -1,7 +1,9 @@
 package com.example.highrps.author.query;
 
+import com.example.highrps.author.domain.AuthorEntity;
 import com.example.highrps.author.domain.AuthorRedis;
 import com.example.highrps.author.domain.AuthorRedisRepository;
+import com.example.highrps.author.domain.AuthorRepository;
 import com.example.highrps.author.dto.AuthorRequest;
 import com.example.highrps.infrastructure.cache.RequestCoalescer;
 import com.example.highrps.shared.ResourceNotFoundException;
@@ -38,15 +40,18 @@ public class AuthorQueryService {
     private final DeletionMarkerHandler deletionMarkerHandler;
     private final RequestCoalescer<AuthorRequest> requestCoalescer;
     private final JsonMapper jsonMapper;
+    private final AuthorRepository authorRepository;
 
     public AuthorQueryService(
             Cache<String, String> localCache,
             AuthorRedisRepository authorRedisRepository,
+            AuthorRepository authorRepository,
             StreamsBuilderFactoryBean kafkaStreamsFactory,
             JsonMapper jsonMapper,
             DeletionMarkerHandler deletionMarkerHandler) {
         this.localCache = localCache;
         this.authorRedisRepository = authorRedisRepository;
+        this.authorRepository = authorRepository;
         this.kafkaStreamsFactory = kafkaStreamsFactory;
         this.jsonMapper = jsonMapper;
         this.deletionMarkerHandler = deletionMarkerHandler;
@@ -124,7 +129,27 @@ public class AuthorQueryService {
             return projection;
         }
 
-        throw new ResourceNotFoundException("Author not found for email: " + email);
+        // 5. Database fallback
+        AuthorEntity authorEntity = authorRepository.getByEmail(email);
+        log.debug("Hit DB for email: {}", email);
+        AuthorProjection projection = fromEntity(authorEntity);
+        // Warm both caches and return
+        try {
+            String json = jsonMapper.writeValueAsString(projection);
+            localCache.put(cacheKey, json);
+
+            authorRedisRepository.save(toRedis(new AuthorRequest(
+                    authorEntity.getFirstName(),
+                    authorEntity.getMiddleName(),
+                    authorEntity.getLastName(),
+                    authorEntity.getMobile(),
+                    authorEntity.getEmail(),
+                    authorEntity.getRegisteredAt(),
+                    authorEntity.getCreatedAt(),
+                    authorEntity.getModifiedAt())));
+        } catch (Exception _) {
+        }
+        return projection;
     }
 
     public boolean exists(String email) {
@@ -151,6 +176,18 @@ public class AuthorQueryService {
         } catch (Exception e) {
             throw new RuntimeException("Failed to parse AuthorProjection from JSON", e);
         }
+    }
+
+    private AuthorProjection fromEntity(AuthorEntity entity) {
+        return new AuthorProjection(
+                entity.getEmail(),
+                entity.getFirstName(),
+                entity.getMiddleName(),
+                entity.getLastName(),
+                entity.getMobile(),
+                entity.getRegisteredAt(),
+                entity.getCreatedAt(),
+                entity.getModifiedAt());
     }
 
     private AuthorProjection fromRedis(AuthorRedis authorRedis) {

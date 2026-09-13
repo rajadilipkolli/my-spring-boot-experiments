@@ -74,14 +74,10 @@ public class ApiLoadBenchmark {
             return;
         }
 
-        try {
-            JsonNode node = jsonMapper.readTree(response.body());
-            if (node.has("postId")) {
-                createdPostIds.put(
-                        postIdsCounter.getAndIncrement(), node.get("postId").asLong());
-            }
-        } catch (Exception e) {
-            // ignore parse errors
+        JsonNode node = jsonMapper.readTree(response.body());
+        if (node.has("postId")) {
+            createdPostIds.put(
+                    postIdsCounter.getAndIncrement(), node.get("postId").asLong());
         }
     }
 

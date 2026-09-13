@@ -92,6 +92,9 @@ We ran JMH benchmarks on the local environment simulating a workload of 90% read
 | After Async Refactoring (100 Threads)                         | ~867 ops/s     | ~762 ops/s     | ~104 ops/s       |
 | After Async Refactoring (500 Threads)                         | ~825 ops/s     | ~739 ops/s     | ~85 ops/s        |
 | After Removing Redis Sync Writes & Batch Tuning (500 Threads) | ~819 ops/s     | ~591 ops/s     | ~227 ops/s       |
+| After Idempotency Implementation (500 Threads)                | ~156 ops/s     | ~149 ops/s     | ~7 ops/s         |
+| After Idempotency Lua Script (100 Threads)                    | ~443 ops/s     | ~435 ops/s     | ~8 ops/s         |
+| After Offloading Idempotency (100 Threads)                    | ~266 ops/s     | ~261 ops/s     | ~5 ops/s         |
 
 **Note on Redis Sync Optimization:** By eliminating redundant, blocking network I/O calls to Redis from the API hot-path (and delegating them fully to background Kafka Streams consumer event loops), the application achieves a **~2.6x increase in write-throughput concurrency** (227 ops/s up from 85 ops/s) under extreme load (500 threads).
 

@@ -30,6 +30,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.kafka.core.KafkaTemplate;
 
 /**
@@ -60,6 +61,9 @@ class PostCommentCommandServiceTest {
     private PostCommentRedisRepository postCommentRedisRepository;
 
     @Mock
+    private RedisTemplate<String, String> redisTemplate;
+
+    @Mock
     private PostCommentMapper postCommentMapper;
 
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
@@ -78,7 +82,8 @@ class PostCommentCommandServiceTest {
                 meterRegistry,
                 deletionMarkerHandler,
                 postCommentRedisRepository,
-                appProperties);
+                appProperties,
+                redisTemplate);
     }
 
     @Test

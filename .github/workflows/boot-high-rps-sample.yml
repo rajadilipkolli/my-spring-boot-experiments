@@ -4,10 +4,12 @@ on:
   push:
     paths:
       - "boot-high-rps-sample/**"
+      - ".github/workflows/boot-high-rps-sample.yml"
     branches: [main]
   pull_request:
     paths:
       - "boot-high-rps-sample/**"
+      - ".github/workflows/boot-high-rps-sample.yml"
     types:
       - opened
       - synchronize
@@ -32,3 +34,93 @@ jobs:
           cache: "maven"
       - name: Build with Maven
         run: ./mvnw clean verify
+
+  gatling-smoke:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: boot-high-rps-sample
+
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      
+      - name: Set up JDK
+        uses: actions/setup-java@v6
+        with:
+          java-version: 25
+          distribution: "temurin"
+          cache: "maven"
+          
+      - name: Start Infrastructure
+        run: |
+          docker-compose -f docker/docker-compose.yml up -d
+          
+      - name: Build Application
+        run: ./mvnw -DskipTests clean package
+        
+      - name: Start Application and Wait for Health
+        run: |
+          java -jar target/boot-high-rps-sample-0.1.0-SNAPSHOT.jar --spring.profiles.active=local &
+          echo "Waiting for /actuator/health to report UP..."
+          until curl -s http://localhost:8080/actuator/health | grep '"status":"UP"'; do
+            sleep 2
+          done
+          echo "Application is UP!"
+          
+      - name: Generate Test Data
+        run: |
+          ./mvnw exec:java -Dexec.mainClass="com.example.highrps.gatling.setup.DataGenerator" \
+          -Dexec.classpathScope=test \
+          -Dauthors=10 -Dposts=50 -Dcomments=100 -Dtags=5 -DdataDir=target/loadtest-data
+          
+      - name: Run Gatling Smoke Test
+        run: |
+          ./mvnw gatling:test -Dprofile=smoke -DdurationMinutes=1 -DwarmupMinutes=0 \
+          -Dauthors=10 -Dposts=50 -Dcomments=100 -Dtags=5 -DdataDir=target/loadtest-data || true
+          
+      - name: Publish Gatling Metrics to Summary
+        run: |
+          # Find the stats.json file
+          STATS_FILE=$(find target/gatling -name "stats.json" | head -n 1)
+          if [ -f "$STATS_FILE" ]; then
+            echo "## Gatling Smoke Test Results" >> $GITHUB_STEP_SUMMARY
+            echo "**Profile:** smoke | **Duration:** 1 min | **Warmup:** 0 min" >> $GITHUB_STEP_SUMMARY
+            echo "**Dataset:** 10 authors, 50 posts, 100 comments, 5 tags" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            
+            TOTAL=$(jq '.stats.numberOfRequests.total' $STATS_FILE)
+            OK=$(jq '.stats.numberOfRequests.ok' $STATS_FILE)
+            KO=$(jq '.stats.numberOfRequests.ko' $STATS_FILE)
+            RPS=$(jq '.stats.meanNumberOfRequestsPerSecond.total' $STATS_FILE)
+            P50=$(jq '.stats.percentiles1.total' $STATS_FILE)
+            P95=$(jq '.stats.percentiles3.total' $STATS_FILE)
+            P99=$(jq '.stats.percentiles4.total' $STATS_FILE)
+            
+            # Use awk/bc for float division if total > 0
+            if [ "$TOTAL" -gt 0 ]; then
+               ERROR_RATE=$(awk "BEGIN {printf \"%.2f\", ($KO / $TOTAL) * 100}")
+            else
+               ERROR_RATE="0.00"
+            fi
+            
+            echo "| Metric | Value |" >> $GITHUB_STEP_SUMMARY
+            echo "|---|---|" >> $GITHUB_STEP_SUMMARY
+            echo "| Throughput | $RPS req/s |" >> $GITHUB_STEP_SUMMARY
+            echo "| Total Requests | $TOTAL ($OK OK, $KO KO) |" >> $GITHUB_STEP_SUMMARY
+            echo "| Error Rate | $ERROR_RATE % |" >> $GITHUB_STEP_SUMMARY
+            echo "| p50 Latency | $P50 ms |" >> $GITHUB_STEP_SUMMARY
+            echo "| p95 Latency | $P95 ms |" >> $GITHUB_STEP_SUMMARY
+            echo "| p99 Latency | $P99 ms |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "## Gatling Smoke Test Failed" >> $GITHUB_STEP_SUMMARY
+            echo "stats.json not found." >> $GITHUB_STEP_SUMMARY
+          fi
+          
+      - name: Upload Gatling Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: gatling-smoke-report
+          path: boot-high-rps-sample/target/gatling/
+          retention-days: 14

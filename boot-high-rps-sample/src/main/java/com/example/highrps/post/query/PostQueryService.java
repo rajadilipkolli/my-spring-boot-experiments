@@ -1,12 +1,12 @@
 package com.example.highrps.post.query;
 
 import com.example.highrps.infrastructure.cache.RequestCoalescer;
-import com.example.highrps.post.domain.PostRedis;
-import com.example.highrps.post.domain.PostRedisRepository;
+import com.example.highrps.post.domain.*;
 import com.example.highrps.post.domain.requests.NewPostRequest;
 import com.example.highrps.shared.ResourceNotFoundException;
 import com.example.highrps.shared.redis.DeletionMarkerHandler;
 import com.github.benmanes.caffeine.cache.Cache;
+import java.util.List;
 import java.util.Optional;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StoreQueryParameters;
@@ -35,15 +35,18 @@ public class PostQueryService {
     private final DeletionMarkerHandler deletionMarkerHandler;
     private final RequestCoalescer<NewPostRequest> requestCoalescer;
     private final JsonMapper jsonMapper;
+    private final PostRepository postRepository;
 
     public PostQueryService(
             Cache<String, String> localCache,
             PostRedisRepository postRedisRepository,
+            PostRepository postRepository,
             StreamsBuilderFactoryBean kafkaStreamsFactory,
             JsonMapper jsonMapper,
             DeletionMarkerHandler deletionMarkerHandler) {
         this.localCache = localCache;
         this.postRedisRepository = postRedisRepository;
+        this.postRepository = postRepository;
         this.kafkaStreamsFactory = kafkaStreamsFactory;
         this.jsonMapper = jsonMapper;
         this.deletionMarkerHandler = deletionMarkerHandler;
@@ -74,9 +77,10 @@ public class PostQueryService {
             PostProjection projection = fromRedis(redisPost.get());
             // Warm local cache and return JSON
             try {
-                String json = jsonMapper.writeValueAsString(projection);
-                localCache.put(cacheKey, json);
-                return json;
+                String jsonStr = jsonMapper.writeValueAsString(projection);
+                localCache.put(cacheKey, jsonStr);
+                return jsonStr;
+
             } catch (Exception e) {
                 log.warn("Failed to serialize to JSON", e);
                 throw new RuntimeException("Serialization error", e);
@@ -100,20 +104,35 @@ public class PostQueryService {
 
             // Warm both caches and return JSON
             try {
-                String json = jsonMapper.writeValueAsString(projection);
-                localCache.put(cacheKey, json);
+                String jsonStr = jsonMapper.writeValueAsString(projection);
+                localCache.put(cacheKey, jsonStr);
 
                 PostRedis redisEntity = toRedis(streamsData, postId);
                 postRedisRepository.save(redisEntity);
-                return json;
+                return jsonStr;
+
             } catch (Exception e) {
                 log.warn("Failed to warm caches from Streams", e);
                 throw new RuntimeException("Serialization error", e);
             }
         }
 
-        // Not found in any cache
-        throw new ResourceNotFoundException("Post not found for id: " + postId);
+        // 5. Database fallback
+        return postRepository
+                .findByPostRefId(postId)
+                .map(entity -> {
+                    log.debug("Hit DB for postId: {}", postId);
+                    PostProjection projection = fromEntity(entity);
+                    try {
+                        String jsonStr = jsonMapper.writeValueAsString(projection);
+                        localCache.put(cacheKey, jsonStr);
+                        return jsonStr;
+
+                    } catch (Exception e) {
+                        throw new RuntimeException("Serialization error", e);
+                    }
+                })
+                .orElseThrow(() -> new ResourceNotFoundException("Post not found for id: " + postId));
     }
 
     public boolean exists(Long postId) {
@@ -134,12 +153,21 @@ public class PostQueryService {
                 StoreQueryParameters.fromNameAndType("posts-store", QueryableStoreTypes.keyValueStore()));
     }
 
-    private PostProjection parseProjection(String json) {
-        try {
-            return jsonMapper.readValue(json, PostProjection.class);
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to parse PostProjection from JSON", e);
-        }
+    private PostProjection fromEntity(PostEntity entity) {
+        return new PostProjection(
+                entity.getPostRefId(),
+                entity.getTitle(),
+                entity.getContent(),
+                entity.getAuthorEntity().getEmail(),
+                entity.isPublished(),
+                entity.getPublishedAt(),
+                entity.getCreatedAt(),
+                entity.getModifiedAt(),
+                new PostDetailsResponse(
+                        entity.getDetails().getDetailsKey(),
+                        entity.getDetails().getCreatedAt(),
+                        entity.getDetails().getCreatedBy()),
+                List.of());
     }
 
     private PostProjection fromRedis(PostRedis postRedis) {

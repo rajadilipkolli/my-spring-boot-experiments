@@ -13,6 +13,7 @@ import com.example.highrps.post.query.PostProjection;
 import com.example.highrps.shared.IdGenerator;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StoreQueryParameters;
@@ -35,10 +36,57 @@ class PostControllerIT extends AbstractIntegrationTest {
     }
 
     @Test
+    void shouldRejectDuplicatePostTitle() {
+        String title = "Unique Title For Duplicate Test " + UUID.randomUUID();
+
+        // First post should succeed
+        mockMvcTester
+                .post()
+                .header("Idempotency-Key", UUID.randomUUID().toString())
+                .uri("/api/posts")
+                .content("""
+                        {
+                          "title": "%s",
+                          "content": "First post content",
+                          "email": "junit@email.com",
+                          "details": {
+                            "detailsKey": "This is a summary",
+                            "createdBy": "JunitIteration"
+                          }
+                        }
+                        """.formatted(title))
+                .contentType(MediaType.APPLICATION_JSON)
+                .exchange()
+                .assertThat()
+                .hasStatus(HttpStatus.CREATED);
+
+        // Second post with the same title should fail with 409 Conflict
+        mockMvcTester
+                .post()
+                .header("Idempotency-Key", UUID.randomUUID().toString())
+                .uri("/api/posts")
+                .content("""
+                        {
+                          "title": "%s",
+                          "content": "Second post content",
+                          "email": "junit@email.com",
+                          "details": {
+                            "detailsKey": "This is a summary",
+                            "createdBy": "JunitIteration"
+                          }
+                        }
+                        """.formatted(title))
+                .contentType(MediaType.APPLICATION_JSON)
+                .exchange()
+                .assertThat()
+                .hasStatus(HttpStatus.CONFLICT);
+    }
+
+    @Test
     void createPost() {
         var result = mockMvcTester
                 .post()
-                .header("Idempotency-Key", java.util.UUID.randomUUID().toString())
+                .header("Idempotency-Key", UUID.randomUUID().toString())
                 .content("""
                         {
                           "title": "High RPS with Spring Boot",
@@ -98,7 +146,7 @@ class PostControllerIT extends AbstractIntegrationTest {
         AtomicReference<Long> postId = new AtomicReference<>();
         mockMvcTester
                 .post()
-                .header("Idempotency-Key", java.util.UUID.randomUUID().toString())
+                .header("Idempotency-Key", UUID.randomUUID().toString())
                 .uri("/api/posts")
                 .content("""
           {
@@ -167,7 +215,7 @@ class PostControllerIT extends AbstractIntegrationTest {
         // 2) Update the post via the new PUT endpoint to change content
         mockMvcTester
                 .put()
-                .header("Idempotency-Key", java.util.UUID.randomUUID().toString())
+                .header("Idempotency-Key", UUID.randomUUID().toString())
                 .uri("/api/posts/" + postId.get())
                 .content("""
                         {
@@ -214,7 +262,7 @@ class PostControllerIT extends AbstractIntegrationTest {
         // 3) Delete the post
         mockMvcTester
                 .delete()
-                .header("Idempotency-Key", java.util.UUID.randomUUID().toString())
+                .header("Idempotency-Key", UUID.randomUUID().toString())
                 .uri("/api/posts/{postId}", postId.get())
                 .exchange()
                 .assertThat()
@@ -259,7 +307,7 @@ class PostControllerIT extends AbstractIntegrationTest {
         AtomicReference<Long> postId = new AtomicReference<>();
         mockMvcTester
                 .post()
-                .header("Idempotency-Key", java.util.UUID.randomUUID().toString())
+                .header("Idempotency-Key", UUID.randomUUID().toString())
                 .uri("/api/posts")
                 .content("""
           {
@@ -341,7 +389,7 @@ class PostControllerIT extends AbstractIntegrationTest {
         // 2) Update the post via the new PUT endpoint to change content
         mockMvcTester
                 .put()
-                .header("Idempotency-Key", java.util.UUID.randomUUID().toString())
+                .header("Idempotency-Key", UUID.randomUUID().toString())
                 .uri("/api/posts/{postId}", postId.get())
                 .content("""
                         {
@@ -394,7 +442,7 @@ class PostControllerIT extends AbstractIntegrationTest {
         // 3) Delete the post
         mockMvcTester
                 .delete()
-                .header("Idempotency-Key", java.util.UUID.randomUUID().toString())
+                .header("Idempotency-Key", UUID.randomUUID().toString())
                 .uri("/api/posts/{postId}", postId.get())
                 .exchange()
                 .assertThat()
@@ -441,7 +489,7 @@ class PostControllerIT extends AbstractIntegrationTest {
         AtomicReference<Long> postId = new AtomicReference<>();
         mockMvcTester
                 .post()
-                .header("Idempotency-Key", java.util.UUID.randomUUID().toString())
+                .header("Idempotency-Key", UUID.randomUUID().toString())
                 .uri("/api/posts")
                 .content("""
                         {
@@ -552,7 +600,7 @@ class PostControllerIT extends AbstractIntegrationTest {
         // Create initial post
         mockMvcTester
                 .post()
-                .header("Idempotency-Key", java.util.UUID.randomUUID().toString())
+                .header("Idempotency-Key", UUID.randomUUID().toString())
                 .uri("/api/posts")
                 .content("""
                         {
@@ -575,7 +623,7 @@ class PostControllerIT extends AbstractIntegrationTest {
         // Attempt to create duplicate post
         mockMvcTester
                 .post()
-                .header("Idempotency-Key", java.util.UUID.randomUUID().toString())
+                .header("Idempotency-Key", UUID.randomUUID().toString())
                 .uri("/api/posts")
                 .content("""
                         {

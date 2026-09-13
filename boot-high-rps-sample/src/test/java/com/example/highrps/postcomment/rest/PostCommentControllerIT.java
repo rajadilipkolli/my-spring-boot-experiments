@@ -15,6 +15,7 @@ import com.example.highrps.shared.IdGenerator;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StoreQueryParameters;
 import org.apache.kafka.streams.errors.InvalidStateStoreException;
@@ -72,7 +73,7 @@ class PostCommentControllerIT extends AbstractIntegrationTest {
         long count = postCommentRepository.count();
         var result = mockMvcTester
                 .post()
-                .header("Idempotency-Key", java.util.UUID.randomUUID().toString())
+                .header("Idempotency-Key", UUID.randomUUID().toString())
                 .uri("/api/posts/{postId}/comments", postId)
                 .content("""
                                                 {
@@ -128,7 +129,7 @@ class PostCommentControllerIT extends AbstractIntegrationTest {
         Long[] commentIdHolder = new Long[1];
         mockMvcTester
                 .post()
-                .header("Idempotency-Key", java.util.UUID.randomUUID().toString())
+                .header("Idempotency-Key", UUID.randomUUID().toString())
                 .uri("/api/posts/{postId}/comments", postId)
                 .content("""
                                                                 {
@@ -183,7 +184,7 @@ class PostCommentControllerIT extends AbstractIntegrationTest {
         // Create multiple comments
         mockMvcTester
                 .post()
-                .header("Idempotency-Key", java.util.UUID.randomUUID().toString())
+                .header("Idempotency-Key", UUID.randomUUID().toString())
                 .uri("/api/posts/{postId}/comments", postId)
                 .content("""
                                                 {
@@ -199,7 +200,7 @@ class PostCommentControllerIT extends AbstractIntegrationTest {
 
         mockMvcTester
                 .post()
-                .header("Idempotency-Key", java.util.UUID.randomUUID().toString())
+                .header("Idempotency-Key", UUID.randomUUID().toString())
                 .uri("/api/posts/{postId}/comments", postId)
                 .content("""
                                                 {
@@ -235,7 +236,7 @@ class PostCommentControllerIT extends AbstractIntegrationTest {
         Long[] commentIdHolder = new Long[1];
         mockMvcTester
                 .post()
-                .header("Idempotency-Key", java.util.UUID.randomUUID().toString())
+                .header("Idempotency-Key", UUID.randomUUID().toString())
                 .uri("/api/posts/{postId}/comments", postId)
                 .content("""
                                                                 {
@@ -257,7 +258,7 @@ class PostCommentControllerIT extends AbstractIntegrationTest {
         // Update the comment
         mockMvcTester
                 .put()
-                .header("Idempotency-Key", java.util.UUID.randomUUID().toString())
+                .header("Idempotency-Key", UUID.randomUUID().toString())
                 .uri("/api/posts/{postId}/comments/{postCommentId}", postId, commentId)
                 .content("""
                                                 {
@@ -305,7 +306,7 @@ class PostCommentControllerIT extends AbstractIntegrationTest {
         Long[] commentIdHolder = new Long[1];
         mockMvcTester
                 .post()
-                .header("Idempotency-Key", java.util.UUID.randomUUID().toString())
+                .header("Idempotency-Key", UUID.randomUUID().toString())
                 .uri("/api/posts/{postId}/comments", postId)
                 .content("""
                                                                 {
@@ -327,7 +328,7 @@ class PostCommentControllerIT extends AbstractIntegrationTest {
         // Delete the comment
         mockMvcTester
                 .delete()
-                .header("Idempotency-Key", java.util.UUID.randomUUID().toString())
+                .header("Idempotency-Key", UUID.randomUUID().toString())
                 .uri("/api/posts/{postId}/comments/{postCommentId}", postId, commentId)
                 .exchange()
                 .assertThat()
@@ -351,6 +352,45 @@ class PostCommentControllerIT extends AbstractIntegrationTest {
     }
 
     @Test
+    void shouldRejectDuplicateCommentTitleForSamePost() {
+        String title = "Unique Title For Duplicate Test " + UUID.randomUUID();
+
+        // First comment should succeed
+        mockMvcTester
+                .post()
+                .header("Idempotency-Key", UUID.randomUUID().toString())
+                .uri("/api/posts/{postId}/comments", postId)
+                .content("""
+                        {
+                          "title": "%s",
+                          "content": "First comment content",
+                          "published": true
+                        }
+                        """.formatted(title))
+                .contentType(MediaType.APPLICATION_JSON)
+                .exchange()
+                .assertThat()
+                .hasStatus(HttpStatus.CREATED);
+
+        // Second comment with the same title and same postId should fail with 400 Bad Request
+        mockMvcTester
+                .post()
+                .header("Idempotency-Key", UUID.randomUUID().toString())
+                .uri("/api/posts/{postId}/comments", postId)
+                .content("""
+                        {
+                          "title": "%s",
+                          "content": "Second comment content",
+                          "published": true
+                        }
+                        """.formatted(title))
+                .contentType(MediaType.APPLICATION_JSON)
+                .exchange()
+                .assertThat()
+                .hasStatus(HttpStatus.CONFLICT);
+    }
+
+    @Test
     void shouldReturn404WhenCommentNotFound() {
         mockMvcTester
                 .get()
@@ -367,7 +407,7 @@ class PostCommentControllerIT extends AbstractIntegrationTest {
         Long[] commentIdHolder = new Long[1];
         mockMvcTester
                 .post()
-                .header("Idempotency-Key", java.util.UUID.randomUUID().toString())
+                .header("Idempotency-Key", UUID.randomUUID().toString())
                 .uri("/api/posts/{postId}/comments", postId)
                 .content("""
                                                                 {
@@ -401,7 +441,7 @@ class PostCommentControllerIT extends AbstractIntegrationTest {
         Long[] commentIdHolder = new Long[1];
         mockMvcTester
                 .post()
-                .header("Idempotency-Key", java.util.UUID.randomUUID().toString())
+                .header("Idempotency-Key", UUID.randomUUID().toString())
                 .uri("/api/posts/{postId}/comments", postId)
                 .content("""
                         {

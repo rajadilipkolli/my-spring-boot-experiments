@@ -1,0 +1,146 @@
+name: boot-high-rps-sample-perf
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "boot-high-rps-sample/**"
+  schedule:
+    - cron: '0 2 * * *' # Every day at 2 AM
+  workflow_dispatch:
+    inputs:
+      profile:
+        description: 'Load Profile (normal, high, stress)'
+        required: true
+        default: 'normal'
+      durationMinutes:
+        description: 'Duration (minutes)'
+        required: false
+        default: '15'
+      targetRps:
+        description: 'Target RPS (if overriding profile default)'
+        required: false
+
+jobs:
+  performance-comparison:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: boot-high-rps-sample
+
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK
+        uses: actions/setup-java@v6
+        with:
+          java-version: 25
+          distribution: "temurin"
+          cache: "maven"
+
+      - name: Setup Profile Inputs
+        id: config
+        run: |
+          PROFILE="${{ github.event.inputs.profile || 'normal' }}"
+          DURATION="${{ github.event.inputs.durationMinutes || '15' }}"
+          RPS_ARG=""
+          if [ -n "${{ github.event.inputs.targetRps }}" ]; then
+            RPS_ARG="-DtargetRps=${{ github.event.inputs.targetRps }}"
+          fi
+          echo "profile=$PROFILE" >> $GITHUB_ENV
+          echo "duration=$DURATION" >> $GITHUB_ENV
+          echo "rps_arg=$RPS_ARG" >> $GITHUB_ENV
+
+      - name: Run Baseline (HEAD~1)
+        run: |
+          # Store original head to return later
+          CURRENT_HEAD=$(git rev-parse HEAD)
+          echo "current_head=$CURRENT_HEAD" >> $GITHUB_ENV
+          
+          # Checkout baseline
+          git checkout HEAD~1
+          
+          # Start Infra and Monitoring
+          docker-compose -f docker/docker-compose.yml up -d
+          docker-compose -f docker/docker-compose-monitoring.yml up -d
+          
+          # Build & Start App
+          ./mvnw -DskipTests clean package
+          java -jar target/boot-high-rps-sample-0.1.0-SNAPSHOT.jar --spring.profiles.active=local &
+          APP_PID=$!
+          echo "app_pid_baseline=$APP_PID" >> $GITHUB_ENV
+          
+          echo "Waiting for /actuator/health to report UP..."
+          until curl -s http://localhost:8080/actuator/health | grep '"status":"UP"'; do sleep 2; done
+          
+          # Generate Data
+          ./mvnw exec:java -Dexec.mainClass="com.example.highrps.gatling.setup.DataGenerator" \
+          -Dexec.classpathScope=test -DdataDir=target/loadtest-data
+          
+          # Run Gatling
+          ./mvnw gatling:test -Dprofile=$PROFILE -DdurationMinutes=$DURATION $RPS_ARG || true
+          
+          # Save Stats
+          STATS_FILE=$(find target/gatling -name "stats.json" | head -n 1)
+          cp $STATS_FILE ../baseline-stats.json
+          mv target/gatling ../baseline-report
+          
+          # Teardown
+          kill $APP_PID
+          docker-compose -f docker/docker-compose.yml down -v
+          docker-compose -f docker/docker-compose-monitoring.yml down -v
+          
+      - name: Run High RPS (HEAD)
+        run: |
+          # Checkout HEAD
+          git checkout $current_head
+          
+          # Start Infra and Monitoring
+          docker-compose -f docker/docker-compose.yml up -d
+          docker-compose -f docker/docker-compose-monitoring.yml up -d
+          
+          # Build & Start App
+          ./mvnw -DskipTests clean package
+          java -jar target/boot-high-rps-sample-0.1.0-SNAPSHOT.jar --spring.profiles.active=local &
+          APP_PID=$!
+          
+          echo "Waiting for /actuator/health to report UP..."
+          until curl -s http://localhost:8080/actuator/health | grep '"status":"UP"'; do sleep 2; done
+          
+          # Generate Data
+          ./mvnw exec:java -Dexec.mainClass="com.example.highrps.gatling.setup.DataGenerator" \
+          -Dexec.classpathScope=test -DdataDir=target/loadtest-data
+          
+          # Run Gatling
+          ./mvnw gatling:test -Dprofile=$PROFILE -DdurationMinutes=$DURATION $RPS_ARG || true
+          
+          # Save Stats
+          STATS_FILE=$(find target/gatling -name "stats.json" | head -n 1)
+          cp $STATS_FILE ../head-stats.json
+          mv target/gatling ../head-report
+          
+          # Teardown
+          kill $APP_PID
+          docker-compose -f docker/docker-compose.yml down -v
+          docker-compose -f docker/docker-compose-monitoring.yml down -v
+          
+      - name: Compare Results
+        run: |
+          pwsh scripts/compare-results.ps1 -BaselineStats ../baseline-stats.json -HighRpsStats ../head-stats.json > comparison.md
+          cat comparison.md >> $GITHUB_STEP_SUMMARY
+          
+      - name: Upload Baseline Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: gatling-baseline-report
+          path: baseline-report/
+          retention-days: 14
+
+      - name: Upload HEAD Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: gatling-head-report
+          path: head-report/
+          retention-days: 14

@@ -99,7 +99,7 @@ public class PostCommentQueryService {
                     "Hit local cache for postId={} commentId={}",
                     query.postId(),
                     query.commentId().id());
-            return postCommentMapper.fromJson(cached);
+            return PostCommentCommandResult.fromJson(cached);
         }
 
         // 3. Redis materialized view
@@ -119,7 +119,7 @@ public class PostCommentQueryService {
             PostCommentCommandResult result = postCommentMapper.toResultFromRedis(redisEntity);
             // Warm local cache
             try {
-                var json = postCommentMapper.toJson(result);
+                var json = result.toJson();
                 localCache.put(cacheKey, json);
             } catch (Exception e) {
                 log.warn("Failed to warm local cache", e);
@@ -149,7 +149,7 @@ public class PostCommentQueryService {
 
                 // Warm both caches
                 try {
-                    var json = postCommentMapper.toJson(result);
+                    var json = result.toJson();
                     localCache.put(cacheKey, json);
                     postCommentRedisRepository.save(postCommentMapper.toRedis(cachedRequest));
                 } catch (Exception e) {
@@ -172,8 +172,9 @@ public class PostCommentQueryService {
 
         // Update caches on cache miss
         try {
-            var json = postCommentMapper.toJson(result);
+            var json = result.toJson();
             localCache.put(cacheKey, json);
+            postCommentRedisRepository.save(postCommentMapper.toRedisFromEntity(comment));
         } catch (Exception e) {
             log.warn("Failed to update local cache after database lookup", e);
         }

@@ -8,6 +8,7 @@ import com.example.highrps.post.domain.events.PostCreatedEvent;
 import com.example.highrps.post.domain.events.PostDeletedEvent;
 import com.example.highrps.post.domain.events.PostUpdatedEvent;
 import com.example.highrps.shared.AbstractCommandService;
+import com.example.highrps.shared.ResourceConflictException;
 import com.example.highrps.shared.config.AppProperties;
 import com.example.highrps.shared.redis.DeletionMarkerHandler;
 import com.github.benmanes.caffeine.cache.Cache;
@@ -63,7 +64,7 @@ public class PostCommandService extends AbstractCommandService {
         Boolean acquired = redisTemplate.opsForValue().setIfAbsent(reservationKey, "1", Duration.ofMinutes(5));
 
         if (Boolean.FALSE.equals(acquired)) {
-            throw new IllegalArgumentException("Post already exists with id: " + cmd.postId());
+            throw new ResourceConflictException("Post already exists with id: " + cmd.postId());
         }
 
         boolean exists = false;
@@ -74,7 +75,7 @@ public class PostCommandService extends AbstractCommandService {
         }
 
         if (exists) {
-            throw new IllegalArgumentException("Post already exists with id: " + cmd.postId());
+            throw new ResourceConflictException("Post already exists with id: " + cmd.postId());
         }
 
         // Generate timestamps

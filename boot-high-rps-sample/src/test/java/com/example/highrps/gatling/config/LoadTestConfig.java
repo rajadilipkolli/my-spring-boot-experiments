@@ -1,0 +1,97 @@
+package com.example.highrps.gatling.config;
+
+import java.util.Optional;
+
+public class LoadTestConfig {
+
+    // Profiles: smoke, normal, high, stress
+    public static final String PROFILE = getProperty("profile", "smoke");
+
+    public static final String BASE_URL = getProperty("baseUrl", "http://localhost:8080");
+
+    // Dataset sizes
+    public static final int AUTHORS_SIZE = getIntProperty("authors", 100);
+    public static final int POSTS_SIZE = getIntProperty("posts", 1000);
+    public static final int COMMENTS_SIZE = getIntProperty("comments", 5000);
+    public static final int TAGS_SIZE = getIntProperty("tags", 50);
+
+    // Traffic weights
+    public static final double READ_POST_WEIGHT = getDoubleProperty("readPostWeight", 45.0);
+    public static final double READ_COMMENTS_WEIGHT = getDoubleProperty("readCommentsWeight", 20.0);
+    public static final double READ_TAG_POSTS_WEIGHT = getDoubleProperty("readTagPostsWeight", 10.0);
+    public static final double CREATE_COMMENT_WEIGHT = getDoubleProperty("createCommentWeight", 15.0);
+    public static final double CREATE_POST_WEIGHT = getDoubleProperty("createPostWeight", 8.0);
+    public static final double REGISTER_AUTHOR_WEIGHT = getDoubleProperty("registerAuthorWeight", 2.0);
+
+    // Global properties that can be overridden by profile
+    public static final double TARGET_RPS = getProfileTargetRps();
+    public static final int DURATION_MINUTES = getProfileDurationMinutes();
+    public static final int WARMUP_MINUTES = getProfileWarmupMinutes();
+
+    // Assertion thresholds
+    public static final double MAX_ERROR_RATE = getDoubleProperty("maxErrorRate", 1.0); // 1%
+    public static final int BASELINE_P95_MS = getIntProperty("baseline.p95", 50);
+    public static final int BASELINE_P99_MS = getIntProperty("baseline.p99", 100);
+    public static final double BASELINE_THROUGHPUT = getDoubleProperty("baseline.throughput", TARGET_RPS * 0.9);
+
+    // Allowed deltas
+    public static final int ALLOWED_P95_DELTA_PERCENT = getIntProperty("allowed.p95.delta.percent", 5);
+    public static final int ALLOWED_P99_DELTA_PERCENT = getIntProperty("allowed.p99.delta.percent", 10);
+    public static final int ALLOWED_THROUGHPUT_DELTA_PERCENT = getIntProperty("allowed.throughput.delta.percent", 10);
+
+    public static final String DATA_DIR = getProperty("dataDir", "target/loadtest-data");
+
+    private static String getProperty(String key, String defaultValue) {
+        return Optional.ofNullable(System.getProperty(key))
+                .orElseGet(() -> Optional.ofNullable(
+                                System.getenv(key.toUpperCase().replace('.', '_')))
+                        .orElse(defaultValue));
+    }
+
+    private static int getIntProperty(String key, int defaultValue) {
+        String val = getProperty(key, null);
+        return val != null ? Integer.parseInt(val) : defaultValue;
+    }
+
+    private static double getDoubleProperty(String key, double defaultValue) {
+        String val = getProperty(key, null);
+        return val != null ? Double.parseDouble(val) : defaultValue;
+    }
+
+    private static double getProfileTargetRps() {
+        String override = getProperty("targetRps", null);
+        if (override != null) {
+            return Double.parseDouble(override);
+        }
+        return switch (PROFILE) {
+            case "smoke" -> 10.0;
+            case "normal" -> 50.0;
+            case "high", "stress" -> 100.0;
+            default -> 10.0;
+        };
+    }
+
+    private static int getProfileDurationMinutes() {
+        String override = getProperty("durationMinutes", null);
+        if (override != null) {
+            return Integer.parseInt(override);
+        }
+        return switch (PROFILE) {
+            case "smoke" -> 5;
+            case "normal", "high", "stress" -> 15;
+            default -> 5;
+        };
+    }
+
+    private static int getProfileWarmupMinutes() {
+        String override = getProperty("warmupMinutes", null);
+        if (override != null) {
+            return Integer.parseInt(override);
+        }
+        return switch (PROFILE) {
+            case "smoke" -> 5;
+            case "normal", "high", "stress" -> 5;
+            default -> 5;
+        };
+    }
+}
