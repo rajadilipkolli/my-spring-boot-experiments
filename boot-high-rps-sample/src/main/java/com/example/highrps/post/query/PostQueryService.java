@@ -170,10 +170,12 @@ public class PostQueryService {
                 entity.getPublishedAt(),
                 entity.getCreatedAt(),
                 entity.getModifiedAt(),
-                new PostDetailsResponse(
-                        entity.getDetails().getDetailsKey(),
-                        entity.getDetails().getCreatedAt(),
-                        entity.getDetails().getCreatedBy()),
+                entity.getDetails() == null
+                        ? null
+                        : new PostDetailsResponse(
+                                entity.getDetails().getDetailsKey(),
+                                entity.getDetails().getCreatedAt(),
+                                entity.getDetails().getCreatedBy()),
                 List.of());
     }
 
