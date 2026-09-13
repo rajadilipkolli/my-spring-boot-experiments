@@ -17,7 +17,7 @@ public class CommentScenario {
                             .set("randomTitle", "Gatling Comment " + uuid.substring(0, 8));
                 })
                 .exec(http("Create Comment")
-                        .post("/api/post-comments")
+                        .post("/api/posts/#{postId}/comments")
                         .header("Idempotency-Key", "#{idempotencyKey}")
                         .body(
                                 StringBody(
