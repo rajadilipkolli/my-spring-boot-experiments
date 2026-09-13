@@ -5,8 +5,6 @@ on:
     branches: [main]
     paths:
       - "boot-high-rps-sample/**"
-  schedule:
-    - cron: '0 2 * * *' # Every day at 2 AM
   workflow_dispatch:
     inputs:
       profile:
@@ -75,7 +73,9 @@ jobs:
               kill "$APP_PID"
             fi
             docker compose -f docker/docker-compose.yml down -v || true
-            docker compose -f docker/docker-compose-monitoring.yml down -v || true
+            if [ -f docker/docker-compose-monitoring.yml ]; then
+              docker compose -f docker/docker-compose-monitoring.yml down -v || true
+            fi
           }
           trap cleanup EXIT
 
@@ -85,7 +85,9 @@ jobs:
           
           # Start Infra and Monitoring
           docker compose -f docker/docker-compose.yml up -d
-          docker compose -f docker/docker-compose-monitoring.yml up -d
+          if [ -f docker/docker-compose-monitoring.yml ]; then
+            docker compose -f docker/docker-compose-monitoring.yml up -d
+          fi
           
           # Build & Start App
           ./mvnw -DskipTests clean package
@@ -142,7 +144,9 @@ jobs:
               kill "$APP_PID"
             fi
             docker compose -f docker/docker-compose.yml down -v || true
-            docker compose -f docker/docker-compose-monitoring.yml down -v || true
+            if [ -f docker/docker-compose-monitoring.yml ]; then
+              docker compose -f docker/docker-compose-monitoring.yml down -v || true
+            fi
           }
           trap cleanup EXIT
 
@@ -151,7 +155,9 @@ jobs:
           
           # Start Infra and Monitoring
           docker compose -f docker/docker-compose.yml up -d
-          docker compose -f docker/docker-compose-monitoring.yml up -d
+          if [ -f docker/docker-compose-monitoring.yml ]; then
+            docker compose -f docker/docker-compose-monitoring.yml up -d
+          fi
           
           # Build & Start App
           ./mvnw -DskipTests clean package
