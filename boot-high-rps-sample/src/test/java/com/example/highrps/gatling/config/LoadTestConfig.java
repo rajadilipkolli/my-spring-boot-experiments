@@ -1,5 +1,6 @@
 package com.example.highrps.gatling.config;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Optional;
 import java.util.Properties;
