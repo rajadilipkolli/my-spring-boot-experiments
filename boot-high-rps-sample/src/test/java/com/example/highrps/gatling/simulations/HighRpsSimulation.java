@@ -8,6 +8,8 @@ import com.example.highrps.gatling.scenarios.*;
 import io.gatling.javaapi.core.*;
 import io.gatling.javaapi.http.*;
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
 
 public class HighRpsSimulation extends Simulation {
 
@@ -33,25 +35,9 @@ public class HighRpsSimulation extends Simulation {
         int durationMins = LoadTestConfig.DURATION_MINUTES;
         int warmupMins = LoadTestConfig.WARMUP_MINUTES;
 
-        PopulationBuilder population;
-
-        if ("stress".equalsIgnoreCase(LoadTestConfig.PROFILE)) {
-            population = scn.injectOpen(
-                    nothingFor(5),
-                    rampUsersPerSec(0).to(100).during(Duration.ofMinutes(warmupMins)),
-                    constantUsersPerSec(100).during(Duration.ofMinutes(durationMins)),
-                    rampUsersPerSec(100).to(250).during(Duration.ofMinutes(5)),
-                    constantUsersPerSec(250).during(Duration.ofMinutes(durationMins)),
-                    rampUsersPerSec(250).to(500).during(Duration.ofMinutes(5)),
-                    constantUsersPerSec(500).during(Duration.ofMinutes(durationMins)),
-                    rampUsersPerSec(500).to(1000).during(Duration.ofMinutes(5)),
-                    constantUsersPerSec(1000).during(Duration.ofMinutes(durationMins)));
-        } else {
-            population = scn.injectOpen(
-                    nothingFor(5),
-                    rampUsersPerSec(0).to(targetRps).during(Duration.ofMinutes(warmupMins)),
-                    constantUsersPerSec(targetRps).during(Duration.ofMinutes(durationMins)));
-        }
+        boolean stressProfile = "stress".equalsIgnoreCase(LoadTestConfig.PROFILE);
+        PopulationBuilder population =
+                scn.injectOpen(injectionSteps(stressProfile, targetRps, durationMins, warmupMins));
 
         setUp(population)
                 .protocols(httpProtocol)
@@ -64,5 +50,30 @@ public class HighRpsSimulation extends Simulation {
                         global().requestsPerSec()
                                 .gte(LoadTestConfig.BASELINE_THROUGHPUT
                                         * (1.0 + LoadTestConfig.ALLOWED_THROUGHPUT_DELTA_PERCENT / 100.0)));
+    }
+
+    static List<OpenInjectionStep> injectionSteps(
+            boolean stressProfile, double targetRps, int durationMins, int warmupMins) {
+        List<OpenInjectionStep> steps = new ArrayList<>();
+        steps.add(nothingFor(5));
+
+        if (warmupMins != 0) {
+            double warmupTargetRps = stressProfile ? 100 : targetRps;
+            steps.add(rampUsersPerSec(0).to(warmupTargetRps).during(Duration.ofMinutes(warmupMins)));
+        }
+
+        if (stressProfile) {
+            steps.add(constantUsersPerSec(100).during(Duration.ofMinutes(durationMins)));
+            steps.add(rampUsersPerSec(100).to(250).during(Duration.ofMinutes(5)));
+            steps.add(constantUsersPerSec(250).during(Duration.ofMinutes(durationMins)));
+            steps.add(rampUsersPerSec(250).to(500).during(Duration.ofMinutes(5)));
+            steps.add(constantUsersPerSec(500).during(Duration.ofMinutes(durationMins)));
+            steps.add(rampUsersPerSec(500).to(1000).during(Duration.ofMinutes(5)));
+            steps.add(constantUsersPerSec(1000).during(Duration.ofMinutes(durationMins)));
+        } else {
+            steps.add(constantUsersPerSec(targetRps).during(Duration.ofMinutes(durationMins)));
+        }
+
+        return steps;
     }
 }
