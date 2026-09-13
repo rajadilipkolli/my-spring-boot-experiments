@@ -19,7 +19,7 @@
         <java.version>25</java.version>
         <springdoc-openapi.version>3.1.1</springdoc-openapi.version>
         <mapstruct.version>1.6.3</mapstruct.version>
-        <datasource-micrometer-boot.version>2.2.1</datasource-micrometer-boot.version>
+        <datasource-micrometer-boot.version>2.3.0</datasource-micrometer-boot.version>
         <spring-modulith.version>2.1.1</spring-modulith.version>
         <gatling.version>3.15.1</gatling.version>
         <gatling-maven-plugin.version>4.21.12</gatling-maven-plugin.version>
