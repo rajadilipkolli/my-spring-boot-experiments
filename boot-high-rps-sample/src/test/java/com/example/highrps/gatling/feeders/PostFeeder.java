@@ -70,7 +70,7 @@ public class PostFeeder {
                     long current = 0;
                     for (Map<String, Object> p : posts) {
                         current += (Integer) p.get("weight");
-                        if (current >= target) {
+                        if (current > target) {
                             return p;
                         }
                     }

@@ -9,9 +9,12 @@ This document outlines the procedure to load test `boot-high-rps-sample` and eva
 
 ## Infrastructure Startup Order
 
-1. Start main infrastructure: `docker-compose -f docker/docker-compose.yml up -d`
-2. Start monitoring stack: `docker-compose -f docker/docker-compose-monitoring.yml up -d`
-3. Generate data: `mvn exec:java -Dexec.mainClass="com.example.highrps.gatling.setup.DataGenerator" -Dexec.classpathScope=test`
+1. Start main infrastructure: `docker compose -f docker/docker-compose.yml up -d`
+2. Start monitoring stack: `docker compose -f docker/docker-compose-monitoring.yml up -d`
+3. Build the application and load-test classes: `./mvnw -DskipTests clean package`
+4. In a separate terminal, start the application and leave it running: `java -jar target/boot-high-rps-sample-0.1.0-SNAPSHOT.jar --spring.profiles.active=local`
+5. Wait for `http://localhost:8080/actuator/health` to report `UP`.
+6. Generate data: `./mvnw exec:java -Dexec.mainClass="com.example.highrps.gatling.setup.DataGenerator" -Dexec.classpathScope=test`
 
 Alternatively, use the orchestration script: `.\scripts\run-load-test.ps1 -Profile normal`
 

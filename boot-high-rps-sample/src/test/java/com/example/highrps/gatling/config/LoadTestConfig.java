@@ -1,8 +1,12 @@
 package com.example.highrps.gatling.config;
 
+import java.io.InputStream;
 import java.util.Optional;
+import java.util.Properties;
 
 public class LoadTestConfig {
+
+    private static final Properties FILE_PROPERTIES = loadProperties();
 
     // Profiles: smoke, normal, high, stress
     public static final String PROFILE = getProperty("profile", "smoke");
@@ -40,6 +44,7 @@ public class LoadTestConfig {
     public static final int ALLOWED_THROUGHPUT_DELTA_PERCENT = getIntProperty("allowed.throughput.delta.percent", 10);
 
     public static final String DATA_DIR = getProperty("dataDir", "target/loadtest-data");
+    public static final long DATA_SEED = getLongProperty("dataSeed", 2674L);
 
     /**
      * Resolves a setting from a system property, environment variable, or default value.
@@ -52,7 +57,7 @@ public class LoadTestConfig {
         return Optional.ofNullable(System.getProperty(key))
                 .orElseGet(() -> Optional.ofNullable(
                                 System.getenv(key.toUpperCase().replace('.', '_')))
-                        .orElse(defaultValue));
+                        .orElseGet(() -> FILE_PROPERTIES.getProperty(key, defaultValue)));
     }
 
     /**
@@ -77,6 +82,23 @@ public class LoadTestConfig {
     private static double getDoubleProperty(String key, double defaultValue) {
         String val = getProperty(key, null);
         return val != null ? Double.parseDouble(val) : defaultValue;
+    }
+
+    private static long getLongProperty(String key, long defaultValue) {
+        String val = getProperty(key, null);
+        return val != null ? Long.parseLong(val) : defaultValue;
+    }
+
+    private static Properties loadProperties() {
+        Properties properties = new Properties();
+        try (InputStream input = LoadTestConfig.class.getClassLoader().getResourceAsStream("load-test.properties")) {
+            if (input != null) {
+                properties.load(input);
+            }
+        } catch (IOException exception) {
+            throw new IllegalStateException("Unable to load load-test.properties", exception);
+        }
+        return properties;
     }
 
     /**

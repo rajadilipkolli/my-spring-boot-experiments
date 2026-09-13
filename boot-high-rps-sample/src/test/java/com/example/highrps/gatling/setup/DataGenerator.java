@@ -18,7 +18,7 @@ import java.util.UUID;
 public class DataGenerator {
 
     private static final HttpClient client = HttpClient.newHttpClient();
-    private static final Random random = new Random();
+    private static final Random random = new Random(LoadTestConfig.DATA_SEED);
 
     /**
      * Generates load-test fixtures through the running sample API.
@@ -55,14 +55,14 @@ public class DataGenerator {
         try (PrintWriter writer = new PrintWriter(new FileWriter(LoadTestConfig.DATA_DIR + "/authors.csv"))) {
             writer.println("email");
             for (int i = 0; i < count; i++) {
-                String email = "author" + i + "_" + UUID.randomUUID().toString().substring(0, 8) + "@example.com";
+                String email = "author" + i + "_" + nextUuid().toString().substring(0, 8) + "@example.com";
                 String json = "{\"firstName\":\"Author" + i
                         + "\", \"lastName\":\"Test\", \"mobile\":\"1234567890\", \"email\":\"" + email + "\"}";
 
                 HttpRequest request = HttpRequest.newBuilder()
                         .uri(URI.create(LoadTestConfig.BASE_URL + "/api/author"))
                         .header("Content-Type", "application/json")
-                        .header("Idempotency-Key", UUID.randomUUID().toString())
+                        .header("Idempotency-Key", nextUuid().toString())
                         .POST(HttpRequest.BodyPublishers.ofString(json))
                         .build();
 
@@ -135,14 +135,14 @@ public class DataGenerator {
                                         .map(t -> "{\"tagName\":\"" + t + "\"}")
                                         .toList()) + "]";
                 String json = "{\"title\":\"Post " + i + "\", \"content\":\"Content for post " + i
-                        + "\", \"authorEmail\":\"" + author
+                        + "\", \"email\":\"" + author
                         + "\", \"details\":{\"detailsKey\":\"Test details\",\"createdBy\":\"DataGenerator\"}, \"tags\":"
                         + tagsJson + "}";
 
                 HttpRequest request = HttpRequest.newBuilder()
                         .uri(URI.create(LoadTestConfig.BASE_URL + "/api/posts"))
                         .header("Content-Type", "application/json")
-                        .header("Idempotency-Key", UUID.randomUUID().toString())
+                        .header("Idempotency-Key", nextUuid().toString())
                         .POST(HttpRequest.BodyPublishers.ofString(json))
                         .build();
 
@@ -188,7 +188,7 @@ public class DataGenerator {
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(LoadTestConfig.BASE_URL + "/api/posts/" + postId + "/comments"))
                     .header("Content-Type", "application/json")
-                    .header("Idempotency-Key", UUID.randomUUID().toString())
+                    .header("Idempotency-Key", nextUuid().toString())
                     .POST(HttpRequest.BodyPublishers.ofString(json))
                     .build();
 
@@ -210,5 +210,9 @@ public class DataGenerator {
         double p = 3.0;
         double r = random.nextDouble();
         return (int) (Math.pow(r, p) * max);
+    }
+
+    private static UUID nextUuid() {
+        return new UUID(random.nextLong(), random.nextLong());
     }
 }

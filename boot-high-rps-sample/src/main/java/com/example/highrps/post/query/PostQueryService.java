@@ -6,7 +6,6 @@ import com.example.highrps.post.domain.requests.NewPostRequest;
 import com.example.highrps.shared.ResourceNotFoundException;
 import com.example.highrps.shared.redis.DeletionMarkerHandler;
 import com.github.benmanes.caffeine.cache.Cache;
-import java.util.List;
 import java.util.Optional;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StoreQueryParameters;
@@ -203,7 +202,12 @@ public class PostQueryService {
                                 entity.getDetails().getDetailsKey(),
                                 entity.getDetails().getCreatedAt(),
                                 entity.getDetails().getCreatedBy()),
-                List.of());
+                entity.getTags().stream()
+                        .map(postTag -> {
+                            TagEntity tag = postTag.getTagEntity();
+                            return new TagResponse(tag.getId(), tag.getTagName(), tag.getTagDescription());
+                        })
+                        .toList());
     }
 
     /**
