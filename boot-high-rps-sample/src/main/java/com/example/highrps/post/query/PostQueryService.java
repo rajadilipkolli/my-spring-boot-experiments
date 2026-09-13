@@ -53,6 +53,13 @@ public class PostQueryService {
         this.requestCoalescer = new RequestCoalescer<>();
     }
 
+    /**
+     * Resolves a post from the read caches, stream state, or database and warms faster cache layers when possible.
+     *
+     * @param query the post ID query
+     * @return the matching post serialized as JSON
+     * @throws ResourceNotFoundException if the post is marked as deleted or cannot be found
+     */
     public String getPost(PostQuery query) {
         Long postId = query.postId();
         log.debug("Querying post with id: {}", postId);

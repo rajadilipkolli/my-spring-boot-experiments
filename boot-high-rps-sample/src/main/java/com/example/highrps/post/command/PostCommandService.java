@@ -57,6 +57,13 @@ public class PostCommandService extends AbstractCommandService {
         this.redisTemplate = redisTemplate;
     }
 
+    /**
+     * Creates a post and publishes its creation event.
+     *
+     * @param cmd the post data to create
+     * @return a future completed with the created post after the event is published
+     * @throws ResourceConflictException if the post ID is already reserved or is detected by the query service
+     */
     public CompletableFuture<PostCommandResult> createPost(CreatePostCommand cmd) {
         log.info("Creating post with id: {}", cmd.postId());
 

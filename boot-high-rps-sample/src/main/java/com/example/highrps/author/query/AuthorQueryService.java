@@ -58,6 +58,13 @@ public class AuthorQueryService {
         this.requestCoalescer = new RequestCoalescer<>();
     }
 
+    /**
+     * Resolves an author from the read caches, stream state, or database and warms faster cache layers when possible.
+     *
+     * @param query the email-based author query
+     * @return the matching author projection
+     * @throws ResourceNotFoundException if the author is marked as deleted or cannot be found
+     */
     public AuthorProjection getAuthor(AuthorQuery query) {
         String email = query.email();
         log.debug("Querying author with email: {}", email);

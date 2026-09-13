@@ -58,6 +58,13 @@ public class AuthorCommandService extends AbstractCommandService {
         this.authorRedisRepository = authorRedisRepository;
     }
 
+    /**
+     * Creates an author and publishes its creation event, using a lowercase email as the aggregate key.
+     *
+     * @param cmd the author data to create
+     * @return a future completed with the created author after the event is published
+     * @throws ResourceConflictException if the email is already reserved or is detected in the read model
+     */
     public CompletableFuture<AuthorCommandResult> createAuthor(CreateAuthorCommand cmd) {
         String aggregateKey = cmd.email().toLowerCase(Locale.ROOT);
 

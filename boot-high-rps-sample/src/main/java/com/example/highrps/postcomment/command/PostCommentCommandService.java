@@ -77,7 +77,12 @@ public class PostCommentCommandService extends AbstractCommandService {
     }
 
     /**
-     * Create a new comment with event-driven pattern using application events.
+     * Creates a comment for an existing post and publishes its creation event.
+     *
+     * @param cmd the comment data and parent post ID
+     * @return a future completed with the created comment after the event is published
+     * @throws ResourceNotFoundException if the parent post cannot be found
+     * @throws ResourceConflictException if the post and comment title are already reserved
      */
     public CompletableFuture<PostCommentCommandResult> createComment(CreatePostCommentCommand cmd) {
         // Validate post exists

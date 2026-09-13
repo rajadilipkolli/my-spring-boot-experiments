@@ -66,6 +66,12 @@ class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return problemDetail;
     }
 
+    /**
+     * Unwraps an asynchronous request failure and delegates recognized causes to their direct exception handlers.
+     *
+     * @param e the asynchronous wrapper exception
+     * @return problem details for the wrapped failure
+     */
     @ExceptionHandler({CompletionException.class, ExecutionException.class})
     public ProblemDetail handleCompletionException(Exception e) {
         Throwable cause = e.getCause();
@@ -99,6 +105,12 @@ class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return problemDetail;
     }
 
+    /**
+     * Converts a resource conflict into an HTTP 409 problem response.
+     *
+     * @param e the conflict to report
+     * @return problem details containing the conflict message
+     */
     @ExceptionHandler(ResourceConflictException.class)
     public ProblemDetail handle(ResourceConflictException e) {
         log.info("Resource conflict", e);

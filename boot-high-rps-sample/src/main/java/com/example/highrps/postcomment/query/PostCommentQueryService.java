@@ -80,7 +80,11 @@ public class PostCommentQueryService {
     }
 
     /**
-     * Get comment by ID with multi-layer cache pattern.
+     * Resolves a comment that belongs to the requested post and warms faster cache layers when possible.
+     *
+     * @param query the parent post and comment identifiers
+     * @return the matching comment
+     * @throws ResourceNotFoundException if the comment is deleted, absent, or belongs to another post
      */
     public PostCommentCommandResult getCommentById(GetPostCommentQuery query) {
         var cacheKey = CacheKeyGenerator.generatePostCommentKey(

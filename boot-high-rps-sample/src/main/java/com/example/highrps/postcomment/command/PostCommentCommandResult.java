@@ -50,6 +50,7 @@ public record PostCommentCommandResult(
      * Serialize this result to JSON for cache storage.
      *
      * @return JSON representation
+     * @throws IllegalStateException if serialization fails
      */
     public String toJson() {
         try {
