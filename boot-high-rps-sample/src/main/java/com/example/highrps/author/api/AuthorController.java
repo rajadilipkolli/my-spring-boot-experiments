@@ -33,12 +33,24 @@ public class AuthorController {
         this.authorQueryService = authorQueryService;
     }
 
+    /**
+     * Retrieves an author by email address.
+     *
+     * @param email the author's email address
+     * @return the matching author
+     */
     @GetMapping("/{email}")
     public ResponseEntity<AuthorProjection> getAuthorByEmail(@PathVariable String email) {
         AuthorProjection resp = authorQueryService.getAuthor(new AuthorQuery(email.toLowerCase(Locale.ROOT)));
         return ResponseEntity.ok(resp);
     }
 
+    /**
+     * Creates an author from the supplied request.
+     *
+     * @param newAuthorRequest the author details
+     * @return a future containing the created author response
+     */
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public CompletableFuture<ResponseEntity<AuthorCommandResult>> createAuthor(
             @RequestBody @Valid AuthorRequest newAuthorRequest) {
@@ -59,6 +71,13 @@ public class AuthorController {
         });
     }
 
+    /**
+     * Updates the author identified by email.
+     *
+     * @param email the author's current email address
+     * @param newAuthorRequest the replacement author details
+     * @return a future containing the updated author response
+     */
     @PutMapping(
             value = "/{email}",
             consumes = MediaType.APPLICATION_JSON_VALUE,

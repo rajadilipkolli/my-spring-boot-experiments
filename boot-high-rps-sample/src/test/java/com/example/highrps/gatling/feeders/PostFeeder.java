@@ -18,6 +18,11 @@ public class PostFeeder {
 
     private static List<Map<String, Object>> postsCache = null;
 
+    /**
+     * Loads generated posts and their read weights once.
+     *
+     * @return cached post feeder rows
+     */
     public static synchronized List<Map<String, Object>> loadPosts() {
         if (postsCache == null) {
             postsCache = new ArrayList<>();
@@ -37,6 +42,11 @@ public class PostFeeder {
         return postsCache;
     }
 
+    /**
+     * Creates a random feeder with uniform post selection.
+     *
+     * @return the post CSV feeder
+     */
     public static FeederBuilder<String> getUniform() {
         return csv(Paths.get(LoadTestConfig.DATA_DIR + "/posts.csv")
                         .toAbsolutePath()
@@ -44,6 +54,11 @@ public class PostFeeder {
                 .random();
     }
 
+    /**
+     * Creates an infinite iterator that selects posts according to their weights.
+     *
+     * @return the weighted post iterator
+     */
     public static Iterator<Map<String, Object>> getSkewed() {
         List<Map<String, Object>> posts = loadPosts();
         long totalWeight =

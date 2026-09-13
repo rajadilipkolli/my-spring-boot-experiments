@@ -13,6 +13,9 @@ public class TagFeeder {
 
     private static Map<String, List<String>> tagToPosts = null;
 
+    /**
+     * Loads the generated tag-to-post index once.
+     */
     public static synchronized void loadTagToPosts() {
         if (tagToPosts == null) {
             tagToPosts = new HashMap<>();
@@ -33,6 +36,11 @@ public class TagFeeder {
         }
     }
 
+    /**
+     * Creates a random feeder over generated tags.
+     *
+     * @return the tag CSV feeder
+     */
     public static FeederBuilder<String> getTags() {
         return csv(Paths.get(LoadTestConfig.DATA_DIR + "/tags.csv")
                         .toAbsolutePath()
@@ -40,6 +48,12 @@ public class TagFeeder {
                 .random();
     }
 
+    /**
+     * Returns generated post identifiers associated with a tag.
+     *
+     * @param tag the tag name
+     * @return associated post identifiers
+     */
     public static List<String> getPostsForTag(String tag) {
         if (tagToPosts == null) {
             loadTagToPosts();

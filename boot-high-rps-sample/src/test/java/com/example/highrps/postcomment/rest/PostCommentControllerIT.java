@@ -68,6 +68,9 @@ class PostCommentControllerIT extends AbstractIntegrationTest {
         postId = postEntity.getPostRefId();
     }
 
+    /**
+     * Verifies a post comment can be created.
+     */
     @Test
     void shouldCreatePostComment() {
         long count = postCommentRepository.count();
@@ -123,6 +126,9 @@ class PostCommentControllerIT extends AbstractIntegrationTest {
                 });
     }
 
+    /**
+     * Verifies a post comment can be retrieved by identifier.
+     */
     @Test
     void shouldGetPostCommentById() {
         // Create a comment first
@@ -179,6 +185,9 @@ class PostCommentControllerIT extends AbstractIntegrationTest {
                 });
     }
 
+    /**
+     * Verifies all comments for a post can be listed.
+     */
     @Test
     void shouldGetAllCommentsForPost() {
         // Create multiple comments
@@ -230,6 +239,9 @@ class PostCommentControllerIT extends AbstractIntegrationTest {
                         .hasSize(2));
     }
 
+    /**
+     * Verifies a post comment can be updated.
+     */
     @Test
     void shouldUpdatePostComment() {
         // Create a comment
@@ -300,6 +312,9 @@ class PostCommentControllerIT extends AbstractIntegrationTest {
                 });
     }
 
+    /**
+     * Verifies a post comment can be deleted.
+     */
     @Test
     void shouldDeletePostComment() {
         // Create a comment
@@ -351,6 +366,9 @@ class PostCommentControllerIT extends AbstractIntegrationTest {
                 });
     }
 
+    /**
+     * Verifies duplicate comment titles on one post produce a conflict response.
+     */
     @Test
     void shouldRejectDuplicateCommentTitleForSamePost() {
         String title = "Unique Title For Duplicate Test " + UUID.randomUUID();
@@ -390,6 +408,9 @@ class PostCommentControllerIT extends AbstractIntegrationTest {
                 .hasStatus(HttpStatus.CONFLICT);
     }
 
+    /**
+     * Verifies an unknown comment identifier produces a not-found response.
+     */
     @Test
     void shouldReturn404WhenCommentNotFound() {
         mockMvcTester
@@ -401,6 +422,9 @@ class PostCommentControllerIT extends AbstractIntegrationTest {
                 .hasContentType(MediaType.APPLICATION_PROBLEM_JSON);
     }
 
+    /**
+     * Verifies a comment cannot be read through a different parent post.
+     */
     @Test
     void shouldReturn404WhenCommentDoesNotBelongToPost() {
         // Create a comment for this post
@@ -435,6 +459,9 @@ class PostCommentControllerIT extends AbstractIntegrationTest {
                 .hasStatus(HttpStatus.NOT_FOUND);
     }
 
+    /**
+     * Verifies comment reads fall back to Kafka Streams after cache misses.
+     */
     @Test
     void shouldFallbackToKafkaStreamsWhenCachesAreMissed() {
         // 1) Create a comment

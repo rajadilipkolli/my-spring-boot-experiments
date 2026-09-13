@@ -40,6 +40,18 @@ public class AuthorCommandService extends AbstractCommandService {
     private final RedisTemplate<String, String> redisTemplate;
     private final AuthorRedisRepository authorRedisRepository;
 
+    /**
+     * Creates an author command service with its event, cache, and persistence collaborators.
+     *
+     * @param kafkaTemplate publisher for author events
+     * @param localCache local author cache
+     * @param jsonMapper serializer for cached values
+     * @param deletionMarkerHandler handler for deleted aggregates
+     * @param authorQueryService author read service
+     * @param redisTemplate Redis operations used for reservations
+     * @param authorRedisRepository Redis author repository
+     * @param appProperties application configuration
+     */
     public AuthorCommandService(
             KafkaTemplate<String, Object> kafkaTemplate,
             Cache<String, String> localCache,

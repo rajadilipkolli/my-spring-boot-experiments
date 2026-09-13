@@ -53,6 +53,11 @@ public class ApiLoadBenchmark {
         }
     }
 
+    /**
+     * Benchmarks concurrent post creation requests.
+     *
+     * @throws Exception when the HTTP request fails
+     */
     @Benchmark
     @Group("mix")
     @GroupThreads(50)

@@ -41,6 +41,13 @@ public class LoadTestConfig {
 
     public static final String DATA_DIR = getProperty("dataDir", "target/loadtest-data");
 
+    /**
+     * Resolves a setting from a system property, environment variable, or default value.
+     *
+     * @param key the property name
+     * @param defaultValue the fallback value
+     * @return the resolved value
+     */
     private static String getProperty(String key, String defaultValue) {
         return Optional.ofNullable(System.getProperty(key))
                 .orElseGet(() -> Optional.ofNullable(
@@ -48,16 +55,35 @@ public class LoadTestConfig {
                         .orElse(defaultValue));
     }
 
+    /**
+     * Resolves an integer setting.
+     *
+     * @param key the property name
+     * @param defaultValue the fallback value
+     * @return the resolved integer
+     */
     private static int getIntProperty(String key, int defaultValue) {
         String val = getProperty(key, null);
         return val != null ? Integer.parseInt(val) : defaultValue;
     }
 
+    /**
+     * Resolves a decimal setting.
+     *
+     * @param key the property name
+     * @param defaultValue the fallback value
+     * @return the resolved decimal
+     */
     private static double getDoubleProperty(String key, double defaultValue) {
         String val = getProperty(key, null);
         return val != null ? Double.parseDouble(val) : defaultValue;
     }
 
+    /**
+     * Resolves the target request rate for the selected profile.
+     *
+     * @return requests per second
+     */
     private static double getProfileTargetRps() {
         String override = getProperty("targetRps", null);
         if (override != null) {
@@ -71,6 +97,11 @@ public class LoadTestConfig {
         };
     }
 
+    /**
+     * Resolves the steady-state duration for the selected profile.
+     *
+     * @return duration in minutes
+     */
     private static int getProfileDurationMinutes() {
         String override = getProperty("durationMinutes", null);
         if (override != null) {
@@ -83,6 +114,11 @@ public class LoadTestConfig {
         };
     }
 
+    /**
+     * Resolves the warm-up duration for the selected profile.
+     *
+     * @return warm-up time in minutes
+     */
     private static int getProfileWarmupMinutes() {
         String override = getProperty("warmupMinutes", null);
         if (override != null) {

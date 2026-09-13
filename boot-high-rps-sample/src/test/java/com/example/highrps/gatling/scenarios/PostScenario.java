@@ -9,6 +9,11 @@ import java.util.UUID;
 
 public class PostScenario {
 
+    /**
+     * Builds the post creation and verification flow.
+     *
+     * @return the Gatling scenario chain
+     */
     public static ChainBuilder create() {
         return feed(AuthorFeeder.get())
                 .exec(session -> {

@@ -24,6 +24,9 @@ class AuthorControllerIT extends AbstractIntegrationTest {
         super.clearDatabase();
     }
 
+    /**
+     * Verifies the complete author API lifecycle and its read models.
+     */
     @Test
     void crudAuthorResourcesAPICheck() {
         String email = "junitState-" + UUID.randomUUID() + "@email.com";
@@ -201,6 +204,9 @@ class AuthorControllerIT extends AbstractIntegrationTest {
          */
     }
 
+    /**
+     * Verifies author reads fall back to Kafka Streams after cache misses.
+     */
     @Test
     void shouldFallbackToKafkaStreamsWhenCachesAreMissed() {
         String email = "streams-fallback-" + UUID.randomUUID() + "@email.com";

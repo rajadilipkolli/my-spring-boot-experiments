@@ -8,6 +8,11 @@ import java.nio.file.Paths;
 
 public class AuthorFeeder {
 
+    /**
+     * Creates a random feeder over generated authors.
+     *
+     * @return the author CSV feeder
+     */
     public static FeederBuilder<String> get() {
         return csv(Paths.get(LoadTestConfig.DATA_DIR + "/authors.csv")
                         .toAbsolutePath()

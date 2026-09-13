@@ -8,6 +8,11 @@ import io.gatling.javaapi.core.ChainBuilder;
 
 public class ReadCommentsScenario {
 
+    /**
+     * Builds the flow that reads comments for a random post.
+     *
+     * @return the Gatling scenario chain
+     */
     public static ChainBuilder read() {
         return feed(PostFeeder.getUniform())
                 .exec(http("Read Comments").get("/api/posts/#{postId}/comments").check(status().is(200)));

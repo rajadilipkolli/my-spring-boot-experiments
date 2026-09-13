@@ -57,6 +57,12 @@ class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return problemDetail;
     }
 
+    /**
+     * Converts a Kafka publishing failure into an HTTP 503 problem response.
+     *
+     * @param e the publishing failure
+     * @return problem details containing the failure message
+     */
     @ExceptionHandler(KafkaPublishException.class)
     public ProblemDetail handle(KafkaPublishException e) {
         log.error("Kafka publish error", e);
@@ -96,6 +102,12 @@ class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return handleUnexpected(e);
     }
 
+    /**
+     * Converts an invalid argument into an HTTP 400 problem response.
+     *
+     * @param e the invalid argument failure
+     * @return problem details containing the failure message
+     */
     @ExceptionHandler(IllegalArgumentException.class)
     public ProblemDetail handle(IllegalArgumentException e) {
         log.info("Illegal argument", e);
@@ -120,6 +132,12 @@ class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return problemDetail;
     }
 
+    /**
+     * Converts a missing resource into an HTTP 404 problem response.
+     *
+     * @param e the missing-resource failure
+     * @return problem details containing the failure message
+     */
     @ExceptionHandler(ResourceNotFoundException.class)
     public ProblemDetail handle(ResourceNotFoundException e) {
         log.debug("Resource not found: {}", e.getMessage());

@@ -8,6 +8,11 @@ import java.util.UUID;
 
 public class AuthorScenario {
 
+    /**
+     * Builds the author registration and verification flow.
+     *
+     * @return the Gatling scenario chain
+     */
     public static ChainBuilder register() {
         return exec(session -> {
                     String uuid = UUID.randomUUID().toString();

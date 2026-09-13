@@ -9,6 +9,11 @@ import java.util.UUID;
 
 public class CommentScenario {
 
+    /**
+     * Builds the comment creation flow.
+     *
+     * @return the Gatling scenario chain
+     */
     public static ChainBuilder create() {
         return feed(PostFeeder.getUniform())
                 .exec(session -> {

@@ -9,6 +9,11 @@ import java.util.List;
 
 public class TagScenario {
 
+    /**
+     * Builds the flow that reads posts associated with a random tag.
+     *
+     * @return the Gatling scenario chain
+     */
     public static ChainBuilder read() {
         return feed(TagFeeder.getTags())
                 .exec(session -> {

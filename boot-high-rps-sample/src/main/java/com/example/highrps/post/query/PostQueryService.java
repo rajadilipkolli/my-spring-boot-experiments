@@ -37,6 +37,16 @@ public class PostQueryService {
     private final JsonMapper jsonMapper;
     private final PostRepository postRepository;
 
+    /**
+     * Creates a post query service backed by local, Redis, stream, and database views.
+     *
+     * @param localCache local post cache
+     * @param postRedisRepository Redis post repository
+     * @param postRepository database post repository
+     * @param kafkaStreamsFactory Kafka Streams lifecycle access
+     * @param jsonMapper serializer for cached values
+     * @param deletionMarkerHandler handler for deleted aggregates
+     */
     public PostQueryService(
             Cache<String, String> localCache,
             PostRedisRepository postRedisRepository,
@@ -142,6 +152,12 @@ public class PostQueryService {
                 .orElseThrow(() -> new ResourceNotFoundException("Post not found for id: " + postId));
     }
 
+    /**
+     * Checks whether a post can be resolved by identifier.
+     *
+     * @param postId the post identifier
+     * @return {@code true} when the post exists
+     */
     public boolean exists(Long postId) {
         try {
             getPost(new PostQuery(postId));
@@ -151,6 +167,11 @@ public class PostQueryService {
         }
     }
 
+    /**
+     * Returns the post state store when Kafka Streams is running.
+     *
+     * @return the post store, or {@code null} while streams are unavailable
+     */
     private ReadOnlyKeyValueStore<String, NewPostRequest> getKeyValueStore() {
         KafkaStreams kafkaStreams = kafkaStreamsFactory.getKafkaStreams();
         if (kafkaStreams == null || kafkaStreams.state() != KafkaStreams.State.RUNNING) {
@@ -160,6 +181,12 @@ public class PostQueryService {
                 StoreQueryParameters.fromNameAndType("posts-store", QueryableStoreTypes.keyValueStore()));
     }
 
+    /**
+     * Maps a database post to its read projection.
+     *
+     * @param entity the database post
+     * @return the post projection
+     */
     private PostProjection fromEntity(PostEntity entity) {
         return new PostProjection(
                 entity.getPostRefId(),
@@ -179,6 +206,12 @@ public class PostQueryService {
                 List.of());
     }
 
+    /**
+     * Maps a Redis post to its read projection.
+     *
+     * @param postRedis the cached post
+     * @return the post projection
+     */
     private PostProjection fromRedis(PostRedis postRedis) {
         return new PostProjection(
                 postRedis.getId(),

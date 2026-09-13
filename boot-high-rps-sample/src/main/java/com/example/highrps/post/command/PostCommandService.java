@@ -39,6 +39,18 @@ public class PostCommandService extends AbstractCommandService {
     private final com.example.highrps.post.query.PostQueryService postQueryService;
     private final org.springframework.data.redis.core.RedisTemplate<String, String> redisTemplate;
 
+    /**
+     * Creates a post command service with its event, cache, and persistence collaborators.
+     *
+     * @param kafkaTemplate publisher for post events
+     * @param localCache local post cache
+     * @param postRedisRepository Redis post repository
+     * @param jsonMapper serializer for cached values
+     * @param deletionMarkerHandler handler for deleted aggregates
+     * @param postQueryService post read service
+     * @param redisTemplate Redis operations used for reservations
+     * @param appProperties application configuration
+     */
     public PostCommandService(
             KafkaTemplate<String, Object> kafkaTemplate,
             Cache<String, String> localCache,

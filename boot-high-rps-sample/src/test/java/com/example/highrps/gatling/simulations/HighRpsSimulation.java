@@ -25,6 +25,9 @@ public class HighRpsSimulation extends Simulation {
                     percent(LoadTestConfig.CREATE_POST_WEIGHT).then(PostScenario.create()),
                     percent(LoadTestConfig.REGISTER_AUTHOR_WEIGHT).then(AuthorScenario.register()));
 
+    /**
+     * Configures the selected load profile and its regression assertions.
+     */
     public HighRpsSimulation() {
         double targetRps = LoadTestConfig.TARGET_RPS;
         int durationMins = LoadTestConfig.DURATION_MINUTES;

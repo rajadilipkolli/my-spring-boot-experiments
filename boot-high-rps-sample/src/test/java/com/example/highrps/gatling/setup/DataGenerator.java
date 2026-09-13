@@ -20,6 +20,12 @@ public class DataGenerator {
     private static final HttpClient client = HttpClient.newHttpClient();
     private static final Random random = new Random();
 
+    /**
+     * Generates load-test fixtures through the running sample API.
+     *
+     * @param args ignored command-line arguments
+     * @throws Exception when fixture creation or file output fails
+     */
     public static void main(String[] args) throws Exception {
         System.out.println("Starting Data Generation...");
 
@@ -36,6 +42,13 @@ public class DataGenerator {
         System.out.println("Data Generation Completed!");
     }
 
+    /**
+     * Creates authors and writes successful identities to the author feeder.
+     *
+     * @param count the number of authors to request
+     * @return successfully created author emails
+     * @throws Exception when an HTTP request or file operation fails
+     */
     private static List<String> generateAuthors(int count) throws Exception {
         System.out.println("Generating " + count + " authors...");
         List<String> authors = new ArrayList<>();
@@ -65,6 +78,13 @@ public class DataGenerator {
         return authors;
     }
 
+    /**
+     * Generates tag names and their feeder file.
+     *
+     * @param count the number of tags to generate
+     * @return generated tag names
+     * @throws Exception when the feeder file cannot be written
+     */
     private static List<String> generateTags(int count) throws Exception {
         System.out.println("Generating " + count + " tags...");
         List<String> tags = new ArrayList<>();
@@ -79,6 +99,15 @@ public class DataGenerator {
         return tags;
     }
 
+    /**
+     * Creates posts and writes post and tag-association feeders.
+     *
+     * @param count the number of posts to request
+     * @param authors available author emails
+     * @param tags available tag names
+     * @return successfully created post identifiers
+     * @throws Exception when an HTTP request or file operation fails
+     */
     private static List<String> generatePosts(int count, List<String> authors, List<String> tags) throws Exception {
         System.out.println("Generating " + count + " posts...");
         List<String> posts = new ArrayList<>();
@@ -138,6 +167,14 @@ public class DataGenerator {
         return posts;
     }
 
+    /**
+     * Creates comments across the generated posts.
+     *
+     * @param count the number of comments to request
+     * @param posts available post identifiers
+     * @param authors available author emails
+     * @throws Exception when an HTTP request fails
+     */
     private static void generateComments(int count, List<String> posts, List<String> authors) throws Exception {
         System.out.println("Generating " + count + " comments...");
         for (int i = 0; i < count; i++) {
@@ -162,6 +199,12 @@ public class DataGenerator {
         }
     }
 
+    /**
+     * Selects an index using a power distribution that favors lower values.
+     *
+     * @param max the exclusive upper bound
+     * @return a weighted index
+     */
     private static int getSkewedIndex(int max) {
         // Power distribution for skewness (x^p)
         double p = 3.0;

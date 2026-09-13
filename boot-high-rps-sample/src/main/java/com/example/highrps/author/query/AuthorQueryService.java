@@ -42,6 +42,16 @@ public class AuthorQueryService {
     private final JsonMapper jsonMapper;
     private final AuthorRepository authorRepository;
 
+    /**
+     * Creates an author query service backed by local, Redis, stream, and database views.
+     *
+     * @param localCache local author cache
+     * @param authorRedisRepository Redis author repository
+     * @param authorRepository database author repository
+     * @param kafkaStreamsFactory Kafka Streams lifecycle access
+     * @param jsonMapper serializer for cached values
+     * @param deletionMarkerHandler handler for deleted aggregates
+     */
     public AuthorQueryService(
             Cache<String, String> localCache,
             AuthorRedisRepository authorRedisRepository,
@@ -159,6 +169,12 @@ public class AuthorQueryService {
         return projection;
     }
 
+    /**
+     * Checks whether an author can be resolved by email.
+     *
+     * @param email the email to check
+     * @return {@code true} when the author exists
+     */
     public boolean exists(String email) {
         try {
             getAuthor(new AuthorQuery(email));
@@ -177,6 +193,12 @@ public class AuthorQueryService {
                 StoreQueryParameters.fromNameAndType("authors-store", QueryableStoreTypes.keyValueStore()));
     }
 
+    /**
+     * Deserializes a cached author projection.
+     *
+     * @param json the cached JSON value
+     * @return the deserialized projection
+     */
     private AuthorProjection parseProjection(String json) {
         try {
             return jsonMapper.readValue(json, AuthorProjection.class);
@@ -185,6 +207,12 @@ public class AuthorQueryService {
         }
     }
 
+    /**
+     * Maps a database author to its read projection.
+     *
+     * @param entity the database author
+     * @return the author projection
+     */
     private AuthorProjection fromEntity(AuthorEntity entity) {
         return new AuthorProjection(
                 entity.getEmail(),
@@ -197,6 +225,12 @@ public class AuthorQueryService {
                 entity.getModifiedAt());
     }
 
+    /**
+     * Maps a Redis author to its read projection.
+     *
+     * @param authorRedis the cached author
+     * @return the author projection
+     */
     private AuthorProjection fromRedis(AuthorRedis authorRedis) {
         return new AuthorProjection(
                 authorRedis.getEmail(),

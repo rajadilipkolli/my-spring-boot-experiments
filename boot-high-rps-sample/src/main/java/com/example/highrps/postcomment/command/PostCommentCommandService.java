@@ -49,6 +49,20 @@ public class PostCommentCommandService extends AbstractCommandService {
     private final PostCommentRedisRepository postCommentRedisRepository;
     private final RedisTemplate<String, String> redisTemplate;
 
+    /**
+     * Creates a comment command service with its event, cache, and persistence collaborators.
+     *
+     * @param postQueryService post read service
+     * @param postCommentQueryService comment read service
+     * @param kafkaTemplate publisher for comment events
+     * @param localCache local comment cache
+     * @param postCommentMapper comment mapper
+     * @param meterRegistry metrics registry
+     * @param deletionMarkerHandler handler for deleted aggregates
+     * @param postCommentRedisRepository Redis comment repository
+     * @param appProperties application configuration
+     * @param redisTemplate Redis operations used for reservations
+     */
     public PostCommentCommandService(
             PostQueryService postQueryService,
             PostCommentQueryService postCommentQueryService,
@@ -206,6 +220,13 @@ public class PostCommentCommandService extends AbstractCommandService {
                 "PostComment");
     }
 
+    /**
+     * Updates local and Redis read caches after a comment mutation.
+     *
+     * @param postId the parent post identifier
+     * @param commentId the comment identifier
+     * @param result the current comment state
+     */
     private void updateCaches(Long postId, Long commentId, PostCommentCommandResult result) {
         String cacheKey = CacheKeyGenerator.generatePostCommentKey(postId, commentId);
 

@@ -35,6 +35,9 @@ class PostControllerIT extends AbstractIntegrationTest {
         super.clearDatabase();
     }
 
+    /**
+     * Verifies that the post creation endpoint persists a post.
+     */
     @Test
     void createPost() {
         var result = mockMvcTester
@@ -84,6 +87,9 @@ class PostControllerIT extends AbstractIntegrationTest {
                 .hasContentType(MediaType.APPLICATION_PROBLEM_JSON);
     }
 
+    /**
+     * Verifies the complete post API lifecycle.
+     */
     @Test
     void crudPostResourcesAPICheck() {
         String title = "sample-post";
@@ -243,6 +249,9 @@ class PostControllerIT extends AbstractIntegrationTest {
         assertThat(localCache.getIfPresent(cacheKey)).isNull();
     }
 
+    /**
+     * Verifies post mutations are reflected in stream and cache state.
+     */
     @Test
     void crudPostResourcesWithStateCheck() {
         String title = "delete-me";
@@ -428,6 +437,9 @@ class PostControllerIT extends AbstractIntegrationTest {
         assertThat(postRedisRepository.existsById(postId.get())).isFalse();
     }
 
+    /**
+     * Verifies post reads fall back to Kafka Streams after cache misses.
+     */
     @Test
     void shouldFallbackToKafkaStreamsWhenCachesAreMissed() {
         AuthorEntity entity = new AuthorEntity()
@@ -545,6 +557,9 @@ class PostControllerIT extends AbstractIntegrationTest {
         assertThat(localCache.getIfPresent(cacheKey)).isNotNull();
     }
 
+    /**
+     * Verifies duplicate post identifiers produce a conflict response.
+     */
     @Test
     @DisplayName("Should reject duplicate post creation with same postId")
     void testShouldRejectDuplicatePost() {

@@ -25,17 +25,35 @@ public class PostController {
     private final PostCommandService postCommandService;
     private final PostQueryService postQueryService;
 
+    /**
+     * Creates a post controller.
+     *
+     * @param postCommandService post write service
+     * @param postQueryService post read service
+     */
     public PostController(PostCommandService postCommandService, PostQueryService postQueryService) {
         this.postCommandService = postCommandService;
         this.postQueryService = postQueryService;
     }
 
+    /**
+     * Retrieves a post by its public identifier.
+     *
+     * @param postId the post identifier
+     * @return the serialized post
+     */
     @GetMapping(value = "/{postId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> getPostByPostId(@PathVariable @Positive Long postId) {
         String postJson = postQueryService.getPost(new PostQuery(postId));
         return ResponseEntity.ok(postJson);
     }
 
+    /**
+     * Creates a post.
+     *
+     * @param newPostRequest the post details
+     * @return a future containing the created post response
+     */
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public CompletableFuture<ResponseEntity<PostCommandResult>> createPost(
             @RequestBody @Valid NewPostRequest newPostRequest) {
@@ -50,6 +68,13 @@ public class PostController {
         });
     }
 
+    /**
+     * Updates a post.
+     *
+     * @param postId the post identifier
+     * @param updatePostRequest the replacement post details
+     * @return a future containing the updated post response
+     */
     @PutMapping(
             value = "/{postId}",
             consumes = MediaType.APPLICATION_JSON_VALUE,
@@ -60,6 +85,12 @@ public class PostController {
         return postCommandService.updatePost(cmd).thenApply(ResponseEntity::ok);
     }
 
+    /**
+     * Deletes a post.
+     *
+     * @param postId the post identifier
+     * @return a future containing an empty response
+     */
     @DeleteMapping(value = "/{postId}")
     public CompletableFuture<ResponseEntity<Void>> deletePost(@PathVariable @Positive Long postId) {
         return postCommandService

@@ -32,16 +32,35 @@ public class PostCommentController {
     private final PostCommentCommandService commandService;
     private final PostCommentQueryService queryService;
 
+    /**
+     * Creates a post-comment controller.
+     *
+     * @param commandService comment write service
+     * @param queryService comment read service
+     */
     public PostCommentController(PostCommentCommandService commandService, PostCommentQueryService queryService) {
         this.commandService = commandService;
         this.queryService = queryService;
     }
 
+    /**
+     * Lists comments for a post.
+     *
+     * @param postId the parent post identifier
+     * @return the post's comments
+     */
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<PostCommentCommandResult>> getAllComments(@PathVariable @Positive Long postId) {
         return ResponseEntity.ok(queryService.getCommentsByPostId(postId));
     }
 
+    /**
+     * Retrieves a comment belonging to a post.
+     *
+     * @param postId the parent post identifier
+     * @param postCommentId the comment identifier
+     * @return the matching comment
+     */
     @GetMapping(value = "/{postCommentId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<PostCommentCommandResult> getComment(
             @PathVariable @Positive Long postId, @PathVariable @Positive Long postCommentId) {
@@ -50,6 +69,13 @@ public class PostCommentController {
         return ResponseEntity.ok(result);
     }
 
+    /**
+     * Creates a comment for a post.
+     *
+     * @param postId the parent post identifier
+     * @param request the comment details
+     * @return a future containing the created comment response
+     */
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public CompletableFuture<ResponseEntity<PostCommentCommandResult>> createComment(
             @PathVariable @Positive Long postId, @RequestBody @Valid CreatePostCommentRequest request) {
@@ -66,6 +92,14 @@ public class PostCommentController {
                 });
     }
 
+    /**
+     * Updates a comment belonging to a post.
+     *
+     * @param postId the parent post identifier
+     * @param postCommentId the comment identifier
+     * @param request the replacement comment details
+     * @return a future containing the updated comment response
+     */
     @PutMapping(
             value = "/{postCommentId}",
             consumes = MediaType.APPLICATION_JSON_VALUE,

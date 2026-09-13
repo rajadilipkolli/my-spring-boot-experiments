@@ -9,6 +9,11 @@ import java.util.Map;
 
 public class ReadPostScenario {
 
+    /**
+     * Builds the weighted post-read flow with optional comment retrieval.
+     *
+     * @return the Gatling scenario chain
+     */
     public static ChainBuilder read() {
         return exec(session -> {
                     Map<String, Object> post = PostFeeder.getSkewed().next();

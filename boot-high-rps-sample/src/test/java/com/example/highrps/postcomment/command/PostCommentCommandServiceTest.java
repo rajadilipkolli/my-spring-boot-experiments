@@ -75,6 +75,9 @@ class PostCommentCommandServiceTest {
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private MeterRegistry meterRegistry;
 
+    /**
+     * Creates the command service under test with mocked collaborators.
+     */
     @BeforeEach
     void setUp() {
         AppProperties appProperties = new AppProperties();
@@ -92,6 +95,9 @@ class PostCommentCommandServiceTest {
                 redisTemplate);
     }
 
+    /**
+     * Verifies comment creation publishes a creation event.
+     */
     @Test
     @DisplayName("Should publish PostCommentCreatedEvent when creating a comment")
     void shouldPublishEventWhenCreatingComment() {
@@ -123,6 +129,9 @@ class PostCommentCommandServiceTest {
                 .isEqualTo(String.valueOf(eventCaptor.getValue().commentId()));
     }
 
+    /**
+     * Verifies comment updates publish an update event.
+     */
     @Test
     @DisplayName("Should publish PostCommentUpdatedEvent when updating a comment")
     void shouldPublishEventWhenUpdatingComment() {
