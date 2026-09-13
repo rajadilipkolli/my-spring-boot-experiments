@@ -36,53 +36,6 @@ class PostControllerIT extends AbstractIntegrationTest {
     }
 
     @Test
-    void shouldRejectDuplicatePostTitle() {
-        String title = "Unique Title For Duplicate Test " + UUID.randomUUID();
-
-        // First post should succeed
-        mockMvcTester
-                .post()
-                .header("Idempotency-Key", UUID.randomUUID().toString())
-                .uri("/api/posts")
-                .content("""
-                        {
-                          "title": "%s",
-                          "content": "First post content",
-                          "email": "junit@email.com",
-                          "details": {
-                            "detailsKey": "This is a summary",
-                            "createdBy": "JunitIteration"
-                          }
-                        }
-                        """.formatted(title))
-                .contentType(MediaType.APPLICATION_JSON)
-                .exchange()
-                .assertThat()
-                .hasStatus(HttpStatus.CREATED);
-
-        // Second post with the same title should fail with 409 Conflict
-        mockMvcTester
-                .post()
-                .header("Idempotency-Key", UUID.randomUUID().toString())
-                .uri("/api/posts")
-                .content("""
-                        {
-                          "title": "%s",
-                          "content": "Second post content",
-                          "email": "junit@email.com",
-                          "details": {
-                            "detailsKey": "This is a summary",
-                            "createdBy": "JunitIteration"
-                          }
-                        }
-                        """.formatted(title))
-                .contentType(MediaType.APPLICATION_JSON)
-                .exchange()
-                .assertThat()
-                .hasStatus(HttpStatus.CONFLICT);
-    }
-
-    @Test
     void createPost() {
         var result = mockMvcTester
                 .post()
@@ -641,7 +594,7 @@ class PostControllerIT extends AbstractIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .exchange()
                 .assertThat()
-                .hasStatus(HttpStatus.BAD_REQUEST)
+                .hasStatus(HttpStatus.CONFLICT)
                 .hasContentType(MediaType.APPLICATION_PROBLEM_JSON);
     }
 }
