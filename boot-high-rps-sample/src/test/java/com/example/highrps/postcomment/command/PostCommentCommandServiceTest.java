@@ -11,6 +11,7 @@ import static org.mockito.Mockito.when;
 import com.example.highrps.post.query.PostQueryService;
 import com.example.highrps.postcomment.domain.PostCommentMapper;
 import com.example.highrps.postcomment.domain.PostCommentRedisRepository;
+import com.example.highrps.postcomment.domain.PostCommentRequest;
 import com.example.highrps.postcomment.domain.events.PostCommentCreatedEvent;
 import com.example.highrps.postcomment.domain.events.PostCommentDeletedEvent;
 import com.example.highrps.postcomment.domain.events.PostCommentUpdatedEvent;
@@ -21,6 +22,7 @@ import com.example.highrps.shared.config.AppProperties;
 import com.example.highrps.shared.redis.DeletionMarkerHandler;
 import com.github.benmanes.caffeine.cache.Cache;
 import io.micrometer.core.instrument.MeterRegistry;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.concurrent.CompletableFuture;
@@ -31,6 +33,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.kafka.core.KafkaTemplate;
 
 /**
@@ -61,10 +64,13 @@ class PostCommentCommandServiceTest {
     private PostCommentRedisRepository postCommentRedisRepository;
 
     @Mock
+    private PostCommentMapper postCommentMapper;
+
+    @Mock
     private RedisTemplate<String, String> redisTemplate;
 
     @Mock
-    private PostCommentMapper postCommentMapper;
+    private ValueOperations<String, String> valueOperations;
 
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private MeterRegistry meterRegistry;
@@ -90,7 +96,18 @@ class PostCommentCommandServiceTest {
     @DisplayName("Should publish PostCommentCreatedEvent when creating a comment")
     void shouldPublishEventWhenCreatingComment() {
         // Arrange
+        org.mockito.Mockito.lenient().when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+        org.mockito.Mockito.lenient()
+                .when(valueOperations.setIfAbsent(
+                        org.mockito.ArgumentMatchers.anyString(),
+                        org.mockito.ArgumentMatchers.anyString(),
+                        org.mockito.ArgumentMatchers.any(java.time.Duration.class)))
+                .thenReturn(true);
+
         Long postId = 1L;
+        given(redisTemplate.opsForValue()).willReturn(valueOperations);
+        given(valueOperations.setIfAbsent(anyString(), anyString(), any(Duration.class)))
+                .willReturn(true);
         when(postQueryService.exists(postId)).thenReturn(true);
         CreatePostCommentCommand command = new CreatePostCommentCommand("Title", "Content", postId, true);
         given(kafkaTemplate.send(anyString(), anyString(), any())).willReturn(CompletableFuture.completedFuture(null));
@@ -125,6 +142,16 @@ class PostCommentCommandServiceTest {
                         LocalDateTime.now(),
                         LocalDateTime.now()));
         given(kafkaTemplate.send(anyString(), anyString(), any())).willReturn(CompletableFuture.completedFuture(null));
+        given(postCommentMapper.toResultFromRequest(any(PostCommentRequest.class)))
+                .willReturn(new PostCommentCommandResult(
+                        updateCommand.commentId().id(),
+                        postId,
+                        updateCommand.title(),
+                        updateCommand.content(),
+                        true,
+                        OffsetDateTime.now(),
+                        LocalDateTime.now(),
+                        LocalDateTime.now()));
 
         // Act
         postCommentCommandService.updateComment(updateCommand).join();

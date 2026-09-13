@@ -63,8 +63,8 @@ jobs:
           git checkout HEAD~1
           
           # Start Infra and Monitoring
-          docker-compose -f docker/docker-compose.yml up -d
-          docker-compose -f docker/docker-compose-monitoring.yml up -d
+          docker compose -f docker/docker-compose.yml up -d
+          docker compose -f docker/docker-compose-monitoring.yml up -d
           
           # Build & Start App
           ./mvnw -DskipTests clean package
@@ -89,8 +89,8 @@ jobs:
           
           # Teardown
           kill $APP_PID
-          docker-compose -f docker/docker-compose.yml down -v
-          docker-compose -f docker/docker-compose-monitoring.yml down -v
+          docker compose -f docker/docker-compose.yml down -v
+          docker compose -f docker/docker-compose-monitoring.yml down -v
           
       - name: Run High RPS (HEAD)
         run: |
@@ -98,8 +98,8 @@ jobs:
           git checkout $current_head
           
           # Start Infra and Monitoring
-          docker-compose -f docker/docker-compose.yml up -d
-          docker-compose -f docker/docker-compose-monitoring.yml up -d
+          docker compose -f docker/docker-compose.yml up -d
+          docker compose -f docker/docker-compose-monitoring.yml up -d
           
           # Build & Start App
           ./mvnw -DskipTests clean package
@@ -123,8 +123,8 @@ jobs:
           
           # Teardown
           kill $APP_PID
-          docker-compose -f docker/docker-compose.yml down -v
-          docker-compose -f docker/docker-compose-monitoring.yml down -v
+          docker compose -f docker/docker-compose.yml down -v
+          docker compose -f docker/docker-compose-monitoring.yml down -v
           
       - name: Compare Results
         run: |
