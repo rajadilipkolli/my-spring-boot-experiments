@@ -130,17 +130,17 @@ public class PostCommentCommandService extends AbstractCommandService {
         PostCommentCommandResult result = postCommentMapper.toResultFromRequest(request);
 
         return executeCommand(
-                "post-comments-aggregates",
-                String.valueOf(commentId),
-                CacheKeyGenerator.generatePostCommentKey(cmd.postId(), commentId),
-                event,
-                result,
-                () -> {
-                    updateCaches(cmd.postId(), commentId, result);
-                    eventsPublishedCounter.increment();
-                },
-                "create post comment",
-                "PostComment")
+                        "post-comments-aggregates",
+                        String.valueOf(commentId),
+                        CacheKeyGenerator.generatePostCommentKey(cmd.postId(), commentId),
+                        event,
+                        result,
+                        () -> {
+                            updateCaches(cmd.postId(), commentId, result);
+                            eventsPublishedCounter.increment();
+                        },
+                        "create post comment",
+                        "PostComment")
                 .whenComplete((_, err) -> {
                     if (err != null && !isPendingPublishFailure(err)) {
                         try {
