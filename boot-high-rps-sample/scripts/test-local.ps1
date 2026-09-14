@@ -1,3 +1,9 @@
+param(
+    [string]$Profile = "smoke",
+    [int]$DurationMinutes = 1,
+    [int]$WarmupMinutes = 1
+)
+
 Stop-Process -Name java -ErrorAction SilentlyContinue
 
 Write-Host "Starting infrastructure..."
@@ -38,17 +44,21 @@ if (-not $AppReady) {
     exit 1
 }
 
-Write-Host "App is UP! Running Data Generator..."
-cmd /c "mvnw.cmd exec:java -Dexec.mainClass=com.example.highrps.gatling.setup.DataGenerator -Dexec.classpathScope=test -DdataDir=target/loadtest-data"
+if (Test-Path "target/loadtest-data") {
+    Write-Host "Data already present under target/loadtest-data. Skipping Data Generator..."
+} else {
+    Write-Host "App is UP! Running Data Generator..."
+    cmd /c "mvnw.cmd exec:java -Dexec.mainClass=com.example.highrps.gatling.setup.DataGenerator -Dexec.classpathScope=test -DdataDir=target/loadtest-data"
 
-if ($LASTEXITCODE -ne 0) {
-    Write-Host "Data Generator failed!"
-    Stop-Process -Name java -ErrorAction SilentlyContinue
-    exit 1
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "Data Generator failed!"
+        Stop-Process -Name java -ErrorAction SilentlyContinue
+        exit 1
+    }
 }
 
-Write-Host "Running Gatling..."
-cmd /c "mvnw.cmd gatling:test -Dprofile=smoke -DdurationMinutes=1 -DwarmupMinutes=1"
+Write-Host "Running Gatling with Profile: $Profile..."
+cmd /c "mvnw.cmd gatling:test -Dprofile=$Profile -DdurationMinutes=$DurationMinutes -DwarmupMinutes=$WarmupMinutes"
 
 Stop-Process -Name java -ErrorAction SilentlyContinue
 Write-Host "Done!"

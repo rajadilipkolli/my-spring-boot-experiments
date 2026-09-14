@@ -37,7 +37,17 @@ public class DataGenerator {
         List<String> authors = generateAuthors(LoadTestConfig.AUTHORS_SIZE);
         List<String> tags = generateTags(LoadTestConfig.TAGS_SIZE);
         List<String> posts = generatePosts(LoadTestConfig.POSTS_SIZE, authors, tags);
-        generateComments(LoadTestConfig.COMMENTS_SIZE, posts, authors);
+        generateComments(LoadTestConfig.COMMENTS_SIZE, posts, authors, null);
+
+        System.out.println("Generating mutable/deletable pools...");
+        List<String> mutablePosts =
+                generatePostsSimple(LoadTestConfig.MUTABLE_POST_POOL_SIZE, authors, tags, "/mutable_posts.csv");
+        List<String> deletablePosts =
+                generatePostsSimple(LoadTestConfig.DELETABLE_POST_POOL_SIZE, authors, tags, "/deletable_posts.csv");
+
+        generateComments(LoadTestConfig.MUTABLE_COMMENT_POOL_SIZE, mutablePosts, authors, "/mutable_comments.csv");
+        generateComments(
+                LoadTestConfig.DELETABLE_COMMENT_POOL_SIZE, deletablePosts, authors, "/deletable_comments.csv");
 
         System.out.println("Data Generation Completed!");
     }
@@ -108,6 +118,51 @@ public class DataGenerator {
      * @return successfully created post identifiers
      * @throws Exception when an HTTP request or file operation fails
      */
+    private static List<String> generatePostsSimple(int count, List<String> authors, List<String> tags, String fileName)
+            throws Exception {
+        System.out.println("Generating " + count + " posts for " + fileName + "...");
+        List<String> posts = new ArrayList<>();
+        try (PrintWriter writer = new PrintWriter(new FileWriter(LoadTestConfig.DATA_DIR + fileName))) {
+            writer.println("postId,authorEmail");
+            for (int i = 0; i < count; i++) {
+                String author = authors.get(random.nextInt(authors.size()));
+                int numTags = 1;
+                List<String> postTags = new ArrayList<>();
+                for (int j = 0; j < numTags; j++) {
+                    postTags.add(tags.get(random.nextInt(tags.size())));
+                }
+                String tagsJson = "["
+                        + String.join(
+                                ",",
+                                postTags.stream()
+                                        .map(t -> "{\"tagName\":\"" + t + "\"}")
+                                        .toList()) + "]";
+                String json = "{\"title\":\"Pool Post " + i + "\", \"content\":\"Content for pool post " + i
+                        + "\", \"email\":\"" + author
+                        + "\", \"details\":{\"detailsKey\":\"Test\",\"createdBy\":\"DataGenerator\"}, \"tags\":"
+                        + tagsJson + "}";
+
+                HttpRequest request = HttpRequest.newBuilder()
+                        .uri(URI.create(LoadTestConfig.BASE_URL + "/api/posts"))
+                        .header("Content-Type", "application/json")
+                        .header("Idempotency-Key", nextUuid().toString())
+                        .POST(HttpRequest.BodyPublishers.ofString(json))
+                        .build();
+
+                HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+                if (response.statusCode() == 201) {
+                    String location = response.headers().firstValue("Location").orElse("");
+                    String postId = location.substring(location.lastIndexOf('/') + 1);
+                    posts.add(postId);
+                    writer.println(postId + "," + author);
+                } else {
+                    System.err.println("Failed to create post: " + response.statusCode() + " " + response.body());
+                }
+            }
+        }
+        return posts;
+    }
+
     private static List<String> generatePosts(int count, List<String> authors, List<String> tags) throws Exception {
         System.out.println("Generating " + count + " posts...");
         List<String> posts = new ArrayList<>();
@@ -175,26 +230,41 @@ public class DataGenerator {
      * @param authors available author emails
      * @throws Exception when an HTTP request fails
      */
-    private static void generateComments(int count, List<String> posts, List<String> authors) throws Exception {
-        System.out.println("Generating " + count + " comments...");
-        for (int i = 0; i < count; i++) {
-            // Most posts get few comments, some get many
-            String postId = posts.get(getSkewedIndex(posts.size()));
-            String author = authors.get(random.nextInt(authors.size()));
+    private static void generateComments(int count, List<String> posts, List<String> authors, String fileName)
+            throws Exception {
+        System.out.println("Generating " + count + " comments" + (fileName != null ? " for " + fileName : "") + "...");
+        PrintWriter writer = null;
+        if (fileName != null) {
+            writer = new PrintWriter(new FileWriter(LoadTestConfig.DATA_DIR + fileName));
+            writer.println("postId,commentId,authorEmail");
+        }
+        try {
+            for (int i = 0; i < count; i++) {
+                String postId = posts.get(getSkewedIndex(posts.size()));
+                String author = authors.get(random.nextInt(authors.size()));
 
-            String json = "{\"title\":\"Comment " + i + "\", \"content\":\"Comment " + i + "\", \"authorEmail\":\""
-                    + author + "\", \"published\":true}";
+                String json = "{\"title\":\"Comment " + i + "\", \"content\":\"Comment " + i + "\", \"authorEmail\":\""
+                        + author + "\", \"published\":true}";
 
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(LoadTestConfig.BASE_URL + "/api/posts/" + postId + "/comments"))
-                    .header("Content-Type", "application/json")
-                    .header("Idempotency-Key", nextUuid().toString())
-                    .POST(HttpRequest.BodyPublishers.ofString(json))
-                    .build();
+                HttpRequest request = HttpRequest.newBuilder()
+                        .uri(URI.create(LoadTestConfig.BASE_URL + "/api/posts/" + postId + "/comments"))
+                        .header("Content-Type", "application/json")
+                        .header("Idempotency-Key", nextUuid().toString())
+                        .POST(HttpRequest.BodyPublishers.ofString(json))
+                        .build();
 
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            if (response.statusCode() != 201) {
-                System.err.println("Failed to create comment: " + response.statusCode() + " " + response.body());
+                HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+                if (response.statusCode() != 201) {
+                    System.err.println("Failed to create comment: " + response.statusCode() + " " + response.body());
+                } else if (writer != null) {
+                    String location = response.headers().firstValue("Location").orElse("");
+                    String commentId = location.substring(location.lastIndexOf('/') + 1);
+                    writer.println(postId + "," + commentId + "," + author);
+                }
+            }
+        } finally {
+            if (writer != null) {
+                writer.close();
             }
         }
     }

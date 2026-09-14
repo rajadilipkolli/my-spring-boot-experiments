@@ -238,21 +238,23 @@ public class PostCommentCommandService extends AbstractCommandService {
             log.warn("Failed to update local cache for comment: {}", commentId, e);
         }
 
-        // Update Redis synchronously for guaranteed read-your-writes
-        try {
-            PostCommentRedis redisEntity = new PostCommentRedis()
-                    .setCommentId(String.valueOf(commentId))
-                    .setTitle(result.title())
-                    .setContent(result.content())
-                    .setPublished(result.published())
-                    .setPublishedAt(result.publishedAt())
-                    .setPostId(postId);
-            redisEntity.setCreatedAt(result.createdAt());
-            redisEntity.setModifiedAt(result.modifiedAt());
-            postCommentRedisRepository.save(redisEntity);
-            log.debug("Synchronously updated Redis for post comment: {}", commentId);
-        } catch (Exception e) {
-            log.error("Failed to synchronously update Redis for post comment: {}", commentId, e);
-        }
+        // Update Redis asynchronously to avoid blocking the hot path
+        CompletableFuture.runAsync(() -> {
+            try {
+                PostCommentRedis redisEntity = new PostCommentRedis()
+                        .setCommentId(String.valueOf(commentId))
+                        .setTitle(result.title())
+                        .setContent(result.content())
+                        .setPublished(result.published())
+                        .setPublishedAt(result.publishedAt())
+                        .setPostId(postId);
+                redisEntity.setCreatedAt(result.createdAt());
+                redisEntity.setModifiedAt(result.modifiedAt());
+                postCommentRedisRepository.save(redisEntity);
+                log.debug("Asynchronously updated Redis for post comment: {}", commentId);
+            } catch (Exception e) {
+                log.error("Failed to asynchronously update Redis for post comment: {}", commentId, e);
+            }
+        });
     }
 }

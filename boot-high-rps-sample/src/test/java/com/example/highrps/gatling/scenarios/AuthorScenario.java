@@ -19,7 +19,7 @@ public class AuthorScenario {
                     return session.set("newEmail", "new_author_" + uuid.substring(0, 8) + "@example.com")
                             .set("idempotencyKey", uuid);
                 })
-                .exec(http("Register Author")
+                .exec(http("author_register")
                         .post("/api/author")
                         .header("Idempotency-Key", "#{idempotencyKey}")
                         .body(

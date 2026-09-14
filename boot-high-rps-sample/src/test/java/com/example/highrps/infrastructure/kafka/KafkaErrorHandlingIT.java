@@ -5,6 +5,7 @@ import static org.awaitility.Awaitility.await;
 
 import com.example.highrps.common.AbstractIntegrationTest;
 import java.time.Duration;
+import java.util.concurrent.TimeUnit;
 import org.apache.kafka.streams.KafkaStreams;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -29,7 +30,7 @@ class KafkaErrorHandlingIT extends AbstractIntegrationTest {
         String poisonPillKey = "poison-pill-key";
         byte[] poisonPillValue = "invalid-json-not-base64".getBytes();
         try {
-            kafkaTemplate.send(topic, poisonPillKey, poisonPillValue).get(10, java.util.concurrent.TimeUnit.SECONDS);
+            kafkaTemplate.send(topic, poisonPillKey, poisonPillValue).get(10, TimeUnit.SECONDS);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -47,7 +48,7 @@ class KafkaErrorHandlingIT extends AbstractIntegrationTest {
         // Act: send poison pill to the topic consumed by Streams
         String poisonPillKey = "streams-poison-pill-key";
         byte[] poisonPillValue = "not-a-valid-json".getBytes();
-        kafkaTemplate.send("events", poisonPillKey, poisonPillValue).get(10, java.util.concurrent.TimeUnit.SECONDS);
+        kafkaTemplate.send("posts-aggregates", poisonPillKey, poisonPillValue).get(10, TimeUnit.SECONDS);
 
         // Assert: wait a bit and ensure Streams state is still RUNNING
         await().atMost(Duration.ofSeconds(10)).untilAsserted(() -> {

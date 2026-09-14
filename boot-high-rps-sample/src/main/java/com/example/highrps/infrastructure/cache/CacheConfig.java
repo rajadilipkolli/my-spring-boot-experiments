@@ -1,5 +1,6 @@
 package com.example.highrps.infrastructure.cache;
 
+import com.example.highrps.shared.config.AppProperties;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import java.time.Duration;
@@ -21,9 +22,9 @@ public class CacheConfig {
     private static final Logger log = LoggerFactory.getLogger(CacheConfig.class);
 
     @Bean
-    Cache<String, String> localCache() {
+    Cache<String, String> localCache(AppProperties appProperties) {
         return Caffeine.newBuilder()
-                .maximumSize(10_000)
+                .maximumSize(appProperties.getCache().getLocalMaxSize())
                 .expireAfterWrite(Duration.ofMinutes(5))
                 .executor(Executors.newVirtualThreadPerTaskExecutor())
                 .recordStats()

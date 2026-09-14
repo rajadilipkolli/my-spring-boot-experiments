@@ -1,72 +1,152 @@
 param(
-    [Parameter(Mandatory=$true)]
-    [string]$BaselineStats,
+    [Parameter(Mandatory=True)]
+    [string],
     
-    [Parameter(Mandatory=$true)]
-    [string]$HighRpsStats
+    [Parameter(Mandatory=True)]
+    [string],
+    
+    [Parameter(Mandatory=False)]
+    [string] = "",
+    
+    [Parameter(Mandatory=False)]
+    [string] = ""
 )
 
-if (-not (Test-Path $BaselineStats) -or -not (Test-Path $HighRpsStats)) {
+if (-not (Test-Path ) -or -not (Test-Path )) {
     Write-Error "Both stats files must exist."
     exit 1
 }
 
-$baseline = Get-Content $BaselineStats | ConvertFrom-Json
-$highRps = Get-Content $HighRpsStats | ConvertFrom-Json
-
-$bStats = $baseline.stats
-$hStats = $highRps.stats
-
-$bReqs = $bStats.numberOfRequests.total
-$hReqs = $hStats.numberOfRequests.total
-$bOk = $bStats.numberOfRequests.ok
-$hOk = $hStats.numberOfRequests.ok
-$bKo = $bStats.numberOfRequests.ko
-$hKo = $hStats.numberOfRequests.ko
-
-$bErrRate = if ($bReqs -gt 0) { [math]::Round(($bKo / $bReqs) * 100, 2) } else { $null }
-$hErrRate = if ($hReqs -gt 0) { [math]::Round(($hKo / $hReqs) * 100, 2) } else { $null }
-$bErrRateDisplay = if ($null -eq $bErrRate) { "N/A" } else { $bErrRate }
-$hErrRateDisplay = if ($null -eq $hErrRate) { "N/A" } else { $hErrRate }
-$errRateDelta = if ($null -eq $bErrRate -or $null -eq $hErrRate) {
-    "N/A"
-} else {
-    [math]::Round($hErrRate - $bErrRate, 2)
-}
-
-$bMeanRps = $bStats.meanNumberOfRequestsPerSecond.total
-$hMeanRps = $hStats.meanNumberOfRequestsPerSecond.total
-
-# Percentiles
-$b50 = $bStats.percentiles1.total
-$h50 = $hStats.percentiles1.total
-$b75 = $bStats.percentiles2.total
-$h75 = $hStats.percentiles2.total
-$b95 = $bStats.percentiles3.total
-$h95 = $hStats.percentiles3.total
-$b99 = $bStats.percentiles4.total
-$h99 = $hStats.percentiles4.total
-
-$bMax = $bStats.maxResponseTime.total
-$hMax = $hStats.maxResponseTime.total
+ = Get-Content  | ConvertFrom-Json
+ = Get-Content  | ConvertFrom-Json
 
 Write-Host "## Performance Comparison"
 Write-Host ""
+Write-Host "### Per-Endpoint Statistics"
+Write-Host ""
+
+ = @("author_register", "post_create", "post_read", "comment_create", "comment_read", "tag_read", "post_update", "post_delete", "comment_update", "comment_delete")
+
+foreach ( in ) {
+     = .contents.
+     = .contents.
+    
+    if ( -eq  -and  -eq ) { continue }
+    
+    Write-Host "#### Endpoint: "
+    Write-Host "| Metric | Baseline | High RPS | Delta |"
+    Write-Host "|---|---|---|---|"
+    
+    if ( -ne ) {  = .stats } else {  =  }
+    if ( -ne ) {  = .stats } else {  =  }
+
+    function Get-Stat(, ) {
+        if ( -eq ) { return "N/A" }
+         = 
+        foreach ( in .Split(".")) {
+            if ( -ne ) {  = . }
+        }
+        if ( -eq ) { return "N/A" }
+        return 
+    }
+    
+     = Get-Stat  "meanNumberOfRequestsPerSecond.total"
+     = Get-Stat  "meanNumberOfRequestsPerSecond.total"
+     = if ( -ne "N/A" -and  -ne "N/A") { [math]::Round( - , 2) } else { "N/A" }
+    
+     = Get-Stat  "percentiles1.total"
+     = Get-Stat  "percentiles1.total"
+     = if ( -ne "N/A" -and  -ne "N/A") {  -  } else { "N/A" }
+
+     = Get-Stat  "percentiles2.total"
+     = Get-Stat  "percentiles2.total"
+     = if ( -ne "N/A" -and  -ne "N/A") {  -  } else { "N/A" }
+
+     = Get-Stat  "percentiles3.total"
+     = Get-Stat  "percentiles3.total"
+     = if ( -ne "N/A" -and  -ne "N/A") {  -  } else { "N/A" }
+    
+     = Get-Stat  "percentiles4.total"
+     = Get-Stat  "percentiles4.total"
+     = if ( -ne "N/A" -and  -ne "N/A") {  -  } else { "N/A" }
+
+     = Get-Stat  "maxResponseTime.total"
+     = Get-Stat  "maxResponseTime.total"
+     = if ( -ne "N/A" -and  -ne "N/A") {  -  } else { "N/A" }
+
+     = Get-Stat  "numberOfRequests.ok"
+     = Get-Stat  "numberOfRequests.ok"
+     = Get-Stat  "numberOfRequests.ko"
+     = Get-Stat  "numberOfRequests.ko"
+
+     = Get-Stat  "numberOfRequests.total"
+     = Get-Stat  "numberOfRequests.total"
+    
+     = if ( -ne "N/A" -and  -gt 0) { [math]::Round(( / ) * 100, 2) } else { "N/A" }
+     = if ( -ne "N/A" -and  -gt 0) { [math]::Round(( / ) * 100, 2) } else { "N/A" }
+     = if ( -ne "N/A" -and  -ne "N/A") { [math]::Round( - , 2) } else { "N/A" }
+
+    Write-Host "| Throughput (RPS) |  |  |  |"
+    Write-Host "| Response Time p50 (ms) |  |  |  |"
+    Write-Host "| Response Time p75 (ms) |  |  |  |"
+    Write-Host "| Response Time p95 (ms) |  |  |  |"
+    Write-Host "| Response Time p99 (ms) |  |  |  |"
+    Write-Host "| Max Response Time (ms) |  |  |  |"
+    Write-Host "| Successful Requests |  |  | 0 |"
+    Write-Host "| Failed Requests |  |  | 0 |"
+    Write-Host "| Error Rate (%) |  |  |  |"
+    Write-Host ""
+}
+
+Write-Host "### Global (Aggregate) Statistics (Complementary)"
+Write-Host ""
 Write-Host "| Metric | Baseline | High RPS | Delta |"
 Write-Host "|---|---|---|---|"
-Write-Host "| Throughput (RPS) | $bMeanRps | $hMeanRps | $([math]::Round($hMeanRps - $bMeanRps, 2)) |"
-Write-Host "| Error Rate (%) | $bErrRateDisplay | $hErrRateDisplay | $errRateDelta |"
-Write-Host "| p50 (ms) | $b50 | $h50 | $($h50 - $b50) |"
-Write-Host "| p75 (ms) | $b75 | $h75 | $($h75 - $b75) |"
-Write-Host "| p95 (ms) | $b95 | $h95 | $($h95 - $b95) |"
-Write-Host "| p99 (ms) | $b99 | $h99 | $($h99 - $b99) |"
-Write-Host "| Max (ms) | $bMax | $hMax | $($hMax - $bMax) |"
+ = .stats
+ = .stats
+ = Get-Stat  "meanNumberOfRequestsPerSecond.total"
+ = Get-Stat  "meanNumberOfRequestsPerSecond.total"
+ = if ( -ne "N/A" -and  -ne "N/A") { [math]::Round( - , 2) } else { "N/A" }
+ = Get-Stat  "numberOfRequests.total"
+ = Get-Stat  "numberOfRequests.total"
+ = Get-Stat  "numberOfRequests.ko"
+ = Get-Stat  "numberOfRequests.ko"
+ = if ( -ne "N/A" -and  -gt 0) { [math]::Round(( / ) * 100, 2) } else { "N/A" }
+ = if ( -ne "N/A" -and  -gt 0) { [math]::Round(( / ) * 100, 2) } else { "N/A" }
+ = if ( -ne "N/A" -and  -ne "N/A") { [math]::Round( - , 2) } else { "N/A" }
+ = Get-Stat  "percentiles1.total"
+ = Get-Stat  "percentiles1.total"
+ = Get-Stat  "percentiles2.total"
+ = Get-Stat  "percentiles2.total"
+ = Get-Stat  "percentiles3.total"
+ = Get-Stat  "percentiles3.total"
+ = Get-Stat  "percentiles4.total"
+ = Get-Stat  "percentiles4.total"
+ = Get-Stat  "maxResponseTime.total"
+ = Get-Stat  "maxResponseTime.total"
+Write-Host "| Throughput (RPS) |  |  |  |"
+Write-Host "| Error Rate (%) |  |  |  |"
+Write-Host "| p50 (ms) |  |  | 0 |"
+Write-Host "| p75 (ms) |  |  | 0 |"
+Write-Host "| p95 (ms) |  |  | 0 |"
+Write-Host "| p99 (ms) |  |  | 0 |"
+Write-Host "| Max (ms) |  |  | 0 |"
 Write-Host ""
-Write-Host "### HTTP Status / Timeouts"
-Write-Host "- Baseline: $bOk OK, $bKo KO"
-Write-Host "- High RPS: $hOk OK, $hKo KO"
-
-if ($bReqs -eq 0 -or $hReqs -eq 0) {
-    Write-Error "Performance comparison requires both runs to contain at least one request."
-    exit 1
+Write-Host "### Diagnostics Comparison"
+Write-Host ""
+if ( -ne "" -and  -ne "" -and (Test-Path ) -and (Test-Path )) {
+     = Get-Content  | ConvertFrom-Json
+     = Get-Content  | ConvertFrom-Json
+    Write-Host "| Metric | Baseline | High RPS | Delta |"
+    Write-Host "|---|---|---|---|"
+    
+     = @("cpu", "memory", "gc_pause", "allocation_rate", "thread_count", "db_connections", "db_pool_utilization", "query_latency", "host_cpu", "host_memory")
+    foreach ( in ) {
+         = if ( -ne .) { . } else { "N/A" }
+         = if ( -ne .) { . } else { "N/A" }
+         = if ( -ne "N/A" -and  -ne "N/A") { [math]::Round( - , 2) } else { "N/A" }
+        Write-Host "|  |  |  |  |"
+    }
+} else {
+    Write-Host "_Diagnostics were not provided for comparison._"
 }

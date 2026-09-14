@@ -257,31 +257,33 @@ public class PostCommandService extends AbstractCommandService {
             log.warn("Failed to update local cache for postId: {}", postId, e);
         }
 
-        // Update Redis synchronously for guaranteed read-your-writes
-        try {
-            PostRedis redisEntity = new PostRedis()
-                    .setId(postId)
-                    .setTitle(result.title())
-                    .setContent(result.content())
-                    .setAuthorEmail(result.authorEmail())
-                    .setPublished(result.published())
-                    .setPublishedAt(result.publishedAt());
+        // Update Redis asynchronously to avoid blocking the hot path
+        CompletableFuture.runAsync(() -> {
+            try {
+                PostRedis redisEntity = new PostRedis()
+                        .setId(postId)
+                        .setTitle(result.title())
+                        .setContent(result.content())
+                        .setAuthorEmail(result.authorEmail())
+                        .setPublished(result.published())
+                        .setPublishedAt(result.publishedAt());
 
-            if (result.details() != null) {
-                redisEntity.setDetails(result.details());
+                if (result.details() != null) {
+                    redisEntity.setDetails(result.details());
+                }
+
+                if (result.tags() != null) {
+                    redisEntity.setTags(result.tags());
+                }
+
+                redisEntity.setCreatedAt(result.createdAt());
+                redisEntity.setModifiedAt(result.modifiedAt());
+                postRedisRepository.save(redisEntity);
+                log.debug("Asynchronously updated Redis for post: {}", postId);
+            } catch (Exception e) {
+                log.error("Failed to asynchronously update Redis for post: {}", postId, e);
             }
-
-            if (result.tags() != null) {
-                redisEntity.setTags(result.tags());
-            }
-
-            redisEntity.setCreatedAt(result.createdAt());
-            redisEntity.setModifiedAt(result.modifiedAt());
-            postRedisRepository.save(redisEntity);
-            log.debug("Synchronously updated Redis for post: {}", postId);
-        } catch (Exception e) {
-            log.error("Failed to synchronously update Redis for post: {}", postId, e);
-        }
+        });
     }
 
     private LocalDateTime getCreatedAt(Long postId) {

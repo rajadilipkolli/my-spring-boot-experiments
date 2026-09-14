@@ -24,14 +24,15 @@ class ObservabilityMetricsIT extends AbstractIntegrationTest {
 
         try {
             // Trigger producer action which will fire the MdcProducerInterceptor
-            SendResult<String, Object> sendResult =
-                    kafkaTemplate.send("events", "test-key", "test-payload").get(5, TimeUnit.SECONDS);
+            SendResult<String, Object> sendResult = kafkaTemplate
+                    .send("posts-aggregates", "test-key", "test-payload")
+                    .get(5, TimeUnit.SECONDS);
 
             KafkaTemplate<String, Object> localKafkaTemplate = new KafkaTemplate<>(producerFactory);
             localKafkaTemplate.setConsumerFactory(
                     applicationContext.getBean("newPostConsumerFactory", ConsumerFactory.class));
             ConsumerRecord<String, Object> record = localKafkaTemplate.receive(
-                    "events",
+                    "posts-aggregates",
                     sendResult.getRecordMetadata().partition(),
                     sendResult.getRecordMetadata().offset(),
                     Duration.ofSeconds(5));

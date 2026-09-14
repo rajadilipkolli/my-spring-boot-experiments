@@ -15,6 +15,6 @@ public class ReadCommentsScenario {
      */
     public static ChainBuilder read() {
         return feed(PostFeeder.getUniform())
-                .exec(http("Read Comments").get("/api/posts/#{postId}/comments").check(status().is(200)));
+                .exec(http("comment_read").get("/api/posts/#{postId}/comments").check(status().is(200)));
     }
 }

@@ -45,6 +45,10 @@ jobs:
           PROFILE_INPUT: ${{ github.event.inputs.profile || 'normal' }}
           DURATION_INPUT: ${{ github.event.inputs.durationMinutes || '15' }}
           TARGET_RPS_INPUT: ${{ github.event.inputs.targetRps }}
+          POST_UPDATE_WEIGHT: ${{ github.event.inputs.postUpdateWeight || '1.0' }}
+          POST_DELETE_WEIGHT: ${{ github.event.inputs.postDeleteWeight || '1.0' }}
+          COMMENT_UPDATE_WEIGHT: ${{ github.event.inputs.commentUpdateWeight || '1.0' }}
+          COMMENT_DELETE_WEIGHT: ${{ github.event.inputs.commentDeleteWeight || '1.0' }}
         run: |
           case "$PROFILE_INPUT" in
             normal|high|stress) ;;
@@ -115,7 +119,7 @@ jobs:
             -Dexec.classpathScope=test -DdataDir=target/loadtest-data -DdataSeed=2674
           
           # Run Gatling
-          MAVEN_ARGS=(-Dprofile="$PROFILE" -DdurationMinutes="$DURATION")
+          MAVEN_ARGS=(-Dprofile="$PROFILE" -DdurationMinutes="$DURATION" -DpostUpdateWeight="$POST_UPDATE_WEIGHT" -DpostDeleteWeight="$POST_DELETE_WEIGHT" -DcommentUpdateWeight="$COMMENT_UPDATE_WEIGHT" -DcommentDeleteWeight="$COMMENT_DELETE_WEIGHT")
           if [[ -n "$TARGET_RPS" ]]; then
             MAVEN_ARGS+=(-DtargetRps="$TARGET_RPS")
           fi
@@ -123,6 +127,9 @@ jobs:
           ./mvnw gatling:test "${MAVEN_ARGS[@]}"
           GATLING_STATUS=$?
           set -e
+          
+          # Collect Diagnostics
+          python3 scripts/collect_diagnostics.py ../baseline-diagnostics "$RUNNER_TEMP/baseline-app.log"
           
           # Save Stats
           if [[ -d target/gatling ]]; then
@@ -185,7 +192,7 @@ jobs:
             -Dexec.classpathScope=test -DdataDir=target/loadtest-data -DdataSeed=2674
           
           # Run Gatling
-          MAVEN_ARGS=(-Dprofile="$PROFILE" -DdurationMinutes="$DURATION")
+          MAVEN_ARGS=(-Dprofile="$PROFILE" -DdurationMinutes="$DURATION" -DpostUpdateWeight="$POST_UPDATE_WEIGHT" -DpostDeleteWeight="$POST_DELETE_WEIGHT" -DcommentUpdateWeight="$COMMENT_UPDATE_WEIGHT" -DcommentDeleteWeight="$COMMENT_DELETE_WEIGHT")
           if [[ -n "$TARGET_RPS" ]]; then
             MAVEN_ARGS+=(-DtargetRps="$TARGET_RPS")
           fi
@@ -193,6 +200,9 @@ jobs:
           ./mvnw gatling:test "${MAVEN_ARGS[@]}"
           GATLING_STATUS=$?
           set -e
+          
+          # Collect Diagnostics
+          python3 scripts/collect_diagnostics.py ../baseline-diagnostics "$RUNNER_TEMP/baseline-app.log"
           
           # Save Stats
           if [[ -d target/gatling ]]; then
@@ -208,8 +218,12 @@ jobs:
       - name: Compare Results
         if: ${{ always() }}
         run: |
-          pwsh scripts/compare-results.ps1 -BaselineStats ../baseline-stats.json -HighRpsStats ../head-stats.json > comparison.md
+          pwsh scripts/compare-results.ps1 -BaselineStats ../baseline-stats.json -HighRpsStats ../head-stats.json -BaselineDiagnostics ../baseline-diagnostics/summary.json -HighRpsDiagnostics ../head-diagnostics/summary.json > comparison.md
           cat comparison.md >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Diagnostics Artifacts" >> $GITHUB_STEP_SUMMARY
+          echo "- [Baseline Diagnostics (Run Artifacts)](#)" >> $GITHUB_STEP_SUMMARY
+          echo "- [High RPS Diagnostics (Run Artifacts)](#)" >> $GITHUB_STEP_SUMMARY
           
       - name: Upload Baseline Report
         if: ${{ always() }}
@@ -225,4 +239,21 @@ jobs:
         with:
           name: gatling-head-report
           path: head-report/
+          retention-days: 14
+
+
+      - name: Upload Baseline Diagnostics
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: baseline-diagnostics-${{ env.PROFILE }}
+          path: ../baseline-diagnostics/
+          retention-days: 14
+          
+      - name: Upload High RPS Diagnostics
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: head-diagnostics-${{ env.PROFILE }}
+          path: ../head-diagnostics/
           retention-days: 14
