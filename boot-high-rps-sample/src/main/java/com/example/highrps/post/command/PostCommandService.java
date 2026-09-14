@@ -270,6 +270,10 @@ public class PostCommandService extends AbstractCommandService {
 
         // Update Redis asynchronously to avoid blocking the hot path
         redisWriteQueue.enqueue(String.valueOf(postId), () -> {
+            if (deletionMarkerHandler.isDeleted(DeletionMarkerHandler.POST, String.valueOf(postId))) {
+                log.debug("Skipping Redis update for deleted post: {}", postId);
+                return CompletableFuture.completedFuture(null);
+            }
             try {
                 PostRedis redisEntity = new PostRedis()
                         .setId(postId)
