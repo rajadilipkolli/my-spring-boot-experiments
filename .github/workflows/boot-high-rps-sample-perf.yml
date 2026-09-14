@@ -18,6 +18,22 @@ on:
       targetRps:
         description: 'Target RPS (if overriding profile default)'
         required: false
+      postUpdateWeight:
+        description: 'Post update operation weight'
+        required: false
+        default: '1.0'
+      postDeleteWeight:
+        description: 'Post delete operation weight'
+        required: false
+        default: '1.0'
+      commentUpdateWeight:
+        description: 'Comment update operation weight'
+        required: false
+        default: '1.0'
+      commentDeleteWeight:
+        description: 'Comment delete operation weight'
+        required: false
+        default: '1.0'
 
 jobs:
   performance-comparison:
@@ -67,6 +83,10 @@ jobs:
           printf 'PROFILE=%s\n' "$PROFILE_INPUT" >> "$GITHUB_ENV"
           printf 'DURATION=%s\n' "$DURATION_INPUT" >> "$GITHUB_ENV"
           printf 'TARGET_RPS=%s\n' "$TARGET_RPS_INPUT" >> "$GITHUB_ENV"
+          printf 'POST_UPDATE_WEIGHT=%s\n' "$POST_UPDATE_WEIGHT" >> "$GITHUB_ENV"
+          printf 'POST_DELETE_WEIGHT=%s\n' "$POST_DELETE_WEIGHT" >> "$GITHUB_ENV"
+          printf 'COMMENT_UPDATE_WEIGHT=%s\n' "$COMMENT_UPDATE_WEIGHT" >> "$GITHUB_ENV"
+          printf 'COMMENT_DELETE_WEIGHT=%s\n' "$COMMENT_DELETE_WEIGHT" >> "$GITHUB_ENV"
           printf 'CURRENT_HEAD=%s\n' "$(git rev-parse HEAD)" >> "$GITHUB_ENV"
 
       - name: Run Baseline (HEAD~1)
@@ -86,7 +106,7 @@ jobs:
           # Run the baseline application with the current revision's load-test harness.
           git checkout "$CURRENT_HEAD~1"
           git checkout "$CURRENT_HEAD" -- pom.xml src/test/java/com/example/highrps/gatling src/test/resources/load-test.properties
-          
+    
           # Start Infra and Monitoring
           docker compose -f docker/docker-compose.yml up -d
           if [ -f docker/docker-compose-monitoring.yml ]; then
@@ -98,7 +118,7 @@ jobs:
           java -jar target/boot-high-rps-sample-0.1.0-SNAPSHOT.jar --spring.profiles.active=local \
             > "$RUNNER_TEMP/baseline-app.log" 2>&1 &
           APP_PID=$!
-          
+
           echo "Waiting for /actuator/health to report UP..."
           deadline=$((SECONDS + 120))
           until curl --fail --silent --show-error --max-time 5 http://localhost:8080/actuator/health \
@@ -113,7 +133,7 @@ jobs:
             fi
             sleep 2
           done
-
+          
           # Generate Data
           ./mvnw exec:java -Dexec.mainClass="com.example.highrps.gatling.setup.DataGenerator" \
             -Dexec.classpathScope=test -DdataDir=target/loadtest-data -DdataSeed=2674
@@ -127,9 +147,6 @@ jobs:
           ./mvnw gatling:test "${MAVEN_ARGS[@]}"
           GATLING_STATUS=$?
           set -e
-          
-          # Collect Diagnostics
-          python3 scripts/collect_diagnostics.py ../baseline-diagnostics "$RUNNER_TEMP/baseline-app.log"
           
           # Save Stats
           if [[ -d target/gatling ]]; then
@@ -200,10 +217,7 @@ jobs:
           ./mvnw gatling:test "${MAVEN_ARGS[@]}"
           GATLING_STATUS=$?
           set -e
-          
-          # Collect Diagnostics
-          python3 scripts/collect_diagnostics.py ../baseline-diagnostics "$RUNNER_TEMP/baseline-app.log"
-          
+         
           # Save Stats
           if [[ -d target/gatling ]]; then
             STATS_FILE=$(find target/gatling -name "stats.json" -print -quit)
@@ -218,12 +232,8 @@ jobs:
       - name: Compare Results
         if: ${{ always() }}
         run: |
-          pwsh scripts/compare-results.ps1 -BaselineStats ../baseline-stats.json -HighRpsStats ../head-stats.json -BaselineDiagnostics ../baseline-diagnostics/summary.json -HighRpsDiagnostics ../head-diagnostics/summary.json > comparison.md
+          pwsh scripts/compare-results.ps1 -BaselineStats ../baseline-stats.json -HighRpsStats ../head-stats.json > comparison.md
           cat comparison.md >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### Diagnostics Artifacts" >> $GITHUB_STEP_SUMMARY
-          echo "- [Baseline Diagnostics (Run Artifacts)](#)" >> $GITHUB_STEP_SUMMARY
-          echo "- [High RPS Diagnostics (Run Artifacts)](#)" >> $GITHUB_STEP_SUMMARY
           
       - name: Upload Baseline Report
         if: ${{ always() }}
@@ -240,20 +250,4 @@ jobs:
           name: gatling-head-report
           path: head-report/
           retention-days: 14
-
-
-      - name: Upload Baseline Diagnostics
-        if: ${{ always() }}
-        uses: actions/upload-artifact@v7
-        with:
-          name: baseline-diagnostics-${{ env.PROFILE }}
-          path: ../baseline-diagnostics/
-          retention-days: 14
           
-      - name: Upload High RPS Diagnostics
-        if: ${{ always() }}
-        uses: actions/upload-artifact@v7
-        with:
-          name: head-diagnostics-${{ env.PROFILE }}
-          path: ../head-diagnostics/
-          retention-days: 14

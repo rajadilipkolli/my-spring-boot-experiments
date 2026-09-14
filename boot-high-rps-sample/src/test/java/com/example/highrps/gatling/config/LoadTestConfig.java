@@ -21,9 +21,9 @@ public class LoadTestConfig {
     public static final int TAGS_SIZE = getIntProperty("tags", 50);
 
     public static final int MUTABLE_POST_POOL_SIZE = getIntProperty("mutablePostPoolSize", 50);
-    public static final int DELETABLE_POST_POOL_SIZE = getIntProperty("deletablePostPoolSize", 1000);
+    public static final int DELETABLE_POST_POOL_SIZE = getProfileDeletablePostPoolSize();
     public static final int MUTABLE_COMMENT_POOL_SIZE = getIntProperty("mutableCommentPoolSize", 50);
-    public static final int DELETABLE_COMMENT_POOL_SIZE = getIntProperty("deletableCommentPoolSize", 5000);
+    public static final int DELETABLE_COMMENT_POOL_SIZE = getProfileDeletableCommentPoolSize();
 
     // Traffic weights
     public static final double READ_POST_WEIGHT = getDoubleProperty("readPostWeight", 41.0);
@@ -161,6 +161,32 @@ public class LoadTestConfig {
             case "smoke" -> 1;
             case "normal", "high", "stress" -> 3;
             default -> 5;
+        };
+    }
+
+    private static int getProfileDeletablePostPoolSize() {
+        String override = getProperty("deletablePostPoolSize", null);
+        if (override != null) {
+            return Integer.parseInt(override);
+        }
+        return switch (PROFILE) {
+            case "smoke" -> 100;
+            case "normal" -> 1000;
+            case "high", "stress" -> 20000;
+            default -> 1000;
+        };
+    }
+
+    private static int getProfileDeletableCommentPoolSize() {
+        String override = getProperty("deletableCommentPoolSize", null);
+        if (override != null) {
+            return Integer.parseInt(override);
+        }
+        return switch (PROFILE) {
+            case "smoke" -> 500;
+            case "normal" -> 5000;
+            case "high", "stress" -> 50000;
+            default -> 5000;
         };
     }
 }
