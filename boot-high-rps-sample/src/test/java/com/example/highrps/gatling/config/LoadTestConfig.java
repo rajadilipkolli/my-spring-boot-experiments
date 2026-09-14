@@ -172,7 +172,8 @@ public class LoadTestConfig {
         return switch (PROFILE) {
             case "smoke" -> 100;
             case "normal" -> 1000;
-            case "high", "stress" -> 20000;
+            case "high" -> 20000;
+            case "stress" -> 25000;
             default -> 1000;
         };
     }
