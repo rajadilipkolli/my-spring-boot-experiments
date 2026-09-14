@@ -213,7 +213,7 @@ jobs:
           
       - name: Upload Baseline Report
         if: ${{ always() }}
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           name: gatling-baseline-report
           path: baseline-report/
@@ -221,7 +221,7 @@ jobs:
 
       - name: Upload HEAD Report
         if: ${{ always() }}
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           name: gatling-head-report
           path: head-report/
