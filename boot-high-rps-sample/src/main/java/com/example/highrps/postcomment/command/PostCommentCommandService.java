@@ -13,6 +13,7 @@ import com.example.highrps.postcomment.domain.vo.PostCommentId;
 import com.example.highrps.postcomment.query.GetPostCommentQuery;
 import com.example.highrps.postcomment.query.PostCommentQueryService;
 import com.example.highrps.shared.AbstractCommandService;
+import com.example.highrps.shared.AggregateOperationQueue;
 import com.example.highrps.shared.IdGenerator;
 import com.example.highrps.shared.ResourceConflictException;
 import com.example.highrps.shared.ResourceNotFoundException;
@@ -48,6 +49,7 @@ public class PostCommentCommandService extends AbstractCommandService {
     private final DeletionMarkerHandler deletionMarkerHandler;
     private final PostCommentRedisRepository postCommentRedisRepository;
     private final RedisTemplate<String, String> redisTemplate;
+    private final AggregateOperationQueue redisWriteQueue = new AggregateOperationQueue();
 
     /**
      * Creates a comment command service with its event, cache, and persistence collaborators.
@@ -128,17 +130,17 @@ public class PostCommentCommandService extends AbstractCommandService {
         PostCommentCommandResult result = postCommentMapper.toResultFromRequest(request);
 
         return executeCommand(
-                        "post-comments-aggregates",
-                        String.valueOf(commentId),
-                        CacheKeyGenerator.generatePostCommentKey(cmd.postId(), commentId),
-                        event,
-                        result,
-                        () -> {
-                            updateCaches(cmd.postId(), commentId, result);
-                            eventsPublishedCounter.increment();
-                        },
-                        "create post comment",
-                        "PostComment")
+                "post-comments-aggregates",
+                String.valueOf(commentId),
+                CacheKeyGenerator.generatePostCommentKey(cmd.postId(), commentId),
+                event,
+                result,
+                () -> {
+                    updateCaches(cmd.postId(), commentId, result);
+                    eventsPublishedCounter.increment();
+                },
+                "create post comment",
+                "PostComment")
                 .whenComplete((_, err) -> {
                     if (err != null && !isPendingPublishFailure(err)) {
                         try {
@@ -240,7 +242,7 @@ public class PostCommentCommandService extends AbstractCommandService {
         }
 
         // Update Redis asynchronously to avoid blocking the hot path
-        CompletableFuture.runAsync(() -> {
+        redisWriteQueue.enqueue(cacheKey, () -> {
             try {
                 PostCommentRedis redisEntity = new PostCommentRedis()
                         .setCommentId(String.valueOf(commentId))
@@ -256,6 +258,7 @@ public class PostCommentCommandService extends AbstractCommandService {
             } catch (Exception e) {
                 log.error("Failed to asynchronously update Redis for post comment: {}", commentId, e);
             }
+            return CompletableFuture.completedFuture(null);
         });
     }
 }

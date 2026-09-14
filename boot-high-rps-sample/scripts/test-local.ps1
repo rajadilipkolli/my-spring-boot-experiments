@@ -4,6 +4,35 @@ param(
     [int]$WarmupMinutes = 1
 )
 
+$DataDirectory = "target/loadtest-data"
+$CompletionMarker = Join-Path $DataDirectory ".complete"
+$RequiredFeederFiles = @{
+    "authors.csv" = "email"
+    "tags.csv" = "tag"
+    "posts.csv" = "postId,weight"
+    "post_tags.csv" = "tag,postId"
+    "mutable_posts.csv" = "postId,authorEmail"
+    "deletable_posts.csv" = "postId,authorEmail"
+    "mutable_comments.csv" = "postId,commentId,authorEmail"
+    "deletable_comments.csv" = "postId,commentId,authorEmail"
+}
+
+function Test-RequiredFeederFiles {
+    foreach ($entry in $RequiredFeederFiles.GetEnumerator()) {
+        $filePath = Join-Path $DataDirectory $entry.Key
+        if (-not (Test-Path -LiteralPath $filePath -PathType Leaf)) {
+            return $false
+        }
+
+        $lines = @(Get-Content -LiteralPath $filePath)
+        if ($lines.Count -le 1 -or $lines[0] -ne $entry.Value) {
+            return $false
+        }
+    }
+
+    return $true
+}
+
 Stop-Process -Name java -ErrorAction SilentlyContinue
 
 Write-Host "Starting infrastructure..."
@@ -44,17 +73,30 @@ if (-not $AppReady) {
     exit 1
 }
 
-if (Test-Path "target/loadtest-data") {
+if ((Test-Path -LiteralPath $CompletionMarker -PathType Leaf) -or (Test-RequiredFeederFiles)) {
     Write-Host "Data already present under target/loadtest-data. Skipping Data Generator..."
 } else {
+    if (Test-Path -LiteralPath $DataDirectory) {
+        Write-Host "Load-test data is incomplete. Clearing it before regeneration..."
+        Remove-Item -LiteralPath $DataDirectory -Recurse -Force
+    }
+
     Write-Host "App is UP! Running Data Generator..."
-    cmd /c "mvnw.cmd exec:java -Dexec.mainClass=com.example.highrps.gatling.setup.DataGenerator -Dexec.classpathScope=test -DdataDir=target/loadtest-data"
+    cmd /c "mvnw.cmd exec:java -Dexec.mainClass=com.example.highrps.gatling.setup.DataGenerator -Dexec.classpathScope=test -DdataDir=$DataDirectory"
 
     if ($LASTEXITCODE -ne 0) {
         Write-Host "Data Generator failed!"
         Stop-Process -Name java -ErrorAction SilentlyContinue
         exit 1
     }
+
+    if (-not (Test-RequiredFeederFiles)) {
+            Write-Host "Data Generator completed without producing valid feeder files!"
+            Stop-Process -Name java -ErrorAction SilentlyContinue
+            exit 1
+    }
+
+    New-Item -ItemType File -Path $CompletionMarker -Force | Out-Null
 }
 
 Write-Host "Running Gatling with Profile: $Profile..."

@@ -7,7 +7,9 @@ import com.example.highrps.post.domain.TagResponse;
 import com.example.highrps.post.domain.events.PostCreatedEvent;
 import com.example.highrps.post.domain.events.PostDeletedEvent;
 import com.example.highrps.post.domain.events.PostUpdatedEvent;
+import com.example.highrps.post.query.PostQueryService;
 import com.example.highrps.shared.AbstractCommandService;
+import com.example.highrps.shared.AggregateOperationQueue;
 import com.example.highrps.shared.ResourceConflictException;
 import com.example.highrps.shared.config.AppProperties;
 import com.example.highrps.shared.redis.DeletionMarkerHandler;
@@ -18,6 +20,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import tools.jackson.databind.json.JsonMapper;
@@ -36,8 +39,9 @@ public class PostCommandService extends AbstractCommandService {
     private final PostRedisRepository postRedisRepository;
     private final JsonMapper jsonMapper;
     private final DeletionMarkerHandler deletionMarkerHandler;
-    private final com.example.highrps.post.query.PostQueryService postQueryService;
-    private final org.springframework.data.redis.core.RedisTemplate<String, String> redisTemplate;
+    private final PostQueryService postQueryService;
+    private final RedisTemplate<String, String> redisTemplate;
+    private final AggregateOperationQueue redisWriteQueue = new AggregateOperationQueue();
 
     /**
      * Creates a post command service with its event, cache, and persistence collaborators.
@@ -57,8 +61,8 @@ public class PostCommandService extends AbstractCommandService {
             PostRedisRepository postRedisRepository,
             JsonMapper jsonMapper,
             DeletionMarkerHandler deletionMarkerHandler,
-            com.example.highrps.post.query.PostQueryService postQueryService,
-            org.springframework.data.redis.core.RedisTemplate<String, String> redisTemplate,
+            PostQueryService postQueryService,
+            RedisTemplate<String, String> redisTemplate,
             AppProperties appProperties) {
         super(kafkaTemplate, appProperties.getKafka().getPublishTimeOutMs());
         this.localCache = localCache;
@@ -265,7 +269,7 @@ public class PostCommandService extends AbstractCommandService {
         }
 
         // Update Redis asynchronously to avoid blocking the hot path
-        CompletableFuture.runAsync(() -> {
+        redisWriteQueue.enqueue(String.valueOf(postId), () -> {
             try {
                 PostRedis redisEntity = new PostRedis()
                         .setId(postId)
@@ -290,6 +294,7 @@ public class PostCommandService extends AbstractCommandService {
             } catch (Exception e) {
                 log.error("Failed to asynchronously update Redis for post: {}", postId, e);
             }
+            return CompletableFuture.completedFuture(null);
         });
     }
 

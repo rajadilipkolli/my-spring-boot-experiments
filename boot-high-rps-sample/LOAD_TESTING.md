@@ -1,6 +1,6 @@
 # Load Testing Guide
 
-This document outlines the procedure to load test oot-high-rps-sample and evaluate its maximum sustainable RPS.
+This document outlines the procedure to load test `boot-high-rps-sample` and evaluate its maximum sustainable RPS.
 
 ## Identical-Configuration Rule
 Baseline and high-RPS runs must keep the dataset (including mutable/deletable pools), the traffic mix and all weights (including the four mutation weights), the target RPS, duration, warm-up, ramp, load-generator configuration, JVM configuration, database configuration, and infrastructure identical. Only the implementation under test changes.
@@ -22,8 +22,7 @@ The data generator builds shared read/create pools, as well as dedicated mutable
 
 You can override Gatling profiles using -Dprofile=<name>:
 - smoke: 10 RPS for 5 mins (plus 5 min warmup).
-- 
-ormal: 50 RPS for 15 mins (plus 5 min warmup).
+- normal: 50 RPS for 15 mins (plus 5 min warmup).
 - high: 100 RPS for 15 mins (plus 5 min warmup).
 - stress: Stepped load from 100, 250, 500, to 1000 RPS.
 
@@ -32,18 +31,18 @@ ormal: 50 RPS for 15 mins (plus 5 min warmup).
 Refer to src/test/resources/load-test.properties for all overridable settings.
 
 ### Operation Weights
-| Operation | Default Weight | Purpose |
-|---|---|---|
-| readPostWeight | 41.0 | Read a post by ID |
-| readCommentsWeight | 20.0 | Read comments for a post |
-| readTagPostsWeight | 10.0 | Read posts by tag |
-| createCommentWeight | 15.0 | Create a new comment |
-| createPostWeight | 8.0 | Create a new post |
-| registerAuthorWeight | 2.0 | Register a new author |
-| postUpdateWeight | 1.0 | Update a post (mutable pool) |
-| postDeleteWeight | 1.0 | Delete a post (deletable pool) |
-| commentUpdateWeight | 1.0 | Update a comment (mutable pool) |
-| commentDeleteWeight | 1.0 | Delete a comment (deletable pool) |
+| Operation            | Default Weight | Purpose                           |
+|----------------------|----------------|-----------------------------------|
+| readPostWeight       | 41.0           | Read a post by ID                 |
+| readCommentsWeight   | 20.0           | Read comments for a post          |
+| readTagPostsWeight   | 10.0           | Read posts by tag                 |
+| createCommentWeight  | 15.0           | Create a new comment              |
+| createPostWeight     | 8.0            | Create a new post                 |
+| registerAuthorWeight | 2.0            | Register a new author             |
+| postUpdateWeight     | 1.0            | Update a post (mutable pool)      |
+| postDeleteWeight     | 1.0            | Delete a post (deletable pool)    |
+| commentUpdateWeight  | 1.0            | Update a comment (mutable pool)   |
+| commentDeleteWeight  | 1.0            | Delete a comment (deletable pool) |
 
 Mutation weights are kept low by default to simulate typical read-heavy CMS traffic, but are fully configurable.
 
@@ -51,14 +50,13 @@ Mutation weights are kept low by default to simulate typical read-heavy CMS traf
 
 Per-endpoint (per-API) statistics are the **primary** comparison view, providing granular insight into how specific API optimizations perform. Global statistics are provided as a complementary view.
 
-1. **Baseline**: Checkout the earlier commit (before optimizations), compile, start infra, and run the smoke or 
-ormal profile. Save the 	arget/gatling/*/js/stats.json file.
+1. **Baseline**: Checkout the earlier commit (before optimizations), compile, start infra, and run the smoke or normal profile. Save the 	target/gatling/*/js/stats.json file.
 2. **High RPS**: Checkout HEAD, compile, start infra, and run the same profile. Save the Gatling stats.json.
 3. **Compare**: Run .\scripts\compare-results.ps1 -BaselineStats path/to/base.json -HighRpsStats path/to/head.json
 
 ## Viewing Reports
 You can view the detailed Gatling HTML report at:
-	arget/gatling/<sim>/index.html
+	target/gatling/<sim>/index.html
 
 ## Diagnostics Collection
 Diagnostics are collected as a first-class output of each benchmark run.
