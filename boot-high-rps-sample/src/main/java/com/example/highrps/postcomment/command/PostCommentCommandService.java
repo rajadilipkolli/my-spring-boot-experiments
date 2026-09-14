@@ -221,7 +221,8 @@ public class PostCommentCommandService extends AbstractCommandService {
     }
 
     /**
-     * Updates local and Redis read caches after a comment mutation.
+     * Attempts to update the local read cache immediately, then schedules a best-effort Redis update.
+     * Cache write failures are logged without being propagated to the command result.
      *
      * @param postId the parent post identifier
      * @param commentId the comment identifier

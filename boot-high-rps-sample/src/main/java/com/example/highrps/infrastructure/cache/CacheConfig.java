@@ -21,6 +21,12 @@ public class CacheConfig {
 
     private static final Logger log = LoggerFactory.getLogger(CacheConfig.class);
 
+    /**
+     * Creates the shared in-process cache with the configured entry limit and a five-minute write expiry.
+     *
+     * @param appProperties application configuration containing the local cache limit
+     * @return the cache used by application read and write paths
+     */
     @Bean
     Cache<String, String> localCache(AppProperties appProperties) {
         return Caffeine.newBuilder()

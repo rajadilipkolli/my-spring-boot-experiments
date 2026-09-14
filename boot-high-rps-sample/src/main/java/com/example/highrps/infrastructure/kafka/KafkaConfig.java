@@ -129,8 +129,13 @@ public class KafkaConfig {
         return getStringConcurrentKafkaListenerContainerFactory(postCommentConsumerFactory, recoverer);
     }
 
-    // Application-level topics. Kafka Streams will create internal changelog topics
-    // automatically.
+    /**
+     * Declares the compacted Kafka topics used for post, author, and post-comment aggregates.
+     *
+     * @param appProperties application configuration supplying partition counts, replication factors, and minimum
+     *     in-sync replicas
+     * @return the application topic declarations for Kafka administration
+     */
     @Bean
     KafkaAdmin.NewTopics applicationTopics(AppProperties appProperties) {
         int postsAggregatesPartitions =

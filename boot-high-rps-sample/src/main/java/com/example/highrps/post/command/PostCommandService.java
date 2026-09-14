@@ -246,6 +246,13 @@ public class PostCommandService extends AbstractCommandService {
                 "Post");
     }
 
+    /**
+     * Attempts to update the local read cache immediately, then schedules a best-effort Redis update.
+     * Cache write failures are logged without being propagated to the command result.
+     *
+     * @param postId the post identifier used as the cache key
+     * @param result the current post state to cache
+     */
     private void updateCaches(Long postId, PostCommandResult result) {
         String cacheKey = String.valueOf(postId);
 
