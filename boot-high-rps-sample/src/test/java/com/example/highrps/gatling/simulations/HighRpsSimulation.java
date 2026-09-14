@@ -132,6 +132,15 @@ public class HighRpsSimulation extends Simulation {
                                 * (1.0 + LoadTestConfig.ALLOWED_P99_DELTA_PERCENT / 100.0))));
     }
 
+    /**
+     * Builds the user-injection schedule for the selected load profile.
+     *
+     * @param stressProfile whether to use the stepped stress schedule
+     * @param targetRps the steady-state request rate
+     * @param durationMins the duration of each steady-state stage
+     * @param warmupMins the optional warm-up duration
+     * @return the ordered Gatling injection steps
+     */
     static List<OpenInjectionStep> injectionSteps(
             boolean stressProfile, double targetRps, int durationMins, int warmupMins) {
         List<OpenInjectionStep> steps = new ArrayList<>();

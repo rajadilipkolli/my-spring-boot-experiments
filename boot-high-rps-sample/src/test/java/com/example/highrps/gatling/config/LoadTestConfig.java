@@ -95,11 +95,24 @@ public class LoadTestConfig {
         return val != null ? Double.parseDouble(val) : defaultValue;
     }
 
+    /**
+     * Resolves a long-valued setting.
+     *
+     * @param key the property name
+     * @param defaultValue the fallback value
+     * @return the resolved long value
+     */
     private static long getLongProperty(String key, long defaultValue) {
         String val = getProperty(key, null);
         return val != null ? Long.parseLong(val) : defaultValue;
     }
 
+    /**
+     * Loads the optional load-test property file from the classpath.
+     *
+     * @return the loaded properties, or an empty set when the resource is absent
+     * @throws IllegalStateException when the resource cannot be read
+     */
     private static Properties loadProperties() {
         Properties properties = new Properties();
         try (InputStream input = LoadTestConfig.class.getClassLoader().getResourceAsStream("load-test.properties")) {
@@ -164,6 +177,11 @@ public class LoadTestConfig {
         };
     }
 
+    /**
+     * Resolves the number of posts reserved for destructive scenarios.
+     *
+     * @return the deletable post pool size for the selected profile
+     */
     private static int getProfileDeletablePostPoolSize() {
         String override = getProperty("deletablePostPoolSize", null);
         if (override != null) {
@@ -178,6 +196,11 @@ public class LoadTestConfig {
         };
     }
 
+    /**
+     * Resolves the number of comments reserved for destructive scenarios.
+     *
+     * @return the deletable comment pool size for the selected profile
+     */
     private static int getProfileDeletableCommentPoolSize() {
         String override = getProperty("deletableCommentPoolSize", null);
         if (override != null) {

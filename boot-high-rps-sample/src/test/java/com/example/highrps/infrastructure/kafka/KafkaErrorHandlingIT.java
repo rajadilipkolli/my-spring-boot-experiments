@@ -18,6 +18,7 @@ class KafkaErrorHandlingIT extends AbstractIntegrationTest {
         super.clearDatabase();
     }
 
+    /** Verifies that malformed aggregate records are routed to the dead-letter topic and Redis. */
     @Test
     @DisplayName("Should route poison pill from consumer to DLT and save to Redis")
     void shouldRoutePoisonPillToDLT() {
@@ -42,6 +43,7 @@ class KafkaErrorHandlingIT extends AbstractIntegrationTest {
         });
     }
 
+    /** Verifies that an invalid aggregate record does not stop the Kafka Streams application. */
     @Test
     @DisplayName("Should not crash Streams application when poison pill is encountered")
     void shouldNotCrashStreamsOnPoisonPill() throws Exception {

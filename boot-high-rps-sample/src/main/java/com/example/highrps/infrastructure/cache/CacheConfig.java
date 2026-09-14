@@ -41,6 +41,12 @@ public class CacheConfig {
                 .build();
     }
 
+    /**
+     * Creates the string Redis template used for cache reservations and deletion markers.
+     *
+     * @param factory the Redis connection factory
+     * @return a template configured with string key and value serializers
+     */
     @Bean
     @Primary
     RedisTemplate<String, String> redisTemplate(LettuceConnectionFactory factory) {

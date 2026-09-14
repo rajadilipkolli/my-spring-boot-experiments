@@ -163,6 +163,15 @@ public class DataGenerator {
         return posts;
     }
 
+    /**
+     * Creates the weighted post population and its tag associations.
+     *
+     * @param count the number of posts to request
+     * @param authors available author emails
+     * @param tags available tag names
+     * @return successfully created post identifiers
+     * @throws Exception when an HTTP request or file operation fails
+     */
     private static List<String> generatePosts(int count, List<String> authors, List<String> tags) throws Exception {
         System.out.println("Generating " + count + " posts...");
         List<String> posts = new ArrayList<>();
@@ -282,6 +291,11 @@ public class DataGenerator {
         return (int) (Math.pow(r, p) * max);
     }
 
+    /**
+     * Generates the next deterministic identifier from the configured data seed.
+     *
+     * @return the next identifier
+     */
     private static UUID nextUuid() {
         return new UUID(random.nextLong(), random.nextLong());
     }

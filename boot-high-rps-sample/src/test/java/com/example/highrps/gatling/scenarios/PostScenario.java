@@ -43,6 +43,11 @@ public class PostScenario {
                         .check(jsonPath("$.tags[0].tagName").is("gatling")));
     }
 
+    /**
+     * Builds the post update and read-back verification flow.
+     *
+     * @return the Gatling scenario chain
+     */
     public static ChainBuilder update() {
         return feed(MutationFeeder.mutablePosts())
                 .exec(session -> {
@@ -66,6 +71,11 @@ public class PostScenario {
                         .check(jsonPath("$.authorEmail").is(session -> session.getString("authorEmail"))));
     }
 
+    /**
+     * Builds the post deletion and not-found verification flow.
+     *
+     * @return the Gatling scenario chain
+     */
     public static ChainBuilder delete() {
         return feed(MutationFeeder.deletablePosts())
                 .exec(session -> session.set("idempotencyKey", UUID.randomUUID().toString()))

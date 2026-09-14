@@ -124,6 +124,7 @@ class PostCommandServiceTest {
         assertThat(event.title()).isEqualTo("Test Title");
     }
 
+    /** Verifies that creation metadata is durable before a follow-up update reads it. */
     @Test
     @DisplayName("Should persist creation metadata before an immediate update")
     void shouldPersistCreationMetadataBeforeImmediateUpdate() throws InterruptedException {

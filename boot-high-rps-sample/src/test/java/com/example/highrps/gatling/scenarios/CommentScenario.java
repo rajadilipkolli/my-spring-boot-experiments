@@ -31,6 +31,11 @@ public class CommentScenario {
                         .check(status().is(201)));
     }
 
+    /**
+     * Builds the comment update and read-back verification flow.
+     *
+     * @return the Gatling scenario chain
+     */
     public static ChainBuilder update() {
         return feed(MutationFeeder.mutableComments())
                 .exec(session -> {
@@ -52,6 +57,11 @@ public class CommentScenario {
                         .check(jsonPath("$.postId").is(session -> session.getString("postId"))));
     }
 
+    /**
+     * Builds the comment deletion and not-found verification flow.
+     *
+     * @return the Gatling scenario chain
+     */
     public static ChainBuilder delete() {
         return feed(MutationFeeder.deletableComments())
                 .exec(session -> session.set("idempotencyKey", UUID.randomUUID().toString()))

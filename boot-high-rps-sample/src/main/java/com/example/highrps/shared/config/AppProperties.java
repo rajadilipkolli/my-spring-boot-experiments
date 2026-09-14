@@ -31,10 +31,20 @@ public class AppProperties {
         this.batch = batch;
     }
 
+    /**
+     * Returns the local cache settings.
+     *
+     * @return the cache settings
+     */
     public Cache getCache() {
         return cache;
     }
 
+    /**
+     * Replaces the local cache settings.
+     *
+     * @param cache the cache settings to use
+     */
     public void setCache(Cache cache) {
         this.cache = cache;
     }
@@ -42,10 +52,20 @@ public class AppProperties {
     public static class Cache {
         private long localMaxSize = 10000;
 
+        /**
+         * Returns the maximum number of entries retained by the local cache.
+         *
+         * @return the local cache entry limit
+         */
         public long getLocalMaxSize() {
             return localMaxSize;
         }
 
+        /**
+         * Sets the maximum number of entries retained by the local cache.
+         *
+         * @param localMaxSize the local cache entry limit
+         */
         public void setLocalMaxSize(long localMaxSize) {
             this.localMaxSize = localMaxSize;
         }

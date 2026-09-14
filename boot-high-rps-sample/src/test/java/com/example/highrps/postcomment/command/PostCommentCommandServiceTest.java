@@ -201,6 +201,7 @@ class PostCommentCommandServiceTest {
         verify(deletionMarkerHandler).markDeleted(any(String.class), any(String.class));
     }
 
+    /** Verifies that a deletion marker is queued after pending Redis writes for the same comment. */
     @Test
     @DisplayName("Should serialize Redis writes with the deletion marker")
     void shouldSerializeRedisWritesWithDeletionMarker() throws InterruptedException {

@@ -164,6 +164,12 @@ public class PostCommandService extends AbstractCommandService {
                 });
     }
 
+    /**
+     * Updates a post and publishes the resulting aggregate event.
+     *
+     * @param cmd the replacement post data
+     * @return a future completed with the updated post after the event is published
+     */
     public CompletableFuture<PostCommandResult> updatePost(UpdatePostCommand cmd) {
         log.info("Updating post with id: {}", cmd.postId());
 
@@ -224,6 +230,12 @@ public class PostCommandService extends AbstractCommandService {
                 "Post");
     }
 
+    /**
+     * Deletes a post, invalidates its local cache entry, and records a Redis deletion marker.
+     *
+     * @param postId the identifier of the post to delete
+     * @return a future completed after the deletion event and cache cleanup finish
+     */
     public CompletableFuture<Void> deletePost(Long postId) {
         log.info("Deleting post with id: {}", postId);
 
@@ -303,6 +315,12 @@ public class PostCommandService extends AbstractCommandService {
         });
     }
 
+    /**
+     * Reads the original creation time from Redis, falling back to the current time when unavailable.
+     *
+     * @param postId the post identifier
+     * @return the stored creation time or the current time
+     */
     private LocalDateTime getCreatedAt(Long postId) {
         // Try to get from Redis first
         try {
@@ -316,10 +334,22 @@ public class PostCommandService extends AbstractCommandService {
         }
     }
 
+    /**
+     * Reads the tags currently stored for a post.
+     *
+     * @param postId the post identifier
+     * @return the stored tags, or an empty list when the post is absent
+     */
     private List<TagResponse> getExistingTags(Long postId) {
         return postRedisRepository.findById(postId).map(PostRedis::getTags).orElse(List.of());
     }
 
+    /**
+     * Reads the author email currently stored for a post.
+     *
+     * @param postId the post identifier
+     * @return the author email, or {@code null} when it cannot be read
+     */
     private String getAuthorEmail(Long postId) {
         try {
             return postRedisRepository

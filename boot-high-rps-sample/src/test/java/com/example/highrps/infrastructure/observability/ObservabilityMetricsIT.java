@@ -16,6 +16,7 @@ import org.springframework.kafka.support.SendResult;
 
 class ObservabilityMetricsIT extends AbstractIntegrationTest {
 
+    /** Verifies Kafka metric publication and correlation identifier propagation through MDC. */
     @Test
     @DisplayName("Should export Kafka client metrics and propagate correlationId via MDC")
     void shouldExportKafkaMetricsAndMDC() throws Exception {
