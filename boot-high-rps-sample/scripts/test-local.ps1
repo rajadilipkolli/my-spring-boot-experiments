@@ -73,7 +73,8 @@ if (-not $AppReady) {
     exit 1
 }
 
-if ((Test-Path -LiteralPath $CompletionMarker -PathType Leaf) -or (Test-RequiredFeederFiles)) {
+$RequiredFeederFilesValid = Test-RequiredFeederFiles
+if ((Test-Path -LiteralPath $CompletionMarker -PathType Leaf) -and $RequiredFeederFilesValid) {
     Write-Host "Data already present under target/loadtest-data. Skipping Data Generator..."
 } else {
     if (Test-Path -LiteralPath $DataDirectory) {
@@ -101,6 +102,7 @@ if ((Test-Path -LiteralPath $CompletionMarker -PathType Leaf) -or (Test-Required
 
 Write-Host "Running Gatling with Profile: $Profile..."
 cmd /c "mvnw.cmd gatling:test -Dprofile=$Profile -DdurationMinutes=$DurationMinutes -DwarmupMinutes=$WarmupMinutes"
+$GatlingExitCode = $LASTEXITCODE
 
 Stop-Process -Name java -ErrorAction SilentlyContinue
-Write-Host "Done!"
+exit $GatlingExitCode

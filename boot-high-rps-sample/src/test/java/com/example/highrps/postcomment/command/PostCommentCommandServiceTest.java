@@ -5,11 +5,16 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.example.highrps.infrastructure.cache.CacheKeyGenerator;
 import com.example.highrps.post.query.PostQueryService;
 import com.example.highrps.postcomment.domain.PostCommentMapper;
+import com.example.highrps.postcomment.domain.PostCommentRedis;
 import com.example.highrps.postcomment.domain.PostCommentRedisRepository;
 import com.example.highrps.postcomment.domain.PostCommentRequest;
 import com.example.highrps.postcomment.domain.events.PostCommentCreatedEvent;
@@ -26,6 +31,9 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -191,5 +199,68 @@ class PostCommentCommandServiceTest {
                         eq(String.valueOf(commentId.id())),
                         any(PostCommentDeletedEvent.class));
         verify(deletionMarkerHandler).markDeleted(any(String.class), any(String.class));
+    }
+
+    @Test
+    @DisplayName("Should serialize Redis writes with the deletion marker")
+    void shouldSerializeRedisWritesWithDeletionMarker() throws InterruptedException {
+        Long postId = 4L;
+        PostCommentId commentId = new PostCommentId(1003L);
+        String cacheKey = CacheKeyGenerator.generatePostCommentKey(postId, commentId.id());
+        UpdatePostCommentCommand updateCommand =
+                new UpdatePostCommentCommand(commentId, postId, "Title", "Content", true);
+        PostCommentCommandResult result = new PostCommentCommandResult(
+                commentId.id(),
+                postId,
+                "Title",
+                "Content",
+                true,
+                OffsetDateTime.now(),
+                LocalDateTime.now(),
+                LocalDateTime.now());
+        AtomicBoolean deleted = new AtomicBoolean();
+        CountDownLatch saveStarted = new CountDownLatch(1);
+        CountDownLatch releaseSave = new CountDownLatch(1);
+        CountDownLatch deletedWriteChecked = new CountDownLatch(1);
+
+        given(postCommentQueryService.getCommentById(new GetPostCommentQuery(postId, commentId)))
+                .willReturn(result);
+        given(postCommentMapper.toResultFromRequest(any(PostCommentRequest.class)))
+                .willReturn(result);
+        given(kafkaTemplate.send(anyString(), anyString(), any())).willReturn(CompletableFuture.completedFuture(null));
+        given(deletionMarkerHandler.isDeleted(DeletionMarkerHandler.POST_COMMENT, cacheKey))
+                .willAnswer(_ -> {
+                    if (deleted.get()) {
+                        deletedWriteChecked.countDown();
+                    }
+                    return deleted.get();
+                });
+        given(postCommentRedisRepository.save(any(PostCommentRedis.class))).willAnswer(invocation -> {
+            saveStarted.countDown();
+            assertThat(releaseSave.await(5, TimeUnit.SECONDS)).isTrue();
+            return invocation.getArgument(0);
+        });
+        doAnswer(_ -> {
+                    deleted.set(true);
+                    return null;
+                })
+                .when(deletionMarkerHandler)
+                .markDeleted(DeletionMarkerHandler.POST_COMMENT, cacheKey);
+
+        postCommentCommandService.updateComment(updateCommand).join();
+        assertThat(saveStarted.await(5, TimeUnit.SECONDS)).isTrue();
+
+        CompletableFuture<Void> deletion = postCommentCommandService.deleteComment(commentId, postId);
+        assertThat(deletion.isDone()).isFalse();
+        releaseSave.countDown();
+        deletion.join();
+
+        var ordered = inOrder(postCommentRedisRepository, deletionMarkerHandler);
+        ordered.verify(postCommentRedisRepository).save(any(PostCommentRedis.class));
+        ordered.verify(deletionMarkerHandler).markDeleted(DeletionMarkerHandler.POST_COMMENT, cacheKey);
+
+        postCommentCommandService.updateComment(updateCommand).join();
+        assertThat(deletedWriteChecked.await(5, TimeUnit.SECONDS)).isTrue();
+        verify(postCommentRedisRepository, times(1)).save(any(PostCommentRedis.class));
     }
 }

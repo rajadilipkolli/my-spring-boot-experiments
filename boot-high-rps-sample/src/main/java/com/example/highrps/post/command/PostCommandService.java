@@ -149,7 +149,7 @@ public class PostCommandService extends AbstractCommandService {
                         String.valueOf(cmd.postId()),
                         event,
                         result,
-                        () -> updateCaches(cmd.postId(), result),
+                        () -> updateCaches(cmd.postId(), result).join(),
                         "create post",
                         "Post")
                 .whenComplete((res, err) -> {
@@ -256,8 +256,9 @@ public class PostCommandService extends AbstractCommandService {
      *
      * @param postId the post identifier used as the cache key
      * @param result the current post state to cache
+     * @return a future completed after the queued Redis update finishes
      */
-    private void updateCaches(Long postId, PostCommandResult result) {
+    private CompletableFuture<Void> updateCaches(Long postId, PostCommandResult result) {
         String cacheKey = String.valueOf(postId);
 
         // Update local cache
@@ -269,7 +270,7 @@ public class PostCommandService extends AbstractCommandService {
         }
 
         // Update Redis asynchronously to avoid blocking the hot path
-        redisWriteQueue.enqueue(String.valueOf(postId), () -> {
+        return redisWriteQueue.enqueue(String.valueOf(postId), () -> {
             if (deletionMarkerHandler.isDeleted(DeletionMarkerHandler.POST, String.valueOf(postId))) {
                 log.debug("Skipping Redis update for deleted post: {}", postId);
                 return CompletableFuture.completedFuture(null);

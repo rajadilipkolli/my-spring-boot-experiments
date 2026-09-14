@@ -211,12 +211,13 @@ public class PostCommentCommandService extends AbstractCommandService {
                     } catch (Exception e) {
                         log.warn("Failed to invalidate local cache for comment: {}", commentId.id(), e);
                     }
-                    // 3. Mark deleted in Redis with TTL using unified handler
-                    try {
-                        deletionMarkerHandler.markDeleted(DeletionMarkerHandler.POST_COMMENT, cacheKey);
-                    } catch (Exception e) {
-                        log.warn("Failed to mark post comment deleted in Redis: {}", cacheKey, e);
-                    }
+                    // 3. Queue the marker behind pending Redis writes and wait for the deletion barrier
+                    redisWriteQueue
+                            .enqueue(cacheKey, () -> {
+                                deletionMarkerHandler.markDeleted(DeletionMarkerHandler.POST_COMMENT, cacheKey);
+                                return CompletableFuture.completedFuture(null);
+                            })
+                            .join();
                 },
                 "delete post comment",
                 "PostComment");
@@ -253,6 +254,10 @@ public class PostCommentCommandService extends AbstractCommandService {
                         .setPostId(postId);
                 redisEntity.setCreatedAt(result.createdAt());
                 redisEntity.setModifiedAt(result.modifiedAt());
+                if (deletionMarkerHandler.isDeleted(DeletionMarkerHandler.POST_COMMENT, cacheKey)) {
+                    log.debug("Skipping Redis update for deleted post comment: {}", commentId);
+                    return CompletableFuture.completedFuture(null);
+                }
                 postCommentRedisRepository.save(redisEntity);
                 log.debug("Asynchronously updated Redis for post comment: {}", commentId);
             } catch (Exception e) {
