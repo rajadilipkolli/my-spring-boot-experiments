@@ -61,6 +61,8 @@ public class PostScenario {
                 .exec(http("Verify Updated Post")
                         .get("/api/posts/#{postId}")
                         .check(status().is(200))
+                        .check(jsonPath("$.title").is(session -> session.getString("randomTitle")))
+                        .check(jsonPath("$.content").is(session -> session.getString("randomContent")))
                         .check(jsonPath("$.authorEmail").is(session -> session.getString("authorEmail"))));
     }
 
