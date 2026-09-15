@@ -4,18 +4,29 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
 import com.example.highrps.common.AbstractIntegrationTest;
+import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 import org.apache.kafka.streams.KafkaStreams;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 
 class KafkaErrorHandlingIT extends AbstractIntegrationTest {
+
+    @Autowired
+    private CircuitBreakerRegistry circuitBreakerRegistry;
 
     @BeforeEach
     void setUp() {
         super.clearDatabase();
+    }
+
+    @AfterEach
+    void resetFaultInjectionState() {
+        circuitBreakerRegistry.circuitBreaker("redisProjection").reset();
     }
 
     /** Verifies that malformed aggregate records are routed to the dead-letter topic and Redis. */
@@ -47,6 +58,9 @@ class KafkaErrorHandlingIT extends AbstractIntegrationTest {
     @Test
     @DisplayName("Should not crash Streams application when poison pill is encountered")
     void shouldNotCrashStreamsOnPoisonPill() throws Exception {
+        String dlqKey = "dlq:posts-aggregates-dlt";
+        Long initialDlqSize = redisTemplate.opsForList().size(dlqKey);
+
         // Act: send poison pill to the topic consumed by Streams
         String poisonPillKey = "streams-poison-pill-key";
         byte[] poisonPillValue = "not-a-valid-json".getBytes();
@@ -57,6 +71,13 @@ class KafkaErrorHandlingIT extends AbstractIntegrationTest {
             var streams = streamsBuilderFactoryBean.getKafkaStreams();
             assertThat(streams).isNotNull();
             assertThat(streams.state()).isEqualTo(KafkaStreams.State.RUNNING);
+        });
+
+        // The Redis projection listener consumes the same topic. Wait for its retry chain to settle before the
+        // circuit breaker is reset so this fault injection cannot affect the next integration test.
+        await().atMost(Duration.ofSeconds(10)).untilAsserted(() -> {
+            Long currentDlqSize = redisTemplate.opsForList().size(dlqKey);
+            assertThat(currentDlqSize).isNotNull().isGreaterThan(initialDlqSize == null ? 0L : initialDlqSize);
         });
 
         // Note: Kafka Streams doesn't automatically route to DLT for deserialization errors
