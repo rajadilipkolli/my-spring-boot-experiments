@@ -4,7 +4,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
 import com.example.highrps.common.AbstractIntegrationTest;
+import com.example.highrps.post.domain.PostDetailsResponse;
+import com.example.highrps.post.domain.events.PostCreatedEvent;
+import com.example.highrps.shared.IdGenerator;
 import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.junit.jupiter.api.DisplayName;
@@ -24,9 +29,21 @@ class ObservabilityMetricsIT extends AbstractIntegrationTest {
         MDC.put("correlationId", correlationId);
 
         try {
+            LocalDateTime now = LocalDateTime.now();
+            PostCreatedEvent event = new PostCreatedEvent(
+                    IdGenerator.generateLong(),
+                    "Observability test",
+                    "Valid aggregate payload",
+                    "observability@example.com",
+                    false,
+                    null,
+                    now,
+                    new PostDetailsResponse("observability", now, "integration-test"),
+                    List.of());
+
             // Trigger producer action which will fire the MdcProducerInterceptor
             SendResult<String, Object> sendResult = kafkaTemplate
-                    .send("posts-aggregates", "test-key", "test-payload")
+                    .send("posts-aggregates", String.valueOf(event.postId()), event)
                     .get(5, TimeUnit.SECONDS);
 
             KafkaTemplate<String, Object> localKafkaTemplate = new KafkaTemplate<>(producerFactory);

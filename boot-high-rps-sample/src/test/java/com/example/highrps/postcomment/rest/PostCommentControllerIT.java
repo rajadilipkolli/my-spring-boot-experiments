@@ -489,9 +489,11 @@ class PostCommentControllerIT extends AbstractIntegrationTest {
         String cacheKey =
                 com.example.highrps.infrastructure.cache.CacheKeyGenerator.generatePostCommentKey(postId, commentId);
 
-        // Redis is populated synchronously
-        assertThat(postCommentRedisRepository.findById(String.valueOf(commentId)))
-                .isPresent();
+        // The command path updates Redis asynchronously; wait until that write is visible before testing fallback.
+        await().atMost(Duration.ofSeconds(10))
+                .pollInterval(Duration.ofMillis(100))
+                .untilAsserted(() -> assertThat(postCommentRedisRepository.findById(String.valueOf(commentId)))
+                        .isPresent());
 
         // Also wait for Kafka Streams to process it so the fallback test works
         StreamsBuilderFactoryBean streamsFactory =
