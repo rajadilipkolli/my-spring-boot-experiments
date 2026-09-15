@@ -12,6 +12,9 @@ public class AppProperties {
     @NestedConfigurationProperty
     private Batch batch = new Batch();
 
+    @NestedConfigurationProperty
+    private Cache cache = new Cache();
+
     public Kafka getKafka() {
         return kafka;
     }
@@ -28,11 +31,50 @@ public class AppProperties {
         this.batch = batch;
     }
 
+    /**
+     * Returns the local cache settings.
+     *
+     * @return the cache settings
+     */
+    public Cache getCache() {
+        return cache;
+    }
+
+    /**
+     * Replaces the local cache settings.
+     *
+     * @param cache the cache settings to use
+     */
+    public void setCache(Cache cache) {
+        this.cache = cache;
+    }
+
+    public static class Cache {
+        private long localMaxSize = 10000;
+
+        /**
+         * Returns the maximum number of entries retained by the local cache.
+         *
+         * @return the local cache entry limit
+         */
+        public long getLocalMaxSize() {
+            return localMaxSize;
+        }
+
+        /**
+         * Sets the maximum number of entries retained by the local cache.
+         *
+         * @param localMaxSize the local cache entry limit
+         */
+        public void setLocalMaxSize(long localMaxSize) {
+            this.localMaxSize = localMaxSize;
+        }
+    }
+
     public static class Kafka {
         private long publishTimeOutMs = 5000;
         private String minInsyncReplicas = "1";
 
-        private Topic eventsTopic = new Topic(3, (short) 1, 604800000L);
         private Topic postsAggregatesTopic = new Topic(3, (short) 1, null);
         private Topic authorsAggregatesTopic = new Topic(3, (short) 1, null);
         private Topic postCommentsAggregatesTopic = new Topic(3, (short) 1, null);
@@ -51,14 +93,6 @@ public class AppProperties {
 
         public void setMinInsyncReplicas(String minInsyncReplicas) {
             this.minInsyncReplicas = minInsyncReplicas;
-        }
-
-        public Topic getEventsTopic() {
-            return eventsTopic;
-        }
-
-        public void setEventsTopic(Topic eventsTopic) {
-            this.eventsTopic = eventsTopic;
         }
 
         public Topic getPostsAggregatesTopic() {

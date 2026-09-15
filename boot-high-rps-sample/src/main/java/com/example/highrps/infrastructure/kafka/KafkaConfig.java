@@ -129,12 +129,15 @@ public class KafkaConfig {
         return getStringConcurrentKafkaListenerContainerFactory(postCommentConsumerFactory, recoverer);
     }
 
-    // Application-level topics. Kafka Streams will create internal changelog topics
-    // automatically.
+    /**
+     * Declares the compacted Kafka topics used for post, author, and post-comment aggregates.
+     *
+     * @param appProperties application configuration supplying partition counts, replication factors, and minimum
+     *     in-sync replicas
+     * @return the application topic declarations for Kafka administration
+     */
     @Bean
-    KafkaAdmin.NewTopics eventsTopic(AppProperties appProperties) {
-        int eventsPartitions = appProperties.getKafka().getEventsTopic().getPartitions();
-        short eventsReplication = appProperties.getKafka().getEventsTopic().getReplicationFactor();
+    KafkaAdmin.NewTopics applicationTopics(AppProperties appProperties) {
         int postsAggregatesPartitions =
                 appProperties.getKafka().getPostsAggregatesTopic().getPartitions();
         short postsAggregatesReplication =
@@ -147,15 +150,7 @@ public class KafkaConfig {
                 appProperties.getKafka().getPostCommentsAggregatesTopic().getPartitions();
         short postCommentsAggregatesReplication =
                 appProperties.getKafka().getPostCommentsAggregatesTopic().getReplicationFactor();
-        long tombstoneRetentionMs = appProperties.getKafka().getEventsTopic().getTombstoneRetentionMs();
         String minInSyncReplicas = appProperties.getKafka().getMinInsyncReplicas();
-
-        NewTopic events = new NewTopic("events", eventsPartitions, eventsReplication);
-        Map<String, String> eventsCfg = new HashMap<>();
-        eventsCfg.put("cleanup.policy", "compact,delete");
-        eventsCfg.put("delete.retention.ms", String.valueOf(tombstoneRetentionMs));
-        eventsCfg.put("min.insync.replicas", minInSyncReplicas);
-        events.configs(eventsCfg);
 
         NewTopic posts = new NewTopic("posts-aggregates", postsAggregatesPartitions, postsAggregatesReplication);
         posts.configs(Map.of("cleanup.policy", "compact", "min.insync.replicas", minInSyncReplicas));
@@ -165,6 +160,7 @@ public class KafkaConfig {
         NewTopic postComments = new NewTopic(
                 "post-comments-aggregates", postCommentsAggregatesPartitions, postCommentsAggregatesReplication);
         postComments.configs(Map.of("cleanup.policy", "compact", "min.insync.replicas", minInSyncReplicas));
-        return new KafkaAdmin.NewTopics(events, posts, authors, postComments);
+
+        return new KafkaAdmin.NewTopics(posts, authors, postComments);
     }
 }

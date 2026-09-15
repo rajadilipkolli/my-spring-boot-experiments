@@ -29,6 +29,6 @@ public class TagScenario {
                  * and fetch each post individually.
                  */
                 .foreach("#{postIdsToFetch}", "postId")
-                .on(exec(http("Read Post By Tag").get("/api/posts/#{postId}").check(status().is(200))));
+                .on(exec(http("tag_read").get("/api/posts/#{postId}").check(status().is(200))));
     }
 }

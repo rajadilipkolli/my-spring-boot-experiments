@@ -4,6 +4,7 @@ import static io.gatling.javaapi.core.CoreDsl.*;
 import static io.gatling.javaapi.http.HttpDsl.*;
 
 import com.example.highrps.gatling.feeders.AuthorFeeder;
+import com.example.highrps.gatling.feeders.MutationFeeder;
 import io.gatling.javaapi.core.ChainBuilder;
 import java.util.UUID;
 
@@ -21,7 +22,7 @@ public class PostScenario {
                     return session.set("idempotencyKey", uuid)
                             .set("randomTitle", "Gatling Post " + uuid.substring(0, 8));
                 })
-                .exec(http("Create Post")
+                .exec(http("post_create")
                         .post("/api/posts")
                         .header("Idempotency-Key", "#{idempotencyKey}")
                         .body(
@@ -40,5 +41,48 @@ public class PostScenario {
                         .check(status().is(200))
                         .check(jsonPath("$.authorEmail").is(session -> session.getString("email")))
                         .check(jsonPath("$.tags[0].tagName").is("gatling")));
+    }
+
+    /**
+     * Builds the post update and read-back verification flow.
+     *
+     * @return the Gatling scenario chain
+     */
+    public static ChainBuilder update() {
+        return feed(MutationFeeder.mutablePosts())
+                .exec(session -> {
+                    String uuid = UUID.randomUUID().toString();
+                    return session.set("idempotencyKey", uuid)
+                            .set("randomTitle", "Updated Gatling Post " + uuid.substring(0, 8))
+                            .set("randomContent", "Updated Content " + uuid.substring(0, 8));
+                })
+                .exec(http("post_update")
+                        .put("/api/posts/#{postId}")
+                        .header("Idempotency-Key", "#{idempotencyKey}")
+                        .body(
+                                StringBody(
+                                        "{\"title\":\"#{randomTitle}\", \"content\":\"#{randomContent}\", \"email\":\"#{authorEmail}\", \"details\":{\"detailsKey\":\"Test details\",\"createdBy\":\"Gatling\"}, \"tags\":[{\"tagName\":\"gatling\"}, {\"tagName\":\"loadtest\"}]}"))
+                        .check(status().is(200)))
+                .exec(http("Verify Updated Post")
+                        .get("/api/posts/#{postId}")
+                        .check(status().is(200))
+                        .check(jsonPath("$.title").is(session -> session.getString("randomTitle")))
+                        .check(jsonPath("$.content").is(session -> session.getString("randomContent")))
+                        .check(jsonPath("$.authorEmail").is(session -> session.getString("authorEmail"))));
+    }
+
+    /**
+     * Builds the post deletion and not-found verification flow.
+     *
+     * @return the Gatling scenario chain
+     */
+    public static ChainBuilder delete() {
+        return feed(MutationFeeder.deletablePosts())
+                .exec(session -> session.set("idempotencyKey", UUID.randomUUID().toString()))
+                .exec(http("post_delete")
+                        .delete("/api/posts/#{postId}")
+                        .header("Idempotency-Key", "#{idempotencyKey}")
+                        .check(status().is(204)))
+                .exec(http("Verify Deleted Post").get("/api/posts/#{postId}").check(status().is(404)));
     }
 }

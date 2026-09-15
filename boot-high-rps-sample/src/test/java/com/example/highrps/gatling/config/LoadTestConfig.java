@@ -20,13 +20,23 @@ public class LoadTestConfig {
     public static final int COMMENTS_SIZE = getIntProperty("comments", 5000);
     public static final int TAGS_SIZE = getIntProperty("tags", 50);
 
+    public static final int MUTABLE_POST_POOL_SIZE = getIntProperty("mutablePostPoolSize", 50);
+    public static final int DELETABLE_POST_POOL_SIZE = getProfileDeletablePostPoolSize();
+    public static final int MUTABLE_COMMENT_POOL_SIZE = getIntProperty("mutableCommentPoolSize", 50);
+    public static final int DELETABLE_COMMENT_POOL_SIZE = getProfileDeletableCommentPoolSize();
+
     // Traffic weights
-    public static final double READ_POST_WEIGHT = getDoubleProperty("readPostWeight", 45.0);
+    public static final double READ_POST_WEIGHT = getDoubleProperty("readPostWeight", 41.0);
     public static final double READ_COMMENTS_WEIGHT = getDoubleProperty("readCommentsWeight", 20.0);
     public static final double READ_TAG_POSTS_WEIGHT = getDoubleProperty("readTagPostsWeight", 10.0);
     public static final double CREATE_COMMENT_WEIGHT = getDoubleProperty("createCommentWeight", 15.0);
     public static final double CREATE_POST_WEIGHT = getDoubleProperty("createPostWeight", 8.0);
     public static final double REGISTER_AUTHOR_WEIGHT = getDoubleProperty("registerAuthorWeight", 2.0);
+
+    public static final double UPDATE_POST_WEIGHT = getDoubleProperty("postUpdateWeight", 1.0);
+    public static final double DELETE_POST_WEIGHT = getDoubleProperty("postDeleteWeight", 1.0);
+    public static final double UPDATE_COMMENT_WEIGHT = getDoubleProperty("commentUpdateWeight", 1.0);
+    public static final double DELETE_COMMENT_WEIGHT = getDoubleProperty("commentDeleteWeight", 1.0);
 
     // Global properties that can be overridden by profile
     public static final double TARGET_RPS = getProfileTargetRps();
@@ -85,11 +95,24 @@ public class LoadTestConfig {
         return val != null ? Double.parseDouble(val) : defaultValue;
     }
 
+    /**
+     * Resolves a long-valued setting.
+     *
+     * @param key the property name
+     * @param defaultValue the fallback value
+     * @return the resolved long value
+     */
     private static long getLongProperty(String key, long defaultValue) {
         String val = getProperty(key, null);
         return val != null ? Long.parseLong(val) : defaultValue;
     }
 
+    /**
+     * Loads the optional load-test property file from the classpath.
+     *
+     * @return the loaded properties, or an empty set when the resource is absent
+     * @throws IllegalStateException when the resource cannot be read
+     */
     private static Properties loadProperties() {
         Properties properties = new Properties();
         try (InputStream input = LoadTestConfig.class.getClassLoader().getResourceAsStream("load-test.properties")) {
@@ -148,9 +171,46 @@ public class LoadTestConfig {
             return Integer.parseInt(override);
         }
         return switch (PROFILE) {
-            case "smoke" -> 5;
-            case "normal", "high", "stress" -> 5;
+            case "smoke" -> 1;
+            case "normal", "high", "stress" -> 3;
             default -> 5;
+        };
+    }
+
+    /**
+     * Resolves the number of posts reserved for destructive scenarios.
+     *
+     * @return the deletable post pool size for the selected profile
+     */
+    private static int getProfileDeletablePostPoolSize() {
+        String override = getProperty("deletablePostPoolSize", null);
+        if (override != null) {
+            return Integer.parseInt(override);
+        }
+        return switch (PROFILE) {
+            case "smoke" -> 100;
+            case "normal" -> 1000;
+            case "high" -> 20000;
+            case "stress" -> 25000;
+            default -> 1000;
+        };
+    }
+
+    /**
+     * Resolves the number of comments reserved for destructive scenarios.
+     *
+     * @return the deletable comment pool size for the selected profile
+     */
+    private static int getProfileDeletableCommentPoolSize() {
+        String override = getProperty("deletableCommentPoolSize", null);
+        if (override != null) {
+            return Integer.parseInt(override);
+        }
+        return switch (PROFILE) {
+            case "smoke" -> 500;
+            case "normal" -> 5000;
+            case "high", "stress" -> 50000;
+            default -> 5000;
         };
     }
 }

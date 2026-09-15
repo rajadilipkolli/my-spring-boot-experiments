@@ -1,5 +1,6 @@
 package com.example.highrps.infrastructure.cache;
 
+import com.example.highrps.shared.config.AppProperties;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import java.time.Duration;
@@ -20,10 +21,16 @@ public class CacheConfig {
 
     private static final Logger log = LoggerFactory.getLogger(CacheConfig.class);
 
+    /**
+     * Creates the shared in-process cache with the configured entry limit and a five-minute write expiry.
+     *
+     * @param appProperties application configuration containing the local cache limit
+     * @return the cache used by application read and write paths
+     */
     @Bean
-    Cache<String, String> localCache() {
+    Cache<String, String> localCache(AppProperties appProperties) {
         return Caffeine.newBuilder()
-                .maximumSize(10_000)
+                .maximumSize(appProperties.getCache().getLocalMaxSize())
                 .expireAfterWrite(Duration.ofMinutes(5))
                 .executor(Executors.newVirtualThreadPerTaskExecutor())
                 .recordStats()
@@ -34,6 +41,12 @@ public class CacheConfig {
                 .build();
     }
 
+    /**
+     * Creates the string Redis template used for cache reservations and deletion markers.
+     *
+     * @param factory the Redis connection factory
+     * @return a template configured with string key and value serializers
+     */
     @Bean
     @Primary
     RedisTemplate<String, String> redisTemplate(LettuceConnectionFactory factory) {

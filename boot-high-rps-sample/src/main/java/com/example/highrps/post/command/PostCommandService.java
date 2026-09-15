@@ -7,7 +7,9 @@ import com.example.highrps.post.domain.TagResponse;
 import com.example.highrps.post.domain.events.PostCreatedEvent;
 import com.example.highrps.post.domain.events.PostDeletedEvent;
 import com.example.highrps.post.domain.events.PostUpdatedEvent;
+import com.example.highrps.post.query.PostQueryService;
 import com.example.highrps.shared.AbstractCommandService;
+import com.example.highrps.shared.AggregateOperationQueue;
 import com.example.highrps.shared.ResourceConflictException;
 import com.example.highrps.shared.config.AppProperties;
 import com.example.highrps.shared.redis.DeletionMarkerHandler;
@@ -18,6 +20,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import tools.jackson.databind.json.JsonMapper;
@@ -36,8 +39,9 @@ public class PostCommandService extends AbstractCommandService {
     private final PostRedisRepository postRedisRepository;
     private final JsonMapper jsonMapper;
     private final DeletionMarkerHandler deletionMarkerHandler;
-    private final com.example.highrps.post.query.PostQueryService postQueryService;
-    private final org.springframework.data.redis.core.RedisTemplate<String, String> redisTemplate;
+    private final PostQueryService postQueryService;
+    private final RedisTemplate<String, String> redisTemplate;
+    private final AggregateOperationQueue redisWriteQueue = new AggregateOperationQueue();
 
     /**
      * Creates a post command service with its event, cache, and persistence collaborators.
@@ -57,8 +61,8 @@ public class PostCommandService extends AbstractCommandService {
             PostRedisRepository postRedisRepository,
             JsonMapper jsonMapper,
             DeletionMarkerHandler deletionMarkerHandler,
-            com.example.highrps.post.query.PostQueryService postQueryService,
-            org.springframework.data.redis.core.RedisTemplate<String, String> redisTemplate,
+            PostQueryService postQueryService,
+            RedisTemplate<String, String> redisTemplate,
             AppProperties appProperties) {
         super(kafkaTemplate, appProperties.getKafka().getPublishTimeOutMs());
         this.localCache = localCache;
@@ -145,7 +149,7 @@ public class PostCommandService extends AbstractCommandService {
                         String.valueOf(cmd.postId()),
                         event,
                         result,
-                        () -> updateCaches(cmd.postId(), result),
+                        () -> updateCaches(cmd.postId(), result).join(),
                         "create post",
                         "Post")
                 .whenComplete((res, err) -> {
@@ -160,6 +164,12 @@ public class PostCommandService extends AbstractCommandService {
                 });
     }
 
+    /**
+     * Updates a post and publishes the resulting aggregate event.
+     *
+     * @param cmd the replacement post data
+     * @return a future completed with the updated post after the event is published
+     */
     public CompletableFuture<PostCommandResult> updatePost(UpdatePostCommand cmd) {
         log.info("Updating post with id: {}", cmd.postId());
 
@@ -220,6 +230,12 @@ public class PostCommandService extends AbstractCommandService {
                 "Post");
     }
 
+    /**
+     * Deletes a post, invalidates its local cache entry, and records a Redis deletion marker.
+     *
+     * @param postId the identifier of the post to delete
+     * @return a future completed after the deletion event and cache cleanup finish
+     */
     public CompletableFuture<Void> deletePost(Long postId) {
         log.info("Deleting post with id: {}", postId);
 
@@ -246,7 +262,15 @@ public class PostCommandService extends AbstractCommandService {
                 "Post");
     }
 
-    private void updateCaches(Long postId, PostCommandResult result) {
+    /**
+     * Attempts to update the local read cache immediately, then schedules a best-effort Redis update.
+     * Cache write failures are logged without being propagated to the command result.
+     *
+     * @param postId the post identifier used as the cache key
+     * @param result the current post state to cache
+     * @return a future completed after the queued Redis update finishes
+     */
+    private CompletableFuture<Void> updateCaches(Long postId, PostCommandResult result) {
         String cacheKey = String.valueOf(postId);
 
         // Update local cache
@@ -257,33 +281,46 @@ public class PostCommandService extends AbstractCommandService {
             log.warn("Failed to update local cache for postId: {}", postId, e);
         }
 
-        // Update Redis synchronously for guaranteed read-your-writes
-        try {
-            PostRedis redisEntity = new PostRedis()
-                    .setId(postId)
-                    .setTitle(result.title())
-                    .setContent(result.content())
-                    .setAuthorEmail(result.authorEmail())
-                    .setPublished(result.published())
-                    .setPublishedAt(result.publishedAt());
-
-            if (result.details() != null) {
-                redisEntity.setDetails(result.details());
+        // Update Redis asynchronously to avoid blocking the hot path
+        return redisWriteQueue.enqueue(String.valueOf(postId), () -> {
+            if (deletionMarkerHandler.isDeleted(DeletionMarkerHandler.POST, String.valueOf(postId))) {
+                log.debug("Skipping Redis update for deleted post: {}", postId);
+                return CompletableFuture.completedFuture(null);
             }
+            try {
+                PostRedis redisEntity = new PostRedis()
+                        .setId(postId)
+                        .setTitle(result.title())
+                        .setContent(result.content())
+                        .setAuthorEmail(result.authorEmail())
+                        .setPublished(result.published())
+                        .setPublishedAt(result.publishedAt());
 
-            if (result.tags() != null) {
-                redisEntity.setTags(result.tags());
+                if (result.details() != null) {
+                    redisEntity.setDetails(result.details());
+                }
+
+                if (result.tags() != null) {
+                    redisEntity.setTags(result.tags());
+                }
+
+                redisEntity.setCreatedAt(result.createdAt());
+                redisEntity.setModifiedAt(result.modifiedAt());
+                postRedisRepository.save(redisEntity);
+                log.debug("Asynchronously updated Redis for post: {}", postId);
+            } catch (Exception e) {
+                log.error("Failed to asynchronously update Redis for post: {}", postId, e);
             }
-
-            redisEntity.setCreatedAt(result.createdAt());
-            redisEntity.setModifiedAt(result.modifiedAt());
-            postRedisRepository.save(redisEntity);
-            log.debug("Synchronously updated Redis for post: {}", postId);
-        } catch (Exception e) {
-            log.error("Failed to synchronously update Redis for post: {}", postId, e);
-        }
+            return CompletableFuture.completedFuture(null);
+        });
     }
 
+    /**
+     * Reads the original creation time from Redis, falling back to the current time when unavailable.
+     *
+     * @param postId the post identifier
+     * @return the stored creation time or the current time
+     */
     private LocalDateTime getCreatedAt(Long postId) {
         // Try to get from Redis first
         try {
@@ -297,10 +334,22 @@ public class PostCommandService extends AbstractCommandService {
         }
     }
 
+    /**
+     * Reads the tags currently stored for a post.
+     *
+     * @param postId the post identifier
+     * @return the stored tags, or an empty list when the post is absent
+     */
     private List<TagResponse> getExistingTags(Long postId) {
         return postRedisRepository.findById(postId).map(PostRedis::getTags).orElse(List.of());
     }
 
+    /**
+     * Reads the author email currently stored for a post.
+     *
+     * @param postId the post identifier
+     * @return the author email, or {@code null} when it cannot be read
+     */
     private String getAuthorEmail(Long postId) {
         try {
             return postRedisRepository

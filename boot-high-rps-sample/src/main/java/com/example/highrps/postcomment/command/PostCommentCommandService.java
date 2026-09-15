@@ -13,6 +13,7 @@ import com.example.highrps.postcomment.domain.vo.PostCommentId;
 import com.example.highrps.postcomment.query.GetPostCommentQuery;
 import com.example.highrps.postcomment.query.PostCommentQueryService;
 import com.example.highrps.shared.AbstractCommandService;
+import com.example.highrps.shared.AggregateOperationQueue;
 import com.example.highrps.shared.IdGenerator;
 import com.example.highrps.shared.ResourceConflictException;
 import com.example.highrps.shared.ResourceNotFoundException;
@@ -48,6 +49,7 @@ public class PostCommentCommandService extends AbstractCommandService {
     private final DeletionMarkerHandler deletionMarkerHandler;
     private final PostCommentRedisRepository postCommentRedisRepository;
     private final RedisTemplate<String, String> redisTemplate;
+    private final AggregateOperationQueue redisWriteQueue = new AggregateOperationQueue();
 
     /**
      * Creates a comment command service with its event, cache, and persistence collaborators.
@@ -209,19 +211,21 @@ public class PostCommentCommandService extends AbstractCommandService {
                     } catch (Exception e) {
                         log.warn("Failed to invalidate local cache for comment: {}", commentId.id(), e);
                     }
-                    // 3. Mark deleted in Redis with TTL using unified handler
-                    try {
-                        deletionMarkerHandler.markDeleted(DeletionMarkerHandler.POST_COMMENT, cacheKey);
-                    } catch (Exception e) {
-                        log.warn("Failed to mark post comment deleted in Redis: {}", cacheKey, e);
-                    }
+                    // 3. Queue the marker behind pending Redis writes and wait for the deletion barrier
+                    redisWriteQueue
+                            .enqueue(cacheKey, () -> {
+                                deletionMarkerHandler.markDeleted(DeletionMarkerHandler.POST_COMMENT, cacheKey);
+                                return CompletableFuture.completedFuture(null);
+                            })
+                            .join();
                 },
                 "delete post comment",
                 "PostComment");
     }
 
     /**
-     * Updates local and Redis read caches after a comment mutation.
+     * Attempts to update the local read cache immediately, then schedules a best-effort Redis update.
+     * Cache write failures are logged without being propagated to the command result.
      *
      * @param postId the parent post identifier
      * @param commentId the comment identifier
@@ -238,21 +242,28 @@ public class PostCommentCommandService extends AbstractCommandService {
             log.warn("Failed to update local cache for comment: {}", commentId, e);
         }
 
-        // Update Redis synchronously for guaranteed read-your-writes
-        try {
-            PostCommentRedis redisEntity = new PostCommentRedis()
-                    .setCommentId(String.valueOf(commentId))
-                    .setTitle(result.title())
-                    .setContent(result.content())
-                    .setPublished(result.published())
-                    .setPublishedAt(result.publishedAt())
-                    .setPostId(postId);
-            redisEntity.setCreatedAt(result.createdAt());
-            redisEntity.setModifiedAt(result.modifiedAt());
-            postCommentRedisRepository.save(redisEntity);
-            log.debug("Synchronously updated Redis for post comment: {}", commentId);
-        } catch (Exception e) {
-            log.error("Failed to synchronously update Redis for post comment: {}", commentId, e);
-        }
+        // Update Redis asynchronously to avoid blocking the hot path
+        redisWriteQueue.enqueue(cacheKey, () -> {
+            try {
+                PostCommentRedis redisEntity = new PostCommentRedis()
+                        .setCommentId(String.valueOf(commentId))
+                        .setTitle(result.title())
+                        .setContent(result.content())
+                        .setPublished(result.published())
+                        .setPublishedAt(result.publishedAt())
+                        .setPostId(postId);
+                redisEntity.setCreatedAt(result.createdAt());
+                redisEntity.setModifiedAt(result.modifiedAt());
+                if (deletionMarkerHandler.isDeleted(DeletionMarkerHandler.POST_COMMENT, cacheKey)) {
+                    log.debug("Skipping Redis update for deleted post comment: {}", commentId);
+                    return CompletableFuture.completedFuture(null);
+                }
+                postCommentRedisRepository.save(redisEntity);
+                log.debug("Asynchronously updated Redis for post comment: {}", commentId);
+            } catch (Exception e) {
+                log.error("Failed to asynchronously update Redis for post comment: {}", commentId, e);
+            }
+            return CompletableFuture.completedFuture(null);
+        });
     }
 }

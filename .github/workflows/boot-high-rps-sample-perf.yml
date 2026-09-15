@@ -18,6 +18,22 @@ on:
       targetRps:
         description: 'Target RPS (if overriding profile default)'
         required: false
+      postUpdateWeight:
+        description: 'Post update operation weight'
+        required: false
+        default: '1.0'
+      postDeleteWeight:
+        description: 'Post delete operation weight'
+        required: false
+        default: '1.0'
+      commentUpdateWeight:
+        description: 'Comment update operation weight'
+        required: false
+        default: '1.0'
+      commentDeleteWeight:
+        description: 'Comment delete operation weight'
+        required: false
+        default: '1.0'
 
 jobs:
   performance-comparison:
@@ -45,6 +61,10 @@ jobs:
           PROFILE_INPUT: ${{ github.event.inputs.profile || 'normal' }}
           DURATION_INPUT: ${{ github.event.inputs.durationMinutes || '15' }}
           TARGET_RPS_INPUT: ${{ github.event.inputs.targetRps }}
+          POST_UPDATE_WEIGHT: ${{ github.event.inputs.postUpdateWeight || '1.0' }}
+          POST_DELETE_WEIGHT: ${{ github.event.inputs.postDeleteWeight || '1.0' }}
+          COMMENT_UPDATE_WEIGHT: ${{ github.event.inputs.commentUpdateWeight || '1.0' }}
+          COMMENT_DELETE_WEIGHT: ${{ github.event.inputs.commentDeleteWeight || '1.0' }}
         run: |
           case "$PROFILE_INPUT" in
             normal|high|stress) ;;
@@ -63,6 +83,10 @@ jobs:
           printf 'PROFILE=%s\n' "$PROFILE_INPUT" >> "$GITHUB_ENV"
           printf 'DURATION=%s\n' "$DURATION_INPUT" >> "$GITHUB_ENV"
           printf 'TARGET_RPS=%s\n' "$TARGET_RPS_INPUT" >> "$GITHUB_ENV"
+          printf 'POST_UPDATE_WEIGHT=%s\n' "$POST_UPDATE_WEIGHT" >> "$GITHUB_ENV"
+          printf 'POST_DELETE_WEIGHT=%s\n' "$POST_DELETE_WEIGHT" >> "$GITHUB_ENV"
+          printf 'COMMENT_UPDATE_WEIGHT=%s\n' "$COMMENT_UPDATE_WEIGHT" >> "$GITHUB_ENV"
+          printf 'COMMENT_DELETE_WEIGHT=%s\n' "$COMMENT_DELETE_WEIGHT" >> "$GITHUB_ENV"
           printf 'CURRENT_HEAD=%s\n' "$(git rev-parse HEAD)" >> "$GITHUB_ENV"
 
       - name: Run Baseline (HEAD~1)
@@ -82,7 +106,7 @@ jobs:
           # Run the baseline application with the current revision's load-test harness.
           git checkout "$CURRENT_HEAD~1"
           git checkout "$CURRENT_HEAD" -- pom.xml src/test/java/com/example/highrps/gatling src/test/resources/load-test.properties
-          
+    
           # Start Infra and Monitoring
           docker compose -f docker/docker-compose.yml up -d
           if [ -f docker/docker-compose-monitoring.yml ]; then
@@ -94,7 +118,7 @@ jobs:
           java -jar target/boot-high-rps-sample-0.1.0-SNAPSHOT.jar --spring.profiles.active=local \
             > "$RUNNER_TEMP/baseline-app.log" 2>&1 &
           APP_PID=$!
-          
+
           echo "Waiting for /actuator/health to report UP..."
           deadline=$((SECONDS + 120))
           until curl --fail --silent --show-error --max-time 5 http://localhost:8080/actuator/health \
@@ -109,13 +133,13 @@ jobs:
             fi
             sleep 2
           done
-
+          
           # Generate Data
           ./mvnw exec:java -Dexec.mainClass="com.example.highrps.gatling.setup.DataGenerator" \
             -Dexec.classpathScope=test -DdataDir=target/loadtest-data -DdataSeed=2674
           
           # Run Gatling
-          MAVEN_ARGS=(-Dprofile="$PROFILE" -DdurationMinutes="$DURATION")
+          MAVEN_ARGS=(-Dprofile="$PROFILE" -DdurationMinutes="$DURATION" -DpostUpdateWeight="$POST_UPDATE_WEIGHT" -DpostDeleteWeight="$POST_DELETE_WEIGHT" -DcommentUpdateWeight="$COMMENT_UPDATE_WEIGHT" -DcommentDeleteWeight="$COMMENT_DELETE_WEIGHT")
           if [[ -n "$TARGET_RPS" ]]; then
             MAVEN_ARGS+=(-DtargetRps="$TARGET_RPS")
           fi
@@ -185,7 +209,7 @@ jobs:
             -Dexec.classpathScope=test -DdataDir=target/loadtest-data -DdataSeed=2674
           
           # Run Gatling
-          MAVEN_ARGS=(-Dprofile="$PROFILE" -DdurationMinutes="$DURATION")
+          MAVEN_ARGS=(-Dprofile="$PROFILE" -DdurationMinutes="$DURATION" -DpostUpdateWeight="$POST_UPDATE_WEIGHT" -DpostDeleteWeight="$POST_DELETE_WEIGHT" -DcommentUpdateWeight="$COMMENT_UPDATE_WEIGHT" -DcommentDeleteWeight="$COMMENT_DELETE_WEIGHT")
           if [[ -n "$TARGET_RPS" ]]; then
             MAVEN_ARGS+=(-DtargetRps="$TARGET_RPS")
           fi
@@ -193,7 +217,7 @@ jobs:
           ./mvnw gatling:test "${MAVEN_ARGS[@]}"
           GATLING_STATUS=$?
           set -e
-          
+         
           # Save Stats
           if [[ -d target/gatling ]]; then
             STATS_FILE=$(find target/gatling -name "stats.json" -print -quit)
@@ -226,3 +250,4 @@ jobs:
           name: gatling-head-report
           path: head-report/
           retention-days: 14
+          

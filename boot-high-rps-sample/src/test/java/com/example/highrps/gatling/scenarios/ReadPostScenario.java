@@ -19,7 +19,7 @@ public class ReadPostScenario {
                     Map<String, Object> post = PostFeeder.getSkewed().next();
                     return session.set("postId", post.get("postId"));
                 })
-                .exec(http("Read Post")
+                .exec(http("post_read")
                         .get("/api/posts/#{postId}")
                         .check(status().is(200))
                         .check(jsonPath("$.authorEmail").exists())
