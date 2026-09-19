@@ -46,7 +46,7 @@ jobs:
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
-          persist-credentials: false
+          persist-credentials: true
 
       - name: Set up JDK
         uses: actions/setup-java@v6
@@ -89,78 +89,7 @@ jobs:
           printf 'COMMENT_DELETE_WEIGHT=%s\n' "$COMMENT_DELETE_WEIGHT" >> "$GITHUB_ENV"
           printf 'CURRENT_HEAD=%s\n' "$(git rev-parse HEAD)" >> "$GITHUB_ENV"
 
-      - name: Run Baseline (HEAD~1)
-        run: |
-          APP_PID=""
-          cleanup() {
-            if [[ -n "$APP_PID" ]] && kill -0 "$APP_PID" 2>/dev/null; then
-              kill "$APP_PID"
-            fi
-            docker compose -f docker/docker-compose.yml down -v || true
-            if [ -f docker/docker-compose-monitoring.yml ]; then
-              docker compose -f docker/docker-compose-monitoring.yml down -v || true
-            fi
-          }
-          trap cleanup EXIT
-
-          # Run the baseline application with the current revision's load-test harness.
-          git checkout "$CURRENT_HEAD~1"
-          git checkout "$CURRENT_HEAD" -- pom.xml src/test/java/com/example/highrps/gatling src/test/resources/load-test.properties
-    
-          # Start Infra and Monitoring
-          docker compose -f docker/docker-compose.yml up -d
-          if [ -f docker/docker-compose-monitoring.yml ]; then
-            docker compose -f docker/docker-compose-monitoring.yml up -d
-          fi
-          
-          # Build & Start App
-          ./mvnw -DskipTests clean package
-          java -jar target/boot-high-rps-sample-0.1.0-SNAPSHOT.jar --spring.profiles.active=local \
-            > "$RUNNER_TEMP/baseline-app.log" 2>&1 &
-          APP_PID=$!
-
-          echo "Waiting for /actuator/health to report UP..."
-          deadline=$((SECONDS + 120))
-          until curl --fail --silent --show-error --max-time 5 http://localhost:8080/actuator/health \
-            | grep -q '"status":"UP"'; do
-            if (( SECONDS >= deadline )); then
-              echo "::error::Baseline application did not become healthy within 120 seconds"
-              ps -p "$APP_PID" -f || true
-              tail -n 200 "$RUNNER_TEMP/baseline-app.log" || true
-              docker compose -f docker/docker-compose.yml ps || true
-              docker compose -f docker/docker-compose.yml logs --no-color --tail=100 || true
-              exit 1
-            fi
-            sleep 2
-          done
-          
-          # Generate Data
-          ./mvnw exec:java -Dexec.mainClass="com.example.highrps.gatling.setup.DataGenerator" \
-            -Dexec.classpathScope=test -DdataDir=target/loadtest-data -DdataSeed=2674
-          
-          # Run Gatling
-          MAVEN_ARGS=(-Dprofile="$PROFILE" -DdurationMinutes="$DURATION" -DpostUpdateWeight="$POST_UPDATE_WEIGHT" -DpostDeleteWeight="$POST_DELETE_WEIGHT" -DcommentUpdateWeight="$COMMENT_UPDATE_WEIGHT" -DcommentDeleteWeight="$COMMENT_DELETE_WEIGHT")
-          if [[ -n "$TARGET_RPS" ]]; then
-            MAVEN_ARGS+=(-DtargetRps="$TARGET_RPS")
-          fi
-          set +e
-          ./mvnw gatling:test "${MAVEN_ARGS[@]}"
-          GATLING_STATUS=$?
-          set -e
-          
-          # Save Stats
-          if [[ -d target/gatling ]]; then
-            STATS_FILE=$(find target/gatling -name "stats.json" -print -quit)
-            if [[ -n "$STATS_FILE" ]]; then
-              cp "$STATS_FILE" ../baseline-stats.json
-            fi
-            mv target/gatling ../baseline-report
-          fi
-
-          exit "$GATLING_STATUS"
-          
-      - name: Run High RPS (HEAD)
-        if: ${{ always() && env.CURRENT_HEAD != '' }}
+      - name: Run Gatling Tests
         run: |
           APP_PID=""
           cleanup() {
@@ -222,9 +151,9 @@ jobs:
           if [[ -d target/gatling ]]; then
             STATS_FILE=$(find target/gatling -name "stats.json" -print -quit)
             if [[ -n "$STATS_FILE" ]]; then
-              cp "$STATS_FILE" ../head-stats.json
+              cp "$STATS_FILE" ../stats.json
             fi
-            mv target/gatling ../head-report
+            mv target/gatling ../gatling-report
           fi
 
           exit "$GATLING_STATUS"
@@ -232,22 +161,35 @@ jobs:
       - name: Compare Results
         if: ${{ always() }}
         run: |
-          pwsh scripts/compare-results.ps1 -BaselineStats ../baseline-stats.json -HighRpsStats ../head-stats.json > comparison.md
-          cat comparison.md >> $GITHUB_STEP_SUMMARY
+          if [ -f ../docs/baselines/main-baseline.json ]; then
+            pwsh scripts/compare-results.ps1 -BaselineStats ../docs/baselines/main-baseline.json -HighRpsStats ../stats.json > comparison.md
+            cat comparison.md >> $GITHUB_STEP_SUMMARY
+          else
+            echo "No baseline found to compare against. This run will establish the first baseline." >> $GITHUB_STEP_SUMMARY
+          fi
           
-      - name: Upload Baseline Report
+      - name: Upload Gatling Report
         if: ${{ always() }}
         uses: actions/upload-artifact@v7
         with:
-          name: gatling-baseline-report
-          path: baseline-report/
-          retention-days: 14
-
-      - name: Upload HEAD Report
-        if: ${{ always() }}
-        uses: actions/upload-artifact@v7
-        with:
-          name: gatling-head-report
-          path: head-report/
+          name: gatling-report
+          path: gatling-report/
           retention-days: 14
           
+      - name: Update baseline on main branch
+        if: success() && github.ref == 'refs/heads/main'
+        run: |
+          mkdir -p ../docs/baselines
+          cp ../stats.json ../docs/baselines/main-baseline.json
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add ../docs/baselines/main-baseline.json
+          if git diff --staged --quiet; then
+            echo "Baseline unchanged."
+          else
+            git commit -m "perf: update performance baseline [skip ci]"
+            git push
+          fi
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
