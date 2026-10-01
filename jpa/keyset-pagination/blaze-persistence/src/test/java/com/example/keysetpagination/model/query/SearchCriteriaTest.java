@@ -20,6 +20,7 @@ import org.junit.jupiter.params.provider.NullAndEmptySource;
 
 class SearchCriteriaTest {
 
+    /** Verifies invalid IN and BETWEEN value counts fail during specification creation. */
     @ParameterizedTest
     @MethodSource("invalidValues")
     void shouldRejectInvalidValuesBeforeBuildingSpecification(QueryOperator operator, List<String> values) {
@@ -33,6 +34,7 @@ class SearchCriteriaTest {
                                 : "BETWEEN operator requires exactly 2 values");
     }
 
+    /** Supplies missing, empty, and incorrectly sized value lists for IN and BETWEEN. */
     static Stream<Arguments> invalidValues() {
         return Stream.of(
                 Arguments.of(QueryOperator.IN, null),
@@ -43,6 +45,7 @@ class SearchCriteriaTest {
                 Arguments.of(QueryOperator.BETWEEN, List.of("1", "2", "3")));
     }
 
+    /** Verifies IN and BETWEEN values are parsed as entity IDs before predicate creation. */
     @ParameterizedTest
     @MethodSource("validValues")
     void shouldParseValidValues(QueryOperator operator, List<String> values) {
@@ -60,12 +63,14 @@ class SearchCriteriaTest {
         }
     }
 
+    /** Supplies valid pairs of string IDs for IN and BETWEEN predicates. */
     static Stream<Arguments> validValues() {
         return Stream.of(
                 Arguments.of(QueryOperator.IN, List.of("1", "2")),
                 Arguments.of(QueryOperator.BETWEEN, List.of("1", "2")));
     }
 
+    /** Verifies equality filters with missing or empty values can create a specification. */
     @ParameterizedTest
     @NullAndEmptySource
     void shouldAllowNullEquality(List<String> values) {
@@ -73,6 +78,7 @@ class SearchCriteriaTest {
         assertThat(criteria.toSpecification(Actor.class)).isNotNull();
     }
 
+    /** Creates an actor ID filter with the supplied operator and raw values. */
     private SearchCriteria<Actor> criteria(QueryOperator operator, List<String> values) {
         SearchCriteria<Actor> criteria = new SearchCriteria<>();
         criteria.setField("id");

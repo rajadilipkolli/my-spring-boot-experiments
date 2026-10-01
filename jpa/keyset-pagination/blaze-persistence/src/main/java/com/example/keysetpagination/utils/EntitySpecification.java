@@ -22,6 +22,14 @@ public class EntitySpecification<T> {
         this.filterAttributesProvider = new FilterAttributesProvider();
     }
 
+    /**
+     * Combines non-null flat filters with AND.
+     *
+     * @param searchCriteria flat filters to convert
+     * @param entityType entity type providing filter attributes
+     * @return the combined specification, or null if the array is null or empty
+     * @deprecated use {@link #specificationBuilder(List, Class)} to support nested groups
+     */
     @Deprecated
     public Specification<T> specificationBuilder(SearchCriteria[] searchCriteria, Class<T> entityType) {
         if (Objects.nonNull(searchCriteria) && searchCriteria.length > 0) {
@@ -34,6 +42,13 @@ public class EntitySpecification<T> {
         return null;
     }
 
+    /**
+     * Combines non-null filters and nested groups with AND at the top level.
+     *
+     * @param searchCriteriaList filters and groups to convert
+     * @param entityType entity type providing filter attributes
+     * @return the combined specification, or null if the list is null or empty
+     */
     public Specification<T> specificationBuilder(List<ISearchCriteria<?>> searchCriteriaList, Class<T> entityType) {
         if (searchCriteriaList != null && !searchCriteriaList.isEmpty()) {
             List<Specification<T>> specifications = searchCriteriaList.stream()

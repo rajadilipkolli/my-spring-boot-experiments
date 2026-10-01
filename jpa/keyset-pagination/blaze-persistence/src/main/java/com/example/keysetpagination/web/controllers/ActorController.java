@@ -47,6 +47,12 @@ public class ActorController {
         return actorService.findAll(findActorsQuery);
     }
 
+    /**
+     * Searches actors using the validated request body's filters and pagination settings.
+     *
+     * @param searchRequest filters, nested groups, sorting, and keyset pagination settings
+     * @return matching actors and page metadata
+     */
     @PostMapping("/search")
     public PagedResult<ActorResponse> searchActors(@RequestBody @Valid SearchRequest searchRequest) {
         FindActorsQuery findActorsQuery = new FindActorsQuery(

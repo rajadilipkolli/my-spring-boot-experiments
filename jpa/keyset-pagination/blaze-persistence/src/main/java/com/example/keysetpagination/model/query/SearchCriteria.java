@@ -49,6 +49,7 @@ public class SearchCriteria<T> implements ISearchCriteria<T> {
         this.values = values;
     }
 
+    /** Returns the first filter value, or null when values are absent or empty. */
     @JsonIgnore
     public String getValue() {
         if (values == null || values.isEmpty()) return null;
@@ -72,6 +73,7 @@ public class SearchCriteria<T> implements ISearchCriteria<T> {
         return values.getFirst();
     }
 
+    /** Sets the lower range bound, creating its slot if needed and retaining at most two values. */
     public void setLow(String low) {
         if (values == null) {
             values = new ArrayList<>();
@@ -93,6 +95,14 @@ public class SearchCriteria<T> implements ISearchCriteria<T> {
         return values.get(1);
     }
 
+    /**
+     * Sets the upper range bound, retaining at most two values.
+     *
+     * <p>When values are null, initializes a null lower bound followed by the upper bound.
+     *
+     * @param high upper range bound
+     * @throws IndexOutOfBoundsException if the existing values list is empty
+     */
     public void setHigh(String high) {
         if (values == null) {
             values = new ArrayList<>();
@@ -108,6 +118,15 @@ public class SearchCriteria<T> implements ISearchCriteria<T> {
         }
     }
 
+    /**
+     * Validates the filter field and value count, then creates a specification that parses values
+     * using the field's format when its predicate is built.
+     *
+     * @param entityType entity type providing the available filter attributes
+     * @return a specification applying the operator to the resolved field path
+     * @throws IllegalArgumentException if the field is unknown, IN has no values, or BETWEEN does
+     *     not have exactly two values
+     */
     @Override
     public Specification<T> toSpecification(Class<T> entityType) {
         Map<String, SerializableFormat<? extends Serializable>> filterAttributes =
@@ -154,6 +173,14 @@ public class SearchCriteria<T> implements ISearchCriteria<T> {
         };
     }
 
+    /**
+     * Resolves a dot-separated field path from the entity root.
+     *
+     * @param root entity root from which path traversal starts
+     * @param fieldName field name, optionally containing nested attributes
+     * @return the path to the final attribute
+     * @throws IllegalArgumentException if a path segment cannot be resolved
+     */
     private Path<?> getPath(Root<?> root, String fieldName) {
         String[] fieldParts = fieldName.split("\\.");
         Path<?> path = root.get(fieldParts[0]);
@@ -172,6 +199,7 @@ public class SearchCriteria<T> implements ISearchCriteria<T> {
     record MyParserContextImpl(Map<String, SerializableFormat<? extends Serializable>> contextMap)
             implements ParserContext {
 
+        /** Returns the field format registered under the given name, or null if absent. */
         public Object getAttribute(String name) {
             return this.contextMap.get(name);
         }

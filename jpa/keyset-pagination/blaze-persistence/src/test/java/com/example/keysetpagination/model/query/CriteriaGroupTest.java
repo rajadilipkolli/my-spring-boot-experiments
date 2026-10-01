@@ -15,6 +15,7 @@ class CriteriaGroupTest {
 
     private final JsonMapper jsonMapper = new JsonMapper();
 
+    /** Verifies both logical operators preserve a nested predicate while ignoring null children. */
     @ParameterizedTest
     @EnumSource(LogicalOperator.class)
     void shouldSkipNullEntriesAndPreserveNonNullCriteria(LogicalOperator operator) {
@@ -27,6 +28,7 @@ class CriteriaGroupTest {
                 .isSameAs(predicate);
     }
 
+    /** Verifies a group containing only null children contributes no predicate. */
     @ParameterizedTest
     @EnumSource(LogicalOperator.class)
     void shouldAllowOnlyNullEntries(LogicalOperator operator) {
@@ -36,6 +38,7 @@ class CriteriaGroupTest {
                 .isNull();
     }
 
+    /** Verifies serialized groups and leaf criteria include their respective type discriminators. */
     @Test
     void testSerializationWithDiscriminator() {
         SearchCriteria<Object> sc = new SearchCriteria<>();
@@ -51,6 +54,7 @@ class CriteriaGroupTest {
         assertThat(json).contains("\"type\":\"criteria\"");
     }
 
+    /** Verifies the group discriminator restores an OR group containing a leaf criterion. */
     @Test
     void testDeserialization() throws Exception {
         String json = """
@@ -77,6 +81,7 @@ class CriteriaGroupTest {
         assertThat(group.getCriteriaList().getFirst()).isInstanceOf(SearchCriteria.class);
     }
 
+    /** Verifies deserialization preserves nested AND and OR groups and their leaf criterion. */
     @Test
     void testDeeplyNestedSerializationDeserialization() throws Exception {
         String json = """

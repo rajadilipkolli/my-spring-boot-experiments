@@ -57,6 +57,7 @@ class ActorControllerTest {
     @Autowired
     private JsonMapper jsonMapper;
 
+    /** Verifies pagination, sorting, and keyset bounds from the body reach the actor service. */
     @Test
     void shouldUseSearchBodyPagingSortingAndKeysetBounds() throws Exception {
         mockMvc.perform(post("/api/actors/search")
@@ -70,6 +71,7 @@ class ActorControllerTest {
         verify(actorService).findAll(List.of(), new FindActorsQuery(3, 5, 10L, 20L, "name", "desc"));
     }
 
+    /** Verifies an empty search body uses default paging and sorting with no keyset bounds. */
     @Test
     void shouldUseDefaultSearchPagingAndSorting() throws Exception {
         mockMvc.perform(post("/api/actors/search")
@@ -80,6 +82,7 @@ class ActorControllerTest {
         verify(actorService).findAll(List.of(), new FindActorsQuery(0, 10, null, null, "id", "asc"));
     }
 
+    /** Verifies invalid paging returns HTTP 400 without invoking the actor service. */
     @ParameterizedTest
     @ValueSource(strings = {"{\"pageNo\": -1}", "{\"pageSize\": 0}"})
     void shouldRejectInvalidSearchPaging(String body) throws Exception {
@@ -91,6 +94,7 @@ class ActorControllerTest {
         verifyNoInteractions(actorService);
     }
 
+    /** Verifies invalid nested IN and BETWEEN values produce HTTP 400 with a validation detail. */
     @ParameterizedTest
     @ValueSource(strings = {"IN", "BETWEEN"})
     void shouldReturn400ForInvalidSearchValues(String operator) throws Exception {

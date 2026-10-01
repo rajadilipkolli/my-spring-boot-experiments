@@ -45,6 +45,13 @@ public class ActorService {
         return getActorResponsePagedResult(actorRepository.findAll(specification, keysetPageable));
     }
 
+    /**
+     * Searches actors using filters and nested groups combined with AND at the top level.
+     *
+     * @param searchCriteriaList filters to apply; null or empty selects actors without filtering
+     * @param findActorsQuery pagination, sorting, and keyset bounds
+     * @return matching actor responses with page metadata
+     */
     public PagedResult<ActorResponse> findAll(
             List<ISearchCriteria<?>> searchCriteriaList, FindActorsQuery findActorsQuery) {
         Specification<Actor> specification =

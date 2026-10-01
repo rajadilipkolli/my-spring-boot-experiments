@@ -40,6 +40,7 @@ public class GlobalExceptionHandler {
         return problemDetail;
     }
 
+    /** Returns a 400 validation problem containing the invalid argument message. */
     @ExceptionHandler(IllegalArgumentException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     ProblemDetail onException(IllegalArgumentException exception) {

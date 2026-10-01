@@ -91,6 +91,7 @@ class ActorControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.keySetPageResponse.firstResult", is(2)));
     }
 
+    /** Verifies a structured search body combines creation-date and name filters. */
     @Test
     void shouldSearchAllActors() throws Exception {
         this.mockMvc
@@ -123,6 +124,7 @@ class ActorControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.totalElements", is(3)));
     }
 
+    /** Verifies an OR group returns actors matching either name filter. */
     @Test
     void shouldSearchActorsWithOrGroup() throws Exception {
         this.mockMvc
@@ -156,6 +158,7 @@ class ActorControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.data.size()", is(2)));
     }
 
+    /** Verifies an AND group applies its date filter alongside a nested OR name group. */
     @Test
     void shouldSearchActorsWithAndContainingNestedOr() throws Exception {
         this.mockMvc
@@ -201,6 +204,7 @@ class ActorControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.data.size()", is(2)));
     }
 
+    /** Verifies filters nested through multiple logical groups select the matching actor. */
     @Test
     void shouldSearchActorsDeeplyNested() throws Exception {
         this.mockMvc
@@ -240,6 +244,7 @@ class ActorControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.data.size()", is(1)));
     }
 
+    /** Verifies a top-level leaf filter and a nested group are applied together. */
     @Test
     void shouldSearchActorsMixedMixed() throws Exception {
         this.mockMvc
