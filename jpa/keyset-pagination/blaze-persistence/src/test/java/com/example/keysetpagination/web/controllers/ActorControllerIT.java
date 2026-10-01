@@ -91,14 +91,17 @@ class ActorControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.keySetPageResponse.firstResult", is(2)));
     }
 
-    /** Verifies a structured search body combines creation-date and name filters. */
+    /** Verifies a structured search body combines filters with pagination and descending sorting. */
     @Test
     void shouldSearchAllActors() throws Exception {
         this.mockMvc
-                .perform(post("/api/actors/search?pageNo=0&pageSize=2&sortDir=desc")
+                .perform(post("/api/actors/search")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                         {
+                                          "pageNo": 0,
+                                          "pageSize": 2,
+                                          "sortDir": "desc",
                                           "searchCriteriaList": [
                                             {
                                               "type": "criteria",
@@ -121,7 +124,13 @@ class ActorControllerIT extends AbstractIntegrationTest {
                                         """.formatted(LocalDate.now())))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.size()", is(2)))
-                .andExpect(jsonPath("$.totalElements", is(3)));
+                .andExpect(jsonPath("$.data[0].name", is("Third Actor")))
+                .andExpect(jsonPath("$.data[1].name", is("Second Actor")))
+                .andExpect(jsonPath("$.totalElements", is(3)))
+                .andExpect(jsonPath("$.pageNumber", is(1)))
+                .andExpect(jsonPath("$.totalPages", is(2)))
+                .andExpect(jsonPath("$.hasNext", is(true)))
+                .andExpect(jsonPath("$.keySetPageResponse.maxResults", is(2)));
     }
 
     /** Verifies an OR group returns actors matching either name filter. */
