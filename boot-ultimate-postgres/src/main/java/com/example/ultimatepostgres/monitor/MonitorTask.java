@@ -22,6 +22,14 @@ public class MonitorTask {
         this.jobQueueRepository = jobQueueRepository;
     }
 
+    /**
+     * Reports total cache rows, including expired entries, and jobs in all statuses.
+     *
+     * <p>Calls through the Spring proxy are skipped if the shared task lock is held. The lock
+     * prevents concurrent execution only while its one-minute lease remains valid.
+     *
+     * @throws org.springframework.dao.DataAccessException if a repository count fails
+     */
     @Scheduled(fixedDelay = 15000)
     @SchedulerLock(name = "monitorTask", lockAtLeastFor = "PT10S", lockAtMostFor = "PT1M")
     @Transactional(readOnly = true)

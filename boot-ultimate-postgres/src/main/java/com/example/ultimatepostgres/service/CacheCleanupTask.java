@@ -21,8 +21,15 @@ public class CacheCleanupTask {
     }
 
     /**
+     * Deletes cache entries whose expiration is at or before the application clock's current time.
+     *
+     * <p>Calls through the Spring proxy are skipped if the shared task lock is held. The lock
+     * prevents concurrent execution only while its five-minute lease remains valid.
+     *
      * Note: UNLOGGED tables are not crash-safe.
      * DELETE produces dead rows that autovacuum reclaims.
+     *
+     * @throws org.springframework.dao.DataAccessException if deleting expired entries fails
      */
     @Scheduled(fixedDelayString = "${app.cache.cleanup-interval:60000}")
     // lockAtLeastFor must stay below app.cache.cleanup-interval

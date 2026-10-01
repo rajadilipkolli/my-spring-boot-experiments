@@ -12,6 +12,12 @@ import org.springframework.jdbc.core.JdbcTemplate;
 @EnableSchedulerLock(defaultLockAtMostFor = "PT2M")
 public class LockConfig {
 
+    /**
+     * Creates a scheduler lock provider that uses the database clock for lock timestamps.
+     *
+     * @param dataSource the database containing the shared {@code shedlock} table
+     * @return the JDBC lock provider for coordinating scheduled tasks across instances
+     */
     @Bean
     public LockProvider lockProvider(DataSource dataSource) {
         return new JdbcTemplateLockProvider(JdbcTemplateLockProvider.Configuration.builder()
