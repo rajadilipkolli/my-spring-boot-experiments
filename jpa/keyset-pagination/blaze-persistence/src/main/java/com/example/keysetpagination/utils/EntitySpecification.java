@@ -2,6 +2,7 @@ package com.example.keysetpagination.utils;
 
 import com.blazebit.text.ParserContext;
 import com.blazebit.text.SerializableFormat;
+import com.example.keysetpagination.model.query.ISearchCriteria;
 import com.example.keysetpagination.model.query.SearchCriteria;
 import jakarta.persistence.criteria.Path;
 import jakarta.persistence.criteria.Root;
@@ -21,11 +22,23 @@ public class EntitySpecification<T> {
         this.filterAttributesProvider = new FilterAttributesProvider();
     }
 
+    @Deprecated
     public Specification<T> specificationBuilder(SearchCriteria[] searchCriteria, Class<T> entityType) {
         if (Objects.nonNull(searchCriteria) && searchCriteria.length > 0) {
             List<Specification<T>> specifications = Stream.of(searchCriteria)
                     .filter(Objects::nonNull)
                     .map(sc -> createSpecification(sc, entityType))
+                    .toList();
+            return Specification.allOf(specifications);
+        }
+        return null;
+    }
+
+    public Specification<T> specificationBuilder(List<ISearchCriteria<?>> searchCriteriaList, Class<T> entityType) {
+        if (searchCriteriaList != null && !searchCriteriaList.isEmpty()) {
+            List<Specification<T>> specifications = searchCriteriaList.stream()
+                    .filter(Objects::nonNull)
+                    .map(sc -> (Specification<T>) ((ISearchCriteria<T>) sc).toSpecification(entityType))
                     .toList();
             return Specification.allOf(specifications);
         }

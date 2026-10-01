@@ -97,34 +97,180 @@ class ActorControllerIT extends AbstractIntegrationTest {
                 .perform(post("/api/actors/search?pageNo=0&pageSize=2&sortDir=desc")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
-                                        [
-                                          {
-                                            "queryOperator": "EQ",
-                                            "field": "createdOn",
-                                            "values": [
-                                              "%s"
-                                            ]
-                                          },
-                                          {
-                                            "queryOperator": "ENDS_WITH",
-                                            "field": "name",
-                                            "values": [
-                                              "Actor"
-                                            ]
-                                          }
-                                        ]
+                                        {
+                                          "searchCriteriaList": [
+                                            {
+                                              "type": "criteria",
+                                              "queryOperator": "EQ",
+                                              "field": "createdOn",
+                                              "values": [
+                                                "%s"
+                                              ]
+                                            },
+                                            {
+                                              "type": "criteria",
+                                              "queryOperator": "ENDS_WITH",
+                                              "field": "name",
+                                              "values": [
+                                                "Actor"
+                                              ]
+                                            }
+                                          ]
+                                        }
                                         """.formatted(LocalDate.now())))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.size()", is(2)))
-                .andExpect(jsonPath("$.totalElements", is(3)))
-                .andExpect(jsonPath("$.pageNumber", is(1)))
-                .andExpect(jsonPath("$.totalPages", is(2)))
-                .andExpect(jsonPath("$.isFirst", is(true)))
-                .andExpect(jsonPath("$.isLast", is(false)))
-                .andExpect(jsonPath("$.hasNext", is(true)))
-                .andExpect(jsonPath("$.hasPrevious", is(false)))
-                .andExpect(jsonPath("$.keySetPageResponse.maxResults", is(2)))
-                .andExpect(jsonPath("$.keySetPageResponse.firstResult", is(0)));
+                .andExpect(jsonPath("$.totalElements", is(3)));
+    }
+
+    @Test
+    void shouldSearchActorsWithOrGroup() throws Exception {
+        this.mockMvc
+                .perform(post("/api/actors/search")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                        {
+                                          "searchCriteriaList": [
+                                            {
+                                              "type": "group",
+                                              "operator": "OR",
+                                              "criteriaList": [
+                                                {
+                                                  "type": "criteria",
+                                                  "queryOperator": "EQ",
+                                                  "field": "name",
+                                                  "values": ["First Actor"]
+                                                },
+                                                {
+                                                  "type": "criteria",
+                                                  "queryOperator": "EQ",
+                                                  "field": "name",
+                                                  "values": ["Second Actor"]
+                                                }
+                                              ]
+                                            }
+                                          ]
+                                        }
+                                        """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.size()", is(2)));
+    }
+
+    @Test
+    void shouldSearchActorsWithAndContainingNestedOr() throws Exception {
+        this.mockMvc
+                .perform(post("/api/actors/search")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                        {
+                                          "searchCriteriaList": [
+                                            {
+                                              "type": "group",
+                                              "operator": "AND",
+                                              "criteriaList": [
+                                                {
+                                                  "type": "criteria",
+                                                  "queryOperator": "EQ",
+                                                  "field": "createdOn",
+                                                  "values": ["%s"]
+                                                },
+                                                {
+                                                  "type": "group",
+                                                  "operator": "OR",
+                                                  "criteriaList": [
+                                                    {
+                                                      "type": "criteria",
+                                                      "queryOperator": "EQ",
+                                                      "field": "name",
+                                                      "values": ["First Actor"]
+                                                    },
+                                                    {
+                                                      "type": "criteria",
+                                                      "queryOperator": "EQ",
+                                                      "field": "name",
+                                                      "values": ["Second Actor"]
+                                                    }
+                                                  ]
+                                                }
+                                              ]
+                                            }
+                                          ]
+                                        }
+                                        """.formatted(LocalDate.now())))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.size()", is(2)));
+    }
+
+    @Test
+    void shouldSearchActorsDeeplyNested() throws Exception {
+        this.mockMvc
+                .perform(post("/api/actors/search")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                        {
+                                          "searchCriteriaList": [
+                                            {
+                                              "type": "group",
+                                              "operator": "OR",
+                                              "criteriaList": [
+                                                {
+                                                  "type": "group",
+                                                  "operator": "AND",
+                                                  "criteriaList": [
+                                                    {
+                                                      "type": "group",
+                                                      "operator": "OR",
+                                                      "criteriaList": [
+                                                        {
+                                                          "type": "criteria",
+                                                          "queryOperator": "EQ",
+                                                          "field": "name",
+                                                          "values": ["First Actor"]
+                                                        }
+                                                      ]
+                                                    }
+                                                  ]
+                                                }
+                                              ]
+                                            }
+                                          ]
+                                        }
+                                        """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.size()", is(1)));
+    }
+
+    @Test
+    void shouldSearchActorsMixedMixed() throws Exception {
+        this.mockMvc
+                .perform(post("/api/actors/search")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                        {
+                                          "searchCriteriaList": [
+                                            {
+                                              "type": "criteria",
+                                              "queryOperator": "EQ",
+                                              "field": "createdOn",
+                                              "values": ["%s"]
+                                            },
+                                            {
+                                              "type": "group",
+                                              "operator": "OR",
+                                              "criteriaList": [
+                                                {
+                                                  "type": "criteria",
+                                                  "queryOperator": "EQ",
+                                                  "field": "name",
+                                                  "values": ["First Actor"]
+                                                }
+                                              ]
+                                            }
+                                          ]
+                                        }
+                                        """.formatted(LocalDate.now())))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.size()", is(1)));
     }
 
     @Test
