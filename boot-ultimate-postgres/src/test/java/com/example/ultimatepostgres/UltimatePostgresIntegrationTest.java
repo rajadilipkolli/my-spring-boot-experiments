@@ -39,6 +39,10 @@ class UltimatePostgresIntegrationTest extends AbstractIntegrationTest {
         assertThat(cacheService.get("key2")).isEmpty();
 
         cacheCleanupTask.cleanupExpiredEntries(); // should delete key2
+
+        Integer lockCount = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM shedlock WHERE name = 'cacheCleanupTask'", Integer.class);
+        assertThat(lockCount).isGreaterThan(0);
     }
 
     @Test

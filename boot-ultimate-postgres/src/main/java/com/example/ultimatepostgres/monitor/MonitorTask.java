@@ -2,6 +2,7 @@ package com.example.ultimatepostgres.monitor;
 
 import com.example.ultimatepostgres.repository.CacheRepository;
 import com.example.ultimatepostgres.repository.JobQueueRepository;
+import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -22,6 +23,7 @@ public class MonitorTask {
     }
 
     @Scheduled(fixedDelay = 15000)
+    @SchedulerLock(name = "monitorTask", lockAtLeastFor = "PT10S", lockAtMostFor = "PT1M")
     @Transactional(readOnly = true)
     public void monitor() {
         long cacheSize = cacheRepository.count();

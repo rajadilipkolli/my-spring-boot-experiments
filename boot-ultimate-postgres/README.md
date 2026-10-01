@@ -39,3 +39,11 @@ The `Initializer` will automatically run on startup and demonstrate adding to th
 - **Publish**: `POST /api/pubsub/publish` (Body: `your message here`)
 - **Messages**: `GET /api/pubsub/messages`
 - **Combined**: `POST /api/pubsub/combined/{id}` (Body: `{"task": "combined payload"}`)
+
+## Multi-Node Scheduling
+
+In a multi-node clustered environment, redundant execution of scheduled background tasks is avoided using [ShedLock](https://github.com/lukas-krecan/ShedLock).
+
+* **Cache Cleanup and Monitor Tasks**: Both the CacheCleanupTask and MonitorTask are protected by ShedLock using the PostgreSQL clock (usingDbTime()). This ensures that only one node in the cluster executes each task per interval. Note that ShedLock does not guarantee exactly-once execution (it is a distributed lock, not a robust job scheduler); however, the DELETE queries used in cleanup are idempotent, so occasional overlapping execution is harmless.
+* **Job Queue**: The job queue worker (JobWorkerTask) does not use ShedLock. Instead, it relies on PostgreSQL's native FOR UPDATE SKIP LOCKED. It runs concurrently on all nodes, allowing workers across the cluster to claim disjoint sets of jobs from the queue in parallel without deadlocks.
+

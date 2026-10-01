@@ -16,12 +16,23 @@
 
     <properties>
         <java.version>25</java.version>
+        <shedlock.version>7.10.1</shedlock.version>
         <spotless.version>3.10.2</spotless.version>
         <properties-maven-plugin.version>1.3.1</properties-maven-plugin.version>
         <sonar-maven-plugin.version>5.8.0.7211</sonar-maven-plugin.version>
     </properties>
 
     <dependencies>
+        <dependency>
+            <groupId>net.javacrumbs.shedlock</groupId>
+            <artifactId>shedlock-spring</artifactId>
+            <version>${shedlock.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>net.javacrumbs.shedlock</groupId>
+            <artifactId>shedlock-provider-jdbc-template</artifactId>
+            <version>${shedlock.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>

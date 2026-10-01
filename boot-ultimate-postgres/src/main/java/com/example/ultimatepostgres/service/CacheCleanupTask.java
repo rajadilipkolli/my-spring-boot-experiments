@@ -2,6 +2,7 @@ package com.example.ultimatepostgres.service;
 
 import com.example.ultimatepostgres.repository.CacheRepository;
 import java.time.OffsetDateTime;
+import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -24,6 +25,8 @@ public class CacheCleanupTask {
      * DELETE produces dead rows that autovacuum reclaims.
      */
     @Scheduled(fixedDelayString = "${app.cache.cleanup-interval:60000}")
+    // lockAtLeastFor must stay below app.cache.cleanup-interval
+    @SchedulerLock(name = "cacheCleanupTask", lockAtLeastFor = "PT30S", lockAtMostFor = "PT5M")
     @Transactional
     public void cleanupExpiredEntries() {
         int deleted = cacheRepository.deleteExpired(OffsetDateTime.now());
