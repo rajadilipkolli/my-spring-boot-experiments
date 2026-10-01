@@ -40,6 +40,15 @@ public class GlobalExceptionHandler {
         return problemDetail;
     }
 
+    @ExceptionHandler(IllegalArgumentException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    ProblemDetail onException(IllegalArgumentException exception) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, exception.getMessage());
+        problemDetail.setTitle("Constraint Violation");
+        problemDetail.setType(URI.create("http://api.boot-data-keyset-pagination.com/errors/validation-error"));
+        return problemDetail;
+    }
+
     @ExceptionHandler(Exception.class)
     ProblemDetail onException(Exception exception) {
         if (exception instanceof ResourceNotFoundException resourceNotFoundException) {

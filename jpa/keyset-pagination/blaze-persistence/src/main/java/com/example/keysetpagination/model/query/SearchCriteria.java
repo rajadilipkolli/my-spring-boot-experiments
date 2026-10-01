@@ -121,6 +121,13 @@ public class SearchCriteria<T> implements ISearchCriteria<T> {
             throw new IllegalArgumentException("Invalid field in SearchCriteria: " + this.getField());
         }
 
+        if (queryOperator == QueryOperator.IN && (values == null || values.isEmpty())) {
+            throw new IllegalArgumentException("IN operator requires at least one value");
+        }
+        if (queryOperator == QueryOperator.BETWEEN && (values == null || values.size() != 2)) {
+            throw new IllegalArgumentException("BETWEEN operator requires exactly 2 values");
+        }
+
         return (root, criteriaQuery, criteriaBuilder) -> {
             try {
                 Path<?> path = getPath(root, this.getField());

@@ -41,7 +41,9 @@ public class CriteriaGroup<T> implements ISearchCriteria<T> {
 
         List<Specification<T>> specs = new ArrayList<>();
         for (ISearchCriteria<?> criteria : criteriaList) {
-            specs.add(((ISearchCriteria<T>) criteria).toSpecification(entityClass));
+            if (criteria != null) {
+                specs.add(((ISearchCriteria<T>) criteria).toSpecification(entityClass));
+            }
         }
 
         if (operator == LogicalOperator.OR) {

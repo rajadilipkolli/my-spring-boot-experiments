@@ -48,15 +48,14 @@ public class ActorController {
     }
 
     @PostMapping("/search")
-    public PagedResult<ActorResponse> searchActors(
-            @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_NUMBER, required = false) int pageNo,
-            @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_SIZE, required = false) int pageSize,
-            @RequestParam(defaultValue = AppConstants.DEFAULT_SORT_BY, required = false) String sortBy,
-            @RequestParam(defaultValue = AppConstants.DEFAULT_SORT_DIRECTION, required = false) String sortDir,
-            @RequestParam(required = false) Long lowest,
-            @RequestParam(required = false) Long highest,
-            @RequestBody @Valid SearchRequest searchRequest) {
-        FindActorsQuery findActorsQuery = new FindActorsQuery(pageNo, pageSize, lowest, highest, sortBy, sortDir);
+    public PagedResult<ActorResponse> searchActors(@RequestBody @Valid SearchRequest searchRequest) {
+        FindActorsQuery findActorsQuery = new FindActorsQuery(
+                searchRequest.getPageNo(),
+                searchRequest.getPageSize(),
+                searchRequest.getLowest(),
+                searchRequest.getHighest(),
+                searchRequest.getSortBy(),
+                searchRequest.getSortDir());
 
         return actorService.findAll(searchRequest.getSearchCriteriaList(), findActorsQuery);
     }

@@ -1,14 +1,40 @@
 package com.example.keysetpagination.model.query;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 
+import jakarta.persistence.criteria.Predicate;
+import java.util.Arrays;
 import java.util.List;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import tools.jackson.databind.json.JsonMapper;
 
 class CriteriaGroupTest {
 
     private final JsonMapper jsonMapper = new JsonMapper();
+
+    @ParameterizedTest
+    @EnumSource(LogicalOperator.class)
+    void shouldSkipNullEntriesAndPreserveNonNullCriteria(LogicalOperator operator) {
+        Predicate predicate = mock(Predicate.class);
+        ISearchCriteria<Object> criterion = entityType -> (root, query, builder) -> predicate;
+        CriteriaGroup<Object> nested = new CriteriaGroup<>(operator, Arrays.asList(null, criterion, null));
+        CriteriaGroup<Object> group = new CriteriaGroup<>(operator, Arrays.asList(null, nested));
+
+        assertThat(group.toSpecification(Object.class).toPredicate(null, null, null))
+                .isSameAs(predicate);
+    }
+
+    @ParameterizedTest
+    @EnumSource(LogicalOperator.class)
+    void shouldAllowOnlyNullEntries(LogicalOperator operator) {
+        CriteriaGroup<Object> group = new CriteriaGroup<>(operator, Arrays.asList(null, null));
+
+        assertThat(group.toSpecification(Object.class).toPredicate(null, null, null))
+                .isNull();
+    }
 
     @Test
     void testSerializationWithDiscriminator() {
