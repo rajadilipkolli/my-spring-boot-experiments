@@ -1,6 +1,6 @@
 -- liquibase formatted sql
 
--- changeset boot-scheduler-shedlock:1
+-- changeset boot-ultimate-postgres:3
 CREATE TABLE shedlock (
     name VARCHAR(64) NOT NULL,
     lock_until TIMESTAMP NOT NULL,
