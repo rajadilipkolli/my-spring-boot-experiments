@@ -5,9 +5,12 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -16,15 +19,22 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.example.keysetpagination.entities.Actor;
 import com.example.keysetpagination.exception.ActorNotFoundException;
+import com.example.keysetpagination.model.query.FindActorsQuery;
+import com.example.keysetpagination.model.query.ISearchCriteria;
 import com.example.keysetpagination.model.request.ActorRequest;
 import com.example.keysetpagination.model.response.ActorResponse;
 import com.example.keysetpagination.services.ActorService;
+import com.example.keysetpagination.utils.EntitySpecification;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.HttpHeaders;
@@ -46,6 +56,70 @@ class ActorControllerTest {
 
     @Autowired
     private JsonMapper jsonMapper;
+
+    /** Verifies pagination, sorting, and keyset bounds from the body reach the actor service. */
+    @Test
+    void shouldUseSearchBodyPagingSortingAndKeysetBounds() throws Exception {
+        mockMvc.perform(post("/api/actors/search")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"pageNo": 3, "pageSize": 5, "sortBy": "name", "sortDir": "desc",
+                                 "lowest": 10, "highest": 20}
+                                """))
+                .andExpect(status().isOk());
+
+        verify(actorService).findAll(List.of(), new FindActorsQuery(3, 5, 10L, 20L, "name", "desc"));
+    }
+
+    /** Verifies an empty search body uses default paging and sorting with no keyset bounds. */
+    @Test
+    void shouldUseDefaultSearchPagingAndSorting() throws Exception {
+        mockMvc.perform(post("/api/actors/search")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isOk());
+
+        verify(actorService).findAll(List.of(), new FindActorsQuery(0, 10, null, null, "id", "asc"));
+    }
+
+    /** Verifies invalid paging returns HTTP 400 without invoking the actor service. */
+    @ParameterizedTest
+    @ValueSource(strings = {"{\"pageNo\": -1}", "{\"pageSize\": 0}"})
+    void shouldRejectInvalidSearchPaging(String body) throws Exception {
+        mockMvc.perform(post("/api/actors/search")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(actorService);
+    }
+
+    /** Verifies invalid nested IN and BETWEEN values produce HTTP 400 with a validation detail. */
+    @ParameterizedTest
+    @ValueSource(strings = {"IN", "BETWEEN"})
+    void shouldReturn400ForInvalidSearchValues(String operator) throws Exception {
+        given(actorService.findAll(anyList(), any(FindActorsQuery.class))).willAnswer(invocation -> {
+            List<ISearchCriteria<?>> criteria = invocation.getArgument(0);
+            new EntitySpecification<Actor>().specificationBuilder(criteria, Actor.class);
+            return null;
+        });
+
+        mockMvc.perform(post("/api/actors/search")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"searchCriteriaList": [{"type": "group", "criteriaList": [
+                                  {"type": "criteria", "field": "id", "queryOperator": "%s", "values": []}
+                                ]}]}
+                                """.formatted(operator)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status", is(400)))
+                .andExpect(jsonPath(
+                        "$.detail",
+                        is(
+                                operator.equals("IN")
+                                        ? "IN operator requires at least one value"
+                                        : "BETWEEN operator requires exactly 2 values")));
+    }
 
     @Nested
     @DisplayName("findById methods")

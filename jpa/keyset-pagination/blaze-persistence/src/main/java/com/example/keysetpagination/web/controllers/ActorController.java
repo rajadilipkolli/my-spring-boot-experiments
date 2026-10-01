@@ -2,7 +2,7 @@ package com.example.keysetpagination.web.controllers;
 
 import com.example.keysetpagination.exception.ActorNotFoundException;
 import com.example.keysetpagination.model.query.FindActorsQuery;
-import com.example.keysetpagination.model.query.SearchCriteria;
+import com.example.keysetpagination.model.query.SearchRequest;
 import com.example.keysetpagination.model.request.ActorRequest;
 import com.example.keysetpagination.model.response.ActorResponse;
 import com.example.keysetpagination.model.response.PagedResult;
@@ -47,19 +47,23 @@ public class ActorController {
         return actorService.findAll(findActorsQuery);
     }
 
+    /**
+     * Searches actors using the validated request body's filters and pagination settings.
+     *
+     * @param searchRequest filters, nested groups, sorting, and keyset pagination settings
+     * @return matching actors and page metadata
+     */
     @PostMapping("/search")
-    public PagedResult<ActorResponse> searchActors(
-            @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_NUMBER, required = false) int pageNo,
-            @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_SIZE, required = false) int pageSize,
-            @RequestParam(defaultValue = AppConstants.DEFAULT_SORT_BY, required = false) String sortBy,
-            @RequestParam(defaultValue = AppConstants.DEFAULT_SORT_DIRECTION, required = false) String sortDir,
-            @RequestParam(required = false) Long lowest,
-            @RequestParam(required = false) Long highest,
-            @RequestBody SearchCriteria[] searchCriteria) {
+    public PagedResult<ActorResponse> searchActors(@RequestBody @Valid SearchRequest searchRequest) {
+        FindActorsQuery findActorsQuery = new FindActorsQuery(
+                searchRequest.getPageNo(),
+                searchRequest.getPageSize(),
+                searchRequest.getLowest(),
+                searchRequest.getHighest(),
+                searchRequest.getSortBy(),
+                searchRequest.getSortDir());
 
-        FindActorsQuery findActorsQuery = new FindActorsQuery(pageNo, pageSize, lowest, highest, sortBy, sortDir);
-
-        return actorService.findAll(searchCriteria, findActorsQuery);
+        return actorService.findAll(searchRequest.getSearchCriteriaList(), findActorsQuery);
     }
 
     @GetMapping("/{id}")

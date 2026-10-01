@@ -9,6 +9,7 @@ import com.example.keysetpagination.entities.Actor;
 import com.example.keysetpagination.exception.ActorNotFoundException;
 import com.example.keysetpagination.mapper.ActorMapper;
 import com.example.keysetpagination.model.query.FindActorsQuery;
+import com.example.keysetpagination.model.query.ISearchCriteria;
 import com.example.keysetpagination.model.query.SearchCriteria;
 import com.example.keysetpagination.model.request.ActorRequest;
 import com.example.keysetpagination.model.response.ActorResponse;
@@ -40,6 +41,21 @@ public class ActorService {
 
     public PagedResult<ActorResponse> findAll(SearchCriteria[] searchCriteria, FindActorsQuery findActorsQuery) {
         Specification<Actor> specification = actorEntitySpecification.specificationBuilder(searchCriteria, Actor.class);
+        KeysetPageable keysetPageable = createPageable(findActorsQuery);
+        return getActorResponsePagedResult(actorRepository.findAll(specification, keysetPageable));
+    }
+
+    /**
+     * Searches actors using filters and nested groups combined with AND at the top level.
+     *
+     * @param searchCriteriaList filters to apply; null or empty selects actors without filtering
+     * @param findActorsQuery pagination, sorting, and keyset bounds
+     * @return matching actor responses with page metadata
+     */
+    public PagedResult<ActorResponse> findAll(
+            List<ISearchCriteria<?>> searchCriteriaList, FindActorsQuery findActorsQuery) {
+        Specification<Actor> specification =
+                actorEntitySpecification.specificationBuilder(searchCriteriaList, Actor.class);
         KeysetPageable keysetPageable = createPageable(findActorsQuery);
         return getActorResponsePagedResult(actorRepository.findAll(specification, keysetPageable));
     }
