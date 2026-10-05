@@ -1,0 +1,29 @@
+{
+  "$schema": "https://raw.githubusercontent.com/Continuous-Actions/dynamic-monorepo/v1/schema.json",
+  "projects": {
+    "boot-data-multipledatasources":      { "path": "jpa/boot-data-multipledatasources", "targets": ["test"] },
+    "boot-jooq-r2dbc-sample":             { "path": "r2dbc/boot-jooq-r2dbc-sample", "targets": ["test"] },
+    "boot-hibernate2ndlevelcache-sample": { "path": "jpa/boot-hibernate2ndlevelcache-sample", "targets": ["test"] },
+    "httpClients-boot-http-proxy":        { "path": "httpClients/boot-http-proxy", "targets": ["test"] },
+    "httpClients-boot-rest-template":     { "path": "httpClients/boot-rest-template", "targets": ["test"] },
+    "httpClients-boot-spring-grpc":       { "path": "httpClients/boot-spring-grpc", "targets": ["test"] },
+    "httpClients-boot-web-client-webflux":{ "path": "httpClients/boot-web-client-webflux", "targets": ["test"] },
+    "httpClients-boot-web-client-mvc":    { "path": "httpClients/boot-web-client-mvc", "targets": ["test"] },
+    "boot-data-customsequence":           { "path": "jpa/boot-data-customsequence", "targets": ["test"] },
+    "boot-jpa-locks":                     { "path": "jpa/boot-jpa-locks", "targets": ["test"] },
+    "boot-r2dbc-reactive-cache":          { "path": "r2dbc/boot-r2dbc-reactive-cache", "targets": ["test"] },
+    "boot-r2dbc-json-column":             { "path": "r2dbc/boot-r2dbc-json-column", "targets": ["test"] },
+    "boot-r2dbc-sample":                  { "path": "r2dbc/boot-r2dbc-sample", "targets": ["test"] },
+    "boot-jndi-sample":                   { "path": "jpa/boot-jndi-sample", "targets": ["test"] },
+    "boot-jpa-jooq-sample":               { "path": "jpa/boot-jpa-jooq-sample", "targets": ["test"] },
+    "boot-data-keyset-pagination-blaze":  { "path": "jpa/keyset-pagination/blaze-persistence", "targets": ["test"] },
+    "boot-keyset-pagination-window-jpa":  { "path": "jpa/keyset-pagination/boot-data-window-pagination", "targets": ["test"] },
+    "boot-graphql-querydsl":              { "path": "graphql/boot-graphql-querydsl", "targets": ["test"] },
+    "boot-graphql-webflux":               { "path": "graphql/boot-graphql-webflux", "targets": ["test"] },
+    "boot-graphql-webmvc":                { "path": "graphql/boot-graphql-webmvc", "targets": ["test"] },
+    "httpClients-boot-restclient":        { "path": "httpClients/boot-restclient", "targets": ["test"] },
+    "boot-data-envers":                   { "path": "jpa/boot-data-envers", "targets": ["test"] },
+    "boot-scheduler-quartz":              { "path": "scheduler/boot-scheduler-quartz", "targets": ["test"] },
+    "boot-scheduler-shedlock":            { "path": "scheduler/boot-scheduler-shedlock", "targets": ["test"] }
+  }
+}
