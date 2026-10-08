@@ -1,0 +1,60 @@
+name: modules
+
+# One workflow for the modules listed in dynamic-monorepo.config.json (they all ran the
+# same JDK 25 + ./mvnw clean verify job). The `plan` job works out which modules a push
+# or pull request touched and only those are built and tested. Modules with their own
+# special CI (multitenancy, archunit, togglz, ...) keep their dedicated workflows.
+on:
+  push:
+    branches: [main]
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+
+permissions:
+  contents: read
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      modules: ${{ steps.plan.outputs.test }}
+      has_modules: ${{ steps.plan.outputs.has_test }}
+      paths: ${{ steps.plan.outputs.paths }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: Continuous-Actions/dynamic-monorepo@v1
+        id: plan
+
+  build:
+    name: ${{ matrix.module }}
+    needs: plan
+    if: needs.plan.outputs.has_modules == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        module: ${{ fromJSON(needs.plan.outputs.modules) }}
+    defaults:
+      run:
+        working-directory: ${{ fromJSON(needs.plan.outputs.paths)[matrix.module] }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
+          persist-credentials: false
+
+      - name: Set up JDK
+        uses: actions/setup-java@v6.0.1
+        with:
+          java-version: 25.0.4+101.0.LTS
+          distribution: "temurin"
+          cache: "maven"
+
+      - name: Grant execute permission for mvnw
+        run: chmod +x mvnw
+
+      - name: Build and analyze
+        run: ./mvnw clean verify
