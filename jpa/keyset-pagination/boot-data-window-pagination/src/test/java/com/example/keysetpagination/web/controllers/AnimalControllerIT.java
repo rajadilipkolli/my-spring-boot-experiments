@@ -212,6 +212,7 @@ class AnimalControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.habitat", is(animalRequest.habitat())));
     }
 
+    /** Verifies that missing name and type produce a 400 problem response with both field violations. */
     @Test
     void shouldReturn400WhenCreateNewAnimalWithoutNameAndType() throws Exception {
         AnimalRequest animalRequest = new AnimalRequest(null, null, null);
@@ -221,7 +222,7 @@ class AnimalControllerIT extends AbstractIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonMapper.writeValueAsString(animalRequest)))
                 .andExpect(status().isBadRequest())
-                .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                 .andExpect(jsonPath("$.type", is("https://api.boot-data-window-pagination.com/errors/validation")))
                 .andExpect(jsonPath("$.title", is("Constraint Violation")))
                 .andExpect(jsonPath("$.status", is(400)))

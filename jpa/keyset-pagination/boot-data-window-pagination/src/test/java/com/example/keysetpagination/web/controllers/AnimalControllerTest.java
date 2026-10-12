@@ -114,6 +114,7 @@ class AnimalControllerTest {
                 .andExpect(jsonPath("$.hasPrevious", is(true)));
     }
 
+    /** Verifies that a page size below one produces a 400 validation problem response. */
     @Test
     void shouldReturnBadRequestWhenPageSizeIsLessThanMin() throws Exception {
         SearchRequest searchRequest = new SearchRequest();
@@ -122,7 +123,7 @@ class AnimalControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonMapper.writeValueAsString(searchRequest)))
                 .andExpect(status().isBadRequest())
-                .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                 .andExpect(jsonPath("$.type", is("https://api.boot-data-window-pagination.com/errors/validation")))
                 .andExpect(jsonPath("$.title", is("Constraint Violation")))
                 .andExpect(jsonPath("$.status", is(400)))
@@ -132,6 +133,7 @@ class AnimalControllerTest {
                 .andExpect(jsonPath("$.timestamp", notNullValue()));
     }
 
+    /** Verifies that a page size above 100 produces a 400 validation problem response. */
     @Test
     void shouldReturnBadRequestWhenPageSizeExceedsMax() throws Exception {
         SearchRequest searchRequest = new SearchRequest();
@@ -140,7 +142,7 @@ class AnimalControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonMapper.writeValueAsString(searchRequest)))
                 .andExpect(status().isBadRequest())
-                .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                 .andExpect(jsonPath("$.type", is("https://api.boot-data-window-pagination.com/errors/validation")))
                 .andExpect(jsonPath("$.title", is("Constraint Violation")))
                 .andExpect(jsonPath("$.status", is(400)))
@@ -172,6 +174,7 @@ class AnimalControllerTest {
                 .andExpect(jsonPath("$.name", is(animal.name())));
     }
 
+    /** Verifies that fetching a missing animal produces a 404 problem response. */
     @Test
     void shouldReturn404WhenFetchingNonExistingAnimal() throws Exception {
         Long animalId = 1L;
@@ -180,7 +183,7 @@ class AnimalControllerTest {
         this.mockMvc
                 .perform(get("/api/animals/{id}", animalId))
                 .andExpect(status().isNotFound())
-                .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                 .andExpect(jsonPath("$.type", is("https://api.boot-data-window-pagination.com/errors/not-found")))
                 .andExpect(jsonPath("$.title", is("Not Found")))
                 .andExpect(jsonPath("$.status", is(404)))
@@ -204,6 +207,7 @@ class AnimalControllerTest {
                 .andExpect(jsonPath("$.name", is(animalResponse.name())));
     }
 
+    /** Verifies that missing name and type produce a 400 problem response with both field violations. */
     @Test
     void shouldReturn400WhenCreateNewAnimalWithoutNameAndType() throws Exception {
         AnimalRequest animalRequest = new AnimalRequest(null, null, null);
@@ -213,7 +217,7 @@ class AnimalControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonMapper.writeValueAsString(animalRequest)))
                 .andExpect(status().isBadRequest())
-                .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                 .andExpect(jsonPath("$.type", is("https://api.boot-data-window-pagination.com/errors/validation")))
                 .andExpect(jsonPath("$.title", is("Constraint Violation")))
                 .andExpect(jsonPath("$.status", is(400)))
@@ -245,6 +249,7 @@ class AnimalControllerTest {
                 .andExpect(jsonPath("$.name", is(animalResponse.name())));
     }
 
+    /** Verifies that updating a missing animal produces a 404 problem response. */
     @Test
     void shouldReturn404WhenUpdatingNonExistingAnimal() throws Exception {
         Long animalId = 1L;
@@ -257,7 +262,7 @@ class AnimalControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonMapper.writeValueAsString(animalRequest)))
                 .andExpect(status().isNotFound())
-                .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                 .andExpect(jsonPath("$.type", is("https://api.boot-data-window-pagination.com/errors/not-found")))
                 .andExpect(jsonPath("$.title", is("Not Found")))
                 .andExpect(jsonPath("$.status", is(404)))
@@ -278,6 +283,7 @@ class AnimalControllerTest {
                 .andExpect(jsonPath("$.name", is(animal.name())));
     }
 
+    /** Verifies that deleting a missing animal produces a problem response identifying the missing ID. */
     @Test
     void shouldReturn404WhenDeletingNonExistingAnimal() throws Exception {
         Long animalId = 1L;
@@ -285,7 +291,7 @@ class AnimalControllerTest {
 
         this.mockMvc
                 .perform(delete("/api/animals/{id}", animalId))
-                .andExpect(header().string("Content-Type", is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                 .andExpect(jsonPath("$.type", is("https://api.boot-data-window-pagination.com/errors/not-found")))
                 .andExpect(jsonPath("$.title", is("Not Found")))
                 .andExpect(jsonPath("$.status", is(404)))
