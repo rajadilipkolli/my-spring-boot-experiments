@@ -114,6 +114,7 @@ class AnimalControllerTest {
                 .andExpect(jsonPath("$.hasPrevious", is(true)));
     }
 
+    /** Verifies that a page size below one produces a 400 validation problem response. */
     @Test
     void shouldReturnBadRequestWhenPageSizeIsLessThanMin() throws Exception {
         SearchRequest searchRequest = new SearchRequest();
@@ -132,6 +133,7 @@ class AnimalControllerTest {
                 .andExpect(jsonPath("$.timestamp", notNullValue()));
     }
 
+    /** Verifies that a page size above 100 produces a 400 validation problem response. */
     @Test
     void shouldReturnBadRequestWhenPageSizeExceedsMax() throws Exception {
         SearchRequest searchRequest = new SearchRequest();
@@ -172,6 +174,7 @@ class AnimalControllerTest {
                 .andExpect(jsonPath("$.name", is(animal.name())));
     }
 
+    /** Verifies that fetching a missing animal produces a 404 problem response. */
     @Test
     void shouldReturn404WhenFetchingNonExistingAnimal() throws Exception {
         Long animalId = 1L;
@@ -204,6 +207,7 @@ class AnimalControllerTest {
                 .andExpect(jsonPath("$.name", is(animalResponse.name())));
     }
 
+    /** Verifies that missing name and type produce a 400 problem response with both field violations. */
     @Test
     void shouldReturn400WhenCreateNewAnimalWithoutNameAndType() throws Exception {
         AnimalRequest animalRequest = new AnimalRequest(null, null, null);
@@ -245,6 +249,7 @@ class AnimalControllerTest {
                 .andExpect(jsonPath("$.name", is(animalResponse.name())));
     }
 
+    /** Verifies that updating a missing animal produces a 404 problem response. */
     @Test
     void shouldReturn404WhenUpdatingNonExistingAnimal() throws Exception {
         Long animalId = 1L;
@@ -278,6 +283,7 @@ class AnimalControllerTest {
                 .andExpect(jsonPath("$.name", is(animal.name())));
     }
 
+    /** Verifies that deleting a missing animal produces a problem response identifying the missing ID. */
     @Test
     void shouldReturn404WhenDeletingNonExistingAnimal() throws Exception {
         Long animalId = 1L;

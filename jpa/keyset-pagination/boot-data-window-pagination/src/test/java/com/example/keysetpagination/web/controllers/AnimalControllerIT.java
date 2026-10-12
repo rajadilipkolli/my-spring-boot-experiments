@@ -212,6 +212,7 @@ class AnimalControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.habitat", is(animalRequest.habitat())));
     }
 
+    /** Verifies that missing name and type produce a 400 problem response with both field violations. */
     @Test
     void shouldReturn400WhenCreateNewAnimalWithoutNameAndType() throws Exception {
         AnimalRequest animalRequest = new AnimalRequest(null, null, null);

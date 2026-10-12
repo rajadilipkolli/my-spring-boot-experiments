@@ -52,6 +52,11 @@ public class CriteriaGroup implements ISearchCriteria {
         return result;
     }
 
+    /**
+     * Returns the group operator and criteria, including nested groups, in bracketed form.
+     *
+     * @return the string representation of this group
+     */
     @Override
     public String toString() {
         return new StringJoiner(", ", CriteriaGroup.class.getSimpleName() + "[", "]")

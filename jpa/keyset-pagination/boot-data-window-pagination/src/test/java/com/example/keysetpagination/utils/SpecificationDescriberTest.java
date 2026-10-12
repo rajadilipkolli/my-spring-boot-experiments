@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 
 class SpecificationDescriberTest {
 
+    /** Verifies that a leaf description contains its field, operator, and quoted value. */
     @Test
     void describeSingleSearchCriteriaLeaf() {
         SearchCriteria<String> criteria = new SearchCriteria<>(QueryOperator.EQ, "name", List.of("Lion"));
@@ -20,6 +21,7 @@ class SpecificationDescriberTest {
         assertThat(result).isEqualTo("name EQ [\"Lion\"]");
     }
 
+    /** Verifies that embedded double quotes and newline characters are escaped in values. */
     @Test
     void describeQuotedMultilineValue() {
         SearchCriteria<String> criteria = new SearchCriteria<>(QueryOperator.EQ, "name", List.of("The \"Lion\"\nKing"));
@@ -27,6 +29,7 @@ class SpecificationDescriberTest {
         assertThat(SpecificationDescriber.describe(criteria)).isEqualTo("name EQ [\"The \\\"Lion\\\"\\nKing\"]");
     }
 
+    /** Verifies that a null value is rendered without quotes. */
     @Test
     void describeNullValue() {
         SearchCriteria<String> criteria =
@@ -35,6 +38,7 @@ class SpecificationDescriberTest {
         assertThat(SpecificationDescriber.describe(criteria)).isEqualTo("name EQ [null]");
     }
 
+    /** Verifies that top-level criteria appear on separate lines in list order. */
     @Test
     void describeFlatListOfMultipleCriteria() {
         List<ISearchCriteria<?>> criteriaList = List.of(
@@ -47,6 +51,7 @@ class SpecificationDescriberTest {
                 age GT ["5"]""");
     }
 
+    /** Verifies that an AND operator precedes its indented child criteria. */
     @Test
     void describeCriteriaGroupWithAndOperator() {
         CriteriaGroup group = new CriteriaGroup(
@@ -62,6 +67,7 @@ class SpecificationDescriberTest {
                   age GT ["5"]""");
     }
 
+    /** Verifies that an OR operator precedes its indented child criteria. */
     @Test
     void describeCriteriaGroupWithOrOperator() {
         CriteriaGroup group = new CriteriaGroup(
@@ -77,6 +83,7 @@ class SpecificationDescriberTest {
                   status EQ ["PENDING"]""");
     }
 
+    /** Verifies that each nested group adds exactly two spaces of indentation. */
     @Test
     void describeDeeplyNestedStructure() {
         CriteriaGroup orSubgroup = new CriteriaGroup(
@@ -104,6 +111,7 @@ class SpecificationDescriberTest {
         assertThat(lines[4]).startsWith("    ").doesNotStartWith("     ");
     }
 
+    /** Verifies that both describe overloads return an empty string for null input. */
     @Test
     void describeEdgeCasesNullInput() {
         assertThat(SpecificationDescriber.describe((ISearchCriteria<?>) null)).isEmpty();
@@ -111,11 +119,13 @@ class SpecificationDescriberTest {
                 .isEmpty();
     }
 
+    /** Verifies that an empty criteria list produces an empty description. */
     @Test
     void describeEdgeCasesEmptyList() {
         assertThat(SpecificationDescriber.describe(Collections.emptyList())).isEmpty();
     }
 
+    /** Verifies that a group with one child retains its operator and child indentation. */
     @Test
     void describeEdgeCasesSingleElementGroup() {
         CriteriaGroup group = new CriteriaGroup(

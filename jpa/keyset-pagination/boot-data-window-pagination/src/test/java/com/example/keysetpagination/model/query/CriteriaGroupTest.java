@@ -29,6 +29,7 @@ class CriteriaGroupTest {
                                 """);
     }
 
+    /** Verifies that an AND group includes its operator and both criteria in list order. */
     @Test
     void toStringWithAndGroup() {
         SearchCriteria<String> crit1 = new SearchCriteria<>(QueryOperator.EQ, "name", List.of("Lion"));
@@ -40,6 +41,7 @@ class CriteriaGroupTest {
                         "CriteriaGroup[operator=AND, criteriaList=[SearchCriteria[queryOperator=EQ, field='name', values=[Lion]], SearchCriteria[queryOperator=GT, field='age', values=[5]]]]");
     }
 
+    /** Verifies that an OR group includes its operator and both criteria in list order. */
     @Test
     void toStringWithOrGroup() {
         SearchCriteria<String> crit1 = new SearchCriteria<>(QueryOperator.EQ, "status", List.of("ACTIVE"));
@@ -51,6 +53,7 @@ class CriteriaGroupTest {
                         "CriteriaGroup[operator=OR, criteriaList=[SearchCriteria[queryOperator=EQ, field='status', values=[ACTIVE]], SearchCriteria[queryOperator=EQ, field='status', values=[PENDING]]]]");
     }
 
+    /** Verifies that nested groups retain their operators and criteria in the string representation. */
     @Test
     void toStringWithNestedGroups() {
         SearchCriteria<String> crit1 = new SearchCriteria<>(QueryOperator.EQ, "name", List.of("Lion"));
