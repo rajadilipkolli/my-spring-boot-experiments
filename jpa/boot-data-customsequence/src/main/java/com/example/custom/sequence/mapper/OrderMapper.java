@@ -15,12 +15,14 @@ public class OrderMapper {
     public OrderResponse getOrderResponse(Order order) {
         Customer customer = order.getCustomer();
         return new OrderResponse(
-                order.getId(), order.getText(), new CustomerResponseWithOutOrder(customer.getId(), customer.getText()));
+                order.getId(),
+                order.getItemName(),
+                new CustomerResponseWithOutOrder(customer.getId(), customer.getName()));
     }
 
     public Order mapToEntity(OrderRequest orderRequest) {
         Order order = new Order();
-        order.setText(orderRequest.text());
+        order.setItemName(orderRequest.itemName());
         return order;
     }
 
@@ -30,7 +32,7 @@ public class OrderMapper {
 
     public List<OrderResponseWithOutCustomer> mapToResponseListWithOutCustomer(List<Order> orders) {
         return orders.stream()
-                .map(order -> new OrderResponseWithOutCustomer(order.getId(), order.getText()))
+                .map(order -> new OrderResponseWithOutCustomer(order.getId(), order.getItemName()))
                 .toList();
     }
 

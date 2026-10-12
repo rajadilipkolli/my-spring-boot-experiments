@@ -33,6 +33,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -57,11 +58,11 @@ class OrderControllerTest {
 
     @BeforeEach
     void setUp() {
-        customer = new Customer().setId("CUST_01").setText("customer1");
+        customer = new Customer().setId("CUST_01").setName("customer1");
         this.orderList = new ArrayList<>();
-        this.orderList.add(new Order().setId("1").setText("text 1").setCustomer(customer));
-        this.orderList.add(new Order().setId("2").setText("text 2").setCustomer(customer));
-        this.orderList.add(new Order().setId("3").setText("text 3").setCustomer(customer));
+        this.orderList.add(new Order().setId("1").setItemName("text 1").setCustomer(customer));
+        this.orderList.add(new Order().setId("2").setItemName("text 2").setCustomer(customer));
+        this.orderList.add(new Order().setId("3").setItemName("text 3").setCustomer(customer));
     }
 
     @Test
@@ -95,13 +96,13 @@ class OrderControllerTest {
     void shouldFindOrderById() throws Exception {
         String orderId = "1";
         OrderResponse order = new OrderResponse(
-                orderId, "text 1", new CustomerResponseWithOutOrder(customer.getId(), customer.getText()));
+                orderId, "text 1", new CustomerResponseWithOutOrder(customer.getId(), customer.getName()));
         given(orderService.findOrderById(orderId)).willReturn(Optional.of(order));
 
         this.mockMvc
                 .perform(get("/api/orders/{id}", orderId))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.text", is(order.text())));
+                .andExpect(jsonPath("$.itemName", is(order.itemName())));
     }
 
     @Test
@@ -123,11 +124,11 @@ class OrderControllerTest {
                         .content(jsonMapper.writeValueAsString(orderRequest)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id", notNullValue()))
-                .andExpect(jsonPath("$.text", is(orderRequest.text())));
+                .andExpect(jsonPath("$.itemName", is(orderRequest.itemName())));
     }
 
     @Test
-    void shouldReturn400WhenCreateNewOrderWithoutText() throws Exception {
+    void shouldReturn400WhenCreateNewOrderWithoutItemName() throws Exception {
         OrderRequest order = new OrderRequest(null, null);
 
         this.mockMvc
@@ -135,7 +136,7 @@ class OrderControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonMapper.writeValueAsString(order)))
                 .andExpect(status().isBadRequest())
-                .andExpect(header().string("Content-Type", is("application/problem+json")))
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                 .andExpect(jsonPath("$.type", is("https://custom-sequence.com/errors/validation-error")))
                 .andExpect(jsonPath("$.title", is("Constraint Violation")))
                 .andExpect(jsonPath("$.status", is(400)))
@@ -144,8 +145,8 @@ class OrderControllerTest {
                 .andExpect(jsonPath("$.violations", hasSize(2)))
                 .andExpect(jsonPath("$.violations[0].field", is("customerId")))
                 .andExpect(jsonPath("$.violations[0].message", is("CustomerId cannot be blank")))
-                .andExpect(jsonPath("$.violations[1].field", is("text")))
-                .andExpect(jsonPath("$.violations[1].message", is("Text cannot be empty")))
+                .andExpect(jsonPath("$.violations[1].field", is("itemName")))
+                .andExpect(jsonPath("$.violations[1].message", is("Item name cannot be blank")))
                 .andReturn();
     }
 
@@ -153,8 +154,8 @@ class OrderControllerTest {
     void shouldUpdateOrder() throws Exception {
         String orderId = "1";
         OrderResponse orderResponse = new OrderResponse(
-                orderId, "Updated text", new CustomerResponseWithOutOrder(customer.getId(), customer.getText()));
-        OrderRequest orderRequest = new OrderRequest("Updated text", customer.getId());
+                orderId, "Updated itemName", new CustomerResponseWithOutOrder(customer.getId(), customer.getName()));
+        OrderRequest orderRequest = new OrderRequest("Updated itemName", customer.getId());
         given(orderService.updateOrderById(orderId, orderRequest)).willReturn(Optional.of(orderResponse));
 
         this.mockMvc
@@ -162,13 +163,13 @@ class OrderControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonMapper.writeValueAsString(orderRequest)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.text", is(orderResponse.text())));
+                .andExpect(jsonPath("$.itemName", is(orderResponse.itemName())));
     }
 
     @Test
     void shouldReturn404WhenUpdatingNonExistingOrder() throws Exception {
         String orderId = "1";
-        OrderRequest orderRequest = new OrderRequest("Updated text", customer.getId());
+        OrderRequest orderRequest = new OrderRequest("Updated itemName", customer.getId());
         given(orderService.updateOrderById(orderId, orderRequest)).willReturn(Optional.empty());
 
         this.mockMvc
@@ -184,14 +185,14 @@ class OrderControllerTest {
     void shouldDeleteOrder() throws Exception {
         String orderId = "1";
         OrderResponse order = new OrderResponse(
-                orderId, "Some text", new CustomerResponseWithOutOrder(customer.getId(), customer.getText()));
+                orderId, "Some itemName", new CustomerResponseWithOutOrder(customer.getId(), customer.getName()));
         given(orderService.findOrderById(orderId)).willReturn(Optional.of(order));
         doNothing().when(orderService).deleteOrderById(order.id());
 
         this.mockMvc
                 .perform(delete("/api/orders/{id}", order.id()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.text", is(order.text())));
+                .andExpect(jsonPath("$.itemName", is(order.itemName())));
     }
 
     @Test

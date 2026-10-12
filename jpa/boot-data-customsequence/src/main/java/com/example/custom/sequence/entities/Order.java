@@ -16,11 +16,11 @@ import org.hibernate.Hibernate;
 public class Order {
 
     @Id
-    @StringPrefixedSequence(numberFormat = "%09d")
+    @StringPrefixedSequence(sequenceName = "orders_seq", numberFormat = "%09d")
     private String id;
 
     @Column(nullable = false)
-    private String text;
+    private String itemName;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "customer_id", nullable = false)
@@ -37,12 +37,12 @@ public class Order {
         return this;
     }
 
-    public String getText() {
-        return text;
+    public String getItemName() {
+        return itemName;
     }
 
-    public Order setText(String text) {
-        this.text = text;
+    public Order setItemName(String text) {
+        this.itemName = text;
         return this;
     }
 
@@ -60,7 +60,7 @@ public class Order {
         if (this == o) return true;
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
         Order order = (Order) o;
-        return Objects.equals(text, order.text) && Objects.equals(customer.getId(), order.customer.getId());
+        return Objects.equals(itemName, order.itemName) && Objects.equals(customer.getId(), order.customer.getId());
     }
 
     @Override

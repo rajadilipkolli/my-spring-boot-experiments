@@ -8,6 +8,7 @@ import com.example.custom.sequence.entities.Order;
 import com.example.custom.sequence.model.request.OrderRequest;
 import com.example.custom.sequence.model.response.OrderResponse;
 import com.example.custom.sequence.model.response.PagedResult;
+import io.hypersistence.utils.jdbc.validator.SQLStatementCountValidator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Objects;
@@ -28,17 +29,19 @@ class OrderControllerIT extends AbstractIntegrationTest {
         customerRepository.deleteAllInBatch();
         customer = createTestCustomer();
         orderList = createTestOrders(customer);
+
+        SQLStatementCountValidator.reset();
     }
 
     private Customer createTestCustomer() {
-        return customerRepository.persist(new Customer().setText("customer1"));
+        return customerRepository.persist(new Customer().setName("customer1"));
     }
 
     private List<Order> createTestOrders(Customer customer) {
         List<Order> orders = List.of(
-                new Order().setText("First Order").setCustomer(customer),
-                new Order().setText("Second Order").setCustomer(customer),
-                new Order().setText("Third Order").setCustomer(customer));
+                new Order().setItemName("First Order").setCustomer(customer),
+                new Order().setItemName("Second Order").setCustomer(customer),
+                new Order().setItemName("Third Order").setCustomer(customer));
         return orderRepository.persistAll(orders);
     }
 
@@ -63,6 +66,9 @@ class OrderControllerIT extends AbstractIntegrationTest {
                     assertThat(pagedResult.hasNext()).isFalse();
                     assertThat(pagedResult.hasPrevious()).isFalse();
                 });
+
+        SQLStatementCountValidator.assertSelectCount(2);
+        SQLStatementCountValidator.assertTotalCount(2);
     }
 
     @Test
@@ -80,12 +86,12 @@ class OrderControllerIT extends AbstractIntegrationTest {
                 .convertTo(OrderResponse.class)
                 .satisfies(orderResponse -> {
                     assertThat(orderResponse.id()).isEqualTo(orderId);
-                    assertThat(orderResponse.text()).isEqualTo(order.getText());
+                    assertThat(orderResponse.itemName()).isEqualTo(order.getItemName());
                 });
     }
 
     @Test
-    void shouldCreateNewOrder() throws Exception {
+    void shouldCreateNewOrder() {
         OrderRequest orderRequest = new OrderRequest("New Order", customer.getId());
 
         this.mockMvcTester
@@ -100,12 +106,15 @@ class OrderControllerIT extends AbstractIntegrationTest {
                 .convertTo(OrderResponse.class)
                 .satisfies(orderResponse -> {
                     assertThat(orderResponse.id()).hasSize(9);
-                    assertThat(orderResponse.text()).isEqualTo(orderRequest.text());
+                    assertThat(orderResponse.itemName()).isEqualTo(orderRequest.itemName());
                 });
+        SQLStatementCountValidator.assertSelectCount(1);
+        SQLStatementCountValidator.assertInsertCount(1);
+        SQLStatementCountValidator.assertTotalCount(2);
     }
 
     @Test
-    void shouldReturn400WhenCreateNewOrderWithoutText() throws Exception {
+    void shouldReturn400WhenCreateNewOrderWithoutItemName() {
         OrderRequest orderRequest = new OrderRequest(null, "CUS_1");
 
         this.mockMvcTester
@@ -132,13 +141,16 @@ class OrderControllerIT extends AbstractIntegrationTest {
                     @SuppressWarnings("unchecked")
                     LinkedHashMap<String, Object> violation =
                             (LinkedHashMap<String, Object>) ((List<?>) violations).getFirst();
-                    assertThat(violation).containsEntry("field", "text");
-                    assertThat(violation).containsEntry("message", "Text cannot be empty");
+                    assertThat(violation).containsEntry("field", "itemName");
+                    assertThat(violation).containsEntry("message", "Item name cannot be blank");
                 });
+        SQLStatementCountValidator.assertSelectCount(0);
+        SQLStatementCountValidator.assertInsertCount(0);
+        SQLStatementCountValidator.assertTotalCount(0);
     }
 
     @Test
-    void shouldUpdateOrder() throws Exception {
+    void shouldUpdateOrder() {
         OrderRequest orderRequest = new OrderRequest("Updated Order", customer.getId());
         Order order = orderList.getFirst();
 
@@ -154,12 +166,19 @@ class OrderControllerIT extends AbstractIntegrationTest {
                 .convertTo(OrderResponse.class)
                 .satisfies(orderResponse -> {
                     assertThat(orderResponse.id()).isEqualTo(order.getId());
-                    assertThat(orderResponse.text()).isEqualTo(orderRequest.text());
+                    assertThat(orderResponse.itemName()).isEqualTo(orderRequest.itemName());
                 });
+
+        // select for customer
+        SQLStatementCountValidator.assertSelectCount(1);
+        // update for order table
+        SQLStatementCountValidator.assertUpdateCount(1);
+        SQLStatementCountValidator.assertInsertCount(0);
+        SQLStatementCountValidator.assertDeleteCount(0);
     }
 
     @Test
-    void shouldReturn400WhenUpdatingOrderWithInvalidCustomerId() throws Exception {
+    void shouldReturn400WhenUpdatingOrderWithInvalidCustomerId() {
         OrderRequest orderRequest = new OrderRequest("Updated Order", "INVALID_ID");
         Order order = orderList.getFirst();
 
@@ -173,7 +192,7 @@ class OrderControllerIT extends AbstractIntegrationTest {
     }
 
     @Test
-    void shouldReturn404WhenUpdatingNonExistentOrder() throws Exception {
+    void shouldReturn404WhenUpdatingNonExistentOrder() {
         OrderRequest orderRequest = new OrderRequest("Updated Order", customer.getId());
 
         this.mockMvcTester
@@ -200,9 +219,16 @@ class OrderControllerIT extends AbstractIntegrationTest {
                 .convertTo(OrderResponse.class)
                 .satisfies(orderResponse -> {
                     assertThat(orderResponse.id()).isEqualTo(orderId);
-                    assertThat(orderResponse.text()).isEqualTo(order.getText());
+                    assertThat(orderResponse.itemName()).isEqualTo(order.getItemName());
                 });
 
+        // select for order and customer
+        SQLStatementCountValidator.assertSelectCount(2);
+        SQLStatementCountValidator.assertUpdateCount(0);
+        SQLStatementCountValidator.assertInsertCount(0);
+        // delete for order table
+        SQLStatementCountValidator.assertDeleteCount(1);
+        SQLStatementCountValidator.assertTotalCount(3);
         // Verify order is deleted from database
         assertThat(orderRepository.findById(orderId)).isEmpty();
     }

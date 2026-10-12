@@ -13,7 +13,13 @@ import org.hibernate.annotations.IdGeneratorType;
 @Target({METHOD, FIELD})
 public @interface StringPrefixedSequence {
 
+    String sequenceName();
+
     String valuePrefix() default "";
 
     String numberFormat() default "%d";
+
+    int initialValue() default 1;
+
+    int allocationSize() default 50;
 }

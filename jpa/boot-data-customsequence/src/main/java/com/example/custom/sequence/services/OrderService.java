@@ -61,7 +61,7 @@ public class OrderService {
     public Optional<OrderResponse> saveOrder(OrderRequest orderRequest) {
         return customerService.findById(orderRequest.customerId()).map(customer -> {
             Order order = new Order();
-            order.setText(orderRequest.text());
+            order.setItemName(orderRequest.itemName());
             order.setCustomer(customer);
             return orderMapper.getOrderResponse(orderRepository.persist(order));
         });
@@ -72,7 +72,7 @@ public class OrderService {
         return orderRepository
                 .findByIdAndCustomer_Id(id, orderRequest.customerId())
                 .map(order -> {
-                    order.setText(orderRequest.text());
+                    order.setItemName(orderRequest.itemName());
                     return orderMapper.getOrderResponse(orderRepository.mergeAndFlush(order));
                 });
     }

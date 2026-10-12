@@ -17,11 +17,11 @@ import org.hibernate.Hibernate;
 public class Customer {
 
     @Id
-    @StringPrefixedSequence(valuePrefix = "CUS", numberFormat = "%05d")
+    @StringPrefixedSequence(sequenceName = "customers_seq", valuePrefix = "CUS", numberFormat = "%05d")
     private String id;
 
     @Column(nullable = false)
-    private String text;
+    private String name;
 
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Order> orders = new ArrayList<>();
@@ -37,12 +37,12 @@ public class Customer {
         return this;
     }
 
-    public String getText() {
-        return text;
+    public String getName() {
+        return name;
     }
 
-    public Customer setText(String text) {
-        this.text = text;
+    public Customer setName(String text) {
+        this.name = text;
         return this;
     }
 

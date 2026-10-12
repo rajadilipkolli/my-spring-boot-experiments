@@ -77,7 +77,7 @@ class OrderServiceTest {
         assertThat(optionalOrder).isPresent();
         OrderResponse order = optionalOrder.get();
         assertThat(order.id()).isEqualTo("1");
-        assertThat(order.text()).isEqualTo("junitText");
+        assertThat(order.itemName()).isEqualTo("junitText");
     }
 
     @Test
@@ -85,7 +85,7 @@ class OrderServiceTest {
         // given
         given(customerService.findById("1"))
                 .willReturn(Optional.of(
-                        new Customer().setId("1").setText("custText").setOrders(List.of())));
+                        new Customer().setId("1").setName("custText").setOrders(List.of())));
         given(orderRepository.persist(getOrder())).willReturn(getOrder());
         given(orderMapper.getOrderResponse(getOrder())).willReturn(getOrderResponse());
         // when
@@ -93,7 +93,7 @@ class OrderServiceTest {
         // then
         assertThat(persistedOrder.isPresent()).isNotNull();
         assertThat(persistedOrder.get().id()).isEqualTo("1");
-        assertThat(persistedOrder.get().text()).isEqualTo("junitText");
+        assertThat(persistedOrder.get().itemName()).isEqualTo("junitText");
     }
 
     @Test
@@ -122,10 +122,10 @@ class OrderServiceTest {
     private Order getOrder() {
         Order order = new Order();
         order.setId("1");
-        order.setText("junitText");
+        order.setItemName("junitText");
         Customer customer = new Customer();
         customer.setId("1");
-        customer.setText("custText");
+        customer.setName("custText");
         order.setCustomer(customer);
         return order;
     }
