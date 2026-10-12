@@ -56,6 +56,7 @@ class OrderControllerTest {
     private List<Order> orderList;
     private Customer customer;
 
+    /** Creates named order fixtures associated with a customer for controller tests. */
     @BeforeEach
     void setUp() {
         customer = new Customer().setId("CUST_01").setName("customer1");
@@ -92,6 +93,7 @@ class OrderControllerTest {
         return new PagedResult<>(page);
     }
 
+    /** Verifies that fetching an existing order exposes the itemName response field. */
     @Test
     void shouldFindOrderById() throws Exception {
         String orderId = "1";
@@ -113,6 +115,7 @@ class OrderControllerTest {
         this.mockMvc.perform(get("/api/orders/{id}", orderId)).andExpect(status().isNotFound());
     }
 
+    /** Verifies that order creation returns HTTP 201 with an identifier and the requested item name. */
     @Test
     void shouldCreateNewOrder() throws Exception {
 
@@ -127,6 +130,7 @@ class OrderControllerTest {
                 .andExpect(jsonPath("$.itemName", is(orderRequest.itemName())));
     }
 
+    /** Verifies that missing customer and item values return HTTP 400 with both field violations. */
     @Test
     void shouldReturn400WhenCreateNewOrderWithoutItemName() throws Exception {
         OrderRequest order = new OrderRequest(null, null);
@@ -150,6 +154,7 @@ class OrderControllerTest {
                 .andReturn();
     }
 
+    /** Verifies that updating an order returns the replacement item name. */
     @Test
     void shouldUpdateOrder() throws Exception {
         String orderId = "1";
@@ -166,6 +171,7 @@ class OrderControllerTest {
                 .andExpect(jsonPath("$.itemName", is(orderResponse.itemName())));
     }
 
+    /** Verifies that an unmatched order update returns HTTP 404 and calls the service once. */
     @Test
     void shouldReturn404WhenUpdatingNonExistingOrder() throws Exception {
         String orderId = "1";
@@ -181,6 +187,7 @@ class OrderControllerTest {
         verify(orderService, times(1)).updateOrderById(orderId, orderRequest);
     }
 
+    /** Verifies that deleting an order returns its item name in the response. */
     @Test
     void shouldDeleteOrder() throws Exception {
         String orderId = "1";

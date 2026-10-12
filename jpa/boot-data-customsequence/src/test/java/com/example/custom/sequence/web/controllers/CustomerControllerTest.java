@@ -52,6 +52,7 @@ class CustomerControllerTest {
 
     private List<Customer> customerList;
 
+    /** Creates named customer fixtures with empty order lists for controller tests. */
     @BeforeEach
     void setUp() {
         this.customerList = new ArrayList<>();
@@ -79,6 +80,7 @@ class CustomerControllerTest {
                 .andExpect(jsonPath("$.hasPrevious", is(false)));
     }
 
+    /** Verifies that fetching an existing customer exposes the customerName response field. */
     @Test
     void shouldFindCustomerById() throws Exception {
         String customerId = "CUS_1";
@@ -99,6 +101,7 @@ class CustomerControllerTest {
         this.mockMvc.perform(get("/api/customers/{id}", customerId)).andExpect(status().isNotFound());
     }
 
+    /** Verifies that customer creation returns HTTP 201 with an identifier and the requested name. */
     @Test
     void shouldCreateNewCustomer() throws Exception {
 
@@ -116,6 +119,7 @@ class CustomerControllerTest {
                 .andExpect(jsonPath("$.customerName", is(customerRequest.customerName())));
     }
 
+    /** Verifies that a null customer name returns HTTP 400 with the customerName violation. */
     @Test
     void shouldReturn400WhenCreateNewCustomerWithInvalidData() throws Exception {
         CustomerRequest customerRequest = new CustomerRequest(null, List.of(new OrderRequest("ORD_1", null)));
@@ -137,6 +141,7 @@ class CustomerControllerTest {
                 .andReturn();
     }
 
+    /** Verifies that an empty customer name returns HTTP 400 with a field-specific validation error. */
     @Test
     void shouldReturn400WhenCreateNewCustomerWithEmptyCustomerName() throws Exception {
         CustomerRequest customerRequest = new CustomerRequest("", new ArrayList<>());
@@ -156,6 +161,7 @@ class CustomerControllerTest {
                 .andExpect(jsonPath("$.violations[0].message", is("Customer name cannot be blank")));
     }
 
+    /** Verifies that updating a customer returns its new name and order details. */
     @Test
     void shouldUpdateCustomer() throws Exception {
         String customerId = "CUS_1";
@@ -177,6 +183,7 @@ class CustomerControllerTest {
                 .andExpect(jsonPath("$.orderResponses[0].orderDescription", is("New Order")));
     }
 
+    /** Verifies that updating with an empty customer name returns the customerName validation error. */
     @Test
     void shouldReturn400WhenUpdateCustomerWithEmptyCustomerName() throws Exception {
         String customerId = "CUS_1";
@@ -199,6 +206,7 @@ class CustomerControllerTest {
         ;
     }
 
+    /** Verifies that updating a missing customer returns HTTP 404. */
     @Test
     void shouldReturn404WhenUpdatingNonExistingCustomer() throws Exception {
         String customerId = "CUS_1";
@@ -213,6 +221,7 @@ class CustomerControllerTest {
                 .andExpect(status().isNotFound());
     }
 
+    /** Verifies that deleting a customer returns its name in the response. */
     @Test
     void shouldDeleteCustomer() throws Exception {
         String customerId = "CUS_1";

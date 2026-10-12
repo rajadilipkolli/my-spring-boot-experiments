@@ -37,10 +37,21 @@ public class Customer {
         return this;
     }
 
+    /**
+     * Returns the customer's name.
+     *
+     * @return the customer name
+     */
     public String getName() {
         return name;
     }
 
+    /**
+     * Sets the customer's name.
+     *
+     * @param text the customer name
+     * @return this customer for chained updates
+     */
     public Customer setName(String text) {
         this.name = text;
         return this;

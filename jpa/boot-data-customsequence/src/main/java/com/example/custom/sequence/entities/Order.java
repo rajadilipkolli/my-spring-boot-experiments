@@ -37,10 +37,21 @@ public class Order {
         return this;
     }
 
+    /**
+     * Returns the name of the ordered item.
+     *
+     * @return the item name
+     */
     public String getItemName() {
         return itemName;
     }
 
+    /**
+     * Sets the name of the ordered item.
+     *
+     * @param text the item name
+     * @return this order for chained updates
+     */
     public Order setItemName(String text) {
         this.itemName = text;
         return this;
@@ -55,6 +66,12 @@ public class Order {
         return this;
     }
 
+    /**
+     * Compares orders by item name and customer identifier, accounting for Hibernate proxies.
+     *
+     * @param o the object to compare; orders being compared must have associated customers
+     * @return whether the objects represent the same item for the same customer
+     */
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

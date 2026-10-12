@@ -30,6 +30,15 @@ public class StringPrefixedNumberFormattedSequenceIdGenerator
     private final DatabaseStructure structure;
     private final Optimizer optimizer;
 
+    /**
+     * Creates a string identifier generator backed by a pooled-low database sequence.
+     *
+     * @param config sequence name, allocation settings, prefix, and numeric format
+     * @param member annotated entity member supplied by Hibernate
+     * @param context mapping and database metadata used to configure the sequence
+     * @throws HibernateException if the sequence name is blank, the allocation size is not positive,
+     *     or the database does not support sequences
+     */
     public StringPrefixedNumberFormattedSequenceIdGenerator(
             StringPrefixedSequence config, Member member, GeneratorCreationContext context) {
 
@@ -67,6 +76,16 @@ public class StringPrefixedNumberFormattedSequenceIdGenerator
         return EnumSet.of(EventType.INSERT);
     }
 
+    /**
+     * Obtains the next pooled sequence value and formats it with the configured prefix.
+     *
+     * @param session session used when the optimizer needs another sequence allocation
+     * @param owner entity receiving the identifier
+     * @param currentValue current identifier value, unused by this generator
+     * @param eventType persistence event requesting the identifier
+     * @return the prefixed identifier formatted using the root locale
+     * @throws HibernateException if the optimizer returns a nonnumeric value
+     */
     @Override
     public Object generate(
             SharedSessionContractImplementor session, Object owner, Object currentValue, EventType eventType) {
@@ -80,12 +99,22 @@ public class StringPrefixedNumberFormattedSequenceIdGenerator
         return valuePrefix + String.format(Locale.ROOT, numberFormat, number.longValue());
     }
 
+    /**
+     * Registers the sequence and any optimizer-specific schema objects with Hibernate.
+     *
+     * @param database database model that receives the exported objects
+     */
     @Override
     public void registerExportables(Database database) {
         structure.registerExportables(database);
         structure.registerExtraExportables(table, optimizer);
     }
 
+    /**
+     * Initializes the sequence SQL using Hibernate's SQL generation context.
+     *
+     * @param context dialect and naming context for generating SQL
+     */
     @Override
     public void initialize(SqlStringGenerationContext context) {
         structure.initialize(context);

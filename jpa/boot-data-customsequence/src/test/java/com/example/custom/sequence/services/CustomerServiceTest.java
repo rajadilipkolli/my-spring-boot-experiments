@@ -60,6 +60,7 @@ class CustomerServiceTest {
         assertThat(pagedResult.totalElements()).isOne();
     }
 
+    /** Verifies that a customer lookup returns the mapped identifier and customer name. */
     @Test
     void findCustomerById() {
         // given
@@ -74,6 +75,7 @@ class CustomerServiceTest {
         assertThat(customer.customerName()).isEqualTo("junitTest");
     }
 
+    /** Verifies that saving a customer returns the mapped identifier and customer name. */
     @Test
     void saveCustomer() {
         // given
@@ -88,6 +90,7 @@ class CustomerServiceTest {
         assertThat(persistedCustomer.customerName()).isEqualTo("junitTest");
     }
 
+    /** Verifies that deletion returns the customer details and deletes the matching identifier. */
     @Test
     void deleteCustomerById() {
         // given
@@ -103,6 +106,7 @@ class CustomerServiceTest {
         verify(customerRepository, times(1)).deleteById("CUS_1");
     }
 
+    /** Creates the named customer fixture used by the service mocks. */
     private Customer getCustomer() {
         Customer customer = new Customer();
         customer.setId("CUS_1");

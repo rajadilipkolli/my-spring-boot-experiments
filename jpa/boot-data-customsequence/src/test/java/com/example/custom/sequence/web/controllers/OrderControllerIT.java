@@ -23,6 +23,7 @@ class OrderControllerIT extends AbstractIntegrationTest {
     private List<Order> orderList = null;
     private Customer customer;
 
+    /** Replaces order and customer fixtures and resets SQL counts before each integration test. */
     @BeforeEach
     void setUp() {
         orderRepository.deleteAllInBatch();
@@ -33,10 +34,17 @@ class OrderControllerIT extends AbstractIntegrationTest {
         SQLStatementCountValidator.reset();
     }
 
+    /** Persists the named customer used as the owner of test orders. */
     private Customer createTestCustomer() {
         return customerRepository.persist(new Customer().setName("customer1"));
     }
 
+    /**
+     * Persists three named order fixtures for the supplied customer.
+     *
+     * @param customer the owner of the test orders
+     * @return the persisted orders with generated identifiers
+     */
     private List<Order> createTestOrders(Customer customer) {
         List<Order> orders = List.of(
                 new Order().setItemName("First Order").setCustomer(customer),
@@ -45,6 +53,7 @@ class OrderControllerIT extends AbstractIntegrationTest {
         return orderRepository.persistAll(orders);
     }
 
+    /** Verifies order pagination metadata and the two selects used to fetch the page. */
     @Test
     void shouldFetchAllOrders() {
 
@@ -71,6 +80,7 @@ class OrderControllerIT extends AbstractIntegrationTest {
         SQLStatementCountValidator.assertTotalCount(2);
     }
 
+    /** Verifies that fetching an order returns its persisted identifier and item name. */
     @Test
     void shouldFindOrderById() {
         Order order = orderList.getFirst();
@@ -90,6 +100,7 @@ class OrderControllerIT extends AbstractIntegrationTest {
                 });
     }
 
+    /** Verifies that order creation returns a nine-character identifier using one select and one insert. */
     @Test
     void shouldCreateNewOrder() {
         OrderRequest orderRequest = new OrderRequest("New Order", customer.getId());
@@ -113,6 +124,7 @@ class OrderControllerIT extends AbstractIntegrationTest {
         SQLStatementCountValidator.assertTotalCount(2);
     }
 
+    /** Verifies that a missing item name produces a validation error without executing SQL. */
     @Test
     void shouldReturn400WhenCreateNewOrderWithoutItemName() {
         OrderRequest orderRequest = new OrderRequest(null, "CUS_1");
@@ -149,6 +161,7 @@ class OrderControllerIT extends AbstractIntegrationTest {
         SQLStatementCountValidator.assertTotalCount(0);
     }
 
+    /** Verifies that updating an item name preserves the order identifier and uses one select and one update. */
     @Test
     void shouldUpdateOrder() {
         OrderRequest orderRequest = new OrderRequest("Updated Order", customer.getId());
@@ -177,6 +190,7 @@ class OrderControllerIT extends AbstractIntegrationTest {
         SQLStatementCountValidator.assertDeleteCount(0);
     }
 
+    /** Verifies that an update with an unmatched customer identifier returns HTTP 404. */
     @Test
     void shouldReturn400WhenUpdatingOrderWithInvalidCustomerId() {
         OrderRequest orderRequest = new OrderRequest("Updated Order", "INVALID_ID");
@@ -191,6 +205,7 @@ class OrderControllerIT extends AbstractIntegrationTest {
                 .hasStatus(HttpStatus.NOT_FOUND);
     }
 
+    /** Verifies that updating a nonexistent order returns HTTP 404. */
     @Test
     void shouldReturn404WhenUpdatingNonExistentOrder() {
         OrderRequest orderRequest = new OrderRequest("Updated Order", customer.getId());
@@ -204,6 +219,7 @@ class OrderControllerIT extends AbstractIntegrationTest {
                 .hasStatus(HttpStatus.NOT_FOUND);
     }
 
+    /** Verifies that deletion returns the order details and removes the row with two selects and one delete. */
     @Test
     void shouldDeleteOrder() {
         Order order = orderList.getFirst();

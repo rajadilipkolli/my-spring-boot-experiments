@@ -23,6 +23,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
 
     private List<Customer> customerList = null;
 
+    /** Replaces customer fixtures and resets SQL counts before each integration test. */
     @BeforeEach
     void setUp() {
         customerRepository.deleteAllInBatch();
@@ -62,6 +63,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
         SQLStatementCountValidator.assertTotalCount(2);
     }
 
+    /** Verifies that fetching a customer returns its name and orders with one select. */
     @Test
     void shouldFindCustomerById() {
         Customer customer = customerList.getFirst();
@@ -85,6 +87,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
         SQLStatementCountValidator.assertTotalCount(1);
     }
 
+    /** Verifies that customer creation uses a pooled identifier and only one insert. */
     @Test
     void shouldCreateNewCustomer() {
         CustomerRequest customerRequest = new CustomerRequest("New Customer", null);
@@ -112,6 +115,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
         assertThat(customerRepository.count()).isEqualTo(4);
     }
 
+    /** Verifies that a missing customer name produces a validation error without executing SQL. */
     @Test
     void shouldReturn400WhenCreateNewCustomerWithoutCustomerName() {
         CustomerRequest customerRequest = new CustomerRequest(null, List.of(new OrderRequest("First Order", null)));
@@ -151,6 +155,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
         assertThat(customerRepository.count()).isEqualTo(3);
     }
 
+    /** Verifies customer renaming and order reconciliation, including SQL counts for each update. */
     @Test
     void shouldUpdateCustomer() {
         Customer customer = customerList.getFirst();
@@ -243,6 +248,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
         SQLStatementCountValidator.assertTotalCount(3);
     }
 
+    /** Verifies that deletion returns the customer name and removes the row with the expected SQL counts. */
     @Test
     void shouldDeleteCustomer() {
         Customer customer = customerList.getFirst();

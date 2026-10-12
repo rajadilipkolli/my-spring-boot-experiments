@@ -66,6 +66,7 @@ class OrderServiceTest {
         assertThat(pagedResult.totalElements()).isOne();
     }
 
+    /** Verifies that an order lookup returns the mapped identifier and item name. */
     @Test
     void findOrderById() {
         // given
@@ -80,6 +81,7 @@ class OrderServiceTest {
         assertThat(order.itemName()).isEqualTo("junitText");
     }
 
+    /** Verifies that saving an order for an existing customer returns its identifier and item name. */
     @Test
     void saveOrder() {
         // given
@@ -119,6 +121,7 @@ class OrderServiceTest {
         verify(orderRepository, times(1)).deleteById("1");
     }
 
+    /** Creates an order fixture with an item name and an associated customer. */
     private Order getOrder() {
         Order order = new Order();
         order.setId("1");

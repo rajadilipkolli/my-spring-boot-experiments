@@ -57,6 +57,12 @@ public class OrderService {
         return orderRepository.findById(id).map(orderMapper::getOrderResponse);
     }
 
+    /**
+     * Persists a new order for the customer identified in the request.
+     *
+     * @param orderRequest item details and the customer identifier
+     * @return the saved order response, or empty if the customer does not exist
+     */
     @Transactional
     public Optional<OrderResponse> saveOrder(OrderRequest orderRequest) {
         return customerService.findById(orderRequest.customerId()).map(customer -> {
@@ -67,6 +73,13 @@ public class OrderService {
         });
     }
 
+    /**
+     * Updates an order's item name when both its identifier and customer match.
+     *
+     * @param id the order identifier
+     * @param orderRequest the replacement item name and owning customer identifier
+     * @return the updated order response, or empty if no matching order exists
+     */
     @Transactional
     public Optional<OrderResponse> updateOrderById(String id, OrderRequest orderRequest) {
         return orderRepository
