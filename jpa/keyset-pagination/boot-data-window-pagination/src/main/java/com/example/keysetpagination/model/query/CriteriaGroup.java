@@ -1,6 +1,7 @@
 package com.example.keysetpagination.model.query;
 
 import java.util.List;
+import java.util.StringJoiner;
 import org.springframework.data.jpa.domain.Specification;
 
 public class CriteriaGroup implements ISearchCriteria {
@@ -49,5 +50,13 @@ public class CriteriaGroup implements ISearchCriteria {
             }
         }
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", CriteriaGroup.class.getSimpleName() + "[", "]")
+                .add("operator=" + operator)
+                .add("criteriaList=" + criteriaList)
+                .toString();
     }
 }
