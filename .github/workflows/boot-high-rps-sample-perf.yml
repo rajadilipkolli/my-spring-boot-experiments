@@ -161,8 +161,17 @@ jobs:
       - name: Compare Results
         if: ${{ always() }}
         run: |
-          if [ -f ../docs/baselines/main-baseline.json ]; then
-            pwsh scripts/compare-results.ps1 -BaselineStats ../docs/baselines/main-baseline.json -HighRpsStats ../stats.json > comparison.md
+          STATS_PATH=""
+          if [ -f ../stats.json ]; then
+            STATS_PATH="../stats.json"
+          elif [ -d ../gatling-report ]; then
+            STATS_PATH=$(find ../gatling-report -name "stats.json" -print -quit)
+          fi
+
+          if [ -z "$STATS_PATH" ]; then
+            echo "No performance stats were generated for this run (tests may have failed or timed out before completion)." >> $GITHUB_STEP_SUMMARY
+          elif [ -f ../docs/baselines/main-baseline.json ]; then
+            pwsh scripts/compare-results.ps1 -BaselineStats ../docs/baselines/main-baseline.json -HighRpsStats "$STATS_PATH" > comparison.md
             cat comparison.md >> $GITHUB_STEP_SUMMARY
           else
             echo "No baseline found to compare against. This run will establish the first baseline." >> $GITHUB_STEP_SUMMARY

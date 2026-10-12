@@ -12,8 +12,13 @@ param(
     [string]$HighRpsDiagnostics = ""
 )
 
-if (-not (Test-Path $BaselineStats) -or -not (Test-Path $HighRpsStats)) {
-    Write-Error "Both stats files must exist."
+if (-not (Test-Path $BaselineStats)) {
+    Write-Error "Baseline stats file not found: $BaselineStats"
+    exit 1
+}
+
+if (-not (Test-Path $HighRpsStats)) {
+    Write-Error "High RPS stats file not found: $HighRpsStats"
     exit 1
 }
 
