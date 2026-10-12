@@ -23,6 +23,7 @@
     "boot-graphql-webmvc":                { "path": "graphql/boot-graphql-webmvc", "targets": ["test"] },
     "httpClients-boot-restclient":        { "path": "httpClients/boot-restclient", "targets": ["test"] },
     "boot-data-envers":                   { "path": "jpa/boot-data-envers", "targets": ["test"] },
+    "boot-scheduler-jobrunr":             { "path": "scheduler/boot-scheduler-jobrunr", "targets": ["test"]},
     "boot-scheduler-quartz":              { "path": "scheduler/boot-scheduler-quartz", "targets": ["test"] },
     "boot-scheduler-shedlock":            { "path": "scheduler/boot-scheduler-shedlock", "targets": ["test"] }
   }
