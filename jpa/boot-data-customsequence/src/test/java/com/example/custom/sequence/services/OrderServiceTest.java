@@ -66,6 +66,7 @@ class OrderServiceTest {
         assertThat(pagedResult.totalElements()).isOne();
     }
 
+    /** Verifies that an order lookup returns the mapped identifier and item name. */
     @Test
     void findOrderById() {
         // given
@@ -77,15 +78,16 @@ class OrderServiceTest {
         assertThat(optionalOrder).isPresent();
         OrderResponse order = optionalOrder.get();
         assertThat(order.id()).isEqualTo("1");
-        assertThat(order.text()).isEqualTo("junitText");
+        assertThat(order.itemName()).isEqualTo("junitText");
     }
 
+    /** Verifies that saving an order for an existing customer returns its identifier and item name. */
     @Test
     void saveOrder() {
         // given
         given(customerService.findById("1"))
                 .willReturn(Optional.of(
-                        new Customer().setId("1").setText("custText").setOrders(List.of())));
+                        new Customer().setId("1").setName("custText").setOrders(List.of())));
         given(orderRepository.persist(getOrder())).willReturn(getOrder());
         given(orderMapper.getOrderResponse(getOrder())).willReturn(getOrderResponse());
         // when
@@ -93,7 +95,7 @@ class OrderServiceTest {
         // then
         assertThat(persistedOrder.isPresent()).isNotNull();
         assertThat(persistedOrder.get().id()).isEqualTo("1");
-        assertThat(persistedOrder.get().text()).isEqualTo("junitText");
+        assertThat(persistedOrder.get().itemName()).isEqualTo("junitText");
     }
 
     @Test
@@ -119,13 +121,14 @@ class OrderServiceTest {
         verify(orderRepository, times(1)).deleteById("1");
     }
 
+    /** Creates an order fixture with an item name and an associated customer. */
     private Order getOrder() {
         Order order = new Order();
         order.setId("1");
-        order.setText("junitText");
+        order.setItemName("junitText");
         Customer customer = new Customer();
         customer.setId("1");
-        customer.setText("custText");
+        customer.setName("custText");
         order.setCustomer(customer);
         return order;
     }

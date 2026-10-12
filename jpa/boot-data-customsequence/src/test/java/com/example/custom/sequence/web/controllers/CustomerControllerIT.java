@@ -23,14 +23,15 @@ class CustomerControllerIT extends AbstractIntegrationTest {
 
     private List<Customer> customerList = null;
 
+    /** Replaces customer fixtures and resets SQL counts before each integration test. */
     @BeforeEach
     void setUp() {
         customerRepository.deleteAllInBatch();
 
         customerList = new ArrayList<>();
-        customerList.add(new Customer().setText("First Customer"));
-        customerList.add(new Customer().setText("Second Customer"));
-        customerList.add(new Customer().setText("Third Customer"));
+        customerList.add(new Customer().setName("First Customer"));
+        customerList.add(new Customer().setName("Second Customer"));
+        customerList.add(new Customer().setName("Third Customer"));
         customerList = customerRepository.persistAll(customerList);
 
         SQLStatementCountValidator.reset();
@@ -62,6 +63,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
         SQLStatementCountValidator.assertTotalCount(2);
     }
 
+    /** Verifies that fetching a customer returns its name and orders with one select. */
     @Test
     void shouldFindCustomerById() {
         Customer customer = customerList.getFirst();
@@ -77,7 +79,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                 .convertTo(CustomerResponse.class)
                 .satisfies(customerResponse -> {
                     assertThat(customerResponse.id()).isEqualTo(customer.getId());
-                    assertThat(customerResponse.text()).isEqualTo(customer.getText());
+                    assertThat(customerResponse.customerName()).isEqualTo(customer.getName());
                     assertThat(customerResponse.orderResponses()).isEmpty();
                 });
 
@@ -85,6 +87,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
         SQLStatementCountValidator.assertTotalCount(1);
     }
 
+    /** Verifies that customer creation uses a pooled identifier and only one insert. */
     @Test
     void shouldCreateNewCustomer() {
         CustomerRequest customerRequest = new CustomerRequest("New Customer", null);
@@ -101,19 +104,20 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                 .convertTo(CustomerResponse.class)
                 .satisfies(customerResponse -> {
                     assertThat(customerResponse.id()).startsWith("CUS").hasSize(8);
-                    assertThat(customerResponse.text()).isEqualTo(customerRequest.text());
+                    assertThat(customerResponse.customerName()).isEqualTo(customerRequest.customerName());
                     assertThat(customerResponse.orderResponses()).isEmpty();
                 });
 
-        SQLStatementCountValidator.assertSelectCount(1); // 1 SELECT for sequence value
+        SQLStatementCountValidator.assertSelectCount(0); // should use pooled sequence value
         SQLStatementCountValidator.assertInsertCount(1);
-        SQLStatementCountValidator.assertTotalCount(2);
+        SQLStatementCountValidator.assertTotalCount(1);
 
         assertThat(customerRepository.count()).isEqualTo(4);
     }
 
+    /** Verifies that a missing customer name produces a validation error without executing SQL. */
     @Test
-    void shouldReturn400WhenCreateNewCustomerWithoutText() {
+    void shouldReturn400WhenCreateNewCustomerWithoutCustomerName() {
         CustomerRequest customerRequest = new CustomerRequest(null, List.of(new OrderRequest("First Order", null)));
 
         this.mockMvcTester
@@ -142,8 +146,8 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                     @SuppressWarnings("unchecked")
                     LinkedHashMap<String, Object> violation =
                             (LinkedHashMap<String, Object>) ((List<?>) violations).getFirst();
-                    assertThat(violation).containsEntry("field", "text");
-                    assertThat(violation).containsEntry("message", "Text cannot be empty");
+                    assertThat(violation).containsEntry("field", "customerName");
+                    assertThat(violation).containsEntry("message", "Customer name cannot be blank");
                 });
 
         SQLStatementCountValidator.assertTotalCount(0);
@@ -151,6 +155,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
         assertThat(customerRepository.count()).isEqualTo(3);
     }
 
+    /** Verifies customer renaming and order reconciliation, including SQL counts for each update. */
     @Test
     void shouldUpdateCustomer() {
         Customer customer = customerList.getFirst();
@@ -167,7 +172,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                 .bodyJson()
                 .convertTo(CustomerResponse.class)
                 .satisfies(customerResponse -> {
-                    assertThat(customerResponse.text()).isEqualTo("Updated Customer");
+                    assertThat(customerResponse.customerName()).isEqualTo("Updated Customer");
                     assertThat(customerResponse.orderResponses()).isEmpty();
                 });
 
@@ -177,6 +182,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
         SQLStatementCountValidator.assertUpdateCount(1);
         SQLStatementCountValidator.assertInsertCount(0);
         SQLStatementCountValidator.assertDeleteCount(0);
+        SQLStatementCountValidator.assertTotalCount(2);
 
         List<OrderRequest> orders = new ArrayList<>();
         orders.add(new OrderRequest("First Order", customer.getId()));
@@ -197,16 +203,17 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                 .bodyJson()
                 .convertTo(CustomerResponse.class)
                 .satisfies(customerResponse -> {
-                    assertThat(customerResponse.text()).isEqualTo("Updated Customer1");
+                    assertThat(customerResponse.customerName()).isEqualTo("Updated Customer1");
                     assertThat(customerResponse.orderResponses()).isNotEmpty().hasSize(2);
                 });
-        // select for customer and 2 for orders sequence
-        SQLStatementCountValidator.assertSelectCount(3);
+        // select for customer and 1 for orders sequence
+        SQLStatementCountValidator.assertSelectCount(2);
         // update for customer table
         SQLStatementCountValidator.assertUpdateCount(1);
         // bulk insert for orders
         SQLStatementCountValidator.assertInsertCount(1);
         SQLStatementCountValidator.assertDeleteCount(0);
+        SQLStatementCountValidator.assertTotalCount(4);
 
         orders = new ArrayList<>();
         orders.add(new OrderRequest("Third Order", customer.getId()));
@@ -227,19 +234,21 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                 .bodyJson()
                 .convertTo(CustomerResponse.class)
                 .satisfies(customerResponse -> {
-                    assertThat(customerResponse.text()).isEqualTo("Updated Customer1");
+                    assertThat(customerResponse.customerName()).isEqualTo("Updated Customer1");
                     assertThat(customerResponse.orderResponses()).isNotEmpty().hasSize(2);
                 });
-        // select for customer and 2 for orders sequence
-        SQLStatementCountValidator.assertSelectCount(2);
+        // select for customer
+        SQLStatementCountValidator.assertSelectCount(1);
         // update for customer table
         SQLStatementCountValidator.assertUpdateCount(0);
         // bulk insert for orders
         SQLStatementCountValidator.assertInsertCount(1);
         // delete for first order
         SQLStatementCountValidator.assertDeleteCount(1);
+        SQLStatementCountValidator.assertTotalCount(3);
     }
 
+    /** Verifies that deletion returns the customer name and removes the row with the expected SQL counts. */
     @Test
     void shouldDeleteCustomer() {
         Customer customer = customerList.getFirst();
@@ -252,8 +261,8 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                 .hasContentType(MediaType.APPLICATION_JSON)
                 .bodyJson()
                 .convertTo(CustomerResponse.class)
-                .satisfies(
-                        customerResponse -> assertThat(customerResponse.text()).isEqualTo(customer.getText()));
+                .satisfies(customerResponse ->
+                        assertThat(customerResponse.customerName()).isEqualTo(customer.getName()));
 
         // select for customer only
         SQLStatementCountValidator.assertSelectCount(1);

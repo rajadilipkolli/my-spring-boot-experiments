@@ -6,7 +6,7 @@ create sequence orders_seq start with 1 increment by 50;
 
 create table orders (
     id varchar(10) not null,
-    text varchar(1024) not null,
+    item_name varchar(1024) not null,
     customer_id varchar(10) not null,
     primary key (id)
 );

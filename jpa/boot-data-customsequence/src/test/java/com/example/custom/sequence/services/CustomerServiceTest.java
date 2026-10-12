@@ -60,6 +60,7 @@ class CustomerServiceTest {
         assertThat(pagedResult.totalElements()).isOne();
     }
 
+    /** Verifies that a customer lookup returns the mapped identifier and customer name. */
     @Test
     void findCustomerById() {
         // given
@@ -71,9 +72,10 @@ class CustomerServiceTest {
         assertThat(optionalCustomer).isPresent();
         CustomerResponse customer = optionalCustomer.get();
         assertThat(customer.id()).isEqualTo("CUS_1");
-        assertThat(customer.text()).isEqualTo("junitTest");
+        assertThat(customer.customerName()).isEqualTo("junitTest");
     }
 
+    /** Verifies that saving a customer returns the mapped identifier and customer name. */
     @Test
     void saveCustomer() {
         // given
@@ -85,9 +87,10 @@ class CustomerServiceTest {
         // then
         assertThat(persistedCustomer).isNotNull();
         assertThat(persistedCustomer.id()).isEqualTo("CUS_1");
-        assertThat(persistedCustomer.text()).isEqualTo("junitTest");
+        assertThat(persistedCustomer.customerName()).isEqualTo("junitTest");
     }
 
+    /** Verifies that deletion returns the customer details and deletes the matching identifier. */
     @Test
     void deleteCustomerById() {
         // given
@@ -99,14 +102,15 @@ class CustomerServiceTest {
         // then
         assertThat(response).isPresent();
         assertThat(response.get().id()).isEqualTo("CUS_1");
-        assertThat(response.get().text()).isEqualTo("junitTest");
+        assertThat(response.get().customerName()).isEqualTo("junitTest");
         verify(customerRepository, times(1)).deleteById("CUS_1");
     }
 
+    /** Creates the named customer fixture used by the service mocks. */
     private Customer getCustomer() {
         Customer customer = new Customer();
         customer.setId("CUS_1");
-        customer.setText("junitTest");
+        customer.setName("junitTest");
         return customer;
     }
 

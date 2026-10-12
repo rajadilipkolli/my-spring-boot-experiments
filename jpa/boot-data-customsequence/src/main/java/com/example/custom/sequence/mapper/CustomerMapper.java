@@ -21,13 +21,25 @@ public class CustomerMapper {
         this.orderRepository = orderRepository;
     }
 
+    /**
+     * Maps a customer and its orders to a response without nested customer references.
+     *
+     * @param saved the customer to expose
+     * @return the customer response with its order summaries
+     */
     public CustomerResponse mapToResponse(Customer saved) {
         return new CustomerResponse(
-                saved.getId(), saved.getText(), orderMapper.mapToResponseListWithOutCustomer(saved.getOrders()));
+                saved.getId(), saved.getName(), orderMapper.mapToResponseListWithOutCustomer(saved.getOrders()));
     }
 
+    /**
+     * Creates a customer and associates any orders supplied in the request.
+     *
+     * @param customerRequest customer details; a null order list leaves the customer without orders
+     * @return the new customer with both sides of each order association set
+     */
     public Customer mapToEntity(CustomerRequest customerRequest) {
-        Customer customer = new Customer().setText(customerRequest.text());
+        Customer customer = new Customer().setName(customerRequest.customerName());
         if (customerRequest.orders() == null) {
             return customer;
         }
@@ -35,8 +47,17 @@ public class CustomerMapper {
         return customer;
     }
 
+    /**
+     * Updates the customer name and reconciles supplied orders by item name.
+     *
+     * <p>A null order list preserves existing orders. Otherwise, omitted orders are removed, matching
+     * orders retain their identifiers, and new orders are associated with the customer.
+     *
+     * @param customerRequest the requested name and optional replacement order list
+     * @param foundCustomer the existing customer to update
+     */
     public void updateCustomerFromRequest(CustomerRequest customerRequest, Customer foundCustomer) {
-        foundCustomer.setText(customerRequest.text());
+        foundCustomer.setName(customerRequest.customerName());
         if (customerRequest.orders() == null) {
             return;
         }
@@ -60,7 +81,7 @@ public class CustomerMapper {
             // manually set the id of the existing order to avoid creating a new order instead of
             // updating the existing one
             for (Order foundOrder : foundCustomer.getOrders()) {
-                if (foundOrder.getText().equals(existingOrder.getText())) {
+                if (foundOrder.getItemName().equals(existingOrder.getItemName())) {
                     existingOrder.setId(foundOrder.getId());
                     break;
                 }

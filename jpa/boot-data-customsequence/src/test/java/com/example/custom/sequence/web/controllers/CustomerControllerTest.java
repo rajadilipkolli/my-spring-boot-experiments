@@ -30,6 +30,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -51,12 +52,13 @@ class CustomerControllerTest {
 
     private List<Customer> customerList;
 
+    /** Creates named customer fixtures with empty order lists for controller tests. */
     @BeforeEach
     void setUp() {
         this.customerList = new ArrayList<>();
-        this.customerList.add(new Customer().setId("CUS_1").setText("text 1").setOrders(new ArrayList<>()));
-        this.customerList.add(new Customer().setId("CUS_2").setText("text 2").setOrders(new ArrayList<>()));
-        this.customerList.add(new Customer().setId("CUS_3").setText("text 3").setOrders(new ArrayList<>()));
+        this.customerList.add(new Customer().setId("CUS_1").setName("text 1").setOrders(new ArrayList<>()));
+        this.customerList.add(new Customer().setId("CUS_2").setName("text 2").setOrders(new ArrayList<>()));
+        this.customerList.add(new Customer().setId("CUS_3").setName("text 3").setOrders(new ArrayList<>()));
     }
 
     @Test
@@ -78,6 +80,7 @@ class CustomerControllerTest {
                 .andExpect(jsonPath("$.hasPrevious", is(false)));
     }
 
+    /** Verifies that fetching an existing customer exposes the customerName response field. */
     @Test
     void shouldFindCustomerById() throws Exception {
         String customerId = "CUS_1";
@@ -87,7 +90,7 @@ class CustomerControllerTest {
         this.mockMvc
                 .perform(get("/api/customers/{id}", customerId))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.text", is(customer.text())));
+                .andExpect(jsonPath("$.customerName", is(customer.customerName())));
     }
 
     @Test
@@ -98,6 +101,7 @@ class CustomerControllerTest {
         this.mockMvc.perform(get("/api/customers/{id}", customerId)).andExpect(status().isNotFound());
     }
 
+    /** Verifies that customer creation returns HTTP 201 with an identifier and the requested name. */
     @Test
     void shouldCreateNewCustomer() throws Exception {
 
@@ -112,9 +116,10 @@ class CustomerControllerTest {
                         .content(jsonMapper.writeValueAsString(customerRequest)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id", notNullValue()))
-                .andExpect(jsonPath("$.text", is(customerRequest.text())));
+                .andExpect(jsonPath("$.customerName", is(customerRequest.customerName())));
     }
 
+    /** Verifies that a null customer name returns HTTP 400 with the customerName violation. */
     @Test
     void shouldReturn400WhenCreateNewCustomerWithInvalidData() throws Exception {
         CustomerRequest customerRequest = new CustomerRequest(null, List.of(new OrderRequest("ORD_1", null)));
@@ -124,44 +129,46 @@ class CustomerControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonMapper.writeValueAsString(customerRequest)))
                 .andExpect(status().isBadRequest())
-                .andExpect(header().string("Content-Type", is("application/problem+json")))
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                 .andExpect(jsonPath("$.type", is("https://custom-sequence.com/errors/validation-error")))
                 .andExpect(jsonPath("$.title", is("Constraint Violation")))
                 .andExpect(jsonPath("$.status", is(400)))
                 .andExpect(jsonPath("$.detail", is("Invalid request content.")))
                 .andExpect(jsonPath("$.instance", is("/api/customers")))
                 .andExpect(jsonPath("$.violations", hasSize(1)))
-                .andExpect(jsonPath("$.violations[0].field", is("text")))
-                .andExpect(jsonPath("$.violations[0].message", is("Text cannot be empty")))
+                .andExpect(jsonPath("$.violations[0].field", is("customerName")))
+                .andExpect(jsonPath("$.violations[0].message", is("Customer name cannot be blank")))
                 .andReturn();
     }
 
+    /** Verifies that an empty customer name returns HTTP 400 with a field-specific validation error. */
     @Test
-    void shouldReturn400WhenCreateNewCustomerWithEmptyText() throws Exception {
+    void shouldReturn400WhenCreateNewCustomerWithEmptyCustomerName() throws Exception {
         CustomerRequest customerRequest = new CustomerRequest("", new ArrayList<>());
         this.mockMvc
                 .perform(post("/api/customers")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonMapper.writeValueAsString(customerRequest)))
                 .andExpect(status().isBadRequest())
-                .andExpect(header().string("Content-Type", is("application/problem+json")))
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                 .andExpect(jsonPath("$.type", is("https://custom-sequence.com/errors/validation-error")))
                 .andExpect(jsonPath("$.title", is("Constraint Violation")))
                 .andExpect(jsonPath("$.status", is(400)))
                 .andExpect(jsonPath("$.detail", is("Invalid request content.")))
                 .andExpect(jsonPath("$.instance", is("/api/customers")))
                 .andExpect(jsonPath("$.violations", hasSize(1)))
-                .andExpect(jsonPath("$.violations[0].field", is("text")))
-                .andExpect(jsonPath("$.violations[0].message", is("Text cannot be empty")));
+                .andExpect(jsonPath("$.violations[0].field", is("customerName")))
+                .andExpect(jsonPath("$.violations[0].message", is("Customer name cannot be blank")));
     }
 
+    /** Verifies that updating a customer returns its new name and order details. */
     @Test
     void shouldUpdateCustomer() throws Exception {
         String customerId = "CUS_1";
         CustomerResponse customerResponse = new CustomerResponse(
-                customerId, "Updated text", List.of(new OrderResponseWithOutCustomer("ORD_1", "New Order")));
+                customerId, "Updated Name", List.of(new OrderResponseWithOutCustomer("ORD_1", "New Order")));
         CustomerRequest customerRequest =
-                new CustomerRequest("Updated text", List.of(new OrderRequest("ORD_1", customerId)));
+                new CustomerRequest("Updated Name", List.of(new OrderRequest("ORD_1", customerId)));
         given(customerService.updateCustomerById(customerId, customerRequest))
                 .willReturn(Optional.of(customerResponse));
 
@@ -170,46 +177,51 @@ class CustomerControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonMapper.writeValueAsString(customerRequest)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.text", is(customerResponse.text())))
+                .andExpect(jsonPath("$.customerName", is(customerResponse.customerName())))
                 .andExpect(jsonPath("$.orderResponses", hasSize(1)))
                 .andExpect(jsonPath("$.orderResponses[0].id", is("ORD_1")))
                 .andExpect(jsonPath("$.orderResponses[0].orderDescription", is("New Order")));
     }
 
+    /** Verifies that updating with an empty customer name returns the customerName validation error. */
     @Test
-    void shouldReturn400WhenUpdateCustomerWithEmpty() throws Exception {
+    void shouldReturn400WhenUpdateCustomerWithEmptyCustomerName() throws Exception {
         String customerId = "CUS_1";
-        CustomerRequest customerRequest = new CustomerRequest("Updated text", List.of(new OrderRequest("ORD_1", null)));
+        CustomerRequest customerRequest = new CustomerRequest("", List.of(new OrderRequest("ORD_1", customerId)));
 
         this.mockMvc
                 .perform(put("/api/customers/{id}", customerId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonMapper.writeValueAsString(customerRequest)))
                 .andExpect(status().isBadRequest())
-                .andExpect(header().string("Content-Type", is("application/problem+json")))
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(MediaType.APPLICATION_PROBLEM_JSON_VALUE)))
                 .andExpect(jsonPath("$.type", is("https://custom-sequence.com/errors/validation-error")))
                 .andExpect(jsonPath("$.title", is("Constraint Violation")))
                 .andExpect(jsonPath("$.status", is(400)))
                 .andExpect(jsonPath("$.detail", is("Invalid request content.")))
                 .andExpect(jsonPath("$.instance", is("/api/customers/CUS_1")))
                 .andExpect(jsonPath("$.violations", hasSize(1)))
-                .andExpect(jsonPath("$.violations[0].field", is("orders[0].customerId")))
-                .andExpect(jsonPath("$.violations[0].message", is("CustomerId cannot be blank")));
+                .andExpect(jsonPath("$.violations[0].field", is("customerName")))
+                .andExpect(jsonPath("$.violations[0].message", is("Customer name cannot be blank")));
+        ;
     }
 
+    /** Verifies that updating a missing customer returns HTTP 404. */
     @Test
     void shouldReturn404WhenUpdatingNonExistingCustomer() throws Exception {
         String customerId = "CUS_1";
         given(customerService.findCustomerById(customerId)).willReturn(Optional.empty());
-        Customer customer = new Customer().setId(customerId).setText("Updated text");
+        CustomerRequest customerRequest =
+                new CustomerRequest("Dummy Name", List.of(new OrderRequest("ORD_1", customerId)));
 
         this.mockMvc
                 .perform(put("/api/customers/{id}", customerId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonMapper.writeValueAsString(customer)))
+                        .content(jsonMapper.writeValueAsString(customerRequest)))
                 .andExpect(status().isNotFound());
     }
 
+    /** Verifies that deleting a customer returns its name in the response. */
     @Test
     void shouldDeleteCustomer() throws Exception {
         String customerId = "CUS_1";
@@ -219,7 +231,7 @@ class CustomerControllerTest {
         this.mockMvc
                 .perform(delete("/api/customers/{id}", customerId))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.text", is(customerResponse.text())));
+                .andExpect(jsonPath("$.customerName", is(customerResponse.customerName())));
     }
 
     @Test
