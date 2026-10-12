@@ -21,6 +21,21 @@ class SpecificationDescriberTest {
     }
 
     @Test
+    void describeQuotedMultilineValue() {
+        SearchCriteria<String> criteria = new SearchCriteria<>(QueryOperator.EQ, "name", List.of("The \"Lion\"\nKing"));
+
+        assertThat(SpecificationDescriber.describe(criteria)).isEqualTo("name EQ [\"The \\\"Lion\\\"\\nKing\"]");
+    }
+
+    @Test
+    void describeNullValue() {
+        SearchCriteria<String> criteria =
+                new SearchCriteria<>(QueryOperator.EQ, "name", Collections.singletonList(null));
+
+        assertThat(SpecificationDescriber.describe(criteria)).isEqualTo("name EQ [null]");
+    }
+
+    @Test
     void describeFlatListOfMultipleCriteria() {
         List<ISearchCriteria<?>> criteriaList = List.of(
                 new SearchCriteria<>(QueryOperator.EQ, "name", List.of("Lion")),

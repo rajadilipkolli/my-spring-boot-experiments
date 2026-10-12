@@ -68,7 +68,7 @@ public final class SpecificationDescriber {
             return "[]";
         }
         return values.stream()
-                .map(v -> v == null ? "null" : "\"" + v + "\"")
+                .map(v -> v == null ? "null" : "\"" + v.replace("\"", "\\\"").replace("\n", "\\n") + "\"")
                 .collect(Collectors.joining(", ", "[", "]"));
     }
 }
