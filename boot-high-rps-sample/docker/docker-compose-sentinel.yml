@@ -2,7 +2,7 @@ name: boot-high-rps-sample
 services:
   redis-master:
     container_name: redis-master
-    image: 'bitnami/redis:latest'
+    image: 'bitnamilegacy/redis:8.2.1-debian-12-r0'
     environment:
       - ALLOW_EMPTY_PASSWORD=yes
       - REDIS_REPLICATION_MODE=master
@@ -13,7 +13,7 @@ services:
 
   redis-slave:
     container_name: slave-redis
-    image: 'bitnami/redis:latest'
+    image: 'bitnamilegacy/redis:8.2.1-debian-12-r0'
     environment:
       - ALLOW_EMPTY_PASSWORD=yes
       - REDIS_REPLICATION_MODE=slave
@@ -26,13 +26,19 @@ services:
       - demo-network
 
   redis-sentinel-1:
-    image: 'bitnami/redis-sentinel:latest'
+    image: 'bitnamilegacy/redis-sentinel:8.2.1-debian-12-r0'
     container_name: sentinel-1
     environment:
       - ALLOW_EMPTY_PASSWORD=yes
       - REDIS_MASTER_SET=mymaster
       - REDIS_MASTER_HOST=redis-master
       - REDIS_SENTINEL_DOWN_AFTER_MILLISECONDS=10000
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -p 26379 ping | grep -q '^PONG$'"]
+      interval: 3s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
     depends_on:
       - redis-master
       - redis-slave
@@ -42,13 +48,19 @@ services:
       - demo-network
 
   redis-sentinel-2:
-    image: 'bitnami/redis-sentinel:latest'
+    image: 'bitnamilegacy/redis-sentinel:8.2.1-debian-12-r0'
     container_name: sentinel-2
     environment:
       - ALLOW_EMPTY_PASSWORD=yes
       - REDIS_MASTER_SET=mymaster
       - REDIS_MASTER_HOST=redis-master
       - REDIS_SENTINEL_DOWN_AFTER_MILLISECONDS=10000
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -p 26379 ping | grep -q '^PONG$'"]
+      interval: 3s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
     depends_on:
       - redis-master
       - redis-slave
@@ -58,13 +70,19 @@ services:
       - demo-network
 
   redis-sentinel-3:
-    image: 'bitnami/redis-sentinel:latest'
+    image: 'bitnamilegacy/redis-sentinel:8.2.1-debian-12-r0'
     container_name: sentinel-3
     environment:
       - ALLOW_EMPTY_PASSWORD=yes
       - REDIS_MASTER_SET=mymaster
       - REDIS_MASTER_HOST=redis-master
       - REDIS_SENTINEL_DOWN_AFTER_MILLISECONDS=10000
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -p 26379 ping | grep -q '^PONG$'"]
+      interval: 3s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
     depends_on:
       - redis-master
       - redis-slave

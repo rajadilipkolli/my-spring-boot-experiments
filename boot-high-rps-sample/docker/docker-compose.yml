@@ -49,22 +49,6 @@ services:
     networks:
       - demo-network
 
-  redis:
-    container_name: redis
-    image: 'redis:8.10.2-alpine'
-    extra_hosts: [ 'host.docker.internal:host-gateway' ]
-    ports:
-      - '6379:6379'
-    volumes:
-      - 'redis_data:/data:rw'
-    healthcheck:
-      test: redis-cli ping
-      interval: 3s
-      timeout: 5s
-      retries: 5
-    networks:
-      - demo-network
-
   kafka:
     container_name: kafka
     image: apache/kafka-native:4.3.1
@@ -118,8 +102,16 @@ services:
     ports:
       - "8080:8080"
     depends_on:
-      - postgresqldb
-      - kafka
+      postgresqldb:
+        condition: service_started
+      kafka:
+        condition: service_started
+      redis-sentinel-1:
+        condition: service_healthy
+      redis-sentinel-2:
+        condition: service_healthy
+      redis-sentinel-3:
+        condition: service_healthy
     networks:
       - demo-network
 
@@ -127,6 +119,3 @@ networks:
   demo-network:
     name: demo-network
     driver: bridge
-
-volumes:
-  redis_data:

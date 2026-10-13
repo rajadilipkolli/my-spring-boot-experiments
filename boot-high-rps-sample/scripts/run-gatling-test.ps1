@@ -37,8 +37,11 @@ function Test-RequiredFeederFiles {
 Stop-Process -Name java -ErrorAction SilentlyContinue
 
 Write-Host "Starting infrastructure..."
-docker compose -p boot-high-rps-sample -f docker/docker-compose-sentinel.yml up -d
-docker compose -p boot-high-rps-sample -f docker/docker-compose.yml up -d
+docker compose -p boot-high-rps-sample -f docker/docker-compose.yml -f docker/docker-compose-sentinel.yml up -d postgresqldb kafka redis-master redis-slave redis-sentinel-1 redis-sentinel-2 redis-sentinel-3
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "Infrastructure startup failed!"
+    exit 1
+}
 
 # Skip grafana-lgtm for stress profile — at 1000 RPS it consumes ~138% CPU and 3 GB RAM
 # on the same host, competing with the app and inflating latency.
@@ -67,14 +70,14 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 Write-Host "Building Docker image..."
-docker compose -p boot-high-rps-sample -f docker/docker-compose.yml build app
+docker compose -p boot-high-rps-sample -f docker/docker-compose.yml -f docker/docker-compose-sentinel.yml build app
 if ($LASTEXITCODE -ne 0) {
     Write-Host "Docker image build failed!"
     exit 1
 }
 
 Write-Host "Starting app..."
-docker compose -p boot-high-rps-sample -f docker/docker-compose.yml up -d app
+docker compose -p boot-high-rps-sample -f docker/docker-compose.yml -f docker/docker-compose-sentinel.yml up -d app
 
 Write-Host "Waiting for app to start..."
 $AppReady = $false
@@ -93,7 +96,7 @@ for ($i = 0; $i -lt 120; $i++) {
 
 if (-not $AppReady) {
     Write-Host "App failed to start!"
-    docker compose -p boot-high-rps-sample -f docker/docker-compose.yml logs app
+    docker compose -p boot-high-rps-sample -f docker/docker-compose.yml -f docker/docker-compose-sentinel.yml logs app
     exit 1
 }
 

@@ -7,14 +7,16 @@ Baseline and high-RPS runs must keep the dataset (including mutable/deletable po
 
 ## Infrastructure Startup Order
 
-1. Start main infrastructure: docker compose -f docker/docker-compose.yml up -d
+From `boot-high-rps-sample`:
+
+1. Start main infrastructure: `docker compose -f docker/docker-compose.yml -f docker/docker-compose-sentinel.yml up -d postgresqldb kafka redis-master redis-slave redis-sentinel-1 redis-sentinel-2 redis-sentinel-3`
 2. Start monitoring stack: docker compose -f docker/docker-compose-monitoring.yml up -d
 3. Build the application and load-test classes: ./mvnw -DskipTests clean package
 4. In a separate terminal, start the application and leave it running: java -jar target/boot-high-rps-sample-0.1.0-SNAPSHOT.jar --spring.profiles.active=local
 5. Wait for http://localhost:8080/actuator/health to report UP.
 6. Generate data: ./mvnw exec:java -Dexec.mainClass="com.example.highrps.gatling.setup.DataGenerator" -Dexec.classpathScope=test
 
-Alternatively, use the orchestration script: .\scripts\run-load-test.ps1 -Profile normal
+Alternatively, use the orchestration script: `.\scripts\run-gatling-test.ps1 -Profile normal`. It builds and starts the containerized app with the production profile using both Compose files and the same Redis/Sentinel image pins. Use this same invocation and infrastructure for baseline and high-RPS runs.
 
 The data generator builds shared read/create pools, as well as dedicated mutable and deletable pools. The deletable pools are sized large enough so each run uses them as a non-repeating queue. For longer runs, increase the deletable pool sizes in your config to avoid starvation.
 
