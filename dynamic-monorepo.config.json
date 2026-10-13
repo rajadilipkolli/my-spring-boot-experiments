@@ -3,6 +3,7 @@
   "projects": {
     "batch-boot-jpa-sample":              { "path": "batch-boot-jpa-sample", "targets": ["test"] },            
     "boot-chaos-monkey":                  { "path": "boot-chaos-monkey", "targets": ["test"] },
+    "boot-jooq-spring-sample":            { "path": "boot-jooq-spring-sample", "targets": ["test"] },
     "boot-opensearch-sample":             { "path": "boot-opensearch-sample", "targets": ["test"]},
     "boot-data-multipledatasources":      { "path": "jpa/boot-data-multipledatasources", "targets": ["test"] },
     "boot-jooq-r2dbc-sample":             { "path": "r2dbc/boot-jooq-r2dbc-sample", "targets": ["test"] },
