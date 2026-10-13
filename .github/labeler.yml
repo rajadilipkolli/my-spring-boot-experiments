@@ -10,6 +10,9 @@
 "component : high-rps":
   - changed-files:
       - any-glob-to-any-file: 'boot-high-rps-sample/**/*'
+"component : jooq-spring":
+  - changed-files:
+      - any-glob-to-any-file: 'boot-jooq-spring-sample/**/*'
 "component: mongodb-elasticsearch":
   - changed-files:
       - any-glob-to-any-file: 'boot-mongodb-elasticsearch/**/*'
@@ -139,6 +142,7 @@
           - boot-api-archunit-sample/pom.xml
           - boot-chaos-monkey/pom.xml
           - boot-high-rps-sample/pom.xml
+          - boot-jooq-spring-sample/pom.xml
           - boot-mongodb-elasticsearch/pom.xml
           - boot-opensearch-sample/pom.xml
           - boot-rabbitmq-thymeleaf/pom.xml
