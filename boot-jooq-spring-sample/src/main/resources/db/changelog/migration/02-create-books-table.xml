@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.29.xsd">
+
+    <changeSet author="appUser" id="createTable-books">
+        <createSequence
+            sequenceName="books_seq"
+            incrementBy="1"
+            startValue="1"
+        />
+
+        <createTable tableName="books">
+            <column name="id" type="bigint" defaultValueSequenceNext="books_seq">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="title" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="isbn" type="varchar(255)">
+                <constraints nullable="false" unique="true" uniqueConstraintName="uc_books_isbn"/>
+            </column>
+            <column name="author_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="published_year" type="int"/>
+            <column name="created_at" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint baseColumnNames="author_id" baseTableName="books"
+                                 constraintName="fk_books_author_id" referencedColumnNames="id"
+                                 referencedTableName="authors"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"/>
+    </changeSet>
+</databaseChangeLog>
