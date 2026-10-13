@@ -25,7 +25,7 @@ Write-Output ""
 Write-Output "### Per-Endpoint Statistics"
 Write-Output ""
 
-$endpoints = @("author_register", "post_create", "post_read", "comment_create", "comment_read", "tag_read", "post_update", "post_delete", "Verify Deleted Post", "comment_update", "comment_delete", "Verify Deleted Comment")
+$endpoints = @("author_register", "post_create", "Verify Created Post", "post_read", "Read Post Comments", "comment_create", "comment_read", "tag_read", "post_update", "post_delete", "Verify Deleted Post", "comment_update", "comment_delete", "Verify Deleted Comment")
 
 function Get-Stat($statsObj, $path) {
     if ($null -eq $statsObj) { return "N/A" }

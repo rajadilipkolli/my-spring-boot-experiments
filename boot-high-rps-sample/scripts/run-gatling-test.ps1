@@ -99,11 +99,15 @@ if (-not $AppReady) {
 }
 
 $RequiredFeederFilesValid = Test-RequiredFeederFiles
-if ((Test-Path -LiteralPath $CompletionMarker -PathType Leaf) -and $RequiredFeederFilesValid) {
+$CompletedProfile = $null
+if (Test-Path -LiteralPath $CompletionMarker -PathType Leaf) {
+    $CompletedProfile = Get-Content -LiteralPath $CompletionMarker -Raw
+}
+if ($CompletedProfile -eq $Profile -and $RequiredFeederFilesValid) {
     Write-Host "Data already present under target/loadtest-data. Skipping Data Generator..."
 } else {
     if (Test-Path -LiteralPath $DataDirectory) {
-        Write-Host "Load-test data is incomplete. Clearing it before regeneration..."
+        Write-Host "Load-test data is incomplete or was generated for a different profile. Clearing it before regeneration..."
         Remove-Item -LiteralPath $DataDirectory -Recurse -Force
     }
 
@@ -124,13 +128,12 @@ if ((Test-Path -LiteralPath $CompletionMarker -PathType Leaf) -and $RequiredFeed
             exit 1
     }
 
-    New-Item -ItemType File -Path $CompletionMarker -Force | Out-Null
+    Set-Content -LiteralPath $CompletionMarker -Value $Profile -NoNewline -ErrorAction Stop
 }
 
 $ExtraArgs = ""
-if ($Profile -eq "stress" -and $PSBoundParameters.ContainsKey("TargetRps")) {
-    Write-Host "TargetRps cannot be overridden for the stress profile."
-    exit 1
+if ($Profile -eq "stress" -and -not $PSBoundParameters.ContainsKey("TargetRps")) {
+    $TargetRps = 1000
 }
 if ($TargetRps -gt 0) {
     $ExtraArgs += " -DtargetRps=$TargetRps"
