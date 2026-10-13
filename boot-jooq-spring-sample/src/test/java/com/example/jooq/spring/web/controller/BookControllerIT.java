@@ -43,9 +43,10 @@ class BookControllerIT extends AbstractIntegrationTest {
                 .uri("/api/books")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
-                .content(jsonMapper.writeValueAsString(request));
+                .content(jsonMapper.writeValueAsString(request))
+                .exchange();
 
-        result.assertThat()
+        assertThat(result)
                 .hasStatus(HttpStatus.CREATED)
                 .bodyJson()
                 .convertTo(BookResponse.class)
@@ -53,7 +54,7 @@ class BookControllerIT extends AbstractIntegrationTest {
                     assertThat(bookResponse.id()).isNotNull();
                     assertThat(bookResponse.title()).isEqualTo("Mistborn: The Final Empire");
                     assertThat(bookResponse.authorId()).isEqualTo(authorId);
-                    result.assertThat()
+                    assertThat(result)
                             .hasHeader(HttpHeaders.LOCATION, "http://localhost/api/books/" + bookResponse.id());
                 });
     }

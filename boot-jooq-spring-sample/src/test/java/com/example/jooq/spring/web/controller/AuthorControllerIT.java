@@ -34,9 +34,10 @@ class AuthorControllerIT extends AbstractIntegrationTest {
                 .uri("/api/authors")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
-                .content(jsonMapper.writeValueAsString(request));
+                .content(jsonMapper.writeValueAsString(request))
+                .exchange();
 
-        result.assertThat()
+        assertThat(result)
                 .hasStatus(HttpStatus.CREATED)
                 .bodyJson()
                 .convertTo(AuthorResponse.class)
@@ -44,7 +45,7 @@ class AuthorControllerIT extends AbstractIntegrationTest {
                     assertThat(authorResponse.id()).isNotNull();
                     assertThat(authorResponse.name()).isEqualTo("Isaac Asimov");
                     assertThat(authorResponse.email()).isEqualTo("asimov@example.com");
-                    result.assertThat()
+                    assertThat(result)
                             .hasHeader(HttpHeaders.LOCATION, "http://localhost/api/authors/" + authorResponse.id());
                 });
     }
