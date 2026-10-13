@@ -78,6 +78,10 @@ if ($LASTEXITCODE -ne 0) {
 
 Write-Host "Starting app..."
 docker compose -p boot-high-rps-sample -f docker/docker-compose.yml -f docker/docker-compose-sentinel.yml up -d app
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "App startup failed!"
+    exit 1
+}
 
 Write-Host "Waiting for app to start..."
 $AppReady = $false
