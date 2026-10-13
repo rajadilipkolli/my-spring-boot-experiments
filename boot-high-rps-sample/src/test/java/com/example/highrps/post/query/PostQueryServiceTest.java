@@ -55,6 +55,7 @@ class PostQueryServiceTest {
     private JsonMapper jsonMapper;
     private PostQueryService postQueryService;
 
+    /** Initializes an empty local cache and the query service with mocked dependencies. */
     @BeforeEach
     void setUp() {
         localCache = Caffeine.newBuilder().build();
@@ -68,6 +69,7 @@ class PostQueryServiceTest {
                 deletionMarkerHandler);
     }
 
+    /** Verifies that a local cache hit avoids Redis, Kafka Streams, and the database read service. */
     @Test
     @DisplayName("Should return from local cache without hitting PostReadService, Redis, or Streams")
     void shouldReturnFromLocalCacheWithoutHittingPostReadService() {
@@ -86,6 +88,7 @@ class PostQueryServiceTest {
         verifyNoInteractions(kafkaStreamsFactory);
     }
 
+    /** Verifies that a Redis hit warms the local cache without querying the database. */
     @Test
     @DisplayName("Should return from Redis without hitting PostReadService and warm local cache")
     void shouldReturnFromRedisWithoutHittingPostReadService() {
@@ -112,6 +115,7 @@ class PostQueryServiceTest {
         verifyNoInteractions(postReadService);
     }
 
+    /** Verifies that a stream hit populates Redis and the local cache without querying the database. */
     @Test
     @DisplayName("Should return from Kafka Streams without hitting PostReadService and warm Redis and local cache")
     void shouldReturnFromKafkaStreamsWithoutHittingPostReadService() {
@@ -144,6 +148,7 @@ class PostQueryServiceTest {
         verifyNoInteractions(postReadService);
     }
 
+    /** Verifies that cache misses fall back to the database read service and warm the local cache. */
     @Test
     @DisplayName("Should fall back to PostReadService when caches miss and warm local cache")
     void shouldFallbackToPostReadServiceWhenCachesMiss() {
@@ -173,6 +178,7 @@ class PostQueryServiceTest {
         verify(postReadService).findByPostRefId(postId);
     }
 
+    /** Verifies that an absent database projection produces a resource-not-found exception. */
     @Test
     @DisplayName("Should throw ResourceNotFoundException when PostReadService returns empty")
     void shouldThrowNotFoundWhenPostReadServiceReturnsEmpty() {

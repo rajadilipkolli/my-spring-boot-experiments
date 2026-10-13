@@ -4,6 +4,7 @@ import json
 import urllib.request
 
 def run_cmd(cmd, outfile):
+    """Write a shell command's combined output to a file, reporting exceptions."""
     try:
         with open(outfile, 'w') as f:
             subprocess.run(cmd, shell=True, stdout=f, stderr=subprocess.STDOUT)
@@ -11,6 +12,7 @@ def run_cmd(cmd, outfile):
         print(f"Error running {cmd}: {e}")
 
 def fetch_url(url, outfile):
+    """Save a URL response to a file with a five-second timeout, reporting errors."""
     try:
         req = urllib.request.Request(url)
         with urllib.request.urlopen(req, timeout=5) as response:

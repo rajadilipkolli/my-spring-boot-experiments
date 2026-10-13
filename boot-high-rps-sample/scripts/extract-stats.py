@@ -107,6 +107,7 @@ _NAME_RE = re.compile(
 
 
 def parse_report(report_dir):
+    """Read index.html into global and per-request stats; exit if it is missing."""
     index_path = os.path.join(report_dir, "index.html")
     if not os.path.isfile(index_path):
         sys.exit(f"ERROR: index.html not found in {report_dir}")
@@ -127,6 +128,7 @@ def parse_report(report_dir):
     is_root_row   = False
 
     def flush():
+        """Store the accumulated row statistics and reset the row state."""
         nonlocal current_name, current_cells, is_root_row
         if current_cells:
             stats = _parse_row(current_cells)
@@ -162,6 +164,7 @@ def parse_report(report_dir):
 
 
 def find_latest_report(base_dir="target/gatling"):
+    """Return the last report directory by name; exit if no report exists."""
     if not os.path.isdir(base_dir):
         sys.exit(f"ERROR: Gatling output directory not found: {base_dir}")
     runs = [
@@ -176,6 +179,7 @@ def find_latest_report(base_dir="target/gatling"):
 
 
 def main():
+    """Extract report statistics to JSON, exiting if global statistics are absent."""
     ap = argparse.ArgumentParser(description="Extract Gatling stats to JSON")
     ap.add_argument("--report-dir", default=None,
                     help="Path to a specific Gatling report directory")

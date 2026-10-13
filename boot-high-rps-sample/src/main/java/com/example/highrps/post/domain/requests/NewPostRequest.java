@@ -30,6 +30,13 @@ public record NewPostRequest(
         List<@Valid TagResponse> tags)
         implements Serializable {
 
+    /**
+     * Maps a post request to a Redis entry, treating a null published flag as false.
+     *
+     * @param newPostRequest the post data
+     * @param postId the identifier to use for the Redis entry
+     * @return the populated Redis post
+     */
     public static PostRedis toRedis(NewPostRequest newPostRequest, Long postId) {
         return new PostRedis()
                 .setId(postId)

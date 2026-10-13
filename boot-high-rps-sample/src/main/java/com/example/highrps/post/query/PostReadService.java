@@ -16,6 +16,11 @@ public class PostReadService {
 
     private final PostRepository postRepository;
 
+    /**
+     * Creates the database read service used when cached post views are unavailable.
+     *
+     * @param postRepository the database post repository
+     */
     public PostReadService(PostRepository postRepository) {
         this.postRepository = postRepository;
     }

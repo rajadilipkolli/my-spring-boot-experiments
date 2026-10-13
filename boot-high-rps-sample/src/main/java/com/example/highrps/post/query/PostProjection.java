@@ -57,6 +57,12 @@ public record PostProjection(
                         .toList());
     }
 
+    /**
+     * Maps a stream post request to its read projection, treating a null published flag as false.
+     *
+     * @param request the post data from the stream
+     * @return the post projection
+     */
     static PostProjection fromNewPostRequest(NewPostRequest request) {
         return new PostProjection(
                 request.postId(),

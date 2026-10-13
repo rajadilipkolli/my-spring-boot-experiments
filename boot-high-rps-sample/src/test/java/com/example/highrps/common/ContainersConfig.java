@@ -18,6 +18,11 @@ import org.testcontainers.utility.DockerImageName;
 @TestConfiguration(proxyBeanMethods = false)
 public class ContainersConfig {
 
+    /**
+     * Creates a reusable observability container with a two-minute startup timeout.
+     *
+     * @return the configured LGTM stack container
+     */
     @Bean
     @ServiceConnection
     LgtmStackContainer lgtmContainer() {
