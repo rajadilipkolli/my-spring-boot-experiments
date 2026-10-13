@@ -101,10 +101,10 @@ jobs:
       - name: Publish Gatling Metrics to Summary
         if: ${{ always() }}
         run: |
-          # Find the stats.json file
+          # Extract stats from Gatling HTML report (3.13+ no longer emits global_stats.json)
           STATS_FILE=""
           if [[ -d target/gatling ]]; then
-            STATS_FILE=$(find target/gatling -name "stats.json" -print -quit)
+            python3 ./scripts/extract-stats.py --out gatling-stats.json && STATS_FILE="gatling-stats.json" || true
           fi
           if [[ -n "$STATS_FILE" && -f "$STATS_FILE" ]]; then
             echo "## Gatling Smoke Test Results" >> $GITHUB_STEP_SUMMARY

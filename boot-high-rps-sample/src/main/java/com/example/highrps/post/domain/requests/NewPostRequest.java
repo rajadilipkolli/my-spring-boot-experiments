@@ -1,8 +1,8 @@
 package com.example.highrps.post.domain.requests;
 
 import com.example.highrps.post.domain.PostDetailsResponse;
+import com.example.highrps.post.domain.PostRedis;
 import com.example.highrps.post.domain.TagResponse;
-import com.example.highrps.shared.IdGenerator;
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.validation.Valid;
@@ -30,31 +30,24 @@ public record NewPostRequest(
         List<@Valid TagResponse> tags)
         implements Serializable {
 
-    public NewPostRequest withPublishedAt(LocalDateTime publishedAt) {
-        return new NewPostRequest(
-                this.postId,
-                this.title,
-                this.content,
-                this.email,
-                this.published,
-                publishedAt,
-                this.createdAt,
-                this.modifiedAt,
-                this.details,
-                this.tags);
-    }
-
-    public NewPostRequest withTimestamps(LocalDateTime createdAt, LocalDateTime modifiedAt) {
-        return new NewPostRequest(
-                this.postId != null ? this.postId : IdGenerator.generateLong(),
-                this.title,
-                this.content,
-                this.email,
-                this.published,
-                this.publishedAt,
-                createdAt,
-                modifiedAt,
-                this.details,
-                this.tags);
+    /**
+     * Maps a post request to a Redis entry, treating a null published flag as false.
+     *
+     * @param newPostRequest the post data
+     * @param postId the identifier to use for the Redis entry
+     * @return the populated Redis post
+     */
+    public static PostRedis toRedis(NewPostRequest newPostRequest, Long postId) {
+        return new PostRedis()
+                .setId(postId)
+                .setTitle(newPostRequest.title())
+                .setContent(newPostRequest.content())
+                .setPublished(newPostRequest.published() != null && newPostRequest.published())
+                .setPublishedAt(newPostRequest.publishedAt())
+                .setAuthorEmail(newPostRequest.email())
+                .setCreatedAt(newPostRequest.createdAt())
+                .setModifiedAt(newPostRequest.modifiedAt())
+                .setDetails(newPostRequest.details())
+                .setTags(newPostRequest.tags());
     }
 }

@@ -119,7 +119,8 @@ public class PostCommandService extends AbstractCommandService {
                         .toList()
                 : List.of();
 
-        // Publish domain event (transactional - committed with transaction)
+        // Publish domain event (no transaction; database persistence occurs later through the listener and batch
+        // processor)
         PostCreatedEvent event = new PostCreatedEvent(
                 cmd.postId(),
                 cmd.title(),

@@ -18,10 +18,15 @@ import org.testcontainers.utility.DockerImageName;
 @TestConfiguration(proxyBeanMethods = false)
 public class ContainersConfig {
 
+    /**
+     * Creates a reusable observability container with a two-minute startup timeout.
+     *
+     * @return the configured LGTM stack container
+     */
     @Bean
     @ServiceConnection
     LgtmStackContainer lgtmContainer() {
-        return new LgtmStackContainer(DockerImageName.parse("grafana/otel-lgtm:0.33.1"))
+        return new LgtmStackContainer(DockerImageName.parse("grafana/otel-lgtm:0.36.0"))
                 .withStartupTimeout(Duration.ofMinutes(2))
                 .withReuse(true);
     }

@@ -14,6 +14,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 
 public class DataGenerator {
 
@@ -71,7 +73,7 @@ public class DataGenerator {
 
                 HttpRequest request = HttpRequest.newBuilder()
                         .uri(URI.create(LoadTestConfig.BASE_URL + "/api/author"))
-                        .header("Content-Type", "application/json")
+                        .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                         .header("Idempotency-Key", nextUuid().toString())
                         .POST(HttpRequest.BodyPublishers.ofString(json))
                         .build();
@@ -144,7 +146,7 @@ public class DataGenerator {
 
                 HttpRequest request = HttpRequest.newBuilder()
                         .uri(URI.create(LoadTestConfig.BASE_URL + "/api/posts"))
-                        .header("Content-Type", "application/json")
+                        .header(HttpHeaders.CONTENT_TYPE, "application/json")
                         .header("Idempotency-Key", nextUuid().toString())
                         .POST(HttpRequest.BodyPublishers.ofString(json))
                         .build();
@@ -205,7 +207,7 @@ public class DataGenerator {
 
                 HttpRequest request = HttpRequest.newBuilder()
                         .uri(URI.create(LoadTestConfig.BASE_URL + "/api/posts"))
-                        .header("Content-Type", "application/json")
+                        .header(HttpHeaders.CONTENT_TYPE, "application/json")
                         .header("Idempotency-Key", nextUuid().toString())
                         .POST(HttpRequest.BodyPublishers.ofString(json))
                         .build();
@@ -257,7 +259,7 @@ public class DataGenerator {
 
                 HttpRequest request = HttpRequest.newBuilder()
                         .uri(URI.create(LoadTestConfig.BASE_URL + "/api/posts/" + postId + "/comments"))
-                        .header("Content-Type", "application/json")
+                        .header(HttpHeaders.CONTENT_TYPE, "application/json")
                         .header("Idempotency-Key", nextUuid().toString())
                         .POST(HttpRequest.BodyPublishers.ofString(json))
                         .build();
