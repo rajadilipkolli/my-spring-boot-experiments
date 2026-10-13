@@ -8,7 +8,9 @@ import com.example.highrps.common.AbstractIntegrationTest;
 import com.example.highrps.infrastructure.kafka.batch.ScheduledBatchProcessor;
 import com.example.highrps.post.command.PostCommandResult;
 import com.example.highrps.post.domain.PostDetailsResponse;
+import com.example.highrps.post.domain.PostEntity;
 import com.example.highrps.post.domain.PostRedis;
+import com.example.highrps.post.domain.TagEntity;
 import com.example.highrps.post.query.PostProjection;
 import com.example.highrps.shared.IdGenerator;
 import java.time.Duration;
@@ -611,5 +613,67 @@ class PostControllerIT extends AbstractIntegrationTest {
                 .assertThat()
                 .hasStatus(HttpStatus.CONFLICT)
                 .hasContentType(MediaType.APPLICATION_PROBLEM_JSON);
+    }
+
+    /**
+     * Verifies that GET /api/posts/{postId} succeeds via direct database JPA fallback,
+     * fully mapping lazy details, author, and tags without throwing LazyInitializationException.
+     */
+    @Test
+    @DisplayName("Should retrieve post via JPA fallback and correctly map lazy associations")
+    void testShouldRetrievePostViaJpaFallbackWithLazyLoadedAssociations() {
+        String email = "jpafallback@local.com";
+        AuthorEntity author = authorRepository.save(new AuthorEntity()
+                .setEmail(email)
+                .setFirstName("JPA")
+                .setLastName("Fallback")
+                .setMobile(9876543210L));
+
+        TagEntity tag = tagRepository.save(
+                new TagEntity().setTagName("fallback-tag").setTagDescription("tag for fallback test"));
+
+        Long postId = IdGenerator.generateLong();
+        PostEntity postEntity = new PostEntity("JPA Fallback Post", "Content from JPA Fallback", author);
+        postEntity.setPostRefId(postId);
+        postEntity.setPublished(true);
+        postEntity.setPublishedAt(LocalDateTime.now());
+        postEntity.setDetails(new com.example.highrps.post.domain.PostDetailsEntity()
+                .setDetailsKey("fallback-detail-key")
+                .setCreatedBy("jpa-tester"));
+        postEntity.addTag(tag);
+
+        postRepository.save(postEntity);
+
+        // Ensure neither local cache nor Redis nor tombstone has this postId
+        String cacheKey = String.valueOf(postId);
+        localCache.invalidate(cacheKey);
+        postRedisRepository.deleteById(postId);
+
+        // GET should hit PostReadService JPA fallback and map details, tags, author
+        mockMvcTester
+                .get()
+                .uri("/api/posts/{postId}", postId)
+                .exchange()
+                .assertThat()
+                .hasStatus(HttpStatus.OK)
+                .hasContentType(MediaType.APPLICATION_JSON)
+                .bodyJson()
+                .convertTo(PostProjection.class)
+                .satisfies(postResponse -> {
+                    assertThat(postResponse.postId()).isEqualTo(postId);
+                    assertThat(postResponse.title()).isEqualTo("JPA Fallback Post");
+                    assertThat(postResponse.content()).isEqualTo("Content from JPA Fallback");
+                    assertThat(postResponse.authorEmail()).isEqualTo(email);
+                    assertThat(postResponse.published()).isTrue();
+                    assertThat(postResponse.details()).isNotNull();
+                    assertThat(postResponse.details().detailsKey()).isEqualTo("fallback-detail-key");
+                    assertThat(postResponse.details().createdBy()).isEqualTo("jpa-tester");
+                    assertThat(postResponse.tags()).hasSize(1);
+                    assertThat(postResponse.tags().getFirst().tagName()).isEqualTo("fallback-tag");
+                    assertThat(postResponse.tags().getFirst().tagDescription()).isEqualTo("tag for fallback test");
+                });
+
+        // Verify local cache got populated by the fallback
+        assertThat(localCache.getIfPresent(cacheKey)).isNotNull();
     }
 }

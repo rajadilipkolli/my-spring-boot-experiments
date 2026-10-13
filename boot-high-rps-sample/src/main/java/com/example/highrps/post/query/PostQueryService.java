@@ -15,7 +15,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.kafka.config.StreamsBuilderFactoryBean;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import tools.jackson.databind.json.JsonMapper;
 
 /**
@@ -23,7 +22,6 @@ import tools.jackson.databind.json.JsonMapper;
  * Handles all read operations with multi-layer caching strategy.
  */
 @Service
-@Transactional(readOnly = true)
 public class PostQueryService {
 
     private static final Logger log = LoggerFactory.getLogger(PostQueryService.class);
@@ -34,14 +32,14 @@ public class PostQueryService {
     private final DeletionMarkerHandler deletionMarkerHandler;
     private final RequestCoalescer<NewPostRequest> requestCoalescer;
     private final JsonMapper jsonMapper;
-    private final PostRepository postRepository;
+    private final PostReadService postReadService;
 
     /**
      * Creates a post query service backed by local, Redis, stream, and database views.
      *
      * @param localCache local post cache
      * @param postRedisRepository Redis post repository
-     * @param postRepository database post repository
+     * @param postReadService dedicated read service for JPA fallback
      * @param kafkaStreamsFactory Kafka Streams lifecycle access
      * @param jsonMapper serializer for cached values
      * @param deletionMarkerHandler handler for deleted aggregates
@@ -49,13 +47,13 @@ public class PostQueryService {
     public PostQueryService(
             Cache<String, String> localCache,
             PostRedisRepository postRedisRepository,
-            PostRepository postRepository,
+            PostReadService postReadService,
             StreamsBuilderFactoryBean kafkaStreamsFactory,
             JsonMapper jsonMapper,
             DeletionMarkerHandler deletionMarkerHandler) {
         this.localCache = localCache;
         this.postRedisRepository = postRedisRepository;
-        this.postRepository = postRepository;
+        this.postReadService = postReadService;
         this.kafkaStreamsFactory = kafkaStreamsFactory;
         this.jsonMapper = jsonMapper;
         this.deletionMarkerHandler = deletionMarkerHandler;
@@ -90,7 +88,7 @@ public class PostQueryService {
         Optional<PostRedis> redisPost = postRedisRepository.findById(postId);
         if (redisPost.isPresent()) {
             log.debug("Hit Redis for postId: {}", postId);
-            PostProjection projection = fromRedis(redisPost.get());
+            PostProjection projection = PostProjection.fromRedis(redisPost.get());
             // Warm local cache and return JSON
             try {
                 String jsonStr = jsonMapper.writeValueAsString(projection);
@@ -116,14 +114,14 @@ public class PostQueryService {
 
         if (streamsData != null) {
             log.debug("Hit Kafka Streams for postId: {}", postId);
-            PostProjection projection = fromNewPostRequest(streamsData);
+            PostProjection projection = PostProjection.fromNewPostRequest(streamsData);
 
             // Warm both caches and return JSON
             try {
                 String jsonStr = jsonMapper.writeValueAsString(projection);
                 localCache.put(cacheKey, jsonStr);
 
-                PostRedis redisEntity = toRedis(streamsData, postId);
+                PostRedis redisEntity = NewPostRequest.toRedis(streamsData, postId);
                 postRedisRepository.save(redisEntity);
                 return jsonStr;
 
@@ -134,11 +132,10 @@ public class PostQueryService {
         }
 
         // 5. Database fallback
-        return postRepository
+        return postReadService
                 .findByPostRefId(postId)
-                .map(entity -> {
+                .map(projection -> {
                     log.debug("Hit DB for postId: {}", postId);
-                    PostProjection projection = fromEntity(entity);
                     try {
                         String jsonStr = jsonMapper.writeValueAsString(projection);
                         localCache.put(cacheKey, jsonStr);
@@ -178,83 +175,5 @@ public class PostQueryService {
         }
         return kafkaStreams.store(
                 StoreQueryParameters.fromNameAndType("posts-store", QueryableStoreTypes.keyValueStore()));
-    }
-
-    /**
-     * Maps a database post to its read projection.
-     *
-     * @param entity the database post
-     * @return the post projection
-     */
-    private PostProjection fromEntity(PostEntity entity) {
-        return new PostProjection(
-                entity.getPostRefId(),
-                entity.getTitle(),
-                entity.getContent(),
-                entity.getAuthorEntity().getEmail(),
-                entity.isPublished(),
-                entity.getPublishedAt(),
-                entity.getCreatedAt(),
-                entity.getModifiedAt(),
-                entity.getDetails() == null
-                        ? null
-                        : new PostDetailsResponse(
-                                entity.getDetails().getDetailsKey(),
-                                entity.getDetails().getCreatedAt(),
-                                entity.getDetails().getCreatedBy()),
-                entity.getTags().stream()
-                        .map(postTag -> {
-                            TagEntity tag = postTag.getTagEntity();
-                            return new TagResponse(tag.getId(), tag.getTagName(), tag.getTagDescription());
-                        })
-                        .toList());
-    }
-
-    /**
-     * Maps a Redis post to its read projection.
-     *
-     * @param postRedis the cached post
-     * @return the post projection
-     */
-    private PostProjection fromRedis(PostRedis postRedis) {
-        return new PostProjection(
-                postRedis.getId(),
-                postRedis.getTitle(),
-                postRedis.getContent(),
-                postRedis.getAuthorEmail(),
-                postRedis.isPublished(),
-                postRedis.getPublishedAt(),
-                postRedis.getCreatedAt(),
-                postRedis.getModifiedAt(),
-                postRedis.getDetails(),
-                postRedis.getTags());
-    }
-
-    private PostProjection fromNewPostRequest(NewPostRequest request) {
-        return new PostProjection(
-                request.postId(),
-                request.title(),
-                request.content(),
-                request.email(),
-                request.published() != null && request.published(),
-                request.publishedAt(),
-                request.createdAt(),
-                request.modifiedAt(),
-                request.details(),
-                request.tags());
-    }
-
-    private PostRedis toRedis(NewPostRequest request, Long postId) {
-        return new PostRedis()
-                .setId(postId)
-                .setTitle(request.title())
-                .setContent(request.content())
-                .setPublished(request.published() != null && request.published())
-                .setPublishedAt(request.publishedAt())
-                .setAuthorEmail(request.email())
-                .setCreatedAt(request.createdAt())
-                .setModifiedAt(request.modifiedAt())
-                .setDetails(request.details())
-                .setTags(request.tags());
     }
 }
