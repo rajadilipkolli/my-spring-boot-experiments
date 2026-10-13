@@ -3,7 +3,8 @@ ARG JAR_FILE=target/boot-high-rps-sample-0.1.0-SNAPSHOT.jar
 COPY ${JAR_FILE} app.jar
 
 # Run as non-root user
-RUN addgroup --system spring && adduser --system --ingroup spring spring
+RUN addgroup --system spring && adduser --system --ingroup spring spring \
+    && mkdir -p /logs && chown spring:spring /logs
 RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
 USER spring:spring
 
