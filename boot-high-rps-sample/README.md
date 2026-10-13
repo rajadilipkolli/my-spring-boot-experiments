@@ -31,10 +31,12 @@ Redis keys
 - `events:queue` — list used for batch DB writes (pushed on publish).
 
 Run & smoke test (local)
-1. Start infra (docker compose):
+From the repository root:
+
+1. Start infrastructure (Redis master, replica and three Sentinels):
 
 ```powershell
-docker compose up -d kafka redis postgres
+docker compose -f boot-high-rps-sample/docker/docker-compose.yml -f boot-high-rps-sample/docker/docker-compose-sentinel.yml up -d kafka postgresqldb redis-master redis-slave redis-sentinel-1 redis-sentinel-2 redis-sentinel-3
 ```
 
 2. Build and run the app:
@@ -60,6 +62,19 @@ curl -X POST -H "Content-Type: application/json" -d '{"title":"High RPS","conten
 redis-cli GET posts:<postId>
 curl http://localhost:8080/api/posts/<postId>
 ```
+
+## Run with the production profile (Docker)
+
+From `boot-high-rps-sample`, package the application and start the combined stack:
+
+```powershell
+./mvnw -DskipTests package
+docker compose -f docker/docker-compose.yml -f docker/docker-compose-sentinel.yml up -d --build app
+```
+
+Compose sets `SPRING_PROFILES_ACTIVE=production` and waits for all three Sentinels to be healthy before starting the app. Use both Compose files for subsequent `build`, `logs` and `down` commands too. The Redis master owns host port 6379; there is no separate standalone Redis service.
+
+Redis and Redis Sentinel both use Bitnami's fixed `8.2.1-debian-12-r0` images from `bitnamilegacy`, where the versioned images are archived. Keep these image pins and the combined infrastructure configuration identical for baseline and high-RPS runs.
 
 Production tuning notes
 - Enable virtual threads: `spring.threads.virtual.enabled=true` (already present).
