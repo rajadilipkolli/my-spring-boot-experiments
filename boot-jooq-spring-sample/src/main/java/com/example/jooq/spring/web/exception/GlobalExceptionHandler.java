@@ -33,8 +33,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(DataIntegrityViolationException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
     ProblemDetail handleDataIntegrityViolationException(DataIntegrityViolationException ex) {
-        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
-                HttpStatus.CONFLICT, "The request conflicts with existing data.");
+        ProblemDetail problemDetail =
+                ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, "The request conflicts with existing data.");
         problemDetail.setTitle("Data Integrity Violation");
         problemDetail.setType(URI.create("https://api.boot-jooq-spring.com/errors/conflict"));
         problemDetail.setProperty("timestamp", Instant.now().toString());
