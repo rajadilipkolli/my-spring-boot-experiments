@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 
 public record AuthorResponse(Long id, String name, String email, LocalDateTime createdAt) {
 
+    /** Copies author record values into an API response. */
     public static AuthorResponse toResponse(AuthorsRecord record) {
         return new AuthorResponse(record.getId(), record.getName(), record.getEmail(), record.getCreatedAt());
     }

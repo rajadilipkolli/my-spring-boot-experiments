@@ -15,20 +15,40 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class AuthorDAO extends JooqDAO<Authors, AuthorsRecord, Long> {
 
+    /** Creates an author DAO using the supplied database context. */
     public AuthorDAO(DSLContext dslContext) {
         super(dslContext, AUTHORS);
     }
 
+    /**
+     * Finds an author by email.
+     *
+     * @return the matching author, or empty if no email matches
+     * @throws org.springframework.dao.DataAccessException if the database query fails
+     */
     @Transactional(readOnly = true)
     public Optional<AuthorsRecord> findByEmail(String email) {
         return dslContext.selectFrom(table).where(AUTHORS.EMAIL.eq(email)).fetchOptional();
     }
 
+    /**
+     * Retrieves a page of authors in ascending ID order.
+     *
+     * @param offset number of rows to skip, starting from zero
+     * @param limit maximum number of rows to return
+     * @return the selected authors, or an empty list if the page has no rows
+     * @throws org.springframework.dao.DataAccessException if the database query fails
+     */
     @Transactional(readOnly = true)
     public List<AuthorsRecord> findAll(int offset, int limit) {
         return findAll(offset, limit, List.of(AUTHORS.ID.asc()));
     }
 
+    /**
+     * Retrieves all authors in ascending ID order, or an empty list if none exist.
+     *
+     * @throws org.springframework.dao.DataAccessException if the database query fails
+     */
     @Transactional(readOnly = true)
     public List<AuthorsRecord> findAll() {
         return dslContext.selectFrom(table).orderBy(AUTHORS.ID.asc()).fetch();

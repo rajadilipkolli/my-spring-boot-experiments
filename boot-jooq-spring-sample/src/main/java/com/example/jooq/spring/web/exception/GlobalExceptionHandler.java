@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class GlobalExceptionHandler {
 
+    /** Converts a missing-entity error to an HTTP 404 problem with its message and a timestamp. */
     @ExceptionHandler(EntityNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     ProblemDetail handleEntityNotFoundException(EntityNotFoundException ex) {
@@ -30,6 +31,7 @@ public class GlobalExceptionHandler {
         return problemDetail;
     }
 
+    /** Converts a database constraint error to an HTTP 409 problem with a generic detail and timestamp. */
     @ExceptionHandler(DataIntegrityViolationException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
     ProblemDetail handleDataIntegrityViolationException(DataIntegrityViolationException ex) {
@@ -41,6 +43,13 @@ public class GlobalExceptionHandler {
         return problemDetail;
     }
 
+    /**
+     * Converts request field validation failures to an HTTP 400 problem with a timestamp.
+     *
+     * @return a problem with violations sorted by field name, including rejected values
+     * @throws ClassCastException if a validation error is an object error rather than a field error
+     * @throws NullPointerException if a field error has no default message
+     */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     ProblemDetail handleMethodArgumentNotValidException(MethodArgumentNotValidException ex) {

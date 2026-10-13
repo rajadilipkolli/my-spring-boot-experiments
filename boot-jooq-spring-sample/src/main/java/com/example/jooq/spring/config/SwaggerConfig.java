@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration(proxyBeanMethods = false)
 public class SwaggerConfig {
 
+    /** Defines API metadata with a server URL relative to the current host. */
     @Bean
     OpenAPI openApi() {
         return new OpenAPI()
