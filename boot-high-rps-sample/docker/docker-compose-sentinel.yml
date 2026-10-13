@@ -1,0 +1,79 @@
+name: boot-high-rps-sample
+services:
+  redis-master:
+    container_name: redis-master
+    image: 'bitnami/redis:latest'
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+      - REDIS_REPLICATION_MODE=master
+    ports:
+      - "6379:6379"
+    networks:
+      - demo-network
+
+  redis-slave:
+    container_name: slave-redis
+    image: 'bitnami/redis:latest'
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+      - REDIS_REPLICATION_MODE=slave
+      - REDIS_MASTER_HOST=redis-master
+    ports:
+      - "7000:6379"
+    depends_on:
+      - redis-master
+    networks:
+      - demo-network
+
+  redis-sentinel-1:
+    image: 'bitnami/redis-sentinel:latest'
+    container_name: sentinel-1
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+      - REDIS_MASTER_SET=mymaster
+      - REDIS_MASTER_HOST=redis-master
+      - REDIS_SENTINEL_DOWN_AFTER_MILLISECONDS=10000
+    depends_on:
+      - redis-master
+      - redis-slave
+    ports:
+      - "26379:26379"
+    networks:
+      - demo-network
+
+  redis-sentinel-2:
+    image: 'bitnami/redis-sentinel:latest'
+    container_name: sentinel-2
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+      - REDIS_MASTER_SET=mymaster
+      - REDIS_MASTER_HOST=redis-master
+      - REDIS_SENTINEL_DOWN_AFTER_MILLISECONDS=10000
+    depends_on:
+      - redis-master
+      - redis-slave
+    ports:
+      - "26380:26379"
+    networks:
+      - demo-network
+
+  redis-sentinel-3:
+    image: 'bitnami/redis-sentinel:latest'
+    container_name: sentinel-3
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+      - REDIS_MASTER_SET=mymaster
+      - REDIS_MASTER_HOST=redis-master
+      - REDIS_SENTINEL_DOWN_AFTER_MILLISECONDS=10000
+    depends_on:
+      - redis-master
+      - redis-slave
+    ports:
+      - "26381:26379"
+    networks:
+      - demo-network
+
+networks:
+  demo-network:
+    name: demo-network
+    driver: bridge

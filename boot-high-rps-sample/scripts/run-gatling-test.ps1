@@ -73,9 +73,8 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
-Write-Host "Starting app behind load balancer..."
-docker compose -p boot-high-rps-sample -f docker/docker-compose.yml up -d --scale app=2
-docker restart boot-high-rps-sample-nginx-1
+Write-Host "Starting app..."
+docker compose -p boot-high-rps-sample -f docker/docker-compose.yml up -d app
 
 Write-Host "Waiting for app to start..."
 $AppReady = $false
@@ -94,7 +93,7 @@ for ($i = 0; $i -lt 120; $i++) {
 
 if (-not $AppReady) {
     Write-Host "App failed to start!"
-    docker logs boot-high-rps-sample-app-1
+    docker compose -p boot-high-rps-sample -f docker/docker-compose.yml logs app
     exit 1
 }
 

@@ -55,48 +55,8 @@ jobs:
           distribution: "temurin"
           cache: "maven"
           
-      - name: Start Infrastructure
-        run: |
-          docker compose -f docker/docker-compose.yml up -d
-          
-      - name: Build Application
-        run: ./mvnw -DskipTests clean package
-        
-      - name: Start Application and Wait for Health
-        run: |
-          java -jar target/boot-high-rps-sample-0.1.0-SNAPSHOT.jar --spring.profiles.active=local \
-            > target/smoke-app.log 2>&1 &
-          APP_PID=$!
-          echo "Waiting for /actuator/health to report UP..."
-          deadline=$((SECONDS + 120))
-          until curl --fail --silent --show-error --max-time 5 http://localhost:8080/actuator/health \
-            | grep -q '"status":"UP"'; do
-            if (( SECONDS >= deadline )); then
-              echo "::error::Application did not become healthy within 120 seconds"
-              ps -p "$APP_PID" -f || true
-              tail -n 200 target/smoke-app.log || true
-              docker compose -f docker/docker-compose.yml ps || true
-              docker compose -f docker/docker-compose.yml logs --no-color --tail=100 || true
-              exit 1
-            fi
-            sleep 2
-          done
-          echo "Application is UP!"
-          
-      - name: Generate Test Data
-        run: |
-          ./mvnw exec:java -Dexec.mainClass="com.example.highrps.gatling.setup.DataGenerator" \
-          -Dexec.classpathScope=test \
-          -Dauthors=10 -Dposts=50 -Dcomments=100 -Dtags=5 -DdataDir=target/loadtest-data
-          
       - name: Run Gatling Smoke Test
-        run: |
-          set +e
-          ./mvnw gatling:test -Dprofile=smoke -DdurationMinutes=1 -DwarmupMinutes=0 \
-            -Dauthors=10 -Dposts=50 -Dcomments=100 -Dtags=5 -DdataDir=target/loadtest-data
-          GATLING_STATUS=$?
-          set -e
-          exit "$GATLING_STATUS"
+        run: pwsh ./scripts/run-gatling-test.ps1 -Profile smoke -DurationMinutes 1 -WarmupMinutes 0
           
       - name: Publish Gatling Metrics to Summary
         if: ${{ always() }}

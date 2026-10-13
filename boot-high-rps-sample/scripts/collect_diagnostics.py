@@ -31,8 +31,7 @@ def main():
     run_cmd("docker ps", f"{out_dir}/docker-ps.txt")
 
     # Logs
-    run_cmd("docker logs boot-high-rps-sample-app-1", f"{out_dir}/app-1.log")
-    run_cmd("docker logs boot-high-rps-sample-app-2", f"{out_dir}/app-2.log")
+    run_cmd("docker compose -p boot-high-rps-sample -f docker/docker-compose.yml logs app", f"{out_dir}/app.log")
     run_cmd("docker logs postgresql", f"{out_dir}/postgres.log")
     run_cmd("docker logs redis-master", f"{out_dir}/redis-master.log")
     run_cmd("docker logs slave-redis", f"{out_dir}/slave-redis.log")
