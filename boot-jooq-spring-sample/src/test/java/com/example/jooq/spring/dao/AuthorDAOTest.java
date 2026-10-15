@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.example.jooq.spring.common.SQLContainerConfig;
 import com.example.jooq.spring.db.tables.records.AuthorsRecord;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
@@ -26,7 +26,7 @@ class AuthorDAOTest {
         AuthorsRecord author = new AuthorsRecord();
         author.setName("George Orwell");
         author.setEmail("george.orwell@example.com");
-        author.setCreatedAt(LocalDateTime.now());
+        author.setCreatedAt(OffsetDateTime.parse("2026-01-15T09:30:00+05:30"));
 
         int rows = authorDAO.save(author);
         assertThat(rows).isEqualTo(1);
@@ -36,6 +36,7 @@ class AuthorDAOTest {
         assertThat(found).isPresent();
         assertThat(found.get().getName()).isEqualTo("George Orwell");
         assertThat(found.get().getEmail()).isEqualTo("george.orwell@example.com");
+        assertThat(found.get().getCreatedAt()).isEqualTo(author.getCreatedAt());
     }
 
     @Test
@@ -43,13 +44,13 @@ class AuthorDAOTest {
         AuthorsRecord author1 = new AuthorsRecord();
         author1.setName("Author One");
         author1.setEmail("author1@example.com");
-        author1.setCreatedAt(LocalDateTime.now());
+        author1.setCreatedAt(OffsetDateTime.now());
         authorDAO.save(author1);
 
         AuthorsRecord author2 = new AuthorsRecord();
         author2.setName("Author Two");
         author2.setEmail("author2@example.com");
-        author2.setCreatedAt(LocalDateTime.now());
+        author2.setCreatedAt(OffsetDateTime.now());
         authorDAO.save(author2);
 
         List<AuthorsRecord> authors = authorDAO.findAll();
@@ -61,7 +62,7 @@ class AuthorDAOTest {
         AuthorsRecord author = new AuthorsRecord();
         author.setName("Jane Austen");
         author.setEmail("jane.austen@example.com");
-        author.setCreatedAt(LocalDateTime.now());
+        author.setCreatedAt(OffsetDateTime.now());
         authorDAO.save(author);
 
         Optional<AuthorsRecord> found = authorDAO.findByEmail("jane.austen@example.com");
@@ -74,7 +75,7 @@ class AuthorDAOTest {
         AuthorsRecord author = new AuthorsRecord();
         author.setName("Temporary Author");
         author.setEmail("temp.author@example.com");
-        author.setCreatedAt(LocalDateTime.now());
+        author.setCreatedAt(OffsetDateTime.now());
         authorDAO.save(author);
 
         Long id = author.getId();
@@ -88,7 +89,7 @@ class AuthorDAOTest {
         AuthorsRecord author = new AuthorsRecord();
         author.setName("Delete By Id Author");
         author.setEmail("deletebyid@example.com");
-        author.setCreatedAt(LocalDateTime.now());
+        author.setCreatedAt(OffsetDateTime.now());
         authorDAO.save(author);
 
         Long id = author.getId();
@@ -104,7 +105,7 @@ class AuthorDAOTest {
         AuthorsRecord author = new AuthorsRecord();
         author.setName("Count Author");
         author.setEmail("count@example.com");
-        author.setCreatedAt(LocalDateTime.now());
+        author.setCreatedAt(OffsetDateTime.now());
         authorDAO.save(author);
 
         assertThat(authorDAO.count()).isEqualTo(initialCount + 1);

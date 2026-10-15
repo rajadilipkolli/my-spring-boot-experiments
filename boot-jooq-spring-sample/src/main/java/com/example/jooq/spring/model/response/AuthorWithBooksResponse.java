@@ -1,11 +1,11 @@
 package com.example.jooq.spring.model.response;
 
 import com.example.jooq.spring.db.tables.records.AuthorsRecord;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 public record AuthorWithBooksResponse(
-        Long id, String name, String email, LocalDateTime createdAt, List<BookResponse> books) {
+        Long id, String name, String email, OffsetDateTime createdAt, List<BookResponse> books) {
 
     /**
      * Combines author record values with the supplied book responses.

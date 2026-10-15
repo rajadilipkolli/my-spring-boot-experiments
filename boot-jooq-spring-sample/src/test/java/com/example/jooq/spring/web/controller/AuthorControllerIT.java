@@ -8,7 +8,7 @@ import com.example.jooq.spring.db.tables.records.BooksRecord;
 import com.example.jooq.spring.model.request.CreateAuthorRequest;
 import com.example.jooq.spring.model.response.AuthorResponse;
 import com.example.jooq.spring.model.response.AuthorWithBooksResponse;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
@@ -68,7 +68,7 @@ class AuthorControllerIT extends AbstractIntegrationTest {
         AuthorsRecord author = new AuthorsRecord();
         author.setName("Arthur C. Clarke");
         author.setEmail("clarke@example.com");
-        author.setCreatedAt(LocalDateTime.now());
+        author.setCreatedAt(OffsetDateTime.now());
         authorDAO.save(author);
 
         mockMvcTester
@@ -95,13 +95,13 @@ class AuthorControllerIT extends AbstractIntegrationTest {
         AuthorsRecord author1 = new AuthorsRecord();
         author1.setName("Author 1");
         author1.setEmail("author1@test.com");
-        author1.setCreatedAt(LocalDateTime.now());
+        author1.setCreatedAt(OffsetDateTime.now());
         authorDAO.save(author1);
 
         AuthorsRecord author2 = new AuthorsRecord();
         author2.setName("Author 2");
         author2.setEmail("author2@test.com");
-        author2.setCreatedAt(LocalDateTime.now());
+        author2.setCreatedAt(OffsetDateTime.now());
         authorDAO.save(author2);
 
         mockMvcTester
@@ -121,7 +121,7 @@ class AuthorControllerIT extends AbstractIntegrationTest {
         AuthorsRecord author = new AuthorsRecord();
         author.setName("Original Name");
         author.setEmail("original@example.com");
-        author.setCreatedAt(LocalDateTime.now());
+        author.setCreatedAt(OffsetDateTime.now());
         authorDAO.save(author);
 
         CreateAuthorRequest updateRequest = new CreateAuthorRequest("Updated Name", "updated@example.com");
@@ -146,7 +146,7 @@ class AuthorControllerIT extends AbstractIntegrationTest {
         AuthorsRecord author = new AuthorsRecord();
         author.setName("Frank Herbert");
         author.setEmail("herbert@example.com");
-        author.setCreatedAt(LocalDateTime.now());
+        author.setCreatedAt(OffsetDateTime.parse("2026-01-15T09:30:00+05:30"));
         authorDAO.save(author);
 
         BooksRecord book = new BooksRecord();
@@ -154,7 +154,7 @@ class AuthorControllerIT extends AbstractIntegrationTest {
         book.setIsbn("978-0441172719");
         book.setAuthorId(author.getId());
         book.setPublishedYear(1965);
-        book.setCreatedAt(LocalDateTime.now());
+        book.setCreatedAt(OffsetDateTime.parse("2026-01-15T09:30:00-04:00"));
         bookDAO.save(book);
 
         mockMvcTester
@@ -167,8 +167,10 @@ class AuthorControllerIT extends AbstractIntegrationTest {
                 .convertTo(AuthorWithBooksResponse.class)
                 .satisfies(res -> {
                     assertThat(res.name()).isEqualTo("Frank Herbert");
+                    assertThat(res.createdAt()).isEqualTo(author.getCreatedAt());
                     assertThat(res.books()).hasSize(1);
                     assertThat(res.books().getFirst().title()).isEqualTo("Dune");
+                    assertThat(res.books().getFirst().createdAt()).isEqualTo(book.getCreatedAt());
                 });
     }
 
@@ -177,7 +179,7 @@ class AuthorControllerIT extends AbstractIntegrationTest {
         AuthorsRecord author = new AuthorsRecord();
         author.setName("To Delete");
         author.setEmail("delete@example.com");
-        author.setCreatedAt(LocalDateTime.now());
+        author.setCreatedAt(OffsetDateTime.now());
         authorDAO.save(author);
 
         mockMvcTester
