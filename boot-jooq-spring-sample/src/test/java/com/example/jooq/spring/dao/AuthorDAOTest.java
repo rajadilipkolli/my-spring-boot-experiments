@@ -36,7 +36,8 @@ class AuthorDAOTest {
         assertThat(found).isPresent();
         assertThat(found.get().getName()).isEqualTo("George Orwell");
         assertThat(found.get().getEmail()).isEqualTo("george.orwell@example.com");
-        assertThat(found.get().getCreatedAt().toInstant()).isEqualTo(author.getCreatedAt().toInstant());
+        assertThat(found.get().getCreatedAt().toInstant())
+                .isEqualTo(author.getCreatedAt().toInstant());
     }
 
     @Test
