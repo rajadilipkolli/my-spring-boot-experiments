@@ -8,7 +8,7 @@ import com.example.jooq.spring.model.response.AuthorResponse;
 import com.example.jooq.spring.model.response.AuthorWithBooksResponse;
 import com.example.jooq.spring.model.response.BookResponse;
 import com.example.jooq.spring.web.exception.EntityNotFoundException;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,7 +27,7 @@ public class AuthorService {
     }
 
     /**
-     * Persists a new author with the current local creation time.
+     * Persists a new author with the current creation time including its UTC offset.
      *
      * @return the saved author's values, including its generated ID
      * @throws org.springframework.dao.DataIntegrityViolationException if the author violates database
@@ -38,7 +38,7 @@ public class AuthorService {
         AuthorsRecord record = new AuthorsRecord();
         record.setName(request.name());
         record.setEmail(request.email());
-        record.setCreatedAt(LocalDateTime.now());
+        record.setCreatedAt(OffsetDateTime.now());
         authorDAO.save(record);
         return AuthorResponse.toResponse(record);
     }

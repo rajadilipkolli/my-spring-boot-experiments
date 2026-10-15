@@ -5,7 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.example.jooq.spring.common.SQLContainerConfig;
 import com.example.jooq.spring.db.tables.records.AuthorsRecord;
 import com.example.jooq.spring.db.tables.records.BooksRecord;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -33,7 +33,7 @@ class BookDAOTest {
         AuthorsRecord author = new AuthorsRecord();
         author.setName("J.K. Rowling");
         author.setEmail("jk.rowling@example.com");
-        author.setCreatedAt(LocalDateTime.now());
+        author.setCreatedAt(OffsetDateTime.now());
         authorDAO.save(author);
         this.authorId = author.getId();
     }
@@ -45,13 +45,14 @@ class BookDAOTest {
         book.setIsbn("978-0747532699");
         book.setAuthorId(authorId);
         book.setPublishedYear(1997);
-        book.setCreatedAt(LocalDateTime.now());
+        book.setCreatedAt(OffsetDateTime.parse("2026-01-15T09:30:00-04:00"));
         bookDAO.save(book);
 
         List<BooksRecord> books = bookDAO.findByAuthorId(authorId);
         assertThat(books).hasSize(1);
         assertThat(books.getFirst().getTitle()).isEqualTo("Harry Potter and the Philosopher's Stone");
         assertThat(books.getFirst().getIsbn()).isEqualTo("978-0747532699");
+        assertThat(books.getFirst().getCreatedAt()).isEqualTo(book.getCreatedAt());
     }
 
     @Test
@@ -61,7 +62,7 @@ class BookDAOTest {
         book.setIsbn("978-0747538493");
         book.setAuthorId(authorId);
         book.setPublishedYear(1998);
-        book.setCreatedAt(LocalDateTime.now());
+        book.setCreatedAt(OffsetDateTime.now());
         bookDAO.save(book);
 
         Optional<BooksRecord> found = bookDAO.findByIsbn("978-0747538493");
@@ -79,7 +80,7 @@ class BookDAOTest {
         book1.setIsbn("ISBN-001");
         book1.setAuthorId(authorId);
         book1.setPublishedYear(2001);
-        book1.setCreatedAt(LocalDateTime.now());
+        book1.setCreatedAt(OffsetDateTime.now());
         bookDAO.save(book1);
 
         BooksRecord book2 = new BooksRecord();
@@ -87,7 +88,7 @@ class BookDAOTest {
         book2.setIsbn("ISBN-002");
         book2.setAuthorId(authorId);
         book2.setPublishedYear(2002);
-        book2.setCreatedAt(LocalDateTime.now());
+        book2.setCreatedAt(OffsetDateTime.now());
         bookDAO.save(book2);
 
         assertThat(bookDAO.countByAuthorId(authorId)).isEqualTo(2);
@@ -100,7 +101,7 @@ class BookDAOTest {
         book1.setIsbn("ISBN-OLD");
         book1.setAuthorId(authorId);
         book1.setPublishedYear(1990);
-        book1.setCreatedAt(LocalDateTime.now());
+        book1.setCreatedAt(OffsetDateTime.now());
         bookDAO.save(book1);
 
         BooksRecord book2 = new BooksRecord();
@@ -108,7 +109,7 @@ class BookDAOTest {
         book2.setIsbn("ISBN-MID");
         book2.setAuthorId(authorId);
         book2.setPublishedYear(2000);
-        book2.setCreatedAt(LocalDateTime.now());
+        book2.setCreatedAt(OffsetDateTime.now());
         bookDAO.save(book2);
 
         BooksRecord book3 = new BooksRecord();
@@ -116,7 +117,7 @@ class BookDAOTest {
         book3.setIsbn("ISBN-NEW");
         book3.setAuthorId(authorId);
         book3.setPublishedYear(2020);
-        book3.setCreatedAt(LocalDateTime.now());
+        book3.setCreatedAt(OffsetDateTime.now());
         bookDAO.save(book3);
 
         List<BooksRecord> books = bookDAO.findByPublishedYearRange(1995, 2005);
