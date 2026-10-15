@@ -7,7 +7,7 @@ import com.example.jooq.spring.db.tables.records.AuthorsRecord;
 import com.example.jooq.spring.db.tables.records.BooksRecord;
 import com.example.jooq.spring.model.request.CreateBookRequest;
 import com.example.jooq.spring.model.response.BookResponse;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
@@ -28,7 +28,7 @@ class BookControllerIT extends AbstractIntegrationTest {
         AuthorsRecord author = new AuthorsRecord();
         author.setName("Brandon Sanderson");
         author.setEmail("sanderson@example.com");
-        author.setCreatedAt(LocalDateTime.now());
+        author.setCreatedAt(OffsetDateTime.now());
         authorDAO.save(author);
         this.authorId = author.getId();
     }
@@ -79,7 +79,7 @@ class BookControllerIT extends AbstractIntegrationTest {
         book.setIsbn("978-0765326355");
         book.setAuthorId(authorId);
         book.setPublishedYear(2010);
-        book.setCreatedAt(LocalDateTime.now());
+        book.setCreatedAt(OffsetDateTime.now());
         bookDAO.save(book);
 
         mockMvcTester
@@ -101,7 +101,7 @@ class BookControllerIT extends AbstractIntegrationTest {
         book.setIsbn("978-0765326362");
         book.setAuthorId(authorId);
         book.setPublishedYear(2014);
-        book.setCreatedAt(LocalDateTime.now());
+        book.setCreatedAt(OffsetDateTime.now());
         bookDAO.save(book);
 
         mockMvcTester
@@ -124,7 +124,7 @@ class BookControllerIT extends AbstractIntegrationTest {
         book1.setIsbn("978-0765326379");
         book1.setAuthorId(authorId);
         book1.setPublishedYear(2017);
-        book1.setCreatedAt(LocalDateTime.now());
+        book1.setCreatedAt(OffsetDateTime.now());
         bookDAO.save(book1);
 
         mockMvcTester
@@ -146,7 +146,7 @@ class BookControllerIT extends AbstractIntegrationTest {
         book.setIsbn("978-0765326386");
         book.setAuthorId(authorId);
         book.setPublishedYear(2020);
-        book.setCreatedAt(LocalDateTime.now());
+        book.setCreatedAt(OffsetDateTime.now());
         bookDAO.save(book);
 
         mockMvcTester.delete().uri("/api/books/{id}", book.getId()).assertThat().hasStatus(HttpStatus.NO_CONTENT);

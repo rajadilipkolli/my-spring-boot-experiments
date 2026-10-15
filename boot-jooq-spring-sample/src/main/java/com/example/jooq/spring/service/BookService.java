@@ -6,7 +6,7 @@ import com.example.jooq.spring.db.tables.records.BooksRecord;
 import com.example.jooq.spring.model.request.CreateBookRequest;
 import com.example.jooq.spring.model.response.BookResponse;
 import com.example.jooq.spring.web.exception.EntityNotFoundException;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,7 +25,7 @@ public class BookService {
     }
 
     /**
-     * Persists a book for an existing author with the current local creation time.
+     * Persists a book for an existing author with the current creation time including its UTC offset.
      *
      * @param request book details; a null publication year represents an unknown year
      * @return the saved book's values, including its generated ID
@@ -35,18 +35,19 @@ public class BookService {
      * @throws org.springframework.dao.DataAccessException if another database failure occurs
      */
     public BookResponse createBook(CreateBookRequest request) {
-        authorDAO
-                .findById(request.authorId())
-                .orElseThrow(() -> new EntityNotFoundException("Author not found with id: " + request.authorId()));
+        boolean existsById = authorDAO.existsById(request.authorId());
+        if (!existsById) {
+            throw new EntityNotFoundException("Author not found with id: " + request.authorId());
+        }
 
         BooksRecord record = new BooksRecord();
         record.setTitle(request.title());
         record.setIsbn(request.isbn());
         record.setAuthorId(request.authorId());
         record.setPublishedYear(request.publishedYear());
-        record.setCreatedAt(LocalDateTime.now());
+        record.setCreatedAt(OffsetDateTime.now());
         bookDAO.save(record);
-        return toResponse(record);
+        return BookResponse.toBookResponse(record);
     }
 
     /**
@@ -58,7 +59,7 @@ public class BookService {
     @Transactional(readOnly = true)
     public BookResponse findById(Long id) {
         return bookDAO.findById(id)
-                .map(this::toResponse)
+                .map(BookResponse::toBookResponse)
                 .orElseThrow(() -> new EntityNotFoundException("Book not found with id: " + id));
     }
 
@@ -69,7 +70,7 @@ public class BookService {
      */
     @Transactional(readOnly = true)
     public List<BookResponse> findAll() {
-        return bookDAO.findAll().stream().map(this::toResponse).toList();
+        return bookDAO.findAll().stream().map(BookResponse::toBookResponse).toList();
     }
 
     /**
@@ -81,10 +82,13 @@ public class BookService {
      */
     @Transactional(readOnly = true)
     public List<BookResponse> findByAuthor(Long authorId) {
-        authorDAO
-                .findById(authorId)
-                .orElseThrow(() -> new EntityNotFoundException("Author not found with id: " + authorId));
-        return bookDAO.findByAuthorId(authorId).stream().map(this::toResponse).toList();
+        boolean existsById = authorDAO.existsById(authorId);
+        if (!existsById) {
+            throw new EntityNotFoundException("Author not found with id: " + authorId);
+        }
+        return bookDAO.findByAuthorId(authorId).stream()
+                .map(BookResponse::toBookResponse)
+                .toList();
     }
 
     /**
@@ -94,18 +98,10 @@ public class BookService {
      * @throws org.springframework.dao.DataAccessException if a database operation fails
      */
     public void deleteBook(Long id) {
-        bookDAO.findById(id).orElseThrow(() -> new EntityNotFoundException("Book not found with id: " + id));
+        boolean existsById = bookDAO.existsById(id);
+        if (!existsById) {
+            throw new EntityNotFoundException("Book not found with id: " + id);
+        }
         bookDAO.deleteById(id);
-    }
-
-    /** Copies book record values into an API response, preserving an unknown publication year as null. */
-    private BookResponse toResponse(BooksRecord record) {
-        return new BookResponse(
-                record.getId(),
-                record.getTitle(),
-                record.getIsbn(),
-                record.getAuthorId(),
-                record.getPublishedYear(),
-                record.getCreatedAt());
     }
 }
