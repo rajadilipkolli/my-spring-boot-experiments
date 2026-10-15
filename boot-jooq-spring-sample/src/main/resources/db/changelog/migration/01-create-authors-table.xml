@@ -22,7 +22,7 @@
             <column name="email" type="varchar(255)">
                 <constraints nullable="false" unique="true" uniqueConstraintName="uc_authors_email"/>
             </column>
-            <column name="created_at" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP">
+            <column name="created_at" type="timestamptz" defaultValueComputed="CURRENT_TIMESTAMP">
                 <constraints nullable="false"/>
             </column>
         </createTable>

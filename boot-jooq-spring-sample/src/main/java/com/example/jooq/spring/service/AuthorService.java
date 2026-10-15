@@ -108,7 +108,10 @@ public class AuthorService {
      * @throws org.springframework.dao.DataAccessException if a database operation fails
      */
     public void deleteAuthor(Long id) {
-        authorDAO.findById(id).orElseThrow(() -> new EntityNotFoundException("Author not found with id: " + id));
+        boolean existsById = authorDAO.existsById(id);
+        if (!existsById) {
+            throw new EntityNotFoundException("Author not found with id: " + id);
+        }
         authorDAO.deleteById(id);
     }
 

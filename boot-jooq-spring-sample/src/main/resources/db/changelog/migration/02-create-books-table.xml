@@ -26,7 +26,7 @@
                 <constraints nullable="false"/>
             </column>
             <column name="published_year" type="int"/>
-            <column name="created_at" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP">
+            <column name="created_at" type="timestamptz" defaultValueComputed="CURRENT_TIMESTAMP">
                 <constraints nullable="false"/>
             </column>
         </createTable>
