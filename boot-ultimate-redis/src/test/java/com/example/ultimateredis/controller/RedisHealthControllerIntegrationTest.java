@@ -8,8 +8,10 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 
+/** Integration tests for Redis health reporting through the REST API. */
 class RedisHealthControllerIntegrationTest extends AbstractIntegrationTest {
 
+    /** Verifies that the health endpoint reports Redis as up and includes connection details. */
     @Test
     void checkHealth() {
         this.mockMvcTester

@@ -84,6 +84,11 @@ class RedisValueOperationsUtilTest {
         verify(redisTemplate).expire(key, timeout, unit);
     }
 
+    /**
+     * Verifies that scanning deserializes matching keys and closes the Redis cursor.
+     *
+     * @throws Exception if scanning or closing the cursor fails
+     */
     @Test
     void getKeysWithPattern_shouldReturnMatchingKeys() throws Exception {
         // Arrange

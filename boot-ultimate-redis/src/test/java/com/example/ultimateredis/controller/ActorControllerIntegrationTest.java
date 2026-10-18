@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 
+/** Integration tests for actor CRUD endpoints backed by Redis. */
 class ActorControllerIntegrationTest extends AbstractIntegrationTest {
 
     private Actor testActor1;

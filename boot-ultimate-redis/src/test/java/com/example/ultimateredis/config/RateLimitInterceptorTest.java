@@ -13,6 +13,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+/** Unit tests for request admission and rejection by the rate limit interceptor. */
 @ExtendWith(MockitoExtension.class)
 class RateLimitInterceptorTest {
 
@@ -28,6 +29,11 @@ class RateLimitInterceptorTest {
     @InjectMocks
     private RateLimitInterceptor rateLimitInterceptor;
 
+    /**
+     * Verifies that a request proceeds when the client's rate limiter grants a token.
+     *
+     * @throws Exception if the interceptor fails while handling the request
+     */
     @Test
     void preHandle_whenAllowed_returnsTrue() throws Exception {
         given(request.getRemoteAddr()).willReturn("127.0.0.1");
@@ -38,6 +44,7 @@ class RateLimitInterceptorTest {
         assertThat(result).isTrue();
     }
 
+    /** Verifies that an exhausted rate limit rejects the request with the expected exception. */
     @Test
     void preHandle_whenExceeded_throwsRateLimitExceededException() {
         given(request.getRemoteAddr()).willReturn("127.0.0.1");
