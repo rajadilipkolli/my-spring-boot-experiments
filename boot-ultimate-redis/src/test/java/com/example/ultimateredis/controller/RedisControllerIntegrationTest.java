@@ -18,7 +18,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-class RedisControllerTest extends AbstractIntegrationTest {
+class RedisControllerIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     @Order(1)

@@ -8,7 +8,7 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 
-class RedisHealthControllerTest extends AbstractIntegrationTest {
+class RedisHealthControllerIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     void checkHealth() {

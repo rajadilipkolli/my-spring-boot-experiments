@@ -8,7 +8,7 @@ import java.time.Duration;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 
-class RedisPubSubTest extends AbstractIntegrationTest {
+class RedisPubSubIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     void publishMessage_shouldReturnSuccessAndConsume() {
