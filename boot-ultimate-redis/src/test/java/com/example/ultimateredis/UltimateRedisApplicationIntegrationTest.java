@@ -15,7 +15,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 
-class UltimateRedisApplicationTests extends AbstractIntegrationTest {
+/** Integration tests for Redis value operations, scripts, and rate limiting. */
+class UltimateRedisApplicationIntegrationTest extends AbstractIntegrationTest {
 
     @Autowired
     private RedisTemplate<String, Object> redisTemplate;

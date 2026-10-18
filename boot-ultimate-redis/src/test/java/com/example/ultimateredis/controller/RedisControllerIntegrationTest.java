@@ -17,8 +17,9 @@ import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 
+/** Integration tests for Redis cache endpoints, conditional writes, and operation metrics. */
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-class RedisControllerTest extends AbstractIntegrationTest {
+class RedisControllerIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     @Order(1)

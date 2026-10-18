@@ -8,8 +8,10 @@ import java.time.Duration;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 
-class RedisPubSubTest extends AbstractIntegrationTest {
+/** Integration tests for publishing and consuming Redis messages through the REST API. */
+class RedisPubSubIntegrationTest extends AbstractIntegrationTest {
 
+    /** Verifies that publishing succeeds and the Redis consumer receives the original message. */
     @Test
     void publishMessage_shouldReturnSuccessAndConsume() {
         String message = "Hello PubSub Integration Test!";

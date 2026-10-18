@@ -2,6 +2,7 @@ package com.example.ultimateredis.config;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -12,6 +13,7 @@ import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.redis.connection.RedisConnection;
@@ -82,14 +84,19 @@ class RedisValueOperationsUtilTest {
         verify(redisTemplate).expire(key, timeout, unit);
     }
 
+    /**
+     * Verifies that scanning deserializes matching keys and closes the Redis cursor.
+     *
+     * @throws Exception if scanning or closing the cursor fails
+     */
     @Test
     void getKeysWithPattern_shouldReturnMatchingKeys() throws Exception {
         // Arrange
         String pattern = "test*";
-        RedisConnection connection = org.mockito.Mockito.mock(RedisConnection.class);
-        RedisKeyCommands keyCommands = org.mockito.Mockito.mock(RedisKeyCommands.class);
-        Cursor<byte[]> cursor = org.mockito.Mockito.mock(Cursor.class);
-        RedisSerializer<?> serializer = org.mockito.Mockito.mock(RedisSerializer.class);
+        RedisConnection connection = mock(RedisConnection.class);
+        RedisKeyCommands keyCommands = mock(RedisKeyCommands.class);
+        Cursor<byte[]> cursor = mock(Cursor.class);
+        RedisSerializer<?> serializer = mock(RedisSerializer.class);
 
         when(connection.keyCommands()).thenReturn(keyCommands);
         when(keyCommands.scan(any(ScanOptions.class))).thenReturn(cursor);
@@ -98,8 +105,7 @@ class RedisValueOperationsUtilTest {
         when(redisTemplate.getKeySerializer()).thenReturn((RedisSerializer) serializer);
         when(serializer.deserialize(any(byte[].class))).thenReturn("test1", "test2");
 
-        org.mockito.ArgumentCaptor<RedisCallback<Set<String>>> captor =
-                org.mockito.ArgumentCaptor.forClass(RedisCallback.class);
+        ArgumentCaptor<RedisCallback<Set<String>>> captor = ArgumentCaptor.forClass(RedisCallback.class);
 
         when(redisTemplate.execute(captor.capture())).thenAnswer(invocation -> {
             RedisCallback<Set<String>> callback = invocation.getArgument(0);
