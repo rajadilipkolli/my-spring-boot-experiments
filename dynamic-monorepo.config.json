@@ -5,6 +5,7 @@
     "boot-chaos-monkey":                  { "path": "boot-chaos-monkey", "targets": ["test"] },
     "boot-jooq-spring-sample":            { "path": "boot-jooq-spring-sample", "targets": ["test"] },
     "boot-opensearch-sample":             { "path": "boot-opensearch-sample", "targets": ["test"]},
+    "boot-rabbitmq-thymeleaf":            { "path": "boot-rabbitmq-thymeleaf", "targets": ["test"]},
     "boot-data-multipledatasources":      { "path": "jpa/boot-data-multipledatasources", "targets": ["test"] },
     "boot-jooq-r2dbc-sample":             { "path": "r2dbc/boot-jooq-r2dbc-sample", "targets": ["test"] },
     "boot-hibernate2ndlevelcache-sample": { "path": "jpa/boot-hibernate2ndlevelcache-sample", "targets": ["test"] },
