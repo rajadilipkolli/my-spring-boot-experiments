@@ -44,7 +44,7 @@ public class ContainersConfig {
 
     @Bean
     KafkaContainer kafkaContainer(Network testNetwork, ToxiproxyContainer toxiproxyContainer) {
-        return new KafkaContainer(DockerImageName.parse("apache/kafka-native").withTag("4.3.1")) {
+        return new KafkaContainer(DockerImageName.parse("apache/kafka-native").withTag("4.4.0")) {
             @Override
             public String getBootstrapServers() {
                 return toxiproxyContainer.getHost() + ":" + toxiproxyContainer.getMappedPort(8666);
