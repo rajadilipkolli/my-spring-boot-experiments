@@ -17,7 +17,7 @@
     <properties>
         <java.version>25</java.version>
         <jooq-spring.version>1.2.0</jooq-spring.version>
-        <springdoc-openapi.version>3.1.1</springdoc-openapi.version>
+        <springdoc-openapi.version>3.2.0</springdoc-openapi.version>
         <datasource-micrometer-boot.version>2.3.0</datasource-micrometer-boot.version>
         <testcontainers-jooq-codegen-maven-plugin.version>1.0.0</testcontainers-jooq-codegen-maven-plugin.version>
         <tcjooq.skip>false</tcjooq.skip>
