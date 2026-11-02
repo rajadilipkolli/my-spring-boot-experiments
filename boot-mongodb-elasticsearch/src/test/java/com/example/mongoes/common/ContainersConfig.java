@@ -17,7 +17,8 @@ public class ContainersConfig {
     @RestartScope
     ElasticsearchContainer elasticsearchContainer() {
         return new ElasticsearchContainer("docker.elastic.co/elasticsearch/elasticsearch:9.5.6")
-                .withEnv(Map.of("xpack.security.enabled", "false"));
+                .withEnv(Map.of("xpack.security.enabled", "false"))
+                .withStartupTimeout(java.time.Duration.ofMinutes(3));
     }
 
     @ServiceConnection

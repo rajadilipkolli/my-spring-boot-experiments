@@ -62,8 +62,7 @@ class SearchControllerTest {
 
         @Test
         void whenValidParameters_thenOk() {
-            given(searchService.searchMatchBorough("test", 0, 10))
-                    .willReturn(Mono.just(Flux.empty()));
+            given(searchService.searchMatchBorough("test", 0, 10)).willReturn(Flux.empty());
 
             webTestClient
                     .get()
@@ -79,7 +78,7 @@ class SearchControllerTest {
         @Test
         void whenValidParameters_thenReturns200() {
             given(searchService.queryBoolWithMust("Manhattan", "Italian", "Restaurant", 0, 10))
-                    .willReturn(Mono.just(Flux.empty()));
+                    .willReturn(Flux.empty());
 
             webTestClient
                     .get()

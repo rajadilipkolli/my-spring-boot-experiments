@@ -11,4 +11,9 @@ public final class AppConstants {
     public static final String CUISINE = "cuisine";
     public static final String NAME = "restaurant_name";
     public static final String RESTAURANT_ID = "restaurant_id";
+
+    public static final String BOROUGH_KEYWORD = "borough.keyword";
+    public static final String CUISINE_KEYWORD = "cuisine.keyword";
+    public static final String NAME_KEYWORD = "restaurant_name.keyword";
+    public static final String CUISINE_VECTOR = "cuisine_vector";
 }

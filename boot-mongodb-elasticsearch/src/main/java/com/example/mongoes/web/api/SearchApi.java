@@ -56,7 +56,7 @@ public interface SearchApi {
                 @ApiResponse(responseCode = "400", description = "Invalid parameters provided")
             })
     @GetMapping("/search/borough")
-    Mono<ResponseEntity<Flux<Restaurant>>> searchPhrase(
+    Flux<Restaurant> searchPhrase(
             @RequestParam @NotBlank(message = "Query cannot be blank") String query,
             @RequestParam(defaultValue = "10") @Min(1) @Max(100) Integer limit,
             @RequestParam(defaultValue = "0") @Min(0) Integer offset);
@@ -177,8 +177,8 @@ public interface SearchApi {
             })
     @GetMapping("/search/terms")
     Mono<ResponseEntity<SearchPageResponse<Restaurant>>> searchTerms(
-            @RequestParam("query") @NotEmpty(message = "Queries list cannot be empty") @Valid
-                    List<@NotBlank(message = "Query term cannot be blank") String> queries,
+            @RequestParam("query") @NotEmpty(message = "Queries list cannot be empty")
+                    List<@Valid @NotBlank(message = "Query term cannot be blank") String> queries,
             @RequestParam(defaultValue = "10") @Min(1) @Max(100) Integer limit,
             @RequestParam(defaultValue = "0") @Min(0) Integer offset);
 
@@ -223,7 +223,7 @@ public interface SearchApi {
                 @ApiResponse(responseCode = "400", description = "Invalid parameters provided")
             })
     @GetMapping("/search/must/bool")
-    Mono<ResponseEntity<Flux<Restaurant>>> searchBoolMust(
+    Flux<Restaurant> searchBoolMust(
             @RequestParam @NotBlank(message = "Borough cannot be blank") String borough,
             @RequestParam @NotBlank(message = "Cuisine cannot be blank") String cuisine,
             @RequestParam @NotBlank(message = "Name cannot be blank") String name,
@@ -516,4 +516,86 @@ public interface SearchApi {
                     @Pattern(regexp = "^(km|mi)$", message = "Unit must be either 'km' or 'mi'")
                     @NotBlank(message = "Unit cannot be blank")
                     String unit);
+
+    @Operation(
+            summary = "Search restaurants by vector similarity (kNN)",
+            description = "Search restaurants using dense vector similarity",
+            parameters = {
+                @Parameter(
+                        name = "vector",
+                        in = ParameterIn.QUERY,
+                        description = "Query vector floats",
+                        example = "0.1,0.2,0.3"),
+                @Parameter(
+                        name = "k",
+                        in = ParameterIn.QUERY,
+                        description = "Number of nearest neighbors",
+                        example = "5"),
+                @Parameter(
+                        name = "limit",
+                        in = ParameterIn.QUERY,
+                        description = "Page limit",
+                        example = "10"),
+                @Parameter(
+                        name = "offset",
+                        in = ParameterIn.QUERY,
+                        description = "Page offset",
+                        example = "0")
+            })
+    @GetMapping("/search/knn")
+    Mono<ResponseEntity<SearchPageResponse<Restaurant>>> searchKnn(
+            @RequestParam @NotEmpty(message = "Vector cannot be empty") List<Float> vector,
+            @RequestParam(defaultValue = "5", required = false)
+                    @Positive(message = "k must be positive")
+                    Integer k,
+            @RequestParam(defaultValue = "10", required = false) @Min(1) @Max(100) Integer limit,
+            @RequestParam(defaultValue = "0", required = false) @Min(0) Integer offset);
+
+    @Operation(
+            summary = "Hybrid search combining lexical text matching and vector similarity",
+            description =
+                    "Search restaurants using both multi-match text query and kNN vector similarity",
+            parameters = {
+                @Parameter(
+                        name = "query",
+                        in = ParameterIn.QUERY,
+                        description = "Text query",
+                        example = "Pizza"),
+                @Parameter(
+                        name = "vector",
+                        in = ParameterIn.QUERY,
+                        description = "Query vector floats",
+                        example = "0.1,0.2,0.3"),
+                @Parameter(
+                        name = "k",
+                        in = ParameterIn.QUERY,
+                        description = "Number of nearest neighbors",
+                        example = "5"),
+                @Parameter(
+                        name = "limit",
+                        in = ParameterIn.QUERY,
+                        description = "Page limit",
+                        example = "10"),
+                @Parameter(
+                        name = "offset",
+                        in = ParameterIn.QUERY,
+                        description = "Page offset",
+                        example = "0")
+            })
+    @GetMapping("/search/hybrid")
+    Mono<ResponseEntity<SearchPageResponse<Restaurant>>> searchHybrid(
+            @RequestParam @NotBlank(message = "Query cannot be blank") String query,
+            @RequestParam @NotEmpty(message = "Vector cannot be empty") List<Float> vector,
+            @RequestParam(defaultValue = "5", required = false)
+                    @Positive(message = "k must be positive")
+                    Integer k,
+            @RequestParam(defaultValue = "10", required = false) @Min(1) @Max(100) Integer limit,
+            @RequestParam(defaultValue = "0", required = false) @Min(0) Integer offset);
+
+    @Operation(
+            summary = "Get average inspection score across restaurants",
+            description =
+                    "Calculates average inspection score across all grades using scripted aggregation")
+    @GetMapping("/search/average-score")
+    Mono<ResponseEntity<Double>> getAverageScore();
 }

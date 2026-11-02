@@ -73,6 +73,11 @@ class RestaurantESRepositoryIntegrationTest extends AbstractIntegrationTest {
         Grades grade = new Grades("A", LocalDateTime.of(2022, 1, 1, 1, 1, 1), 15);
         Grades grade1 = new Grades("B", LocalDateTime.of(2022, 3, 31, 23, 59, 59), 15);
         restaurant.setGrades(List.of(grade, grade1));
+        if (id == 2L) {
+            restaurant.setCuisineVector(List.of(0.9f, 0.1f, 0.1f));
+        } else {
+            restaurant.setCuisineVector(List.of(0.1f, 0.9f, 0.1f));
+        }
         return restaurant;
     }
 
@@ -474,5 +479,44 @@ class RestaurantESRepositoryIntegrationTest extends AbstractIntegrationTest {
                 .isNotNull()
                 .extracting(Point::getX, Point::getY)
                 .containsExactly(-73.9, 40.8);
+    }
+
+    @Test
+    void knnSearch_ShouldFindNearestNeighbor() {
+        this.restaurantESRepository
+                .knnSearch(List.of(0.9f, 0.1f, 0.1f), 1, PageRequest.of(0, 10))
+                .as(StepVerifier::create)
+                .consumeNextWith(
+                        searchPage -> {
+                            assertThat(searchPage.isEmpty()).isFalse();
+                            assertThat(searchPage.getContent()).hasSize(1);
+                            Restaurant match = searchPage.getContent().getFirst().getContent();
+                            assertThat(match.getRestaurantId()).isEqualTo(2L);
+                            assertThat(match.getName()).isEqualTo(RESTAURANT_NAME);
+                        })
+                .verifyComplete();
+    }
+
+    @Test
+    void hybridSearch_ShouldCombineTextAndKnn() {
+        this.restaurantESRepository
+                .hybridSearch("Brooklyn", List.of(0.9f, 0.1f, 0.1f), 1, PageRequest.of(0, 10))
+                .as(StepVerifier::create)
+                .consumeNextWith(
+                        searchPage -> {
+                            assertThat(searchPage.isEmpty()).isFalse();
+                            Restaurant match = searchPage.getContent().getFirst().getContent();
+                            assertThat(match.getRestaurantId()).isEqualTo(2L);
+                        })
+                .verifyComplete();
+    }
+
+    @Test
+    void averageInspectionScore_ShouldComputeAverage() {
+        this.restaurantESRepository
+                .averageInspectionScore()
+                .as(StepVerifier::create)
+                .consumeNextWith(avg -> assertThat(avg).isEqualTo(15.0))
+                .verifyComplete();
     }
 }

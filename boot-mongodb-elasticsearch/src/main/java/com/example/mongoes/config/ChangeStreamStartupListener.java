@@ -9,8 +9,10 @@ import com.mongodb.client.model.changestream.ChangeStreamDocument;
 import com.mongodb.client.model.changestream.OperationType;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Objects;
+import java.util.ArrayList;
+import java.util.List;
 import org.bson.BsonTimestamp;
+import org.bson.BsonValue;
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,6 +31,8 @@ import reactor.util.retry.Retry;
 public class ChangeStreamStartupListener {
 
     private static final Logger log = LoggerFactory.getLogger(ChangeStreamStartupListener.class);
+    private static final int BATCH_SIZE = 50;
+    private static final Duration BATCH_TIMEOUT = Duration.ofMillis(100);
 
     private final ReactiveMongoTemplate reactiveMongoTemplate;
     private final RestaurantESRepository restaurantESRepository;
@@ -71,84 +75,115 @@ public class ChangeStreamStartupListener {
                                         .watchCollection(AppConstants.RESTAURANT_COLLECTION)
                                         .resumeAt(options)
                                         .listen())
-                .delayElements(Duration.ofMillis(1))
                 .publishOn(Schedulers.boundedElastic())
-                .concatMap(
-                        restaurantChangeStreamEvent -> {
-                            log.info(
-                                    "processed at {} ", restaurantChangeStreamEvent.getTimestamp());
-                            Restaurant restaurant = restaurantChangeStreamEvent.getBody();
-                            Mono<Void> elasticsearchOp = Mono.empty();
+                .bufferTimeout(BATCH_SIZE, BATCH_TIMEOUT)
+                .filter(batch -> !batch.isEmpty())
+                .concatMap(this::processBatch);
+    }
 
-                            if (restaurant != null) {
-                                if (restaurantChangeStreamEvent.getOperationType()
-                                        == OperationType.DELETE) {
-                                    elasticsearchOp =
-                                            this.restaurantESRepository
-                                                    .delete(restaurant)
-                                                    .log()
-                                                    .doOnError(
-                                                            error ->
-                                                                    log.error(
-                                                                            "Error deleting restaurant: {}",
-                                                                            error.getMessage()));
-                                } else if (restaurantChangeStreamEvent.getOperationType()
-                                                == OperationType.REPLACE
-                                        || restaurantChangeStreamEvent.getOperationType()
-                                                == OperationType.INSERT) {
-                                    elasticsearchOp =
-                                            this.restaurantESRepository
-                                                    .save(restaurant)
-                                                    .log()
-                                                    .doOnError(
-                                                            error ->
-                                                                    log.error(
-                                                                            "Error saving restaurant: {}",
-                                                                            error.getMessage()))
-                                                    .then();
-                                }
-                            } else {
-                                ChangeStreamDocument<Document> eventRaw =
-                                        restaurantChangeStreamEvent.getRaw();
-                                if (Objects.requireNonNull(eventRaw).getOperationType()
-                                        == OperationType.DELETE) {
-                                    if (eventRaw.getDocumentKey() != null) {
-                                        var objectId =
-                                                eventRaw.getDocumentKey()
-                                                        .get("_id")
-                                                        .asObjectId()
-                                                        .getValue()
-                                                        .toString();
-                                        elasticsearchOp =
-                                                this.restaurantESRepository
-                                                        .deleteById(objectId)
-                                                        .doOnError(
-                                                                error ->
-                                                                        log.error(
-                                                                                "Error deleting restaurant by ID: {}",
-                                                                                error
-                                                                                        .getMessage()));
-                                    } else {
-                                        log.warn(
-                                                "Document key is null for DELETE operation. Cannot delete restaurant from repository.");
-                                    }
-                                }
-                            }
+    private Flux<ChangeStreamEvent<Restaurant>> processBatch(
+            List<ChangeStreamEvent<Restaurant>> batch) {
+        List<Restaurant> toSave = new ArrayList<>();
+        List<String> idsToDelete = new ArrayList<>();
 
-                            return elasticsearchOp.then(
-                                    this.changeStreamResumeRepository
-                                            .update(restaurantChangeStreamEvent.getBsonTimestamp())
-                                            .log()
-                                            .retryWhen(
-                                                    Retry.backoff(3, Duration.ofSeconds(1))
-                                                            .maxBackoff(Duration.ofSeconds(10)))
-                                            .doOnError(
-                                                    error ->
-                                                            log.error(
-                                                                    "Failed to update resume token: {}",
-                                                                    error.getMessage()))
-                                            .then(Mono.just(restaurantChangeStreamEvent)));
-                        });
+        for (ChangeStreamEvent<Restaurant> event : batch) {
+            log.info("Processed change stream event at {}", event.getTimestamp());
+            OperationType operationType = event.getOperationType();
+            Restaurant restaurant = event.getBody();
+
+            if (operationType == OperationType.DELETE) {
+                if (restaurant != null && restaurant.getId() != null) {
+                    idsToDelete.add(restaurant.getId());
+                } else {
+                    String id = extractId(event.getRaw());
+                    if (id != null) {
+                        idsToDelete.add(id);
+                    } else {
+                        log.warn(
+                                "Document key is null for DELETE operation. Cannot delete restaurant"
+                                        + " from repository: {}",
+                                event);
+                    }
+                }
+            } else if (operationType == OperationType.INSERT
+                    || operationType == OperationType.REPLACE
+                    || operationType == OperationType.UPDATE) {
+                if (restaurant != null) {
+                    toSave.add(restaurant);
+                } else {
+                    log.warn("Received {} event without body: {}", operationType, event);
+                }
+            }
+        }
+
+        Mono<Void> saveOp =
+                toSave.isEmpty()
+                        ? Mono.empty()
+                        : this.restaurantESRepository
+                                .saveAll(toSave)
+                                .doOnError(
+                                        error ->
+                                                log.error(
+                                                        "Error bulk saving restaurants: {}",
+                                                        error.getMessage()))
+                                .then();
+
+        Mono<Void> deleteOp =
+                idsToDelete.isEmpty()
+                        ? Mono.empty()
+                        : this.restaurantESRepository
+                                .deleteAllById(idsToDelete)
+                                .doOnError(
+                                        error ->
+                                                log.error(
+                                                        "Error bulk deleting restaurants: {}",
+                                                        error.getMessage()));
+
+        BsonTimestamp latestTimestamp = getLatestTimestamp(batch);
+        Mono<Void> resumeTokenOp =
+                latestTimestamp == null
+                        ? Mono.empty()
+                        : this.changeStreamResumeRepository
+                                .update(latestTimestamp)
+                                .retryWhen(
+                                        Retry.backoff(3, Duration.ofSeconds(1))
+                                                .maxBackoff(Duration.ofSeconds(10)))
+                                .doOnError(
+                                        error ->
+                                                log.error(
+                                                        "Failed to update resume token: {}",
+                                                        error.getMessage()))
+                                .then();
+
+        return saveOp.then(deleteOp).then(resumeTokenOp).thenMany(Flux.fromIterable(batch));
+    }
+
+    private BsonTimestamp getLatestTimestamp(List<ChangeStreamEvent<Restaurant>> batch) {
+        ChangeStreamEvent<Restaurant> lastEvent = batch.getLast();
+        if (lastEvent.getBsonTimestamp() != null) {
+            return lastEvent.getBsonTimestamp();
+        }
+        if (lastEvent.getRaw() != null) {
+            return lastEvent.getRaw().getClusterTime();
+        }
+        return null;
+    }
+
+    private String extractId(ChangeStreamDocument<Document> eventRaw) {
+        if (eventRaw == null || eventRaw.getDocumentKey() == null) {
+            return null;
+        }
+        BsonValue idValue = eventRaw.getDocumentKey().get("_id");
+        if (idValue == null) {
+            return null;
+        }
+        if (idValue.isObjectId()) {
+            return idValue.asObjectId().getValue().toHexString();
+        } else if (idValue.isString()) {
+            return idValue.asString().getValue();
+        } else {
+            return idValue.toString();
+        }
     }
 
     private Mono<ChangeStreamOptions> getChangeStreamOption() {

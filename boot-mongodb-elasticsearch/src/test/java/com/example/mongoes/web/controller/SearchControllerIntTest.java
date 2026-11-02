@@ -49,6 +49,7 @@ class SearchControllerIntTest extends AbstractIntegrationTest {
         Grades oldGrade = new Grades("C", LocalDateTime.of(2000, 1, 1, 0, 0, 0), 10);
         Grades olderGrade = new Grades("D", LocalDateTime.of(1999, 1, 1, 0, 0, 0), 5);
         restaurant1.setGrades(List.of(oldGrade, olderGrade));
+        restaurant1.setCuisineVector(List.of(0.1f, 0.9f, 0.1f));
 
         this.restaurantESRepository
                 .deleteAll()
@@ -79,6 +80,7 @@ class SearchControllerIntTest extends AbstractIntegrationTest {
         Grades grade = new Grades("A", LocalDateTime.of(2024, 1, 1, 1, 1, 1), 15);
         Grades grade1 = new Grades("B", LocalDateTime.of(2025, 3, 31, 23, 59, 59), 15);
         restaurant.setGrades(List.of(grade, grade1));
+        restaurant.setCuisineVector(List.of(0.9f, 0.1f, 0.1f));
         return restaurant;
     }
 
@@ -496,11 +498,11 @@ class SearchControllerIntTest extends AbstractIntegrationTest {
                             assertThat(page.facets())
                                     .containsKeys("MyBorough", "MyCuisine", "MyDateRange");
                             var cuisineAgg = page.facets().get("MyCuisine");
-                            assertThat(cuisineAgg).containsKey("chinese");
-                            assertThat(cuisineAgg.get("chinese")).isPositive();
+                            assertThat(cuisineAgg).containsKey("Chinese");
+                            assertThat(cuisineAgg.get("Chinese")).isPositive();
                             var boroughAgg = page.facets().get("MyBorough");
-                            assertThat(boroughAgg).containsKey("brooklyn");
-                            assertThat(boroughAgg.get("brooklyn")).isPositive();
+                            assertThat(boroughAgg).containsKey("Brooklyn");
+                            assertThat(boroughAgg.get("Brooklyn")).isPositive();
                             assertThat(page.isFirst()).isTrue();
                             assertThat(page.isLast()).isTrue();
                             assertThat(page.hasNext()).isFalse();
@@ -536,5 +538,54 @@ class SearchControllerIntTest extends AbstractIntegrationTest {
                             assertThat(first.location()).isEqualTo(new Point(-73.9, 40.8));
                             assertThat(first.dist()).isNotNegative();
                         });
+    }
+
+    @Test
+    void knnSearchEndpoint() {
+        this.webTestClient
+                .get()
+                .uri("/search/knn?vector=0.9,0.1,0.1&k=1&limit=10&offset=0")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(new ParameterizedTypeReference<SearchPageResponse<Restaurant>>() {})
+                .value(
+                        response -> {
+                            assertThat(response.data()).hasSize(1);
+                            assertThat(response.data().getFirst().getRestaurantId()).isEqualTo(2L);
+                            assertThat(response.data().getFirst().getName())
+                                    .isEqualTo(RESTAURANT_NAME);
+                        });
+    }
+
+    @Test
+    void hybridSearchEndpoint() {
+        this.webTestClient
+                .get()
+                .uri("/search/hybrid?query=Brooklyn&vector=0.9,0.1,0.1&k=1&limit=10&offset=0")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(new ParameterizedTypeReference<SearchPageResponse<Restaurant>>() {})
+                .value(
+                        response -> {
+                            assertThat(response.data()).isNotEmpty();
+                            assertThat(response.data().getFirst().getRestaurantId()).isEqualTo(2L);
+                        });
+    }
+
+    @Test
+    void averageScoreEndpoint() {
+        this.webTestClient
+                .get()
+                .uri("/search/average-score")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(Double.class)
+                .value(avg -> assertThat(avg).isEqualTo(11.25));
     }
 }

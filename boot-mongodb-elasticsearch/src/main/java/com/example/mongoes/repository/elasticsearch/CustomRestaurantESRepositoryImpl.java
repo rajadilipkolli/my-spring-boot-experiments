@@ -1,8 +1,10 @@
 package com.example.mongoes.repository.elasticsearch;
 
 import co.elastic.clients.elasticsearch._types.FieldValue;
+import co.elastic.clients.elasticsearch._types.KnnSearch;
 import co.elastic.clients.elasticsearch._types.aggregations.Aggregation;
 import co.elastic.clients.elasticsearch._types.aggregations.AggregationBuilders;
+import co.elastic.clients.elasticsearch._types.aggregations.AvgAggregate;
 import co.elastic.clients.elasticsearch._types.aggregations.DateRangeExpression;
 import co.elastic.clients.elasticsearch._types.query_dsl.Operator;
 import co.elastic.clients.elasticsearch._types.query_dsl.QueryBuilders;
@@ -11,9 +13,12 @@ import com.example.mongoes.document.Restaurant;
 import com.example.mongoes.utils.AppConstants;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.elasticsearch.client.elc.ElasticsearchAggregations;
 import org.springframework.data.elasticsearch.client.elc.NativeQuery;
 import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.SearchHit;
@@ -84,7 +89,7 @@ public class CustomRestaurantESRepositoryImpl implements CustomRestaurantESRepos
                                 QueryBuilders.term(
                                         builder ->
                                                 builder.value(queryTerm)
-                                                        .field(AppConstants.BOROUGH)
+                                                        .field(AppConstants.BOROUGH_KEYWORD)
                                                         .caseInsensitive(true)))
                         .build();
         query.setPageable(pageable);
@@ -95,23 +100,28 @@ public class CustomRestaurantESRepositoryImpl implements CustomRestaurantESRepos
     @Override
     public Mono<SearchPage<Restaurant>> termsQueryForBorough(
             List<String> queries, Pageable pageable) {
+        List<FieldValue> fieldValues =
+                queries.stream()
+                        .flatMap(
+                                q ->
+                                        Stream.of(
+                                                q,
+                                                q.toLowerCase(),
+                                                StringUtils.capitalize(q.toLowerCase())))
+                        .distinct()
+                        .map(FieldValue::of)
+                        .toList();
+
         Query query =
                 NativeQuery.builder()
                         .withQuery(
                                 QueryBuilders.terms(
-                                        builder -> {
-                                            builder.field(AppConstants.BOROUGH);
-                                            builder.terms(
-                                                    termsBuilder ->
-                                                            termsBuilder.value(
-                                                                    queries.stream()
-                                                                            .map(
-                                                                                    String
-                                                                                            ::toLowerCase)
-                                                                            .map(FieldValue::of)
-                                                                            .toList()));
-                                            return builder;
-                                        }))
+                                        builder ->
+                                                builder.field(AppConstants.BOROUGH_KEYWORD)
+                                                        .terms(
+                                                                termsBuilder ->
+                                                                        termsBuilder.value(
+                                                                                fieldValues))))
                         .build();
         query.setPageable(pageable);
 
@@ -389,11 +399,11 @@ public class CustomRestaurantESRepositoryImpl implements CustomRestaurantESRepos
             String[] sortFields) {
         Aggregation cuisineTermsBuilder =
                 AggregationBuilders.terms(
-                        builder -> builder.field(AppConstants.CUISINE).size(limit));
+                        builder -> builder.field(AppConstants.CUISINE_KEYWORD).size(limit));
         // .order(BucketOrder.count(false));
         Aggregation boroughTermsBuilder =
                 AggregationBuilders.terms(
-                        builder -> builder.field(AppConstants.BOROUGH).size(limit));
+                        builder -> builder.field(AppConstants.BOROUGH_KEYWORD).size(limit));
         // .order(BucketOrder.count(false));
         Aggregation dateRangeBuilder =
                 AggregationBuilders.dateRange(
@@ -459,5 +469,84 @@ public class CustomRestaurantESRepositoryImpl implements CustomRestaurantESRepos
         query.setPageable(pageable);
 
         return reactiveElasticsearchOperations.searchForPage(query, Restaurant.class);
+    }
+
+    @Override
+    public Mono<SearchPage<Restaurant>> knnSearch(List<Float> vector, int k, Pageable pageable) {
+        KnnSearch knnSearch =
+                new KnnSearch.Builder()
+                        .field(AppConstants.CUISINE_VECTOR)
+                        .queryVector(vector)
+                        .k(k)
+                        .numCandidates(Math.max(k * 2, 50))
+                        .build();
+
+        Query query = NativeQuery.builder().withKnnSearches(knnSearch).build();
+        query.setPageable(pageable);
+
+        return reactiveElasticsearchOperations.searchForPage(query, Restaurant.class);
+    }
+
+    @Override
+    public Mono<SearchPage<Restaurant>> hybridSearch(
+            String queryKeyword, List<Float> vector, int k, Pageable pageable) {
+        KnnSearch knnSearch =
+                new KnnSearch.Builder()
+                        .field(AppConstants.CUISINE_VECTOR)
+                        .queryVector(vector)
+                        .k(k)
+                        .numCandidates(Math.max(k * 2, 50))
+                        .build();
+
+        Query query =
+                NativeQuery.builder()
+                        .withQuery(
+                                QueryBuilders.multiMatch(
+                                        builder ->
+                                                builder.query(queryKeyword)
+                                                        .fields(
+                                                                AppConstants.BOROUGH,
+                                                                AppConstants.CUISINE,
+                                                                AppConstants.NAME)))
+                        .withKnnSearches(knnSearch)
+                        .build();
+        query.setPageable(pageable);
+
+        return reactiveElasticsearchOperations.searchForPage(query, Restaurant.class);
+    }
+
+    @Override
+    public Mono<Double> averageInspectionScore() {
+        Query query =
+                NativeQuery.builder()
+                        .withAggregation(
+                                "avg_score",
+                                AggregationBuilders.avg(
+                                        avg ->
+                                                avg.script(
+                                                        s ->
+                                                                s.source(
+                                                                        so ->
+                                                                                so.scriptString(
+                                                                                        "double total = 0; int count = 0; for (grade in params._source.grades) { if (grade.score != null) { total += grade.score; count++; } } return count > 0 ? total / count : 0.0;")))))
+                        .build();
+        query.setPageable(PageRequest.of(0, 1));
+
+        return reactiveElasticsearchOperations
+                .searchForPage(query, Restaurant.class)
+                .map(
+                        page -> {
+                            ElasticsearchAggregations aggs =
+                                    (ElasticsearchAggregations)
+                                            page.getSearchHits().getAggregations();
+                            if (aggs != null && aggs.get("avg_score") != null) {
+                                AvgAggregate avgAgg =
+                                        aggs.get("avg_score").aggregation().getAggregate().avg();
+                                return avgAgg != null && avgAgg.value() != null
+                                        ? avgAgg.value()
+                                        : 0.0;
+                            }
+                            return 0.0;
+                        });
     }
 }

@@ -45,4 +45,11 @@ public interface CustomRestaurantESRepository {
             String[] sortFields);
 
     Mono<SearchPage<Restaurant>> findAll(Pageable pageable);
+
+    Mono<SearchPage<Restaurant>> knnSearch(List<Float> vector, int k, Pageable pageable);
+
+    Mono<SearchPage<Restaurant>> hybridSearch(
+            String queryKeyword, List<Float> vector, int k, Pageable pageable);
+
+    Mono<Double> averageInspectionScore();
 }
