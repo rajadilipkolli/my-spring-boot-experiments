@@ -521,14 +521,7 @@ public class CustomRestaurantESRepositoryImpl implements CustomRestaurantESRepos
                 NativeQuery.builder()
                         .withAggregation(
                                 "avg_score",
-                                AggregationBuilders.avg(
-                                        avg ->
-                                                avg.script(
-                                                        s ->
-                                                                s.source(
-                                                                        so ->
-                                                                                so.scriptString(
-                                                                                        "double total = 0; int count = 0; for (grade in params._source.grades) { if (grade.score != null) { total += grade.score; count++; } } return count > 0 ? total / count : 0.0;")))))
+                                AggregationBuilders.avg(avg -> avg.field("grades.score")))
                         .build();
         query.setPageable(PageRequest.of(0, 1));
 

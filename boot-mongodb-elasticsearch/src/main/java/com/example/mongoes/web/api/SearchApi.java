@@ -3,6 +3,7 @@ package com.example.mongoes.web.api;
 import com.example.mongoes.document.Restaurant;
 import com.example.mongoes.model.response.ResultData;
 import com.example.mongoes.model.response.SearchPageResponse;
+import com.example.mongoes.web.validator.ValidVector;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
@@ -544,9 +545,10 @@ public interface SearchApi {
             })
     @GetMapping("/search/knn")
     Mono<ResponseEntity<SearchPageResponse<Restaurant>>> searchKnn(
-            @RequestParam @NotEmpty(message = "Vector cannot be empty") List<Float> vector,
+            @RequestParam @ValidVector List<Float> vector,
             @RequestParam(defaultValue = "5", required = false)
                     @Positive(message = "k must be positive")
+                    @Max(value = 100, message = "k cannot exceed 100")
                     Integer k,
             @RequestParam(defaultValue = "10", required = false) @Min(1) @Max(100) Integer limit,
             @RequestParam(defaultValue = "0", required = false) @Min(0) Integer offset);
@@ -585,9 +587,10 @@ public interface SearchApi {
     @GetMapping("/search/hybrid")
     Mono<ResponseEntity<SearchPageResponse<Restaurant>>> searchHybrid(
             @RequestParam @NotBlank(message = "Query cannot be blank") String query,
-            @RequestParam @NotEmpty(message = "Vector cannot be empty") List<Float> vector,
+            @RequestParam @ValidVector List<Float> vector,
             @RequestParam(defaultValue = "5", required = false)
                     @Positive(message = "k must be positive")
+                    @Max(value = 100, message = "k cannot exceed 100")
                     Integer k,
             @RequestParam(defaultValue = "10", required = false) @Min(1) @Max(100) Integer limit,
             @RequestParam(defaultValue = "0", required = false) @Min(0) Integer offset);

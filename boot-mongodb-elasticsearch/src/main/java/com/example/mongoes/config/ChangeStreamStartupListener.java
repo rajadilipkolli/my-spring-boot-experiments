@@ -81,8 +81,8 @@ public class ChangeStreamStartupListener {
                 .concatMap(this::processBatch);
     }
 
-    private Flux<ChangeStreamEvent<Restaurant>> processBatch(
-            List<ChangeStreamEvent<Restaurant>> batch) {
+    // Visible for testing
+    Flux<ChangeStreamEvent<Restaurant>> processBatch(List<ChangeStreamEvent<Restaurant>> batch) {
         List<Restaurant> toSave = new ArrayList<>();
         List<String> idsToDelete = new ArrayList<>();
 
@@ -92,23 +92,29 @@ public class ChangeStreamStartupListener {
             Restaurant restaurant = event.getBody();
 
             if (operationType == OperationType.DELETE) {
-                if (restaurant != null && restaurant.getId() != null) {
-                    idsToDelete.add(restaurant.getId());
-                } else {
-                    String id = extractId(event.getRaw());
-                    if (id != null) {
+                String id =
+                        (restaurant != null && restaurant.getId() != null)
+                                ? restaurant.getId()
+                                : extractId(event.getRaw());
+                if (id != null) {
+                    toSave.removeIf(r -> id.equals(r.getId()));
+                    if (!idsToDelete.contains(id)) {
                         idsToDelete.add(id);
-                    } else {
-                        log.warn(
-                                "Document key is null for DELETE operation. Cannot delete restaurant"
-                                        + " from repository: {}",
-                                event);
                     }
+                } else {
+                    log.warn(
+                            "Document key is null for DELETE operation. Cannot delete restaurant"
+                                    + " from repository: {}",
+                            event);
                 }
             } else if (operationType == OperationType.INSERT
                     || operationType == OperationType.REPLACE
                     || operationType == OperationType.UPDATE) {
                 if (restaurant != null) {
+                    if (restaurant.getId() != null) {
+                        idsToDelete.remove(restaurant.getId());
+                        toSave.removeIf(r -> restaurant.getId().equals(r.getId()));
+                    }
                     toSave.add(restaurant);
                 } else {
                     log.warn("Received {} event without body: {}", operationType, event);

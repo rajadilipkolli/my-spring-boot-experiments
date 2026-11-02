@@ -176,15 +176,13 @@ public class SearchService {
 
     public Mono<SearchPageResponse<Restaurant>> searchKnn(
             List<Float> vector, int k, Integer offset, Integer limit) {
-        Pageable pageable =
-                PageRequest.of(offset, limit, Sort.by(AppConstants.RESTAURANT_ID).ascending());
+        Pageable pageable = PageRequest.of(offset, limit);
         return restaurantESRepository.knnSearch(vector, k, pageable).map(SearchPageResponse::new);
     }
 
     public Mono<SearchPageResponse<Restaurant>> searchHybrid(
             String query, List<Float> vector, int k, Integer offset, Integer limit) {
-        Pageable pageable =
-                PageRequest.of(offset, limit, Sort.by(AppConstants.RESTAURANT_ID).ascending());
+        Pageable pageable = PageRequest.of(offset, limit);
         return restaurantESRepository
                 .hybridSearch(query, vector, k, pageable)
                 .map(SearchPageResponse::new);
