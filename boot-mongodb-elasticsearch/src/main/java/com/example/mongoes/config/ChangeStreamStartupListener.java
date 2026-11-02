@@ -66,6 +66,11 @@ public class ChangeStreamStartupListener {
                 .subscribe();
     }
 
+    /**
+     * Watches restaurant changes and synchronizes them to Elasticsearch in batches of up to 50
+     * events or 100 milliseconds. Emits each batch's events after its writes and resume timestamp
+     * update complete. Errors from the change stream or batch processing propagate to subscribers.
+     */
     public Flux<ChangeStreamEvent<Restaurant>> changeStreamProcessor() {
         return getChangeStreamOption()
                 .flatMapMany(
@@ -81,6 +86,16 @@ public class ChangeStreamStartupListener {
                 .concatMap(this::processBatch);
     }
 
+    /**
+     * Synchronizes a nonempty batch, keeping the last actionable change for each identified
+     * restaurant. Deletes without an identifiable ID and writes without a body are skipped. Saves
+     * precede deletes, followed by an update using the last event's timestamp when available.
+     * The original events are emitted in order after these operations complete. Write errors
+     * propagate; resume update errors propagate after retries are exhausted.
+     *
+     * @param batch events in arrival order; must not be empty
+     * @throws java.util.NoSuchElementException if the batch is empty
+     */
     // Visible for testing
     Flux<ChangeStreamEvent<Restaurant>> processBatch(List<ChangeStreamEvent<Restaurant>> batch) {
         List<Restaurant> toSave = new ArrayList<>();

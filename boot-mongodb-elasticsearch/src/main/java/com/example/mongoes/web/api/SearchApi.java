@@ -29,6 +29,12 @@ import reactor.core.publisher.Mono;
 @Tag(name = "Search", description = "Restaurant search operations API")
 public interface SearchApi {
 
+    /**
+     * Streams restaurants matching the borough query.
+     *
+     * @param offset zero-based page number
+     * @param limit maximum results per page
+     */
     @Operation(
             summary = "Search restaurants by borough using phrase match",
             description = "Search for restaurants in a specific borough using phrase matching",
@@ -144,6 +150,12 @@ public interface SearchApi {
             @RequestParam(defaultValue = "10") @Min(1) @Max(100) Integer limit,
             @RequestParam(defaultValue = "0") @Min(0) Integer offset);
 
+    /**
+     * Searches borough keywords using the supplied terms and selected capitalization variants.
+     *
+     * @param offset zero-based page number
+     * @param limit maximum results per page
+     */
     @Operation(
             summary = "Terms search for boroughs",
             description = "Search for restaurants in multiple boroughs using terms matching",
@@ -183,6 +195,12 @@ public interface SearchApi {
             @RequestParam(defaultValue = "10") @Min(1) @Max(100) Integer limit,
             @RequestParam(defaultValue = "0") @Min(0) Integer offset);
 
+    /**
+     * Streams restaurants matching the borough, cuisine, and name criteria.
+     *
+     * @param offset zero-based page number
+     * @param limit maximum results per page
+     */
     @Operation(
             summary = "Boolean must search",
             description = "Search for restaurants matching all specified criteria (AND condition)",
@@ -518,6 +536,15 @@ public interface SearchApi {
                     @NotBlank(message = "Unit cannot be blank")
                     String unit);
 
+    /**
+     * Searches restaurants by cuisine vector similarity.
+     *
+     * @param vector exactly three finite values, at least one of which must be nonzero
+     * @param k number of nearest neighbors, from 1 to 100
+     * @param limit maximum results per page, from 1 to 100
+     * @param offset zero-based page number
+     * @return a publisher of the search response; search errors propagate to subscribers
+     */
     @Operation(
             summary = "Search restaurants by vector similarity (kNN)",
             description = "Search restaurants using dense vector similarity",
@@ -553,6 +580,15 @@ public interface SearchApi {
             @RequestParam(defaultValue = "10", required = false) @Min(1) @Max(100) Integer limit,
             @RequestParam(defaultValue = "0", required = false) @Min(0) Integer offset);
 
+    /**
+     * Combines text matching across borough, cuisine, and name with cuisine vector similarity.
+     *
+     * @param vector exactly three finite values, at least one of which must be nonzero
+     * @param k number of nearest neighbors, from 1 to 100
+     * @param limit maximum results per page, from 1 to 100
+     * @param offset zero-based page number
+     * @return a publisher of the search response; search errors propagate to subscribers
+     */
     @Operation(
             summary = "Hybrid search combining lexical text matching and vector similarity",
             description =
@@ -595,6 +631,10 @@ public interface SearchApi {
             @RequestParam(defaultValue = "10", required = false) @Min(1) @Max(100) Integer limit,
             @RequestParam(defaultValue = "0", required = false) @Min(0) Integer offset);
 
+    /**
+     * Returns the average indexed grade score, or 0.0 if the aggregation or its value is absent.
+     * Search errors propagate to subscribers.
+     */
     @Operation(
             summary = "Get average inspection score across restaurants",
             description =

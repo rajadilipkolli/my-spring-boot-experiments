@@ -81,6 +81,7 @@ public class CustomRestaurantESRepositoryImpl implements CustomRestaurantESRepos
         return reactiveElasticsearchOperations.searchForPage(query, Restaurant.class);
     }
 
+    /** Searches the borough keyword field with case-insensitive exact matching. */
     @Override
     public Mono<SearchPage<Restaurant>> termQueryForBorough(String queryTerm, Pageable pageable) {
         Query query =
@@ -97,6 +98,10 @@ public class CustomRestaurantESRepositoryImpl implements CustomRestaurantESRepos
         return reactiveElasticsearchOperations.searchForPage(query, Restaurant.class);
     }
 
+    /**
+     * Searches borough keywords for each supplied term, its lowercase form, and its capitalized
+     * lowercase form. Other capitalization variants are not added automatically.
+     */
     @Override
     public Mono<SearchPage<Restaurant>> termsQueryForBorough(
             List<String> queries, Pageable pageable) {
@@ -322,7 +327,7 @@ public class CustomRestaurantESRepositoryImpl implements CustomRestaurantESRepos
      * "aggs": {
      * "MyCuisine": {
      * "terms": {
-     * "field": "cuisine",
+     * "field": "cuisine.keyword",
      * "size": 1000,
      * "order": {
      * "_count": "desc"
@@ -331,7 +336,7 @@ public class CustomRestaurantESRepositoryImpl implements CustomRestaurantESRepos
      * },
      * "MyBorough": {
      * "terms": {
-     * "field": "borough",
+     * "field": "borough.keyword",
      * "size": 1000
      * }
      * },

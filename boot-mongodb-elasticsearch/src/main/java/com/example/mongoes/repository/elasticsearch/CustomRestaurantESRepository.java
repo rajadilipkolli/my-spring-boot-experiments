@@ -46,10 +46,31 @@ public interface CustomRestaurantESRepository {
 
     Mono<SearchPage<Restaurant>> findAll(Pageable pageable);
 
+    /**
+     * Searches by similarity to the cuisine vector.
+     *
+     * @param vector query vector for the three-dimensional cuisine field
+     * @param k number of nearest neighbors to retrieve
+     * @param pageable requested result page
+     * @return a publisher of the search page; Elasticsearch errors propagate to subscribers
+     */
     Mono<SearchPage<Restaurant>> knnSearch(List<Float> vector, int k, Pageable pageable);
 
+    /**
+     * Combines cuisine vector similarity with a text search across borough, cuisine, and name.
+     *
+     * @param queryKeyword text to match
+     * @param vector query vector for the three-dimensional cuisine field
+     * @param k number of nearest neighbors to retrieve
+     * @param pageable requested result page
+     * @return a publisher of the search page; Elasticsearch errors propagate to subscribers
+     */
     Mono<SearchPage<Restaurant>> hybridSearch(
             String queryKeyword, List<Float> vector, int k, Pageable pageable);
 
+    /**
+     * Returns the average of indexed grade scores, or 0.0 when the average aggregation or its
+     * value is absent. Elasticsearch errors propagate to subscribers.
+     */
     Mono<Double> averageInspectionScore();
 }

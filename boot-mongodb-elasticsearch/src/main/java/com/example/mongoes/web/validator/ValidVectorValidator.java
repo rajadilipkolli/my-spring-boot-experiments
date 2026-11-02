@@ -8,6 +8,10 @@ public class ValidVectorValidator implements ConstraintValidator<ValidVector, Li
 
     private static final int EXPECTED_DIMENSIONS = 3;
 
+    /**
+     * Accepts exactly three non-null finite components with at least one nonzero value. A null
+     * vector is invalid.
+     */
     @Override
     public boolean isValid(List<Float> vector, ConstraintValidatorContext context) {
         if (vector == null) {
