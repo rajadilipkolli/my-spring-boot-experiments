@@ -76,7 +76,7 @@ public class ChangeStreamStartupListener {
                                         .resumeAt(options)
                                         .listen())
                 .publishOn(Schedulers.boundedElastic())
-                .bufferTimeout(BATCH_SIZE, BATCH_TIMEOUT)
+                .bufferTimeout(BATCH_SIZE, BATCH_TIMEOUT, true)
                 .filter(batch -> !batch.isEmpty())
                 .concatMap(this::processBatch);
     }
