@@ -14,7 +14,17 @@ A reactive Spring Boot application demonstrating seamless integration between Mo
 
 ## Architecture
 
-The application follows a reactive architecture pattern using Spring WebFlux:
+```mermaid
+flowchart LR
+    Client([Client / API]) -->|Writes| MC[RestaurantController]
+    MC -->|Reactive save| MR[(MongoDB 9.x)]
+    MR -->|Change Stream| CSL[ChangeStreamStartupListener]
+    CSL -->|Batch Index / Sync| ES[(Elasticsearch 9.x)]
+    Client -->|Search & Aggregations| SC[SearchController]
+    SC -->|Query DSL / kNN / Scripted Aggs| ES
+```
+
+Detailed component interaction using Spring WebFlux:
 
 ```mermaid
 flowchart TB
@@ -41,7 +51,7 @@ flowchart TB
     subgraph Infrastructure [Data Infrastructure]
         direction LR
         MongoDB[(MongoDB\nReplica Set)]
-        Elastic[(Elasticsearch 8.x)]
+        Elastic[(Elasticsearch 9.x)]
         
         MongoDB -.-> |Emit Change Streams| Listener
     end

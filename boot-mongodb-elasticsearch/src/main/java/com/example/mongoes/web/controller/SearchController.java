@@ -25,9 +25,8 @@ class SearchController implements SearchApi {
     }
 
     @Override
-    public Mono<ResponseEntity<Flux<Restaurant>>> searchPhrase(
-            String query, Integer limit, Integer offset) {
-        return searchService.searchMatchBorough(query, offset, limit).map(ResponseEntity::ok);
+    public Flux<Restaurant> searchPhrase(String query, Integer limit, Integer offset) {
+        return searchService.searchMatchBorough(query, offset, limit);
     }
 
     @Override
@@ -51,11 +50,9 @@ class SearchController implements SearchApi {
     }
 
     @Override
-    public Mono<ResponseEntity<Flux<Restaurant>>> searchBoolMust(
+    public Flux<Restaurant> searchBoolMust(
             String borough, String cuisine, String name, Integer limit, Integer offset) {
-        return searchService
-                .queryBoolWithMust(borough, cuisine, name, offset, limit)
-                .map(ResponseEntity::ok);
+        return searchService.queryBoolWithMust(borough, cuisine, name, offset, limit);
     }
 
     @Override
@@ -119,5 +116,22 @@ class SearchController implements SearchApi {
     public Flux<ResultData> searchRestaurantsWithInRange(
             Double lat, Double lon, Double distance, String unit) {
         return this.searchService.searchRestaurantsWithInRange(lat, lon, distance, unit);
+    }
+
+    @Override
+    public Mono<ResponseEntity<SearchPageResponse<Restaurant>>> searchKnn(
+            List<Float> vector, Integer k, Integer limit, Integer offset) {
+        return searchService.searchKnn(vector, k, offset, limit).map(ResponseEntity::ok);
+    }
+
+    @Override
+    public Mono<ResponseEntity<SearchPageResponse<Restaurant>>> searchHybrid(
+            String query, List<Float> vector, Integer k, Integer limit, Integer offset) {
+        return searchService.searchHybrid(query, vector, k, offset, limit).map(ResponseEntity::ok);
+    }
+
+    @Override
+    public Mono<ResponseEntity<Double>> getAverageScore() {
+        return searchService.getAverageInspectionScore().map(ResponseEntity::ok);
     }
 }

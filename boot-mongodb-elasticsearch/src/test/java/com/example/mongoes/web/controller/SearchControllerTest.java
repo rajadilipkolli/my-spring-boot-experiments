@@ -62,8 +62,7 @@ class SearchControllerTest {
 
         @Test
         void whenValidParameters_thenOk() {
-            given(searchService.searchMatchBorough("test", 0, 10))
-                    .willReturn(Mono.just(Flux.empty()));
+            given(searchService.searchMatchBorough("test", 0, 10)).willReturn(Flux.empty());
 
             webTestClient
                     .get()
@@ -79,7 +78,7 @@ class SearchControllerTest {
         @Test
         void whenValidParameters_thenReturns200() {
             given(searchService.queryBoolWithMust("Manhattan", "Italian", "Restaurant", 0, 10))
-                    .willReturn(Mono.just(Flux.empty()));
+                    .willReturn(Flux.empty());
 
             webTestClient
                     .get()
@@ -1097,6 +1096,70 @@ class SearchControllerTest {
             webTestClient
                     .get()
                     .uri("/search/simple?query=Manhattan AND Italian&limit=10&offset=-1")
+                    .exchange()
+                    .expectStatus()
+                    .isBadRequest();
+        }
+    }
+
+    @Nested
+    class KnnVectorValidation {
+
+        @Test
+        void whenVectorHasFewerThanThreeComponents_thenReturns400() {
+            webTestClient
+                    .get()
+                    .uri("/search/knn?vector=0.1,0.2")
+                    .exchange()
+                    .expectStatus()
+                    .isBadRequest();
+        }
+
+        @Test
+        void whenVectorHasMoreThanThreeComponents_thenReturns400() {
+            webTestClient
+                    .get()
+                    .uri("/search/knn?vector=0.1,0.2,0.3,0.4")
+                    .exchange()
+                    .expectStatus()
+                    .isBadRequest();
+        }
+
+        @Test
+        void whenVectorIsZeroVector_thenReturns400() {
+            webTestClient
+                    .get()
+                    .uri("/search/knn?vector=0.0,0.0,0.0")
+                    .exchange()
+                    .expectStatus()
+                    .isBadRequest();
+        }
+
+        @Test
+        void whenHybridVectorIsZeroVector_thenReturns400() {
+            webTestClient
+                    .get()
+                    .uri("/search/hybrid?query=pizza&vector=0.0,0.0,0.0")
+                    .exchange()
+                    .expectStatus()
+                    .isBadRequest();
+        }
+
+        @Test
+        void whenKExceeds100_thenReturns400() {
+            webTestClient
+                    .get()
+                    .uri("/search/knn?vector=0.1,0.2,0.3&k=101")
+                    .exchange()
+                    .expectStatus()
+                    .isBadRequest();
+        }
+
+        @Test
+        void whenHybridKExceeds100_thenReturns400() {
+            webTestClient
+                    .get()
+                    .uri("/search/hybrid?query=pizza&vector=0.1,0.2,0.3&k=101")
                     .exchange()
                     .expectStatus()
                     .isBadRequest();

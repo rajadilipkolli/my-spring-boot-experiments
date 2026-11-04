@@ -31,10 +31,10 @@ public class SearchService {
         this.aggregationProcessor = aggregationProcessor;
     }
 
-    public Mono<Flux<Restaurant>> searchMatchBorough(String query, Integer offset, Integer limit) {
+    public Flux<Restaurant> searchMatchBorough(String query, Integer offset, Integer limit) {
         Pageable pageable =
                 PageRequest.of(offset, limit, Sort.by(AppConstants.RESTAURANT_ID).ascending());
-        return Mono.just(restaurantESRepository.findByBorough(query, pageable));
+        return restaurantESRepository.findByBorough(query, pageable);
     }
 
     public Mono<SearchPageResponse<Restaurant>> multiSearchQuery(
@@ -64,13 +64,12 @@ public class SearchService {
                 .map(SearchPageResponse::new);
     }
 
-    public Mono<Flux<Restaurant>> queryBoolWithMust(
+    public Flux<Restaurant> queryBoolWithMust(
             String borough, String cuisine, String name, Integer offset, Integer limit) {
         Pageable pageable =
                 PageRequest.of(offset, limit, Sort.by(AppConstants.RESTAURANT_ID).ascending());
-        return Mono.just(
-                restaurantESRepository.findByBoroughAndCuisineAndName(
-                        borough, cuisine, name, pageable));
+        return restaurantESRepository.findByBoroughAndCuisineAndName(
+                borough, cuisine, name, pageable);
     }
 
     public Mono<SearchPageResponse<Restaurant>> queryBoolWithShould(
@@ -173,5 +172,23 @@ public class SearchService {
                                             eRestaurant.getAddress().getLocation(),
                                             dist));
                         });
+    }
+
+    public Mono<SearchPageResponse<Restaurant>> searchKnn(
+            List<Float> vector, int k, Integer offset, Integer limit) {
+        Pageable pageable = PageRequest.of(offset, limit);
+        return restaurantESRepository.knnSearch(vector, k, pageable).map(SearchPageResponse::new);
+    }
+
+    public Mono<SearchPageResponse<Restaurant>> searchHybrid(
+            String query, List<Float> vector, int k, Integer offset, Integer limit) {
+        Pageable pageable = PageRequest.of(offset, limit);
+        return restaurantESRepository
+                .hybridSearch(query, vector, k, pageable)
+                .map(SearchPageResponse::new);
+    }
+
+    public Mono<Double> getAverageInspectionScore() {
+        return restaurantESRepository.averageInspectionScore();
     }
 }

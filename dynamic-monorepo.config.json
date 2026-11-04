@@ -4,6 +4,7 @@
     "batch-boot-jpa-sample":              { "path": "batch-boot-jpa-sample", "targets": ["test"] },            
     "boot-chaos-monkey":                  { "path": "boot-chaos-monkey", "targets": ["test"] },
     "boot-jooq-spring-sample":            { "path": "boot-jooq-spring-sample", "targets": ["test"] },
+    "boot-mongodb-elasticsearch":         { "path": "boot-mongodb-elasticsearch", "targets": ["test"]},
     "boot-opensearch-sample":             { "path": "boot-opensearch-sample", "targets": ["test"]},
     "boot-rabbitmq-thymeleaf":            { "path": "boot-rabbitmq-thymeleaf", "targets": ["test"]},
     "boot-togglz-sample":                 { "path": "boot-togglz-sample", "targets": ["test"]},

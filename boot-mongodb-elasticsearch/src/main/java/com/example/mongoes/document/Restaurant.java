@@ -10,6 +10,11 @@ import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.annotation.Version;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
+import org.springframework.data.elasticsearch.annotations.InnerField;
+import org.springframework.data.elasticsearch.annotations.KnnAlgorithmType;
+import org.springframework.data.elasticsearch.annotations.KnnIndexOptions;
+import org.springframework.data.elasticsearch.annotations.KnnSimilarity;
+import org.springframework.data.elasticsearch.annotations.MultiField;
 import org.springframework.data.elasticsearch.annotations.Setting;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -29,19 +34,33 @@ public class Restaurant {
     private Long restaurantId;
 
     @NotBlank(message = "Restaurant Name Can't be Blank")
-    @Field(value = "restaurant_name", fielddata = true, type = FieldType.Text)
+    @MultiField(
+            mainField = @Field(value = "restaurant_name", type = FieldType.Text),
+            otherFields = {@InnerField(suffix = "keyword", type = FieldType.Keyword)})
     private String name;
 
     @Field(type = FieldType.Object)
     private Address address;
 
     @NotBlank(message = "Borough Can't be Blank")
-    @Field(fielddata = true, type = FieldType.Text)
+    @MultiField(
+            mainField = @Field(type = FieldType.Text),
+            otherFields = {@InnerField(suffix = "keyword", type = FieldType.Keyword)})
     private String borough;
 
     @NotBlank(message = "Cuisine Can't be Blank")
-    @Field(fielddata = true, type = FieldType.Text)
+    @MultiField(
+            mainField = @Field(type = FieldType.Text),
+            otherFields = {@InnerField(suffix = "keyword", type = FieldType.Keyword)})
     private String cuisine;
+
+    @Field(
+            value = "cuisine_vector",
+            type = FieldType.Dense_Vector,
+            dims = 3,
+            knnSimilarity = KnnSimilarity.COSINE,
+            knnIndexOptions = @KnnIndexOptions(type = KnnAlgorithmType.HNSW))
+    private List<Float> cuisineVector;
 
     private List<Grades> grades = new ArrayList<>();
 
@@ -97,6 +116,14 @@ public class Restaurant {
         this.cuisine = cuisine;
     }
 
+    public List<Float> getCuisineVector() {
+        return cuisineVector;
+    }
+
+    public void setCuisineVector(List<Float> cuisineVector) {
+        this.cuisineVector = cuisineVector;
+    }
+
     public List<Grades> getGrades() {
         return grades;
     }
@@ -122,6 +149,7 @@ public class Restaurant {
                 .add("address=" + address)
                 .add("borough='" + borough + "'")
                 .add("cuisine='" + cuisine + "'")
+                .add("cuisineVector=" + cuisineVector)
                 .add("grades=" + grades)
                 .add("version=" + version)
                 .toString();

@@ -3,6 +3,7 @@ package com.example.mongoes.web.api;
 import com.example.mongoes.document.Restaurant;
 import com.example.mongoes.model.response.ResultData;
 import com.example.mongoes.model.response.SearchPageResponse;
+import com.example.mongoes.web.validator.ValidVector;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
@@ -28,6 +29,12 @@ import reactor.core.publisher.Mono;
 @Tag(name = "Search", description = "Restaurant search operations API")
 public interface SearchApi {
 
+    /**
+     * Streams restaurants matching the borough query.
+     *
+     * @param offset zero-based page number
+     * @param limit maximum results per page
+     */
     @Operation(
             summary = "Search restaurants by borough using phrase match",
             description = "Search for restaurants in a specific borough using phrase matching",
@@ -56,7 +63,7 @@ public interface SearchApi {
                 @ApiResponse(responseCode = "400", description = "Invalid parameters provided")
             })
     @GetMapping("/search/borough")
-    Mono<ResponseEntity<Flux<Restaurant>>> searchPhrase(
+    Flux<Restaurant> searchPhrase(
             @RequestParam @NotBlank(message = "Query cannot be blank") String query,
             @RequestParam(defaultValue = "10") @Min(1) @Max(100) Integer limit,
             @RequestParam(defaultValue = "0") @Min(0) Integer offset);
@@ -143,6 +150,12 @@ public interface SearchApi {
             @RequestParam(defaultValue = "10") @Min(1) @Max(100) Integer limit,
             @RequestParam(defaultValue = "0") @Min(0) Integer offset);
 
+    /**
+     * Searches borough keywords using the supplied terms and selected capitalization variants.
+     *
+     * @param offset zero-based page number
+     * @param limit maximum results per page
+     */
     @Operation(
             summary = "Terms search for boroughs",
             description = "Search for restaurants in multiple boroughs using terms matching",
@@ -177,11 +190,17 @@ public interface SearchApi {
             })
     @GetMapping("/search/terms")
     Mono<ResponseEntity<SearchPageResponse<Restaurant>>> searchTerms(
-            @RequestParam("query") @NotEmpty(message = "Queries list cannot be empty") @Valid
-                    List<@NotBlank(message = "Query term cannot be blank") String> queries,
+            @RequestParam("query") @NotEmpty(message = "Queries list cannot be empty")
+                    List<@Valid @NotBlank(message = "Query term cannot be blank") String> queries,
             @RequestParam(defaultValue = "10") @Min(1) @Max(100) Integer limit,
             @RequestParam(defaultValue = "0") @Min(0) Integer offset);
 
+    /**
+     * Streams restaurants matching the borough, cuisine, and name criteria.
+     *
+     * @param offset zero-based page number
+     * @param limit maximum results per page
+     */
     @Operation(
             summary = "Boolean must search",
             description = "Search for restaurants matching all specified criteria (AND condition)",
@@ -223,7 +242,7 @@ public interface SearchApi {
                 @ApiResponse(responseCode = "400", description = "Invalid parameters provided")
             })
     @GetMapping("/search/must/bool")
-    Mono<ResponseEntity<Flux<Restaurant>>> searchBoolMust(
+    Flux<Restaurant> searchBoolMust(
             @RequestParam @NotBlank(message = "Borough cannot be blank") String borough,
             @RequestParam @NotBlank(message = "Cuisine cannot be blank") String cuisine,
             @RequestParam @NotBlank(message = "Name cannot be blank") String name,
@@ -516,4 +535,110 @@ public interface SearchApi {
                     @Pattern(regexp = "^(km|mi)$", message = "Unit must be either 'km' or 'mi'")
                     @NotBlank(message = "Unit cannot be blank")
                     String unit);
+
+    /**
+     * Searches restaurants by cuisine vector similarity.
+     *
+     * @param vector exactly three finite values, at least one of which must be nonzero
+     * @param k number of nearest neighbors, from 1 to 100
+     * @param limit maximum results per page, from 1 to 100
+     * @param offset zero-based page number
+     * @return a publisher of the search response; search errors propagate to subscribers
+     */
+    @Operation(
+            summary = "Search restaurants by vector similarity (kNN)",
+            description = "Search restaurants using dense vector similarity",
+            parameters = {
+                @Parameter(
+                        name = "vector",
+                        in = ParameterIn.QUERY,
+                        description = "Query vector floats",
+                        example = "0.1,0.2,0.3"),
+                @Parameter(
+                        name = "k",
+                        in = ParameterIn.QUERY,
+                        description = "Number of nearest neighbors",
+                        example = "5"),
+                @Parameter(
+                        name = "limit",
+                        in = ParameterIn.QUERY,
+                        description = "Page limit",
+                        example = "10"),
+                @Parameter(
+                        name = "offset",
+                        in = ParameterIn.QUERY,
+                        description = "Page offset",
+                        example = "0")
+            })
+    @GetMapping("/search/knn")
+    Mono<ResponseEntity<SearchPageResponse<Restaurant>>> searchKnn(
+            @RequestParam @ValidVector List<Float> vector,
+            @RequestParam(defaultValue = "5", required = false)
+                    @Positive(message = "k must be positive")
+                    @Max(value = 100, message = "k cannot exceed 100")
+                    Integer k,
+            @RequestParam(defaultValue = "10", required = false) @Min(1) @Max(100) Integer limit,
+            @RequestParam(defaultValue = "0", required = false) @Min(0) Integer offset);
+
+    /**
+     * Combines text matching across borough, cuisine, and name with cuisine vector similarity.
+     *
+     * @param vector exactly three finite values, at least one of which must be nonzero
+     * @param k number of nearest neighbors, from 1 to 100
+     * @param limit maximum results per page, from 1 to 100
+     * @param offset zero-based page number
+     * @return a publisher of the search response; search errors propagate to subscribers
+     */
+    @Operation(
+            summary = "Hybrid search combining lexical text matching and vector similarity",
+            description =
+                    "Search restaurants using both multi-match text query and kNN vector similarity",
+            parameters = {
+                @Parameter(
+                        name = "query",
+                        in = ParameterIn.QUERY,
+                        description = "Text query",
+                        example = "Pizza"),
+                @Parameter(
+                        name = "vector",
+                        in = ParameterIn.QUERY,
+                        description = "Query vector floats",
+                        example = "0.1,0.2,0.3"),
+                @Parameter(
+                        name = "k",
+                        in = ParameterIn.QUERY,
+                        description = "Number of nearest neighbors",
+                        example = "5"),
+                @Parameter(
+                        name = "limit",
+                        in = ParameterIn.QUERY,
+                        description = "Page limit",
+                        example = "10"),
+                @Parameter(
+                        name = "offset",
+                        in = ParameterIn.QUERY,
+                        description = "Page offset",
+                        example = "0")
+            })
+    @GetMapping("/search/hybrid")
+    Mono<ResponseEntity<SearchPageResponse<Restaurant>>> searchHybrid(
+            @RequestParam @NotBlank(message = "Query cannot be blank") String query,
+            @RequestParam @ValidVector List<Float> vector,
+            @RequestParam(defaultValue = "5", required = false)
+                    @Positive(message = "k must be positive")
+                    @Max(value = 100, message = "k cannot exceed 100")
+                    Integer k,
+            @RequestParam(defaultValue = "10", required = false) @Min(1) @Max(100) Integer limit,
+            @RequestParam(defaultValue = "0", required = false) @Min(0) Integer offset);
+
+    /**
+     * Returns the average indexed grade score, or 0.0 if the aggregation or its value is absent.
+     * Search errors propagate to subscribers.
+     */
+    @Operation(
+            summary = "Get average inspection score across restaurants",
+            description =
+                    "Calculates average inspection score across all grades using scripted aggregation")
+    @GetMapping("/search/average-score")
+    Mono<ResponseEntity<Double>> getAverageScore();
 }
