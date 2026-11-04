@@ -89,9 +89,9 @@ public class ChangeStreamStartupListener {
     /**
      * Synchronizes a nonempty batch, keeping the last actionable change for each identified
      * restaurant. Deletes without an identifiable ID and writes without a body are skipped. Saves
-     * precede deletes, followed by an update using the last event's timestamp when available.
-     * The original events are emitted in order after these operations complete. Write errors
-     * propagate; resume update errors propagate after retries are exhausted.
+     * precede deletes, followed by an update using the last event's timestamp when available. The
+     * original events are emitted in order after these operations complete. Write errors propagate;
+     * resume update errors propagate after retries are exhausted.
      *
      * @param batch events in arrival order; must not be empty
      * @throws java.util.NoSuchElementException if the batch is empty

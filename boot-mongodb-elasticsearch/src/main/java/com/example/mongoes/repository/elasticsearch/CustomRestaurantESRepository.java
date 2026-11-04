@@ -69,8 +69,8 @@ public interface CustomRestaurantESRepository {
             String queryKeyword, List<Float> vector, int k, Pageable pageable);
 
     /**
-     * Returns the average of indexed grade scores, or 0.0 when the average aggregation or its
-     * value is absent. Elasticsearch errors propagate to subscribers.
+     * Returns the average of indexed grade scores, or 0.0 when the average aggregation or its value
+     * is absent. Elasticsearch errors propagate to subscribers.
      */
     Mono<Double> averageInspectionScore();
 }
