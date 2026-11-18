@@ -15,12 +15,12 @@ public class ContainerConfiguration {
     @ServiceConnection
     @RestartScope
     RabbitMQContainer rabbitMQContainer() {
-        return new RabbitMQContainer(DockerImageName.parse("rabbitmq").withTag("4.4.0-management"));
+        return new RabbitMQContainer(DockerImageName.parse("rabbitmq").withTag("4.4.1-management"));
     }
 
     @Bean
     @ServiceConnection
     PostgreSQLContainer postgreSQLContainer() {
-        return new PostgreSQLContainer(DockerImageName.parse("postgres").withTag("18.6-alpine"));
+        return new PostgreSQLContainer(DockerImageName.parse("postgres").withTag("18.7-alpine"));
     }
 }
