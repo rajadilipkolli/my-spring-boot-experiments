@@ -12,7 +12,7 @@ public class ContainersConfig {
     @Bean
     @ServiceConnection
     public PostgreSQLContainer postgresContainer() {
-        return new PostgreSQLContainer(DockerImageName.parse("postgres:18.6-alpine"))
+        return new PostgreSQLContainer(DockerImageName.parse("postgres:19.0-alpine"))
                 .withCommand("postgres -c wal_level=logical");
     }
 }
