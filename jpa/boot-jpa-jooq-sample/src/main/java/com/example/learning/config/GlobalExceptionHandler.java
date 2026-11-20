@@ -2,6 +2,7 @@ package com.example.learning.config;
 
 import com.example.learning.exception.PostAlreadyExistsException;
 import com.example.learning.exception.ResourceNotFoundException;
+import jakarta.servlet.http.HttpServletRequest;
 import java.net.URI;
 import java.time.Instant;
 import java.util.Comparator;
@@ -28,9 +29,11 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    ProblemDetail onException(MethodArgumentNotValidException methodArgumentNotValidException) {
+    ProblemDetail onException(
+            MethodArgumentNotValidException methodArgumentNotValidException, HttpServletRequest request) {
         ProblemDetail problemDetail =
                 ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(400), "Invalid request content.");
+        problemDetail.setInstance(URI.create(request.getRequestURI()));
         problemDetail.setTitle("Constraint Violation");
         problemDetail.setType(URI.create("https://api.boot-jpa-jooq.com/errors/validation-error"));
         List<ApiValidationError> validationErrorsList = methodArgumentNotValidException.getAllErrors().stream()
@@ -49,9 +52,10 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(PostAlreadyExistsException.class)
-    ProblemDetail onException(PostAlreadyExistsException postAlreadyExistsException) {
+    ProblemDetail onException(PostAlreadyExistsException postAlreadyExistsException, HttpServletRequest request) {
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
                 postAlreadyExistsException.getHttpStatus(), postAlreadyExistsException.getMessage());
+        problemDetail.setInstance(URI.create(request.getRequestURI()));
         problemDetail.setTitle("Duplicate entry");
         problemDetail.setType(URI.create("https://api.boot-jpa-jooq.com/errors/already-exists"));
         problemDetail.setProperty("errorCategory", "Generic");
@@ -60,10 +64,11 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    ProblemDetail onException(Exception exception) {
+    ProblemDetail onException(Exception exception, HttpServletRequest request) {
         if (exception instanceof ResourceNotFoundException resourceNotFoundException) {
             ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
                     resourceNotFoundException.getHttpStatus(), resourceNotFoundException.getMessage());
+            problemDetail.setInstance(URI.create(request.getRequestURI()));
             problemDetail.setTitle("Not Found");
             problemDetail.setType(URI.create("https://api.boot-jpa-jooq.com/errors/not-found"));
             problemDetail.setProperty("errorCategory", "Generic");
@@ -72,6 +77,7 @@ public class GlobalExceptionHandler {
         } else {
             ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
                     HttpStatusCode.valueOf(500), "An unexpected error occurred while processing your request");
+            problemDetail.setInstance(URI.create(request.getRequestURI()));
             problemDetail.setTitle("Internal Server Error");
             problemDetail.setType(URI.create("https://api.boot-jpa-jooq.com/errors/internal-error"));
             problemDetail.setProperty("errorCategory", "Generic");

@@ -11,7 +11,7 @@ import org.springframework.amqp.core.ExchangeBuilder;
 import org.springframework.amqp.core.FanoutExchange;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.core.QueueBuilder;
-import org.springframework.boot.amqp.autoconfigure.RabbitTemplateCustomizer;
+import org.springframework.boot.rabbitmq.autoconfigure.RabbitTemplateCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.converter.JacksonJsonMessageConverter;
