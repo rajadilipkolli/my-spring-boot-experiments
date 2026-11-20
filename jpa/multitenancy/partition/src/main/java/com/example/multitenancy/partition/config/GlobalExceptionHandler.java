@@ -1,5 +1,6 @@
 package com.example.multitenancy.partition.config;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import java.net.URI;
 import java.util.Comparator;
@@ -19,9 +20,11 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    ProblemDetail onException(MethodArgumentNotValidException methodArgumentNotValidException) {
+    ProblemDetail onException(
+            MethodArgumentNotValidException methodArgumentNotValidException, HttpServletRequest request) {
         ProblemDetail problemDetail =
                 ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Invalid request content.");
+        problemDetail.setInstance(URI.create(request.getRequestURI()));
         problemDetail.setTitle("Constraint Violation");
         List<ApiValidationError> validationErrorsList = methodArgumentNotValidException.getAllErrors().stream()
                 .map(objectError -> {
@@ -47,8 +50,9 @@ class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
-    public ProblemDetail onConstraintValidationException(ConstraintViolationException e) {
+    public ProblemDetail onConstraintValidationException(ConstraintViolationException e, HttpServletRequest request) {
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Validation error");
+        problemDetail.setInstance(URI.create(request.getRequestURI()));
         problemDetail.setTitle("Constraint Violation");
 
         List<ApiValidationError> validationErrors = e.getConstraintViolations().stream()

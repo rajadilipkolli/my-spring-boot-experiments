@@ -1,6 +1,7 @@
 package com.example.keysetpagination.config;
 
 import com.example.keysetpagination.exception.ResourceNotFoundException;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import java.net.URI;
 import java.time.Instant;
@@ -21,9 +22,11 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    ProblemDetail onException(MethodArgumentNotValidException methodArgumentNotValidException) {
+    ProblemDetail onException(
+            MethodArgumentNotValidException methodArgumentNotValidException, HttpServletRequest request) {
         ProblemDetail problemDetail =
                 ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(400), "Invalid request content.");
+        problemDetail.setInstance(URI.create(request.getRequestURI()));
         problemDetail.setTitle("Constraint Violation");
         problemDetail.setType(URI.create("https://api.boot-data-window-pagination.com/errors/validation"));
         List<ApiValidationError> validationErrorsList = methodArgumentNotValidException.getAllErrors().stream()
@@ -43,7 +46,7 @@ class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
-    ProblemDetail onException(ConstraintViolationException constraintViolationException) {
+    ProblemDetail onException(ConstraintViolationException constraintViolationException, HttpServletRequest request) {
         List<ApiValidationError> apiValidationErrors = constraintViolationException.getConstraintViolations().stream()
                 .map(constraintViolation -> new ApiValidationError(
                         constraintViolation.getRootBeanClass().getSimpleName(),
@@ -54,6 +57,7 @@ class GlobalExceptionHandler {
                 .toList();
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
                 HttpStatusCode.valueOf(400), constraintViolationException.getMessage());
+        problemDetail.setInstance(URI.create(request.getRequestURI()));
         problemDetail.setTitle("Constraint Violation");
         problemDetail.setType(URI.create("https://api.boot-data-window-pagination.com/errors/validation"));
         problemDetail.setProperty("errorCategory", "Validation");
