@@ -1,6 +1,7 @@
 package com.example.keysetpagination.config;
 
 import com.example.keysetpagination.exception.ResourceNotFoundException;
+import jakarta.servlet.http.HttpServletRequest;
 import java.net.URI;
 import java.time.Instant;
 import java.util.Comparator;
@@ -21,7 +22,8 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    ProblemDetail onException(MethodArgumentNotValidException methodArgumentNotValidException) {
+    ProblemDetail onException(
+            MethodArgumentNotValidException methodArgumentNotValidException, HttpServletRequest request) {
         ProblemDetail problemDetail =
                 ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Invalid request content.");
         problemDetail.setTitle("Constraint Violation");
@@ -37,21 +39,23 @@ public class GlobalExceptionHandler {
                 .sorted(Comparator.comparing(ApiValidationError::field))
                 .toList();
         problemDetail.setProperty("violations", validationErrorsList);
+        problemDetail.setInstance(URI.create(request.getRequestURI()));
         return problemDetail;
     }
 
     /** Returns a 400 validation problem containing the invalid argument message. */
     @ExceptionHandler(IllegalArgumentException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    ProblemDetail onException(IllegalArgumentException exception) {
+    ProblemDetail onException(IllegalArgumentException exception, HttpServletRequest request) {
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, exception.getMessage());
         problemDetail.setTitle("Constraint Violation");
         problemDetail.setType(URI.create("http://api.boot-data-keyset-pagination.com/errors/validation-error"));
+        problemDetail.setInstance(URI.create(request.getRequestURI()));
         return problemDetail;
     }
 
     @ExceptionHandler(Exception.class)
-    ProblemDetail onException(Exception exception) {
+    ProblemDetail onException(Exception exception, HttpServletRequest request) {
         if (exception instanceof ResourceNotFoundException resourceNotFoundException) {
             ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
                     resourceNotFoundException.getHttpStatus(), resourceNotFoundException.getMessage());
@@ -59,11 +63,13 @@ public class GlobalExceptionHandler {
             problemDetail.setType(URI.create("http://api.boot-data-keyset-pagination.com/errors/not-found"));
             problemDetail.setProperty("errorCategory", "Generic");
             problemDetail.setProperty("timestamp", Instant.now());
+            problemDetail.setInstance(URI.create(request.getRequestURI()));
             return problemDetail;
         } else {
             ProblemDetail problemDetail =
                     ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, "Unexpected server error.");
             problemDetail.setTitle("Internal Server Error");
+            problemDetail.setInstance(URI.create(request.getRequestURI()));
             return problemDetail;
         }
     }

@@ -536,7 +536,7 @@ class PostControllerIntTest extends AbstractIntegrationTest {
     @Test
     void updatePostByUserNameWithNoCommentsAndTags() throws JsonProcessingException {
         PostRequest postRequest = new PostRequest(
-                "existingPostTitle",
+                "postWithoutTagsTitle",
                 "This is a simple post without tags",
                 true,
                 LocalDateTime.parse("2025-01-15T10:00:00"),
@@ -555,10 +555,10 @@ class PostControllerIntTest extends AbstractIntegrationTest {
                 .content(jsonMapper.writeValueAsString(postRequest))
                 .assertThat()
                 .hasStatus(HttpStatus.CREATED)
-                .hasHeader(HttpHeaders.LOCATION, "http://localhost/api/users/junit/posts/existingPostTitle");
+                .hasHeader(HttpHeaders.LOCATION, "http://localhost/api/users/junit/posts/postWithoutTagsTitle");
 
         postRequest = new PostRequest(
-                "existingPostTitle",
+                "postWithoutTagsTitle",
                 "updatedContent",
                 true,
                 LocalDateTime.parse("2025-01-16T10:00:00"),
@@ -567,7 +567,7 @@ class PostControllerIntTest extends AbstractIntegrationTest {
 
         this.mockMvcTester
                 .put()
-                .uri("/api/users/{user_name}/posts/{title}", "junit", "existingPostTitle")
+                .uri("/api/users/{user_name}/posts/{title}", "junit", "postWithoutTagsTitle")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .content(jsonMapper.writeValueAsString(postRequest))
@@ -578,7 +578,7 @@ class PostControllerIntTest extends AbstractIntegrationTest {
                 .convertTo(PostResponse.class)
                 .satisfies(postResponse -> {
                     assertThat(postResponse).isNotNull();
-                    assertThat(postResponse.title()).isEqualTo("existingPostTitle");
+                    assertThat(postResponse.title()).isEqualTo("postWithoutTagsTitle");
                     assertThat(postResponse.content()).isEqualTo("updatedContent");
                     assertThat(postResponse.published()).isNotNull().isEqualTo(true);
                     assertThat(postResponse.publishedAt())

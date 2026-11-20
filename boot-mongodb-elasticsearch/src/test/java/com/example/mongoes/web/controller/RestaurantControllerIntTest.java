@@ -164,7 +164,7 @@ class RestaurantControllerIntTest extends AbstractIntegrationTest {
 
         this.webTestClient
                 .post()
-                .uri("/api/restaurant/{restaurantId}/grade", 1)
+                .uri("/api/restaurant/{restaurantId}/grade", 4)
                 .bodyValue(newGrade)
                 .exchange()
                 .expectStatus()
