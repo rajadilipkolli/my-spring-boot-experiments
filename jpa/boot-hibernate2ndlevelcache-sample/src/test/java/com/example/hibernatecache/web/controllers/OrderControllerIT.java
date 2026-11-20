@@ -138,9 +138,10 @@ class OrderControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.orderItems[0].itemCode", is("ITM1")))
                 .andExpect(jsonPath("$.orderItems[0].orderItemId", notNullValue()));
 
-        SQLStatementCountValidator.assertSelectCount(1);
+        // Hibernate persists the customer association by ID without loading it.
+        SQLStatementCountValidator.assertSelectCount(0);
         SQLStatementCountValidator.assertInsertCount(2);
-        SQLStatementCountValidator.assertTotalCount(3);
+        SQLStatementCountValidator.assertTotalCount(2);
     }
 
     @Test

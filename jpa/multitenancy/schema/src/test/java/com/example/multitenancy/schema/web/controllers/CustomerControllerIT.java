@@ -2,6 +2,7 @@ package com.example.multitenancy.schema.web.controllers;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -835,21 +836,43 @@ class CustomerControllerIT extends AbstractIntegrationTest {
                 t2Customers.add(jsonMapper.readValue(response, Customer.class));
             }
 
-            // Verify tenant1 cannot access tenant2 customer IDs
+            // IDs are local to each schema: an overlapping ID must resolve to that tenant's customer.
             for (Customer t2Customer : t2Customers) {
-                mockMvc.perform(get("/api/customers/{id}", t2Customer.getId()).param("tenant", TENANT_1))
-                        .andExpect(status().isNotFound());
+                var localCustomer = t1Customers.stream()
+                        .filter(customer -> customer.getId().equals(t2Customer.getId()))
+                        .findFirst();
+                var result = mockMvc.perform(
+                        get("/api/customers/{id}", t2Customer.getId()).param("tenant", TENANT_1));
+                if (localCustomer.isPresent()) {
+                    result.andExpect(status().isOk())
+                            .andExpect(jsonPath("$.name", is(localCustomer.get().getName())));
+                } else {
+                    result.andExpect(status().isNotFound());
+                }
             }
 
-            // Verify tenant2 cannot access tenant1 customer IDs
             for (Customer t1Customer : t1Customers) {
-                mockMvc.perform(get("/api/customers/{id}", t1Customer.getId()).param("tenant", TENANT_2))
-                        .andExpect(status().isNotFound());
+                var localCustomer = t2Customers.stream()
+                        .filter(customer -> customer.getId().equals(t1Customer.getId()))
+                        .findFirst();
+                var result = mockMvc.perform(
+                        get("/api/customers/{id}", t1Customer.getId()).param("tenant", TENANT_2));
+                if (localCustomer.isPresent()) {
+                    result.andExpect(status().isOk())
+                            .andExpect(jsonPath("$.name", is(localCustomer.get().getName())));
+                } else {
+                    result.andExpect(status().isNotFound());
+                }
             }
+
+            var tenant1OnlyCustomers = t1Customers.stream()
+                    .filter(customer -> t2Customers.stream()
+                            .noneMatch(other -> other.getId().equals(customer.getId())))
+                    .toList();
 
             // Verify tenant2 cannot update tenant1 customers
             CustomerDto updateDto = new CustomerDto("Hacked Customer");
-            for (Customer t1Customer : t1Customers) {
+            for (Customer t1Customer : tenant1OnlyCustomers) {
                 mockMvc.perform(put("/api/customers/{id}", t1Customer.getId())
                                 .param("tenant", TENANT_2)
                                 .contentType(MediaType.APPLICATION_JSON)
@@ -858,7 +881,7 @@ class CustomerControllerIT extends AbstractIntegrationTest {
             }
 
             // Verify tenant2 cannot delete tenant1 customers
-            for (Customer t1Customer : t1Customers) {
+            for (Customer t1Customer : tenant1OnlyCustomers) {
                 mockMvc.perform(delete("/api/customers/{id}", t1Customer.getId())
                                 .param("tenant", TENANT_2))
                         .andExpect(status().isNotFound());
@@ -867,12 +890,14 @@ class CustomerControllerIT extends AbstractIntegrationTest {
             // Verify data integrity - tenant1 still has all its customers
             mockMvc.perform(get("/api/customers").param("tenant", TENANT_1))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.size()", is(5)));
+                    .andExpect(jsonPath("$.size()", is(5)))
+                    .andExpect(jsonPath("$[*].name", containsInAnyOrder(t1CustomerNames.toArray())));
 
             // Verify data integrity - tenant2 still has all its customers
             mockMvc.perform(get("/api/customers").param("tenant", TENANT_2))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.size()", is(3)));
+                    .andExpect(jsonPath("$.size()", is(3)))
+                    .andExpect(jsonPath("$[*].name", containsInAnyOrder(t2CustomerNames.toArray())));
         }
     }
 

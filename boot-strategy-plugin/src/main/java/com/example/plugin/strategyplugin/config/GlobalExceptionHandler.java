@@ -1,6 +1,7 @@
 package com.example.plugin.strategyplugin.config;
 
 import com.example.plugin.strategyplugin.exception.PluginNotFoundException;
+import jakarta.servlet.http.HttpServletRequest;
 import java.net.URI;
 import java.util.Comparator;
 import java.util.List;
@@ -22,7 +23,9 @@ class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    ProblemDetail onException(MethodArgumentNotValidException methodArgumentNotValidException) {
+    ProblemDetail onException(
+            MethodArgumentNotValidException methodArgumentNotValidException,
+            HttpServletRequest request) {
         ProblemDetail problemDetail =
                 ProblemDetail.forStatusAndDetail(
                         HttpStatusCode.valueOf(400), "Invalid request content.");
@@ -46,13 +49,17 @@ class GlobalExceptionHandler {
                         .sorted(Comparator.comparing(ApiValidationError::field))
                         .toList();
         problemDetail.setProperty("violations", validationErrorsList);
+        problemDetail.setInstance(URI.create(request.getRequestURI()));
         return problemDetail;
     }
 
     @ExceptionHandler(PluginNotFoundException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    ProblemDetail onException(PluginNotFoundException pluginNotFoundException) {
-        return pluginNotFoundException.getBody();
+    ProblemDetail onException(
+            PluginNotFoundException pluginNotFoundException, HttpServletRequest request) {
+        ProblemDetail problemDetail = pluginNotFoundException.getBody();
+        problemDetail.setInstance(URI.create(request.getRequestURI()));
+        return problemDetail;
     }
 
     record ApiValidationError(String object, String field, Object rejectedValue, String message) {}

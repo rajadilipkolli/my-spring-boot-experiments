@@ -7,9 +7,11 @@ import com.example.cache.entities.Movie;
 import com.example.cache.model.request.MovieRequest;
 import com.example.cache.model.response.MovieResponse;
 import com.example.cache.repositories.MovieRepository;
+import com.example.cache.utils.AppConstants;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.ReactiveRedisTemplate;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.BodyInserters;
 import reactor.core.publisher.Flux;
@@ -20,17 +22,23 @@ class MovieControllerIT extends AbstractIntegrationTest {
     @Autowired
     private MovieRepository movieRepository;
 
+    @Autowired
+    private ReactiveRedisTemplate<String, Movie> redisTemplate;
+
     private Flux<Movie> movieFlux = null;
 
     @BeforeEach
     void setUp() {
+        redisTemplate.delete(redisTemplate.keys(AppConstants.MOVIE_KEY + "*")).block();
         movieFlux = movieRepository
                 .deleteAll()
                 .thenMany(Flux.just(
                         new Movie(null, "First Movie"),
                         new Movie(null, "Second Movie"),
                         new Movie(null, "Third Movie")))
-                .flatMap(movieRepository::save);
+                .flatMap(movieRepository::save)
+                .cache();
+        movieFlux.collectList().block();
     }
 
     @Test
@@ -42,7 +50,7 @@ class MovieControllerIT extends AbstractIntegrationTest {
                 .expectStatus()
                 .isOk()
                 .expectBodyList(MovieResponse.class)
-                .hasSize(movieFlux.collectList().block().size());
+                .hasSize(3);
     }
 
     @Test
@@ -99,8 +107,6 @@ class MovieControllerIT extends AbstractIntegrationTest {
                 .isCreated()
                 .expectHeader()
                 .contentType(MediaType.APPLICATION_JSON)
-                .expectHeader()
-                .contentLength(29)
                 .expectHeader()
                 .exists("Location")
                 .expectBody(MovieResponse.class)

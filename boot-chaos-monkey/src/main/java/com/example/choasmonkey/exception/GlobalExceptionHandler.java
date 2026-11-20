@@ -1,5 +1,6 @@
 package com.example.choasmonkey.exception;
 
+import jakarta.servlet.http.HttpServletRequest;
 import java.net.URI;
 import java.util.List;
 import java.util.Objects;
@@ -19,9 +20,11 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    ProblemDetail onException(MethodArgumentNotValidException methodArgumentNotValidException) {
+    ProblemDetail onException(
+            MethodArgumentNotValidException methodArgumentNotValidException, HttpServletRequest request) {
         ProblemDetail problemDetail =
                 ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Invalid request content.");
+        problemDetail.setInstance(URI.create(request.getRequestURI()));
         problemDetail.setTitle("Constraint Violation");
         List<ApiValidationError> validationErrorsList = methodArgumentNotValidException.getAllErrors().stream()
                 .map(objectError -> {

@@ -1,6 +1,7 @@
 package com.example.envers.config;
 
 import com.example.envers.exception.ResourceNotFoundException;
+import jakarta.servlet.http.HttpServletRequest;
 import java.net.URI;
 import java.time.Instant;
 import java.util.Comparator;
@@ -23,7 +24,8 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    ProblemDetail onException(MethodArgumentNotValidException methodArgumentNotValidException) {
+    ProblemDetail onException(
+            MethodArgumentNotValidException methodArgumentNotValidException, HttpServletRequest request) {
         ProblemDetail problemDetail =
                 ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(400), "Invalid request content.");
         problemDetail.setTitle("Constraint Violation");
@@ -40,11 +42,12 @@ public class GlobalExceptionHandler {
                 .sorted(Comparator.comparing(ApiValidationError::field))
                 .toList();
         problemDetail.setProperty("violations", validationErrorsList);
+        problemDetail.setInstance(URI.create(request.getRequestURI()));
         return problemDetail;
     }
 
     @ExceptionHandler(Exception.class)
-    ProblemDetail onException(Exception exception) {
+    ProblemDetail onException(Exception exception, HttpServletRequest request) {
         if (exception instanceof ResourceNotFoundException resourceNotFoundException) {
             ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
                     resourceNotFoundException.getHttpStatus(), resourceNotFoundException.getMessage());
@@ -52,6 +55,7 @@ public class GlobalExceptionHandler {
             problemDetail.setType(URI.create("https://api.boot-data-envers.com/errors/not-found"));
             problemDetail.setProperty("errorCategory", "Generic");
             problemDetail.setProperty("timestamp", Instant.now());
+            problemDetail.setInstance(URI.create(request.getRequestURI()));
             return problemDetail;
         } else {
             return ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(500), exception.getMessage());

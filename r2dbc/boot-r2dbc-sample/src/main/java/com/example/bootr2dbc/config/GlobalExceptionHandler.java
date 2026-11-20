@@ -9,6 +9,7 @@ import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -21,7 +22,8 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(WebExchangeBindException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    ProblemDetail onException(WebExchangeBindException webExchangeBindException) {
+    ProblemDetail onException(
+            WebExchangeBindException webExchangeBindException, ServerHttpRequest request) {
         ProblemDetail problemDetail =
                 ProblemDetail.forStatusAndDetail(
                         HttpStatusCode.valueOf(400), "Invalid request content.");
@@ -42,6 +44,7 @@ public class GlobalExceptionHandler {
                         .sorted(Comparator.comparing(ApiValidationError::field))
                         .toList();
         problemDetail.setProperty("violations", validationErrorsList);
+        problemDetail.setInstance(URI.create(request.getURI().getRawPath()));
         return problemDetail;
     }
 

@@ -10,6 +10,7 @@ import io.micrometer.core.instrument.Timer;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -20,6 +21,12 @@ import org.springframework.http.MediaType;
 /** Integration tests for Redis cache endpoints, conditional writes, and operation metrics. */
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class RedisControllerIntegrationTest extends AbstractIntegrationTest {
+
+    @BeforeEach
+    void resetRateLimit() {
+        stringRedisTemplate.delete(
+                java.util.List.of("rate-limiter:127.0.0.1:tokens", "rate-limiter:127.0.0.1:timestamp"));
+    }
 
     @Test
     @Order(1)

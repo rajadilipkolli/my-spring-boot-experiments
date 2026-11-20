@@ -11,6 +11,7 @@ import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -23,9 +24,10 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(WebExchangeBindException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    ProblemDetail onException(WebExchangeBindException webExchangeBindException) {
+    ProblemDetail onException(WebExchangeBindException webExchangeBindException, ServerHttpRequest request) {
         ProblemDetail problemDetail =
                 ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(400), "Invalid request content.");
+        problemDetail.setInstance(URI.create(request.getURI().getRawPath()));
         problemDetail.setTitle("Constraint Violation");
         problemDetail.setType(URI.create("https://api.boot-reactive-cache.com/errors/constraint-violation"));
         List<ApiValidationError> validationErrorsList = webExchangeBindException.getAllErrors().stream()
@@ -44,17 +46,21 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    ProblemDetail onException(Exception exception) {
+    ProblemDetail onException(Exception exception, ServerHttpRequest request) {
         if (exception instanceof ResourceNotFoundException resourceNotFoundException) {
             ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
                     resourceNotFoundException.getHttpStatus(), resourceNotFoundException.getMessage());
+            problemDetail.setInstance(URI.create(request.getURI().getRawPath()));
             problemDetail.setTitle("Not Found");
             problemDetail.setType(URI.create("https://api.boot-reactive-cache.com/errors/not-found"));
             problemDetail.setProperty("errorCategory", "Generic");
             problemDetail.setProperty("timestamp", Instant.now());
             return problemDetail;
         } else {
-            return ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(500), exception.getMessage());
+            ProblemDetail problemDetail =
+                    ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(500), exception.getMessage());
+            problemDetail.setInstance(URI.create(request.getURI().getRawPath()));
+            return problemDetail;
         }
     }
 
