@@ -20,6 +20,7 @@ public class GlobalExceptionHandler {
         ProblemDetail problemDetail =
                 ProblemDetail.forStatusAndDetail(
                         HttpStatusCode.valueOf(500), exception.getMessage());
+        problemDetail.setInstance(URI.create(request.getRequestURI()));
         problemDetail.setTitle("Internal Server Error");
 
         // Try to extract the 'order' from flash attributes (test uses flashAttr)

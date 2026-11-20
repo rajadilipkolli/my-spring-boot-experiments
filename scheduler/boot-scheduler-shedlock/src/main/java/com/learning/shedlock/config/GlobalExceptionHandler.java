@@ -1,6 +1,7 @@
 package com.learning.shedlock.config;
 
 import com.learning.shedlock.exception.ResourceNotFoundException;
+import jakarta.servlet.http.HttpServletRequest;
 import java.net.URI;
 import java.time.Instant;
 import java.util.Comparator;
@@ -23,9 +24,11 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    ProblemDetail onException(MethodArgumentNotValidException methodArgumentNotValidException) {
+    ProblemDetail onException(
+            MethodArgumentNotValidException methodArgumentNotValidException, HttpServletRequest request) {
         ProblemDetail problemDetail =
                 ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(400), "Invalid request content.");
+        problemDetail.setInstance(URI.create(request.getRequestURI()));
         problemDetail.setTitle("Constraint Violation");
         problemDetail.setType(URI.create("http://api.boot-shedlock-sample.com/errors/validation-error"));
         List<ApiValidationError> validationErrorsList = methodArgumentNotValidException.getAllErrors().stream()
@@ -44,17 +47,21 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    ProblemDetail onException(Exception exception) {
+    ProblemDetail onException(Exception exception, HttpServletRequest request) {
         if (exception instanceof ResourceNotFoundException resourceNotFoundException) {
             ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
                     resourceNotFoundException.getHttpStatus(), resourceNotFoundException.getMessage());
+            problemDetail.setInstance(URI.create(request.getRequestURI()));
             problemDetail.setTitle("Not Found");
             problemDetail.setType(URI.create("http://api.boot-shedlock-sample.com/errors/not-found"));
             problemDetail.setProperty("errorCategory", "Generic");
             problemDetail.setProperty("timestamp", Instant.now());
             return problemDetail;
         } else {
-            return ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(500), exception.getMessage());
+            ProblemDetail problemDetail =
+                    ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(500), exception.getMessage());
+            problemDetail.setInstance(URI.create(request.getRequestURI()));
+            return problemDetail;
         }
     }
 

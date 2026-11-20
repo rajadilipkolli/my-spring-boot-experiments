@@ -1,5 +1,6 @@
 package com.example.rest.webclient.exception;
 
+import java.net.URI;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -7,6 +8,7 @@ import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -20,8 +22,9 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(WebExchangeBindException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     ProblemDetail onWebExchangeBindException(
-            WebExchangeBindException webExchangeBindExceptionException) {
+            WebExchangeBindException webExchangeBindExceptionException, ServerHttpRequest request) {
         ProblemDetail problemDetail = webExchangeBindExceptionException.getBody();
+        problemDetail.setInstance(URI.create(request.getURI().getRawPath()));
         problemDetail.setTitle(webExchangeBindExceptionException.getReason());
         List<ApiValidationError> validationErrorsList =
                 webExchangeBindExceptionException.getAllErrors().stream()

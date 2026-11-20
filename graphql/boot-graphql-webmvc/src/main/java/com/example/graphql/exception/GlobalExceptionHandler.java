@@ -1,5 +1,6 @@
 package com.example.graphql.exception;
 
+import jakarta.servlet.http.HttpServletRequest;
 import java.net.URI;
 import java.util.Comparator;
 import java.util.List;
@@ -21,9 +22,11 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    ProblemDetail onException(MethodArgumentNotValidException methodArgumentNotValidException) {
+    ProblemDetail onException(
+            MethodArgumentNotValidException methodArgumentNotValidException, HttpServletRequest request) {
         ProblemDetail problemDetail =
                 ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(400), "Invalid request content.");
+        problemDetail.setInstance(URI.create(request.getRequestURI()));
         problemDetail.setTitle("Constraint Violation");
         problemDetail.setType(URI.create("https://api.graphql-webmvc.com/errors/validation"));
         List<ApiValidationError> validationErrorsList = methodArgumentNotValidException.getAllErrors().stream()
@@ -42,15 +45,17 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    ProblemDetail onException(Exception exception) {
+    ProblemDetail onException(Exception exception, HttpServletRequest request) {
         if (exception instanceof RestControllerException restControllerException) {
             ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
                     restControllerException.getHttpStatus(), restControllerException.getMessage());
+            problemDetail.setInstance(URI.create(request.getRequestURI()));
             problemDetail.setType(URI.create("https://api.graphql-webmvc.com/errors/not-found"));
             return problemDetail;
         } else {
             ProblemDetail problemDetail =
                     ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(500), exception.getMessage());
+            problemDetail.setInstance(URI.create(request.getRequestURI()));
             problemDetail.setType(URI.create("https://api.graphql-webmvc.com/errors/internal-server-error"));
             return problemDetail;
         }

@@ -12,6 +12,7 @@ import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -25,26 +26,31 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(DuplicateRestaurantException.class)
     public Mono<@NonNull ProblemDetail> handleDuplicateRestaurantException(
-            DuplicateRestaurantException ex) {
+            DuplicateRestaurantException ex, ServerHttpRequest request) {
         ProblemDetail problemDetail =
                 ProblemDetail.forStatusAndDetail(ex.getHttpStatus(), ex.getMessage());
+        problemDetail.setInstance(URI.create(request.getURI().getRawPath()));
         problemDetail.setType(URI.create("https://api.mongoes.com/errors/duplicate-restaurant"));
         return Mono.just(problemDetail);
     }
 
     @ExceptionHandler(RestaurantNotFoundException.class)
-    Mono<@NonNull ProblemDetail> handleRestaurantNotFoundException(RestaurantNotFoundException ex) {
+    Mono<@NonNull ProblemDetail> handleRestaurantNotFoundException(
+            RestaurantNotFoundException ex, ServerHttpRequest request) {
         ProblemDetail problemDetail =
                 ProblemDetail.forStatusAndDetail(ex.getHttpStatus(), ex.getMessage());
+        problemDetail.setInstance(URI.create(request.getURI().getRawPath()));
         problemDetail.setType(URI.create("https://api.mongoes.com/errors/restaurant-not-found"));
         return Mono.just(problemDetail);
     }
 
     @ExceptionHandler(WebExchangeBindException.class)
-    Mono<@NonNull ProblemDetail> handleValidationErrors(WebExchangeBindException ex) {
+    Mono<@NonNull ProblemDetail> handleValidationErrors(
+            WebExchangeBindException ex, ServerHttpRequest request) {
         ProblemDetail problemDetail =
                 ProblemDetail.forStatusAndDetail(
                         HttpStatus.BAD_REQUEST, "Invalid request content.");
+        problemDetail.setInstance(URI.create(request.getURI().getRawPath()));
         problemDetail.setTitle("Bad Request");
         problemDetail.setType(URI.create("https://api.mongoes.com/errors/validation-error"));
         List<ApiValidationError> validationErrorsList =
@@ -66,10 +72,12 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
-    Mono<@NonNull ProblemDetail> handleConstraintViolation(ConstraintViolationException ex) {
+    Mono<@NonNull ProblemDetail> handleConstraintViolation(
+            ConstraintViolationException ex, ServerHttpRequest request) {
 
         ProblemDetail problemDetail =
                 ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Validation failed");
+        problemDetail.setInstance(URI.create(request.getURI().getRawPath()));
         problemDetail.setTitle("Constraint Violation");
         problemDetail.setType(URI.create("https://api.mongoes.com/errors/validation-error"));
         List<ApiValidationError> validationErrorsList =
@@ -88,9 +96,11 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(MissingRequestValueException.class)
-    Mono<@NonNull ProblemDetail> handleException(MissingRequestValueException ex) {
+    Mono<@NonNull ProblemDetail> handleException(
+            MissingRequestValueException ex, ServerHttpRequest request) {
         ProblemDetail problemDetail =
                 ProblemDetail.forStatusAndDetail(ex.getStatusCode(), ex.getBody().getDetail());
+        problemDetail.setInstance(URI.create(request.getURI().getRawPath()));
         problemDetail.setType(URI.create("https://api.mongoes.com/errors/validation-error"));
         return Mono.just(problemDetail);
     }
