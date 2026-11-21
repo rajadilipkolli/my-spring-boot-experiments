@@ -40,14 +40,13 @@ public class ReactivePostController {
         return reactivePostService
                 .findAllReactivePosts(sortBy, sortDir)
                 .collectList()
-                .flatMap(
-                        posts -> {
-                            if (posts.isEmpty()) {
-                                return Mono.just(ResponseEntity.noContent().build());
-                            } else {
-                                return Mono.just(ResponseEntity.ok(posts));
-                            }
-                        });
+                .flatMap(posts -> {
+                    if (posts.isEmpty()) {
+                        return Mono.just(ResponseEntity.noContent().build());
+                    } else {
+                        return Mono.just(ResponseEntity.ok(posts));
+                    }
+                });
     }
 
     @GetMapping("/{id}")
@@ -64,14 +63,13 @@ public class ReactivePostController {
         return reactivePostService
                 .findCommentsForReactivePost(postId)
                 .collectList()
-                .flatMap(
-                        comments -> {
-                            if (comments.isEmpty()) {
-                                return Mono.just(ResponseEntity.noContent().build());
-                            } else {
-                                return Mono.just(ResponseEntity.ok(comments));
-                            }
-                        });
+                .flatMap(comments -> {
+                    if (comments.isEmpty()) {
+                        return Mono.just(ResponseEntity.noContent().build());
+                    } else {
+                        return Mono.just(ResponseEntity.ok(comments));
+                    }
+                });
     }
 
     @PostMapping("/")
@@ -80,19 +78,18 @@ public class ReactivePostController {
             UriComponentsBuilder uriComponentsBuilder) {
         return reactivePostService
                 .saveReactivePost(reactivePostRequest)
-                .map(
-                        savedPost -> {
-                            // Build the location URI
-                            String location =
-                                    uriComponentsBuilder
-                                            .path("/api/posts/{id}")
-                                            .buildAndExpand(savedPost.getId())
-                                            .toUriString();
+                .map(savedPost -> {
+                    // Build the location URI
+                    String location =
+                            uriComponentsBuilder
+                                    .path("/api/posts/{id}")
+                                    .buildAndExpand(savedPost.getId())
+                                    .toUriString();
 
-                            // Create a ResponseEntity with the Location header and the saved
-                            // ReactivePost
-                            return ResponseEntity.created(URI.create(location)).body(savedPost);
-                        });
+                    // Create a ResponseEntity with the Location header and the saved
+                    // ReactivePost
+                    return ResponseEntity.created(URI.create(location)).body(savedPost);
+                });
     }
 
     @PutMapping("/{id}")
@@ -101,11 +98,10 @@ public class ReactivePostController {
             @Validated @RequestBody ReactivePostRequest reactivePostRequest) {
         return reactivePostService
                 .findReactivePostById(id)
-                .flatMap(
-                        existingPost ->
-                                reactivePostService
-                                        .updateReactivePost(reactivePostRequest, existingPost)
-                                        .map(ResponseEntity::ok))
+                .flatMap(existingPost ->
+                        reactivePostService
+                                .updateReactivePost(reactivePostRequest, existingPost)
+                                .map(ResponseEntity::ok))
                 .switchIfEmpty(Mono.just(ResponseEntity.notFound().build()));
     }
 
