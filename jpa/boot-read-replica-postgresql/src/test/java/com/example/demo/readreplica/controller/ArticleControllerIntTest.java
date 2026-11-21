@@ -26,17 +26,16 @@ class ArticleControllerIntTest extends AbstractIntegrationTest {
                 .hasContentType(MediaType.APPLICATION_JSON)
                 .bodyJson()
                 .convertTo(ArticleDTO.class)
-                .satisfies(
-                        articleDTO -> {
-                            assertThat(articleDTO.title())
-                                    .isNotNull()
-                                    .isEqualTo("Waiter! There is a bug in my JSoup!");
-                            assertThat(articleDTO.authored()).isInstanceOf(LocalDateTime.class);
-                            assertThat(articleDTO.published()).isInstanceOf(LocalDateTime.class);
-                            assertThat(articleDTO.commentDTOs())
-                                    .hasSize(2)
-                                    .hasOnlyElementsOfType(CommentDTO.class);
-                        });
+                .satisfies(articleDTO -> {
+                    assertThat(articleDTO.title())
+                            .isNotNull()
+                            .isEqualTo("Waiter! There is a bug in my JSoup!");
+                    assertThat(articleDTO.authored()).isInstanceOf(LocalDateTime.class);
+                    assertThat(articleDTO.published()).isInstanceOf(LocalDateTime.class);
+                    assertThat(articleDTO.commentDTOs())
+                            .hasSize(2)
+                            .hasOnlyElementsOfType(CommentDTO.class);
+                });
     }
 
     @Test
@@ -60,11 +59,10 @@ class ArticleControllerIntTest extends AbstractIntegrationTest {
                 .content(jsonMapper.writeValueAsString(articleDTO))
                 .assertThat()
                 .hasStatus(HttpStatus.CREATED)
-                .matches(
-                        result -> {
-                            location.set(result.getResponse().getHeader("Location"));
-                            assertThat(location.get()).isNotBlank().contains("/articles/");
-                        });
+                .matches(result -> {
+                    location.set(result.getResponse().getHeader("Location"));
+                    assertThat(location.get()).isNotBlank().contains("/articles/");
+                });
 
         mockMvcTester
                 .get()
@@ -74,19 +72,17 @@ class ArticleControllerIntTest extends AbstractIntegrationTest {
                 .hasContentType(MediaType.APPLICATION_JSON)
                 .bodyJson()
                 .convertTo(ArticleDTO.class)
-                .satisfies(
-                        response -> {
-                            assertThat(response.title()).isNotNull().isEqualTo("junitTitle");
-                            assertThat(response.authored()).isInstanceOf(LocalDateTime.class);
-                            assertThat(response.authored().toLocalDate())
-                                    .isEqualTo(LocalDate.now().minusDays(1));
-                            assertThat(response.published()).isInstanceOf(LocalDateTime.class);
-                            assertThat(response.published().toLocalDate())
-                                    .isEqualTo(LocalDate.now());
-                            assertThat(response.commentDTOs())
-                                    .hasSize(1)
-                                    .hasOnlyElementsOfType(CommentDTO.class);
-                        });
+                .satisfies(response -> {
+                    assertThat(response.title()).isNotNull().isEqualTo("junitTitle");
+                    assertThat(response.authored()).isInstanceOf(LocalDateTime.class);
+                    assertThat(response.authored().toLocalDate())
+                            .isEqualTo(LocalDate.now().minusDays(1));
+                    assertThat(response.published()).isInstanceOf(LocalDateTime.class);
+                    assertThat(response.published().toLocalDate()).isEqualTo(LocalDate.now());
+                    assertThat(response.commentDTOs())
+                            .hasSize(1)
+                            .hasOnlyElementsOfType(CommentDTO.class);
+                });
 
         mockMvcTester.delete().uri(location.get()).assertThat().hasStatus(HttpStatus.ACCEPTED);
     }

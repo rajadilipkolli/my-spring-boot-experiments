@@ -73,60 +73,58 @@ class LokiPushIntegrationTest extends AbstractIntegrationTest {
 
         await().atMost(Duration.ofSeconds(60))
                 .pollInterval(Duration.ofSeconds(2))
-                .untilAsserted(
-                        () -> {
-                            boolean found = false;
-                            for (String logql : logqlCandidates) {
-                                String encodedQuery =
-                                        URLEncoder.encode(logql, StandardCharsets.UTF_8);
-                                String qUrl =
-                                        base
-                                                + "/loki/api/v1/query_range?query="
-                                                + encodedQuery
-                                                + "&start="
-                                                + startNs
-                                                + "&end="
-                                                + endNs
-                                                + "&limit=200";
+                .untilAsserted(() -> {
+                    boolean found = false;
+                    for (String logql : logqlCandidates) {
+                        String encodedQuery = URLEncoder.encode(logql, StandardCharsets.UTF_8);
+                        String qUrl =
+                                base
+                                        + "/loki/api/v1/query_range?query="
+                                        + encodedQuery
+                                        + "&start="
+                                        + startNs
+                                        + "&end="
+                                        + endNs
+                                        + "&limit=200";
 
-                                HttpRequest q =
-                                        HttpRequest.newBuilder()
-                                                .uri(URI.create(qUrl))
-                                                .timeout(Duration.ofSeconds(10))
-                                                .GET()
-                                                .build();
-                                HttpResponse<String> resp =
-                                        http.send(q, HttpResponse.BodyHandlers.ofString());
+                        HttpRequest q =
+                                HttpRequest.newBuilder()
+                                        .uri(URI.create(qUrl))
+                                        .timeout(Duration.ofSeconds(10))
+                                        .GET()
+                                        .build();
+                        HttpResponse<String> resp =
+                                http.send(q, HttpResponse.BodyHandlers.ofString());
 
-                                if (resp.statusCode() < 200 || resp.statusCode() >= 300) {
-                                    // try next candidate
-                                    continue;
-                                }
+                        if (resp.statusCode() < 200 || resp.statusCode() >= 300) {
+                            // try next candidate
+                            continue;
+                        }
 
-                                JsonNode root = jsonMapper.readTree(resp.body());
-                                JsonNode data = root.path("data").path("result");
-                                if (data.isArray()) {
-                                    for (JsonNode item : data) {
-                                        JsonNode values = item.path("values");
-                                        if (values.isArray()) {
-                                            for (JsonNode v : values) {
-                                                if (v.isArray() && v.size() > 1) {
-                                                    String line = v.get(1).asText();
-                                                    if (line.contains(unique)) {
-                                                        found = true;
-                                                        break;
-                                                    }
-                                                }
+                        JsonNode root = jsonMapper.readTree(resp.body());
+                        JsonNode data = root.path("data").path("result");
+                        if (data.isArray()) {
+                            for (JsonNode item : data) {
+                                JsonNode values = item.path("values");
+                                if (values.isArray()) {
+                                    for (JsonNode v : values) {
+                                        if (v.isArray() && v.size() > 1) {
+                                            String line = v.get(1).asText();
+                                            if (line.contains(unique)) {
+                                                found = true;
+                                                break;
                                             }
                                         }
-                                        if (found) break;
                                     }
                                 }
-
                                 if (found) break;
                             }
+                        }
 
-                            assertThat(found).as("expected message not found yet in Loki").isTrue();
-                        });
+                        if (found) break;
+                    }
+
+                    assertThat(found).as("expected message not found yet in Loki").isTrue();
+                });
     }
 }

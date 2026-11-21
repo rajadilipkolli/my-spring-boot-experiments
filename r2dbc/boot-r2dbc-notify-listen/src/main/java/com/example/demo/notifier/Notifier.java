@@ -47,7 +47,6 @@ public class Notifier {
                     }
                     return notificationListener
                             .listenTo(notificationRequest.channel())
-                            .doOnSuccess(postgresqlResult -> log.debug(postgresqlResult.toString()))
                             .then(Mono.defer(() -> sendNotification(notificationRequest)
                                     .flatMap(rowsUpdated -> ServerResponse.ok().bodyValue(rowsUpdated))
                                     .onErrorResume(e -> {

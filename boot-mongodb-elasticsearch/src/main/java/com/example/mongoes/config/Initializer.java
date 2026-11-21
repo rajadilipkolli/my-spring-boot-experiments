@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import org.bson.Document;
+import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
@@ -35,7 +36,7 @@ public class Initializer implements CommandLineRunner {
     }
 
     @Override
-    public void run(String... args) throws IOException {
+    public void run(String @NonNull ... args) throws IOException {
         log.info("Running Initializer.....");
         restaurantRepository
                 .deleteAll()
@@ -101,10 +102,29 @@ public class Initializer implements CommandLineRunner {
 
         restaurant.setAddress(address);
 
+        List<Double> vector = document.getList("cuisine_vector", Double.class);
+        if (vector != null && vector.size() == 3) {
+            restaurant.setCuisineVector(vector.stream().map(Double::floatValue).toList());
+        } else {
+            restaurant.setCuisineVector(generateVectorForCuisine(restaurant.getCuisine()));
+        }
+
         List<Grades> gradesList = getGradesList(document.getList("grades", Document.class));
         restaurant.setGrades(gradesList);
 
         return restaurant;
+    }
+
+    private List<Float> generateVectorForCuisine(String cuisine) {
+        if (cuisine == null || cuisine.isBlank()) {
+            return List.of(0.0f, 0.0f, 1.0f);
+        }
+        int hash = Math.abs(cuisine.hashCode());
+        float c1 = ((hash % 100) + 1) / 100.0f;
+        float c2 = ((((float) hash / 100) % 100) + 1) / 100.0f;
+        float c3 = ((((float) hash / 10000) % 100) + 1) / 100.0f;
+        float norm = (float) Math.sqrt(c1 * c1 + c2 * c2 + c3 * c3);
+        return List.of(c1 / norm, c2 / norm, c3 / norm);
     }
 
     private List<Grades> getGradesList(List<Document> gradeDocumentList) {

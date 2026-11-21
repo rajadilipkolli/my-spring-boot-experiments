@@ -32,19 +32,18 @@ class StrategyPluginApplicationTests extends AbstractIntegrationTest {
                 .hasStatus(HttpStatus.BAD_REQUEST)
                 .bodyJson()
                 .convertTo(ProblemDetail.class)
-                .satisfies(
-                        problemDetail -> {
-                            assertThat(problemDetail.getDetail())
-                                    .isEqualTo("Plugin not found for type: xls");
-                            assertThat(problemDetail.getTitle()).isEqualTo("Product Not Found");
-                            assertThat(problemDetail.getStatus()).isEqualTo(400);
-                            assertThat(problemDetail.getType())
-                                    .hasToString("https://api.service.com/errors/bad-request");
-                            assertThat(problemDetail.getInstance())
-                                    .isNotNull()
-                                    .extracting(Object::toString)
-                                    .isEqualTo("/fetch");
-                        });
+                .satisfies(problemDetail -> {
+                    assertThat(problemDetail.getDetail())
+                            .isEqualTo("Plugin not found for type: xls");
+                    assertThat(problemDetail.getTitle()).isEqualTo("Product Not Found");
+                    assertThat(problemDetail.getStatus()).isEqualTo(400);
+                    assertThat(problemDetail.getType())
+                            .hasToString("https://api.service.com/errors/bad-request");
+                    assertThat(problemDetail.getInstance())
+                            .isNotNull()
+                            .extracting(Object::toString)
+                            .isEqualTo("/fetch");
+                });
     }
 
     @Test
@@ -61,10 +60,8 @@ class StrategyPluginApplicationTests extends AbstractIntegrationTest {
                     .hasStatusOk()
                     .bodyJson()
                     .convertTo(GenericDTO.class)
-                    .satisfies(
-                            genericDTO ->
-                                    assertThat(genericDTO.message())
-                                            .isEqualTo("Writing pdf Hello "));
+                    .satisfies(genericDTO ->
+                            assertThat(genericDTO.message()).isEqualTo("Writing pdf Hello "));
 
             this.mockMvcTester
                     .get()
@@ -76,10 +73,8 @@ class StrategyPluginApplicationTests extends AbstractIntegrationTest {
                     .hasStatusOk()
                     .bodyJson()
                     .convertTo(GenericDTO.class)
-                    .satisfies(
-                            genericDTO ->
-                                    assertThat(genericDTO.message())
-                                            .isEqualTo("Writing CSV Hello "));
+                    .satisfies(genericDTO ->
+                            assertThat(genericDTO.message()).isEqualTo("Writing CSV Hello "));
         }
 
         // Generate additional logs to trigger batch sending
@@ -90,11 +85,10 @@ class StrategyPluginApplicationTests extends AbstractIntegrationTest {
         // When: Wait for logs to be batched and sent to Loki
         await().atMost(60, TimeUnit.SECONDS)
                 .pollInterval(5, TimeUnit.SECONDS)
-                .untilAsserted(
-                        () -> {
-                            // Then: Verify logs are present in Loki with correct format
-                            verifyLogsInLoki();
-                        });
+                .untilAsserted(() -> {
+                    // Then: Verify logs are present in Loki with correct format
+                    verifyLogsInLoki();
+                });
 
         System.out.println(
                 "✓ Loki4j 2.0 migration verified: logs are being sent to Loki successfully");

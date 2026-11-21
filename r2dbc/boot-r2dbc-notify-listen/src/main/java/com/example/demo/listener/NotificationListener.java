@@ -61,11 +61,13 @@ public class NotificationListener {
                 .subscribe(null, error -> log.error("Fatal error in notification subscription", error));
     }
 
-    public Mono<PostgresqlResult> listenTo(String channel) {
-        return Mono.from(postgresqlConnection
-                        .createStatement("LISTEN %s".formatted(channel))
+    public Mono<Void> listenTo(String channel) {
+        return Flux.from(postgresqlConnection
+                        .createStatement("LISTEN \"%s\"".formatted(channel))
                         .execute())
-                .doOnSuccess(result -> log.info("Listening on channel: {}", channel))
+                .flatMap(PostgresqlResult::getRowsUpdated)
+                .then()
+                .doOnSuccess(_ -> log.info("Listening on channel: {}", channel))
                 .doOnError(error -> log.error("Error listening to channel: {}", channel, error));
     }
 
@@ -83,9 +85,10 @@ public class NotificationListener {
         notificationSink.tryEmitComplete();
 
         // Unsubscribe from the channel
-        Mono.from(postgresqlConnection
-                        .createStatement("UNLISTEN " + notificationProperties.channelName())
+        Flux.from(postgresqlConnection
+                        .createStatement("UNLISTEN \"%s\"".formatted(notificationProperties.channelName()))
                         .execute())
+                .flatMap(PostgresqlResult::getRowsUpdated)
                 .then(postgresqlConnection.close())
                 .doOnError(error -> log.error("Error closing connection", error))
                 .doOnSuccess(unused -> log.info("Notification listener connection closed"))
