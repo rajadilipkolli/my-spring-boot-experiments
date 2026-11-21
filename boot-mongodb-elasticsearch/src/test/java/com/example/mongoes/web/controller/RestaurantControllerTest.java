@@ -40,12 +40,8 @@ class RestaurantControllerTest {
 
         webTestClient
                 .get()
-                .uri(
-                        uriBuilder ->
-                                uriBuilder
-                                        .path("/api/restaurant")
-                                        .queryParam("limit", "100")
-                                        .build())
+                .uri(uriBuilder ->
+                        uriBuilder.path("/api/restaurant").queryParam("limit", "100").build())
                 .exchange()
                 .expectStatus()
                 .isOk();
@@ -64,12 +60,8 @@ class RestaurantControllerTest {
     void findAllRestaurants_WithInvalidLimit_ShouldReturnBadRequest() {
         webTestClient
                 .get()
-                .uri(
-                        uriBuilder ->
-                                uriBuilder
-                                        .path("/api/restaurant")
-                                        .queryParam("limit", "1000")
-                                        .build())
+                .uri(uriBuilder ->
+                        uriBuilder.path("/api/restaurant").queryParam("limit", "1000").build())
                 .exchange()
                 .expectStatus()
                 .isBadRequest()
@@ -78,22 +70,22 @@ class RestaurantControllerTest {
                 .expectBody()
                 .json(
                         """
-                        {
-                   	"type": "https://api.mongoes.com/errors/validation-error",
-                   	"title": "Constraint Violation",
-                   	"status": 400,
-                   	"detail": "Validation failed",
-                   	"instance": "/api/restaurant",
-                   	"violations": [
-                   		{
-                   			"object": "RestaurantController",
-                   			"field": "findAllRestaurants.limit",
-                   			"rejectedValue": 1000,
-                   			"message": "must be less than or equal to 999"
-                   		}
-                   	]
-                   }
-                  """);
+                              {
+                         \t"type": "https://api.mongoes.com/errors/validation-error",
+                         \t"title": "Constraint Violation",
+                         \t"status": 400,
+                         \t"detail": "Validation failed",
+                         \t"instance": "/api/restaurant",
+                         \t"violations": [
+                         \t\t{
+                         \t\t\t"object": "RestaurantController",
+                         \t\t\t"field": "findAllRestaurants.limit",
+                         \t\t\t"rejectedValue": 1000,
+                         \t\t\t"message": "must be less than or equal to 999"
+                         \t\t}
+                         \t]
+                         }
+                        """);
     }
 
     @Test
@@ -114,8 +106,8 @@ class RestaurantControllerTest {
                 .expectBody()
                 .json(
                         """
-                        {"type":"https://api.mongoes.com/errors/validation-error","title":"Bad Request","status":400,"detail":"Invalid request content.","instance":"/api/restaurant"}
-                  """);
+                              {"type":"https://api.mongoes.com/errors/validation-error","title":"Bad Request","status":400,"detail":"Invalid request content.","instance":"/api/restaurant"}
+                        """);
     }
 
     @Test
@@ -136,8 +128,8 @@ class RestaurantControllerTest {
                 .expectBody()
                 .json(
                         """
-                        {"type":"https://api.mongoes.com/errors/validation-error","title":"Bad Request","status":400,"detail":"Invalid request content.","instance":"/api/restaurant"}
-                  """);
+                              {"type":"https://api.mongoes.com/errors/validation-error","title":"Bad Request","status":400,"detail":"Invalid request content.","instance":"/api/restaurant"}
+                        """);
     }
 
     @Test
@@ -180,8 +172,8 @@ class RestaurantControllerTest {
                 .expectBody()
                 .json(
                         """
-                        {"type":"https://api.mongoes.com/errors/validation-error","title":"Bad Request","status":400,"detail":"Invalid request content.","instance":"/api/restaurant/1/grade"}
-                  """);
+                              {"type":"https://api.mongoes.com/errors/validation-error","title":"Bad Request","status":400,"detail":"Invalid request content.","instance":"/api/restaurant/1/grade"}
+                        """);
     }
 
     @Test
@@ -204,8 +196,8 @@ class RestaurantControllerTest {
                 .expectBody()
                 .json(
                         """
-                        {"type":"https://api.mongoes.com/errors/validation-error","title":"Bad Request","status":400,"detail":"Invalid request content.","instance":"/api/restaurant/1/grade"}
-                  """);
+                              {"type":"https://api.mongoes.com/errors/validation-error","title":"Bad Request","status":400,"detail":"Invalid request content.","instance":"/api/restaurant/1/grade"}
+                        """);
     }
 
     @Test
@@ -281,8 +273,8 @@ class RestaurantControllerTest {
                 .expectBody()
                 .json(
                         """
-                  {"type":"https://api.mongoes.com/errors/validation-error","title":"Constraint Violation","status":400,"detail":"Validation failed","instance":"/api/restaurant/name/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","violations":[{"object":"RestaurantController","field":"findRestaurantByName.restaurantName","rejectedValue":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","message":"size must be between 0 and 255"}]}
-                  """);
+                        {"type":"https://api.mongoes.com/errors/validation-error","title":"Constraint Violation","status":400,"detail":"Validation failed","instance":"/api/restaurant/name/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","violations":[{"object":"RestaurantController","field":"findRestaurantByName.restaurantName","rejectedValue":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","message":"size must be between 0 and 255"}]}
+                        """);
     }
 
     @Test
@@ -370,18 +362,15 @@ class RestaurantControllerTest {
 
         Flux<Restaurant> responseFlux =
                 Flux.range(1, 10)
-                        .flatMap(
-                                i ->
-                                        webTestClient
-                                                .get()
-                                                .uri(
-                                                        "/api/restaurant/name/{restaurantName}",
-                                                        validName)
-                                                .exchange()
-                                                .expectStatus()
-                                                .isOk()
-                                                .returnResult(Restaurant.class)
-                                                .getResponseBody());
+                        .flatMap(i ->
+                                webTestClient
+                                        .get()
+                                        .uri("/api/restaurant/name/{restaurantName}", validName)
+                                        .exchange()
+                                        .expectStatus()
+                                        .isOk()
+                                        .returnResult(Restaurant.class)
+                                        .getResponseBody());
 
         StepVerifier.create(responseFlux)
                 .expectNextCount(10)
@@ -451,8 +440,8 @@ class RestaurantControllerTest {
                 .expectBody()
                 .json(
                         """
-                    {"type":"https://api.mongoes.com/errors/validation-error","title":"Bad Request","status":400,"detail":"Invalid request content.","instance":"/api/restaurant"}
-              """);
+                              {"type":"https://api.mongoes.com/errors/validation-error","title":"Bad Request","status":400,"detail":"Invalid request content.","instance":"/api/restaurant"}
+                        """);
     }
 
     @Test

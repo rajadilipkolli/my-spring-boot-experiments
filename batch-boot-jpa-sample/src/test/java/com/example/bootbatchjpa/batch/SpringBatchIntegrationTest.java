@@ -50,8 +50,10 @@ class SpringBatchIntegrationTest extends AbstractIntegrationTest {
 
         // Assert that we have a manager step plus worker steps
         assertThat(jobExecution.getStepExecutions()).hasSizeGreaterThan(1);
-        jobExecution.getStepExecutions().forEach(stepExecution -> assertThat(stepExecution.getExitStatus())
-                .isEqualTo(ExitStatus.COMPLETED));
+        jobExecution
+                .getStepExecutions()
+                .forEach(stepExecution ->
+                        assertThat(stepExecution.getExitStatus()).isEqualTo(ExitStatus.COMPLETED));
     }
 
     @Test

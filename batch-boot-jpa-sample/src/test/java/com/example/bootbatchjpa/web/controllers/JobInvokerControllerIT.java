@@ -18,6 +18,6 @@ class JobInvokerControllerIT extends AbstractIntegrationTest {
                 .hasPath("message")
                 .extractingPath("message")
                 .asString()
-                .matches("Batch job has been invoked as \\d+");
+                .matches("Batch job has been invoked as \\d+ with status COMPLETED");
     }
 }

@@ -46,8 +46,10 @@ public class CustomerController implements CustomerAPI {
     @GetMapping("/{id}")
     @Override
     public ResponseEntity<CustomerResponse> getCustomerById(@PathVariable String id) {
-        return customerService.findCustomerById(id).map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound()
-                .build());
+        return customerService
+                .findCustomerById(id)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PostMapping
@@ -72,7 +74,9 @@ public class CustomerController implements CustomerAPI {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<CustomerResponse> deleteCustomer(@PathVariable String id) {
-        return customerService.deleteCustomerById(id).map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound()
-                .build());
+        return customerService
+                .deleteCustomerById(id)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 }

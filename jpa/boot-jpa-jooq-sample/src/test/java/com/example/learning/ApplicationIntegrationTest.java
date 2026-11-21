@@ -34,12 +34,14 @@ class ApplicationIntegrationTest extends AbstractIntegrationTest {
                 .ignore(field(Post::getCreatedAt))
                 .ignore(field(Post::getModifiedAt))
                 .supply(all(LocalDateTime.class), () -> LocalDateTime.now())
-                .supply(field(Post::getDetails), () -> Instancio.of(PostDetails.class)
-                        .ignore(field(PostDetails::getId))
-                        .ignore(field(PostDetails::getCreatedAt))
-                        .ignore(field(PostDetails::getModifiedAt))
-                        .ignore(field(PostDetails::getPost))
-                        .create())
+                .supply(
+                        field(Post::getDetails),
+                        () -> Instancio.of(PostDetails.class)
+                                .ignore(field(PostDetails::getId))
+                                .ignore(field(PostDetails::getCreatedAt))
+                                .ignore(field(PostDetails::getModifiedAt))
+                                .ignore(field(PostDetails::getPost))
+                                .create())
                 .supply(field(Post::getComments), () -> new ArrayList<PostComment>())
                 .supply(field(Post::getTags), () -> new ArrayList<PostTag>())
                 .create();

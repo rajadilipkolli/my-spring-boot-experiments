@@ -36,21 +36,16 @@ public class WebClientConfiguration {
                 HttpClient.create(connectionProvider)
                         .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 5000)
                         .responseTimeout(Duration.ofSeconds(5))
-                        .doOnConnected(
-                                conn ->
-                                        conn.addHandlerLast(
-                                                        new ReadTimeoutHandler(5, TimeUnit.SECONDS))
-                                                .addHandlerLast(
-                                                        new WriteTimeoutHandler(
-                                                                5, TimeUnit.SECONDS)));
+                        .doOnConnected(conn ->
+                                conn.addHandlerLast(new ReadTimeoutHandler(5, TimeUnit.SECONDS))
+                                        .addHandlerLast(
+                                                new WriteTimeoutHandler(5, TimeUnit.SECONDS)));
 
         return webClientBuilder ->
                 webClientBuilder
-                        .filter(
-                                (request, next) ->
-                                        next.exchange(request)
-                                                .retryWhen(
-                                                        Retry.backoff(3, Duration.ofMillis(100))))
+                        .filter((request, next) ->
+                                next.exchange(request)
+                                        .retryWhen(Retry.backoff(3, Duration.ofMillis(100))))
                         .clientConnector(new ReactorClientHttpConnector(httpClient));
     }
 }

@@ -95,12 +95,11 @@ class ReadReplicaApplicationIT extends AbstractIntegrationTest {
         Integer noOfRows = primaryJdbcTemplate.queryForObject(countSQL, Integer.class);
         assertThat(noOfRows).isEqualTo(4);
         await().atMost(10, TimeUnit.SECONDS)
-                .untilAsserted(
-                        () -> {
-                            Integer totalCount =
-                                    replicaJdbcTemplate.queryForObject(countSQL, Integer.class);
-                            assertThat(totalCount).isEqualTo(4);
-                        });
+                .untilAsserted(() -> {
+                    Integer totalCount =
+                            replicaJdbcTemplate.queryForObject(countSQL, Integer.class);
+                    assertThat(totalCount).isEqualTo(4);
+                });
     }
 
     @Order(4)
@@ -121,11 +120,9 @@ class ReadReplicaApplicationIT extends AbstractIntegrationTest {
         int rowsAffected = primaryJdbcTemplate.update(deleteSQL, params);
         assertThat(rowsAffected).isOne();
         await().atMost(10, TimeUnit.SECONDS)
-                .untilAsserted(
-                        () -> {
-                            Integer noOfRows =
-                                    replicaJdbcTemplate.queryForObject(countSQL, Integer.class);
-                            assertThat(noOfRows).isEqualTo(3);
-                        });
+                .untilAsserted(() -> {
+                    Integer noOfRows = replicaJdbcTemplate.queryForObject(countSQL, Integer.class);
+                    assertThat(noOfRows).isEqualTo(3);
+                });
     }
 }

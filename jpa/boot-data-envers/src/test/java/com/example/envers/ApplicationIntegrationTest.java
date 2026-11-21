@@ -21,9 +21,11 @@ class ApplicationIntegrationTest extends AbstractIntegrationTest {
 
         Revisions<Integer, Customer> revisions = customerRepository.findRevisions(savedCustomer.getId());
 
-        assertThat(revisions).isNotEmpty().allSatisfy(revision -> assertThat(revision.getEntity())
-                .extracting(Customer::getId, Customer::getName, Customer::getVersion)
-                .containsExactly(savedCustomer.getId(), savedCustomer.getName(), null));
+        assertThat(revisions)
+                .isNotEmpty()
+                .allSatisfy(revision -> assertThat(revision.getEntity())
+                        .extracting(Customer::getId, Customer::getName, Customer::getVersion)
+                        .containsExactly(savedCustomer.getId(), savedCustomer.getName(), null));
     }
 
     @Test
@@ -66,13 +68,15 @@ class ApplicationIntegrationTest extends AbstractIntegrationTest {
         Revision<Integer, Customer> initialRevision = iterator.next();
         Revision<Integer, Customer> finalRevision = iterator.next();
 
-        assertThat(initialRevision).satisfies(rev -> assertThat(rev.getEntity())
-                .extracting(Customer::getId, Customer::getName, Customer::getAddress, Customer::getVersion)
-                .containsExactly(customer.getId(), customer.getName(), customer.getAddress(), null));
+        assertThat(initialRevision)
+                .satisfies(rev -> assertThat(rev.getEntity())
+                        .extracting(Customer::getId, Customer::getName, Customer::getAddress, Customer::getVersion)
+                        .containsExactly(customer.getId(), customer.getName(), customer.getAddress(), null));
 
-        assertThat(finalRevision).satisfies(rev -> assertThat(rev.getEntity())
-                .extracting(Customer::getId, Customer::getName, Customer::getAddress, Customer::getVersion)
-                .containsExactly(customer.getId(), null, null, null));
+        assertThat(finalRevision)
+                .satisfies(rev -> assertThat(rev.getEntity())
+                        .extracting(Customer::getId, Customer::getName, Customer::getAddress, Customer::getVersion)
+                        .containsExactly(customer.getId(), null, null, null));
     }
 
     @Test

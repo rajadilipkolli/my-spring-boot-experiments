@@ -5,12 +5,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.example.demo.common.AbstractIntegrationTest;
 import com.example.demo.listener.NotificationEvent;
 import com.example.demo.notifier.NotificationRequest;
-import org.junit.jupiter.api.Disabled;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 class ApplicationIntTest extends AbstractIntegrationTest {
@@ -51,24 +51,28 @@ class ApplicationIntTest extends AbstractIntegrationTest {
     }
 
     @Test
-    @Disabled
-    void shouldReceiveNotificationOnChannel() {
+    void shouldReceiveNotificationOnChannel() throws Exception {
+        String channel = "junitStreamChannel";
         // Create notification request
-        NotificationRequest notificationRequest = new NotificationRequest("junitChannel", "Hello from test!");
+        NotificationRequest notificationRequest = new NotificationRequest(channel, "Hello from test!");
 
-        // Start listening to notifications (SSE stream)
-        Flux<NotificationEvent> notificationStream = webTestClient
-                .get()
-                .uri("/notifications/junitChannel")
-                .accept(MediaType.TEXT_EVENT_STREAM)
-                .exchange()
-                .expectStatus()
-                .isOk()
-                .returnResult(NotificationEvent.class)
-                .getResponseBody();
+        // Start listening to notifications (SSE stream) in background since exchange() blocks until first event
+        CompletableFuture<Flux<NotificationEvent>> notificationStreamFuture =
+                CompletableFuture.supplyAsync(() -> webTestClient
+                        .get()
+                        .uri("/notifications/{channel}", channel)
+                        .accept(MediaType.TEXT_EVENT_STREAM)
+                        .exchange()
+                        .expectStatus()
+                        .isOk()
+                        .returnResult(NotificationEvent.class)
+                        .getResponseBody());
+
+        // Wait a bit to ensure GET request has reached server and LISTEN is registered
+        Thread.sleep(1000);
 
         // Send the notification and verify the response
-        Mono<Long> postResult = webTestClient
+        webTestClient
                 .post()
                 .uri("/api/notify")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -76,16 +80,15 @@ class ApplicationIntTest extends AbstractIntegrationTest {
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .returnResult(Long.class)
-                .getResponseBody()
-                .single();
+                .expectBody(Long.class)
+                .value(aLong -> assertThat(aLong).isOne());
 
-        // Combine the sending and receiving logic
-        StepVerifier.create(
-                        postResult.thenMany(notificationStream.take(1)) // Ensure we wait for the notification event
-                        )
+        Flux<NotificationEvent> notificationStream = notificationStreamFuture.get(5, TimeUnit.SECONDS);
+
+        // Verify the notification event received on the SSE stream
+        StepVerifier.create(notificationStream.take(1))
                 .assertNext(event -> {
-                    assertThat(event.channel()).isEqualTo("junitChannel");
+                    assertThat(event.channel()).isEqualTo(channel);
                     assertThat(event.message()).isEqualTo("Hello from test!");
                 })
                 .verifyComplete();

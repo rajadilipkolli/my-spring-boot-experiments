@@ -142,19 +142,18 @@ public class SearchService {
 
         return restaurantESRepository
                 .aggregateSearch(searchKeyword, fieldNames, direction, limit, offset, sortFields)
-                .map(
-                        searchPage -> {
-                            ElasticsearchAggregations elasticsearchAggregations =
-                                    (ElasticsearchAggregations)
-                                            searchPage.getSearchHits().getAggregations();
-                            Map<String, Map<String, Long>> facets = new HashMap<>();
-                            if (elasticsearchAggregations != null) {
-                                facets =
-                                        aggregationProcessor.processAggregations(
-                                                elasticsearchAggregations.aggregationsAsMap());
-                            }
-                            return new SearchPageResponse<>(searchPage, facets);
-                        });
+                .map(searchPage -> {
+                    ElasticsearchAggregations elasticsearchAggregations =
+                            (ElasticsearchAggregations)
+                                    searchPage.getSearchHits().getAggregations();
+                    Map<String, Map<String, Long>> facets = new HashMap<>();
+                    if (elasticsearchAggregations != null) {
+                        facets =
+                                aggregationProcessor.processAggregations(
+                                        elasticsearchAggregations.aggregationsAsMap());
+                    }
+                    return new SearchPageResponse<>(searchPage, facets);
+                });
     }
 
     public Flux<ResultData> searchRestaurantsWithInRange(
@@ -162,16 +161,15 @@ public class SearchService {
         GeoPoint location = new GeoPoint(lat, lon);
         return this.restaurantESRepository
                 .searchWithin(location, distance, unit)
-                .flatMap(
-                        restaurantSearchHit -> {
-                            Double dist = (Double) restaurantSearchHit.getSortValues().getFirst();
-                            Restaurant eRestaurant = restaurantSearchHit.getContent();
-                            return Mono.just(
-                                    new ResultData(
-                                            eRestaurant.getName(),
-                                            eRestaurant.getAddress().getLocation(),
-                                            dist));
-                        });
+                .flatMap(restaurantSearchHit -> {
+                    Double dist = (Double) restaurantSearchHit.getSortValues().getFirst();
+                    Restaurant eRestaurant = restaurantSearchHit.getContent();
+                    return Mono.just(
+                            new ResultData(
+                                    eRestaurant.getName(),
+                                    eRestaurant.getAddress().getLocation(),
+                                    dist));
+                });
     }
 
     public Mono<SearchPageResponse<Restaurant>> searchKnn(

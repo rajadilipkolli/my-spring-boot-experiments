@@ -34,13 +34,12 @@ public class AggregationProcessor {
             throw new IllegalArgumentException("aggregationMap must not be null");
         }
         Map<String, Map<String, Long>> resultMap = new HashMap<>();
-        aggregationMap.forEach(
-                (String aggregateKey, ElasticsearchAggregation aggregation) -> {
-                    Map<String, Long> countMap = new HashMap<>();
-                    Aggregate aggregate = aggregation.aggregation().getAggregate();
-                    processAggregate(aggregate, countMap);
-                    resultMap.put(aggregateKey, countMap);
-                });
+        aggregationMap.forEach((String aggregateKey, ElasticsearchAggregation aggregation) -> {
+            Map<String, Long> countMap = new HashMap<>();
+            Aggregate aggregate = aggregation.aggregation().getAggregate();
+            processAggregate(aggregate, countMap);
+            resultMap.put(aggregateKey, countMap);
+        });
         return resultMap;
     }
 
@@ -67,10 +66,9 @@ public class AggregationProcessor {
     private void processDateRangeAggregate(Aggregate aggregate, Map<String, Long> countMap) {
         aggregate.dateRange().buckets().array().stream()
                 .filter(bucket -> bucket.docCount() != 0)
-                .forEach(
-                        bucket ->
-                                countMap.put(
-                                        bucket.fromAsString() + " - " + bucket.toAsString(),
-                                        bucket.docCount()));
+                .forEach(bucket ->
+                        countMap.put(
+                                bucket.fromAsString() + " - " + bucket.toAsString(),
+                                bucket.docCount()));
     }
 }

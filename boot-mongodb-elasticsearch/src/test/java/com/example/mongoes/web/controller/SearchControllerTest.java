@@ -82,16 +82,15 @@ class SearchControllerTest {
 
             webTestClient
                     .get()
-                    .uri(
-                            uriBuilder ->
-                                    uriBuilder
-                                            .path("/search/must/bool")
-                                            .queryParam("borough", "Manhattan")
-                                            .queryParam("cuisine", "Italian")
-                                            .queryParam("name", "Restaurant")
-                                            .queryParam("limit", 10)
-                                            .queryParam("offset", 0)
-                                            .build())
+                    .uri(uriBuilder ->
+                            uriBuilder
+                                    .path("/search/must/bool")
+                                    .queryParam("borough", "Manhattan")
+                                    .queryParam("cuisine", "Italian")
+                                    .queryParam("name", "Restaurant")
+                                    .queryParam("limit", 10)
+                                    .queryParam("offset", 0)
+                                    .build())
                     .exchange()
                     .expectStatus()
                     .isOk();
@@ -101,14 +100,13 @@ class SearchControllerTest {
         void whenBoroughIsBlank_thenReturns400() {
             webTestClient
                     .get()
-                    .uri(
-                            uriBuilder ->
-                                    uriBuilder
-                                            .path("/search/must/bool")
-                                            .queryParam("borough", "")
-                                            .queryParam("cuisine", "Italian")
-                                            .queryParam("name", "Restaurant")
-                                            .build())
+                    .uri(uriBuilder ->
+                            uriBuilder
+                                    .path("/search/must/bool")
+                                    .queryParam("borough", "")
+                                    .queryParam("cuisine", "Italian")
+                                    .queryParam("name", "Restaurant")
+                                    .build())
                     .exchange()
                     .expectStatus()
                     .isBadRequest();
@@ -118,14 +116,13 @@ class SearchControllerTest {
         void whenCuisineIsBlank_thenReturns400() {
             webTestClient
                     .get()
-                    .uri(
-                            uriBuilder ->
-                                    uriBuilder
-                                            .path("/search/must/bool")
-                                            .queryParam("borough", "Manhattan")
-                                            .queryParam("cuisine", "")
-                                            .queryParam("name", "Restaurant")
-                                            .build())
+                    .uri(uriBuilder ->
+                            uriBuilder
+                                    .path("/search/must/bool")
+                                    .queryParam("borough", "Manhattan")
+                                    .queryParam("cuisine", "")
+                                    .queryParam("name", "Restaurant")
+                                    .build())
                     .exchange()
                     .expectStatus()
                     .isBadRequest();
@@ -135,14 +132,13 @@ class SearchControllerTest {
         void whenNameIsBlank_thenReturns400() {
             webTestClient
                     .get()
-                    .uri(
-                            uriBuilder ->
-                                    uriBuilder
-                                            .path("/search/must/bool")
-                                            .queryParam("borough", "Manhattan")
-                                            .queryParam("cuisine", "Italian")
-                                            .queryParam("name", "")
-                                            .build())
+                    .uri(uriBuilder ->
+                            uriBuilder
+                                    .path("/search/must/bool")
+                                    .queryParam("borough", "Manhattan")
+                                    .queryParam("cuisine", "Italian")
+                                    .queryParam("name", "")
+                                    .build())
                     .exchange()
                     .expectStatus()
                     .isBadRequest();
@@ -152,15 +148,14 @@ class SearchControllerTest {
         void whenLimitExceeds100_thenReturns400() {
             webTestClient
                     .get()
-                    .uri(
-                            uriBuilder ->
-                                    uriBuilder
-                                            .path("/search/must/bool")
-                                            .queryParam("borough", "Manhattan")
-                                            .queryParam("cuisine", "Italian")
-                                            .queryParam("name", "Restaurant")
-                                            .queryParam("limit", 101)
-                                            .build())
+                    .uri(uriBuilder ->
+                            uriBuilder
+                                    .path("/search/must/bool")
+                                    .queryParam("borough", "Manhattan")
+                                    .queryParam("cuisine", "Italian")
+                                    .queryParam("name", "Restaurant")
+                                    .queryParam("limit", 101)
+                                    .build())
                     .exchange()
                     .expectStatus()
                     .isBadRequest();
@@ -170,15 +165,14 @@ class SearchControllerTest {
         void whenLimitIsZero_thenSearchMustBoolReturns400() {
             webTestClient
                     .get()
-                    .uri(
-                            uriBuilder ->
-                                    uriBuilder
-                                            .path("/search/must/bool")
-                                            .queryParam("borough", "Manhattan")
-                                            .queryParam("cuisine", "Italian")
-                                            .queryParam("name", "Restaurant")
-                                            .queryParam("limit", 0)
-                                            .build())
+                    .uri(uriBuilder ->
+                            uriBuilder
+                                    .path("/search/must/bool")
+                                    .queryParam("borough", "Manhattan")
+                                    .queryParam("cuisine", "Italian")
+                                    .queryParam("name", "Restaurant")
+                                    .queryParam("limit", 0)
+                                    .build())
                     .exchange()
                     .expectStatus()
                     .isBadRequest();
@@ -188,15 +182,14 @@ class SearchControllerTest {
         void whenOffsetIsNegative_thenReturns400() {
             webTestClient
                     .get()
-                    .uri(
-                            uriBuilder ->
-                                    uriBuilder
-                                            .path("/search/must/bool")
-                                            .queryParam("borough", "Manhattan")
-                                            .queryParam("cuisine", "Italian")
-                                            .queryParam("name", "Restaurant")
-                                            .queryParam("offset", -1)
-                                            .build())
+                    .uri(uriBuilder ->
+                            uriBuilder
+                                    .path("/search/must/bool")
+                                    .queryParam("borough", "Manhattan")
+                                    .queryParam("cuisine", "Italian")
+                                    .queryParam("name", "Restaurant")
+                                    .queryParam("offset", -1)
+                                    .build())
                     .exchange()
                     .expectStatus()
                     .isBadRequest();
@@ -309,14 +302,14 @@ class SearchControllerTest {
 
         private static final String MISSING_PARAMETER_ERROR_JSON =
                 """
-            {
-                "type": "https://api.mongoes.com/errors/validation-error",
-                "title": "Bad Request",
-                "status": 400,
-                "detail": "Required query parameter '%s' is not present.",
-                "instance": "/search/restaurant/withInRange"
-            }
-            """;
+                {
+                    "type": "https://api.mongoes.com/errors/validation-error",
+                    "title": "Bad Request",
+                    "status": 400,
+                    "detail": "Required query parameter '%s' is not present.",
+                    "instance": "/search/restaurant/withInRange"
+                }
+                """;
 
         @ParameterizedTest
         @CsvSource({
@@ -334,15 +327,14 @@ class SearchControllerTest {
                 String expectedMessage) {
             webTestClient
                     .get()
-                    .uri(
-                            uriBuilder ->
-                                    uriBuilder
-                                            .path("/search/restaurant/withInRange")
-                                            .queryParam("lat", lat)
-                                            .queryParam("lon", lon)
-                                            .queryParam("distance", 10.0)
-                                            .queryParam("unit", "km")
-                                            .build())
+                    .uri(uriBuilder ->
+                            uriBuilder
+                                    .path("/search/restaurant/withInRange")
+                                    .queryParam("lat", lat)
+                                    .queryParam("lon", lon)
+                                    .queryParam("distance", 10.0)
+                                    .queryParam("unit", "km")
+                                    .build())
                     .exchange()
                     .expectStatus()
                     .isBadRequest()
@@ -372,14 +364,13 @@ class SearchControllerTest {
         void whenLatitudeMissing_thenReturns400() {
             webTestClient
                     .get()
-                    .uri(
-                            uriBuilder ->
-                                    uriBuilder
-                                            .path("/search/restaurant/withInRange")
-                                            .queryParam("lon", -74.0060)
-                                            .queryParam("distance", 10.0)
-                                            .queryParam("unit", "km")
-                                            .build())
+                    .uri(uriBuilder ->
+                            uriBuilder
+                                    .path("/search/restaurant/withInRange")
+                                    .queryParam("lon", -74.0060)
+                                    .queryParam("distance", 10.0)
+                                    .queryParam("unit", "km")
+                                    .build())
                     .exchange()
                     .expectStatus()
                     .isBadRequest()
@@ -392,14 +383,13 @@ class SearchControllerTest {
         void whenLongitudeMissing_thenReturns400() {
             webTestClient
                     .get()
-                    .uri(
-                            uriBuilder ->
-                                    uriBuilder
-                                            .path("/search/restaurant/withInRange")
-                                            .queryParam("lat", 40.7128)
-                                            .queryParam("distance", 10.0)
-                                            .queryParam("unit", "km")
-                                            .build())
+                    .uri(uriBuilder ->
+                            uriBuilder
+                                    .path("/search/restaurant/withInRange")
+                                    .queryParam("lat", 40.7128)
+                                    .queryParam("distance", 10.0)
+                                    .queryParam("unit", "km")
+                                    .build())
                     .exchange()
                     .expectStatus()
                     .isBadRequest()
@@ -417,28 +407,27 @@ class SearchControllerTest {
         void whenDistanceMissing_thenReturns400() {
             webTestClient
                     .get()
-                    .uri(
-                            uriBuilder ->
-                                    uriBuilder
-                                            .path("/search/restaurant/withInRange")
-                                            .queryParam("lat", 40.7128)
-                                            .queryParam("lon", -74.0060)
-                                            .queryParam("unit", "km")
-                                            .build())
+                    .uri(uriBuilder ->
+                            uriBuilder
+                                    .path("/search/restaurant/withInRange")
+                                    .queryParam("lat", 40.7128)
+                                    .queryParam("lon", -74.0060)
+                                    .queryParam("unit", "km")
+                                    .build())
                     .exchange()
                     .expectStatus()
                     .isBadRequest()
                     .expectBody()
                     .json(
                             """
-                                      {
-                                          "type": "https://api.mongoes.com/errors/validation-error",
-                                          "title": "Bad Request",
-                                          "status": 400,
-                                          "detail": "Required query parameter 'distance' is not present.",
-                                          "instance": "/search/restaurant/withInRange"
-                                      }
-                                      """);
+                            {
+                                "type": "https://api.mongoes.com/errors/validation-error",
+                                "title": "Bad Request",
+                                "status": 400,
+                                "detail": "Required query parameter 'distance' is not present.",
+                                "instance": "/search/restaurant/withInRange"
+                            }
+                            """);
         }
 
         @Test
@@ -446,15 +435,14 @@ class SearchControllerTest {
         void whenDistanceNegative_thenReturns400() {
             webTestClient
                     .get()
-                    .uri(
-                            uriBuilder ->
-                                    uriBuilder
-                                            .path("/search/restaurant/withInRange")
-                                            .queryParam("lat", 40.7128)
-                                            .queryParam("lon", -74.0060)
-                                            .queryParam("distance", -10.0)
-                                            .queryParam("unit", "km")
-                                            .build())
+                    .uri(uriBuilder ->
+                            uriBuilder
+                                    .path("/search/restaurant/withInRange")
+                                    .queryParam("lat", 40.7128)
+                                    .queryParam("lon", -74.0060)
+                                    .queryParam("distance", -10.0)
+                                    .queryParam("unit", "km")
+                                    .build())
                     .exchange()
                     .expectStatus()
                     .isBadRequest()
@@ -490,15 +478,14 @@ class SearchControllerTest {
         void whenUnitInvalid_thenReturns400(String invalidUnit) {
             webTestClient
                     .get()
-                    .uri(
-                            uriBuilder ->
-                                    uriBuilder
-                                            .path("/search/restaurant/withInRange")
-                                            .queryParam("lat", 40.7128)
-                                            .queryParam("lon", -74.0060)
-                                            .queryParam("distance", 10.0)
-                                            .queryParam("unit", invalidUnit)
-                                            .build())
+                    .uri(uriBuilder ->
+                            uriBuilder
+                                    .path("/search/restaurant/withInRange")
+                                    .queryParam("lat", 40.7128)
+                                    .queryParam("lon", -74.0060)
+                                    .queryParam("distance", 10.0)
+                                    .queryParam("unit", invalidUnit)
+                                    .build())
                     .exchange()
                     .expectStatus()
                     .isBadRequest()
@@ -512,14 +499,13 @@ class SearchControllerTest {
         void whenUnitNotProvided_thenUsesDefault() {
             webTestClient
                     .get()
-                    .uri(
-                            uriBuilder ->
-                                    uriBuilder
-                                            .path("/search/restaurant/withInRange")
-                                            .queryParam("lat", 40.7128)
-                                            .queryParam("lon", -74.0060)
-                                            .queryParam("distance", 10.0)
-                                            .build())
+                    .uri(uriBuilder ->
+                            uriBuilder
+                                    .path("/search/restaurant/withInRange")
+                                    .queryParam("lat", 40.7128)
+                                    .queryParam("lon", -74.0060)
+                                    .queryParam("distance", 10.0)
+                                    .build())
                     .exchange()
                     .expectStatus()
                     .isOk();
@@ -535,13 +521,12 @@ class SearchControllerTest {
 
             webTestClient
                     .get()
-                    .uri(
-                            uriBuilder ->
-                                    uriBuilder
-                                            .path("/search/date/range")
-                                            .queryParam("fromDate", "2024-01-01")
-                                            .queryParam("toDate", "2024-12-31")
-                                            .build())
+                    .uri(uriBuilder ->
+                            uriBuilder
+                                    .path("/search/date/range")
+                                    .queryParam("fromDate", "2024-01-01")
+                                    .queryParam("toDate", "2024-12-31")
+                                    .build())
                     .exchange()
                     .expectStatus()
                     .isOk();
@@ -551,13 +536,12 @@ class SearchControllerTest {
         void whenInvalidFromDateFormat_thenReturns400() {
             webTestClient
                     .get()
-                    .uri(
-                            uriBuilder ->
-                                    uriBuilder
-                                            .path("/search/date/range")
-                                            .queryParam("fromDate", "01-01-2024") // invalid format
-                                            .queryParam("toDate", "2024-12-31")
-                                            .build())
+                    .uri(uriBuilder ->
+                            uriBuilder
+                                    .path("/search/date/range")
+                                    .queryParam("fromDate", "01-01-2024") // invalid format
+                                    .queryParam("toDate", "2024-12-31")
+                                    .build())
                     .exchange()
                     .expectStatus()
                     .isBadRequest();
@@ -567,13 +551,12 @@ class SearchControllerTest {
         void whenInvalidToDateFormat_thenReturns400() {
             webTestClient
                     .get()
-                    .uri(
-                            uriBuilder ->
-                                    uriBuilder
-                                            .path("/search/date/range")
-                                            .queryParam("fromDate", "2024-01-01")
-                                            .queryParam("toDate", "2024/12/31") // invalid format
-                                            .build())
+                    .uri(uriBuilder ->
+                            uriBuilder
+                                    .path("/search/date/range")
+                                    .queryParam("fromDate", "2024-01-01")
+                                    .queryParam("toDate", "2024/12/31") // invalid format
+                                    .build())
                     .exchange()
                     .expectStatus()
                     .isBadRequest();
@@ -592,12 +575,11 @@ class SearchControllerTest {
         void whenQueriesListIsEmpty_thenBadRequest() {
             webTestClient
                     .get()
-                    .uri(
-                            uriBuilder ->
-                                    uriBuilder
-                                            .path("/search/terms")
-                                            .queryParam("query") // empty array
-                                            .build())
+                    .uri(uriBuilder ->
+                            uriBuilder
+                                    .path("/search/terms")
+                                    .queryParam("query") // empty array
+                                    .build())
                     .exchange()
                     .expectStatus()
                     .isBadRequest();
@@ -607,12 +589,11 @@ class SearchControllerTest {
         void whenQueriesListContainsBlankValue_thenBadRequest() {
             webTestClient
                     .get()
-                    .uri(
-                            uriBuilder ->
-                                    uriBuilder
-                                            .path("/search/terms")
-                                            .queryParam("query", "Manhattan", " ")
-                                            .build())
+                    .uri(uriBuilder ->
+                            uriBuilder
+                                    .path("/search/terms")
+                                    .queryParam("query", "Manhattan", " ")
+                                    .build())
                     .exchange()
                     .expectStatus()
                     .isBadRequest();
@@ -622,13 +603,12 @@ class SearchControllerTest {
         void whenLimitExceeds100_thenBadRequest() {
             webTestClient
                     .get()
-                    .uri(
-                            uriBuilder ->
-                                    uriBuilder
-                                            .path("/search/terms")
-                                            .queryParam("query", "Manhattan", "Brooklyn")
-                                            .queryParam("limit", "101")
-                                            .build())
+                    .uri(uriBuilder ->
+                            uriBuilder
+                                    .path("/search/terms")
+                                    .queryParam("query", "Manhattan", "Brooklyn")
+                                    .queryParam("limit", "101")
+                                    .build())
                     .exchange()
                     .expectStatus()
                     .isBadRequest();
@@ -638,13 +618,12 @@ class SearchControllerTest {
         void whenOffsetIsNegative_thenBadRequest() {
             webTestClient
                     .get()
-                    .uri(
-                            uriBuilder ->
-                                    uriBuilder
-                                            .path("/search/terms")
-                                            .queryParam("query", "Manhattan", "Brooklyn")
-                                            .queryParam("offset", "-1")
-                                            .build())
+                    .uri(uriBuilder ->
+                            uriBuilder
+                                    .path("/search/terms")
+                                    .queryParam("query", "Manhattan", "Brooklyn")
+                                    .queryParam("offset", "-1")
+                                    .build())
                     .exchange()
                     .expectStatus()
                     .isBadRequest();
@@ -657,14 +636,13 @@ class SearchControllerTest {
 
             webTestClient
                     .get()
-                    .uri(
-                            uriBuilder ->
-                                    uriBuilder
-                                            .path("/search/terms")
-                                            .queryParam("query", "Manhattan", "Brooklyn")
-                                            .queryParam("limit", "10")
-                                            .queryParam("offset", "0")
-                                            .build())
+                    .uri(uriBuilder ->
+                            uriBuilder
+                                    .path("/search/terms")
+                                    .queryParam("query", "Manhattan", "Brooklyn")
+                                    .queryParam("limit", "10")
+                                    .queryParam("offset", "0")
+                                    .build())
                     .exchange()
                     .expectStatus()
                     .isOk();
@@ -680,13 +658,12 @@ class SearchControllerTest {
                     .willReturn(Mono.empty());
             webTestClient
                     .get()
-                    .uri(
-                            uriBuilder ->
-                                    uriBuilder
-                                            .path("/search/restaurant/range")
-                                            .queryParam("lowerLimit", 1000)
-                                            .queryParam("upperLimit", 2000)
-                                            .build())
+                    .uri(uriBuilder ->
+                            uriBuilder
+                                    .path("/search/restaurant/range")
+                                    .queryParam("lowerLimit", 1000)
+                                    .queryParam("upperLimit", 2000)
+                                    .build())
                     .exchange()
                     .expectStatus()
                     .isOk();
@@ -696,12 +673,11 @@ class SearchControllerTest {
         void searchRestaurantIdRange_WithNullLowerLimit_ShouldReturnBadRequest() {
             webTestClient
                     .get()
-                    .uri(
-                            uriBuilder ->
-                                    uriBuilder
-                                            .path("/search/restaurant/range")
-                                            .queryParam("upperLimit", 2000)
-                                            .build())
+                    .uri(uriBuilder ->
+                            uriBuilder
+                                    .path("/search/restaurant/range")
+                                    .queryParam("upperLimit", 2000)
+                                    .build())
                     .exchange()
                     .expectStatus()
                     .isBadRequest()
@@ -722,12 +698,11 @@ class SearchControllerTest {
         void searchRestaurantIdRange_WithNullUpperLimit_ShouldReturnBadRequest() {
             webTestClient
                     .get()
-                    .uri(
-                            uriBuilder ->
-                                    uriBuilder
-                                            .path("/search/restaurant/range")
-                                            .queryParam("lowerLimit", 1000)
-                                            .build())
+                    .uri(uriBuilder ->
+                            uriBuilder
+                                    .path("/search/restaurant/range")
+                                    .queryParam("lowerLimit", 1000)
+                                    .build())
                     .exchange()
                     .expectStatus()
                     .isBadRequest()
@@ -748,13 +723,12 @@ class SearchControllerTest {
         void searchRestaurantIdRange_WithZeroLowerLimit_ShouldReturnBadRequest() {
             webTestClient
                     .get()
-                    .uri(
-                            uriBuilder ->
-                                    uriBuilder
-                                            .path("/search/restaurant/range")
-                                            .queryParam("lowerLimit", 0)
-                                            .queryParam("upperLimit", 2000)
-                                            .build())
+                    .uri(uriBuilder ->
+                            uriBuilder
+                                    .path("/search/restaurant/range")
+                                    .queryParam("lowerLimit", 0)
+                                    .queryParam("upperLimit", 2000)
+                                    .build())
                     .exchange()
                     .expectStatus()
                     .isBadRequest()
@@ -783,13 +757,12 @@ class SearchControllerTest {
         void searchRestaurantIdRange_WithZeroUpperLimit_ShouldReturnBadRequest() {
             webTestClient
                     .get()
-                    .uri(
-                            uriBuilder ->
-                                    uriBuilder
-                                            .path("/search/restaurant/range")
-                                            .queryParam("lowerLimit", 1000)
-                                            .queryParam("upperLimit", 0)
-                                            .build())
+                    .uri(uriBuilder ->
+                            uriBuilder
+                                    .path("/search/restaurant/range")
+                                    .queryParam("lowerLimit", 1000)
+                                    .queryParam("upperLimit", 0)
+                                    .build())
                     .exchange()
                     .expectStatus()
                     .isBadRequest()
@@ -818,13 +791,12 @@ class SearchControllerTest {
         void searchRestaurantIdRange_WithNegativeLowerLimit_ShouldReturnBadRequest() {
             webTestClient
                     .get()
-                    .uri(
-                            uriBuilder ->
-                                    uriBuilder
-                                            .path("/search/restaurant/range")
-                                            .queryParam("lowerLimit", -1000)
-                                            .queryParam("upperLimit", 2000)
-                                            .build())
+                    .uri(uriBuilder ->
+                            uriBuilder
+                                    .path("/search/restaurant/range")
+                                    .queryParam("lowerLimit", -1000)
+                                    .queryParam("upperLimit", 2000)
+                                    .build())
                     .exchange()
                     .expectStatus()
                     .isBadRequest()
@@ -853,13 +825,12 @@ class SearchControllerTest {
         void searchRestaurantIdRange_WithNegativeUpperLimit_ShouldReturnBadRequest() {
             webTestClient
                     .get()
-                    .uri(
-                            uriBuilder ->
-                                    uriBuilder
-                                            .path("/search/restaurant/range")
-                                            .queryParam("lowerLimit", 1000)
-                                            .queryParam("upperLimit", -2000)
-                                            .build())
+                    .uri(uriBuilder ->
+                            uriBuilder
+                                    .path("/search/restaurant/range")
+                                    .queryParam("lowerLimit", 1000)
+                                    .queryParam("upperLimit", -2000)
+                                    .build())
                     .exchange()
                     .expectStatus()
                     .isBadRequest()
@@ -894,16 +865,15 @@ class SearchControllerTest {
 
             webTestClient
                     .get()
-                    .uri(
-                            uriBuilder ->
-                                    uriBuilder
-                                            .path("/search/should/bool")
-                                            .queryParam("borough", "Manhattan")
-                                            .queryParam("cuisine", "Italian")
-                                            .queryParam("name", "Restaurant")
-                                            .queryParam("limit", 10)
-                                            .queryParam("offset", 0)
-                                            .build())
+                    .uri(uriBuilder ->
+                            uriBuilder
+                                    .path("/search/should/bool")
+                                    .queryParam("borough", "Manhattan")
+                                    .queryParam("cuisine", "Italian")
+                                    .queryParam("name", "Restaurant")
+                                    .queryParam("limit", 10)
+                                    .queryParam("offset", 0)
+                                    .build())
                     .exchange()
                     .expectStatus()
                     .isOk();
@@ -913,15 +883,14 @@ class SearchControllerTest {
         void whenLimitExceeds100_thenReturns400() {
             webTestClient
                     .get()
-                    .uri(
-                            uriBuilder ->
-                                    uriBuilder
-                                            .path("/search/should/bool")
-                                            .queryParam("borough", "Manhattan")
-                                            .queryParam("cuisine", "Italian")
-                                            .queryParam("name", "Restaurant")
-                                            .queryParam("limit", 101)
-                                            .build())
+                    .uri(uriBuilder ->
+                            uriBuilder
+                                    .path("/search/should/bool")
+                                    .queryParam("borough", "Manhattan")
+                                    .queryParam("cuisine", "Italian")
+                                    .queryParam("name", "Restaurant")
+                                    .queryParam("limit", 101)
+                                    .build())
                     .exchange()
                     .expectStatus()
                     .isBadRequest();
@@ -931,15 +900,14 @@ class SearchControllerTest {
         void whenLimitIsZero_thenSearchShouldBoolReturns400() {
             webTestClient
                     .get()
-                    .uri(
-                            uriBuilder ->
-                                    uriBuilder
-                                            .path("/search/should/bool")
-                                            .queryParam("borough", "Manhattan")
-                                            .queryParam("cuisine", "Italian")
-                                            .queryParam("name", "Restaurant")
-                                            .queryParam("limit", 0)
-                                            .build())
+                    .uri(uriBuilder ->
+                            uriBuilder
+                                    .path("/search/should/bool")
+                                    .queryParam("borough", "Manhattan")
+                                    .queryParam("cuisine", "Italian")
+                                    .queryParam("name", "Restaurant")
+                                    .queryParam("limit", 0)
+                                    .build())
                     .exchange()
                     .expectStatus()
                     .isBadRequest();
@@ -949,15 +917,14 @@ class SearchControllerTest {
         void whenOffsetIsNegative_thenReturns400() {
             webTestClient
                     .get()
-                    .uri(
-                            uriBuilder ->
-                                    uriBuilder
-                                            .path("/search/should/bool")
-                                            .queryParam("borough", "Manhattan")
-                                            .queryParam("cuisine", "Italian")
-                                            .queryParam("name", "Restaurant")
-                                            .queryParam("offset", -1)
-                                            .build())
+                    .uri(uriBuilder ->
+                            uriBuilder
+                                    .path("/search/should/bool")
+                                    .queryParam("borough", "Manhattan")
+                                    .queryParam("cuisine", "Italian")
+                                    .queryParam("name", "Restaurant")
+                                    .queryParam("offset", -1)
+                                    .build())
                     .exchange()
                     .expectStatus()
                     .isBadRequest();

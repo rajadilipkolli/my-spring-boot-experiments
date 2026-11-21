@@ -32,15 +32,14 @@ public class GlobalExceptionHandler {
         problemDetail.setType(URI.create("https://api.web-client-mvc.com/errors/validation-error"));
         List<ApiValidationError> validationErrorsList =
                 methodArgumentNotValidException.getAllErrors().stream()
-                        .map(
-                                objectError -> {
-                                    FieldError fieldError = (FieldError) objectError;
-                                    return new ApiValidationError(
-                                            fieldError.getObjectName(),
-                                            fieldError.getField(),
-                                            fieldError.getRejectedValue(),
-                                            Objects.requireNonNull(fieldError.getDefaultMessage()));
-                                })
+                        .map(objectError -> {
+                            FieldError fieldError = (FieldError) objectError;
+                            return new ApiValidationError(
+                                    fieldError.getObjectName(),
+                                    fieldError.getField(),
+                                    fieldError.getRejectedValue(),
+                                    Objects.requireNonNull(fieldError.getDefaultMessage()));
+                        })
                         .sorted(Comparator.comparing(ApiValidationError::field))
                         .toList();
         problemDetail.setProperty("violations", validationErrorsList);

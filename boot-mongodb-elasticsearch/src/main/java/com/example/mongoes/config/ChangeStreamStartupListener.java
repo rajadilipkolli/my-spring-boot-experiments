@@ -57,12 +57,11 @@ public class ChangeStreamStartupListener {
                 .retryWhen(
                         Retry.backoff(3, Duration.ofSeconds(10))
                                 .maxBackoff(Duration.ofSeconds(10))
-                                .doBeforeRetry(
-                                        signal ->
-                                                log.warn(
-                                                        "Retrying after failure: {}. Attempt: {}",
-                                                        signal.failure().getMessage(),
-                                                        signal.totalRetries() + 1)))
+                                .doBeforeRetry(signal ->
+                                        log.warn(
+                                                "Retrying after failure: {}. Attempt: {}",
+                                                signal.failure().getMessage(),
+                                                signal.totalRetries() + 1)))
                 .subscribe();
     }
 
@@ -73,13 +72,12 @@ public class ChangeStreamStartupListener {
      */
     public Flux<ChangeStreamEvent<Restaurant>> changeStreamProcessor() {
         return getChangeStreamOption()
-                .flatMapMany(
-                        options ->
-                                reactiveMongoTemplate
-                                        .changeStream(Restaurant.class)
-                                        .watchCollection(AppConstants.RESTAURANT_COLLECTION)
-                                        .resumeAt(options)
-                                        .listen())
+                .flatMapMany(options ->
+                        reactiveMongoTemplate
+                                .changeStream(Restaurant.class)
+                                .watchCollection(AppConstants.RESTAURANT_COLLECTION)
+                                .resumeAt(options)
+                                .listen())
                 .publishOn(Schedulers.boundedElastic())
                 .bufferTimeout(BATCH_SIZE, BATCH_TIMEOUT, true)
                 .filter(batch -> !batch.isEmpty())
@@ -142,11 +140,10 @@ public class ChangeStreamStartupListener {
                         ? Mono.empty()
                         : this.restaurantESRepository
                                 .saveAll(toSave)
-                                .doOnError(
-                                        error ->
-                                                log.error(
-                                                        "Error bulk saving restaurants: {}",
-                                                        error.getMessage()))
+                                .doOnError(error ->
+                                        log.error(
+                                                "Error bulk saving restaurants: {}",
+                                                error.getMessage()))
                                 .then();
 
         Mono<Void> deleteOp =
@@ -154,11 +151,10 @@ public class ChangeStreamStartupListener {
                         ? Mono.empty()
                         : this.restaurantESRepository
                                 .deleteAllById(idsToDelete)
-                                .doOnError(
-                                        error ->
-                                                log.error(
-                                                        "Error bulk deleting restaurants: {}",
-                                                        error.getMessage()));
+                                .doOnError(error ->
+                                        log.error(
+                                                "Error bulk deleting restaurants: {}",
+                                                error.getMessage()));
 
         BsonTimestamp latestTimestamp = getLatestTimestamp(batch);
         Mono<Void> resumeTokenOp =
@@ -169,11 +165,10 @@ public class ChangeStreamStartupListener {
                                 .retryWhen(
                                         Retry.backoff(3, Duration.ofSeconds(1))
                                                 .maxBackoff(Duration.ofSeconds(10)))
-                                .doOnError(
-                                        error ->
-                                                log.error(
-                                                        "Failed to update resume token: {}",
-                                                        error.getMessage()))
+                                .doOnError(error ->
+                                        log.error(
+                                                "Failed to update resume token: {}",
+                                                error.getMessage()))
                                 .then();
 
         return saveOp.then(deleteOp).then(resumeTokenOp).thenMany(Flux.fromIterable(batch));
@@ -209,15 +204,13 @@ public class ChangeStreamStartupListener {
 
     private Mono<ChangeStreamOptions> getChangeStreamOption() {
         return getResumeToken()
-                .map(
-                        resumeToken -> {
-                            ChangeStreamOptions.ChangeStreamOptionsBuilder
-                                    changeStreamOptionsBuilder =
-                                            ChangeStreamOptions.builder()
-                                                    .resumeAt(resumeToken.getResumeTimestamp());
-                            changeStreamOptionsBuilder.returnFullDocumentOnUpdate();
-                            return changeStreamOptionsBuilder.build();
-                        })
+                .map(resumeToken -> {
+                    ChangeStreamOptions.ChangeStreamOptionsBuilder changeStreamOptionsBuilder =
+                            ChangeStreamOptions.builder()
+                                    .resumeAt(resumeToken.getResumeTimestamp());
+                    changeStreamOptionsBuilder.returnFullDocumentOnUpdate();
+                    return changeStreamOptionsBuilder.build();
+                })
                 .defaultIfEmpty(
                         ChangeStreamOptions.builder()
                                 .resumeAt(new BsonTimestamp(Instant.now().getEpochSecond()))

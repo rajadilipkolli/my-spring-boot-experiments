@@ -42,15 +42,10 @@ class ReactivePostServiceTest {
 
         // then
         StepVerifier.create(pagedResult)
-                .expectNextMatches(
-                        reactivePost ->
-                                Objects.equals(reactivePost.getId(), getReactivePost().getId())
-                                        && reactivePost
-                                                .getTitle()
-                                                .equals(getReactivePost().getTitle())
-                                        && reactivePost
-                                                .getContent()
-                                                .equals(getReactivePost().getContent()))
+                .expectNextMatches(reactivePost ->
+                        Objects.equals(reactivePost.getId(), getReactivePost().getId())
+                                && reactivePost.getTitle().equals(getReactivePost().getTitle())
+                                && reactivePost.getContent().equals(getReactivePost().getContent()))
                 .expectComplete()
                 .verify();
     }
@@ -63,15 +58,10 @@ class ReactivePostServiceTest {
         Mono<ReactivePost> reactivePostMono = reactivePostService.findReactivePostById(1L);
         // then
         StepVerifier.create(reactivePostMono)
-                .expectNextMatches(
-                        reactivePost ->
-                                Objects.equals(reactivePost.getId(), getReactivePost().getId())
-                                        && reactivePost
-                                                .getTitle()
-                                                .equals(getReactivePost().getTitle())
-                                        && reactivePost
-                                                .getContent()
-                                                .equals(getReactivePost().getContent()))
+                .expectNextMatches(reactivePost ->
+                        Objects.equals(reactivePost.getId(), getReactivePost().getId())
+                                && reactivePost.getTitle().equals(getReactivePost().getTitle())
+                                && reactivePost.getContent().equals(getReactivePost().getContent()))
                 .expectComplete()
                 .verify();
     }
@@ -94,12 +84,9 @@ class ReactivePostServiceTest {
                 reactivePostService.saveReactivePost(reactivePostRequest);
         // then
         StepVerifier.create(persistedReactivePost)
-                .expectNextMatches(
-                        reactivePost ->
-                                reactivePost.getTitle().equals(getReactivePost().getTitle())
-                                        && reactivePost
-                                                .getContent()
-                                                .equals(getReactivePost().getContent()))
+                .expectNextMatches(reactivePost ->
+                        reactivePost.getTitle().equals(getReactivePost().getTitle())
+                                && reactivePost.getContent().equals(getReactivePost().getContent()))
                 .expectComplete()
                 .verify();
     }

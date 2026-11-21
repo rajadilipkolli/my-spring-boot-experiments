@@ -81,26 +81,21 @@ public class PostService {
         return Flux.fromIterable(createPostCommand.tagName())
                 .flatMap(this::fetchOrInsertTag)
                 .collectList()
-                .flatMap(
-                        tagIdList ->
-                                Mono.from(createPostSQL)
-                                        .flatMap(
-                                                postIdRecord ->
-                                                        insertIntoPostTags(
-                                                                tagIdList,
-                                                                postIdRecord.component1())));
+                .flatMap(tagIdList ->
+                        Mono.from(createPostSQL)
+                                .flatMap(postIdRecord ->
+                                        insertIntoPostTags(tagIdList, postIdRecord.component1())));
     }
 
     private Mono<UUID> insertIntoPostTags(List<UUID> tagIdList, UUID postId) {
         List<PostsTagsRecord> tags =
                 tagIdList.stream()
-                        .map(
-                                tagId -> {
-                                    PostsTagsRecord r = POSTS_TAGS.newRecord();
-                                    r.setPostId(postId);
-                                    r.setTagId(tagId);
-                                    return r;
-                                })
+                        .map(tagId -> {
+                            PostsTagsRecord r = POSTS_TAGS.newRecord();
+                            r.setPostId(postId);
+                            r.setTagId(tagId);
+                            return r;
+                        })
                         .toList();
         return Mono.from(
                         dslContext
@@ -108,11 +103,10 @@ public class PostService {
                                 .columns(POSTS_TAGS.POST_ID, POSTS_TAGS.TAG_ID)
                                 .valuesOfRecords(tags)
                                 .returning())
-                .map(
-                        r -> {
-                            log.debug("inserted tags:: {}", r);
-                            return r.component1();
-                        });
+                .map(r -> {
+                    log.debug("inserted tags:: {}", r);
+                    return r.component1();
+                });
     }
 
     private Mono<UUID> fetchOrInsertTag(String tagName) {
@@ -158,18 +152,17 @@ public class PostService {
 
     public Mono<UUID> addCommentToPostId(String postId, CreatePostComment createPostComment) {
         return findById(postId)
-                .flatMap(
-                        post -> {
-                            PostCommentsRecord r = POST_COMMENTS.newRecord();
-                            r.setContent(createPostComment.content());
-                            r.setPostId(post.getId());
+                .flatMap(post -> {
+                    PostCommentsRecord r = POST_COMMENTS.newRecord();
+                    r.setContent(createPostComment.content());
+                    r.setPostId(post.getId());
 
-                            return Mono.from(
-                                    dslContext
-                                            .insertInto(POST_COMMENTS)
-                                            .set(r)
-                                            .returningResult(POST_COMMENTS.ID));
-                        })
+                    return Mono.from(
+                            dslContext
+                                    .insertInto(POST_COMMENTS)
+                                    .set(r)
+                                    .returningResult(POST_COMMENTS.ID));
+                })
                 .map(Record1::component1);
     }
 }

@@ -75,15 +75,18 @@ class ApplicationIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     void query_customers_with_invalid_after_cursor() {
-        this.graphQlTester.document("""
+        this.graphQlTester
+                .document("""
                         query {
                           customers(first:2, after:"invalid-cursor") {
                             edges { node { id name } cursor }
                             pageInfo { hasNextPage hasPreviousPage }
                           }
                         }
-                        """).execute().errors().satisfy(errors -> assertThat(errors)
-                .hasSize(1));
+                        """)
+                .execute()
+                .errors()
+                .satisfy(errors -> assertThat(errors).hasSize(1));
     }
 
     @Test

@@ -62,18 +62,17 @@ public class CustomRestaurantESRepositoryImpl implements CustomRestaurantESRepos
         Query query =
                 NativeQuery.builder()
                         .withQuery(
-                                QueryBuilders.multiMatch(
-                                        builder -> {
-                                            builder.query(queryKeyWord)
-                                                    .fields(
-                                                            AppConstants.BOROUGH,
-                                                            AppConstants.CUISINE,
-                                                            AppConstants.NAME);
-                                            if (prefixPhraseEnabled) {
-                                                builder.type(TextQueryType.PhrasePrefix);
-                                            }
-                                            return builder;
-                                        }))
+                                QueryBuilders.multiMatch(builder -> {
+                                    builder.query(queryKeyWord)
+                                            .fields(
+                                                    AppConstants.BOROUGH,
+                                                    AppConstants.CUISINE,
+                                                    AppConstants.NAME);
+                                    if (prefixPhraseEnabled) {
+                                        builder.type(TextQueryType.PhrasePrefix);
+                                    }
+                                    return builder;
+                                }))
                         .build();
 
         query.setPageable(pageable);
@@ -87,11 +86,10 @@ public class CustomRestaurantESRepositoryImpl implements CustomRestaurantESRepos
         Query query =
                 NativeQuery.builder()
                         .withQuery(
-                                QueryBuilders.term(
-                                        builder ->
-                                                builder.value(queryTerm)
-                                                        .field(AppConstants.BOROUGH_KEYWORD)
-                                                        .caseInsensitive(true)))
+                                QueryBuilders.term(builder ->
+                                        builder.value(queryTerm)
+                                                .field(AppConstants.BOROUGH_KEYWORD)
+                                                .caseInsensitive(true)))
                         .build();
         query.setPageable(pageable);
 
@@ -107,12 +105,11 @@ public class CustomRestaurantESRepositoryImpl implements CustomRestaurantESRepos
             List<String> queries, Pageable pageable) {
         List<FieldValue> fieldValues =
                 queries.stream()
-                        .flatMap(
-                                q ->
-                                        Stream.of(
-                                                q,
-                                                q.toLowerCase(),
-                                                StringUtils.capitalize(q.toLowerCase())))
+                        .flatMap(q ->
+                                Stream.of(
+                                        q,
+                                        q.toLowerCase(),
+                                        StringUtils.capitalize(q.toLowerCase())))
                         .distinct()
                         .map(FieldValue::of)
                         .toList();
@@ -120,13 +117,10 @@ public class CustomRestaurantESRepositoryImpl implements CustomRestaurantESRepos
         Query query =
                 NativeQuery.builder()
                         .withQuery(
-                                QueryBuilders.terms(
-                                        builder ->
-                                                builder.field(AppConstants.BOROUGH_KEYWORD)
-                                                        .terms(
-                                                                termsBuilder ->
-                                                                        termsBuilder.value(
-                                                                                fieldValues))))
+                                QueryBuilders.terms(builder ->
+                                        builder.field(AppConstants.BOROUGH_KEYWORD)
+                                                .terms(termsBuilder ->
+                                                        termsBuilder.value(fieldValues))))
                         .build();
         query.setPageable(pageable);
 
@@ -140,33 +134,20 @@ public class CustomRestaurantESRepositoryImpl implements CustomRestaurantESRepos
         Query query =
                 NativeQuery.builder()
                         .withQuery(
-                                QueryBuilders.bool(
-                                        builder ->
-                                                builder.should(
-                                                        QueryBuilders.match(
-                                                                matchBuilder ->
-                                                                        matchBuilder
-                                                                                .field(
-                                                                                        AppConstants
-                                                                                                .BOROUGH)
-                                                                                .query(borough)),
-                                                        QueryBuilders.wildcard(
-                                                                wildcardBuilder ->
-                                                                        wildcardBuilder
-                                                                                .field(
-                                                                                        AppConstants
-                                                                                                .CUISINE)
-                                                                                .value(
-                                                                                        "*"
-                                                                                                + cuisine
-                                                                                                + "*")),
-                                                        QueryBuilders.match(
-                                                                matchBuilder ->
-                                                                        matchBuilder
-                                                                                .field(
-                                                                                        AppConstants
-                                                                                                .NAME)
-                                                                                .query(name)))))
+                                QueryBuilders.bool(builder ->
+                                        builder.should(
+                                                QueryBuilders.match(matchBuilder ->
+                                                        matchBuilder
+                                                                .field(AppConstants.BOROUGH)
+                                                                .query(borough)),
+                                                QueryBuilders.wildcard(wildcardBuilder ->
+                                                        wildcardBuilder
+                                                                .field(AppConstants.CUISINE)
+                                                                .value("*" + cuisine + "*")),
+                                                QueryBuilders.match(matchBuilder ->
+                                                        matchBuilder
+                                                                .field(AppConstants.NAME)
+                                                                .query(name)))))
                         .build();
         query.setPageable(pageable);
 
@@ -178,45 +159,23 @@ public class CustomRestaurantESRepositoryImpl implements CustomRestaurantESRepos
         Query query =
                 NativeQuery.builder()
                         .withQuery(
-                                QueryBuilders.bool(
-                                        builder ->
-                                                builder.should(
-                                                        QueryBuilders.wildcard(
-                                                                boroughBuilder ->
-                                                                        boroughBuilder
-                                                                                .field(
-                                                                                        AppConstants
-                                                                                                .BOROUGH)
-                                                                                .caseInsensitive(
-                                                                                        true)
-                                                                                .value(
-                                                                                        "*"
-                                                                                                + queryKeyword
-                                                                                                + "*")),
-                                                        QueryBuilders.wildcard(
-                                                                boroughBuilder ->
-                                                                        boroughBuilder
-                                                                                .field(
-                                                                                        AppConstants
-                                                                                                .CUISINE)
-                                                                                .caseInsensitive(
-                                                                                        true)
-                                                                                .value(
-                                                                                        "*"
-                                                                                                + queryKeyword
-                                                                                                + "*")),
-                                                        QueryBuilders.wildcard(
-                                                                boroughBuilder ->
-                                                                        boroughBuilder
-                                                                                .field(
-                                                                                        AppConstants
-                                                                                                .NAME)
-                                                                                .caseInsensitive(
-                                                                                        true)
-                                                                                .value(
-                                                                                        "*"
-                                                                                                + queryKeyword
-                                                                                                + "*")))))
+                                QueryBuilders.bool(builder ->
+                                        builder.should(
+                                                QueryBuilders.wildcard(boroughBuilder ->
+                                                        boroughBuilder
+                                                                .field(AppConstants.BOROUGH)
+                                                                .caseInsensitive(true)
+                                                                .value("*" + queryKeyword + "*")),
+                                                QueryBuilders.wildcard(boroughBuilder ->
+                                                        boroughBuilder
+                                                                .field(AppConstants.CUISINE)
+                                                                .caseInsensitive(true)
+                                                                .value("*" + queryKeyword + "*")),
+                                                QueryBuilders.wildcard(boroughBuilder ->
+                                                        boroughBuilder
+                                                                .field(AppConstants.NAME)
+                                                                .caseInsensitive(true)
+                                                                .value("*" + queryKeyword + "*")))))
                         .build();
         query.setPageable(pageable);
 
@@ -228,12 +187,11 @@ public class CustomRestaurantESRepositoryImpl implements CustomRestaurantESRepos
         Query query =
                 NativeQuery.builder()
                         .withQuery(
-                                QueryBuilders.regexp(
-                                        reqExBuilder ->
-                                                reqExBuilder
-                                                        .caseInsensitive(true)
-                                                        .field(AppConstants.BOROUGH)
-                                                        .value(reqEx)))
+                                QueryBuilders.regexp(reqExBuilder ->
+                                        reqExBuilder
+                                                .caseInsensitive(true)
+                                                .field(AppConstants.BOROUGH)
+                                                .value(reqEx)))
                         .build();
         query.setPageable(pageable);
 
@@ -246,13 +204,12 @@ public class CustomRestaurantESRepositoryImpl implements CustomRestaurantESRepos
         Query query =
                 NativeQuery.builder()
                         .withQuery(
-                                QueryBuilders.simpleQueryString(
-                                        builder ->
-                                                builder.query(queryKeyword)
-                                                        .fields(AppConstants.BOROUGH)
-                                                        .boost(1.0F)
-                                                        .fields(AppConstants.CUISINE)
-                                                        .boost(2.0F)))
+                                QueryBuilders.simpleQueryString(builder ->
+                                        builder.query(queryKeyword)
+                                                .fields(AppConstants.BOROUGH)
+                                                .boost(1.0F)
+                                                .fields(AppConstants.CUISINE)
+                                                .boost(2.0F)))
                         .build();
 
         query.setPageable(pageable);
@@ -266,19 +223,11 @@ public class CustomRestaurantESRepositoryImpl implements CustomRestaurantESRepos
         Query query =
                 NativeQuery.builder()
                         .withQuery(
-                                QueryBuilders.range(
-                                        rangeBuilder ->
-                                                rangeBuilder.term(
-                                                        builder ->
-                                                                builder.field(
-                                                                                AppConstants
-                                                                                        .RESTAURANT_ID)
-                                                                        .lte(
-                                                                                String.valueOf(
-                                                                                        upperLimit))
-                                                                        .gte(
-                                                                                String.valueOf(
-                                                                                        lowerLimit)))))
+                                QueryBuilders.range(rangeBuilder ->
+                                        rangeBuilder.term(builder ->
+                                                builder.field(AppConstants.RESTAURANT_ID)
+                                                        .lte(String.valueOf(upperLimit))
+                                                        .gte(String.valueOf(lowerLimit)))))
                         .build();
         query.setPageable(pageable);
 
@@ -291,13 +240,11 @@ public class CustomRestaurantESRepositoryImpl implements CustomRestaurantESRepos
         Query query =
                 NativeQuery.builder()
                         .withQuery(
-                                QueryBuilders.range(
-                                        rangeBuilder ->
-                                                rangeBuilder.date(
-                                                        builder ->
-                                                                builder.field("grades.date")
-                                                                        .lte(toDate)
-                                                                        .gte(fromDate))))
+                                QueryBuilders.range(rangeBuilder ->
+                                        rangeBuilder.date(builder ->
+                                                builder.field("grades.date")
+                                                        .lte(toDate)
+                                                        .gte(fromDate))))
                         .build();
         query.setPageable(pageable);
 
@@ -411,21 +358,19 @@ public class CustomRestaurantESRepositoryImpl implements CustomRestaurantESRepos
                         builder -> builder.field(AppConstants.BOROUGH_KEYWORD).size(limit));
         // .order(BucketOrder.count(false));
         Aggregation dateRangeBuilder =
-                AggregationBuilders.dateRange(
-                        builder ->
-                                builder.field("grades.date")
-                                        .format("dd-MM-yyy")
-                                        .timeZone("UTC")
-                                        .ranges(getDateRanges()));
+                AggregationBuilders.dateRange(builder ->
+                        builder.field("grades.date")
+                                .format("dd-MM-yyy")
+                                .timeZone("UTC")
+                                .ranges(getDateRanges()));
 
         Query query =
                 NativeQuery.builder()
                         .withQuery(
-                                QueryBuilders.multiMatch(
-                                        builder ->
-                                                builder.query(searchKeyword)
-                                                        .fields(fieldNames)
-                                                        .operator(Operator.Or)))
+                                QueryBuilders.multiMatch(builder ->
+                                        builder.query(searchKeyword)
+                                                .fields(fieldNames)
+                                                .operator(Operator.Or)))
                         .withSort(Sort.by(direction, sortFields))
                         .withAggregation("MyBorough", boroughTermsBuilder)
                         .withAggregation("MyCuisine", cuisineTermsBuilder)
@@ -441,9 +386,8 @@ public class CustomRestaurantESRepositoryImpl implements CustomRestaurantESRepos
 
         // Create the "Older" DateRangeExpression
         dateList.add(
-                DateRangeExpression.of(
-                        builder ->
-                                builder.key("Older").to(toBuilder -> toBuilder.expr("now-12y/y"))));
+                DateRangeExpression.of(builder ->
+                        builder.key("Older").to(toBuilder -> toBuilder.expr("now-12y/y"))));
 
         // Create DateRangeExpressions for the middle years
         for (int i = 12; i > 0; i--) {
@@ -452,11 +396,10 @@ public class CustomRestaurantESRepositoryImpl implements CustomRestaurantESRepos
 
         // Create the "Newer" DateRangeExpression
         dateList.add(
-                DateRangeExpression.of(
-                        builder ->
-                                builder.key("Newer")
-                                        .from(fromBuilder -> fromBuilder.expr("now-0y/y"))
-                                        .to(toBuilder -> toBuilder.expr("now/d"))));
+                DateRangeExpression.of(builder ->
+                        builder.key("Newer")
+                                .from(fromBuilder -> fromBuilder.expr("now-0y/y"))
+                                .to(toBuilder -> toBuilder.expr("now/d"))));
 
         return dateList;
     }
@@ -506,13 +449,12 @@ public class CustomRestaurantESRepositoryImpl implements CustomRestaurantESRepos
         Query query =
                 NativeQuery.builder()
                         .withQuery(
-                                QueryBuilders.multiMatch(
-                                        builder ->
-                                                builder.query(queryKeyword)
-                                                        .fields(
-                                                                AppConstants.BOROUGH,
-                                                                AppConstants.CUISINE,
-                                                                AppConstants.NAME)))
+                                QueryBuilders.multiMatch(builder ->
+                                        builder.query(queryKeyword)
+                                                .fields(
+                                                        AppConstants.BOROUGH,
+                                                        AppConstants.CUISINE,
+                                                        AppConstants.NAME)))
                         .withKnnSearches(knnSearch)
                         .build();
         query.setPageable(pageable);
@@ -532,19 +474,15 @@ public class CustomRestaurantESRepositoryImpl implements CustomRestaurantESRepos
 
         return reactiveElasticsearchOperations
                 .searchForPage(query, Restaurant.class)
-                .map(
-                        page -> {
-                            ElasticsearchAggregations aggs =
-                                    (ElasticsearchAggregations)
-                                            page.getSearchHits().getAggregations();
-                            if (aggs != null && aggs.get("avg_score") != null) {
-                                AvgAggregate avgAgg =
-                                        aggs.get("avg_score").aggregation().getAggregate().avg();
-                                return avgAgg != null && avgAgg.value() != null
-                                        ? avgAgg.value()
-                                        : 0.0;
-                            }
-                            return 0.0;
-                        });
+                .map(page -> {
+                    ElasticsearchAggregations aggs =
+                            (ElasticsearchAggregations) page.getSearchHits().getAggregations();
+                    if (aggs != null && aggs.get("avg_score") != null) {
+                        AvgAggregate avgAgg =
+                                aggs.get("avg_score").aggregation().getAggregate().avg();
+                        return avgAgg != null && avgAgg.value() != null ? avgAgg.value() : 0.0;
+                    }
+                    return 0.0;
+                });
     }
 }

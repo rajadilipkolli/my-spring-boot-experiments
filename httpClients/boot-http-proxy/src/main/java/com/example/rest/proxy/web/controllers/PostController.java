@@ -42,14 +42,18 @@ class PostController {
 
     @GetMapping("/{id}")
     ResponseEntity<PostResponse> getPostById(@PathVariable Long id) {
-        return postService.findPostById(id).map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound()
-                .build());
+        return postService
+                .findPostById(id)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @GetMapping("/{id}/comments")
     ResponseEntity<List<PostCommentDto>> getPostCommentsById(@PathVariable Long id) {
-        return postService.findPostCommentsById(id).map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound()
-                .build());
+        return postService
+                .findPostCommentsById(id)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PostMapping

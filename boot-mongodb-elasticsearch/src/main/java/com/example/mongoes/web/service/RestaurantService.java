@@ -37,27 +37,25 @@ public class RestaurantService {
     public Mono<Restaurant> addGrade(GradesRequest gradesRequest, Long restaurantId) {
         return this.restaurantRepository
                 .findByRestaurantId(restaurantId)
-                .flatMap(
-                        restaurant -> {
-                            restaurant.getGrades().add(gradesRequest.toGrade());
-                            return this.save(restaurant);
-                        });
+                .flatMap(restaurant -> {
+                    restaurant.getGrades().add(gradesRequest.toGrade());
+                    return this.save(restaurant);
+                });
     }
 
     public Mono<Restaurant> updateGrades(List<GradesRequest> gradesRequestList, Long restaurantId) {
         return this.restaurantRepository
                 .findByRestaurantId(restaurantId)
-                .flatMap(
-                        restaurant -> {
-                            restaurant.getGrades().clear();
-                            restaurant
-                                    .getGrades()
-                                    .addAll(
-                                            gradesRequestList.stream()
-                                                    .map(GradesRequest::toGrade)
-                                                    .toList());
-                            return this.save(restaurant);
-                        });
+                .flatMap(restaurant -> {
+                    restaurant.getGrades().clear();
+                    restaurant
+                            .getGrades()
+                            .addAll(
+                                    gradesRequestList.stream()
+                                            .map(GradesRequest::toGrade)
+                                            .toList());
+                    return this.save(restaurant);
+                });
     }
 
     private Mono<Restaurant> save(Restaurant restaurant) {
@@ -90,15 +88,14 @@ public class RestaurantService {
         return restaurantRepository
                 .findByName(restaurantRequest.name())
                 .hasElement()
-                .flatMap(
-                        exists -> {
-                            if (exists) {
-                                String errorMessage =
-                                        "Restaurant with name '%s' already exists"
-                                                .formatted(restaurantRequest.name());
-                                return Mono.error(new DuplicateRestaurantException(errorMessage));
-                            }
-                            return restaurantRepository.save(restaurantRequest.toRestaurant());
-                        });
+                .flatMap(exists -> {
+                    if (exists) {
+                        String errorMessage =
+                                "Restaurant with name '%s' already exists"
+                                        .formatted(restaurantRequest.name());
+                        return Mono.error(new DuplicateRestaurantException(errorMessage));
+                    }
+                    return restaurantRepository.save(restaurantRequest.toRestaurant());
+                });
     }
 }

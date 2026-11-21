@@ -55,20 +55,18 @@ public class ReactiveCommentsController {
             UriComponentsBuilder uriComponentsBuilder) {
         return reactiveCommentsService
                 .saveReactiveCommentByPostId(reactiveCommentRequest)
-                .map(
-                        savedPostComment -> {
-                            // Build the location URI
-                            String location =
-                                    uriComponentsBuilder
-                                            .path("/api/post/comments/{id}")
-                                            .buildAndExpand(savedPostComment.getId())
-                                            .toUriString();
+                .map(savedPostComment -> {
+                    // Build the location URI
+                    String location =
+                            uriComponentsBuilder
+                                    .path("/api/post/comments/{id}")
+                                    .buildAndExpand(savedPostComment.getId())
+                                    .toUriString();
 
-                            // Create a ResponseEntity with the Location header and the saved
-                            // ReactivePost
-                            return ResponseEntity.created(URI.create(location))
-                                    .body(savedPostComment);
-                        });
+                    // Create a ResponseEntity with the Location header and the saved
+                    // ReactivePost
+                    return ResponseEntity.created(URI.create(location)).body(savedPostComment);
+                });
     }
 
     @PutMapping("/{id}")
@@ -76,12 +74,11 @@ public class ReactiveCommentsController {
             @PathVariable UUID id, @RequestBody ReactiveCommentRequest reactiveCommentRequest) {
         return reactiveCommentsService
                 .findReactiveCommentById(id)
-                .flatMap(
-                        existingPostComment ->
-                                reactiveCommentsService
-                                        .updateReactivePostComment(
-                                                reactiveCommentRequest, existingPostComment)
-                                        .map(ResponseEntity::ok))
+                .flatMap(existingPostComment ->
+                        reactiveCommentsService
+                                .updateReactivePostComment(
+                                        reactiveCommentRequest, existingPostComment)
+                                .map(ResponseEntity::ok))
                 .switchIfEmpty(Mono.just(ResponseEntity.notFound().build()));
     }
 
@@ -89,11 +86,10 @@ public class ReactiveCommentsController {
     public Mono<ResponseEntity<Void>> deleteReactiveComment(@PathVariable UUID id) {
         return reactiveCommentsService
                 .findReactiveCommentById(id)
-                .flatMap(
-                        reactivePostComment ->
-                                reactiveCommentsService
-                                        .deleteReactiveCommentById(id)
-                                        .then(Mono.just(ResponseEntity.noContent().<Void>build())))
+                .flatMap(reactivePostComment ->
+                        reactiveCommentsService
+                                .deleteReactiveCommentById(id)
+                                .then(Mono.just(ResponseEntity.noContent().<Void>build())))
                 .switchIfEmpty(Mono.just(ResponseEntity.notFound().build()));
     }
 }

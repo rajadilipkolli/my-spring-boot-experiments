@@ -70,50 +70,44 @@ class PostRepositoryTest {
         Flux<PostResponse> postResponseFlux =
                 // Step 1: Insert a new post
                 createPost()
-                        .flatMap(
-                                post -> {
-                                    UUID postId = post.getId();
+                        .flatMap(post -> {
+                            UUID postId = post.getId();
 
-                                    // Step 2: Insert a new tag
-                                    return tagRepository
-                                            .save(new Tags().setName("java"))
-                                            .flatMap(
-                                                    tag -> {
-                                                        UUID tagId = tag.getId();
+                            // Step 2: Insert a new tag
+                            return tagRepository
+                                    .save(new Tags().setName("java"))
+                                    .flatMap(tag -> {
+                                        UUID tagId = tag.getId();
 
-                                                        // Step 3: Link post and tag
-                                                        return postTagRepository
-                                                                .save(
-                                                                        new PostTagRelation(
-                                                                                postId, tagId))
-                                                                .thenReturn(postId);
-                                                    });
-                                })
+                                        // Step 3: Link post and tag
+                                        return postTagRepository
+                                                .save(new PostTagRelation(postId, tagId))
+                                                .thenReturn(postId);
+                                    });
+                        })
 
                         // Step 4: Insert comments
-                        .flatMapMany(
-                                postId ->
-                                        createComments(postId, "test comments", "test comments 2"))
+                        .flatMapMany(postId ->
+                                createComments(postId, "test comments", "test comments 2"))
                         .thenMany(
                                 // Step 5: Retrieve data using jOOQ
                                 Flux.from(postRepository.retrievePostsWithCommentsAndTags()));
 
         StepVerifier.create(postResponseFlux)
-                .expectNextMatches(
-                        postResponse -> {
-                            // Assertions for post data
-                            verifyBasicPostResponse(postResponse);
-                            assertThat(postResponse.comments()).isNotEmpty().hasSize(2);
-                            assertThat(postResponse.tags()).isNotEmpty().hasSize(1);
+                .expectNextMatches(postResponse -> {
+                    // Assertions for post data
+                    verifyBasicPostResponse(postResponse);
+                    assertThat(postResponse.comments()).isNotEmpty().hasSize(2);
+                    assertThat(postResponse.tags()).isNotEmpty().hasSize(1);
 
-                            // Assertions for
-                            assertPostComments(postResponse);
+                    // Assertions for
+                    assertPostComments(postResponse);
 
-                            // Assertions for tags
-                            assertThat(postResponse.tags()).first().isEqualTo("java");
+                    // Assertions for tags
+                    assertThat(postResponse.tags()).first().isEqualTo("java");
 
-                            return true;
-                        })
+                    return true;
+                })
                 .expectComplete()
                 .verify();
     }
@@ -129,15 +123,14 @@ class PostRepositoryTest {
                                 postRepository.retrievePostsWithCommentsAndTags());
 
         StepVerifier.create(postResponseFlux)
-                .expectNextMatches(
-                        postResponse -> {
-                            // Assertions for post data
-                            verifyBasicPostResponse(postResponse);
-                            assertThat(postResponse.comments()).isEmpty();
-                            assertThat(postResponse.tags()).isEmpty();
+                .expectNextMatches(postResponse -> {
+                    // Assertions for post data
+                    verifyBasicPostResponse(postResponse);
+                    assertThat(postResponse.comments()).isEmpty();
+                    assertThat(postResponse.tags()).isEmpty();
 
-                            return true;
-                        })
+                    return true;
+                })
                 .expectComplete()
                 .verify();
     }
@@ -151,10 +144,9 @@ class PostRepositoryTest {
         Mono<Tags> secondTag = firstTag.then(tagRepository.save(new Tags().setName("java")));
 
         StepVerifier.create(secondTag)
-                .expectErrorMatches(
-                        throwable ->
-                                throwable instanceof DataIntegrityViolationException
-                                        && throwable.getMessage().contains("unique constraint"))
+                .expectErrorMatches(throwable ->
+                        throwable instanceof DataIntegrityViolationException
+                                && throwable.getMessage().contains("unique constraint"))
                 .verify(Duration.ofSeconds(5));
     }
 
@@ -168,12 +160,9 @@ class PostRepositoryTest {
                                 .setContent("test comment"));
 
         StepVerifier.create(invalidComment)
-                .expectErrorMatches(
-                        throwable ->
-                                throwable instanceof DataIntegrityViolationException
-                                        && throwable
-                                                .getMessage()
-                                                .contains("foreign key constraint"))
+                .expectErrorMatches(throwable ->
+                        throwable instanceof DataIntegrityViolationException
+                                && throwable.getMessage().contains("foreign key constraint"))
                 .verify();
     }
 
@@ -184,31 +173,27 @@ class PostRepositoryTest {
                 postRepository.save(new Post().setTitle("original").setContent("content"));
 
         Mono<Post> testFlow =
-                initialPost.flatMap(
-                        saved -> {
-                            UUID id = saved.getId();
+                initialPost.flatMap(saved -> {
+                    UUID id = saved.getId();
 
-                            // Load two independent instances (same version) to simulate concurrent
-                            // edits
-                            Mono<Post> p1 = postRepository.findById(id);
-                            Mono<Post> p2 = postRepository.findById(id);
+                    // Load two independent instances (same version) to simulate concurrent
+                    // edits
+                    Mono<Post> p1 = postRepository.findById(id);
+                    Mono<Post> p2 = postRepository.findById(id);
 
-                            return Mono.zip(p1, p2)
-                                    .flatMap(
-                                            tuple -> {
-                                                Post post1 = tuple.getT1();
-                                                Post post2 = tuple.getT2();
+                    return Mono.zip(p1, p2)
+                            .flatMap(tuple -> {
+                                Post post1 = tuple.getT1();
+                                Post post2 = tuple.getT2();
 
-                                                post1.setTitle("update1");
-                                                post2.setTitle("update2");
+                                post1.setTitle("update1");
+                                post2.setTitle("update2");
 
-                                                // Persist first update (bumps version), then
-                                                // attempt stale update
-                                                return postRepository
-                                                        .save(post1)
-                                                        .then(postRepository.save(post2));
-                                            });
-                        });
+                                // Persist first update (bumps version), then
+                                // attempt stale update
+                                return postRepository.save(post1).then(postRepository.save(post2));
+                            });
+                });
 
         StepVerifier.create(testFlow)
                 .expectErrorMatches(
@@ -223,10 +208,9 @@ class PostRepositoryTest {
         StepVerifier.create(
                         postRepository.save(
                                 new Post().setTitle(title).setContent(content).setStatus(status)))
-                .expectErrorMatches(
-                        throwable ->
-                                throwable instanceof DataIntegrityViolationException
-                                        && throwable.getMessage().contains(expectedError))
+                .expectErrorMatches(throwable ->
+                        throwable instanceof DataIntegrityViolationException
+                                && throwable.getMessage().contains(expectedError))
                 .verify();
     }
 
@@ -273,9 +257,8 @@ class PostRepositoryTest {
 
     private Flux<Comment> createComments(UUID postId, String... contents) {
         return Flux.fromArray(contents)
-                .flatMap(
-                        content ->
-                                postCommentRepository.save(
-                                        new Comment().setPostId(postId).setContent(content)));
+                .flatMap(content ->
+                        postCommentRepository.save(
+                                new Comment().setPostId(postId).setContent(content)));
     }
 }

@@ -58,13 +58,10 @@ class ObservabilityTests extends AbstractIntegrationTest {
         // Search captured events for an MDC entry with a non-empty traceId
         boolean foundTraceId =
                 listAppender.list.stream()
-                        .anyMatch(
-                                ev -> {
-                                    String traceId = ev.getMDCPropertyMap().get("traceId");
-                                    return traceId != null
-                                            && !traceId.isBlank()
-                                            && !traceId.equals("NONE");
-                                });
+                        .anyMatch(ev -> {
+                            String traceId = ev.getMDCPropertyMap().get("traceId");
+                            return traceId != null && !traceId.isBlank() && !traceId.equals("NONE");
+                        });
 
         // Clean up
         root.detachAppender(listAppender);
@@ -94,22 +91,18 @@ class ObservabilityTests extends AbstractIntegrationTest {
         Awaitility.await()
                 .atMost(Duration.ofSeconds(60))
                 .pollInterval(Duration.ofSeconds(2))
-                .untilAsserted(
-                        () -> {
-                            boolean found =
-                                    meterRegistry.getMeters().stream()
-                                            .anyMatch(
-                                                    m -> {
-                                                        String name = m.getId().getName();
-                                                        if (name == null) return false;
-                                                        return name.contains("http.server.requests")
-                                                                || name.contains(
-                                                                        "http_server_requests")
-                                                                || name.contains(
-                                                                        "http_server_requests_seconds");
-                                                    });
+                .untilAsserted(() -> {
+                    boolean found =
+                            meterRegistry.getMeters().stream()
+                                    .anyMatch(m -> {
+                                        String name = m.getId().getName();
+                                        if (name == null) return false;
+                                        return name.contains("http.server.requests")
+                                                || name.contains("http_server_requests")
+                                                || name.contains("http_server_requests_seconds");
+                                    });
 
-                            assertThat(found).isTrue();
-                        });
+                    assertThat(found).isTrue();
+                });
     }
 }

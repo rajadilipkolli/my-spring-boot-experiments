@@ -61,43 +61,34 @@ public class Initializer implements CommandLineRunner {
                                                 "content of Jooq test",
                                                 Status.PUBLISHED.name())
                                         .returningResult(POSTS.ID)))
-                .flatMap(
-                        postId ->
-                                Mono.from(
+                .flatMap(postId ->
+                        Mono.from(
+                                        dslContext
+                                                .insertInto(TAGS)
+                                                .columns(TAGS.NAME)
+                                                .values("java")
+                                                .returningResult(TAGS.ID))
+                                .flatMap(tagId ->
+                                        Mono.from(
                                                 dslContext
-                                                        .insertInto(TAGS)
-                                                        .columns(TAGS.NAME)
-                                                        .values("java")
-                                                        .returningResult(TAGS.ID))
-                                        .flatMap(
-                                                tagId ->
-                                                        Mono.from(
-                                                                dslContext
-                                                                        .insertInto(POSTS_TAGS)
-                                                                        .columns(
-                                                                                POSTS_TAGS.TAG_ID,
-                                                                                POSTS_TAGS.POST_ID)
-                                                                        .values(
-                                                                                tagId.component1(),
-                                                                                postId.component1())
-                                                                        .returningResult(
-                                                                                POSTS_TAGS
-                                                                                        .POST_ID)))
-                                        .flatMapMany(
-                                                pid ->
-                                                        dslContext
-                                                                .insertInto(POST_COMMENTS)
-                                                                .columns(
-                                                                        POST_COMMENTS.POST_ID,
-                                                                        POST_COMMENTS.CONTENT)
-                                                                .values(
-                                                                        pid.component1(),
-                                                                        "test comments")
-                                                                .values(
-                                                                        pid.component1(),
-                                                                        "test comments 2")
-                                                                .returningResult(POST_COMMENTS.ID))
-                                        .collectList())
+                                                        .insertInto(POSTS_TAGS)
+                                                        .columns(
+                                                                POSTS_TAGS.TAG_ID,
+                                                                POSTS_TAGS.POST_ID)
+                                                        .values(
+                                                                tagId.component1(),
+                                                                postId.component1())
+                                                        .returningResult(POSTS_TAGS.POST_ID)))
+                                .flatMapMany(pid ->
+                                        dslContext
+                                                .insertInto(POST_COMMENTS)
+                                                .columns(
+                                                        POST_COMMENTS.POST_ID,
+                                                        POST_COMMENTS.CONTENT)
+                                                .values(pid.component1(), "test comments")
+                                                .values(pid.component1(), "test comments 2")
+                                                .returningResult(POST_COMMENTS.ID))
+                                .collectList())
                 .thenMany(postRepository.retrievePostsWithCommentsAndTags())
                 .subscribe(
                         data -> log.debug("Retrieved data: {}", data),

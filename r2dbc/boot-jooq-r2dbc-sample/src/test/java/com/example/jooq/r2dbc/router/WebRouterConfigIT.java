@@ -33,27 +33,25 @@ class WebRouterConfigIT extends AbstractIntegrationTest {
     void searchPosts() {
         this.webTestClient
                 .get()
-                .uri(
-                        uriBuilder -> {
-                            uriBuilder.path("/posts/search");
-                            uriBuilder.queryParam("keyword", "Jooq");
-                            return uriBuilder.build();
-                        })
+                .uri(uriBuilder -> {
+                    uriBuilder.path("/posts/search");
+                    uriBuilder.queryParam("keyword", "Jooq");
+                    return uriBuilder.build();
+                })
                 .exchange()
                 .expectStatus()
                 .is2xxSuccessful()
                 .expectBody(PaginatedResult.class)
-                .value(
-                        paginatedResult -> {
-                            assertThat(paginatedResult.data()).isNotEmpty().hasSize(1);
-                            assertThat(paginatedResult.totalElements()).isOne();
-                            assertThat(paginatedResult.pageNumber()).isOne();
-                            assertThat(paginatedResult.totalPages()).isOne();
-                            assertThat(paginatedResult.isFirst()).isTrue();
-                            assertThat(paginatedResult.isLast()).isTrue();
-                            assertThat(paginatedResult.hasNext()).isFalse();
-                            assertThat(paginatedResult.hasPrevious()).isFalse();
-                        });
+                .value(paginatedResult -> {
+                    assertThat(paginatedResult.data()).isNotEmpty().hasSize(1);
+                    assertThat(paginatedResult.totalElements()).isOne();
+                    assertThat(paginatedResult.pageNumber()).isOne();
+                    assertThat(paginatedResult.totalPages()).isOne();
+                    assertThat(paginatedResult.isFirst()).isTrue();
+                    assertThat(paginatedResult.isLast()).isTrue();
+                    assertThat(paginatedResult.hasNext()).isFalse();
+                    assertThat(paginatedResult.hasPrevious()).isFalse();
+                });
     }
 
     @Test

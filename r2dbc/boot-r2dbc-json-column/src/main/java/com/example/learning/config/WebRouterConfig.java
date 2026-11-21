@@ -18,28 +18,40 @@ public class WebRouterConfig {
 
     @Bean
     RouterFunction<ServerResponse> routes(PostHandler postController, CommentHandler commentHandler) {
-        return route().path("/posts", () -> route().nest(
-                                path(""), () -> route().GET("", accept(APPLICATION_JSON), postController::all)
-                                        .POST(
-                                                "",
-                                                contentType(APPLICATION_JSON).and(accept(APPLICATION_JSON)),
-                                                postController::create)
-                                        .build())
-                        .nest(path("{id}"), () -> route().GET("", accept(APPLICATION_JSON), postController::get)
-                                .PUT(
-                                        "",
-                                        contentType(APPLICATION_JSON).and(accept(APPLICATION_JSON)),
-                                        postController::update)
-                                .DELETE("", postController::delete)
-                                .nest(path("comments"), () -> route().GET(
-                                                "", accept(APPLICATION_JSON), commentHandler::getByPostId)
-                                        .POST(
-                                                "",
-                                                contentType(APPLICATION_JSON).and(accept(APPLICATION_JSON)),
-                                                commentHandler::create)
-                                        .build())
+        return route().path(
+                        "/posts",
+                        () -> route().nest(
+                                        path(""),
+                                        () -> route().GET("", accept(APPLICATION_JSON), postController::all)
+                                                .POST(
+                                                        "",
+                                                        contentType(APPLICATION_JSON)
+                                                                .and(accept(APPLICATION_JSON)),
+                                                        postController::create)
+                                                .build())
+                                .nest(
+                                        path("{id}"),
+                                        () -> route().GET("", accept(APPLICATION_JSON), postController::get)
+                                                .PUT(
+                                                        "",
+                                                        contentType(APPLICATION_JSON)
+                                                                .and(accept(APPLICATION_JSON)),
+                                                        postController::update)
+                                                .DELETE("", postController::delete)
+                                                .nest(
+                                                        path("comments"),
+                                                        () -> route().GET(
+                                                                        "",
+                                                                        accept(APPLICATION_JSON),
+                                                                        commentHandler::getByPostId)
+                                                                .POST(
+                                                                        "",
+                                                                        contentType(APPLICATION_JSON)
+                                                                                .and(accept(APPLICATION_JSON)),
+                                                                        commentHandler::create)
+                                                                .build())
+                                                .build())
                                 .build())
-                        .build())
                 .build();
     }
 }

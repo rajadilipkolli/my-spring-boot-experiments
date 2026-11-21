@@ -57,11 +57,10 @@ class PostController {
     ResponseEntity<PostDto> deletePost(@PathVariable Long id) {
         return postService
                 .findPostById(id)
-                .map(
-                        post -> {
-                            postService.deletePostById(id);
-                            return ResponseEntity.ok(post);
-                        })
+                .map(post -> {
+                    postService.deletePostById(id);
+                    return ResponseEntity.ok(post);
+                })
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 }

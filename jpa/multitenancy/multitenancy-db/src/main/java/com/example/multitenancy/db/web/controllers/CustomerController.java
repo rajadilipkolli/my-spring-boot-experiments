@@ -42,8 +42,10 @@ class CustomerController {
     ResponseEntity<Customer> getCustomerById(
             @PathVariable Long id, @RequestHeader(AppConstants.X_TENANT_ID) String tenantId) {
         log.info("fetching customer by id {} for tenant : {}", id, tenantId);
-        return customerService.findCustomerById(id).map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound()
-                .build());
+        return customerService
+                .findCustomerById(id)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PostMapping

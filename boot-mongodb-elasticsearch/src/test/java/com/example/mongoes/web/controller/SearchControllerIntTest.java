@@ -102,41 +102,38 @@ class SearchControllerIntTest extends AbstractIntegrationTest {
 
         webTestClient
                 .get()
-                .uri(
-                        uriBuilder ->
-                                uriBuilder
-                                        .path("/search/multi")
-                                        .queryParam("query", "Chinese")
-                                        .queryParam("offset", 0)
-                                        .queryParam("limit", 10)
-                                        .build())
+                .uri(uriBuilder ->
+                        uriBuilder
+                                .path("/search/multi")
+                                .queryParam("query", "Chinese")
+                                .queryParam("offset", 0)
+                                .queryParam("limit", 10)
+                                .build())
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus()
                 .isOk()
                 .expectBody(new ParameterizedTypeReference<SearchPageResponse<Restaurant>>() {})
-                .value(
-                        page -> {
-                            assertThat(page).isNotNull();
-                            // deterministic dataset -> expect exactly one matching document
-                            assertThat(page.totalElements()).isOne();
-                            assertThat(page.totalHits()).isPositive();
-                            assertThat(page.data()).hasSize(1);
-                            var first = page.data().getFirst();
-                            assertThat(first.getName()).isEqualTo("Yono gardens");
-                            assertThat(first.getBorough()).isEqualTo(BOROUGH_NAME);
-                            assertThat(first.getCuisine()).isEqualTo("Chinese");
-                            assertThat(first.getGrades()).hasSize(2);
-                            assertThat(first.getAddress()).isNotNull();
-                            assertThat(first.getAddress().getLocation())
-                                    .isEqualTo(new Point(-75.0, 41.0));
-                            assertThat(page.pageNumber()).isOne();
-                            assertThat(page.totalPages()).isOne();
-                            assertThat(page.isFirst()).isTrue();
-                            assertThat(page.isLast()).isTrue();
-                            assertThat(page.hasNext()).isFalse();
-                            assertThat(page.hasPrevious()).isFalse();
-                        });
+                .value(page -> {
+                    assertThat(page).isNotNull();
+                    // deterministic dataset -> expect exactly one matching document
+                    assertThat(page.totalElements()).isOne();
+                    assertThat(page.totalHits()).isPositive();
+                    assertThat(page.data()).hasSize(1);
+                    var first = page.data().getFirst();
+                    assertThat(first.getName()).isEqualTo("Yono gardens");
+                    assertThat(first.getBorough()).isEqualTo(BOROUGH_NAME);
+                    assertThat(first.getCuisine()).isEqualTo("Chinese");
+                    assertThat(first.getGrades()).hasSize(2);
+                    assertThat(first.getAddress()).isNotNull();
+                    assertThat(first.getAddress().getLocation()).isEqualTo(new Point(-75.0, 41.0));
+                    assertThat(page.pageNumber()).isOne();
+                    assertThat(page.totalPages()).isOne();
+                    assertThat(page.isFirst()).isTrue();
+                    assertThat(page.isLast()).isTrue();
+                    assertThat(page.hasNext()).isFalse();
+                    assertThat(page.hasPrevious()).isFalse();
+                });
     }
 
     @Test
@@ -144,35 +141,33 @@ class SearchControllerIntTest extends AbstractIntegrationTest {
 
         webTestClient
                 .get()
-                .uri(
-                        uriBuilder ->
-                                uriBuilder
-                                        .path("/search/term/borough")
-                                        .queryParam("query", BOROUGH_NAME)
-                                        .queryParam("offset", 0)
-                                        .queryParam("limit", 10)
-                                        .build())
+                .uri(uriBuilder ->
+                        uriBuilder
+                                .path("/search/term/borough")
+                                .queryParam("query", BOROUGH_NAME)
+                                .queryParam("offset", 0)
+                                .queryParam("limit", 10)
+                                .build())
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus()
                 .isOk()
                 .expectBody(new ParameterizedTypeReference<SearchPageResponse<Restaurant>>() {})
-                .value(
-                        page -> {
-                            assertThat(page).isNotNull();
-                            assertThat(page.totalElements()).isEqualTo(2L);
-                            assertThat(page.data()).hasSize(2);
-                            var termFirst = page.data().getFirst();
-                            assertThat(termFirst.getName()).isEqualTo(RESTAURANT_NAME);
-                            assertThat(termFirst.getBorough()).isEqualTo(BOROUGH_NAME);
-                            assertThat(termFirst.getCuisine()).isEqualTo(CUISINE_NAME);
-                            assertThat(page.pageNumber()).isOne();
-                            assertThat(page.totalPages()).isOne();
-                            assertThat(page.isFirst()).isTrue();
-                            assertThat(page.isLast()).isTrue();
-                            assertThat(page.hasNext()).isFalse();
-                            assertThat(page.hasPrevious()).isFalse();
-                        });
+                .value(page -> {
+                    assertThat(page).isNotNull();
+                    assertThat(page.totalElements()).isEqualTo(2L);
+                    assertThat(page.data()).hasSize(2);
+                    var termFirst = page.data().getFirst();
+                    assertThat(termFirst.getName()).isEqualTo(RESTAURANT_NAME);
+                    assertThat(termFirst.getBorough()).isEqualTo(BOROUGH_NAME);
+                    assertThat(termFirst.getCuisine()).isEqualTo(CUISINE_NAME);
+                    assertThat(page.pageNumber()).isOne();
+                    assertThat(page.totalPages()).isOne();
+                    assertThat(page.isFirst()).isTrue();
+                    assertThat(page.isLast()).isTrue();
+                    assertThat(page.hasNext()).isFalse();
+                    assertThat(page.hasPrevious()).isFalse();
+                });
     }
 
     @Test
@@ -180,35 +175,33 @@ class SearchControllerIntTest extends AbstractIntegrationTest {
 
         webTestClient
                 .get()
-                .uri(
-                        uriBuilder ->
-                                uriBuilder
-                                        .path("/search/terms")
-                                        .queryParam("query", BOROUGH_NAME)
-                                        .queryParam("offset", 0)
-                                        .queryParam("limit", 10)
-                                        .build())
+                .uri(uriBuilder ->
+                        uriBuilder
+                                .path("/search/terms")
+                                .queryParam("query", BOROUGH_NAME)
+                                .queryParam("offset", 0)
+                                .queryParam("limit", 10)
+                                .build())
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus()
                 .isOk()
                 .expectBody(new ParameterizedTypeReference<SearchPageResponse<Restaurant>>() {})
-                .value(
-                        page -> {
-                            assertThat(page).isNotNull();
-                            assertThat(page.totalElements()).isEqualTo(2L);
-                            assertThat(page.data()).hasSize(2);
-                            var termsFirst = page.data().getFirst();
-                            assertThat(termsFirst.getName()).isEqualTo(RESTAURANT_NAME);
-                            assertThat(termsFirst.getBorough()).isEqualTo(BOROUGH_NAME);
-                            assertThat(termsFirst.getCuisine()).isEqualTo(CUISINE_NAME);
-                            assertThat(page.pageNumber()).isOne();
-                            assertThat(page.totalPages()).isOne();
-                            assertThat(page.isFirst()).isTrue();
-                            assertThat(page.isLast()).isTrue();
-                            assertThat(page.hasNext()).isFalse();
-                            assertThat(page.hasPrevious()).isFalse();
-                        });
+                .value(page -> {
+                    assertThat(page).isNotNull();
+                    assertThat(page.totalElements()).isEqualTo(2L);
+                    assertThat(page.data()).hasSize(2);
+                    var termsFirst = page.data().getFirst();
+                    assertThat(termsFirst.getName()).isEqualTo(RESTAURANT_NAME);
+                    assertThat(termsFirst.getBorough()).isEqualTo(BOROUGH_NAME);
+                    assertThat(termsFirst.getCuisine()).isEqualTo(CUISINE_NAME);
+                    assertThat(page.pageNumber()).isOne();
+                    assertThat(page.totalPages()).isOne();
+                    assertThat(page.isFirst()).isTrue();
+                    assertThat(page.isLast()).isTrue();
+                    assertThat(page.hasNext()).isFalse();
+                    assertThat(page.hasPrevious()).isFalse();
+                });
     }
 
     @Test
@@ -216,47 +209,42 @@ class SearchControllerIntTest extends AbstractIntegrationTest {
 
         webTestClient
                 .get()
-                .uri(
-                        uriBuilder ->
-                                uriBuilder
-                                        .path("/search/must/bool")
-                                        .queryParam("name", RESTAURANT_NAME)
-                                        .queryParam("borough", BOROUGH_NAME)
-                                        .queryParam("cuisine", CUISINE_NAME)
-                                        .queryParam("offset", 0)
-                                        .queryParam("limit", 10)
-                                        .build())
+                .uri(uriBuilder ->
+                        uriBuilder
+                                .path("/search/must/bool")
+                                .queryParam("name", RESTAURANT_NAME)
+                                .queryParam("borough", BOROUGH_NAME)
+                                .queryParam("cuisine", CUISINE_NAME)
+                                .queryParam("offset", 0)
+                                .queryParam("limit", 10)
+                                .build())
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus()
                 .isOk()
                 .expectBodyList(Restaurant.class)
                 .hasSize(1)
-                .value(
-                        restaurants -> {
-                            assertThat(restaurants).hasSize(1);
-                            Restaurant restaurant = restaurants.getFirst();
-                            assertThat(restaurant).isNotNull();
-                            assertThat(restaurant.getId()).isNotBlank();
-                            assertThat(restaurant.getRestaurantId()).isEqualTo(2L);
-                            assertThat(restaurant.getName()).isEqualTo(RESTAURANT_NAME);
-                            assertThat(restaurant.getBorough()).isEqualTo(BOROUGH_NAME);
-                            assertThat(restaurant.getCuisine()).isEqualTo(CUISINE_NAME);
-                            assertThat(restaurant.getAddress()).isNotNull();
-                            assertThat(restaurant.getAddress().getBuilding())
-                                    .isEqualTo("junitBuilding");
-                            assertThat(restaurant.getAddress().getLocation())
-                                    .isEqualTo(new Point(-73.9, 40.8));
-                            assertThat(restaurant.getAddress().getStreet())
-                                    .isEqualTo("junitStreet");
-                            assertThat(restaurant.getAddress().getZipcode()).isEqualTo(98765);
-                            assertThat(restaurant.getGrades()).hasSize(2);
-                            var g0 = restaurant.getGrades().getFirst();
-                            assertThat(g0.getGrade()).isEqualTo("A");
-                            assertThat(g0.getDate())
-                                    .isEqualTo(LocalDateTime.of(2024, 1, 1, 1, 1, 1));
-                            assertThat(g0.getScore()).isEqualTo(15);
-                        });
+                .value(restaurants -> {
+                    assertThat(restaurants).hasSize(1);
+                    Restaurant restaurant = restaurants.getFirst();
+                    assertThat(restaurant).isNotNull();
+                    assertThat(restaurant.getId()).isNotBlank();
+                    assertThat(restaurant.getRestaurantId()).isEqualTo(2L);
+                    assertThat(restaurant.getName()).isEqualTo(RESTAURANT_NAME);
+                    assertThat(restaurant.getBorough()).isEqualTo(BOROUGH_NAME);
+                    assertThat(restaurant.getCuisine()).isEqualTo(CUISINE_NAME);
+                    assertThat(restaurant.getAddress()).isNotNull();
+                    assertThat(restaurant.getAddress().getBuilding()).isEqualTo("junitBuilding");
+                    assertThat(restaurant.getAddress().getLocation())
+                            .isEqualTo(new Point(-73.9, 40.8));
+                    assertThat(restaurant.getAddress().getStreet()).isEqualTo("junitStreet");
+                    assertThat(restaurant.getAddress().getZipcode()).isEqualTo(98765);
+                    assertThat(restaurant.getGrades()).hasSize(2);
+                    var g0 = restaurant.getGrades().getFirst();
+                    assertThat(g0.getGrade()).isEqualTo("A");
+                    assertThat(g0.getDate()).isEqualTo(LocalDateTime.of(2024, 1, 1, 1, 1, 1));
+                    assertThat(g0.getScore()).isEqualTo(15);
+                });
     }
 
     @Test
@@ -264,38 +252,36 @@ class SearchControllerIntTest extends AbstractIntegrationTest {
 
         webTestClient
                 .get()
-                .uri(
-                        uriBuilder ->
-                                uriBuilder
-                                        .path("/search/should/bool")
-                                        .queryParam("borough", BOROUGH_NAME)
-                                        .queryParam("cuisine", CUISINE_NAME)
-                                        .queryParam("name", RESTAURANT_NAME)
-                                        .queryParam("offset", 0)
-                                        .queryParam("limit", 5)
-                                        .build())
+                .uri(uriBuilder ->
+                        uriBuilder
+                                .path("/search/should/bool")
+                                .queryParam("borough", BOROUGH_NAME)
+                                .queryParam("cuisine", CUISINE_NAME)
+                                .queryParam("name", RESTAURANT_NAME)
+                                .queryParam("offset", 0)
+                                .queryParam("limit", 5)
+                                .build())
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus()
                 .isOk()
                 .expectBody(new ParameterizedTypeReference<SearchPageResponse<Restaurant>>() {})
-                .value(
-                        page -> {
-                            assertThat(page).isNotNull();
-                            assertThat(page.totalElements()).isEqualTo(2L);
-                            assertThat(page.totalHits()).isGreaterThanOrEqualTo(2L);
-                            assertThat(page.data()).hasSize(2);
-                            var shouldFirst = page.data().getFirst();
-                            assertThat(shouldFirst.getName()).isEqualTo(RESTAURANT_NAME);
-                            assertThat(shouldFirst.getBorough()).isEqualTo(BOROUGH_NAME);
-                            assertThat(shouldFirst.getCuisine()).isEqualTo(CUISINE_NAME);
-                            assertThat(page.pageNumber()).isOne();
-                            assertThat(page.totalPages()).isOne();
-                            assertThat(page.isFirst()).isTrue();
-                            assertThat(page.isLast()).isTrue();
-                            assertThat(page.hasNext()).isFalse();
-                            assertThat(page.hasPrevious()).isFalse();
-                        });
+                .value(page -> {
+                    assertThat(page).isNotNull();
+                    assertThat(page.totalElements()).isEqualTo(2L);
+                    assertThat(page.totalHits()).isGreaterThanOrEqualTo(2L);
+                    assertThat(page.data()).hasSize(2);
+                    var shouldFirst = page.data().getFirst();
+                    assertThat(shouldFirst.getName()).isEqualTo(RESTAURANT_NAME);
+                    assertThat(shouldFirst.getBorough()).isEqualTo(BOROUGH_NAME);
+                    assertThat(shouldFirst.getCuisine()).isEqualTo(CUISINE_NAME);
+                    assertThat(page.pageNumber()).isOne();
+                    assertThat(page.totalPages()).isOne();
+                    assertThat(page.isFirst()).isTrue();
+                    assertThat(page.isLast()).isTrue();
+                    assertThat(page.hasNext()).isFalse();
+                    assertThat(page.hasPrevious()).isFalse();
+                });
     }
 
     @Test
@@ -303,36 +289,34 @@ class SearchControllerIntTest extends AbstractIntegrationTest {
 
         webTestClient
                 .get()
-                .uri(
-                        uriBuilder ->
-                                uriBuilder
-                                        .path("/search/wildcard")
-                                        .queryParam("query", "garden")
-                                        .queryParam("offset", 0)
-                                        .queryParam("limit", 10)
-                                        .build())
+                .uri(uriBuilder ->
+                        uriBuilder
+                                .path("/search/wildcard")
+                                .queryParam("query", "garden")
+                                .queryParam("offset", 0)
+                                .queryParam("limit", 10)
+                                .build())
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus()
                 .isOk()
                 .expectBody(new ParameterizedTypeReference<SearchPageResponse<Restaurant>>() {})
-                .value(
-                        page -> {
-                            assertThat(page).isNotNull();
-                            // expect exact match
-                            assertThat(page.totalElements()).isEqualTo(2L);
-                            assertThat(page.data()).hasSize(2);
-                            var wcFirst = page.data().getFirst();
-                            assertThat(wcFirst.getName()).isEqualTo(RESTAURANT_NAME);
-                            assertThat(wcFirst.getBorough()).isEqualTo(BOROUGH_NAME);
-                            assertThat(wcFirst.getCuisine()).isEqualTo(CUISINE_NAME);
-                            assertThat(page.pageNumber()).isOne();
-                            assertThat(page.totalPages()).isOne();
-                            assertThat(page.isFirst()).isTrue();
-                            assertThat(page.isLast()).isTrue();
-                            assertThat(page.hasNext()).isFalse();
-                            assertThat(page.hasPrevious()).isFalse();
-                        });
+                .value(page -> {
+                    assertThat(page).isNotNull();
+                    // expect exact match
+                    assertThat(page.totalElements()).isEqualTo(2L);
+                    assertThat(page.data()).hasSize(2);
+                    var wcFirst = page.data().getFirst();
+                    assertThat(wcFirst.getName()).isEqualTo(RESTAURANT_NAME);
+                    assertThat(wcFirst.getBorough()).isEqualTo(BOROUGH_NAME);
+                    assertThat(wcFirst.getCuisine()).isEqualTo(CUISINE_NAME);
+                    assertThat(page.pageNumber()).isOne();
+                    assertThat(page.totalPages()).isOne();
+                    assertThat(page.isFirst()).isTrue();
+                    assertThat(page.isLast()).isTrue();
+                    assertThat(page.hasNext()).isFalse();
+                    assertThat(page.hasPrevious()).isFalse();
+                });
     }
 
     @Test
@@ -340,29 +324,27 @@ class SearchControllerIntTest extends AbstractIntegrationTest {
 
         webTestClient
                 .get()
-                .uri(
-                        uriBuilder ->
-                                uriBuilder
-                                        .path("/search/regexp/borough")
-                                        .queryParam("query", "Test.*")
-                                        .queryParam("offset", 0)
-                                        .queryParam("limit", 10)
-                                        .build())
+                .uri(uriBuilder ->
+                        uriBuilder
+                                .path("/search/regexp/borough")
+                                .queryParam("query", "Test.*")
+                                .queryParam("offset", 0)
+                                .queryParam("limit", 10)
+                                .build())
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus()
                 .isOk()
                 .expectBody(new ParameterizedTypeReference<SearchPageResponse<Restaurant>>() {})
-                .value(
-                        page -> {
-                            assertThat(page).isNotNull();
-                            assertThat(page.totalElements()).isZero();
-                            assertThat(page.data()).isEmpty();
-                            assertThat(page.isFirst()).isTrue();
-                            assertThat(page.isLast()).isTrue();
-                            assertThat(page.hasNext()).isFalse();
-                            assertThat(page.hasPrevious()).isFalse();
-                        });
+                .value(page -> {
+                    assertThat(page).isNotNull();
+                    assertThat(page.totalElements()).isZero();
+                    assertThat(page.data()).isEmpty();
+                    assertThat(page.isFirst()).isTrue();
+                    assertThat(page.isLast()).isTrue();
+                    assertThat(page.hasNext()).isFalse();
+                    assertThat(page.hasPrevious()).isFalse();
+                });
     }
 
     @Test
@@ -370,32 +352,30 @@ class SearchControllerIntTest extends AbstractIntegrationTest {
 
         webTestClient
                 .get()
-                .uri(
-                        uriBuilder ->
-                                uriBuilder
-                                        .path("/search/simple")
-                                        .queryParam("query", "Manhattan")
-                                        .queryParam("offset", 0)
-                                        .queryParam("limit", 10)
-                                        .build())
+                .uri(uriBuilder ->
+                        uriBuilder
+                                .path("/search/simple")
+                                .queryParam("query", "Manhattan")
+                                .queryParam("offset", 0)
+                                .queryParam("limit", 10)
+                                .build())
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus()
                 .isOk()
                 .expectBody(new ParameterizedTypeReference<SearchPageResponse<Restaurant>>() {})
-                .value(
-                        page -> {
-                            assertThat(page).isNotNull();
-                            assertThat(page.totalElements()).isZero();
-                            assertThat(page.totalHits()).isZero();
-                            assertThat(page.data()).isEmpty();
-                            assertThat(page.pageNumber()).isOne();
-                            assertThat(page.totalPages()).isZero();
-                            assertThat(page.isFirst()).isTrue();
-                            assertThat(page.isLast()).isTrue();
-                            assertThat(page.hasNext()).isFalse();
-                            assertThat(page.hasPrevious()).isFalse();
-                        });
+                .value(page -> {
+                    assertThat(page).isNotNull();
+                    assertThat(page.totalElements()).isZero();
+                    assertThat(page.totalHits()).isZero();
+                    assertThat(page.data()).isEmpty();
+                    assertThat(page.pageNumber()).isOne();
+                    assertThat(page.totalPages()).isZero();
+                    assertThat(page.isFirst()).isTrue();
+                    assertThat(page.isLast()).isTrue();
+                    assertThat(page.hasNext()).isFalse();
+                    assertThat(page.hasPrevious()).isFalse();
+                });
     }
 
     @Test
@@ -403,34 +383,32 @@ class SearchControllerIntTest extends AbstractIntegrationTest {
 
         webTestClient
                 .get()
-                .uri(
-                        uriBuilder ->
-                                uriBuilder
-                                        .path("/search/restaurant/range")
-                                        .queryParam("lowerLimit", 1)
-                                        .queryParam("upperLimit", 100)
-                                        .build())
+                .uri(uriBuilder ->
+                        uriBuilder
+                                .path("/search/restaurant/range")
+                                .queryParam("lowerLimit", 1)
+                                .queryParam("upperLimit", 100)
+                                .build())
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus()
                 .isOk()
                 .expectBody(new ParameterizedTypeReference<SearchPageResponse<Restaurant>>() {})
-                .value(
-                        page -> {
-                            assertThat(page).isNotNull();
-                            assertThat(page.totalElements()).isOne();
-                            assertThat(page.data()).hasSize(1);
-                            var rangeFirst = page.data().getFirst();
-                            assertThat(rangeFirst.getName()).isEqualTo(RESTAURANT_NAME);
-                            assertThat(rangeFirst.getCuisine()).isEqualTo(CUISINE_NAME);
-                            assertThat(rangeFirst.getBorough()).isEqualTo(BOROUGH_NAME);
-                            assertThat(page.pageNumber()).isOne();
-                            assertThat(page.totalPages()).isOne();
-                            assertThat(page.isFirst()).isTrue();
-                            assertThat(page.isLast()).isTrue();
-                            assertThat(page.hasNext()).isFalse();
-                            assertThat(page.hasPrevious()).isFalse();
-                        });
+                .value(page -> {
+                    assertThat(page).isNotNull();
+                    assertThat(page.totalElements()).isOne();
+                    assertThat(page.data()).hasSize(1);
+                    var rangeFirst = page.data().getFirst();
+                    assertThat(rangeFirst.getName()).isEqualTo(RESTAURANT_NAME);
+                    assertThat(rangeFirst.getCuisine()).isEqualTo(CUISINE_NAME);
+                    assertThat(rangeFirst.getBorough()).isEqualTo(BOROUGH_NAME);
+                    assertThat(page.pageNumber()).isOne();
+                    assertThat(page.totalPages()).isOne();
+                    assertThat(page.isFirst()).isTrue();
+                    assertThat(page.isLast()).isTrue();
+                    assertThat(page.hasNext()).isFalse();
+                    assertThat(page.hasPrevious()).isFalse();
+                });
     }
 
     @Test
@@ -438,36 +416,34 @@ class SearchControllerIntTest extends AbstractIntegrationTest {
 
         webTestClient
                 .get()
-                .uri(
-                        uriBuilder ->
-                                uriBuilder
-                                        .path("/search/date/range")
-                                        .queryParam("fromDate", "2024-01-01")
-                                        .queryParam("toDate", "2024-12-31")
-                                        .queryParam("offset", 0)
-                                        .queryParam("limit", 10)
-                                        .build())
+                .uri(uriBuilder ->
+                        uriBuilder
+                                .path("/search/date/range")
+                                .queryParam("fromDate", "2024-01-01")
+                                .queryParam("toDate", "2024-12-31")
+                                .queryParam("offset", 0)
+                                .queryParam("limit", 10)
+                                .build())
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus()
                 .isOk()
                 .expectBody(new ParameterizedTypeReference<SearchPageResponse<Restaurant>>() {})
-                .value(
-                        page -> {
-                            assertThat(page).isNotNull();
-                            assertThat(page.totalElements()).isOne();
-                            assertThat(page.data()).hasSize(1);
-                            var dateFirst = page.data().getFirst();
-                            assertThat(dateFirst.getName()).isEqualTo(RESTAURANT_NAME);
-                            assertThat(dateFirst.getBorough()).isEqualTo(BOROUGH_NAME);
-                            assertThat(dateFirst.getCuisine()).isEqualTo(CUISINE_NAME);
-                            assertThat(page.pageNumber()).isOne();
-                            assertThat(page.totalPages()).isOne();
-                            assertThat(page.isFirst()).isTrue();
-                            assertThat(page.isLast()).isTrue();
-                            assertThat(page.hasNext()).isFalse();
-                            assertThat(page.hasPrevious()).isFalse();
-                        });
+                .value(page -> {
+                    assertThat(page).isNotNull();
+                    assertThat(page.totalElements()).isOne();
+                    assertThat(page.data()).hasSize(1);
+                    var dateFirst = page.data().getFirst();
+                    assertThat(dateFirst.getName()).isEqualTo(RESTAURANT_NAME);
+                    assertThat(dateFirst.getBorough()).isEqualTo(BOROUGH_NAME);
+                    assertThat(dateFirst.getCuisine()).isEqualTo(CUISINE_NAME);
+                    assertThat(page.pageNumber()).isOne();
+                    assertThat(page.totalPages()).isOne();
+                    assertThat(page.isFirst()).isTrue();
+                    assertThat(page.isLast()).isTrue();
+                    assertThat(page.hasNext()).isFalse();
+                    assertThat(page.hasPrevious()).isFalse();
+                });
     }
 
     @Test
@@ -475,39 +451,36 @@ class SearchControllerIntTest extends AbstractIntegrationTest {
 
         webTestClient
                 .get()
-                .uri(
-                        uriBuilder ->
-                                uriBuilder
-                                        .path("/search/aggregate")
-                                        .queryParam("searchKeyword", "chinese")
-                                        .queryParam("offset", 0)
-                                        .queryParam("limit", 10)
-                                        .queryParam("fieldNames", "restaurant_name", "cuisine")
-                                        .build())
+                .uri(uriBuilder ->
+                        uriBuilder
+                                .path("/search/aggregate")
+                                .queryParam("searchKeyword", "chinese")
+                                .queryParam("offset", 0)
+                                .queryParam("limit", 10)
+                                .queryParam("fieldNames", "restaurant_name", "cuisine")
+                                .build())
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus()
                 .isOk()
                 .expectBody(new ParameterizedTypeReference<SearchPageResponse<Restaurant>>() {})
-                .value(
-                        page -> {
-                            assertThat(page).isNotNull();
-                            assertThat(page.facets()).isNotNull();
-                            // repository builds aggregations with keys: MyBorough, MyCuisine,
-                            // MyDateRange
-                            assertThat(page.facets())
-                                    .containsKeys("MyBorough", "MyCuisine", "MyDateRange");
-                            var cuisineAgg = page.facets().get("MyCuisine");
-                            assertThat(cuisineAgg).containsKey("Chinese");
-                            assertThat(cuisineAgg.get("Chinese")).isPositive();
-                            var boroughAgg = page.facets().get("MyBorough");
-                            assertThat(boroughAgg).containsKey("Brooklyn");
-                            assertThat(boroughAgg.get("Brooklyn")).isPositive();
-                            assertThat(page.isFirst()).isTrue();
-                            assertThat(page.isLast()).isTrue();
-                            assertThat(page.hasNext()).isFalse();
-                            assertThat(page.hasPrevious()).isFalse();
-                        });
+                .value(page -> {
+                    assertThat(page).isNotNull();
+                    assertThat(page.facets()).isNotNull();
+                    // repository builds aggregations with keys: MyBorough, MyCuisine,
+                    // MyDateRange
+                    assertThat(page.facets()).containsKeys("MyBorough", "MyCuisine", "MyDateRange");
+                    var cuisineAgg = page.facets().get("MyCuisine");
+                    assertThat(cuisineAgg).containsKey("Chinese");
+                    assertThat(cuisineAgg.get("Chinese")).isPositive();
+                    var boroughAgg = page.facets().get("MyBorough");
+                    assertThat(boroughAgg).containsKey("Brooklyn");
+                    assertThat(boroughAgg.get("Brooklyn")).isPositive();
+                    assertThat(page.isFirst()).isTrue();
+                    assertThat(page.isLast()).isTrue();
+                    assertThat(page.hasNext()).isFalse();
+                    assertThat(page.hasPrevious()).isFalse();
+                });
     }
 
     @Test
@@ -531,13 +504,12 @@ class SearchControllerIntTest extends AbstractIntegrationTest {
                 .isOk()
                 .expectBodyList(ResultData.class)
                 .hasSize(1)
-                .value(
-                        resultDataList -> {
-                            var first = resultDataList.getFirst();
-                            assertThat(first.name()).isEqualTo(RESTAURANT_NAME);
-                            assertThat(first.location()).isEqualTo(new Point(-73.9, 40.8));
-                            assertThat(first.dist()).isNotNegative();
-                        });
+                .value(resultDataList -> {
+                    var first = resultDataList.getFirst();
+                    assertThat(first.name()).isEqualTo(RESTAURANT_NAME);
+                    assertThat(first.location()).isEqualTo(new Point(-73.9, 40.8));
+                    assertThat(first.dist()).isNotNegative();
+                });
     }
 
     @Test
@@ -550,13 +522,11 @@ class SearchControllerIntTest extends AbstractIntegrationTest {
                 .expectStatus()
                 .isOk()
                 .expectBody(new ParameterizedTypeReference<SearchPageResponse<Restaurant>>() {})
-                .value(
-                        response -> {
-                            assertThat(response.data()).hasSize(1);
-                            assertThat(response.data().getFirst().getRestaurantId()).isEqualTo(2L);
-                            assertThat(response.data().getFirst().getName())
-                                    .isEqualTo(RESTAURANT_NAME);
-                        });
+                .value(response -> {
+                    assertThat(response.data()).hasSize(1);
+                    assertThat(response.data().getFirst().getRestaurantId()).isEqualTo(2L);
+                    assertThat(response.data().getFirst().getName()).isEqualTo(RESTAURANT_NAME);
+                });
     }
 
     @Test
@@ -569,11 +539,10 @@ class SearchControllerIntTest extends AbstractIntegrationTest {
                 .expectStatus()
                 .isOk()
                 .expectBody(new ParameterizedTypeReference<SearchPageResponse<Restaurant>>() {})
-                .value(
-                        response -> {
-                            assertThat(response.data()).isNotEmpty();
-                            assertThat(response.data().getFirst().getRestaurantId()).isEqualTo(2L);
-                        });
+                .value(response -> {
+                    assertThat(response.data()).isNotEmpty();
+                    assertThat(response.data().getFirst().getRestaurantId()).isEqualTo(2L);
+                });
     }
 
     @Test

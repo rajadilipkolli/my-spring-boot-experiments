@@ -56,12 +56,9 @@ public class CustomPostRepositoryImpl extends JooqSorting implements CustomPostR
                                                 .limit(pageable.getPageSize())
                                                 .offset(pageable.getOffset()))
                                 .map(record -> record.into(PostResponse.class))
-                                .doOnError(
-                                        e ->
-                                                log.error(
-                                                        "Error fetching data query: {}",
-                                                        e.getMessage(),
-                                                        e))
+                                .doOnError(e ->
+                                        log.error(
+                                                "Error fetching data query: {}", e.getMessage(), e))
                                 .collectList(), // Collect the result into a list
                         // Fetch count query
                         Mono.from(countQuery).map(Record1::value1) // Get the count value

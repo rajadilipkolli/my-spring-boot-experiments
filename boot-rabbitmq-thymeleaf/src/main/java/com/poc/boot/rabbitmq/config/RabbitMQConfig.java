@@ -82,33 +82,31 @@ public class RabbitMQConfig {
     @Bean
     RabbitTemplateCustomizer rabbitTemplateCustomizer() {
         return rabbitTemplate -> {
-            rabbitTemplate.setConfirmCallback(
-                    (correlationData, ack, cause) -> {
-                        Assert.notNull(correlationData, () -> "correlationData can't be null");
-                        log.info(
-                                "correlation id : {} , acknowledgement : {}, cause : {}",
-                                correlationData.getId(),
-                                ack,
-                                cause);
-                        log.debug(
-                                "persisted correlationId in db : {}",
-                                trackingStateRepository.save(
-                                        new TrackingState()
-                                                .setCorrelationId(correlationData.getId())
-                                                .setAck(ack)
-                                                .setCause(cause)
-                                                .setStatus("processed")));
-                    });
+            rabbitTemplate.setConfirmCallback((correlationData, ack, cause) -> {
+                Assert.notNull(correlationData, () -> "correlationData can't be null");
+                log.info(
+                        "correlation id : {} , acknowledgement : {}, cause : {}",
+                        correlationData.getId(),
+                        ack,
+                        cause);
+                log.debug(
+                        "persisted correlationId in db : {}",
+                        trackingStateRepository.save(
+                                new TrackingState()
+                                        .setCorrelationId(correlationData.getId())
+                                        .setAck(ack)
+                                        .setCause(cause)
+                                        .setStatus("processed")));
+            });
             // This block ensures that returned, un-routable messages are logged.
-            rabbitTemplate.setReturnsCallback(
-                    returnedMessage ->
-                            log.info(
-                                    "Returned: {}\nreplyCode: {}\nreplyText: {}\nexchange/rk: {}/{}",
-                                    returnedMessage.getMessage().toString(),
-                                    returnedMessage.getReplyCode(),
-                                    returnedMessage.getReplyText(),
-                                    returnedMessage.getExchange(),
-                                    returnedMessage.getRoutingKey()));
+            rabbitTemplate.setReturnsCallback(returnedMessage ->
+                    log.info(
+                            "Returned: {}\nreplyCode: {}\nreplyText: {}\nexchange/rk: {}/{}",
+                            returnedMessage.getMessage().toString(),
+                            returnedMessage.getReplyCode(),
+                            returnedMessage.getReplyText(),
+                            returnedMessage.getExchange(),
+                            returnedMessage.getRoutingKey()));
         };
     }
 

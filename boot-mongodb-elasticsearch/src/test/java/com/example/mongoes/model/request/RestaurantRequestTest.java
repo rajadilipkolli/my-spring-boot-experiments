@@ -37,31 +37,31 @@ class RestaurantRequestTest {
     void deserializeInCorrectFormat() throws Exception {
         String jsonContent =
                 """
-        {
-            "restaurantId": 1,
-            "name": "junitRestaurant",
-            "borough": "junitBorough",
-            "cuisine": "junitCuisine",
-            "address": {
-                "location": {
-                    "x": -73.9,
-                    "y": 40.8
-                }
-            },
-            "grades": [
                 {
-                    "grade": "A",
-                    "date": "2022-01-01T01:01:01",
-                    "score": 15
-                },
-                {
-                    "grade": "B",
-                    "date": "2022-03-31T23:59:59",
-                    "score": 15
+                    "restaurantId": 1,
+                    "name": "junitRestaurant",
+                    "borough": "junitBorough",
+                    "cuisine": "junitCuisine",
+                    "address": {
+                        "location": {
+                            "x": -73.9,
+                            "y": 40.8
+                        }
+                    },
+                    "grades": [
+                        {
+                            "grade": "A",
+                            "date": "2022-01-01T01:01:01",
+                            "score": 15
+                        },
+                        {
+                            "grade": "B",
+                            "date": "2022-03-31T23:59:59",
+                            "score": 15
+                        }
+                    ]
                 }
-            ]
-        }
-        """;
+                """;
 
         RestaurantRequest restaurantRequest = jacksonTester.parseObject(jsonContent);
         assertThat(restaurantRequest).isNotNull();

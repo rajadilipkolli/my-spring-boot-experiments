@@ -40,8 +40,10 @@ public class UserController {
 
     @GetMapping("/{id}")
     public ResponseEntity<User> getUserById(@PathVariable Long id) {
-        return userService.findUserById(id).map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound()
-                .build());
+        return userService
+                .findUserById(id)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PostMapping
