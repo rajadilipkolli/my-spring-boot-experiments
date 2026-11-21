@@ -34,7 +34,7 @@ class JobInvokerController {
                 .toJobParameters();
         JobExecution jobExecution = this.jobOperator.start(this.allCustomersJob, jobParameters);
 
-        return new GenericMessage("Batch job has been invoked as " + jobExecution.getJobInstanceId());
+        return new GenericMessage("Batch job has been invoked as " + jobExecution.getJobInstance().getId() + " with status " + jobExecution.getStatus());
     }
 
     private record GenericMessage(String message) {}
