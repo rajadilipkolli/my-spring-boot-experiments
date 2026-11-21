@@ -97,6 +97,11 @@
             <version>${blaze-persistence.version}</version>
             <scope>compile</scope>
         </dependency>
+        <!-- Blaze Persistence Web MVC still uses Jackson 2. -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
