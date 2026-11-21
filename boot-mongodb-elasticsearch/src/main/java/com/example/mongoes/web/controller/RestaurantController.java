@@ -65,11 +65,9 @@ class RestaurantController implements RestaurantApi {
     public Mono<ResponseEntity<Void>> createRestaurant(RestaurantRequest restaurantRequest) {
         return this.restaurantService
                 .createRestaurant(restaurantRequest)
-                .map(
-                        restaurant ->
-                                ResponseEntity.created(
-                                                createRestaurantUri(restaurantRequest.name()))
-                                        .build());
+                .map(restaurant ->
+                        ResponseEntity.created(createRestaurantUri(restaurantRequest.name()))
+                                .build());
     }
 
     private URI createRestaurantUri(String restaurantName) {

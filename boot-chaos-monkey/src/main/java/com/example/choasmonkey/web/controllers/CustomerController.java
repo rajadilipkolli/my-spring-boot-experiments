@@ -45,8 +45,10 @@ public class CustomerController {
 
         return observerRequest(
                 "customers.findById",
-                customerService.findCustomerById(id).map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound()
-                        .build()));
+                customerService
+                        .findCustomerById(id)
+                        .map(ResponseEntity::ok)
+                        .orElseGet(() -> ResponseEntity.notFound().build()));
     }
 
     private ResponseEntity<Customer> observerRequest(

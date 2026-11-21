@@ -51,11 +51,10 @@ class RabbitMQIntegrationTest {
                 .andExpect(flash().attribute("message", "Order message sent successfully"));
         await().pollDelay(1, TimeUnit.SECONDS)
                 .atMost(3, TimeUnit.SECONDS)
-                .untilAsserted(
-                        () -> {
-                            long afterCount = trackingStateRepository.countByStatus("processed");
-                            assertThat(afterCount).isEqualTo(count + 1);
-                        });
+                .untilAsserted(() -> {
+                    long afterCount = trackingStateRepository.countByStatus("processed");
+                    assertThat(afterCount).isEqualTo(count + 1);
+                });
     }
 
     @Test
@@ -68,19 +67,17 @@ class RabbitMQIntegrationTest {
                 .andExpect(flash().attribute("message", "Order message sent successfully"));
         await().pollDelay(1, TimeUnit.SECONDS)
                 .atMost(3, TimeUnit.SECONDS)
-                .untilAsserted(
-                        () -> {
-                            long afterCount = trackingStateRepository.countByStatus("processed");
-                            assertThat(afterCount).isEqualTo(count + 1);
-                        });
+                .untilAsserted(() -> {
+                    long afterCount = trackingStateRepository.countByStatus("processed");
+                    assertThat(afterCount).isEqualTo(count + 1);
+                });
         await().pollDelay(2, TimeUnit.SECONDS)
                 .atMost(10, TimeUnit.SECONDS)
-                .untilAsserted(
-                        () -> {
-                            long afterCount = trackingStateRepository.countByStatus("failed");
-                            assertThat(afterCount).isOne();
-                            afterCount = trackingStateRepository.countByStatus("processed");
-                            assertThat(afterCount).isEqualTo(count);
-                        });
+                .untilAsserted(() -> {
+                    long afterCount = trackingStateRepository.countByStatus("failed");
+                    assertThat(afterCount).isOne();
+                    afterCount = trackingStateRepository.countByStatus("processed");
+                    assertThat(afterCount).isEqualTo(count);
+                });
     }
 }

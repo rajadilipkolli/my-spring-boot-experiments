@@ -95,43 +95,40 @@ class RestaurantControllerIntTest extends AbstractIntegrationTest {
         // Then fetch by name
         await().atMost(Duration.ofSeconds(5))
                 .pollInterval(Duration.ofMillis(500))
-                .untilAsserted(
-                        () ->
-                                this.webTestClient
-                                        .get()
-                                        .uri(
-                                                "/api/restaurant/name/{restaurantName}",
-                                                "testRestaurant")
-                                        .exchange()
-                                        .expectStatus()
-                                        .isOk()
-                                        .expectBody()
-                                        .jsonPath("$.id")
-                                        .exists()
-                                        .jsonPath("$.restaurantId")
-                                        .isEqualTo(101)
-                                        .jsonPath("$.name")
-                                        .isEqualTo("testRestaurant")
-                                        .jsonPath("$.borough")
-                                        .isEqualTo("junitBorough")
-                                        .jsonPath("$.cuisine")
-                                        .isEqualTo("junitCuisine")
-                                        .jsonPath("$.version")
-                                        .isEqualTo(0)
-                                        .jsonPath("$.address.building")
-                                        .isEqualTo("testBuilding")
-                                        .jsonPath("$.address.street")
-                                        .isEqualTo("testStreet")
-                                        .jsonPath("$.address.zipcode")
-                                        .isEqualTo(98765)
-                                        .jsonPath("$.address.location.x")
-                                        .isEqualTo(-73.8)
-                                        .jsonPath("$.address.location.y")
-                                        .isEqualTo(40.1)
-                                        .jsonPath("$.grades")
-                                        .isArray()
-                                        .jsonPath("$.grades.size()")
-                                        .isEqualTo(2));
+                .untilAsserted(() ->
+                        this.webTestClient
+                                .get()
+                                .uri("/api/restaurant/name/{restaurantName}", "testRestaurant")
+                                .exchange()
+                                .expectStatus()
+                                .isOk()
+                                .expectBody()
+                                .jsonPath("$.id")
+                                .exists()
+                                .jsonPath("$.restaurantId")
+                                .isEqualTo(101)
+                                .jsonPath("$.name")
+                                .isEqualTo("testRestaurant")
+                                .jsonPath("$.borough")
+                                .isEqualTo("junitBorough")
+                                .jsonPath("$.cuisine")
+                                .isEqualTo("junitCuisine")
+                                .jsonPath("$.version")
+                                .isEqualTo(0)
+                                .jsonPath("$.address.building")
+                                .isEqualTo("testBuilding")
+                                .jsonPath("$.address.street")
+                                .isEqualTo("testStreet")
+                                .jsonPath("$.address.zipcode")
+                                .isEqualTo(98765)
+                                .jsonPath("$.address.location.x")
+                                .isEqualTo(-73.8)
+                                .jsonPath("$.address.location.y")
+                                .isEqualTo(40.1)
+                                .jsonPath("$.grades")
+                                .isArray()
+                                .jsonPath("$.grades.size()")
+                                .isEqualTo(2));
     }
 
     @Test
@@ -143,16 +140,15 @@ class RestaurantControllerIntTest extends AbstractIntegrationTest {
         // Then get total count
         await().atMost(Duration.ofSeconds(5))
                 .pollInterval(Duration.ofMillis(500))
-                .untilAsserted(
-                        () ->
-                                this.webTestClient
-                                        .get()
-                                        .uri("/api/restaurant/total")
-                                        .exchange()
-                                        .expectStatus()
-                                        .isOk()
-                                        .expectBody(Long.class)
-                                        .value(count -> assertThat(count).isPositive()));
+                .untilAsserted(() ->
+                        this.webTestClient
+                                .get()
+                                .uri("/api/restaurant/total")
+                                .exchange()
+                                .expectStatus()
+                                .isOk()
+                                .expectBody(Long.class)
+                                .value(count -> assertThat(count).isPositive()));
     }
 
     @Test
@@ -313,15 +309,12 @@ class RestaurantControllerIntTest extends AbstractIntegrationTest {
         // Wait for Elasticsearch indexing
         await().atMost(Duration.ofSeconds(5))
                 .pollInterval(Duration.ofMillis(500))
-                .untilAsserted(
-                        () ->
-                                this.webTestClient
-                                        .get()
-                                        .uri(
-                                                "/api/restaurant/{restaurantId}",
-                                                request.restaurantId())
-                                        .exchange()
-                                        .expectStatus()
-                                        .isOk());
+                .untilAsserted(() ->
+                        this.webTestClient
+                                .get()
+                                .uri("/api/restaurant/{restaurantId}", request.restaurantId())
+                                .exchange()
+                                .expectStatus()
+                                .isOk());
     }
 }

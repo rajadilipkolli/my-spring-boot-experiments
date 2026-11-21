@@ -92,7 +92,7 @@ class PostControllerTest {
     @Test
     void shouldCreateNewPost() {
         given(postService.savePost(any(PostDto.class)))
-                .willAnswer((invocation) -> Mono.just(invocation.getArgument(0)));
+                .willAnswer(invocation -> Mono.just(invocation.getArgument(0)));
 
         PostDto post = new PostDto(1L, "some text", 1L, "First Body");
         this.webTestClient
@@ -134,7 +134,7 @@ class PostControllerTest {
         PostDto post = new PostDto(postId, "Updated text", 1L, "First Body");
         given(postService.findPostById(postId)).willReturn(Mono.just(post));
         given(postService.savePost(any(PostDto.class)))
-                .willAnswer((invocation) -> Mono.just(invocation.getArgument(0)));
+                .willAnswer(invocation -> Mono.just(invocation.getArgument(0)));
 
         this.webTestClient
                 .put()

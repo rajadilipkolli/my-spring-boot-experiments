@@ -67,11 +67,10 @@ public class PostController {
     public Mono<ResponseEntity<PostDto>> deletePost(@PathVariable Long id) {
         return postService
                 .findPostById(id)
-                .map(
-                        post -> {
-                            postService.deletePostById(id);
-                            return ResponseEntity.ok(post);
-                        })
+                .map(post -> {
+                    postService.deletePostById(id);
+                    return ResponseEntity.ok(post);
+                })
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 }

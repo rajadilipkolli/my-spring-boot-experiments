@@ -54,18 +54,16 @@ public class Initializer implements CommandLineRunner {
                                 new ClassPathResource("restaurants.json"),
                                 new DefaultDataBufferFactory(),
                                 4096))
-                .map(
-                        dataBuffer -> {
-                            byte[] bytes = new byte[dataBuffer.readableByteCount()];
-                            dataBuffer.read(bytes);
-                            DataBufferUtils.release(dataBuffer);
-                            return new String(bytes, StandardCharsets.UTF_8);
-                        })
-                .flatMapMany(
-                        fileContent -> {
-                            List<String> restaurantArray = Arrays.asList(fileContent.split("\n"));
-                            return this.saveAll(restaurantArray);
-                        });
+                .map(dataBuffer -> {
+                    byte[] bytes = new byte[dataBuffer.readableByteCount()];
+                    dataBuffer.read(bytes);
+                    DataBufferUtils.release(dataBuffer);
+                    return new String(bytes, StandardCharsets.UTF_8);
+                })
+                .flatMapMany(fileContent -> {
+                    List<String> restaurantArray = Arrays.asList(fileContent.split("\n"));
+                    return this.saveAll(restaurantArray);
+                });
     }
 
     private Flux<Restaurant> saveAll(List<String> restaurantStringList) {
@@ -129,16 +127,15 @@ public class Initializer implements CommandLineRunner {
 
     private List<Grades> getGradesList(List<Document> gradeDocumentList) {
         return gradeDocumentList.stream()
-                .map(
-                        gradeDoc -> {
-                            Grades grades = new Grades();
-                            grades.setGrade(gradeDoc.get("grade", String.class));
-                            grades.setScore(gradeDoc.get("score", Integer.class));
-                            grades.setDate(
-                                    DateUtility.convertToLocalDateViaInstant(
-                                            gradeDoc.get("date", Date.class)));
-                            return grades;
-                        })
+                .map(gradeDoc -> {
+                    Grades grades = new Grades();
+                    grades.setGrade(gradeDoc.get("grade", String.class));
+                    grades.setScore(gradeDoc.get("score", Integer.class));
+                    grades.setDate(
+                            DateUtility.convertToLocalDateViaInstant(
+                                    gradeDoc.get("date", Date.class)));
+                    return grades;
+                })
                 .toList();
     }
 }

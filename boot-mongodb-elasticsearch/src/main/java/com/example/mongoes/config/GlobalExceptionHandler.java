@@ -55,16 +55,14 @@ public class GlobalExceptionHandler {
         problemDetail.setType(URI.create("https://api.mongoes.com/errors/validation-error"));
         List<ApiValidationError> validationErrorsList =
                 ex.getAllErrors().stream()
-                        .map(
-                                objectError -> {
-                                    FieldError fieldError = (FieldError) objectError;
-                                    return new ApiValidationError(
-                                            fieldError.getObjectName(),
-                                            fieldError.getField(),
-                                            fieldError.getRejectedValue(),
-                                            Objects.requireNonNull(
-                                                    fieldError.getDefaultMessage(), ""));
-                                })
+                        .map(objectError -> {
+                            FieldError fieldError = (FieldError) objectError;
+                            return new ApiValidationError(
+                                    fieldError.getObjectName(),
+                                    fieldError.getField(),
+                                    fieldError.getRejectedValue(),
+                                    Objects.requireNonNull(fieldError.getDefaultMessage(), ""));
+                        })
                         .sorted(Comparator.comparing(ApiValidationError::field))
                         .toList();
         problemDetail.setProperty("violations", validationErrorsList);
@@ -82,13 +80,12 @@ public class GlobalExceptionHandler {
         problemDetail.setType(URI.create("https://api.mongoes.com/errors/validation-error"));
         List<ApiValidationError> validationErrorsList =
                 ex.getConstraintViolations().stream()
-                        .map(
-                                violation ->
-                                        new ApiValidationError(
-                                                violation.getRootBeanClass().getSimpleName(),
-                                                violation.getPropertyPath().toString(),
-                                                violation.getInvalidValue(),
-                                                violation.getMessage()))
+                        .map(violation ->
+                                new ApiValidationError(
+                                        violation.getRootBeanClass().getSimpleName(),
+                                        violation.getPropertyPath().toString(),
+                                        violation.getInvalidValue(),
+                                        violation.getMessage()))
                         .sorted(Comparator.comparing(ApiValidationError::field))
                         .toList();
         problemDetail.setProperty("violations", validationErrorsList);

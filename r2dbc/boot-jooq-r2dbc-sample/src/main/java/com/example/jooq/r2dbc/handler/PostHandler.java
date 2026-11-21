@@ -53,7 +53,7 @@ public class PostHandler {
     public Mono<ServerResponse> update(ServerRequest req) {
 
         return Mono.zip(
-                        (data) -> {
+                        data -> {
                             Post p = (Post) data[0];
                             Post p2 = (Post) data[1];
                             p.setTitle(p2.getTitle());
@@ -88,20 +88,17 @@ public class PostHandler {
         Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
         return postService
                 .findByKeyword(req.queryParam("keyword").orElse(""), pageable)
-                .flatMap(
-                        paginatedResult ->
-                                ServerResponse.ok()
-                                        .body(Mono.just(paginatedResult), PaginatedResult.class));
+                .flatMap(paginatedResult ->
+                        ServerResponse.ok()
+                                .body(Mono.just(paginatedResult), PaginatedResult.class));
     }
 
     @Loggable
     public Mono<ServerResponse> createComments(ServerRequest req) {
 
         return req.bodyToMono(CreatePostComment.class)
-                .flatMap(
-                        createPostComment ->
-                                postService.addCommentToPostId(
-                                        req.pathVariable("id"), createPostComment))
+                .flatMap(createPostComment ->
+                        postService.addCommentToPostId(req.pathVariable("id"), createPostComment))
                 .flatMap(id -> created(URI.create("/posts/comments/" + id)).build());
     }
 }

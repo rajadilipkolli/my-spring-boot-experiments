@@ -27,16 +27,14 @@ public class GlobalExceptionHandler {
         problemDetail.setTitle("Constraint Violation");
         List<ApiValidationError> validationErrorsList =
                 webExchangeBindException.getAllErrors().stream()
-                        .map(
-                                objectError -> {
-                                    FieldError fieldError = (FieldError) objectError;
-                                    return new ApiValidationError(
-                                            fieldError.getObjectName(),
-                                            fieldError.getField(),
-                                            fieldError.getRejectedValue(),
-                                            Objects.requireNonNull(
-                                                    fieldError.getDefaultMessage(), ""));
-                                })
+                        .map(objectError -> {
+                            FieldError fieldError = (FieldError) objectError;
+                            return new ApiValidationError(
+                                    fieldError.getObjectName(),
+                                    fieldError.getField(),
+                                    fieldError.getRejectedValue(),
+                                    Objects.requireNonNull(fieldError.getDefaultMessage(), ""));
+                        })
                         .sorted(Comparator.comparing(ApiValidationError::field))
                         .toList();
         problemDetail.setProperty("violations", validationErrorsList);
