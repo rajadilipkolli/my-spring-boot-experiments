@@ -52,14 +52,15 @@ class ApplicationIntTest extends AbstractIntegrationTest {
 
     @Test
     void shouldReceiveNotificationOnChannel() throws Exception {
+        String channel = "junitStreamChannel";
         // Create notification request
-        NotificationRequest notificationRequest = new NotificationRequest("junitChannel", "Hello from test!");
+        NotificationRequest notificationRequest = new NotificationRequest(channel, "Hello from test!");
 
         // Start listening to notifications (SSE stream) in background since exchange() blocks until first event
         CompletableFuture<Flux<NotificationEvent>> notificationStreamFuture =
                 CompletableFuture.supplyAsync(() -> webTestClient
                         .get()
-                        .uri("/notifications/junitChannel")
+                        .uri("/notifications/{channel}", channel)
                         .accept(MediaType.TEXT_EVENT_STREAM)
                         .exchange()
                         .expectStatus()
@@ -87,7 +88,7 @@ class ApplicationIntTest extends AbstractIntegrationTest {
         // Verify the notification event received on the SSE stream
         StepVerifier.create(notificationStream.take(1))
                 .assertNext(event -> {
-                    assertThat(event.channel()).isEqualTo("junitChannel");
+                    assertThat(event.channel()).isEqualTo(channel);
                     assertThat(event.message()).isEqualTo("Hello from test!");
                 })
                 .verifyComplete();
