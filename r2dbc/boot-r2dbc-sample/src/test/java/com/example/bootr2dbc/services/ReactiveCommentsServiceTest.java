@@ -43,14 +43,11 @@ class ReactiveCommentsServiceTest {
         // then
         assertThat(pagedResult).isNotNull();
         StepVerifier.create(pagedResult)
-                .expectNextMatches(
-                        reactivePostComment ->
-                                reactivePostComment
-                                                .getPostId()
-                                                .equals(getReactiveComments().getPostId())
-                                        && reactivePostComment
-                                                .getContent()
-                                                .equals(getReactiveComments().getContent()))
+                .expectNextMatches(reactivePostComment ->
+                        reactivePostComment.getPostId().equals(getReactiveComments().getPostId())
+                                && reactivePostComment
+                                        .getContent()
+                                        .equals(getReactiveComments().getContent()))
                 .expectComplete()
                 .verify();
     }
@@ -66,14 +63,11 @@ class ReactiveCommentsServiceTest {
                 reactiveCommentsService.findReactiveCommentById(postCommentId);
         // then
         StepVerifier.create(reactiveCommentsMono)
-                .expectNextMatches(
-                        reactivePostComment ->
-                                reactivePostComment
-                                                .getPostId()
-                                                .equals(getReactiveComments().getPostId())
-                                        && reactivePostComment
-                                                .getContent()
-                                                .equals(getReactiveComments().getContent()))
+                .expectNextMatches(reactivePostComment ->
+                        reactivePostComment.getPostId().equals(getReactiveComments().getPostId())
+                                && reactivePostComment
+                                        .getContent()
+                                        .equals(getReactiveComments().getContent()))
                 .expectComplete()
                 .verify();
     }
@@ -97,14 +91,11 @@ class ReactiveCommentsServiceTest {
                 reactiveCommentsService.saveReactiveCommentByPostId(reactivePostCommentsRequest);
         // then
         StepVerifier.create(persistedReactiveComments)
-                .expectNextMatches(
-                        reactivePostComment ->
-                                reactivePostComment
-                                                .getPostId()
-                                                .equals(getReactiveComments().getPostId())
-                                        && reactivePostComment
-                                                .getContent()
-                                                .equals(getReactiveComments().getContent()))
+                .expectNextMatches(reactivePostComment ->
+                        reactivePostComment.getPostId().equals(getReactiveComments().getPostId())
+                                && reactivePostComment
+                                        .getContent()
+                                        .equals(getReactiveComments().getContent()))
                 .expectComplete()
                 .verify();
     }

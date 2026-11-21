@@ -76,14 +76,12 @@ class ReactiveCommentsControllerTest {
 
         this.webTestClient
                 .get()
-                .uri(
-                        uriBuilder -> {
-                            uriBuilder.queryParam(
-                                    "postId", expectedCommentsList.getFirst().getPostId());
-                            uriBuilder.queryParam("sortBy", "title");
-                            uriBuilder.path("/api/posts/comments/");
-                            return uriBuilder.build();
-                        })
+                .uri(uriBuilder -> {
+                    uriBuilder.queryParam("postId", expectedCommentsList.getFirst().getPostId());
+                    uriBuilder.queryParam("sortBy", "title");
+                    uriBuilder.path("/api/posts/comments/");
+                    return uriBuilder.build();
+                })
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus()
@@ -162,12 +160,11 @@ class ReactiveCommentsControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
                 .jsonPath("$.id")
-                .value(
-                        returningId -> {
-                            // Attempt to parse the value as a UUID
-                            UUID uuid = UUID.fromString((String) returningId);
-                            assertThat(uuid).isNotNull();
-                        })
+                .value(returningId -> {
+                    // Attempt to parse the value as a UUID
+                    UUID uuid = UUID.fromString((String) returningId);
+                    assertThat(uuid).isNotNull();
+                })
                 .jsonPath("$.title")
                 .isEqualTo(reactiveCommentRequest.title())
                 .jsonPath("$.content")

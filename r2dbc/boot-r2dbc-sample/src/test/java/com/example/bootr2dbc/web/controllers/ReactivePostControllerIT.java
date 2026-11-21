@@ -79,11 +79,10 @@ class ReactivePostControllerIT extends AbstractIntegrationTest {
 
         this.webTestClient
                 .mutate() // Mutate the client to add basic authentication headers
-                .defaultHeaders(
-                        headers -> {
-                            headers.setBasicAuth("user", "password");
-                            headers.setContentType(MediaType.APPLICATION_JSON);
-                        })
+                .defaultHeaders(headers -> {
+                    headers.setBasicAuth("user", "password");
+                    headers.setContentType(MediaType.APPLICATION_JSON);
+                })
                 .build()
                 .get()
                 .uri("/api/posts/{id}", reactivePostId)
@@ -107,11 +106,10 @@ class ReactivePostControllerIT extends AbstractIntegrationTest {
         ReactivePostRequest reactivePost = new ReactivePostRequest("New Title", "New ReactivePost");
         this.webTestClient
                 .mutate() // Mutate the client to add basic authentication headers
-                .defaultHeaders(
-                        headers -> {
-                            headers.setBasicAuth("user", "password");
-                            headers.setContentType(MediaType.APPLICATION_JSON);
-                        })
+                .defaultHeaders(headers -> {
+                    headers.setBasicAuth("user", "password");
+                    headers.setContentType(MediaType.APPLICATION_JSON);
+                })
                 .build()
                 .post()
                 .uri("/api/posts/")
@@ -137,11 +135,10 @@ class ReactivePostControllerIT extends AbstractIntegrationTest {
 
         this.webTestClient
                 .mutate() // Mutate the client to add basic authentication headers
-                .defaultHeaders(
-                        headers -> {
-                            headers.setBasicAuth("user", "password");
-                            headers.setContentType(MediaType.APPLICATION_JSON);
-                        })
+                .defaultHeaders(headers -> {
+                    headers.setBasicAuth("user", "password");
+                    headers.setContentType(MediaType.APPLICATION_JSON);
+                })
                 .build()
                 .post()
                 .uri("/api/posts/")
@@ -193,11 +190,10 @@ class ReactivePostControllerIT extends AbstractIntegrationTest {
 
         this.webTestClient
                 .mutate() // Mutate the client to add basic authentication headers
-                .defaultHeaders(
-                        headers -> {
-                            headers.setBasicAuth("user", "password");
-                            headers.setContentType(MediaType.APPLICATION_JSON);
-                        })
+                .defaultHeaders(headers -> {
+                    headers.setBasicAuth("user", "password");
+                    headers.setContentType(MediaType.APPLICATION_JSON);
+                })
                 .build()
                 .put()
                 .uri("/api/posts/{id}", reactivePostId)

@@ -21,32 +21,27 @@ public class SecurityConfig {
         var postPath = "/api/posts/**";
         return http.csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .httpBasic(Customizer.withDefaults())
-                .authorizeExchange(
-                        it ->
-                                it.pathMatchers(
-                                                "/webjars/**",
-                                                "/swagger-ui.html",
-                                                "/swagger-ui/**",
-                                                "/v3/api-docs/**")
-                                        .permitAll() // Allow Springdoc OpenAPI resources
-                                        .pathMatchers(HttpMethod.DELETE, postPath)
-                                        .hasRole("ADMIN")
-                                        .pathMatchers(postPath)
-                                        .hasRole("USER")
-                                        .pathMatchers("/users/{user}/**")
-                                        .access(
-                                                (authentication, object) ->
-                                                        authentication
-                                                                .map(
-                                                                        auth ->
-                                                                                object.getVariables()
-                                                                                        .get("user")
-                                                                                        .equals(
-                                                                                                auth
-                                                                                                        .getName()))
-                                                                .map(AuthorizationDecision::new))
-                                        .anyExchange()
-                                        .authenticated())
+                .authorizeExchange(it ->
+                        it.pathMatchers(
+                                        "/webjars/**",
+                                        "/swagger-ui.html",
+                                        "/swagger-ui/**",
+                                        "/v3/api-docs/**")
+                                .permitAll() // Allow Springdoc OpenAPI resources
+                                .pathMatchers(HttpMethod.DELETE, postPath)
+                                .hasRole("ADMIN")
+                                .pathMatchers(postPath)
+                                .hasRole("USER")
+                                .pathMatchers("/users/{user}/**")
+                                .access((authentication, object) ->
+                                        authentication
+                                                .map(auth ->
+                                                        object.getVariables()
+                                                                .get("user")
+                                                                .equals(auth.getName()))
+                                                .map(AuthorizationDecision::new))
+                                .anyExchange()
+                                .authenticated())
                 .build();
     }
 

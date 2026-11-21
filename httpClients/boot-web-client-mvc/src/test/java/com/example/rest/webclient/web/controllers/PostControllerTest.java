@@ -82,7 +82,7 @@ class PostControllerTest {
     @Test
     void shouldCreateNewPost() throws Exception {
         given(postService.savePost(any(PostDto.class)))
-                .willAnswer((invocation) -> invocation.getArgument(0));
+                .willAnswer(invocation -> invocation.getArgument(0));
 
         PostDto post = new PostDto(1L, 1L, "text 1", "First Body");
         this.mockMvc

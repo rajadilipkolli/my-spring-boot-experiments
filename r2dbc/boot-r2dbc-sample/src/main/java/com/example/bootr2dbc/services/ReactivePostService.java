@@ -69,14 +69,11 @@ public class ReactivePostService {
     @Transactional
     public Mono<ResponseEntity<Object>> deleteReactivePostAndCommentsById(Long id) {
         return findReactivePostById(id)
-                .flatMap(
-                        reactivePost ->
-                                reactiveCommentsRepository
-                                        .deleteAllByPostId(reactivePost.getId())
-                                        .then(
-                                                reactivePostRepository.deleteById(
-                                                        reactivePost.getId()))
-                                        .then(Mono.just(ResponseEntity.noContent().build())))
+                .flatMap(reactivePost ->
+                        reactiveCommentsRepository
+                                .deleteAllByPostId(reactivePost.getId())
+                                .then(reactivePostRepository.deleteById(reactivePost.getId()))
+                                .then(Mono.just(ResponseEntity.noContent().build())))
                 .switchIfEmpty(Mono.just(ResponseEntity.notFound().build()));
     }
 }
