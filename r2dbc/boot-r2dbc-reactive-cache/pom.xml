@@ -21,7 +21,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
         <java.version>25</java.version>
-        <springdoc-openapi.version>3.2.0</springdoc-openapi.version>
+        <springdoc-openapi.version>3.2.1</springdoc-openapi.version>
         <commons-io.version>2.22.0</commons-io.version>
 
         <project.testresult.directory>${project.build.directory}/test-results</project.testresult.directory>
@@ -78,6 +78,11 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-redis-reactive</artifactId>
+        </dependency>
+        <!-- Keep Jackson 2 for the existing Redis key and value serializers. -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>

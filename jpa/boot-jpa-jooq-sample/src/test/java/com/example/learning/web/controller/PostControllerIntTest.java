@@ -10,7 +10,6 @@ import com.example.learning.model.request.TagRequest;
 import com.example.learning.model.response.PostCommentResponse;
 import com.example.learning.model.response.PostResponse;
 import com.example.learning.model.response.TagResponse;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -28,7 +27,7 @@ import org.springframework.http.ProblemDetail;
 class PostControllerIntTest extends AbstractIntegrationTest {
 
     @Test
-    void createPostByUserName() throws JsonProcessingException {
+    void createPostByUserName() {
 
         Tag tagEntity = new Tag().setTagName("spring").setTagDescription("Beautiful Spring");
         tagRepository.save(tagEntity);
@@ -223,7 +222,7 @@ class PostControllerIntTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void createPostWithCommentsWithoutTagsAndDelete() throws JsonProcessingException {
+    void createPostWithCommentsWithoutTagsAndDelete() {
         PostRequest postRequest = new PostRequest(
                 "postWithCommentsWithOutTags",
                 "This is a simple post without tags",
@@ -288,7 +287,7 @@ class PostControllerIntTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void updatePostByUserNameWithNewCommentsAndTags() throws JsonProcessingException {
+    void updatePostByUserNameWithNewCommentsAndTags() {
 
         PostRequest postRequest = new PostRequest(
                 "titleWithNewCommentsAndTags",
@@ -383,7 +382,7 @@ class PostControllerIntTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void updatePostByUserNameWithRemovedCommentsAndTags() throws JsonProcessingException {
+    void updatePostByUserNameWithRemovedCommentsAndTags() {
 
         PostRequest postRequest = new PostRequest(
                 "postWithOutTags",
@@ -441,7 +440,7 @@ class PostControllerIntTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void updatePostByUserNameWithExistingCommentsAndTags() throws JsonProcessingException {
+    void updatePostByUserNameWithExistingCommentsAndTags() {
         PostRequest postRequest = new PostRequest(
                 "existingPostTitleWithTagsAndComments",
                 "updatedContent",
@@ -534,7 +533,7 @@ class PostControllerIntTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void updatePostByUserNameWithNoCommentsAndTags() throws JsonProcessingException {
+    void updatePostByUserNameWithNoCommentsAndTags() {
         PostRequest postRequest = new PostRequest(
                 "postWithoutTagsTitle",
                 "This is a simple post without tags",
@@ -591,7 +590,7 @@ class PostControllerIntTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void updatePostByUserNameWithDuplicateTags() throws JsonProcessingException {
+    void updatePostByUserNameWithDuplicateTags() {
         PostRequest postRequest = new PostRequest(
                 "titleWithDuplicateTags",
                 "This is a simple post with tags",
@@ -687,8 +686,7 @@ class PostControllerIntTest extends AbstractIntegrationTest {
     @ParameterizedTest
     @MethodSource("postTestCases")
     void shouldHandlePostOperationsWithDifferentConfigurations(
-            String title, List<PostCommentRequest> comments, List<TagRequest> tags, boolean expectEmpty)
-            throws JsonProcessingException {
+            String title, List<PostCommentRequest> comments, List<TagRequest> tags, boolean expectEmpty) {
 
         PostRequest postRequest = new PostRequest(
                 title, "Test content", true, LocalDateTime.parse("2025-01-15T10:00:00"), comments, tags);
