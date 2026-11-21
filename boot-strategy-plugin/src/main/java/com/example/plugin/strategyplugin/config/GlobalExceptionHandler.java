@@ -33,18 +33,16 @@ class GlobalExceptionHandler {
         problemDetail.setTitle("Constraint Violation");
         List<ApiValidationError> validationErrorsList =
                 methodArgumentNotValidException.getAllErrors().stream()
-                        .map(
-                                objectError -> {
-                                    if (objectError instanceof FieldError fieldError) {
-                                        return new ApiValidationError(
-                                                fieldError.getObjectName(),
-                                                fieldError.getField(),
-                                                fieldError.getRejectedValue(),
-                                                Objects.requireNonNull(
-                                                        fieldError.getDefaultMessage(), ""));
-                                    }
-                                    return null;
-                                })
+                        .map(objectError -> {
+                            if (objectError instanceof FieldError fieldError) {
+                                return new ApiValidationError(
+                                        fieldError.getObjectName(),
+                                        fieldError.getField(),
+                                        fieldError.getRejectedValue(),
+                                        Objects.requireNonNull(fieldError.getDefaultMessage(), ""));
+                            }
+                            return null;
+                        })
                         .filter(Objects::nonNull)
                         .sorted(Comparator.comparing(ApiValidationError::field))
                         .toList();
