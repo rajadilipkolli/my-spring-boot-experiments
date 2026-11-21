@@ -21,7 +21,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
         <java.version>25</java.version>
-        <springdoc-openapi.version>3.2.0</springdoc-openapi.version>
+        <springdoc-openapi.version>3.2.1</springdoc-openapi.version>
         <!-- Blaze 1.6.20 does not support Spring Data 2026.1 repository query validation. -->
         <spring-data-bom.version>2026.0.2</spring-data-bom.version>
         <blaze-persistence.version>1.6.20</blaze-persistence.version>
