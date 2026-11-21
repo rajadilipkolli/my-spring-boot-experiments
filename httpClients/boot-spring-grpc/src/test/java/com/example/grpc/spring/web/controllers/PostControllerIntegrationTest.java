@@ -109,11 +109,10 @@ class PostControllerIntegrationTest extends AbstractIntegrationTest {
                         postServiceBlockingStub
                                 .listPosts(ListPostsRequest.newBuilder().build())
                                 .getPostsList())
-                .anySatisfy(
-                        p -> {
-                            assertThat(p.getId()).isEqualTo(postId);
-                            assertThat(p.getTitle()).isEqualTo("Updated Title");
-                        });
+                .anySatisfy(p -> {
+                    assertThat(p.getId()).isEqualTo(postId);
+                    assertThat(p.getTitle()).isEqualTo("Updated Title");
+                });
 
         // 5. Delete the Post
         DeletePostResponse deletePostResponse =
@@ -122,10 +121,9 @@ class PostControllerIntegrationTest extends AbstractIntegrationTest {
         assertThat(deletePostResponse.getSuccess()).isTrue();
 
         // 6. Verify Deletion
-        assertThatThrownBy(
-                        () ->
-                                postServiceBlockingStub.getPost(
-                                        GetPostRequest.newBuilder().setId(postId).build()))
+        assertThatThrownBy(() ->
+                        postServiceBlockingStub.getPost(
+                                GetPostRequest.newBuilder().setId(postId).build()))
                 .isInstanceOf(StatusRuntimeException.class)
                 .hasMessageContaining("NOT_FOUND");
     }

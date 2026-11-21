@@ -141,11 +141,10 @@ class PostCommentControllerIntegrationTest extends AbstractIntegrationTest {
                                 .listComments(
                                         ListCommentsRequest.newBuilder().setPostId(postId).build())
                                 .getCommentsList())
-                .anySatisfy(
-                        c -> {
-                            assertThat(c.getId()).isEqualTo(commentId);
-                            assertThat(c.getReview()).isEqualTo("Updated review");
-                        });
+                .anySatisfy(c -> {
+                    assertThat(c.getId()).isEqualTo(commentId);
+                    assertThat(c.getReview()).isEqualTo("Updated review");
+                });
 
         // 6. Delete the Comment
         DeleteCommentResponse deleteCommentResponse =
@@ -157,13 +156,12 @@ class PostCommentControllerIntegrationTest extends AbstractIntegrationTest {
         assertThat(deleteCommentResponse.getSuccess()).isTrue();
 
         // 7. Verify Deletion
-        assertThatThrownBy(
-                        () ->
-                                postCommentServiceBlockingStub.getComment(
-                                        GetCommentRequest.newBuilder()
-                                                .setPostId(postId)
-                                                .setId(commentId)
-                                                .build()))
+        assertThatThrownBy(() ->
+                        postCommentServiceBlockingStub.getComment(
+                                GetCommentRequest.newBuilder()
+                                        .setPostId(postId)
+                                        .setId(commentId)
+                                        .build()))
                 .isInstanceOf(StatusRuntimeException.class)
                 .hasMessageContaining("NOT_FOUND");
     }
