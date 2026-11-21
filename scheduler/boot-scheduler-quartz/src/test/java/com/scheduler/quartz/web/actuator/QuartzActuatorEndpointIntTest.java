@@ -16,8 +16,7 @@ class QuartzActuatorEndpointIntTest extends AbstractIntegrationTest {
     @BeforeEach
     void setup() {
         // Create a job first using the saveOrUpdate endpoint
-        String requestBody =
-                """
+        String requestBody = """
                 {
                     "jobName": "SampleJob",
                     "cronExpression": "0/5 * * * * ?",

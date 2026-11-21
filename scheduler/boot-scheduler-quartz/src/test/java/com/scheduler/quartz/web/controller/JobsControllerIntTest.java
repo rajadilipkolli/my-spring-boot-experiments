@@ -36,8 +36,7 @@ class JobsControllerIntTest extends AbstractIntegrationTest {
 
     @Test
     void saveOrUpdate() {
-        String requestBody =
-                """
+        String requestBody = """
                         {
                             "jobName": "SampleJob",
                             "cronExpression": "0/5 * * * * ?",
@@ -66,8 +65,7 @@ class JobsControllerIntTest extends AbstractIntegrationTest {
 
     @Test
     void saveOrUpdateWithInvalidCronExpression() {
-        String requestBody =
-                """
+        String requestBody = """
                     {
                         "jobName": "SampleJob",
                         "cronExpression": "0/5 * * * *",
@@ -94,8 +92,7 @@ class JobsControllerIntTest extends AbstractIntegrationTest {
 
     @Test
     void pauseJob() {
-        String requestBody =
-                """
+        String requestBody = """
                     {
                         "jobName": "SampleJob",
                         "jobId": "12345"
@@ -115,8 +112,7 @@ class JobsControllerIntTest extends AbstractIntegrationTest {
 
     @Test
     void pauseJobWithInvalidJobName() {
-        String requestBody =
-                """
+        String requestBody = """
                     {
                         "jobName": "InvalidJob",
                         "jobId": "12345"
@@ -141,8 +137,7 @@ class JobsControllerIntTest extends AbstractIntegrationTest {
 
     @Test
     void resumeJob() {
-        String requestBody =
-                """
+        String requestBody = """
                     {
                         "jobName": "SampleJob",
                         "jobId": "12345"
@@ -162,8 +157,7 @@ class JobsControllerIntTest extends AbstractIntegrationTest {
 
     @Test
     void resumeJobWithInvalidJobName() {
-        String requestBody =
-                """
+        String requestBody = """
                     {
                         "jobName": "InvalidJob",
                         "jobId": "12345"
@@ -187,8 +181,7 @@ class JobsControllerIntTest extends AbstractIntegrationTest {
 
     @Test
     void deleteJob() {
-        String requestBody =
-                """
+        String requestBody = """
                     {
                         "jobName": "SampleJob",
                         "jobId": "12345"
@@ -208,8 +201,7 @@ class JobsControllerIntTest extends AbstractIntegrationTest {
 
     @Test
     void deleteJobWithInvalidJobName() {
-        String requestBody =
-                """
+        String requestBody = """
                     {
                         "jobName": "InvalidJob",
                         "jobId": "12345"
