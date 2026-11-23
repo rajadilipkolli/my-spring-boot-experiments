@@ -16,7 +16,7 @@
 
     <properties>
         <java.version>25</java.version>
-        <shedlock.version>7.11.0</shedlock.version>
+        <shedlock.version>7.12.0</shedlock.version>
         <spotless.version>3.12.0</spotless.version>
         <properties-maven-plugin.version>1.4.0</properties-maven-plugin.version>
         <sonar-maven-plugin.version>5.9.0.7382</sonar-maven-plugin.version>
