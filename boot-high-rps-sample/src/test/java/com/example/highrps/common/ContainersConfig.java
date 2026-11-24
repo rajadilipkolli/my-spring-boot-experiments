@@ -26,7 +26,7 @@ public class ContainersConfig {
     @Bean
     @ServiceConnection
     LgtmStackContainer lgtmContainer() {
-        return new LgtmStackContainer(DockerImageName.parse("grafana/otel-lgtm:0.39.0"))
+        return new LgtmStackContainer(DockerImageName.parse("grafana/otel-lgtm:0.41.1"))
                 .withStartupTimeout(Duration.ofMinutes(2))
                 .withReuse(true);
     }
@@ -34,7 +34,7 @@ public class ContainersConfig {
     @Bean
     @ServiceConnection(name = "redis")
     RedisContainer redisContainer() {
-        return new RedisContainer(DockerImageName.parse("redis").withTag("8.10.3-alpine")).withReuse(true);
+        return new RedisContainer(DockerImageName.parse("redis").withTag("8.12.0-alpine")).withReuse(true);
     }
 
     @Bean(destroyMethod = "close")
