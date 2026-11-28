@@ -2,7 +2,7 @@ version: '3.8'
 services:
 
   mariadb:
-    image: mariadb:13.0
+    image: mariadb:13.1
     environment:
       - MYSQL_DATABASE=appdb
       - MYSQL_USER=appuser
